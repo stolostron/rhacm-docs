@@ -1,34 +1,32 @@
 # Summary
- * [Welcome page](welcome_page.html) **(Brandi and Chris)**
- * [Release notes](release_notes.md)
-   * [About](intro.md)
-   * [Architecture](architecture.md)
-   * [What's new](whats_new.md)
-   * [Known issues and limitations](known_issues.md)
-   * [Considerations for GDPR readiness](getting_started/gdpr_readiness.md)
-   * [Considerations for FIPS readiness](getting_started/fips_compliance.md)
- * [Installation and upgrade](install.md) **(Chris)**
-   * [Passport Advantage part numbers](install/part_numbers.md)
-   * [Planning your cluster](installing/planning.md)
-   * [System requirements](supported_system_config/system_reqs.md)
-   * [Hardware requirements and recommendations](supported_system_config/hardware_reqs.md)
-   * [Supported operating systems and platforms](supported_system_config/supported_os.md)
-   * [Supported browsers](supported_system_config/supported_browsers.md)
-   * [Supported cloud providers](supported_clouds.md)
-   * [Sizing your cluster](installing/plan_capacity.md)
-   * [Preparing to secure your cluster](installing/plan_security.md)
-   * [Endpoints](manage_cluster/cluster_endpoints.md)
-   * [Cluster configuration ConfigMap](manage_cluster/configmap_cluster.md)
-   * [Supported environments](supported_environments/environments_overview.md)
-   * [Configuration options](config_isntall.md)
-   * [Upgrading](installing/upgrading.md)
-   * [Reverting to an earlier version](installing/revert.md)
- * [IBM Multicloud Manager Governance and risk](compliance/compliance_intro.md) **(Mikela)**
+ * [Welcome page](about/welcome_page.html) **(Brandi and Chris)**
+ * [Release notes](about/release_notes.md)
+   * [About](about/intro.md)
+   * [Architecture](about/architecture.md)
+   * [What's new](about/whats_new.md)
+   * [Known issues and limitations](about/known_issues.md)
+   * [Considerations for GDPR readiness](about/gdpr_readiness.md)
+   * [Considerations for FIPS readiness](about/fips_compliance.md)
+ * [Installation and upgrade](install/installation.md) **(Chris--decides what we need from this section/create issues if needed)**
+   * [Installation file part numbers](install/part_numbers.md)
+   * [Requirements](install/requirements.md)
+   * [Hardware requirements and recommendations](install/hardware_reqs.md)
+   * [Supported operating systems and platforms](install/supported_os.md)
+   * [Supported browsers](install/supported_browsers.md)
+   * [Supported cloud providers](install/supported_clouds.md)
+   * [Sizing your cluster](install/plan_capacity.md)
+   * [Preparing to secure your cluster](install/plan_security.md)
+   * [Endpoints](install/cluster_endpoints.md)
+   * [Cluster configuration ConfigMap](install/configmap_cluster.md)
+   * [Supported environments](install/environments_overview.md)
+   * [Configuration options](install/config_install.md)
+   * [Upgrading](install/upgrading.md)
+   * [Reverting to an earlier version](install/revert.md)
+ * [IBM Multicloud Manager Governance and risk](compliance/compliance_intro.md) **(Mikela--decides how best to structre the directory)**
    * [IBM Multicloud Manager policy overview](compliance/policy_overview.md)
    * [IBM Multicloud Manager policy controllers](compliance/policy_controllers.md)
      * [Configuration policy controller](manage_policies/config_policy_ctrl.md)
      * [Certificate policy controller](manage_policies/cert_policy_ctrl.md)
-     * [Image vulnerability scan policy controller](manage_policies/va_policy.md) <!--new controller being added; no longer using VA)-->
      * [Audit logging policy controller](compliance/audit_policy_ctrl.md) <!--would like to move this controller into the manage_policies folder later so that all controllers are in one folder-->
      * [Secret encryption policy controller](manage_policies/encrypt_policy.md)
      * [IAM policy controller](compliance/iam_policy_ctrl.md) <!--TBD; if it is ported I want to move the folder into the manage_policis folder-->
@@ -41,12 +39,24 @@
    * [Deleting an IBM Multicloud Manager policy](compliance/delete_policy.md)<!--not too much info here; I would like to move the content into the manage_cluster/manage_grc_policy.md-->
    * [Using a notary service for image signing](compliance/notary_server.md)
    * [Image signing support for image policies](compliance/image_policy_signing.md)
- * [Service discovery](working_serv_intro.md) **(????)**
+ * [Service discovery](working_serv_intro.md) **(???? what devs cover this? Does this change?)**
    * [IBM Multicloud Manager service discovery overview](serv_overview.md)
- * [Cluster management](intro.md)**(Chris)**
-   * [Creating a cluster](create.md)
- * [Application management](overview.md)
-   * [Application lifecycle](app_lifecycle.md)
+ * [Cluster management](manage_cluster/intro.md)**(Chris, review and open issues if scale, create, import changes)**
+   * [Creating a cluster](manage_cluster/create.md)
+     * [Creating an IBM Kubernetes Service cluster](manage_cluster/create_iks..md)
+     * [Creating a Google Kubernetes Engine cluster](manage_cluster/create_gke.md)
+     * [Creating an Azure Kubernetes Service cluster](manage_cluster/create_aks.md)
+     * [Creating an Amazon Elastic Kubernetes Service cluster](manage_cluster/create_eks.md)
+     * [Creating an OpenShift on Amazon Web Services cluster](manage_cluster/create_ocp_aws.md)
+    * [Scaling your clusters](manage_cluster/scale_mcm.md)
+    * [Importing a target managed cluster](manage_cluster/import.md)
+      * [Importing a cluster with the IBM Multicloud Manager management console](manage_cluster/import_gui.md)
+      * [Importing a cluster with the CLI](manage_cluster/import_cli.md)
+      * [Importing a managed cluster in an air gapped environment](manage_cluster/offline_endpoint.md)
+      * [Modifying the multicluster endpoint settings for your cluster](manage_cluster/modify_mc_end.md)
+    * [Upgrading multicluster endpoint](manage_cluster/upgrade_mc_endpoint.md)
+ * [Application management](manage_application/overview.md)
+   * [Application lifecycle](manage_application/.md)
  *  [IAM](iam_intro.md)
  *  [Multitenancy](multitenancy.md)
  *  [Administering](admin/intro.md)
