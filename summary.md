@@ -1,17 +1,81 @@
 # Summary
- * [Welcome](about/mcm_welcome.md)
- * [Architecture](about/architecture.md)
- * [Release notes](about/release_notes.md)
-   * [What's new](about/whats_new.md)
-   * [Known issues and limitations](about/known_issues.md)
-   * [Considerations for GDPR readiness](about/gdpr_readiness.md)
-   * [Considerations for FIPS readiness](about/fips_compliance.md)
- * [Installation and upgrade](install.md)
+ * [Welcome page](welcome_page.html) **(Brandi and Chris)**
+ * [Release notes](release_notes.md)
+   * [About](intro.md)
+   * [Architecture](architecture.md)
+   * [What's new](whats_new.md)
+   * [Known issues and limitations](known_issues.md)
+   * [Considerations for GDPR readiness](getting_started/gdpr_readiness.md)
+   * [Considerations for FIPS readiness](getting_started/fips_compliance.md)
+ * [Installation and upgrade](install.md) **(Chris)**
    * [Passport Advantage part numbers](install/part_numbers.md)
    * [Planning your cluster](installing/planning.md)
    * [System requirements](supported_system_config/system_reqs.md)
-     * [Hardware requirements and recommendations](supported_system_config/hardware_reqs.md)
-     * [Supported operating systems and platforms](supported_system_config/supported_os.md)
+   * [Hardware requirements and recommendations](supported_system_config/hardware_reqs.md)
+   * [Supported operating systems and platforms](supported_system_config/supported_os.md)
+   * [Supported browsers](supported_system_config/supported_browsers.md)
+   * [Supported cloud providers](supported_clouds.md)
+   * [Sizing your cluster](installing/plan_capacity.md)
+   * [Preparing to secure your cluster](installing/plan_security.md)
+   * [Endpoints](manage_cluster/cluster_endpoints.md)
+   * [Cluster configuration ConfigMap](manage_cluster/configmap_cluster.md)
+   * [Supported environments](supported_environments/environments_overview.md)
+   * [Configuration options](config_isntall.md)
+   * [Upgrading](installing/upgrading.md)
+   * [Reverting to an earlier version](installing/revert.md)
+ * [IBM Multicloud Manager Governance and risk](compliance/compliance_intro.md) **(Mikela)**
+   * [IBM Multicloud Manager policy overview](compliance/policy_overview.md)
+   * [IBM Multicloud Manager policy controllers](compliance/policy_controllers.md)
+     * [Configuration policy controller](manage_policies/config_policy_ctrl.md)
+     * [Certificate policy controller](manage_policies/cert_policy_ctrl.md)
+     * [Image vulnerability scan policy controller](manage_policies/va_policy.md) <!--new controller being added; no longer using VA)-->
+     * [Audit logging policy controller](compliance/audit_policy_ctrl.md) <!--would like to move this controller into the manage_policies folder later so that all controllers are in one folder-->
+     * [Secret encryption policy controller](manage_policies/encrypt_policy.md)
+     * [IAM policy controller](compliance/iam_policy_ctrl.md) <!--TBD; if it is ported I want to move the folder into the manage_policis folder-->
+     * [CIS policy controller](compliance/cis_policy.md)<!--also want to move this controller into the manage_policies folder-->
+     * [Network policy controller](manage_policies/nw_policy_ctrl.md)<!--new controller; made up the "potential" file name-->
+   * [IBM Multicloud Manager policy example](compliance/policy_example.md)
+   * [IBM Multicloud Management policy samples](manage_policies/policy_samples.md)
+   * [Creating an IBM Multicloud Manager policy](compliance/create_policy.md)
+   * [Managing a security policy](manage_cluster/manage_grc_policy.md)
+   * [Deleting an IBM Multicloud Manager policy](compliance/delete_policy.md)<!--not too much info here; I would like to move the content into the manage_cluster/manage_grc_policy.md-->
+   * [Using a notary service for image signing](compliance/notary_server.md)
+   * [Image signing support for image policies](compliance/image_policy_signing.md)
+ * [Service discovery](working_serv_intro.md) **(????)**
+   * [IBM Multicloud Manager service discovery overview](serv_overview.md)
+ * [Cluster management](intro.md)**(Chris)**
+   * [Creating a cluster](create.md)
+ * [Application management](overview.md)
+   * [Application lifecycle](app_lifecycle.md)
+ *  [IAM](iam_intro.md)
+ *  [Multitenancy](multitenancy.md)
+ *  [Administering](admin/intro.md)
+ *  [Services and components](components.md)
+ *  [Cloudctl](cloudctl_intro.md) (**????**)
+   *  [Installing cloudctl](install_cli.md)
+   *  [Multicluster commands (mc)](cli_mc_commands.md)
+ *  [User management: Role based access control](user_management/assign_role.md) (**???**)
+    * [Teams](user_management/teams.md)
+     * [Create teams](user_management/create_team.md)
+     * [Add users to a team](user_management/add_user.md)
+     * [Add groups to a team](user_management/add_group.md)
+    * [Remove teams](user_management/remove_team.md)
+    * [Namespaces](user_management/projects.md)     
+ * [APIs](apis/cfc_api.md) (**all**)
+    * [{{site.data.keyword.mcm_notm}} APIs](apis/mcm_apis.md)
+      * [Applications](apis/applications.json)<!--need to change to .md file bc swagger is not supported for RH doc-->
+      * [Channels](apis/channels.json)<!--same issue-->
+      * [Deployables](apis/deployables.json)<!--not sure if this should brought over; same issue-->
+      * [Placement rules](apis/placementRules.json)<!--same-->
+      * [Policies](apis/policies.json)<!--same-->
+      * [Subscriptions](apis/subscriptions.json)<!--same-->
+      * [System healthcheck service](apis/system_hc_api.json)<!--need to verify that system healthchek is coming to RACM-->
+ * [Support](support.md)
+    * [Support types](support_types.md)
+    * [Open source support](opensource_support.md)
+ * [Glossary](getting_started/glossary.md)
+ * [Notices](getting_started/notices.md)
+    * [Supported operating systems and platforms](supported_system_config/supported_os.md)
      * [Supported browsers](supported_system_config/supported_browsers.md)
      * [Supported cloud providers](supported_clouds.md)
    * [Sizing your cluster](installing/plan_capacity.md)
