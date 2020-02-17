@@ -1,7 +1,6 @@
 # Summary
- * [Welcome page](about/welcome_page.html) **(Brandi and Chris)**
- * [Release notes](about/release_notes.md)
-   * [About](about/intro.md)
+ * [About](about/intro.md) **(Brandi and Chris)**
+ * [Release notes](about/release_notes.md) 
    * [Architecture](about/architecture.md)
    * [What's new](about/whats_new.md)
    * [Known issues and limitations](about/known_issues.md)
