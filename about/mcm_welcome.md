@@ -16,7 +16,7 @@ lastupdated: "2020-02-04"
 
 # Product title here
 
-On the cloud journey towards application modernization or the development of cloud native workloads, Kubernetes becomes a clear choice for container orchestration. Kubernetes provides a platform for deploying and managing containers in a standard, consistent control plane. However, as applications workloads move from development to production, the often require multiple fit for purpose Kubernetes clusters to support Continuous Integration/Continuous Delivery DevOps pipelines. (Go over with OM)
+On the cloud journey towards application modernization or the development of cloud native workloads, Kubernetes becomes a clear choice for container orchestration. Kubernetes provides a platform for deploying and managing containers in a standard, consistent control plane. However, as applications workloads move from development to production, the often require multiple fit for purpose Kubernetes clusters to support Continuous Integration/Continuous Delivery DevOps pipelines. 
 
 For example, a given line of business can have two or more Kubernetes clusters to support development, integration testing, and production. Cluster sprawl continues as you add clusters that are configured for specific workloads (GPU enabled High Performance Computing), distributed applications for response time and latency, or to address industry standards and geopolitical requirements that are associated with data residency requirements.
 
@@ -26,4 +26,3 @@ As requirements grow, you might need dozens, if not hundreds, of clusters to sup
   - Enforce policies at the target clusters using Kubernetes-supported custom resource definitions.
   - Deploy and maintain day two operations of business applications distributed across your cluster landscape.
   - Work across a range of environments, including multiple data centers, private clouds and public clouds that run Kubernetes clusters.
-
