@@ -23,16 +23,15 @@
    * [IBM Multicloud Manager policy controllers](compliance/policy_controllers.md)
      * [Configuration policy controller](manage_policies/config_policy_ctrl.md)
      * [Certificate policy controller](manage_policies/cert_policy_ctrl.md)
-     * [Audit logging policy controller](compliance/audit_policy_ctrl.md) <!--would like to move this controller into the manage_policies folder later so that all controllers are in one folder-->
+     * [Audit logging policy controller](manage_policies/audit_policy_ctrl.md)
      * [Secret encryption policy controller](manage_policies/encrypt_policy.md)
-     * [IAM policy controller](compliance/iam_policy_ctrl.md) <!--TBD; if it is ported I want to move the folder into the manage_policis folder-->
-     * [CIS policy controller](compliance/cis_policy.md)<!--also want to move this controller into the manage_policies folder-->
-     * [Network policy controller](manage_policies/nw_policy_ctrl.md)<!--new controller; made up the "potential" file name-->
+     * [IAM policy controller](manage_policies/iam_policy_ctrl.md) <!--TBD-->
+     * [CIS policy controller](manage_policies/cis_policy.md)
+     * [Network policy controller](manage_policies/nw_policy_ctrl.md)
    * [IBM Multicloud Manager policy example](compliance/policy_example.md)
    * [IBM Multicloud Management policy samples](manage_policies/policy_samples.md)
    * [Creating an IBM Multicloud Manager policy](compliance/create_policy.md)
    * [Managing a security policy](manage_cluster/manage_grc_policy.md)
-   * [Deleting an IBM Multicloud Manager policy](compliance/delete_policy.md)<!--not too much info here; I would like to move the content into the manage_cluster/manage_grc_policy.md-->
    * [Using a notary service for image signing](compliance/notary_server.md)
    * [Image signing support for image policies](compliance/image_policy_signing.md)
  * [Service discovery](working_serv_intro.md) **(???? what devs cover this? Does this change?)**
