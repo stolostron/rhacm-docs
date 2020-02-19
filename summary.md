@@ -1,10 +1,10 @@
 # Summary
  * [About](about/mcm_welcome.md) **(Brandi and Chris)**
-  * [Architecture](about/architecture.md)
-  * [What's new](about/whats_new.md)
-  * [Known issues and limitations](about/known_issues.md)
-  * [Considerations for GDPR readiness](about/gdpr_readiness.md)
-  * [Considerations for FIPS readiness](about/fips_compliance.md)
+   * [Architecture](about/architecture.md)
+   * [What's new](about/whats_new.md)
+   * [Known issues and limitations](about/known_issues.md)
+   * [Considerations for GDPR readiness](about/gdpr_readiness.md)
+   * [Considerations for FIPS readiness](about/fips_compliance.md)
  * [Installation and upgrade](install/installation.md) **(Chris--decides what we need from this section/create issues if needed)**
    * [Installation file part numbers](install/part_numbers.md)
    * [Requirements](install/requirements.md)
@@ -68,8 +68,8 @@
  *  [Administering](admin/intro.md)**(????)**
  *  [Services and components](components.md)**(????)**
  *  [Cloudctl](cloudctl_intro.md) (**????**)
-   *  [Installing cloudctl](install_cli.md)
-   *  [Multicluster commands (mc)](cli_mc_commands.md)
+    *  [Installing cloudctl](install_cli.md)
+    *  [Multicluster commands (mc)](cli_mc_commands.md)
  *  [User management: Role based access control](user_management/assign_role.md)(**???**)
     * [Teams](user_management/teams.md)
      * [Create teams](user_management/create_team.md)
