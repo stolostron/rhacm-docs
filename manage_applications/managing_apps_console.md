@@ -36,15 +36,15 @@ From the main _Applications_ dashboard, you can view information about all appli
 From the _Overview_ tab on this dashboard, you can complete the following tasks:
 
 * View a table that lists all applications. If needed, you can use the search box to filter the applications that are listed.
-* For each application, you can view the following information:
+* From the _Applications_ page, you can view the following information:
   * The application name and namespace.
   * The number of managed clusters where the application is deployed through a subscription.
   * The number of subscriptions that are used to deploy the application and the associated status.
-  * The number of vulnerability advisor policy violations.
   * The date when the application was created.
-  * You can also expand the the _Options_ menu for each application to select more options. From this menu, you can edit or delete the application, and open and view Grafana or application monitoring for the application if the related applications are installed.
-* From this tab, you can select to create an application, which opens a YAML editor where you can define an application resource. For more information, see [Creating an application](managing_apps.md#app_create).
-* You can click on the application name for any application to go to the _Applications_ dashboard for that specific application to view more information about that application.
+  * The Grafana dashboard for the application. 
+  
+* From this page, you can also select **New application** to create an application, which opens a YAML editor where you can define an application resource. For more information, see [Creating an application](managing_apps.md#app_create).
+* You can click on an application name to go to the _Applications_ dashboard for that specific application to view more information about that application. You can also access _Grafana_.
 
 From the _Resources_ tab for all applications, you can complete the following tasks:
 
