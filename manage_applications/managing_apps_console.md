@@ -127,7 +127,3 @@ The _Topology_ page is available from the _Observe environments_ sub-menu within
 {: #monitoring}
 
 You can open the Grafana dashboard for your applications to monitor by selecting **Grafana** from the _Monitor health_ sub-menu of the {{site.data.keyword.gui}} main menu. From this page, you can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.
-
-If IBM Cloud App Management is installed, you can also open the Cloud App Management console to view more information about the status and performance of your subscriptions. For instance, you can open that service from the {{site.data.keyword.gui}} to access visualized golden signals and other monitoring data. Expand the the _Options_ menu for an application on the the _Overview_ tab for all applications on the _Applications_ dashboard and select **App monitoring** to open the the Cloud App Management console.
-
-Cloud App Management provides you with additional capabilities for monitoring the performance and availability of your applications. With Cloud App Management, you can improve your IT and application operations management with increased flexibility and cost savings, and intelligent data analysis driven by predictive signals. For more information, see [Installing IBM Cloud App Management](https://www.ibm.com/support/knowledgecenter/SS8G7U_19.4.0/com.ibm.app.mgmt.doc/content/install_mcm.html?cp=SSFC4F_1.2.0).
