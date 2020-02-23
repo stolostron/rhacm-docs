@@ -36,15 +36,15 @@ From the main _Applications_ dashboard, you can view information about all appli
 From the _Overview_ tab on this dashboard, you can complete the following tasks:
 
 * View a table that lists all applications. If needed, you can use the search box to filter the applications that are listed.
-* For each application, you can view the following information:
+* From the _Applications_ page, you can view the following information:
   * The application name and namespace.
   * The number of managed clusters where the application is deployed through a subscription.
   * The number of subscriptions that are used to deploy the application and the associated status.
-  * The number of vulnerability advisor policy violations.
   * The date when the application was created.
-  * You can also expand the the _Options_ menu for each application to select more options. From this menu, you can edit or delete the application, and open and view Grafana or application monitoring for the application if the related applications are installed.
-* From this tab, you can select to create an application, which opens a YAML editor where you can define an application resource. For more information, see [Creating an application](managing_apps.md#app_create).
-* You can click on the application name for any application to go to the _Applications_ dashboard for that specific application to view more information about that application.
+  * The Grafana dashboard for the application. 
+  
+* From this page, you can also select **New application** to create an application, which opens a YAML editor where you can define an application resource. For more information, see [Creating an application](managing_apps.md#app_create).
+* You can click on an application name to go to the _Applications_ dashboard for that specific application to view more information about that application. You can also access _Grafana_.
 
 From the _Resources_ tab for all applications, you can complete the following tasks:
 
@@ -127,7 +127,3 @@ The _Topology_ page is available from the _Observe environments_ sub-menu within
 {: #monitoring}
 
 You can open the Grafana dashboard for your applications to monitor by selecting **Grafana** from the _Monitor health_ sub-menu of the {{site.data.keyword.gui}} main menu. From this page, you can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.
-
-If IBM Cloud App Management is installed, you can also open the Cloud App Management console to view more information about the status and performance of your subscriptions. For instance, you can open that service from the {{site.data.keyword.gui}} to access visualized golden signals and other monitoring data. Expand the the _Options_ menu for an application on the the _Overview_ tab for all applications on the _Applications_ dashboard and select **App monitoring** to open the the Cloud App Management console.
-
-Cloud App Management provides you with additional capabilities for monitoring the performance and availability of your applications. With Cloud App Management, you can improve your IT and application operations management with increased flexibility and cost savings, and intelligent data analysis driven by predictive signals. For more information, see [Installing IBM Cloud App Management](https://www.ibm.com/support/knowledgecenter/SS8G7U_19.4.0/com.ibm.app.mgmt.doc/content/install_mcm.html?cp=SSFC4F_1.2.0).
