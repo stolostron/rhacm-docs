@@ -19,7 +19,7 @@ lastupdated: "2019-12-13"
 {{site.data.keyword.mcm_notm}} provides enhanced application management capabilities through a Kubernetes resource based application model and channel and subscription based deployment options. The application model and deployment capabilities are designed to unify and simplify the deployment experience for creating and managing your application across both single cluster and multi-cluster scenarios.
 {:shortdesc}
 
-With this application management capabilities, you can use channels and subscriptions to gain improved continuous and automated delivery of your deployables to target managed clusters. For more information about deployables, see [Application resources](app_lifecycle.md#deployables).
+With these application management capabilities, you can use channels and subscriptions to gain improved continuous and automated delivery of your deployables to target managed clusters. For more information about deployables, see [Application resources](app_lifecycle.md#deployables).
 
 Your developers and DevOps personnel can use these resources to deploy, update, manage, and monitor versions of your applications across multiple environments through complete automation.
 
