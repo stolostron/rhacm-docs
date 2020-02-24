@@ -1,11 +1,12 @@
 # Summary
- * [About](about/mcm_welcome.md) **(Brandi and Chris)**
+ * [About](about/mcm_welcome.md)
    * [Architecture](about/architecture.md)
    * [What's new](about/whats_new.md)
+   * [Components](about/components.md)
    * [Known issues and limitations](about/known_issues.md)
    * [Considerations for GDPR readiness](about/gdpr_readiness.md)
    * [Considerations for FIPS readiness](about/fips_compliance.md)
- * [Installation and upgrade](install/installation.md) **(Chris--decides what we need from this section/create issues if needed)**
+ * [Installation and upgrade](install/installation.md)
    * [Installation file part numbers](install/part_numbers.md)
    * [Requirements](install/requirements.md)
    * [Hardware requirements and recommendations](install/hardware_reqs.md)
@@ -18,14 +19,14 @@
    * [Cluster configuration ConfigMap](install/configmap_cluster.md)
    * [Supported environments](install/environments_overview.md)
    * [Configuration options](install/config_install.md)
- * [IBM Multicloud Manager Governance and risk](compliance/compliance_intro.md) **(Mikela--decides how best to structre the directory)**
+ * [IBM Multicloud Manager Governance and risk](compliance/compliance_intro.md) 
    * [IBM Multicloud Manager policy overview](compliance/policy_overview.md)
    * [IBM Multicloud Manager policy controllers](compliance/policy_controllers.md)
      * [Configuration policy controller](manage_policies/config_policy_ctrl.md)
      * [Certificate policy controller](manage_policies/cert_policy_ctrl.md)
      * [Audit logging policy controller](manage_policies/audit_policy_ctrl.md)
      * [Secret encryption policy controller](manage_policies/encrypt_policy.md)
-     * [IAM policy controller](manage_policies/iam_policy_ctrl.md) <!--TBD-->
+     * [IAM policy controller](manage_policies/iam_policy_ctrl.md) 
      * [CIS policy controller](manage_policies/cis_policy.md)
      * [Network policy controller](manage_policies/nw_policy_ctrl.md)
    * [IBM Multicloud Manager policy example](compliance/policy_example.md)
@@ -63,29 +64,18 @@
        * [Deploying an application resource with a rolling update](manage_applications/deployment_rollout.md)
        * [Managing applications with the console](manage_applications/managing_apps_console.md)
        * [Migrating subscriptions](manage_applications/migrate_subscriptions.md)
- *  [IAM](iam_intro.md) **(????)**
- *  [Multitenancy](multitenancy.md)**(????)**
- *  [Administering](admin/intro.md)**(????)**
- *  [Services and components](components.md)**(????)**
+ *  [Multitenancy](multitenancy.md)(**(????)**)
  *  [Cloudctl](cloudctl_intro.md) (**????**)
-    *  [Installing cloudctl](install_cli.md)
-    *  [Multicluster commands (mc)](cli_mc_commands.md)
  *  [User management: Role based access control](user_management/assign_role.md)(**???**)
-    * [Teams](user_management/teams.md)
-     * [Create teams](user_management/create_team.md)
-     * [Add users to a team](user_management/add_user.md)
-     * [Add groups to a team](user_management/add_group.md)
-    * [Remove teams](user_management/remove_team.md)
-    * [Namespaces](user_management/projects.md)     
- * [APIs](apis/cfc_api.md) (**all ID squad, no swagger**)
+ * [APIs](apis/cfc_api.md)
     * [{{site.data.keyword.mcm_notm}} APIs](apis/mcm_apis.md)
-      * [Applications](apis/applications.json)<!--need to change to .md file bc swagger is not supported for RH doc-->
-      * [Channels](apis/channels.json)<!--same issue-->
-      * [Deployables](apis/deployables.json)<!--not sure if this should brought over; same issue-->
-      * [Placement rules](apis/placementRules.json)<!--same-->
-      * [Policies](apis/policies.json)<!--same-->
-      * [Subscriptions](apis/subscriptions.json)<!--same-->
-      * [System healthcheck service](apis/system_hc_api.json)<!--need to verify that system healthchek is coming to RACM-->
- * [Support](troubleshoot/support.md) (**Mikela leading**)
+      * [Applications](apis/applications.json)
+      * [Channels](apis/channels.json)
+      * [Deployables](apis/deployables.json)
+      * [Placement rules](apis/placementRules.json)
+      * [Policies](apis/policies.json)
+      * [Subscriptions](apis/subscriptions.json)
+      * [System healthcheck service](apis/system_hc_api.json)
+ * [Support](troubleshoot/support.md) 
     * [Support types](troubleshoot/support_types.md)
     * [Open source support](troubleshoot/opensource_support.md)
