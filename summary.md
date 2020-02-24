@@ -68,7 +68,7 @@
  *  [Cloudctl](cloudctl_intro.md) (**????**)
  *  [User management: Role based access control](user_management/assign_role.md)(**???**)
  * [APIs](apis/cfc_api.md)
-    * [{{site.data.keyword.mcm_notm}} APIs](apis/mcm_apis.md)
+    * [APIs](apis/mcm_apis.md)
       * [Applications](apis/applications.json)
       * [Channels](apis/channels.json)
       * [Deployables](apis/deployables.json)
