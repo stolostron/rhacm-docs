@@ -14,7 +14,7 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} {{site.data.keyword.gui}} components
+# Observability in the {{site.data.keyword.gui}} 
 
 Learn more about a few of the {{site.data.keyword.gui}} components that you can use to view, manage, or customize your {{site.data.keyword.gui}}. 
 
