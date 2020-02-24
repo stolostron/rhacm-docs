@@ -8,7 +8,18 @@ Markdown (MD) is a lightweight markup language with plain text formatting syntax
 ## Doc schedule
 
 Limited release:
+3/9 Development issues all created in the open_cluster repository.
+3/11: Source required for doc issues.
+3/13: Build running markdown source with PDF output.
+3/24: Doc freeze to allow time to complete required processes.
+3/27: Verizon LA
+
 GA and integration with Red Hat docs:
+4/2: Conversion to AsciiDoc complete.
+4/4: Translation ship 1.
+4/15: Builds running AsciiDoc.
+4/17: Doc freeze, translation ship 2.
+4/23: GA
 
 **IMPORTANT:** DOC SHUT DOWN three days before GA; please give us time to finalize our documentation and deliver on time.
 
