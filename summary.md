@@ -59,7 +59,7 @@
      * [Importing a managed cluster in an air gapped environment](manage_cluster/offline_endpoint.md)
      * [Modifying the multicluster endpoint settings for your cluster](manage_cluster/modify_mc_end.md)
    * [Upgrading multicluster endpoint](manage_cluster/upgrade_mc_endpoint.md)
- * [Application management](manage_applications/overview.md)
+ * [Application management (Developer preview)](manage_applications/overview.md)
    * [Application lifecycle](manage_applications/app_lifecycle.md)
    * [Application resources](manage_applications/app_resources.md)
      * [Managing application resources](manage_applications/managing_apps.md)
