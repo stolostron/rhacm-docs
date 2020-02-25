@@ -52,20 +52,20 @@ Please `squad doc` issues where we have a known issue or limitation in the produ
 (Chris)
 Limited release:
 
-3/2: Doc repo and navigation is ready for development input
-3/9: Development issues all created in the open_cluster repository and labeled `squad doc`
-3/11: Dev input required for doc issues 
-3/13: Build running markdown source with PDF output (static doc here?)
-3/24: Doc freeze to allow time to complete required processes (See Doc team shutdown)
-3/27: Verizon LA
+- 3/2: Doc repo and navigation is ready for development input
+- 3/9: Development issues all created in the open_cluster repository and labeled `squad doc`
+- 3/11: Dev input required for doc issues 
+- 3/13: Build running markdown source with PDF output (static doc here?)
+- 3/24: Doc freeze to allow time to complete required processes (See Doc team shutdown)
+- 3/27: Verizon LA
 
 GA and integration with Red Hat docs:
 
-4/2: Conversion to AsciiDoc complete
-4/4: Translation shipment 1
-4/15: Builds running AsciiDoc
-4/17: Doc freeze, translation shipment 2
-4/23: GA to RH decided format
+- 4/2: Conversion to AsciiDoc complete
+- 4/4: Translation shipment 1
+- 4/15: Builds running AsciiDoc
+- 4/17: Doc freeze, translation shipment 2
+- 4/23: GA to RH decided format
 
 **Note** for UI guild: We have set up numerous doc links from the UI in the course of the product evolution. For LR, these docs will not be live. Brandi will follow up with how these icons/links will be updated for GA. Ping for questions.
 
@@ -81,5 +81,5 @@ GA and integration with Red Hat docs:
 
 ## Transforming the docs (doc team future)
 
-Mikela: https://docs.openshift.com/container-platform/4.3/welcome/index.html
+Example: nhttps://docs.openshift.com/container-platform/4.3/welcome/index.html
 
