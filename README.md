@@ -67,7 +67,7 @@ GA and integration with Red Hat docs:
 4/17: Doc freeze, translation ship 2
 4/23: GA to RH dec format
 
-**Note** for UI guild: We have set up mumerous doc links from the UI in the course of the product evolution. For LR, these docs will not be live. Brandi will follow up with how these icons/links will be updated for GA. Ping for questions.
+**Note** for UI guild: We have set up numerous doc links from the UI in the course of the product evolution. For LR, these docs will not be live. Brandi will follow up with how these icons/links will be updated for GA. Ping for questions.
 
 ### Tips for working with the doc files (doc team only)
 
