@@ -81,5 +81,5 @@ GA and integration with Red Hat docs:
 
 ## Transforming the docs (doc team future)
 
-Example: nhttps://docs.openshift.com/container-platform/4.3/welcome/index.html
+Example: https://docs.openshift.com/container-platform/4.3/welcome/index.html
 
