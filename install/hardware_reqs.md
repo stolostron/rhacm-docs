@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019,2020
-lastupdated: "2020-01-15"
+lastupdated: "2020-03-02"
 
 ---
 
@@ -161,7 +161,6 @@ For more information, see [System requirements](https://www.ibm.com/support/know
 | Licensing | Optional | 200 m | 500 m | 256 Mi | 512 Mi | | |
 | Logging | Optional | 1,500 m | 3,000 m | 9,940 Mi | 10,516 Mi | 20 GiB | |
 | Multitenancy Account Quota Enforcement | Optional | 25 m | 100 m | 64 Mi | 64 Mi | | |
-| Mutation Advisor | Optional | 1,000 m | 3,300 m | 2,052 Mi | 7,084 Mi | 100 GiB | |
 | Notary | Optional | 600 m | 600 m  | 1,024 Mi | 1,024 Mi | | |
 | Secret Encryption Policy Controller | Optional | 50 m | 100 m  | 100 Mi | 200 Mi | 110 GiB | |
 | Secure Token Service (STS) | Optional | 410 m | 600 m  | 94 Mi  | 314 Mi | | Requires Red Hat OpenShift Service Mesh (Istio) |
