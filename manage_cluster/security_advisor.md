@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-01-17"
+lastupdated: "2020-03-02"
 
 ---
 
@@ -32,7 +32,7 @@ For more information about SA, see _About Security Advisor_ in the [{{site.data.
 View the descriptions of the three data sources that comprise the Security Advisor:
 
 * _Policy adapter_ creates security findings for non-compliant policies. 
-* The [_Vulnerability Advisor (VA)_](vuln_advisor_mcm.md) runs security checks on running containers in your environment. It is installed on managed clusters. Mutation Advisor (MA) is installed when you install VA. MA creates security findings for process and file mutations.
+* The [_Vulnerability Advisor (VA)_](vuln_advisor_mcm.md) runs security checks on running containers in your environment. It is installed on managed clusters.
 * [_Security Advisor API_](../manage_cluster/security_advisor.md#sa_api) can be used to create, update, query and delete security findings.
 
 ## Security findings
@@ -121,10 +121,10 @@ Complete the following steps to modify your security findings data retention pol
     ```
     {: pre}
 
-7. Set the `DELETE_ALL_FINDINGS_OCCURRENCES_BY_PROVIDERS` parameter value to the target providers. For example, to delete the security findings for the `mutation-advisor` and `security-advisor` providers, your retention policy might resemble the following content:
+7. Set the `DELETE_ALL_FINDINGS_OCCURRENCES_BY_PROVIDERS` parameter value to the target providers. For example, to delete the security findings for the  `security-advisor` providers, your retention policy might resemble the following content:
 
     ```
-    "DELETE_ALL_FINDINGS_OCCURRENCES_BY_PROVIDERS": "mutation-advisor, security-advisor"
+    "DELETE_ALL_FINDINGS_OCCURRENCES_BY_PROVIDERS": "security-advisor"
     ```
     {: pre}
 
