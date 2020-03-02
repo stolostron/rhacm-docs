@@ -1,11 +1,11 @@
-# Product documentation 
+# Product documentation
 
 Markdown (MD) is a lightweight markup language with plain text formatting syntax. If you've created an Issue in GitHub, you've used MD. MD is flexible and easy to use for basic tasks, but it’s not the best for complicated topics. Simplify your topic hierarchy wherever possible. To learn more about MD and its syntax, see [Getting started with writing and formatting on GitHub](https://help.github.com/articles/markdown-basics/).
 
 
 **IMPORTANT:** DOC SHUT DOWN three days before GA; please give us time to finalize our documentation and deliver on time.
 
-To ensure product documentation is accessible, accurate, tested, complete, and follows coporate style manual, we need to shut down incoming work three days before GA. Please open issues early and doc test early.
+To ensure product documentation is accessible, accurate, tested, complete, and follows corporate style manual, we need to shut down incoming work three days before GA. Please open issues early and doc test early.
 
 ## Making documentation updates
 
@@ -17,7 +17,7 @@ Identify documentation content updates (features, enhancements, and bug fixes) a
    - For Program integrated information (PII) review requests (content in the UI), such as tooltips and error messages, open a pull request and label it `squad:doc`.
    - Describe the changes that you are making or want the Doc team to make; keep it in _untriaged_ stage.
    - Add tags such as `bug` or `priority`.
-   - Doc team can use the `help wanted` label if we are waiting for input late in the release. 
+   - Doc team can use the `help wanted` label if we are waiting for input late in the release.
 
 ### Pull requests
 
@@ -37,24 +37,24 @@ This is important for file history and if something has to be undone. Link an is
 
 ### Known issues or limitations
 
-Please `squad doc` issues where we have a known issue or limitation in the product that you want us to document in the [Known issues](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/about/known_issues.md) section. 
+Please `squad doc` issues where we have a known issue or limitation in the product that you want us to document in the [Known issues](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/about/known_issues.md) section.
 
 ### Branch strategy
 
 - We don't have a master branch because devs and doc team should target changes by opening branches from a release branch.
-- Hold all changes that you can't merge on your own branch. 
+- Hold all changes that you can't merge on your own branch.
 - Please start your branch with a letter so your branch is not confused with a release branch:
      `josh-update` not `3.1.1-update`
 - Place all changes that are relevant for the next release in the `doc_stage` (our default branch).
 - "Be kind; delete your branch." Delete your branch after you have merged your changes.
 
-## Doc schedule (draft, input from DE and archtitect) 
+## Doc schedule (draft, input from DE and architect) 
 (Chris)
 Limited release:
 
 - 3/2: Doc repo and navigation is ready for development input
 - 3/9: Development issues all created in the open_cluster repository and labeled `squad doc`
-- 3/11: Dev input required for doc issues 
+- 3/11: Dev input required for doc issues
 - 3/13: Build running markdown source with PDF output (static doc here?)
 - 3/24: Doc freeze to allow time to complete required processes (See Doc team shutdown)
 - 3/27: Verizon LA
@@ -82,4 +82,3 @@ GA and integration with Red Hat docs:
 ## Transforming the docs (doc team future)
 
 Example: https://docs.openshift.com/container-platform/4.3/welcome/index.html
-
