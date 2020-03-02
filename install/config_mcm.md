@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-12-12"
+  years: 2016, 2020
+lastupdated: "2020-03-02"
 
 ---
 
@@ -30,7 +30,6 @@ You can set or update the following parameters by modifying the `config.yaml` fi
 
   * Table 1. [Multicluster-hub settings](#mcm-hub)
   * Table 2. [Vulnerability Advisor (VA) settings](#va)
-  * Table 3. [Mutation Advisor (MA) settings](#ma)
 
 ## Multicluster-hub settings
 {: #mcm-hub}
@@ -56,10 +55,3 @@ You can set or update the following parameters by modifying the `config.yaml` fi
 |`es_secret.key:`|<ul><li>Set to `curator.key` when you use {{site.data.keyword.product}} logging.</li><li>For {{site.data.keyword.open_s}} version 3.0 and 4.0, set to `admin-key`.</li></ul> | `curator.key`|
 {: caption="Table 2. Vulnerability Advisor settings" caption-side="top"}
 
-## Mutation Advisor (MA) settings
-{: #ma}
-
-|Parameter|Description|Default value|
-|---------|-----------|-------------|
-|`mutation-advisor.runtimeEngine:`|<ul><li>Set to `cri-o` when you use {{site.data.keyword.product}}.</li><li>For {{site.data.keyword.open_s}} version 3.0, set to `docker`.</li><li>For {{site.data.keyword.open_s}} version 4.0, set to `cri-o`.</li></ul>|None|
-{: caption="Table 3. Mutation Advisor settings" caption-side="top"}
