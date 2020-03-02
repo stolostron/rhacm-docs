@@ -164,6 +164,5 @@ For more information, see [System requirements](https://www.ibm.com/support/know
 | Notary | Optional | 600 m | 600 m  | 1,024 Mi | 1,024 Mi | | |
 | Secret Encryption Policy Controller | Optional | 50 m | 100 m  | 100 Mi | 200 Mi | 110 GiB | |
 | Secure Token Service (STS) | Optional | 410 m | 600 m  | 94 Mi  | 314 Mi | | Requires Red Hat OpenShift Service Mesh (Istio) |
-| System Healthcheck Service | Optional | 75 m | 600 m | 96 Mi | 256 Mi | | |
 | Vulnerability Advisor (VA) | Optional | 1,940 m | 4,440 m | 8,040 Mi | 27,776 Mi | 10 GiB | Requires Red Hat OpenShift logging (Elasticsearch) |
 {: caption="Table 10. Hub services sizing" caption-side="top"}
