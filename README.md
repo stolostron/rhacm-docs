@@ -48,6 +48,14 @@ Please `squad doc` issues where we have a known issue or limitation in the produ
 - Place all changes that are relevant for the next release in the `doc_stage` (our default branch).
 - "Be kind; delete your branch." Delete your branch after you have merged your changes.
 
+## Using the board
+
+ - Product: Next release/future
+ - Release: GA after any limited or beta
+ - Sprint: Immediate release
+ - In progress: What we have started
+ - Awaiting Verification: In peer/dev review
+
 ## Doc schedule (draft, input from DE and architect) 
 (Chris)
 Limited release:
