@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019,2020
-lastupdated: "2020-01-15"
+lastupdated: "2020-03-04"
 
 ---
 
@@ -191,10 +191,6 @@ Be sure to add a policy to allow images that are not part of the default image p
 If there are an increased number of images that are loaded in the internal registry, you might experience errors when you load the Container images in the [{{site.data.keyword.gui}}].
 
 For instance, loading 250 images might require an increased amount of time and cause timeouts in the [{{site.data.keyword.gui}}], despite performance and feature enhancements. There is a limit on the number of images that the image manager returns. If you can `get` an image from a CLI tool, but not from the {{site.data.keyword.gui}}, it might be caused by the image manager limitations.
-
-When Vulnerability Advisor is installed, the images within the image manager are scanned automatically and the status is displayed on the _Container images_ page. If you sort with the security scan column, the status might disappear. Get the status to reappear by refreshing the page, or sorting by the _Container_ name once or twice. The security scan column reappears.
-
-When Vulnerability Advisor is installed, you cannot view the image details with a failed security scan because the result is a blank page.
 
 #### Team Resources page search for nested resources
 

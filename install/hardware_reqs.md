@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019,2020
-lastupdated: "2020-03-02"
+  years: 2019, 2020
+lastupdated: "2020-03-04"
 
 ---
 
@@ -35,7 +35,6 @@ Before you install the {{site.data.keyword.cloud_pak_mcm}}, review the system re
 * Storage requirements:
   - For offline installation, the {{site.data.keyword.ocp}} image registry requires at least 100 GB.
   - The management services MongoDB and logging each require 20 GB through the storage class.
-  - Vulnerability advisor requires 60 GB through the storage class.
 
 ## {{site.data.keyword.cloud_pak_mcm}}
 {: #cloud_pak}
@@ -164,5 +163,4 @@ For more information, see [System requirements](https://www.ibm.com/support/know
 | Notary | Optional | 600 m | 600 m  | 1,024 Mi | 1,024 Mi | | |
 | Secret Encryption Policy Controller | Optional | 50 m | 100 m  | 100 Mi | 200 Mi | 110 GiB | |
 | Secure Token Service (STS) | Optional | 410 m | 600 m  | 94 Mi  | 314 Mi | | Requires Red Hat OpenShift Service Mesh (Istio) |
-| Vulnerability Advisor (VA) | Optional | 1,940 m | 4,440 m | 8,040 Mi | 27,776 Mi | 10 GiB | Requires Red Hat OpenShift logging (Elasticsearch) |
 {: caption="Table 10. Hub services sizing" caption-side="top"}

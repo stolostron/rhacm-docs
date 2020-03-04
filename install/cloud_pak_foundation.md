@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-19"
+  years: 2019, 2020
+lastupdated: "2020-03-04"
 
 ---
 
@@ -337,7 +337,7 @@ You must update the `config.yaml` file or use the `power.openshift.config.yaml` 
         custom-metrics-adapter: disabled
         image-security-enforcement: disabled
       ```
-    **Note:** To enable Vulnerability Advisor, see [Enabling the Vulnerability Advisor (VA)](../mcm/manage_cluster/va_openshift_mcm.md) for more information.
+    
 
     You can disable the enabled [services](#enabled_common_services) by setting the values in the `management_services` section to `disabled`.
     For example, if you want to disable `metering` during the installation:
@@ -385,12 +385,9 @@ From a web browser, browse to the URL of your cluster. For a list of supported b
 cis-controller: disabled
 kmsplugin: disabled
 logging: disabled
-mutation-advisor: disabled
 notary: disabled
 platform-pod-security: disabled
 secret-encryption-policy-controller: disabled
-system-healthcheck-service: disabled
-vulnerability-advisor: disabled
 ```
 
 ### Services enabled by default

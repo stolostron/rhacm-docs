@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-02"
+lastupdated: "2020-03-04"
 
 ---
 
@@ -32,7 +32,6 @@ For more information about SA, see _About Security Advisor_ in the [{{site.data.
 View the descriptions of the three data sources that comprise the Security Advisor:
 
 * _Policy adapter_ creates security findings for non-compliant policies. 
-* The [_Vulnerability Advisor (VA)_](vuln_advisor_mcm.md) runs security checks on running containers in your environment. It is installed on managed clusters.
 * [_Security Advisor API_](../manage_cluster/security_advisor.md#sa_api) can be used to create, update, query and delete security findings.
 
 ## Security findings
