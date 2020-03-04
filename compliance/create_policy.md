@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-12-12"
+  years: 2018, 2020
+lastupdated: "2020-03-04"
 
 ---
 
@@ -158,7 +158,7 @@ Complete the following steps to create a policy:
       namespace: mcm
       annotations:
         policy.mcm.ibm.com/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
-        policy.mcm.ibm.com/controls: 'MutationAdvisor,VA'
+        policy.mcm.ibm.com/controls: 'control example'
         policy.mcm.ibm.com/standards: 'NIST,HIPAA'
     spec:
       complianceType: musthave
