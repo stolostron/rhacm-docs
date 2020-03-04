@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-02"
+lastupdated: "2020-03-04"
 
 ---
 
@@ -61,5 +61,4 @@ There are some services that are installed, but not enabled by default. You can 
 |--------|-----------|-------------------|
 |logging| Supported by Elasticsearch, Logstash, Filebeat, and Kibana. Collects container logs from `stdout`, `stderr`, and custom file definitions within the container and ensures that all data in transit is TLS-secured using secure ciphers that meet FIPS requirements. Ensures that all data is encrypted at rest using secure ciphers that meet FIPS requirements. | No, unless you are bundling Kibana dashboards or invoking logging APIs. |
 |platform-pod-security| When deploying content across multiple Kubernetes vendors, the workload must validate or document what PodSecurityPolicies or SecurityContextConstraints (for RHOS) are required or expected. |No|
-|vulnerability-advisor|Discovers common vulnerabilities & exposures (CVEs) and insecure configurations of container images and running containers. |No| <!--Red Hat uses their product to scan for vulnerabilities; Insights; so we might need to update the service-->
 {: caption="Table 2. {{site.data.keyword.cloud_pak_mcm}} and standalone {{site.data.keyword.mcm_notm}} disabled services" caption-side="top"}
