@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-12-10"
+  years: 2018, 2020
+lastupdated: "2020-03-04"
 
 ---
 
@@ -67,7 +67,7 @@ metadata:
   annotations:
     policy.mcm.ibm.com/standards: NIST
     policy.mcm.ibm.com/categories: SystemAndInformationIntegrity, RBAC
-    policy.mcm.ibm.com/controls: MutationAdvisor
+    policy.mcm.ibm.com/controls: DifferentControl
   namespace: mcm
 spec:
   remediationAction: "enforce" # enforce or inform

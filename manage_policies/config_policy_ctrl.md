@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2019, 2020
+lastupdated: "2020-03-04"
 
 ---
 
@@ -42,7 +42,7 @@ Each _policy_ within the policy document contains the following elements.
 
     - An `object-template` is used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. An example of object can be a pod security policy, an image policy, or a limit range.
     
-    - A `policy-template` is used to create one or more policies for third party or external security controls. For example, you can create a mutation policy with the mutation policy controller. For more information about other policy and their  controllers, see [{{site.data.keyword.mcm_notm}} policy controllers](../compliance/policy_controllers.md).
+    - A `policy-template` is used to create one or more policies for third party or external security controls. For example, you can create a certificate expiration policy with the certificate policy controller. For more information about other policy and their  controllers, see [{{site.data.keyword.mcm_notm}} policy controllers](../compliance/policy_controllers.md).
 
 ## Creating a configuration policy
 
