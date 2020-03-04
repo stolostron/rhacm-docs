@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-06-06"
+  years: 2016, 2020
+lastupdated: "2020-03-04"
 
 ---
 
@@ -75,7 +75,7 @@ If monitoring and other optional components are enabled, you might not have enou
 ### Large cluster considerations
 {: #large_consider}
 
-Consider the capabilities of {{site.data.keyword.icp_notm}} when you plan for a large cluster. {{site.data.keyword.icp_notm}} has extra enterprise capability workloads in addition to Vanilla Kubernetes, adding more services, such as Calico (node to node MeSH). Also, consider monitoring, logging, and the vulnerability assessment.
+Consider the capabilities of {{site.data.keyword.icp_notm}} when you plan for a large cluster. {{site.data.keyword.icp_notm}} has extra enterprise capability workloads in addition to Vanilla Kubernetes, adding more services, such as Calico (node to node MeSH). Also, consider monitoring and logging assessment.
 
 The following are more considerations:
 
@@ -119,7 +119,6 @@ To create a testing environment with this particular cluster, you can deploy a s
 |	Proxy	| 2	| 4	| 16	| 400 |
 |	Worker - Java Workloads | 3+ (Max:20)	| 8	| 32	| 400 |
 |	Worker | 5+ (Max:70)| 8 | 32	| 400 |
-|	VA	| 3	| 6	| 24	| 500 |
 
 To increase your cluster's resilience level, add two extra master nodes.
 
@@ -134,7 +133,6 @@ To increase your cluster's resilience level, add two extra master nodes.
 |Master node|3|16|128 | 500|
 |Management node|2|16 |128 | 500 |
 |Proxy node|2|4 |16 |256|
-|VA node|3|6 | 48 |500|
 |Worker node|500|8 |32| 400|
 
 **Sizing cluster for 1000 worker nodes**:
@@ -145,7 +143,6 @@ To increase your cluster's resilience level, add two extra master nodes.
 |	Master | 3 | 16 | 128	| 500 |
 |	Management	| 5	| 16	| 128 |	500 |
 |	Proxy |	2	| 4	| 16	| 256 |
-|	VA |	3	 | 6	| 48	| 500 |
 |	Worker | 1000| 8	| 32	|400 |
 
 To increase your cluster resilience level, you must deploy and manage workloads across multiple {{site.data.keyword.icp_notm}} clusters.
