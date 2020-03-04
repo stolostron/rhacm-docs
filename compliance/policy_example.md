@@ -19,7 +19,7 @@ lastupdated: "2019-12-10"
 Each {{site.data.keyword.mcm_notm}} policy can have at least one or multiple templates. For more details about the policy elements, see [{{site.data.keyword.mcm_notm}} policy overview](../compliance/policy_overview.md). 
 {:shortdesc}
   
-The policy requires a _PlacementPolicy_ that defines the clusters that the policy document is applied to, and a _PlacementBinding_ that binds the {{site.data.keyword.mcm_notm}} policy to the `PlacementPolicy`. You can create vulnerability and mutation policies for multiple namespaces on your hub cluster, and only can view the policies, violations, and security findings associated with your cluster and namespace. View the example placement policy and placement binding: 
+The policy requires a _PlacementPolicy_ that defines the clusters that the policy document is applied to, and a _PlacementBinding_ that binds the {{site.data.keyword.mcm_notm}} policy to the `PlacementPolicy`. View the example placement policy and placement binding: 
 
    * Example placement policy that selects clusters based on a label:
       
