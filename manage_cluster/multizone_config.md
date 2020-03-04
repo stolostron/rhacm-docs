@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-09-21"
+  years: 2019, 2020
+lastupdated: "2020-03-04"
 
 ---
 
@@ -39,19 +39,19 @@ Multiple zones have the following requirement for network connectivity between t
 
 Table 1 shows the minimum hardware requirement for the nodes in your multizone cluster. 
 
-Requirement | Boot node | Master node | Proxy node | Worker node | Management node | Vulnerability Advisor (VA) node | etcd node
--- | -- | -- | -- | -- | -- | -- | --
-Cores | 1 | 8  | 4 |4 | 8| 8 | 1
-CPU | >= 2.4 GHz | >= 2.4 GHz | >= 2.4 GHz | >= 2.4 GHz | >= 2.4 GHz | >= 2.4 GHz | >= 2.4 GHz
-RAM | 4 GB |16 GB | 8 GB | 8 GB | 16 GB | 16 GB | 4 GB
-Free disk space to install | 100 GB |300 GB| 150 GB| 300GB,20GB | 300 GB | 300GB | 100 GB
+Requirement | Boot node | Master node | Proxy node | Worker node | Management node | etcd node
+-- | -- | -- | -- | -- | -- | --
+Cores | 1 | 8  | 4 |4 | 8| 1
+CPU | >= 2.4 GHz | >= 2.4 GHz | >= 2.4 GHz | >= 2.4 GHz | >= 2.4 GHz | >= 2.4 GHz
+RAM | 4 GB |16 GB | 8 GB | 8 GB | 16 GB | 4 GB
+Free disk space to install | 100 GB |300 GB| 150 GB| 300GB,20GB | 300 GB | 100 GB
 {: caption="Table 1. Minimum hardware requirement in a multizone environment" caption-side="top"}
 
 You can configure the number of hosts based on your requirement. However, the number of master nodes must be an odd number. The number of etcd nodes must be the same as the number of master nodes. The cluster nodes can be placed in any zone. Table 2 is an example of hosts that are used in a three-zone environment. 
 
-Requirement | Boot node | Master node | Proxy node | Worker node | Management node | VA node | etcd node
+Requirement | Boot node | Master node | Proxy node | Worker node | Management node | etcd node
 -- | -- | -- | -- | -- | -- | -- | --
-Number of hosts | 1 | 5 | 3 | 3 | 3 | 3 | 5
+Number of hosts | 1 | 5 | 3 | 3 | 3 | 5
 {: caption="Table 2. Example of hosts used in a three-zone environment" caption-side="top"}
 
 **Note:** You need only one boot node for your multizone environment.
@@ -70,7 +70,6 @@ Complete the following steps to set up a multizone cluster:
   - One master node in z1, two master nodes in zone 2 (z2), and two master nodes in zone 3 (z3)
   - One management node in z1, one management node in z2, and one management node in z3
   - Two proxy nodes in z2 and one proxy node in z3
-  - One VA node in z1, one VA node in z2, and one VA node in z3
   - One worker node in z1, one worker node in z2, and one worker node in z3
   - One etcd node in z1, two etcd nodes in zone 2 (z2), and two etcd nodes in zone 3 (z3)
   
@@ -121,17 +120,6 @@ Complete the following steps to set up a multizone cluster:
   <IP address of worker node in zone 2>
   [worker_zone3]
   <IP address of worker node in zone 3>
-
-  [va:children]
-  va_zone1
-  va_zone2
-  va_zone3
-  [va_zone1]
-  <IP address of VA node in zone 1>
-  [va_zone2]
-  <IP address of VA node in zone 2>
-  [va_zone3]
-  <IP address of VA node in zone 3>
   
   [etcd:children]
   etcd_zone1
