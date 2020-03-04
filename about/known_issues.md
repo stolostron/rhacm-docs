@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-02-10"
+lastupdated: "2020-03-04"
 
 ---
 
@@ -34,7 +34,6 @@ Review the known issues for {{site.data.keyword.product}}. Additionally, see [{{
   - [Enabling {{site.data.keyword.product}} for the installed monitoring release](#1051)
   - [LDAP user names are case-sensitive](#25735)
   - [Pods are not reachable from the NGINX ingress controller in multitenant isolation mode](#34414)
-  - [Image security enforcement is only supported by {{site.data.keyword.product}} registries](#1497)
   
 ## Menu and logo on the {{site.data.keyword.gui}} header changes
 {: #1527}
@@ -317,7 +316,3 @@ To resolve the issue, disable network isolation in the `kube-system` project.
     ```
     {: codeblock}
 
-## Image security enforcement is only supported by {{site.data.keyword.product}} registries
-{: #1497}
-
-When you enable Vulnerability Advisor (VA) scanning in the ImagePolicy and ClusterImagePolicy specification, you are unable to create workloads in the associated namespaces. The VA scanning integration with image security enforcement only supports the built-in {{site.data.keyword.product}} registry. For more information, see [Scanning an image registry with the Vulnerability Advisor (VA)](../manage_cluster/external_scan.md).
