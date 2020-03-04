@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-02-19"
+lastupdated: "2020-03-04"
 
 ---
 
@@ -51,7 +51,6 @@ spec:
       "helmapi": validate
       "platform-identity-manager": validate
       "platform-identity-provider": validate
-      "vulnerability-advisor": validate
   remediationAction: inform # enforce or inform
   disabled: false
 ```
