@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-02-19"
+lastupdated: "2020-03-05"
 
 ---
 
@@ -23,15 +23,13 @@ Network policy controller can be used to receive notifications about non-complia
 
 The certificate policy controller communicates with the local Kubernetes API server to get the list of secrets that contain certificates and determine all non-compliant certificates.
 
-The Security Advisor Findings API report all non-compliant policies that include certificate policies. See the [{{site.data.keyword.mcm}} security findings](../manage_cluster/security_advisor.md) for more information.
-
-## Certificate policy
+## Network policy
   
-A `CertificatePolicy` is a CustomResourceDefinition (CRD) instance that contains the specifications of which certificates to monitor and refresh. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/){: new_window}.
+A `NetworkPolicy` is a CustomResourceDefinition (CRD) instance that contains the specifications of which certificates to monitor and refresh. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/){: new_window}.
 
 You must create a certificate policy controller to create a certificate policy. For more information, see the known issue topic, [Mapping error for a certificate policy](../../about/known_issues.md#mappingcert).
 
-### Parent policy for the certificate policy 
+### Parent policy for the network policy 
 
 A certificate policy can be either created directly on your managed cluster, or on your hub cluster if it manages your managed cluster. Your managed cluster must be an {{site.data.keyword.mcm_notm}} with the required services. For more information about the services, see [Administering](../../admin/intro.md). If {{site.data.keyword.mcm_notm}} is not installed, you can create a certificate policy directly on your managed cluster by running the following command: `kubectl create -f certificatePolicyFile.yaml`.
 
