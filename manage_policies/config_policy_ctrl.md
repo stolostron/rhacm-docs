@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-04"
+lastupdated: "2020-03-05"
 
 ---
 
@@ -26,7 +26,7 @@ The configuration policy controller communicates with the local Kubernetes API s
 
 ## Configuration policy
   
-A `Policy` is a CustomResourceDefinition (CRD) instance that contains the specifications of the configuration policy elements section. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/){: new_window}.
+A `Policy` is a CustomResourceDefinition (CRD) instance that contains the specifications of the configuration policy elements section. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/){: new_window}.
 
 ### Policy elements
 
