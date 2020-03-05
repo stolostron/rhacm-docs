@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-02-19"
+lastupdated: "2020-03-05"
 
 ---
 
@@ -21,7 +21,7 @@ Identity and Access Management (IAM) policy controller can be used to receive no
 
 The IAM policy controller checks for compliance of the number of cluster administrators that you allow in your cluster, and ensures parity between the IAM role-based access control (RBAC) and Kubernetes RBAC role bindings. The compliance check is based on the parameters that you configure in the IAM policy, and on any backend change that you did to the role bindings in your cluster. The IAM policy controller verifies compliance of the role bindings based on the RBAC that you configure in your cluster. The controller reports whether a role binding is compliant or not. For more information about RBAC in {{site.data.keyword.cloud_pak_mcm}}, see [Role-based access control (RBAC)](../../iam/3.4.0/assign_role.md).
 
-- You must create an IAM policy, which is a CustomResourceDefinition (CRD) instance that contains the specification of the number of cluster administrators that can be configured in your cluster, and role bindings. The controller uses this policy to verify compliance. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
+- You must create an IAM policy, which is a CustomResourceDefinition (CRD) instance that contains the specification of the number of cluster administrators that can be configured in your cluster, and role bindings. The controller uses this policy to verify compliance. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
 
 - You must add the namespaces in the policy in the `namespaceSelector.include` section for which the controller needs to verify compliance. You can also add the namespaces that you do not want the controller to verify compliance for in the `namespaceSelector.exclude` section.
 
