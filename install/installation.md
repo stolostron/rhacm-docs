@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-05-14"
+  years: 2020
+lastupdated: "2020-03-02"
 
 ---
 
@@ -16,15 +16,15 @@ lastupdated: "2019-05-14"
 
 # Installing
 
-You can install either {{site.data.keyword.icp_notm}} or {{site.data.keyword.icp_ce}}.
+Installing {{site.data.keyword.rhacm}} sets up a multi-node cluster production environment. You can install {{site.data.keyword.rhacm}} in either standard or high availability configurations.
 {:shortdesc}
 
-There is one installer for {{site.data.keyword.icp_notm}}, which sets up either a single or multi-node cluster production environment. Regardless of which bundle you selected, either Cloud Native or Enterprise, you follow the same process of installing {{site.data.keyword.icp_notm}}. You can install {{site.data.keyword.icp_notm}} in either standard or high availability configurations. After installation, you can add extra components. For more information, see [{{site.data.keyword.icp_notm}} bundles](../getting_started/bundles.md).
+The installation procedure consists of the following overall steps:
 
-The following diagram illustrates an example workflow with typical tasks that are performed to install {{site.data.keyword.icp_notm}}.
-
-- {: child} [Preparing your cluster for installation](../installing/prep.md) 
-- {: child} [Installing {{site.data.keyword.icp_notm}} Cloud Native and Enterprise](../installing/install_containers.md)
-- {: child} [Installing {{site.data.keyword.IBM_notm}} software onto {{site.data.keyword.icp_notm}}](../installing/install_entitled_workloads.md)
-- {: child} [Configuration options during installation](../installing/install_configuration.md)
+- {: child} [Preparing your cluster for installation](../installing/prep.md)
+- {: child} [Mirror your cluster](../installing/mirror_cluster.md)  
+- {: child} [Installing the cluster](../installing/install_cluster.md)
+- {: child} [Installing when connected](../installing/deploy_operator_connected.md)
+- {: child} [Create the multicluster hub operator](../installing/create_hub_operator.md)
+- {: child} [Create the multicloud hub cluster](../installing/create_hub_cluster.md)
 {: childlinks}
