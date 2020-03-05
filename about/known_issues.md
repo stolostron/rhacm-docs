@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-04"
+lastupdated: "2020-03-05"
 
 ---
 
@@ -26,7 +26,6 @@ Review the known issues for {{site.data.keyword.product}}. Additionally, see [{{
   - [Subscription status remains healthy when deployable source is deleted](#29445)
   - [ObjectBucket channels support including only one resource in each object](#194)
   - [Subscriptions that use a secret must be changed before updates to dependency resources can be detected](#611)
-  - [Remediation field is empty](#31836)
   - [Permission issue with Docker Version 18.03 with Ubuntu 16.04 LTS](#31947)
   - [Hub cluster resources display as `local-cluster` in {{site.data.keyword.gui}} search results ](#31979)
   - [Mapping error for a certificate policy](#1351_mapping)
@@ -140,11 +139,6 @@ kubectl label subscription <subscription-name> -n <subscription-namespace> <labe
 {: codeblock}
 
 When the subscription is changed, the subscription controller is triggered to synchronize with the referenced secret and the subscribed channel resources.
-
-## Remediation field is empty
-{: #31836}
-
-The _Remediation_ field in the detail panel for security findings becomes empty for all of your policies that are associated with your cluster. The _Remediation_ field becomes empty because there are communication issues with the managed cluster.
 
 ## Permission issue with Docker Version 18.03 with Ubuntu 16.04 LTS
 {: #31947}
