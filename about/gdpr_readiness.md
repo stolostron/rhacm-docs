@@ -20,7 +20,7 @@ lastupdated: "2020-03-06"
 {: #notice}
 <!-- This is boilerplate text provided by the GDPR team. It cannot be changed. -->
 
-This document is intended to help you in your preparations for General Data Protection Regulation (GDPR) readiness. It provides information about features of the {{site.data.keyword.product}} platform that you can configure, and aspects of the product's use, that you should consider to help your organization with GDPR readiness. This information is not an exhaustive list, due to the many ways that clients can choose and configure features, and the large variety of ways that the product can be used in itself and with third-party applications and systems.
+This document is intended to help you in your preparations for General Data Protection Regulation (GDPR) readiness. It provides information about features of the {{site.data.keyword.product}} platform that you can configure, and aspects of the product's use, that you should consider to help your organization with GDPR readiness. This information is not an exhaustive list, due to the many ways that clients can choose and configure features, and the large variety of ways that the product can be used in itself and with third-party clusters and systems.
 
 **Clients are responsible for ensuring their own compliance with various laws and regulations, including the European Union General Data Protection Regulation. Clients are solely responsible for obtaining advice of competent legal counsel as to the identification and interpretation of any relevant laws and regulations that may affect the clients' business and any actions the clients may need to take to comply with such laws and regulations.**
 
@@ -67,16 +67,13 @@ The following sections describe aspects of data management within the {{site.dat
 ## Data Life Cycle
 {: #datalifecycle}
 
-{{site.data.keyword.product}} is an application platform for developing and managing on-premises, containerized applications. It is an integrated environment for managing containers that includes the container orchestrator Kubernetes, a private image registry, a management console, and monitoring frameworks.
+{{site.data.keyword.product}} is a platform for developing and managing on-premises, containerized clusters. It is an integrated environment for managing containers that includes the container orchestrator Kubernetes, a private image registry, a management console, and monitoring frameworks.
 
 As such, the {{site.data.keyword.product}} platform deals primarily with technical data that is related to the configuration and management of the platform, some of which might be subject to GDPR. The {{site.data.keyword.product}} platform also deals with information about users who manage the platform. This data is described throughout this document for the awareness of clients responsible for meeting GDPR requirements.
 
-This data is persisted on the platform on local or remote file systems as configuration files or in databases. Applications that are developed to run on the {{site.data.keyword.product}} platform might deal with other forms of personal data subject to GDPR. The mechanisms that are used to protect and manage platform data are also available to applications that run on the platform. Additional mechanisms might be required to manage and protect personal data that is collected by applications run on the {{site.data.keyword.product}} platform. <!--is it accurate to state the user can manage their applications if it is a technical preview?-->
+This data is persisted on the platform on local or remote file systems as configuration files or in databases. Applications that are developed to run on the {{site.data.keyword.product}} platform might deal with other forms of personal data subject to GDPR.
 
-To best understand the {{site.data.keyword.product}} platform and its data flows, you must understand how Kubernetes, Docker, and Helm work. These open source components are fundamental to the {{site.data.keyword.product}} platform. You use Kubernetes deployments to place instances of applications, which are built into Helm charts that reference Docker images. The Helm charts contain the details about your application, and the Docker images contain all the software packages that your applications need to run.
-
-{{site.data.keyword.product}} includes a catalog of containerized software and services from IBM <!--Red Hat--> in the default {{site.data.keyword.product}} repository list. To view a list of all the {{site.data.keyword.product}} charts, see [IBM/charts](https://github.com/IBM/charts/tree/master/stable){:new_window}. <!--need to check to see if RH has something similar otherwise I will remove this section-->For considerations regarding GDPR for the products in the catalog, consult the documentation for those products.
-Some of the applications available in the catalog are open source software. It is the client’s responsibility to determine and implement any appropriate GDPR controls for open source software. Information on these packages is included in the catalog entry.
+To best understand the {{site.data.keyword.product}} platform and its data flows, you must understand how Kubernetes, Docker, and Helm work. These open source components are fundamental to the {{site.data.keyword.product}} platform. You use Kubernetes deployments to place instances of clusters, which are built into Helm charts that reference Docker images. The Helm charts contain the details about your cluster, and the Docker images contain all the software packages that your clusters need to run.
 
 Documentation on {{site.data.keyword.product}} platform can be found in the [{{site.data.keyword.product}} collection](https:needredhatlinkifthereisone).
 
