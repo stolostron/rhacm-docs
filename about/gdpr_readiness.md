@@ -2,7 +2,7 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-02-10"
+lastupdated: "2020-03-06"
 
 ---
 
@@ -20,11 +20,11 @@ lastupdated: "2020-02-10"
 {: #notice}
 <!-- This is boilerplate text provided by the GDPR team. It cannot be changed. -->
 
-This document is intended to help you in your preparations for GDPR readiness. It provides information about features of the {{site.data.keyword.product}} platform that you can configure, and aspects of the product's use, that you should consider to help your organization with GDPR readiness. This information is not an exhaustive list, due to the many ways that clients can choose and configure features, and the large variety of ways that the product can be used in itself and with third-party applications and systems.
+This document is intended to help you in your preparations for General Data Protection Regulation (GDPR) readiness. It provides information about features of the {{site.data.keyword.product}} platform that you can configure, and aspects of the product's use, that you should consider to help your organization with GDPR readiness. This information is not an exhaustive list, due to the many ways that clients can choose and configure features, and the large variety of ways that the product can be used in itself and with third-party applications and systems.
 
-<p class="ibm-h4 ibm-bold">Clients are responsible for ensuring their own compliance with various laws and regulations, including the European Union General Data Protection Regulation. Clients are solely responsible for obtaining advice of competent legal counsel as to the identification and interpretation of any relevant laws and regulations that may affect the clients' business and any actions the clients may need to take to comply with such laws and regulations.</p>
+**Clients are responsible for ensuring their own compliance with various laws and regulations, including the European Union General Data Protection Regulation. Clients are solely responsible for obtaining advice of competent legal counsel as to the identification and interpretation of any relevant laws and regulations that may affect the clients' business and any actions the clients may need to take to comply with such laws and regulations.**
 
-<p class="ibm-h4 ibm-bold">The products, services, and other capabilities described herein are not suitable for all client situations and may have restricted availability. IBM does not provide legal, accounting, or auditing advice or represent or warrant that its services or products will ensure that clients are in compliance with any law or regulation.</p>
+**The products, services, and other capabilities described herein are not suitable for all client situations and may have restricted availability. IBM does not provide legal, accounting, or auditing advice or represent or warrant that its services or products will ensure that clients are in compliance with any law or regulation.**
 
 ## Table of Contents
 
@@ -48,7 +48,7 @@ General Data Protection Regulation (GDPR) has been adopted by the European Union
 
 ### Why is GDPR important?
 
-GDPR establishes a stronger data protection regulatory framework for processing of personal data of individuals. GDPR brings:
+GDPR establishes a stronger data protection regulatory framework for processing personal data of individuals. GDPR brings:
 * New and enhanced rights for individuals
 * Widened definition of personal data
 * New obligations for processors
@@ -56,8 +56,8 @@ GDPR establishes a stronger data protection regulatory framework for processing 
 * Compulsory data breach notification
 
 ### Read more about GDPR
-* [EU GDPR Information Portal ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.eugdpr.org/){:new_window}
-* [ibm.com/GDPR website ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/data-responsibility/gdpr/){:new_window}
+* [EU GDPR Information Portal](https://www.eugdpr.org/){:new_window}
+* [Red Hat GDPR website](https://www.redhat.com/en/gdpr){:new_window}
 
 ## Product Configuration – considerations for GDPR Readiness
 {: #productconfig}
