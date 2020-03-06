@@ -16,7 +16,7 @@ lastupdated: "2020-03-04"
 
 # Services and components
 
-See information about services that are installed and enabled by default, as well as whether they can be disabled in the environment for this {{site.data.keyword.cloud_pak}}.
+See information about services that are installed and enabled by default, as well as whether they can be disabled.
 {:shortdesc}
 
 |Service|Description|Required|
@@ -37,7 +37,7 @@ See information about services that are installed and enabled by default, as wel
 |image-security-enforcement|**Note:** Disabled by default in {{site.data.keyword.ppc_notm}}.|Yes|
 |key-management|Enables workloads to manage the keys that are used to encrypt data and integrate with software modules.|No|
 |key-management-hsm|Enables workloads to manage the keys that are used to encrypt data and integrate with Hardware Service Modules.|No|
-|installation | Common process for preparing services and {{site.data.keyword.cloud_pak}} software | Yes |
+|installation | Common process for preparing services and software | Yes |
 |mcm-kui|Provides the {{site.data.keyword.kui}}.|Yes|
 |metering|Supported by {{site.data.keyword.IBM_notm}} Metering. Requires content to provide the correct tags for the metering service to understand usage for licensing.|Yes|
 |mgmt-repo|Helm repository for common management services. **Note:** Required for dependencies. Do not access directly.|Yes|
@@ -53,7 +53,7 @@ See information about services that are installed and enabled by default, as wel
 |secret-watcher|Works with other Identity and Access Management services to control roles and access in the environment.|Yes, if using OIDC, service IDs, API keys, or other Identity and Access Management services.|
 |security-onboarding|Works with other Identity and Access Management services to control roles and access in the environment.|Yes, if using OIDC, service IDs, API keys, or other Identity and Access Management services.|
 |tiller|Provides a secure implementation of the Tiller component that is found in the community, which addresses several open authorization gaps that are not addressed in the community implementation. Maintains API compatibility with the community Helm command line, and provides access to Helm charts by using an API.|Yes, if you are using the Identity and Access Management services.|
-{: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes and standalone {{site.data.keyword.mcm_notm}} enabled services" caption-side="top"}
+{: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes enabled services" caption-side="top"}
 
 There are some services that are installed, but not enabled by default. You can enable them by activating them in the `config.yaml` file. The following table shows the services that are installed, but not enabled by default:
 
@@ -61,4 +61,4 @@ There are some services that are installed, but not enabled by default. You can 
 |--------|-----------|-------------------|
 |logging| Supported by Elasticsearch, Logstash, Filebeat, and Kibana. Collects container logs from `stdout`, `stderr`, and custom file definitions within the container and ensures that all data in transit is TLS-secured using secure ciphers that meet FIPS requirements. Ensures that all data is encrypted at rest using secure ciphers that meet FIPS requirements. | No, unless you are bundling Kibana dashboards or invoking logging APIs. |
 |platform-pod-security| When deploying content across multiple Kubernetes vendors, the workload must validate or document what PodSecurityPolicies or SecurityContextConstraints (for RHOS) are required or expected. |No|
-{: caption="Table 2. Red Hat Advanced Cluster Management for Kubernetes and standalone {{site.data.keyword.mcm_notm}} disabled services" caption-side="top"}
+{: caption="Table 2. Red Hat Advanced Cluster Management for Kubernetes disabled services" caption-side="top"}
