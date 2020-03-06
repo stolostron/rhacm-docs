@@ -69,16 +69,16 @@ The following sections describe aspects of data management within the {{site.dat
 
 {{site.data.keyword.product}} is an application platform for developing and managing on-premises, containerized applications. It is an integrated environment for managing containers that includes the container orchestrator Kubernetes, a private image registry, a management console, and monitoring frameworks.
 
-As such, the {{site.data.keyword.product}} platform deals primarily with technical data that is related to the configuration and management of the platform, some of which might be subject to GDPR. The {{site.data.keyword.product}} platform also deals with information about users who manage the platform. This data will be described throughout this document for the awareness of clients responsible for meeting GDPR requirements.
+As such, the {{site.data.keyword.product}} platform deals primarily with technical data that is related to the configuration and management of the platform, some of which might be subject to GDPR. The {{site.data.keyword.product}} platform also deals with information about users who manage the platform. This data is described throughout this document for the awareness of clients responsible for meeting GDPR requirements.
 
-This data is persisted on the platform on local or remote file systems as configuration files or in databases. Applications that are developed to run on the {{site.data.keyword.product}} platform might deal with other forms of personal data subject to GDPR. The mechanisms that are used to protect and manage platform data are also available to applications that run on the platform. Additional mechanisms might be required to manage and protect personal data that is collected by applications run on the {{site.data.keyword.product}} platform.
+This data is persisted on the platform on local or remote file systems as configuration files or in databases. Applications that are developed to run on the {{site.data.keyword.product}} platform might deal with other forms of personal data subject to GDPR. The mechanisms that are used to protect and manage platform data are also available to applications that run on the platform. Additional mechanisms might be required to manage and protect personal data that is collected by applications run on the {{site.data.keyword.product}} platform. <!--is it accurate to state the user can manage their applications if it is a technical preview?-->
 
 To best understand the {{site.data.keyword.product}} platform and its data flows, you must understand how Kubernetes, Docker, and Helm work. These open source components are fundamental to the {{site.data.keyword.product}} platform. You use Kubernetes deployments to place instances of applications, which are built into Helm charts that reference Docker images. The Helm charts contain the details about your application, and the Docker images contain all the software packages that your applications need to run.
 
-{{site.data.keyword.product}} includes a catalog of containerized software and services from IBM in the default {{site.data.keyword.product}} repository list. To view a list of all the {{site.data.keyword.product}} charts, see [IBM/charts ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://github.com/IBM/charts/tree/master/stable){:new_window}. For considerations regarding GDPR for the products in the catalog, consult the documentation for those products.
+{{site.data.keyword.product}} includes a catalog of containerized software and services from IBM <!--Red Hat--> in the default {{site.data.keyword.product}} repository list. To view a list of all the {{site.data.keyword.product}} charts, see [IBM/charts](https://github.com/IBM/charts/tree/master/stable){:new_window}. <!--need to check to see if RH has something similar otherwise I will remove this section-->For considerations regarding GDPR for the products in the catalog, consult the documentation for those products.
 Some of the applications available in the catalog are open source software. It is the client’s responsibility to determine and implement any appropriate GDPR controls for open source software. Information on these packages is included in the catalog entry.
 
-Documentation on {{site.data.keyword.product}} platform can be found in the [{{site.data.keyword.product}} collection](https://www.ibm.com/support/knowledgecenter/SSFC4F/product_welcome_cloud_pak.html) in {{site.data.keyword.IBM_notm}} Knowledge Center.
+Documentation on {{site.data.keyword.product}} platform can be found in the [{{site.data.keyword.product}} collection](https:needredhatlinkifthereisone).
 
 ### What types of data flow through {{site.data.keyword.product}} platform
 
@@ -86,19 +86,19 @@ As a platform, {{site.data.keyword.product}} deals with several categories of te
 
 Information on how this technical data is collected/created, stored, accessed, secured, logged, and deleted is described in later sections of this document.
 
-### Personal data used for online contact with IBM
+### Personal data used for online contact with Red Hat 
 
 {{site.data.keyword.product}} clients can submit online comments/feedback/requests for information about {{site.data.keyword.product}} subjects in a variety of ways, primarily:
-* The public {{site.data.keyword.product}} Slack Community
+
 * Public comments area on pages of {{site.data.keyword.product}} product documentation in the {{site.data.keyword.IBM_notm}} Knowledge Center
 * Public comments in the {{site.data.keyword.product}} space of dW Answers
 
-Typically, only the client name and email address are used, to enable personal replies for the subject of the contact, and the use of personal data conforms to the [Red Hat Online Privacy Statement ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.needtofindthecorrectlinkifthereisone.com/privacy/us/en/){:new_window}.
+Typically, only the client name and email address are used, to enable personal replies for the subject of the contact, and the use of personal data conforms to the [Red Hat Online Privacy Statement](https://www.redhat.com/en/about/privacy-policy){:new_window}.
 
 ## Data Collection
 {: #datacollection}
 
-The {{site.data.keyword.product}} platform does not collect sensitive personal data. It does create and manage technical data, such as an administrator user ID and password, service user IDs and passwords, IP addresses, and Kubernetes node names, which might be considered personal data. The {{site.data.keyword.product}} platform also deals with information about users who manage the platform. All such information is only accessible by the system administrator through a management console with role-based access control or by the system administrator though login to a {{site.data.keyword.product}} platform node.
+The {{site.data.keyword.product}} platform does not collect sensitive personal data. It does create and manage technical data, such as an administrator user ID and password, service user IDs and passwords, IP addresses, and Kubernetes node names, which might be considered personal data. The {{site.data.keyword.product}} platform also deals with information about users who manage the platform. All such information is only accessible by the system administrator through a management console with role-based access control, or by the system administrator through login to a {{site.data.keyword.product}} platform node.
 
 Applications that run on the {{site.data.keyword.product}} platform might collect personal data.
 
@@ -109,19 +109,19 @@ When you assess the use of the {{site.data.keyword.product}} platform running co
 * How are credentials that are used by the application to access data sources collected and stored?
 * How is data collected by the application removed as needed?
 
-This is not a definitive list of the types of data that are collected by the {{site.data.keyword.product}} platform. It is provided as an example for consideration. If you have any questions about the types of data, contact IBM.
+This is not a definitive list of the types of data that are collected by the {{site.data.keyword.product}} platform. It is provided as an example for consideration. If you have any questions about the types of data, contact Red Hat.
 
 
 ## Data storage
 {: #datastorage}
 
-The {{site.data.keyword.product}} platform persists technical data that is related to configuration and management of the platform in stateful stores on local or remote file systems as configuration files or in databases. Consideration must be given to securing all data at rest. The {{site.data.keyword.product}} platform supports encryption of data at rest in stateful stores that use `dm-crypt`.
+The {{site.data.keyword.product}} platform persists technical data that is related to configuration and management of the platform in stateful stores on local or remote file systems as configuration files or in databases. Consideration must be given to secure all data at rest. The {{site.data.keyword.product}} platform supports encryption of data at rest in stateful stores that use `dm-crypt`.
 
 The following items highlight the areas where data is stored, which you might want to consider for GDPR.
 
-* **Platform Configuration Data:** The {{site.data.keyword.product}} platform configuration can be customized by updating a configuration YAML file with properties for general settings, Kubernetes, logs, network, Docker, and other settings. This data is used as input to the {{site.data.keyword.product}} platform installer for deploying one or more nodes. The properties also include an administrator user ID and password that are used for bootstrap. For more information, see [Customizing the cluster](../installer/3.2.2/config_yaml.md).
+* **Platform Configuration Data:** The {{site.data.keyword.product}} platform configuration can be customized by updating a configuration YAML file with properties for general settings, Kubernetes, logs, network, Docker, and other settings. This data is used as input to the {{site.data.keyword.product}} platform installer for deploying one or more nodes. The properties also include an administrator user ID and password that are used for bootstrap. For more information, see [Customizing the cluster](../installer/3.2.2/config_yaml.md). <!--there should be a new link here-->
 * **Kubernetes Configuration Data:** Kubernetes cluster state data is stored in a distributed key-value store, `etcd`. 
-* **User Authentication Data, including User IDs and passwords:** User ID and password management are handled through a client enterprise LDAP directory. Users and groups that are defined in LDAP can be added to {{site.data.keyword.product}} platform teams and assigned access roles. {{site.data.keyword.product}} platform stores the email address and user ID from LDAP, but does not store the password. {{site.data.keyword.product}} platform stores the group name and upon login, caches the available groups to which a user belongs. Group membership is not persisted in any long-term way. Securing user and group data at rest in the enterprise LDAP must be considered. {{site.data.keyword.product}} platform also includes an authentication service, Open ID Connect (OIDC) that interacts with the enterprise directory and maintains access tokens. This service uses MongoDB as a backing store.
+* **User Authentication Data, including User IDs and passwords:** User ID and password management are handled through a client enterprise LDAP directory. <!--is enterprise the correct language since this is open source? I think it should be changed to client subscription--> Users and groups that are defined in LDAP can be added to {{site.data.keyword.product}} platform teams and assigned access roles. {{site.data.keyword.product}} platform stores the email address and user ID from LDAP, but does not store the password. {{site.data.keyword.product}} platform stores the group name and upon login, caches the available groups to which a user belongs. Group membership is not persisted in any long-term way. Securing user and group data at rest in the enterprise LDAP must be considered. {{site.data.keyword.product}} platform also includes an authentication service, Open ID Connect (OIDC) that interacts with the enterprise directory and maintains access tokens. This service uses MongoDB as a backing store.
 * **Service authentication data, including user IDs and passwords:** Credentials that are used by {{site.data.keyword.product}} platform components for inter-component access are defined as Kubernetes Secrets. All Kubernetes resource definitions are persisted in the `etcd` key-value data store. Initial credentials values are defined in the platform configuration data as Kubernetes Secret configuration YAML files. For more information, see [Managing Secrets](../applications/managing_secrets.md).
 * **Helm chart data:** {{site.data.keyword.product}} platform includes a catalog of containerized software and services that you can browse and install in your cluster from Helm charts. The Helm service persists configuration data in a MongoDB backing store.
 * **GlusterFS storage file system:** You can use GlusterFS storage in your clusters. Consideration must be given to encrypting the volumes where GlusterFS storage is deployed. 
