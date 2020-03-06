@@ -16,7 +16,7 @@ lastupdated: "2019-11-05"
 
 # Supported Cluster API and managed cloud providers
 
-Learn about the Cluster API cloud providers that are available with {{site.data.keyword.cloud_pak_mcm}}. Also, find the documented managed providers that are available.
+Learn about the Cluster API cloud providers that are available with Red Hat Advanced Cluster Management for Kubernetes. Also, find the documented managed providers that are available.
 {:shortdesc}
 
   - [Supported Cluster API cloud providers](#providers)

@@ -49,11 +49,11 @@ See information about services that are installed and enabled by default, as wel
 |oidcclient-watcher|Works with other Identity and Access Management services to control roles and access in the environment.|Yes, if using OIDC, service IDs, API keys, or other Identity and Access Management services.|
 |platform-api| Service that is used by `cloudctl` and other services, and should not be accessed directly. |Yes|
 |common-web-ui|Provide a view of the resources available in the cluster with support for creation, modification, or removal.|Yes|
-|search|Provides the capability to search for resources using the {{site.data.keyword.gui}} and {{site.data.keyword.kui}} |Yes|
+|search|Provides the capability to search for resources using the console and {{site.data.keyword.kui}} |Yes|
 |secret-watcher|Works with other Identity and Access Management services to control roles and access in the environment.|Yes, if using OIDC, service IDs, API keys, or other Identity and Access Management services.|
 |security-onboarding|Works with other Identity and Access Management services to control roles and access in the environment.|Yes, if using OIDC, service IDs, API keys, or other Identity and Access Management services.|
 |tiller|Provides a secure implementation of the Tiller component that is found in the community, which addresses several open authorization gaps that are not addressed in the community implementation. Maintains API compatibility with the community Helm command line, and provides access to Helm charts by using an API.|Yes, if you are using the Identity and Access Management services.|
-{: caption="Table 1. {{site.data.keyword.cloud_pak_mcm}} and standalone {{site.data.keyword.mcm_notm}} enabled services" caption-side="top"}
+{: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes and standalone {{site.data.keyword.mcm_notm}} enabled services" caption-side="top"}
 
 There are some services that are installed, but not enabled by default. You can enable them by activating them in the `config.yaml` file. The following table shows the services that are installed, but not enabled by default:
 
@@ -61,4 +61,4 @@ There are some services that are installed, but not enabled by default. You can 
 |--------|-----------|-------------------|
 |logging| Supported by Elasticsearch, Logstash, Filebeat, and Kibana. Collects container logs from `stdout`, `stderr`, and custom file definitions within the container and ensures that all data in transit is TLS-secured using secure ciphers that meet FIPS requirements. Ensures that all data is encrypted at rest using secure ciphers that meet FIPS requirements. | No, unless you are bundling Kibana dashboards or invoking logging APIs. |
 |platform-pod-security| When deploying content across multiple Kubernetes vendors, the workload must validate or document what PodSecurityPolicies or SecurityContextConstraints (for RHOS) are required or expected. |No|
-{: caption="Table 2. {{site.data.keyword.cloud_pak_mcm}} and standalone {{site.data.keyword.mcm_notm}} disabled services" caption-side="top"}
+{: caption="Table 2. Red Hat Advanced Cluster Management for Kubernetes and standalone {{site.data.keyword.mcm_notm}} disabled services" caption-side="top"}

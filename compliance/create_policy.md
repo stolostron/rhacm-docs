@@ -21,11 +21,11 @@ Create a security policy to report and validate your cluster compliance based on
 
 **Required access level**: Cluster administrator 
 
-As you create your new policy from the {{site.data.keyword.gui}}, a YAML file is also created.
+As you create your new policy from the console, a YAML file is also created.
 
 - [Creating an {{site.data.keyword.mcm_notm}} security policy](#creating-an-sitedatakeywordmcmnotm-security-policy)
   - [Creating a YAML file for an {{site.data.keyword.mcm_notm}} policy](#creating-a-yaml-file-for-an-sitedatakeywordmcmnotm-policy)
-  - [Creating a cluster security policy from the {{site.data.keyword.mcm_notm}} {{site.data.keyword.gui}}](#creating-a-cluster-security-policy-from-the-sitedatakeywordmcmnotm-sitedatakeywordgui)
+  - [Creating a cluster security policy from the {{site.data.keyword.mcm_notm}} console](#creating-a-cluster-security-policy-from-the-sitedatakeywordmcmnotm-sitedatakeywordgui)
 
 The following objects are required for your {{site.data.keyword.mcm_notm}} policy:
 
@@ -127,7 +127,7 @@ Complete the following steps to create a policy:
    ```
    {: codeblock}
 
-## Creating a cluster security policy from the {{site.data.keyword.mcm_notm}} {{site.data.keyword.gui}}
+## Creating a cluster security policy from the {{site.data.keyword.mcm_notm}} console
 {: #policy_gui}
 
 1. From the navigation menu, click **Govern risk**.

@@ -67,9 +67,9 @@ Apply the limit range policy to limit your memory usage. Your memory usage polic
    
 ### Applying the memory usage policy
 
-Complete the following steps to apply the memory usage policy from the {{site.data.keyword.gui}}:
+Complete the following steps to apply the memory usage policy from the console:
 
-1. Log in to your {{site.data.keyword.product}} {{site.data.keyword.gui}}.
+1. Log in to your {{site.data.keyword.product}} console.
 2. From the navigation menu, click **Governance and risk**. 
 3. Click **Create policy**. 
 4. Select **Limitrange** from the _Specifications_ field.
@@ -104,9 +104,9 @@ Apply the namespace policy to define specific rules for your namespace. Your nam
    
 ### Applying the namespace policy
 
-Complete the following steps to apply the memory usage policy from the {{site.data.keyword.gui}}:
+Complete the following steps to apply the memory usage policy from the console:
 
-1. Log in to your {{site.data.keyword.product}} {{site.data.keyword.gui}}.
+1. Log in to your {{site.data.keyword.product}} console.
 2. From the navigation menu, click **Governance and risk**. 
 3. Click **Create policy**. 
 4. Select **Namespace** from the _Specifications_ field.
@@ -150,9 +150,9 @@ Your network policy might resemble the following YAML file:
  
 ### Applying the network policy
 
-Complete the following steps to apply the network policy from the {{site.data.keyword.gui}}:
+Complete the following steps to apply the network policy from the console:
 
-1. Log in to your {{site.data.keyword.product}} {{site.data.keyword.gui}}.
+1. Log in to your {{site.data.keyword.product}} console.
 2. From the navigation menu, click **Govern risk**. 
 3. Click **Create policy**. 
 4. Select **Networkpolicy** from the _Specifications_ field.
@@ -193,9 +193,9 @@ Apply the pod policy to define the container rules for your pods. A nginx pod mu
 
 ### Applying the pod policy
 
-Complete the following steps to apply the pod policy from the {{site.data.keyword.gui}}:
+Complete the following steps to apply the pod policy from the console:
 
-1. Log in to your {{site.data.keyword.product}} {{site.data.keyword.gui}}
+1. Log in to your {{site.data.keyword.product}} console
 2. From the navigation menu, click **Govern risk**. 
 3. Click **Create policy**. 
 4. Select **Pod** from the _Specifications_ field.
@@ -255,9 +255,9 @@ Your pod security policy might resemble the following YAML file:
    
 ### Applying a pod security policy
 
-Complete the following steps to apply the pod security policy from the {{site.data.keyword.gui}}:
+Complete the following steps to apply the pod security policy from the console:
 
-1. Log in to your {{site.data.keyword.product}} {{site.data.keyword.gui}}
+1. Log in to your {{site.data.keyword.product}} console
 2. From the navigation menu, click **Govern risk**. 
 3. Click **Create policy**. 
 4. Select **Podsecuritypolicy** from the _Specifications_ field.
@@ -305,9 +305,9 @@ Apply a role policy to set rules and permissions for specific roles in your clus
 
 ### Applying a role policy
 
-Complete the following steps to apply the role policy from the {{site.data.keyword.gui}}:
+Complete the following steps to apply the role policy from the console:
 
-1. Log in to your {{site.data.keyword.product}} {{site.data.keyword.gui}}
+1. Log in to your {{site.data.keyword.product}} console
 2. From the navigation menu, click **Govern risk**. 
 3. Click **Create policy**. 
 4. Select **Role** from the _Specifications_ field.
@@ -350,9 +350,9 @@ Apply a role binding policy to bind a policy to a namespace in your cluster. You
    
 ### Apply a role policy
 
-Complete the following steps to apply the role binding policy from the {{site.data.keyword.gui}}:
+Complete the following steps to apply the role binding policy from the console:
 
-1. Log in to your {{site.data.keyword.product}} {{site.data.keyword.gui}}
+1. Log in to your {{site.data.keyword.product}} console
 2. From the navigation menu, click **Govern risk**. 
 3. Click **Create policy**. 
 4. Select **Rolebinding** from the _Specifications_ field.

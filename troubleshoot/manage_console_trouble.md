@@ -14,7 +14,7 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} troubleshooting the {{site.data.keyword.gui}}
+# {{site.data.keyword.mcm_notm}} troubleshooting the console
 
 Learn how to isolate and resolve problems with {{site.data.keyword.mcm_notm}}.
 {:shortdesc}

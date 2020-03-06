@@ -31,10 +31,10 @@ Create application resources to group and view the application components that m
 
 1. Compose your application definition YAML content. To create or update an application resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
 
-2. Create the application within {{site.data.keyword.mcm_notm}}. You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
+2. Create the application within {{site.data.keyword.mcm_notm}}. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
 
-   * To use the {{site.data.keyword.gui}},
-     1. Open the {{site.data.keyword.gui}}.
+   * To use the console,
+     1. Open the console.
      2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
      3. Click **New application**. The _Create application_ window opens.
      4. Update or replace the default YAML content within the editor to define your application.
@@ -78,16 +78,16 @@ For more information about the resource definition for an application, see [Crea
 
 1. Compose your application definition updates. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
 
-2. Update the application definition. You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API:
+2. Update the application definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
-   * To use the {{site.data.keyword.gui}}, complete the following steps:
-     1. Open the {{site.data.keyword.gui}}.
+   * To use the console, complete the following steps:
+     1. Open the console.
      2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
      3. Within the list of all applications, find the row for the application that you want to update. For that row expand the _Options_ menu and click **Edit application**. The _Edit application_ window opens.
      4. Update the YAML content for the application.
      5. When you are finished your edits, click **Close editor**. Your changes are saved and applied automatically.
 
-     You can also use the {{site.data.keyword.gui}} search to find and edit an application:
+     You can also use the console search to find and edit an application:
      1. Click the _Search_ icon in the Header to open the _Search_ page.  
      2. Within the search box, filter by `kind:application` to view all applications.
      3. Within the list of all applications, click the application that you want to update. The _Overview_ page for that application opens.
@@ -102,16 +102,16 @@ For more information about the resource definition for an application, see [Crea
 ## Delete an application
 {: #app_delete}
 
-To delete an application, you can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API:
+To delete an application, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
-* To use the {{site.data.keyword.gui}}, complete the following steps:
-  1. Open the {{site.data.keyword.gui}}.
+* To use the console, complete the following steps:
+  1. Open the console.
   2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
   3. Within the list of all applications, find the row for the application that you want to delete. For that row expand the _Options_ menu and click **Delete application**. A confirmation window opens.
   4. Confirm the removal to delete the application. When the list of all applications is refreshed, the application is no longer included.
   5. When the list of all applications is refreshed, the application is no longer displayed.
 
-  You can also use the {{site.data.keyword.gui}} search to find and delete an application:
+  You can also use the console search to find and delete an application:
   1. From the Navigation menu, click **Search**.  
   2. Within the search box, filter by `kind:application` to view all applications.
   3. Within the list of all applications, expand the _Options_ menu for the application that you want to delete. Click **Delete application**. A confirmation window opens.

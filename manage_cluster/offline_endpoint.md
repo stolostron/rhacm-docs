@@ -33,7 +33,7 @@ After you install {{site.data.keyword.mcm_notm}}, you can import a managed clust
 
 * You must install `cloudctl`. For more information, see [Installing {{site.data.keyword.cloud_pak}} CLI (cloudctl)](../../cloudctl/install_cli.md) to install the CLI.
 
-  **Note:** Download the installation file for CLI tools from the {{site.data.keyword.gui}}.
+  **Note:** Download the installation file for CLI tools from the console.
 
 * You must install Docker. To install Docker, see [Install Docker ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.docker.com/install/){: new_window}.
 
@@ -73,6 +73,6 @@ After you install {{site.data.keyword.mcm_notm}}, you can import a managed clust
   ```
   {: codeblock}
 
-You are ready to complete the import process either from the {{site.data.keyword.mcm_notm}} {{site.data.keyword.gui}} or from the CLI.
+You are ready to complete the import process either from the {{site.data.keyword.mcm_notm}} console or from the CLI.
 
 See [Importing a target managed cluster to the {{site.data.keyword.mcm_notm}} hub cluster](../manage_cluster/import_gui.md) for instructions.

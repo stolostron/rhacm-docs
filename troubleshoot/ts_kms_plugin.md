@@ -31,7 +31,7 @@ Install the Kubernetes CLI to run the troubleshooting commands. For more informa
 
 ### Symptom
 
-Failed to create a secret by using the CLI or the {{site.data.keyword.gui}}. You see the error `Error from server (InternalError): Internal error occurred: rpc error: code = Unknown desc = BXNIM0415E:Provided API key could not be found`.
+Failed to create a secret by using the CLI or the console. You see the error `Error from server (InternalError): Internal error occurred: rpc error: code = Unknown desc = BXNIM0415E:Provided API key could not be found`.
 
 ### Cause
 
@@ -52,7 +52,7 @@ The API key that you provided is not correct.
 ### Symptom
 {: #symptom_connection}
 
-Failed to create a secret by using the CLI or the {{site.data.keyword.gui}}. You see the error `Internal error occurred: rpc error: code = Unavailable desc = grpc: the connection is unavailable`.
+Failed to create a secret by using the CLI or the console. You see the error `Internal error occurred: rpc error: code = Unavailable desc = grpc: the connection is unavailable`.
 
 ### Cause
 {: #cause_connection}
@@ -76,7 +76,7 @@ The Customer Root Key ID is not correct.
 ### Symptom
 {: #symptom_uuid}
 
-Failed to create a secret by using the CLI or the {{site.data.keyword.gui}}. You see the error `Internal error occurred: rpc error: code = Unknown desc = Bad Request: Request requires valid Instance Header containing a valid UUID`.
+Failed to create a secret by using the CLI or the console. You see the error `Internal error occurred: rpc error: code = Unknown desc = Bad Request: Request requires valid Instance Header containing a valid UUID`.
 
 ### Cause
 {: #cause_uuid}
@@ -100,7 +100,7 @@ The Key Management Service instance ID is not correct.
 ### Symptom
 {: #symptom_timeout}
 
-Failed to create a secret by using the CLI or the {{site.data.keyword.gui}}. You see the error `Error from server (InternalError): Internal error occurred: rpc error: code = Unknown desc = Post https://kms-api.kube-system:28674/api/v2/keys/3ecbc3be-3534-41cd-9898-a224134fbb55?action=wrap: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)`.
+Failed to create a secret by using the CLI or the console. You see the error `Error from server (InternalError): Internal error occurred: rpc error: code = Unknown desc = Post https://kms-api.kube-system:28674/api/v2/keys/3ecbc3be-3534-41cd-9898-a224134fbb55?action=wrap: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)`.
 
 ### Cause
 {: #cause_timeout}
@@ -110,7 +110,7 @@ The Key Management Service did not respond.
 ### Solution
 {: #solution_timeout}
 
-1. Log in to the {{site.data.keyword.gui}}.
+1. Log in to the console.
 2. From the navigation menu, select **Workloads** > **Deployments**.
 3. Select `key-management-api`.
 4. Scroll down to Pods. 

@@ -31,6 +31,6 @@ The application management functions within {{site.data.keyword.mcm_notm}} provi
 - {: child} [Managing secrets](managing_secrets.md)
 - {: child} [Deploying an application resource](deployment_app.md)
 - {: child} [Deploying application resources with a rolling update](deployment_rollout.md)
-- {: child} [Managing applications with the {{site.data.keyword.gui}}](managing_apps_console.md)
+- {: child} [Managing applications with the console](managing_apps_console.md)
 - {: child} [Migrating subscriptions](migrate_subscriptions.md)
 {: childlinks}

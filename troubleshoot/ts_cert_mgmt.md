@@ -129,7 +129,7 @@ failed calling webhook "certificates.admission.certmanager.k8s.io": the server i
     - Is the apiserver active?
     - Are requests sent by the apiserver?
     - Is the `ValidatingAdmissionWebhook` enabled?
-         - For non-{{site.data.keyword.cloud_pak_mcm}} environments, check to see whether you specified `--enable-admission-plugins=` in `kube_apiserver_extra_args` in your `config.yaml`. If you did not, then no need to worry. If you did, make sure `ValidatingAdmissionWebhook` is present in the list.
+         - For non-Red Hat Advanced Cluster Management for Kubernetes environments, check to see whether you specified `--enable-admission-plugins=` in `kube_apiserver_extra_args` in your `config.yaml`. If you did not, then no need to worry. If you did, make sure `ValidatingAdmissionWebhook` is present in the list.
          - For {{site.data.keyword.open_s}} environments, check the `master-config.yaml`. If `admissionConfig.pluginConfig` does not contain `ValidatingAdmissionWebhook`, you must add it.
 
 4. As a last resort, uninstall the webhook to disable it.

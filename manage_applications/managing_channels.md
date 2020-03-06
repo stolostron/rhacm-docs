@@ -72,11 +72,11 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    You can use a secret for authentication with only `HelmRepo`, `ObjectBucket`, and `GitHub` type channels. To associate a secret with a channel, include the `spec.secretRef.name` setting in your channel YAML definition.
 
-4. Create the channel within {{site.data.keyword.mcm_notm}}. You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
+4. Create the channel within {{site.data.keyword.mcm_notm}}. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
 
-   * To use the {{site.data.keyword.gui}},
+   * To use the console,
 
-     1. Open the {{site.data.keyword.gui}}.
+     1. Open the console.
      2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
      3. Click the **Resources** tab.
      4. Scroll to the _Resource pipeline_ section. From the list of buttons to the right of the resource summary cards, click **Channel**. The _Create a Channel_ editor is displayed.
@@ -117,18 +117,18 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
 1. Compose the definition updates for your channel. For more information about the YAML structure, including the required fields, see [Channel definition](#channel_compose).
 
-2. Update the definition. You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API:
+2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
-   * To use the {{site.data.keyword.gui}},
+   * To use the console,
 
-       1. Open the {{site.data.keyword.gui}}.
+       1. Open the console.
        2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
        3. Click the **Resources** tab.
        4. Scroll down the page to **Resource pipeline** section. Click the **YAML** edit icon for channel that you want to update. The __Edit channel__ window opens.
        5. Edit the YAML for the channel.
        6. When you are finished, click **Save** to update the channel.
 
-     You can also use the {{site.data.keyword.gui}} search to find and edit a channel:
+     You can also use the console search to find and edit a channel:
        1. From the Navigation menu, click **Search**.  
        2. Within the search box, filter by `kind:channel` to view all channels.
        3. Within the list of all channels, click the channel that you want to update. The YAML for the channel is displayed.
@@ -142,11 +142,11 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 ## Deleting a channel
 {: #channel_delete}
 
-To delete a channel, you can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
+To delete a channel, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
 
-* To use the {{site.data.keyword.gui}}, use the {{site.data.keyword.gui}} search to find and delete a channel:
+* To use the console, use the console search to find and delete a channel:
 
-  1. Open the {{site.data.keyword.gui}}.
+  1. Open the console.
   2. Click the _Search_ icon in the Header to open the _Search_ page.
   3. Within the search box, filter by `kind:channel` to view all channels.
   4. Within the list of all channels, select the _Options_ menu for the channel that you want to delete. Click **Delete channel**.

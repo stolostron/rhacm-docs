@@ -133,7 +133,7 @@ The following items highlight the areas where data is stored, which you might wa
 {: #dataaccess}
 
 {{site.data.keyword.product}} platform data can be accessed through the following defined set of product interfaces.
-* Web user interface (the {{site.data.keyword.gui}})
+* Web user interface (the console)
 * Kubernetes `kubectl` CLI
 * {{site.data.keyword.product}} CLI
 * Helm CLI
@@ -142,9 +142,9 @@ These interfaces are designed to allow you to make administrative changes to you
 
 ### Authentication
 
-The {{site.data.keyword.product}} platform authentication manager accepts user credentials from the {{site.data.keyword.gui}} and forwards the credentials to the backend OIDC provider, which validates the user credentials against the enterprise directory. The OIDC provider then returns an authentication cookie (`auth-cookie`) with the content of a JSON Web Token (`JWT`) to the authentication manager. The JWT token persists information such as the user ID and email address, in addition to group membership at the time of the authentication request. This authentication cookie is then sent back to the {{site.data.keyword.gui}}. The cookie is refreshed during the session. It is valid for 12 hours after you sign out of the {{site.data.keyword.gui}} or close your web browser.
+The {{site.data.keyword.product}} platform authentication manager accepts user credentials from the console and forwards the credentials to the backend OIDC provider, which validates the user credentials against the enterprise directory. The OIDC provider then returns an authentication cookie (`auth-cookie`) with the content of a JSON Web Token (`JWT`) to the authentication manager. The JWT token persists information such as the user ID and email address, in addition to group membership at the time of the authentication request. This authentication cookie is then sent back to the console. The cookie is refreshed during the session. It is valid for 12 hours after you sign out of the console or close your web browser.
 
-For all subsequent authentication requests made from the {{site.data.keyword.gui}}, the front-end NGINX server decodes the available authentication cookie in the request and validates the request by calling the authentication manager.
+For all subsequent authentication requests made from the console, the front-end NGINX server decodes the available authentication cookie in the request and validates the request by calling the authentication manager.
 
 The {{site.data.keyword.product}} platform CLI requires the user to provide credentials to log in.
 
@@ -300,8 +300,8 @@ For more information, see
   * Cluster deploy topology in `etcd`
   * Configuration and secret for deployed applications in `etcd`
 * How to delete data
-  * Use the {{site.data.keyword.product}} {{site.data.keyword.gui}}
-  * Search for and delete data by using the k8s {{site.data.keyword.gui}} (`kubectl`) or `etcd` REST API
+  * Use the {{site.data.keyword.product}} console
+  * Search for and delete data by using the k8s console (`kubectl`) or `etcd` REST API
   * Search for and delete api-server log data by using the Elasticsearch API
 
 

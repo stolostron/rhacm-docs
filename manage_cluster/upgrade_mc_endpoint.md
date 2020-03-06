@@ -27,13 +27,13 @@ After you upgrade your IBM Cloud Pak, you can upgrade your multicluster endpoint
 ## Prerequisites
 {: #prereq}
 
-* You must have an {{site.data.keyword.cloud_pak_mcm}} hub cluster that is deployed on the latest version of {{site.data.keyword.cloud_pak_mcm}} and a managed cluster. To upgrade your {{site.data.keyword.cloud_pak_mcm}}, see [Upgrading the {{site.data.keyword.cloud_pak_mcm}}](../../install/upgrade_offline.md).
+* You must have an Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed on the latest version of Red Hat Advanced Cluster Management for Kubernetes and a managed cluster. To upgrade your Red Hat Advanced Cluster Management for Kubernetes, see [Upgrading the Red Hat Advanced Cluster Management for Kubernetes](../../install/upgrade_offline.md).
 
 * You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md).
 
 * You must install the {{site.data.keyword.cloud_pak}} CLI, `cloudctl`. For more information, see [Installing the {{site.data.keyword.cloud_pak}} CLI](../../cloudctl/install_cli.md) to install the CLI.
 
-  **Note:** Download the installation file for CLI tools from the {{site.data.keyword.gui}}.
+  **Note:** Download the installation file for CLI tools from the console.
 
 * After you install the {{site.data.keyword.cloud_pak}} CLI, you need to install the multicluster plug-in (mc). For more information, see [Installing the {{site.data.keyword.cloud_pak}} CLI (cloudctl) multicluster plug-in (mc)](../../cli/installing_mc_plugin.md) to install the CLI.
 

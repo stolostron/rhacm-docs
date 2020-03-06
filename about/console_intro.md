@@ -14,12 +14,12 @@ lastupdated: "2020-02-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Accessing and using your cluster {{site.data.keyword.gui}}
+# Accessing and using your cluster console
 
-Learn how to access your cluster and use some of the {{site.data.keyword.gui}} components.
+Learn how to access your cluster and use some of the console components.
 {:shortdesc}
 
-- {: child} [Accessing your cluster by using the {{site.data.keyword.gui}}](../installing/url.md)
+- {: child} [Accessing your cluster by using the console](../installing/url.md)
 - {: child} [{{site.data.keyword.gui_caps_only}} components](console.md)
 - {: child} [Managing cluster labels](../console/cluster_label.md)
 {: childlinks}

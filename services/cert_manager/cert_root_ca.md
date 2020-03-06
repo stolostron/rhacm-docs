@@ -76,9 +76,9 @@ Complete the following steps to back up the existing certificates:
 
    7. Update the access permissions by double-clicking the certificate that you added. Update the `When using this certificate` parameter to `Always Trust`.
 
-   8. Return to your Chrome browser and refresh the {{site.data.keyword.gui}}. 
+   8. Return to your Chrome browser and refresh the console. 
 
-      You can log in to your {{site.data.keyword.gui}} with access to the product. For more information, see [Requirements for trusted certificates in iOS 13 and macOS 10.15 ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://support.apple.com/en-us/HT210176){: new_window}.
+      You can log in to your console with access to the product. For more information, see [Requirements for trusted certificates in iOS 13 and macOS 10.15 ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://support.apple.com/en-us/HT210176){: new_window}.
 
 ## Replacing root ca certificates
 {: #root}

@@ -43,4 +43,4 @@ The search returns resources that meet the criteria of your search request, as w
    
 Your search results are grouped by `kind` and each resource `kind` is grouped in a table. You can reorder the data in the tables by selecting the row and column headings.
 
-You can use a search that was saved in the {{site.data.keyword.gui}} by entering the `savedsearches` command and selecting the search that you want to run. **Remember:** You cannot save a search directly that you created in the {{site.data.keyword.kui}}.
+You can use a search that was saved in the console by entering the `savedsearches` command and selecting the search that you want to run. **Remember:** You cannot save a search directly that you created in the {{site.data.keyword.kui}}.

@@ -159,4 +159,4 @@ Complete the following steps to replace image manager certificates.
      {: codeblock}
 
    - If Vulnerability Advisor (VA) is enabled, verify that images that are pushed into the registry are being scanned by VA.
-   - Verify that images that are pushed to the registry are viewable from the {{site.data.keyword.product}} {{site.data.keyword.gui}}.
+   - Verify that images that are pushed to the registry are viewable from the {{site.data.keyword.product}} console.

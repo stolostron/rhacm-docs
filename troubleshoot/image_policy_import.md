@@ -34,11 +34,11 @@ If this error occurs, you can also notice that the `multicluster-endpoint` pods 
 
 ## Causes
 
-This error can occur when the {{site.data.keyword.cloud_pak_mcm}} image registry that you are using is not whitelisted in the image policy.
+This error can occur when the Red Hat Advanced Cluster Management for Kubernetes image registry that you are using is not whitelisted in the image policy.
 
 ## Resolving the problem
 
-Ensure that your images are valid for the `clusterimagepolicy` or `imagepolicy` namespace whenever you plan to import an {{site.data.keyword.cloud_pak_mcm}} cluster. To ensure that your image is valid, add the image registry to the whitelist for your image policy on your hub cluster before you import a cluster to your hub cluster.
+Ensure that your images are valid for the `clusterimagepolicy` or `imagepolicy` namespace whenever you plan to import an Red Hat Advanced Cluster Management for Kubernetes cluster. To ensure that your image is valid, add the image registry to the whitelist for your image policy on your hub cluster before you import a cluster to your hub cluster.
 
 Your image policy can resemble the following example policy:
 

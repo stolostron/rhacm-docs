@@ -78,10 +78,10 @@ When you use Kubernetes secrets with your subscriptions to access channel source
 
 1. Compose the definition updates for your secret. For more information about the YAML structure, including the required fields, see [Secret definition](#secret_compose).
 
-2. Update the definition. You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API:
+2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
-   - To use the {{site.data.keyword.gui}} search to find and edit a secret,
-     1. Open the {{site.data.keyword.gui}}.
+   - To use the console search to find and edit a secret,
+     1. Open the console.
      2. From the main menu, click **Search**.  
      3. Within the search box, filter by `kind:secret` to view all secrets.
      4. Within the list of all secrets, click the secret that you want to update. The YAML for that secret is displayed.
@@ -103,10 +103,10 @@ When your changes are saved, the changes are not automatically detected. The upd
 ## Delete a secret
 {: #secret_delete}
 
-You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API to delete a secret:
+You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API to delete a secret:
 
-   - To use the {{site.data.keyword.gui}} search to find and delete a secret,
-     1. Open the {{site.data.keyword.gui}}.
+   - To use the console search to find and delete a secret,
+     1. Open the console.
      2. From the main menu, click **Search**.  
      3. Within the search box, filter by `kind:secret` to view all secrets.
      4. Within the list of all secrets, select the action menu for the secret that you want to delete. Click **Delete secret**.

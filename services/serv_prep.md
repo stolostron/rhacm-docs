@@ -58,7 +58,7 @@ Configure the DNS for each managed cluster by completing these steps:
 
   The value `mcm.svc` is the default DNS domain suffix for the service registry. If you want to set it to another value, complete the following steps:
 
-    1. Log in to your {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}.
+    1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
 	2. Navigate to **Workloads** -> **Helm Releases**.
 

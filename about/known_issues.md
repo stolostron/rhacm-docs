@@ -19,7 +19,7 @@ lastupdated: "2020-03-05"
 Review the known issues for {{site.data.keyword.product}}. Additionally, see [{{site.data.keyword.product}} troubleshooting](../troubleshoot/mcm_troubleshoot.md) for troubleshooting topics.
 {:shortdesc}
 
-  - [Menu and logo on the {{site.data.keyword.gui}} header changes](#1527)
+  - [Menu and logo on the console header changes](#1527)
   - [Cannot create a Helm release on a managed cluster](#helm_issue)
   - [Applications fail to install during Helm deployment](#load_error)
   - [Missing data in Grafana for {{site.data.keyword.open_s}}](#31754)
@@ -27,17 +27,17 @@ Review the known issues for {{site.data.keyword.product}}. Additionally, see [{{
   - [ObjectBucket channels support including only one resource in each object](#194)
   - [Subscriptions that use a secret must be changed before updates to dependency resources can be detected](#611)
   - [Permission issue with Docker Version 18.03 with Ubuntu 16.04 LTS](#31947)
-  - [Hub cluster resources display as `local-cluster` in {{site.data.keyword.gui}} search results ](#31979)
+  - [Hub cluster resources display as `local-cluster` in console search results ](#31979)
   - [Mapping error for a certificate policy](#1351_mapping)
   - [{{site.data.keyword.kui}} fails when returning over 200 KB of data](#34145)
   - [Enabling {{site.data.keyword.product}} for the installed monitoring release](#1051)
   - [LDAP user names are case-sensitive](#25735)
   - [Pods are not reachable from the NGINX ingress controller in multitenant isolation mode](#34414)
   
-## Menu and logo on the {{site.data.keyword.gui}} header changes
+## Menu and logo on the console header changes
 {: #1527}
 
-When you navigate to certain pages in the {{site.data.keyword.product}} {{site.data.keyword.gui}}, the menu items might shorten and the logo in the header might change from {{site.data.keyword.product}} to {{site.data.keyword.product}}.
+When you navigate to certain pages in the {{site.data.keyword.product}} console, the menu items might shorten and the logo in the header might change from {{site.data.keyword.product}} to {{site.data.keyword.product}}.
 
 To return to the {{site.data.keyword.product}} context, click the button in your browser to go back until you see the {{site.data.keyword.product}} logo in the header, or replace the location of the browser with the following URL:
 
@@ -145,7 +145,7 @@ When the subscription is changed, the subscription controller is triggered to sy
 
 If you use Docker Version 18.03 or higher with Ubuntu 16.04 LTS, containers that run as non-root might have permission issues. This issue appears to be due to a problem between the overlay storage driver and the kernel.
 
-## Hub cluster resources display as `local-cluster` in {{site.data.keyword.gui}} search results
+## Hub cluster resources display as `local-cluster` in console search results
 {: #31979}
 
 Search returns and lists each cluster with the resource that you search. For resources in the _hub_ cluster, the cluster name is displayed as _local-cluster_.

@@ -18,7 +18,7 @@ lastupdated: "2019-09-19"
 
 **{{site.data.keyword.tech_prev}}**
 
-Multiple zones in {{site.data.keyword.mcm}} clusters.
+Multiple zones in Red Hat Advanced Cluster Management for Kubernetes clusters.
 {:shortdesc}
 
 - {: child} [Configuring multiple zones in an {{site.data.keyword.mcm_notm}} cluster](../installing/multizone_config.md)

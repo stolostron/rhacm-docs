@@ -105,10 +105,10 @@ The `minimumDuration` parameter specifies the smallest duration before a certifi
 
 ## Creating a certificate policy
 
-You can create a YAML file for your certificate policy or create a certificate policy from the {{site.data.keyword.gui}}. View the following sections to create a certificate policy:
+You can create a YAML file for your certificate policy or create a certificate policy from the console. View the following sections to create a certificate policy:
 
 * [Creating a YAML file for a certificate policy](#yaml)
-* [Creating a certificate policy from the {{site.data.keyword.gui}}](#policy_gui)
+* [Creating a certificate policy from the console](#policy_gui)
 
 ### Creating a YAML file for a certificate policy
 {: #yaml}
@@ -173,10 +173,10 @@ Complete the following steps to view your certificate policy from the CLI:
    ```
    {: codeblock}
 
-### Create a certificate policy from the {{site.data.keyword.gui}}
+### Create a certificate policy from the console
 {: #policy_gui}
 
-1. Log in to your cluster from the {{site.data.keyword.gui}}.
+1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**
 3. Click **Create policy**.
 4. Enter or select the appropriate values for the following fields:
@@ -216,9 +216,9 @@ A certificate policy is created and the `CertificatePolicy` definition within it
 
 #### View your certificate policy
 
-You can view any certificate policy and its status from the {{site.data.keyword.gui}}.
+You can view any certificate policy and its status from the console.
 
-1. Log in to your cluster from the {{site.data.keyword.gui}}.
+1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**. 
 3. Click the _Policies_ tab to view a summary of your policies and a table list of your policies.
    **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab. 

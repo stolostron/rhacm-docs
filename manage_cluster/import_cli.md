@@ -16,7 +16,7 @@ lastupdated: "2019-12-11"
 
 # Importing a cluster with the CLI
 
-After you install {{site.data.keyword.cloud_pak_mcm}}, you are ready to import a cluster to manage. 
+After you install Red Hat Advanced Cluster Management for Kubernetes, you are ready to import a cluster to manage. 
 {:shortdesc}
 
   - [Prerequisites](#prereq)
@@ -29,13 +29,13 @@ After you install {{site.data.keyword.cloud_pak_mcm}}, you are ready to import a
 ## Prerequisites
 {: #prereq}
 
-* You must have an {{site.data.keyword.cloud_pak_mcm}} hub that is deployed and cluster that you want to manage.
+* You must have an Red Hat Advanced Cluster Management for Kubernetes hub that is deployed and cluster that you want to manage.
 
 * You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md).
 
 * You must install the {{site.data.keyword.product}} CLI, `cloudctl`. For more information, see [Installing the {{site.data.keyword.product}} CLI](../../cloudctl/install_cli.md) to install the CLI.
 
-  **Note:** Download the installation file for CLI tools from the {{site.data.keyword.gui}}.
+  **Note:** Download the installation file for CLI tools from the console.
   
 ## Supported architecture
 
@@ -113,7 +113,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 | migrateFrom320|Migration from 3.2.0 multicluster-endpoint|false|
 {: caption="Table 1. Table of YAML file parameters and descriptions for import" caption-side="}
 
-**Note:** Do not remove parameters, as the {{site.data.keyword.gui}} might not properly render.
+**Note:** Do not remove parameters, as the console might not properly render.
 
 ## Importing the cluster
 {: #import}
@@ -138,7 +138,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
   
 4. Verify that the cluster is successfully imported.
 
-  - Log in to your {{site.data.keyword.cloud_pak_mcm}} hub cluster.
+  - Log in to your Red Hat Advanced Cluster Management for Kubernetes hub cluster.
   - From the navigation bar, click **Clusters**.
   - Find your new imported managed cluster in the list. 
   - Ensure that the status is _Ready_. Depending on environment, it might take a few minutes to see the status.
@@ -146,7 +146,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 ## Deleting an imported cluster
 {: #delete}
 
-You can delete your {{site.data.keyword.cloud_pak_mcm}} managed cluster resources from the hub cluster so that it is not a managed cluster.
+You can delete your Red Hat Advanced Cluster Management for Kubernetes managed cluster resources from the hub cluster so that it is not a managed cluster.
 
 1. Log in to your _hub_ cluster with `cloudctl login`.
 

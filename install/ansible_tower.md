@@ -19,7 +19,7 @@ lastupdated: "2019-12-12"
 {{site.data.keyword.rh_tm}} Ansible Tower automates continuous configurations and deployments.
 {:shortdesc}
 
-Red Hat Ansible Tower is an Internet-based hub that runs your automation tasks. You can configure the optional license to use Red Hat Ansible Tower with the automation capability of the {{site.data.keyword.product}} {{site.data.keyword.gui}}.
+Red Hat Ansible Tower is an Internet-based hub that runs your automation tasks. You can configure the optional license to use Red Hat Ansible Tower with the automation capability of the {{site.data.keyword.product}} console.
 
 ## Installing Red Hat Ansible Tower
 
@@ -43,13 +43,13 @@ You must configure a license for your Red Hat Ansible Tower installation. Comple
 
 ## Configuring single sign-on
 
-Red Hat Ansible Tower supports single sign-on integration with an enterprise identity provider by using the Security Assertion Markup Language (SAML). Configure Red Hat Ansible Tower for single sign-on integration with the SAML identity provider that is used for your {{site.data.keyword.product}} cluster to improve the {{site.data.keyword.gui}} navigation. For more information, see _SAML Authentication Settings_ in [{{site.data.keyword.rh_tm}} Ansible Tower documentation ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.ansible.com/ansible-tower/latest/html/administration/ent_auth.html#saml-authentication-settings){: new_window}. 
+Red Hat Ansible Tower supports single sign-on integration with an enterprise identity provider by using the Security Assertion Markup Language (SAML). Configure Red Hat Ansible Tower for single sign-on integration with the SAML identity provider that is used for your {{site.data.keyword.product}} cluster to improve the console navigation. For more information, see _SAML Authentication Settings_ in [{{site.data.keyword.rh_tm}} Ansible Tower documentation ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.ansible.com/ansible-tower/latest/html/administration/ent_auth.html#saml-authentication-settings){: new_window}. 
 
 **Note**: You can have multiple SAML identity providers. 
 
-## Integrating Red Hat Ansible Tower with {{site.data.keyword.cloud_pak}} {{site.data.keyword.gui}}
+## Integrating Red Hat Ansible Tower with {{site.data.keyword.cloud_pak}} console
 
-Enable navigation to the Red Hat Ansible Tower {{site.data.keyword.gui}} within the {{site.data.keyword.cloud_pak}} {{site.data.keyword.gui}}. 
+Enable navigation to the Red Hat Ansible Tower console within the {{site.data.keyword.cloud_pak}} console. 
 
 Complete the following steps to enable navigation to Red Hat Ansible:
 
@@ -70,6 +70,6 @@ Complete the following steps to enable navigation to Red Hat Ansible:
 
    * `-t` is a required parameter that refers to the {{site.data.keyword.open_s}} project (Kubernetes namespace), where Red Hat Ansible is installed in the {{site.data.keyword.cloud_pak}}.
   
-5. Verify that the Red Hat Ansible Tower instance is in the {{site.data.keyword.cloud_pak}} {{site.data.keyword.gui}} navigation menu. From the {{site.data.keyword.cloud_pak}} navigation menu, click **Automate infrastructure** > **Ansible automation**.
+5. Verify that the Red Hat Ansible Tower instance is in the {{site.data.keyword.cloud_pak}} console navigation menu. From the {{site.data.keyword.cloud_pak}} navigation menu, click **Automate infrastructure** > **Ansible automation**.
 
-Red Hat Ansible Tower is integrated with the {{site.data.keyword.cloud_pak}} {{site.data.keyword.gui}}. 
+Red Hat Ansible Tower is integrated with the {{site.data.keyword.cloud_pak}} console. 

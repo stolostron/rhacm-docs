@@ -19,7 +19,7 @@ lastupdated: "2019-12-05"
 All certificates required by services that run on {{site.data.keyword.product}} are created during the installation of {{site.data.keyword.product}}. Certificates are either created and managed by the {{site.data.keyword.product}} installer or by the {{site.data.keyword.product}} Certificate manager (cert-manager). These certificates are signed by a certificate authority (CA) also created during installation.
 {: shortdesc}
 
-An error message may appear when you attempt to log in to your cluster. If you are unable to access the {{site.data.keyword.gui}}, see, [Cannot access the {{site.data.keyword.product}} {{site.data.keyword.gui}} on macOS](troubleshoot/console_catalina.md) for more information.
+An error message may appear when you attempt to log in to your cluster. If you are unable to access the console, see, [Cannot access the {{site.data.keyword.product}} console on macOS](troubleshoot/console_catalina.md) for more information.
 
 Before you install {{site.data.keyword.product}}, you can provide your own certificate authority (CA) to sign certificates used by {{site.data.keyword.product}} services.
 

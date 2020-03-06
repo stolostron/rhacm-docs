@@ -18,7 +18,7 @@ lastupdated: "2020-03-04"
 
 **{{site.data.keyword.tech_prev}}**
 
-Configure multiple zones in an {{site.data.keyword.mcm}} cluster.
+Configure multiple zones in an Red Hat Advanced Cluster Management for Kubernetes cluster.
 {:shortdesc}
 
 You can set up a cluster with nodes that reside across data centers and configure high availability (HA) across these data centers. Each data center is an availability zone. Configuring multiple zones helps in the following ways:
@@ -60,7 +60,7 @@ Number of hosts | 1 | 5 | 3 | 3 | 3 | 5
 
 Complete the following steps to set up a multizone cluster:
 
-1. Prepare your nodes. For more information, see [Preparing to install the {{site.data.keyword.cloud_pak_mcm}}](../../install/prep.md).
+1. Prepare your nodes. For more information, see [Preparing to install the Red Hat Advanced Cluster Management for Kubernetes](../../install/prep.md).
 
 2. Prepare the `<installation_directory>/cluster/hosts` file for installation.
 
@@ -138,6 +138,6 @@ Complete the following steps to set up a multizone cluster:
 
 3. Configure HA for your multizone environment. For more information, see [Configuring high availability for your {{site.data.keyword.mcm_notm}} clusters](mcm_ha.md). 
 
-4. Install your cluster. For more information, see [{{site.data.keyword.cloud_pak_mcm}} installation](../../install/overview.md).
+4. Install your cluster. For more information, see [Red Hat Advanced Cluster Management for Kubernetes installation](../../install/overview.md).
 
 

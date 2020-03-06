@@ -39,7 +39,7 @@ Complete the following steps to deploy the notary server and signer on {{site.da
      ```
      {: codeblock}
 
-   - Use the {{site.data.keyword.product}} {{site.data.keyword.gui}} to install a chart from the Catalog.
+   - Use the {{site.data.keyword.product}} console to install a chart from the Catalog.
 
    The notary service is successfully deployed when the notary server and signer pods are available.      
 

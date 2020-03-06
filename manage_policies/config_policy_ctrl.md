@@ -46,10 +46,10 @@ Each _policy_ within the policy document contains the following elements.
 
 ## Creating a configuration policy
 
-You can create a YAML file for your configuration policy or create a configuration policy from the {{site.data.keyword.gui}}. View the following sections to create a configuration policy:
+You can create a YAML file for your configuration policy or create a configuration policy from the console. View the following sections to create a configuration policy:
 
 * [Creating a YAML file for a configuration policy](#yaml)
-* [Creating a configuration policy from the {{site.data.keyword.gui}}](#policy_gui)
+* [Creating a configuration policy from the console](#policy_gui)
 
 ### Creating a YAML file for a configuration policy
 {: #yaml}
@@ -114,10 +114,10 @@ Complete the following steps to view your configuration policy from the CLI:
    ```
    {: codeblock}
 
-### Create a configuration policy from the {{site.data.keyword.gui}}
+### Create a configuration policy from the console
 {: #policy_gui}
 
-1. Log in to your cluster from the {{site.data.keyword.gui}}.
+1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**
 3. Click **Create policy**.
 4. Enter or select the appropriate values for the following fields:
@@ -157,9 +157,9 @@ A configuration policy is created and the `Policy` definition might resemble the
 
 #### View your configuration policy
 
-You can view any configuration policy and its status from the {{site.data.keyword.gui}}.
+You can view any configuration policy and its status from the console.
 
-1. Log in to your cluster from the {{site.data.keyword.gui}}.
+1. Log in to your cluster from the console.
 2. From the navigation menu, click **Govern risk**. 
 3. Click the _Policies_ tab to view a summary of your policies and a table list of your policies.
    **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab. 
