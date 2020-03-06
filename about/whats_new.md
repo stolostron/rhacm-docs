@@ -23,7 +23,7 @@ Get a quick overview of changes this release.
   * [Cluster management](#cluster_mngmt)
   * [Application management](#app_mngmt)
   * [Performance improvements](#cluster)
-  * [{{site.data.keyword.gui_caps_only}}](#gui)
+  * [Console](#gui)
   * [Security and compliance](#security)
 
 
@@ -57,7 +57,7 @@ You can create and update policies on your {{site.data.keyword.product}} hub clu
 {: #cluster}
 
 
-## {{site.data.keyword.gui_caps_only}}
+## Console
 {: #gui}
 
 
