@@ -122,18 +122,16 @@ The following items highlight the areas where data is stored, which you might wa
 * **Platform Configuration Data:** The {{site.data.keyword.product}} platform configuration can be customized by updating a configuration YAML file with properties for general settings, Kubernetes, logs, network, Docker, and other settings. This data is used as input to the {{site.data.keyword.product}} platform installer for deploying one or more nodes. The properties also include an administrator user ID and password that are used for bootstrap. For more information, see [Customizing the cluster](../installer/3.2.2/config_yaml.md). <!--there should be a new link here-->
 * **Kubernetes Configuration Data:** Kubernetes cluster state data is stored in a distributed key-value store, `etcd`. 
 * **User Authentication Data, including User IDs and passwords:** User ID and password management are handled through a client enterprise LDAP directory. <!--is enterprise the correct language since this is open source? I think it should be changed to client subscription--> Users and groups that are defined in LDAP can be added to {{site.data.keyword.product}} platform teams and assigned access roles. {{site.data.keyword.product}} platform stores the email address and user ID from LDAP, but does not store the password. {{site.data.keyword.product}} platform stores the group name and upon login, caches the available groups to which a user belongs. Group membership is not persisted in any long-term way. Securing user and group data at rest in the enterprise LDAP must be considered. {{site.data.keyword.product}} platform also includes an authentication service, Open ID Connect (OIDC) that interacts with the enterprise directory and maintains access tokens. This service uses MongoDB as a backing store.
-* **Service authentication data, including user IDs and passwords:** Credentials that are used by {{site.data.keyword.product}} platform components for inter-component access are defined as Kubernetes Secrets. All Kubernetes resource definitions are persisted in the `etcd` key-value data store. Initial credentials values are defined in the platform configuration data as Kubernetes Secret configuration YAML files. For more information, see [Managing Secrets](../applications/managing_secrets.md).
-* **Helm chart data:** {{site.data.keyword.product}} platform includes a catalog of containerized software and services that you can browse and install in your cluster from Helm charts. The Helm service persists configuration data in a MongoDB backing store.
-* **GlusterFS storage file system:** You can use GlusterFS storage in your clusters. Consideration must be given to encrypting the volumes where GlusterFS storage is deployed. 
-* **Monitoring Data:** You can use {{site.data.keyword.product}} platform monitoring to monitor the status of your cluster and applications. This service uses Grafana and Prometheus to present detailed information about cluster nodes and containers. Additional monitoring stacks can be deployed for application monitoring. Monitoring data might be persisted using Kubernetes `PersistentVolumes`.
-* **Metering Data:** You can use the {{site.data.keyword.product}} metering service to view and download detailed usage metrics for your applications and cluster. The metering service uses MongoDB as a backing data store to persist metric data.
+* **Service authentication data, including user IDs and passwords:** Credentials that are used by {{site.data.keyword.product}} platform components for inter-component access are defined as Kubernetes Secrets. All Kubernetes resource definitions are persisted in the `etcd` key-value data store. Initial credential values are defined in the platform configuration data as Kubernetes Secret configuration YAML files. For more information, see [Managing Secrets](../manage_applications/managing_secrets.md).
+* **Helm chart data:** {{site.data.keyword.product}} platform includes a catalog of containerized software and services that you can browse and install in your cluster from Helm charts. The Helm service persists configuration data in a MongoDB backing store. 
+* **Monitoring Data:** You can use {{site.data.keyword.product}} platform monitoring to monitor the status of your cluster and applications <!--remove applications-->. This service uses Grafana and Prometheus to present detailed information about cluster nodes and containers. Additional monitoring stacks can be deployed for application monitoring. Monitoring data might be persisted using Kubernetes `PersistentVolumes`.
 * **Logging Data:** {{site.data.keyword.product}} platform uses an ELK stack for system logs. ELK is an abbreviation for three products, Elasticsearch, Logstash, and Kibana, that are built by Elastic and together comprise a stack of tools that you can use to stream, store, search, and monitor logs. The ELK stack that is provided with {{site.data.keyword.product}} platform uses the official ELK stack images that are published by Elastic. Logging is configured by default for the {{site.data.keyword.product}} platform services. Additional ELK stacks can be deployed for application logging.
 
 ## Data access
 {: #dataaccess}
 
 {{site.data.keyword.product}} platform data can be accessed through the following defined set of product interfaces.
-* Web user interface (the console)
+* The console
 * Kubernetes `kubectl` CLI
 * {{site.data.keyword.product}} CLI
 * Helm CLI
@@ -144,7 +142,7 @@ These interfaces are designed to allow you to make administrative changes to you
 
 The {{site.data.keyword.product}} platform authentication manager accepts user credentials from the console and forwards the credentials to the backend OIDC provider, which validates the user credentials against the enterprise directory. The OIDC provider then returns an authentication cookie (`auth-cookie`) with the content of a JSON Web Token (`JWT`) to the authentication manager. The JWT token persists information such as the user ID and email address, in addition to group membership at the time of the authentication request. This authentication cookie is then sent back to the console. The cookie is refreshed during the session. It is valid for 12 hours after you sign out of the console or close your web browser.
 
-For all subsequent authentication requests made from the console, the front-end NGINX server decodes the available authentication cookie in the request and validates the request by calling the authentication manager.
+For all subsequent authentication requests made from the console, the front-end NGINX server decodes the available authentication cookie in the request and validates the request by calling the authentication manager. <!--nginx is not used, correct? I think this paragraph should be removed-->
 
 The {{site.data.keyword.product}} platform CLI requires the user to provide credentials to log in.
 
@@ -158,11 +156,7 @@ Helm CLI access utilizes certificates to access the cluster.
 
 ### Authorization
 
-{{site.data.keyword.product}} platform roles control access to cluster configuration actions, to catalog and Helm resources, and to Kubernetes resources. Several IAM (Identity and Access Management) roles are provided, including Cluster Administrator, Administrator, Operator, Editor, Viewer. A role is assigned to users or user groups when you add them to a team. Team access to resources can be controlled by namespace.
-
-### Pod Security
-
-Pod security policies are used to set up cluster-level control over what a pod can do or what it can access. 
+{{site.data.keyword.product}} platform roles control access to cluster configuration actions, to catalog and Helm resources, and to Kubernetes resources. Several IAM (Identity and Access Management) roles are provided, including Cluster Administrator, Administrator, Operator, Editor, Viewer. A role is assigned to users or user groups when you add them to a team. Team access to resources can be controlled by namespace. 
 
 ## Data Processing
 {: #dataprocessing}
@@ -171,15 +165,13 @@ Users of {{site.data.keyword.product}} can control the way that technical data t
 
 **Role-based access control** (RBAC) controls what data and functions can be accessed by users.
 
-**Pod security policies** are used to set up cluster-level control over what a pod can do or what it can access.
-
 **Data-in-transit** is protected by using `TLS`. `HTTPS` (`TLS` underlying) is used for secure data transfer between user client and back end services. Users can specify the root certificate to use during installation. 
 
 **Data-at-rest** protection is supported by using `dm-crypt` to encrypt data.
 
 **Data retention** periods for logging (ELK) and monitoring (Prometheus) are configurable and deletion of data is supported through provided APIs.
 
-These same platform mechanisms that are used to manage and secure {{site.data.keyword.product}} platform technical data can be used to manage and secure personal data for user-developed or user-provided applications. Clients can develop their own capabilities to implement further controls.
+These same platform mechanisms that are used to manage and secure {{site.data.keyword.product}} platform technical data can be used to manage and secure personal data for user-developed or user-provided clusters. Clients can develop their own capabilities to implement further controls.
 
 ## Data Deletion
 {: #datadeletion}
@@ -198,22 +190,22 @@ Areas of {{site.data.keyword.product}} platform to consider for support of accou
 
 Function to remove user ID and password data that is managed through an enterprise LDAP directory would be provided by the LDAP product used with {{site.data.keyword.product}} platform.
 
-Personal data that is persisted by platform logging and monitoring consists of IP addresses of cluster components and some user names and user IDs. User-developed or user-provided applications might include other personal data in their use of logging and monitoring. The same mechanisms that are used for deletion of system logging or monitoring data can be used for application logging and monitoring data. Personal data that is collected by applications outside of these services will require application provided mechanisms to delete data. For more information, see
+Personal data that is persisted by platform logging and monitoring consists of IP addresses of cluster components and some user names and user IDs. The same mechanisms that are used for deletion of system logging or monitoring data can be used for application logging and monitoring data. Personal data that is collected by applications outside of these services require cluster provided mechanisms to delete data. For more information, see
 
-* [Prometheus Documentation![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://prometheus.io/docs/introduction/overview/){:new_window}
+* [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/){:new_window}
 
 
 ## Data monitoring
 {: #datamonitoring}
 
-* {{site.data.keyword.product}} platform provides a monitoring service to monitor the status of your cluster and applications. This service uses Grafana and Prometheus to present detailed information about cluster nodes and containers. Monitoring can be configured to generate alerts or integrated with external alert providers. Platform monitoring is enabled by default. Additional monitoring stacks can be deployed for application monitoring. 
-* {{site.data.keyword.product}} provides a metering service to view and download detailed usage metrics for your applications and cluster. Metering is enabled by default for all deployed container applications.
-* {{site.data.keyword.product}} platform provides a logging service that is based on the ELK stack to stream, store, search, and monitor logs. The ELK stack that is provided with {{site.data.keyword.product}} platform uses the official ELK stack images that are published by Elastic. Logging is configured by default to collect system logs for the {{site.data.keyword.product}} platform services. Additional ELK stacks can be deployed for application logging.
+* {{site.data.keyword.product}} platform provides a monitoring service to monitor the status of your clusters. This service uses Grafana and Prometheus to present detailed information about cluster nodes and containers. Monitoring can be configured to generate alerts or integrated with external alert providers. Platform monitoring is enabled by default.
+* {{site.data.keyword.product}} provides a metering service to view and download detailed usage metrics for your clusters. 
+* {{site.data.keyword.product}} platform provides a logging service that is based on the ELK stack to stream, store, search, and monitor logs. The ELK stack that is provided with {{site.data.keyword.product}} platform uses the official ELK stack images that are published by Elastic. Logging is configured by default to collect system logs for the {{site.data.keyword.product}} platform services. 
 
 ## Capability for Restricting Use of Personal Data
 {: #datasubjectrights}
 
-Using the facilities summarized in this document, {{site.data.keyword.product}} platform enables an end user to restrict usage of any technical data within the platform that is considered personal data.
+Using the facilities summarized in this document, {{site.data.keyword.product}} platform enables an end-user to restrict usage of any technical data within the platform that is considered personal data.
 
 Under GDPR, users have rights to access, modify, and restrict processing. Refer to other sections of this document to control the following:
 * Right to access
@@ -239,14 +231,10 @@ This appendix includes details on data that is logged by the platform services.
 * When data is logged
   * With login requests
 * Where data is logged
-  * In the audit logs at `/var/lib/icp/audit`
+  * In the audit logs at `/var/lib/icp/audit` <!--need to update directory path possibly?-->
   * In the audit logs at `/var/log/audit`
 * How to delete data
   * Search for the user specific data and delete the record from the audit log
-
-
-  For more information, see:
-* [High availability {{site.data.keyword.product}} clusters](../installing/mcm_ha.md)
 
 ### {{site.data.keyword.product}} platform API
 
@@ -266,8 +254,8 @@ This appendix includes details on data that is logged by the platform services.
 
 
 For more information, see
-  * [Kubernetes Logging ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/cluster-administration/logging/){:new_window}
-  * [etcdctl ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://github.com/coreos/etcd/blob/master/etcdctl/READMEv2.md){:new_window}
+  * [Kubernetes Logging](https://kubernetes.io/docs/concepts/cluster-administration/logging/){:new_window}
+  * [etcdctl](https://github.com/coreos/etcd/blob/master/etcdctl/READMEv2.md){:new_window}
 
 ### {{site.data.keyword.product}} monitoring
 
@@ -281,10 +269,9 @@ For more information, see
 * How to delete data
   * Search for and delete data by using the Prometheus API
 
-
   For more information, see:
   
-  * [Prometheus Documentation ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://prometheus.io/docs/introduction/overview/){:new_window}
+  * [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/){:new_window}
 
 
 ### {{site.data.keyword.product}} Kubernetes
@@ -304,11 +291,10 @@ For more information, see
   * Search for and delete data by using the k8s console (`kubectl`) or `etcd` REST API
   * Search for and delete api-server log data by using the Elasticsearch API
 
-
   Use caution when modifying Kubernetes cluster configuration or deleting cluster data.
 
   For more information, see:
-  * [Kubernetes kubectl ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/reference/kubectl/overview/){:new_window}
+  * [Kubernetes kubectl](https://kubernetes.io/docs/reference/kubectl/overview/){:new_window}
 
 ### {{site.data.keyword.product}} Helm API
 
@@ -317,27 +303,7 @@ For more information, see
 * When data is logged
   * When a user retrieves charts or repositories that are added to a team
 * Where data is logged
-  * helm-api deployment logs, Elasticsearch
+  * `helm-api` deployment logs, Elasticsearch
 * How to delete data
-  * Search for and delete helm-api log data by using the Elasticsearch API
+  * Search for and delete `helm-api` log data by using the Elasticsearch API
 
-### {{site.data.keyword.product}} Service Broker
-
-* What data is logged
-  * User ID (only at debug log level 10, not at default log level)
-* When data is logged
-  * When API requests are made to the service broker
-  * When the service broker accesses the service catalog
-* Where data is logged
-  * Service broker container log, Elasticsearch
-* How to delete data
-  * Search for and delete the api-server log using Elasticsearch API
-  * Search for and delete the log from the api-server container
-      ```
-      kubectl logs $(kubectl get pods -n kube-system | grep  service-catalogapiserver | awk '{print $1}') -n kube-system | grep admin
-      ```
-      {: codeblock}
-
-
-  For more information, see:
-  * [Kubernetes kubectl ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/reference/kubectl/overview/){:new_window}
