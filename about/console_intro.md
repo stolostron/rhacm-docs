@@ -20,6 +20,6 @@ Learn how to access your cluster and use some of the console components.
 {:shortdesc}
 
 - {: child} [Accessing your cluster by using the console](../installing/url.md)
-- {: child} [{{site.data.keyword.gui_caps_only}} components](console.md)
+- {: child} [Console components](console.md)
 - {: child} [Managing cluster labels](../console/cluster_label.md)
 {: childlinks}

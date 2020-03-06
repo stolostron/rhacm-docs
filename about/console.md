@@ -20,10 +20,10 @@ Learn more about a few of the console components that you can use to view, manag
 
 See [Accessing your cluster by using the console](../installing/url.md) to access your cluster console. 
 
-## {{site.data.keyword.gui_caps_only}} components
+## Console components
 
 
- {{site.data.keyword.gui_caps_only}} components:
+ Console components:
 
 * [Getting started](#get_started)
 * [Overview](#mcm_overview)
