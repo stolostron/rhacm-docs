@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-12-10"
+  years: 2016, 2020
+lastupdated: "2020-03-06"
 
 ---
 
@@ -25,5 +25,4 @@ Access and modify your {{site.data.keyword.product_tm}} cluster by using APIs.
 - {: child} [IAM APIs](../iam/3.4.0/apis/apis_iam.md) <br />
 - {: child} [Image management API](../apis/image_management.md) <br />
 - {: child} [Key Management Service APIs](../apis/kms_apis.md) <br />
-- {: child} [Security findings APIs](../apis/sa_api.json) <br />
 {: childlinks}
