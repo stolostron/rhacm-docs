@@ -34,7 +34,7 @@ You can import existing Alibaba Cloud clusters.
 
    See [_Table 1. YAML file parameters and description_](#table_1) for details about each parameter.
 
-   **Note:** Do not remove parameters, as the {{site.data.keyword.gui}} might not properly render.
+   **Note:** Do not remove parameters, as the console might not properly render.
    
 6. Click **Generate Command** to retrieve the command to deploy the `multicluster-endpoint`.
 
@@ -46,7 +46,7 @@ You can import existing Alibaba Cloud clusters.
 
 9. Prepare the `import.yaml` file for the Alibaba Cloud cluster.
 
-    **Note:** If your managed Alibaba Cloud cluster cannot resolve the domain name of your {{site.data.keyword.cloud_pak_mcm}} hub cluster, you must manually download the `import.yaml` file and change the domain name to IP from bootstrap secret.
+    **Note:** If your managed Alibaba Cloud cluster cannot resolve the domain name of your Red Hat Advanced Cluster Management for Kubernetes hub cluster, you must manually download the `import.yaml` file and change the domain name to IP from bootstrap secret.
 
     1. Paste the following command in the terminal, then modify the command to download the `import.yaml` file:
 

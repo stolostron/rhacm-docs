@@ -20,10 +20,10 @@ Use these tables to find the files you need from [Passport Advantage ![Opens in 
 {: shortdesc}
 
   - [Downloading packages](#download)
-  - [{{site.data.keyword.cloud_pak_mcm}} Core packages](#core)
-  - [IBM Red Hat Software for {{site.data.keyword.cloud_pak_mcm}} packages](#rhel)
-  - [IBM Cloud App Management for {{site.data.keyword.cloud_pak_mcm}} packages](#cloud_app)
-  - [IBM Cloud App Management Extension Pack for {{site.data.keyword.cloud_pak_mcm}} packages](#ext)
+  - [Red Hat Advanced Cluster Management for Kubernetes Core packages](#core)
+  - [IBM Red Hat Software for Red Hat Advanced Cluster Management for Kubernetes packages](#rhel)
+  - [IBM Cloud App Management for Red Hat Advanced Cluster Management for Kubernetes packages](#cloud_app)
+  - [IBM Cloud App Management Extension Pack for Red Hat Advanced Cluster Management for Kubernetes packages](#ext)
   - [IBM Cloud Automation Manager packages](#cloud_auto)
 
 ## Downloading packages
@@ -36,20 +36,20 @@ Complete the following procedure to download your packages:
 3. Search for your files by using the part numbers that are listed in the tables.
 4. Download the files to a directory on your computer.
 
-## {{site.data.keyword.cloud_pak_mcm}} Core packages
+## Red Hat Advanced Cluster Management for Kubernetes Core packages
 {: #core}
 
 | Description                                                                      | File name                               | Passport Advantage part number |
 |----------------------------------------------------------------------------------|-----------------------------------------|--------------------------------|
-| {{site.data.keyword.cloud_pak_mcm}} Core 1.2 Kubernetes image for AMD64      | ibm-cp4mcm-core-1.2-x86_64.tar.gz       | CC4L8EN                        |
-| {{site.data.keyword.cloud_pak_mcm}} Core 1.2 Kubernetes image for Power      | ibm-cp4mcm-core-1.2-ppc64le.tar.gz      | CC4L9EN                        |
-| {{site.data.keyword.cloud_pak_mcm}} Core 1.2 Multicluster-endpoint for AMD64 | mcm-endpoint-3.3.0-amd64.tgz   | CC4LAEN                       |
-| {{site.data.keyword.cloud_pak_mcm}} Core 1.2 Multicluster-endpoint for Power | mcm-endpoint-3.3.0-ppc64le.tgz | CC4LBEN                        |
-| {{site.data.keyword.cloud_pak_mcm}} Core 1.2 Multicluster-endpoint for IBM Z | mcm-endpoint-3.3.0-s390x.tgz   | CC4LCEN                        |
-| {{site.data.keyword.cloud_pak_mcm}} Core 1.2 Key Management HSM              | key-management-hsm-amd64.tar.gz         | CC4PREN                        |
-{: caption="Table 1. {{site.data.keyword.cloud_pak_mcm}} Core packages" caption-side="top"}
+| Red Hat Advanced Cluster Management for Kubernetes Core 1.2 Kubernetes image for AMD64      | ibm-cp4mcm-core-1.2-x86_64.tar.gz       | CC4L8EN                        |
+| Red Hat Advanced Cluster Management for Kubernetes Core 1.2 Kubernetes image for Power      | ibm-cp4mcm-core-1.2-ppc64le.tar.gz      | CC4L9EN                        |
+| Red Hat Advanced Cluster Management for Kubernetes Core 1.2 Multicluster-endpoint for AMD64 | mcm-endpoint-3.3.0-amd64.tgz   | CC4LAEN                       |
+| Red Hat Advanced Cluster Management for Kubernetes Core 1.2 Multicluster-endpoint for Power | mcm-endpoint-3.3.0-ppc64le.tgz | CC4LBEN                        |
+| Red Hat Advanced Cluster Management for Kubernetes Core 1.2 Multicluster-endpoint for IBM Z | mcm-endpoint-3.3.0-s390x.tgz   | CC4LCEN                        |
+| Red Hat Advanced Cluster Management for Kubernetes Core 1.2 Key Management HSM              | key-management-hsm-amd64.tar.gz         | CC4PREN                        |
+{: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes Core packages" caption-side="top"}
 
-## IBM Red Hat Software for {{site.data.keyword.cloud_pak_mcm}} packages
+## IBM Red Hat Software for Red Hat Advanced Cluster Management for Kubernetes packages
 {: #rhel}
 
 | Description                                                                      | File name                               | Passport Advantage part number |
@@ -62,9 +62,9 @@ Complete the following procedure to download your packages:
 | Red Hat CloudForms 5 for Microsoft SCVMM |cfme-hyperv-5.11.x86_64.zip | CC4PUEN   |
 | Red Hat Ansible Tower 3.6 key | temporary-tower-license.txt | CC5BZEN |
 | Automation navigation for IBM Cloud Pak for Multicloud Management 1.2 | automation-navigation-updates.sh | CC4MAEN  |
-{: caption="Table 2. IBM Red Hat Software for {{site.data.keyword.cloud_pak_mcm}} packages" caption-side="top"}
+{: caption="Table 2. IBM Red Hat Software for Red Hat Advanced Cluster Management for Kubernetes packages" caption-side="top"}
 
-## IBM Cloud App Management for {{site.data.keyword.cloud_pak_mcm}} packages
+## IBM Cloud App Management for Red Hat Advanced Cluster Management for Kubernetes packages
 {: #cloud_app}
 
 | Description                                                                      | File name                               | Passport Advantage part number |
@@ -85,9 +85,9 @@ Complete the following procedure to download your packages:
 | Multicluster Event Management Server on AMD64 | icam_ppa_2019.4.0_prod_lite_amd64.tar.gz  | CC4L0EN  |
 | IBM Cloud Unified Agent V2019.4.0 | unifiedAgent_2019.4.0.tar.gz | CC4L1EN  |
 | IBM Cloud App Management V2019.4.0  Agents Install Solaris X86 | appMgtAgents_solaris_x86_2019.4.0.tar.gz| CC4L2EN |
-{: caption="Table 3. IBM Cloud App Management for {{site.data.keyword.cloud_pak_mcm}} packages" caption-side="top"}
+{: caption="Table 3. IBM Cloud App Management for Red Hat Advanced Cluster Management for Kubernetes packages" caption-side="top"}
 
-## IBM Cloud App Management Extension Pack for {{site.data.keyword.cloud_pak_mcm}} packages
+## IBM Cloud App Management Extension Pack for Red Hat Advanced Cluster Management for Kubernetes packages
 {: #ext}
 
 | Description                                                                      | File name                               | Passport Advantage part number |
@@ -97,7 +97,7 @@ Complete the following procedure to download your packages:
 | IBM Cloud App Management V2019.4.0 Extension Pack AIX      | appMgtExt_aix_2019.4.0..tar   | CC4L5EN      |
 | IBM Cloud App Management V2019.4.0 Extension Pack PLinux   | appMgtExt_plinux_2019.4.0.tar   | CC4L6EN     |
 | IBM Cloud App Management V2019.4.0 Extension Pack PLinuxLE | appMgtExt_plinuxle_2019.4.0.tar   | CC4L7EN      |
-{: caption="Table 4. IBM Cloud App Management Extension Pack for {{site.data.keyword.cloud_pak_mcm}} packages" caption-side="top"}
+{: caption="Table 4. IBM Cloud App Management Extension Pack for Red Hat Advanced Cluster Management for Kubernetes packages" caption-side="top"}
 
 ## IBM Cloud Automation Manager packages
 {: #cloud_auto}

@@ -40,7 +40,7 @@ You can now add additional Prometheus instances to manage cluster monitoring. Fo
 
 ### Governance and risk
 
-You can now disable your policies. For more information, see _Disabling your security policy from the {{site.data.keyword.gui}}_ on the [Managing a security policy page](../mcm/manage_cluster/manage_grc_policy.md).
+You can now disable your policies. For more information, see _Disabling your security policy from the console_ on the [Managing a security policy page](../mcm/manage_cluster/manage_grc_policy.md).
 
 You can create and update policies on your {{site.data.keyword.product}} hub cluster for multiple namespaces. You can view only the policies and violations associated with your cluster and namespace. Update your PlacementPolicy to create policies on multiple namespaces. For more information, see [{{site.data.keyword.product}} policy example](../mcm/compliance/policy_example.md).
 

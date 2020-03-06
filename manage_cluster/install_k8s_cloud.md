@@ -29,7 +29,7 @@ Choose from the following instructions to set up your managed cluster:
 
 **Required user type or access level**: Cluster administrator
 
-- {: child} [Importing a cluster with the {{site.data.keyword.mcm_notm}} {{site.data.keyword.gui}}](../manage_cluster/import_gui.md)
+- {: child} [Importing a cluster with the {{site.data.keyword.mcm_notm}} console](../manage_cluster/import_gui.md)
 - {: child} [Importing a cluster with the CLI](../manage_cluster/import_cli.md)
 - {: child} [Importing a managed cluster in an air gapped environment](offline_endpoint.md)
 

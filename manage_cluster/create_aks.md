@@ -16,7 +16,7 @@ lastupdated: "2019-09-12"
 
 # Creating an Azure Kubernetes Service cluster
 
-Follow the procedure to create an Azure Kubernetes Service cluster. You can create a cluster from the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}, or from the CLI. See [Azure Kubernetes Service ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://azure.microsoft.com/en-us/services/kubernetes-service/){:new_window} for more information about the public Kubernetes service. 
+Follow the procedure to create an Azure Kubernetes Service cluster. You can create a cluster from the Red Hat Advanced Cluster Management for Kubernetes console, or from the CLI. See [Azure Kubernetes Service ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://azure.microsoft.com/en-us/services/kubernetes-service/){:new_window} for more information about the public Kubernetes service. 
 {:shortdesc}
 
 ## Supported architectures
@@ -35,11 +35,11 @@ The following hardware architectures are supported:
 ## Prerequisites
 {: #prereq}
 
-* You must have an {{site.data.keyword.cloud_pak_mcm}} hub deployed.
+* You must have an Red Hat Advanced Cluster Management for Kubernetes hub deployed.
 
 * You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md). 
 
-* You need internet access so that your {{site.data.keyword.cloud_pak_mcm}} cluster can create a remote Kubernetes cluster by using Azure Kubernetes Service.
+* You need internet access so that your Red Hat Advanced Cluster Management for Kubernetes cluster can create a remote Kubernetes cluster by using Azure Kubernetes Service.
 
 * You need Azure login credentials, which include user name and password. See [azure.microsoft.com ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://azure.microsoft.com/en-ca/features/azure-portal).
 
@@ -52,10 +52,10 @@ The following hardware architectures are supported:
   ```
   {:codeblock}
   
-<!-- ## Creating your cluster with the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}
+<!-- ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_gui}
 
-You can create clusters from the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} for each of the available cloud providers.
+You can create clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
 
 1. From the navigation menu, click **Clusters**.
 2. Click **Add Cluster**.
@@ -196,7 +196,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 
 |Parameter|Description|Default value|
 |---|---|---|
-|apiVersion|{{site.data.keyword.cloud_pak_mcm}} api; do not edit|cluster.k8s.io/v1alpha1|
+|apiVersion|Red Hat Advanced Cluster Management for Kubernetes api; do not edit|cluster.k8s.io/v1alpha1|
 |kind|Resource type; do not edit|cluster|
 |name|Required; your cluster name|aks-cluster|
 |labels:cloud-provider|Required name of your cloud provider; do not edit|aks|
@@ -279,4 +279,4 @@ After you installed your cluster, you can access your cluster by using the `kube
 
   For more information about the delete command options, run `kubectl delete --help`.
 
-View your cluster in the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}. To scale your cluster, see [Scaling your cluster](scale_mcm.md).
+View your cluster in the Red Hat Advanced Cluster Management for Kubernetes console. To scale your cluster, see [Scaling your cluster](scale_mcm.md).

@@ -212,10 +212,10 @@ For more information see, [CIS rules specifications](../compliance/cis_policy_ru
 ## Creating a CIS policy
 {: #create_policy}
 
-A CIS policy can be created either from the command line by using kubectl or from the {{site.data.keyword.gui}}.
+A CIS policy can be created either from the command line by using kubectl or from the console.
 
 * [Creating a CIS policy from the command line](#create_policy_cli)
-* [Create a CIS policy from {{site.data.keyword.product}} {{site.data.keyword.gui}}](#create_policy_gui)
+* [Create a CIS policy from {{site.data.keyword.product}} console](#create_policy_gui)
 
 ### Creating a CIS policy from the command line
 {: #create_policy_cli}
@@ -273,10 +273,10 @@ kubectl describe cispolicy <name> -n <namespace>
 ```
 {: codeblock}
 
-### Creating a CIS policy from {{site.data.keyword.product}} {{site.data.keyword.gui}}
+### Creating a CIS policy from {{site.data.keyword.product}} console
 {: #create_policy_gui}
 
-1. Log in to {{site.data.keyword.cloud_pak}} for {{site.data.keyword.product}} {{site.data.keyword.gui}}.
+1. Log in to {{site.data.keyword.cloud_pak}} for {{site.data.keyword.product}} console.
 2. From the navigation menu, click **Govern risk**.
 3. Click **Create Policy**.
 4. Enter the name for the CIS policy in the **Name** field.
@@ -530,8 +530,8 @@ spec:
 ## Viewing a CIS policy
 {: #view_policy}
 
-View any CIS Policy and its status from the {{site.data.keyword.gui}}.
-1. Log in to the {{site.data.keyword.cloud-pak_mcm}} {{site.data.keyword.gui}}.
+View any CIS Policy and its status from the console.
+1. Log in to the {{site.data.keyword.cloud-pak_mcm}} console.
 2. From the navigation menu, click **Govern risk**.
 3. Click the _Policies_ tab to view a summary of your policies and a table list of your policies.
 

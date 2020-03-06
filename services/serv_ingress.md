@@ -27,7 +27,7 @@ When you have multiple Kubernetes ingresses that are managed by {{site.data.keyw
 
 The plugin for the Kubernetes ingress discovery must be enabled if you want to discover a Kubernetes ingress in your managed clusters. Complete the following steps to enable the ingress plugin:
 
-1. Log in to your {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}.
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
 2. Navigate to **Workloads** -> **Helm Releases**.
 

@@ -51,7 +51,7 @@ If you install {{site.data.keyword.product}} version {{site.data.keyword.version
 
 You can also use the {{site.data.keyword.product}} CLI commands to view the current settings of the cluster, and to toggle the pod security policy between restricted and unrestricted modes. See [{{site.data.keyword.product}} CLI cm commands (cm)](../../cloudctl/3.2.3/cli_cm_commands.md) for more information about using these commands. 
 
-You can view the PodSecurityPolicy CLI command settings information in the {{site.data.keyword.product}} {{site.data.keyword.gui}} by selecting the settings icon on the Pod Security page. 
+You can view the PodSecurityPolicy CLI command settings information in the {{site.data.keyword.product}} console by selecting the settings icon on the Pod Security page. 
 
 The *namespace overview* page shows the pod security policies for every namespace. See [Namespaces](../../iam/3.4.0/projects.md) for more information about namespaces.
 

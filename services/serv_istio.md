@@ -27,7 +27,7 @@ When you have multiple instances of an Istio service that are managed by {{site.
 
 The plug-in for the Istio discovery must be enabled if you want to discover an Istio service in your managed clusters. Complete the following steps to enable an Istio plug-in:
 
-1. Log in to your {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}.
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
 2. Navigate to **Workloads** -> **Helm Releases**.
 

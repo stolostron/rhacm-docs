@@ -14,9 +14,9 @@ lastupdated: "2019-12-11"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Log in to {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} causes default backend 404 error from IBM Kubernetes Service
+# Log in to Red Hat Advanced Cluster Management for Kubernetes console causes default backend 404 error from IBM Kubernetes Service
 
-An error appears when you log in to the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} because of a connection reuse problem.
+An error appears when you log in to the Red Hat Advanced Cluster Management for Kubernetes console because of a connection reuse problem.
 
 ## Symptom
 

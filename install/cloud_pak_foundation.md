@@ -372,10 +372,10 @@ You must update the `config.yaml` file or use the `power.openshift.config.yaml` 
 ## Verify the installation
 {: #verify}
 
-If the installation succeeded, the access information for your cluster is displayed. You can use the URL to connect to the {{site.data.keyword.product}} {{site.data.keyword.gui}}.
+If the installation succeeded, the access information for your cluster is displayed. You can use the URL to connect to the {{site.data.keyword.product}} console.
 
 From a web browser, browse to the URL of your cluster. For a list of supported browsers, see [Supported browsers](../common-web-ui/1.0.0/supported_browsers.md).
-  * To learn how to access your cluster by using the {{site.data.keyword.product}} {{site.data.keyword.gui}} from a web browser, see [Accessing your {{site.data.keyword.product}} cluster by using the {{site.data.keyword.gui}}](../common-web-ui/1.0.0/access_cluster.md).
+  * To learn how to access your cluster by using the {{site.data.keyword.product}} console from a web browser, see [Accessing your {{site.data.keyword.product}} cluster by using the console](../common-web-ui/1.0.0/access_cluster.md).
   * To learn how to access your cluster by using the command line, see the [CLI tools guide](../cloudctl/3.2.3/cli_guide.md).
 
 ### Services disabled by default

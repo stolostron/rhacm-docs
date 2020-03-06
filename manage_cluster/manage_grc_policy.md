@@ -19,7 +19,7 @@ lastupdated: "2020-03-05"
 Manage your cluster policy to remediate and edit your security policy. 
 {:shortdesc}
 
-## Updating your security policy from the {{site.data.keyword.gui}}
+## Updating your security policy from the console
 
 1. From the navigation menu, click **Govern risk**.
 2. Click the _Policies_ tab.
@@ -29,7 +29,7 @@ Manage your cluster policy to remediate and edit your security policy.
 
 Your policy is updated. 
 
-## Viewing policy violations from the {{site.data.keyword.gui}}
+## Viewing policy violations from the console
 
 1. From the navigation menu, click **Govern risk**.
 2. From the _Overview_ tab, select the number of policy violations to view a table list of the policy violations.  
@@ -37,9 +37,9 @@ Your policy is updated.
 4. Click **Expand summary** to view the summary cards. You can filter your _Summary_ view by categories or standards. 
 5. From the _Summary_ section, select **Policy violations** to view a table of the policies. **Note**: When you select **Policy violations** from a specific summary card, a filter is applied and the summary collapses. Click **Collapse summary** to see less information.
 6. From the _Policies_ tab, view more details about a policy by clicking the **Options** icon > **View Details**. A details window appears with details about the rule violations. Expand the row to view the message and reason for the policy violation. 
-7. Click **Launch Cluster** to open the {{site.data.keyword.gui}} for your cluster.
+7. Click **Launch Cluster** to open the console for your cluster.
 
-## Viewing cluster violations from the {{site.data.keyword.gui}}
+## Viewing cluster violations from the console
 
 1. From the navigation menu, click **Govern risk**.
 2. From the _Overview_ tab, select the number of cluster violations to view a table list of the policy violations.  
@@ -48,7 +48,7 @@ Your policy is updated.
 5. From the _Summary_ section, select **Cluster violations** to view a table of the cluster policy violations. **Note**: When you select **Cluster violations** from a specific summary card, a filter is applied and the summary collapses. Click **Collapse summary** to see less information.
 6. From the _Policies_ tab, view more details about a cluster violation by clicking the **Options** icon > **View policies**. A modal appears with details about the rule violations in your cluster policies. Expand the row to view the message and reason for the cluster policy violation.
 
-## Viewing application violations from the {{site.data.keyword.gui}}
+## Viewing application violations from the console
 
 1. From the navigation menu, click **Governance and risk**.
 2. From the _Overview_ tab, select the _Applications_ tab in the _Top violations_ card.
@@ -57,11 +57,11 @@ Your policy is updated.
 5. From the _Summary_ section, select **Applications** to view a table of the policies. **Note**: When you select **Applications** from a specific summary card, a filter is applied and the summary collapses. Click **Collapse summary** to see less information.
 6. From the _Policies_ tab, view more details about a policy by clicking the **Options** icon > **View application**. A modal appears with details about the rule violations. Expand the row to view the message and reason for the policy violation. 
 
-## Disabling your security policy from the {{site.data.keyword.gui}}
+## Disabling your security policy from the console
 
 After you create a security policy, it is enabled by default. Complete the following steps to disbale your policy:
 
-1. Log in to your {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}.
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
 2. From the navigation menu, click **Govern risk**.
 
@@ -97,7 +97,7 @@ Complete the following steps to delete your policy:
     ```
     {: codeblock}
 
-### Deleting an {{site.data.keyword.mcm_notm}} policy from the {{site.data.keyword.gui}}
+### Deleting an {{site.data.keyword.mcm_notm}} policy from the console
 
 Complete the following steps to delete your policy:
 

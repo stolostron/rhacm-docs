@@ -14,9 +14,9 @@ lastupdated: "2019-12-12"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Preparing to install the {{site.data.keyword.cloud_pak_mcm}}
+# Preparing to install the Red Hat Advanced Cluster Management for Kubernetes
 
-Before you install {{site.data.keyword.cloud_pak_mcm}}, review the following installation requirements.
+Before you install Red Hat Advanced Cluster Management for Kubernetes, review the following installation requirements.
 {:shortdesc}
 
 ## {{site.data.keyword.ocp_tm}}
@@ -32,7 +32,7 @@ Before you install {{site.data.keyword.cloud_pak_mcm}}, review the following ins
     The console URL in this example is `https:// console-openshift-console.apps.new-coral.purple-chesterfield.com`. Open the URL in your browser and check the result. If the console URl is like `console-openshift-console.router.default.svc.cluster.local`, set `openshift_master_default_subdomain` when you install the {{site.data.keyword.ocp}}. For more information, see [Configuring Your Inventory File for OpenShift Container Platform 3.11 ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.openshift.com/container-platform/3.11/install/configuring_inventory_file.html).
 * For an {{site.data.keyword.ocp_ibmcloud}} cluster, you must have a supported {{site.data.keyword.ocp}} version installed by using {{site.data.keyword.iks}} so that the managed {{site.data.keyword.ocp}} service is supported. For more information, see [Tutorial: Creating an IBM Cloud Red Hat OpenShift Container Platform Cluster ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://cloud.ibm.com/docs/containers?topic=containers-openshift_tutorial).
 
-* For a metrics server, you must ensure that the {{site.data.keyword.ocp}} metrics server has been installed before you install the {{site.data.keyword.cloud_pak_mcm}}. For more information about creating the {{site.data.keyword.ocp}} metrics server, see [install the OpenShift Container Platform 3.11 metrics server ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.openshift.com/container-platform/3.11/dev_guide/pod_autoscaling.html).
+* For a metrics server, you must ensure that the {{site.data.keyword.ocp}} metrics server has been installed before you install the Red Hat Advanced Cluster Management for Kubernetes. For more information about creating the {{site.data.keyword.ocp}} metrics server, see [install the OpenShift Container Platform 3.11 metrics server ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.openshift.com/container-platform/3.11/dev_guide/pod_autoscaling.html).
 
 * {: #auth} If you are installing your cluster on a public cloud, such as {{site.data.keyword.iks_ocp}}, you can enable authentication with Red Hat OpenShift. By default, your cluster uses OpenID Connect (OIDC) to authenticate users with Kubernetes. To enable authentication with OpenShift, add the authentication parameters to the `config.yaml` file. For more information, see [Authentication settings](../installer/3.2.2/config_yaml.md#auth).
 

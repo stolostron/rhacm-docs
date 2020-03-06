@@ -22,8 +22,8 @@ Use these tables to find the files you need from [Passport Advantage ![Opens in 
   - [Downloading packages](#download)
   - [{{site.data.keyword.product}} Core packages](#core)
   - [{{site.data.keyword.IBM_notm}} Red Hat Software for {{site.data.keyword.product}} packages](#rhel)
-  - [{{site.data.keyword.IBM_notm}} Cloud App Management for {{site.data.keyword.cloud_pak_mcm}} packages](#cloud_app)
-  - [{{site.data.keyword.IBM_notm}} Cloud App Management Extension Pack for {{site.data.keyword.cloud_pak_mcm}} packages](#ext)
+  - [{{site.data.keyword.IBM_notm}} Cloud App Management for Red Hat Advanced Cluster Management for Kubernetes packages](#cloud_app)
+  - [{{site.data.keyword.IBM_notm}} Cloud App Management Extension Pack for Red Hat Advanced Cluster Management for Kubernetes packages](#ext)
   - [{{site.data.keyword.IBM_notm}} Cloud Automation Manager packages](#cloud_auto)
 
 ## Downloading packages

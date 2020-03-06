@@ -26,7 +26,7 @@ Your developers and DevOps personnel can use these resources to deploy, update, 
   * [Application model](#app_model)
   * [Application resource interactions and lifecycle](#app_interact)
   * [Deploying application resources](#app_deploy)
-  * [Managing applications with the {{site.data.keyword.gui}}](#app_gui)
+  * [Managing applications with the console](#app_gui)
 
 ## Application model
 {: #app_model}
@@ -92,17 +92,17 @@ Once the deployables and other resources are created, the subscription operator 
    2. When a new or updated deployable exists, the subscription operator retrieves the source Kubernetes deployable object or Helm release that is wrapped or represented by the deployable.
    3. The subscription operator then uses the associated placement rule to place the Kubernetes deployable object or Helm release on the managed cluster. The subscription operator then continues to watch for further changes.
 
-To create or edit the resource definitions developers and other users can use the {{site.data.keyword.gui}}, the Kubernetes CLI tool, or REST API.
+To create or edit the resource definitions developers and other users can use the console, the Kubernetes CLI tool, or REST API.
 
 ## Deploying application resources
 {: #app_deploy}
 
 {{site.data.keyword.mcm_notm}} supports multiple options for the deployment of deployable objects and Helm charts. The deployment option that you use can depend upon whether you need to deploy to a single cluster or multiple clusters and the frequency that you need to deploy updates. For more information, see [Deploying an application resource](deployment_app.md).
   
-## Managing applications with the {{site.data.keyword.gui}}
+## Managing applications with the console
 {: #app_gui}
 
-The {{site.data.keyword.gui}} includes an applications dashboard for managing the application lifecycle. You can use the {{site.data.keyword.gui_short}} dashboard to create and manage application, subscriptions, channels, and placement rules. You can also use the {{site.data.keyword.gui_short}} view the status of your applications, channels, subscriptions, and related deployments.
+The console includes an applications dashboard for managing the application lifecycle. You can use the {{site.data.keyword.gui_short}} dashboard to create and manage application, subscriptions, channels, and placement rules. You can also use the {{site.data.keyword.gui_short}} view the status of your applications, channels, subscriptions, and related deployments.
 
 The dashboard includes enhanced capabilities, which your developers and operations personnel can use to create, deploy, update, manage, visualize, and monitor applications across your clusters. With this application dashboard, you can complete the following tasks:
 
@@ -111,10 +111,10 @@ The dashboard includes enhanced capabilities, which your developers and operatio
 * Access an improved topology view that encompasses the new application resource definitions, including channels, subscriptions, and placement rules.
 * View a the logs tab for applications to view logs for each application resource.
 * When IBM Cloud Event Management is enabled, you can use that service to view incident reports.
-* When IBM Cloud App Management is installed, you can open that service from the {{site.data.keyword.gui}} to access visualized golden signals and other monitoring data to view more information about the status and performance of your subscriptions and applications. 
+* When IBM Cloud App Management is installed, you can open that service from the console to access visualized golden signals and other monitoring data to view more information about the status and performance of your subscriptions and applications. 
 * When Grafana is installed, you can open the Grafana dashboard for your applications from the applications dashboard to monitor your applications.
 * Add and edit channels, subscriptions, placement rules, and applications from different views and pages.
 
   **Note:** The application dashboard shows only the application resources that use the new custom resource definitions. Application resources that are based on the definitions that were used for previous versions of {{site.data.keyword.mcm_notm}} are not displayed. You can migrate your older style application resources to use the new definitions and have your resources display in the {{site.data.keyword.gui_short}}.
 
-For more information, see [Managing applications with the {{site.data.keyword.gui}}](managing_apps_console.md).
+For more information, see [Managing applications with the console](managing_apps_console.md).

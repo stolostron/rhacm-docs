@@ -14,9 +14,9 @@ lastupdated: "2019-09-05"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Creating a cluster with {{site.data.keyword.cloud_pak_mcm}}
+# Creating a cluster with Red Hat Advanced Cluster Management for Kubernetes
 
-Learn how to create clusters across cloud providers with {{site.data.keyword.cloud_pak_mcm}}.
+Learn how to create clusters across cloud providers with Red Hat Advanced Cluster Management for Kubernetes.
 {:shortdesc}
 
 

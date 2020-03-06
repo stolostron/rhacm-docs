@@ -182,7 +182,7 @@ Cleaning up job is not complete due to mismatch of image repository path.
 
 1. Remove `key-management-hsm-cleanup` batch job.
 
-  1. Log in to the {{site.data.keyword.gui}}.
+  1. Log in to the console.
   2. From the navigation menu, select **Workloads** > **Jobs** > **Batch Jobs**.
   3. Place the cursor on the `key-management-hsm-cleanup` batch job.
   4. Click **...** > **Remove** to remove the batch job.

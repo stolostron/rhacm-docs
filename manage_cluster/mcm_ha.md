@@ -33,11 +33,11 @@ When you configure {{site.data.keyword.mcm_notm}} HA, multiple hub clusters that
 
 Before you configure HA for {{site.data.keyword.mcm_notm}}, you must complete the following configurations:
 
-- Configure at least 3 or 5 {{site.data.keyword.cloud_pak_mcm}} clusters. For more information, see [{{site.data.keyword.cloud_pak_mcm}} installation](../../install/overview.md).
-- All {{site.data.keyword.cloud_pak_mcm}} clusters, which are hub clusters, must use the same root CA certificate.
+- Configure at least 3 or 5 Red Hat Advanced Cluster Management for Kubernetes clusters. For more information, see [Red Hat Advanced Cluster Management for Kubernetes installation](../../install/overview.md).
+- All Red Hat Advanced Cluster Management for Kubernetes clusters, which are hub clusters, must use the same root CA certificate.
   1. Configure the root CA during OpenShift installation. For more information, see [Configuring Your Inventory File ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.openshift.com/container-platform/3.11/install/configuring_inventory_file.html). Or, you can redeploy OpenShift root CA after OpenShift installation. For more information, see [Redeploying a New or Custom OpenShift Container Platform CA ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.openshift.com/container-platform/3.11/install_config/redeploying_certificates.html#redeploying-new-custom-ca).
   2. Configure {{site.data.keyword.mcm_notm}} root CA for all clusters. For more information, see [Certificates in {{site.data.keyword.product}}](../../cert-manager/3.4.0/certificates.md). 
-- The name and namespace of a managed cluster must be unique across all {{site.data.keyword.cloud_pak_mcm}} clusters.
+- The name and namespace of a managed cluster must be unique across all Red Hat Advanced Cluster Management for Kubernetes clusters.
 
 ## Configure HA on your hub clusters
 

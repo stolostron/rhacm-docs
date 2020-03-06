@@ -41,9 +41,9 @@ The following settings can be updated in the `endpoint.multicloud.ibm.com` Kuber
 
 You can modify the settings of the `endpoint.multicloud.ibm.com` resource by using the hub cluster. Complete the following steps to change the settings: 
 
-1. Authenticate into the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} of the hub cluster.
+1. Authenticate into the Red Hat Advanced Cluster Management for Kubernetes console of the hub cluster.
 
-2. From the main menu of the hub cluster {{site.data.keyword.gui}}, select **Search**. 
+2. From the main menu of the hub cluster console, select **Search**. 
 
 3. In the search parameters, enter the following value: `kind:endpoint`
 

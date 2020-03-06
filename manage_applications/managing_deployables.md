@@ -70,11 +70,11 @@ To update a deployable with a new version, you can change the deployed resource 
 
 1. Compose the definition updates for your deployable. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
 
-2. Update the definition. You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API:
+2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
-   * To use the {{site.data.keyword.gui}} search to find and edit a deployable,
+   * To use the console search to find and edit a deployable,
 
-     1. Open the {{site.data.keyword.gui}}.
+     1. Open the console.
      2. Click the _Search_ icon in the Header to open the _Search_ page.
      3. Within the search box, filter by `kind:deployable` to view all deployables.
      4. Within the list of all deployables, click the deployable that you want to update. The YAML for that deployable is displayed.
@@ -103,11 +103,11 @@ To delete a deployable, delete the source Kubernetes resource or Helm release fr
 
 If the deployable was deployed to a managed cluster through a subscription, the deployable is not removed from the managed cluster. The deployable remains on the managed cluster until the subscription is deleted or is updated to remove or replace the subscribed deployable. When the subscription is deleted or updated, the deleted deployable is deleted from the managed clusters where it was deployed.
 
-You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API to delete a deployable:
+You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API to delete a deployable:
 
-* To use the {{site.data.keyword.gui}} search to find and delete a deployable,
+* To use the console search to find and delete a deployable,
 
-  1. Open the {{site.data.keyword.gui}}.
+  1. Open the console.
   2. Click the _Search_ icon in the Header to open the _Search_ page.
   3. Within the search box, filter by `kind:deployable` to view all deployables.
   4. Within the list of all deployables, find the row for the deployable that you want to delete. For that row, expand the _Options_ menu and click **Delete deployable**. A confirmation window opens.

@@ -30,7 +30,7 @@ Each _policy_ within the policy document contains the following elements:
       * `policy.mcm.ibm.com/categories` - The security control category the policy applies to. For example, Access Control, System and Information Integrity.
       * `policy.mcm.ibm.com/controls` - The name of the security control that is being checked. For example, Center of Internet Security (CIS) and certificate policy controller.
       
-        **Note**: Use your internal security standards or industry standards for the `annotations` field. You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, from the {{site.data.keyword.gui}}.
+        **Note**: Use your internal security standards or industry standards for the `annotations` field. You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, from the console.
 
   - A `namespace` selector that specifies which namespaces within the cluster that the policy is applied to.
 

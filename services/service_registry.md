@@ -16,7 +16,7 @@ lastupdated: "2019-06-05"
 
 # Configuring {{site.data.keyword.mcm_notm}} service discovery and registry
 
-You can configure the {{site.data.keyword.mcm}} service registry to discover Kubernetes, ingress, and Istio services that are in different {{site.data.keyword.mcm_notm}} managed clusters.
+You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Kubernetes, ingress, and Istio services that are in different {{site.data.keyword.mcm_notm}} managed clusters.
 {: shortdesc}
 
 When you have multiple instances of a Kubernetes, ingress, or Istio service that are managed by {{site.data.keyword.mcm_notm}}, it is challenging to maintain them. The {{site.data.keyword.mcm_notm}} service discovery and registry function discovers Kubernetes, ingress, and Istio services that are configured to be discovered.
@@ -58,7 +58,7 @@ Configure the DNS for each managed cluster by completing these steps for each ma
 
   The value `mcm.svc` is the default DNS domain suffix for the service registry. If you want to set it to another value, complete the following steps:
 
-    1. Log in to your {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}.
+    1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
 	2. Navigate to **Workloads** -> **Helm Releases**.
 
@@ -79,7 +79,7 @@ Configure the DNS for each managed cluster by completing these steps for each ma
 
 The `kube-service` plugin is enabled by default in the service registry component. You can discover Kubernetes services in the managed clusters that are using the `kube-service` plugin. The plugins for the ingress and Istio discovery must be enabled if you want to discover a Kubernetes ingress or Istio service in your managed clusters. Complete the following steps to enable ingress and Istio plugins:
 
-1. Log in to your {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}.
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
 2. Navigate to **Workloads** -> **Helm Releases**.
 

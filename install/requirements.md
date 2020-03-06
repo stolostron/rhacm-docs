@@ -16,7 +16,7 @@ lastupdated: "2019-09-25"
 
 # System requirements
 
-Before you install the {{site.data.keyword.cloud_pak_mcm}}, review the required hardware and system configuration settings.
+Before you install the Red Hat Advanced Cluster Management for Kubernetes, review the required hardware and system configuration settings.
 {:shortdesc}
 
 - {: child} [Hardware requirements and recommendations](hardware_reqs.md)

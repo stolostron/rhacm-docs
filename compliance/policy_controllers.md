@@ -14,12 +14,12 @@ lastupdated: "2020-03-04"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm}} policy controllers
+# Red Hat Advanced Cluster Management for Kubernetes policy controllers
 
-Use the {{site.data.keyword.mcm}} governance and risk policy framework to create custom policy controllers. The policy controllers are Kubernetes CustomResourceDefinition (CRD) instance. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
+Use the Red Hat Advanced Cluster Management for Kubernetes governance and risk policy framework to create custom policy controllers. The policy controllers are Kubernetes CustomResourceDefinition (CRD) instance. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
 {:shortdesc}
 
-Create and customize policies with the out of the box policy templates. View the following topics to learn more about the following {{site.data.keyword.mcm}} policy controllers to enforce policies:
+Create and customize policies with the out of the box policy templates. View the following topics to learn more about the following Red Hat Advanced Cluster Management for Kubernetes policy controllers to enforce policies:
 
 - {: child} [Configuration policy controller](../manage_policies/config_policy_ctrl.md)
 - {: child} [Certificate policy controller](../manage_policies/cert_policy_ctrl.md)

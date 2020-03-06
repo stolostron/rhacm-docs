@@ -42,11 +42,11 @@ For more information about deployables and other application resources, see [App
 
 1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription_compose).
 
-2. Create the subscription within {{site.data.keyword.mcm_notm}}. You can use the {{site.data.keyword.gui}}, the Kubernetes CLI (`kubectl`) tool, or REST API:  
+2. Create the subscription within {{site.data.keyword.mcm_notm}}. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
 
-   * To use the {{site.data.keyword.gui}}:
+   * To use the console:
 
-     1. Open the {{site.data.keyword.gui}}.
+     1. Open the console.
      2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
      3. Click the **Resources** tab.
      4. Scroll to the _Resource pipeline_ section. From the list of buttons to the right of the resource summary cards, click **Susbcription**. The _Create a Susbcription_ editor is displayed.
@@ -136,10 +136,10 @@ For more information about the resource definition for an application, see [Crea
 
 1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription_compose.md).
 
-2. Create the subscription within {{site.data.keyword.mcm_notm}}. You can use the {{site.data.keyword.gui}}, the Kubernetes CLI (`kubectl`) tool, or REST API:  
+2. Create the subscription within {{site.data.keyword.mcm_notm}}. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
 
-   * To use the {{site.data.keyword.gui}}:
-       1. Open the {{site.data.keyword.gui}}.
+   * To use the console:
+       1. Open the console.
        2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
        3. Click the **Resources** tab.
        4. Scroll down the page to **Resource pipeline** section. Expand the row for the application that uses the subscription that you want to edit.
@@ -156,7 +156,7 @@ For more information about the resource definition for an application, see [Crea
        5. Edit the YAML.
        6. When you are finished, click **Save** to update the subscription.
 
-     You can also use the {{site.data.keyword.gui}} search to find and edit a subscription:
+     You can also use the console search to find and edit a subscription:
 
        1. Click the **Search** icon in the Header.  
        2. Within the search box, filter by `kind:subscription` to view all subscriptions.
@@ -201,11 +201,11 @@ To define a time window for a subscription, you need to add the required fields 
 ## Deleting subscriptions
 {: #subscription_delete}
 
-To delete a subscription, you can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
+To delete a subscription, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
 
-* To use the {{site.data.keyword.gui}}, use the {{site.data.keyword.gui}} search to find and delete a subscription:
+* To use the console, use the console search to find and delete a subscription:
 
-   1. Open the {{site.data.keyword.gui}}.
+   1. Open the console.
    2. Click the **Search** icon in the Header.  
    3. Within the search box, filter by `kind:subscription` to view all subscriptions.
    4. Within the list of all subscriptions, expand the _Options_ menu for the subscription that you want to delete. Click **Delete subscription**.

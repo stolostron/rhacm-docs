@@ -16,7 +16,7 @@ lastupdated: "2019-11-05"
 
 # Creating an Amazon Elastic Kubernetes Service cluster
 
-Follow the procedure to create an Amazon Elastic Kubernetes Service cluster. You can create a cluster from the {{site.data.keyword.gui}}, or from the CLI. See [Amazon Elastic Kubernetes Service ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://aws.amazon.com/eks/){:new_window} for more information about the public Kubernetes service.
+Follow the procedure to create an Amazon Elastic Kubernetes Service cluster. You can create a cluster from the console, or from the CLI. See [Amazon Elastic Kubernetes Service ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://aws.amazon.com/eks/){:new_window} for more information about the public Kubernetes service.
 {:shortdesc}
 
 ## Supported architectures
@@ -52,10 +52,10 @@ The following hardware architectures are supported:
   ```
   {:codeblock}
   
-<!-- ## Creating your cluster with the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}
+<!-- ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_gui}
 
-You can create clusters from the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} for each of the available cloud providers.
+You can create clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
 
 1. From the navigation menu, click **Clusters**.
 2. Click **Add Cluster**.
@@ -190,7 +190,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 
 |Parameter|Description|Default value|
 |---|---|---|
-|apiVersion|{{site.data.keyword.cloud_pak_mcm}} api; do not edit|cluster.k8s.io/v1alpha1|
+|apiVersion|Red Hat Advanced Cluster Management for Kubernetes api; do not edit|cluster.k8s.io/v1alpha1|
 |kind|Resource type; do not edit|cluster|
 |name|Required; your cluster name|eks-cluster|
 |labels:cloud-provider|Required name of your cloud provider; do not edit|eks|
@@ -272,4 +272,4 @@ After you installed your cluster, you can access your cluster by using the `kube
 
   For more information about the delete command options, run `kubectl delete --help`.
 
-View your cluster in the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}. To scale your cluster, see [Scaling your cluster](scale_mcm.md).
+View your cluster in the Red Hat Advanced Cluster Management for Kubernetes console. To scale your cluster, see [Scaling your cluster](scale_mcm.md).

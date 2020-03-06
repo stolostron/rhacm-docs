@@ -163,7 +163,7 @@ Complete the following steps to replace a management ingress certificate.
    ```
    {: codeblock}
 
-6. After all pods are restarted, navigate to the {{site.data.keyword.product}} {{site.data.keyword.gui}} from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.   
+6. After all pods are restarted, navigate to the {{site.data.keyword.product}} console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.   
 
 **Note:** Several functions are affected by using your own certificate for management ingress. For example, when you use the Helm command to add a Helm repository. If you are adding the repository for your cluster, specify the management ingress CA file as the value for `--ca-file` instead of the Helm CA file. For example,
 ```
@@ -258,7 +258,7 @@ You need to use the management ingress CA file since the repository is from the 
    ```
    {: codeblock}   
 
-5. After all pods are restarted, navigate to the {{site.data.keyword.product}} {{site.data.keyword.gui}} from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
+5. After all pods are restarted, navigate to the {{site.data.keyword.product}} console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
 
 
 **Note:** Several functions are affected by using the default self-signed certificate for management ingress. For example, when you use the Helm command to add a Helm repository. If you are adding the repository for your cluster, specify the management ingress CA file as the value for `--ca-file` instead of the Helm CA file. For example,

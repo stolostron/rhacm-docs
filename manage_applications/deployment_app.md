@@ -69,7 +69,7 @@ To set up and use channels, subscriptions, and placement rules for deployments, 
 
 6. Edit the definition for your deployables and your channel to ensure that deployables are promoted to the channel. For more information, see [Promote a deployable to a channel](#promote_channel).
 
-7. Use the {{site.data.keyword.gui}} to monitor the status of the deployment to the target cluster or clusters for the channel.
+7. Use the console to monitor the status of the deployment to the target cluster or clusters for the channel.
 
 ## Scheduling a deployment
 

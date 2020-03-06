@@ -14,11 +14,11 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} components
+# Red Hat Advanced Cluster Management for Kubernetes console components
 
-Learn more about a few of the {{site.data.keyword.gui}} components that you can use to view, manage, or customize your {{site.data.keyword.gui}}. 
+Learn more about a few of the console components that you can use to view, manage, or customize your console. 
 
-See [Accessing your cluster by using the {{site.data.keyword.gui}}](../installing/url.md) to access your cluster {{site.data.keyword.gui}}. 
+See [Accessing your cluster by using the console](../installing/url.md) to access your cluster console. 
 
 ## {{site.data.keyword.gui_caps_only}} components
 
@@ -34,14 +34,14 @@ See [Accessing your cluster by using the {{site.data.keyword.gui}}](../installin
 ## Getting started 
 {: #get_started}
 
-From the {{site.data.keyword.cloud_pak_mcm}} getting started page, you can view descriptions and tasks, and you can install various CLI tools.
+From the Red Hat Advanced Cluster Management for Kubernetes getting started page, you can view descriptions and tasks, and you can install various CLI tools.
 
 From the _Header_, click the **Help** (?) icon to view the _About_ page, the documentation, and more. From the _User_ menu, you can access the _Configure Client_ page.
 
 ## Overview 
 {: #mcm_overview}
 
-Use the Overview page to view, manage, and reorganize the dashboard of your cluster information. You can view details of your clusters and other cloud service providers that {{site.data.keyword.cloud_pak_mcm}} supports. You can also view details about your applications. The Overview dashboard is continuously refreshed in real time.
+Use the Overview page to view, manage, and reorganize the dashboard of your cluster information. You can view details of your clusters and other cloud service providers that Red Hat Advanced Cluster Management for Kubernetes supports. You can also view details about your applications. The Overview dashboard is continuously refreshed in real time.
 {: shortdesc}
 
 ### Reorganizing your dashboard

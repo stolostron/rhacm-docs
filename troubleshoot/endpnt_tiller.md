@@ -46,7 +46,7 @@ A new imported cluster remains in `Pending` status on the hub cluster, and `endp
 
 ## Causes
 
-The user-deployed Tiller is treated as an {{site.data.keyword.cloud_pak_mcm}} Tiller and does not work because of the CA issuer.
+The user-deployed Tiller is treated as an Red Hat Advanced Cluster Management for Kubernetes Tiller and does not work because of the CA issuer.
 
 ## Resolving the problem
 

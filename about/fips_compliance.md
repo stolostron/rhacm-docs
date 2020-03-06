@@ -26,7 +26,7 @@ For the ciphers that are supported by FIPS, see the following documents:
 
 You can meet FIPS requirements for {{site.data.keyword.product_tm}} by using the following procedures:
 
-* Encrypting network traffic to external endpoints and the {{site.data.keyword.gui}}, ingress service, image manager, Docker registry, and authentication manager.
+* Encrypting network traffic to external endpoints and the console, ingress service, image manager, Docker registry, and authentication manager.
 * [Encrypting Kubernetes secrets with Key Management Service plug-in](../mcm_user_management/kms_plugin.md)
 
 

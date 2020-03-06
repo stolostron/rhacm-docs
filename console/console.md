@@ -14,17 +14,17 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Observability in the {{site.data.keyword.gui}} 
+# Observability in the console 
 
-Learn more about a few of the {{site.data.keyword.gui}} components that you can use to view, manage, or customize your {{site.data.keyword.gui}}. 
+Learn more about a few of the console components that you can use to view, manage, or customize your console. 
 
-See [Accessing your cluster by using the {{site.data.keyword.gui}}](../installing/url.md) to access your cluster {{site.data.keyword.gui}}. 
+See [Accessing your cluster by using the console](../installing/url.md) to access your cluster console. 
 
-## {{site.data.keyword.mcm_notm}} {{site.data.keyword.gui}} components
+## {{site.data.keyword.mcm_notm}} console components
 
-**Note**: You can access the {{site.data.keyword.icp_notm}} experience from **Local cluster** > **Manage Local Cluster**. The {{site.data.keyword.icp_notm}} {{site.data.keyword.gui}} from **Manage Local Cluster** opens in a new tab.
+**Note**: You can access the {{site.data.keyword.icp_notm}} experience from **Local cluster** > **Manage Local Cluster**. The {{site.data.keyword.icp_notm}} console from **Manage Local Cluster** opens in a new tab.
 
-{{site.data.keyword.mcm_notm}} {{site.data.keyword.gui}} components:
+{{site.data.keyword.mcm_notm}} console components:
 
 * [Getting started](#get_started)
 * [Overview](#mcm_overview)
