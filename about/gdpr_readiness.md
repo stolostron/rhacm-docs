@@ -99,12 +99,12 @@ The {{site.data.keyword.product}} platform does not collect sensitive personal d
 
 Applications that run on the {{site.data.keyword.product}} platform might collect personal data.
 
-When you assess the use of the {{site.data.keyword.product}} platform running containerized applications and your need to meet the requirements of GDPR, you must consider the types of personal data that are collected by the application and aspects of how that data is managed, such as:
-* How is the data protected as it flows to and from the application? Is the data encrypted in transit?
-* How is the data stored by the application? Is the data encrypted at rest?
-* How are credentials that are used to access the application collected and stored?
-* How are credentials that are used by the application to access data sources collected and stored?
-* How is data collected by the application removed as needed?
+When you assess the use of the {{site.data.keyword.product}} platform running containerized clusters and your need to meet the requirements of GDPR, you must consider the types of personal data that are collected by the cluster and aspects of how that data is managed, such as:
+* How is the data protected as it flows to and from the clusters? Is the data encrypted in transit?
+* How is the data stored by the cluster? Is the data encrypted at rest?
+* How are credentials that are used to access the cluster collected and stored?
+* How are credentials that are used by the cluster accessing data sources collected and stored?
+* How is data collected by the cluster removed as needed?
 
 This is not a definitive list of the types of data that are collected by the {{site.data.keyword.product}} platform. It is provided as an example for consideration. If you have any questions about the types of data, contact Red Hat.
 
@@ -121,8 +121,8 @@ The following items highlight the areas where data is stored, which you might wa
 * **User Authentication Data, including User IDs and passwords:** User ID and password management are handled through a client enterprise LDAP directory. <!--is enterprise the correct language since this is open source? I think it should be changed to client subscription--> Users and groups that are defined in LDAP can be added to {{site.data.keyword.product}} platform teams and assigned access roles. {{site.data.keyword.product}} platform stores the email address and user ID from LDAP, but does not store the password. {{site.data.keyword.product}} platform stores the group name and upon login, caches the available groups to which a user belongs. Group membership is not persisted in any long-term way. Securing user and group data at rest in the enterprise LDAP must be considered. {{site.data.keyword.product}} platform also includes an authentication service, Open ID Connect (OIDC) that interacts with the enterprise directory and maintains access tokens. This service uses MongoDB as a backing store.
 * **Service authentication data, including user IDs and passwords:** Credentials that are used by {{site.data.keyword.product}} platform components for inter-component access are defined as Kubernetes Secrets. All Kubernetes resource definitions are persisted in the `etcd` key-value data store. Initial credential values are defined in the platform configuration data as Kubernetes Secret configuration YAML files. For more information, see [Managing Secrets](../manage_applications/managing_secrets.md).
 * **Helm chart data:** {{site.data.keyword.product}} platform includes a catalog of containerized software and services that you can browse and install in your cluster from Helm charts. The Helm service persists configuration data in a MongoDB backing store. 
-* **Monitoring Data:** You can use {{site.data.keyword.product}} platform monitoring to monitor the status of your cluster and applications <!--remove applications-->. This service uses Grafana and Prometheus to present detailed information about cluster nodes and containers. Additional monitoring stacks can be deployed for application monitoring. Monitoring data might be persisted using Kubernetes `PersistentVolumes`.
-* **Logging Data:** {{site.data.keyword.product}} platform uses an ELK stack for system logs. ELK is an abbreviation for three products, Elasticsearch, Logstash, and Kibana, that are built by Elastic and together comprise a stack of tools that you can use to stream, store, search, and monitor logs. The ELK stack that is provided with {{site.data.keyword.product}} platform uses the official ELK stack images that are published by Elastic. Logging is configured by default for the {{site.data.keyword.product}} platform services. Additional ELK stacks can be deployed for application logging.
+* **Monitoring Data:** You can use {{site.data.keyword.product}} platform monitoring to monitor the status of your cluster. This service uses Grafana and Prometheus to present detailed information about cluster nodes and containers. Monitoring data might be persisted using Kubernetes `PersistentVolumes`.
+* **Logging Data:** {{site.data.keyword.product}} platform uses an ELK stack for system logs. ELK is an abbreviation for three products, Elasticsearch, Logstash, and Kibana, that are built by Elastic and together comprise a stack of tools that you can use to stream, store, search, and monitor logs. The ELK stack that is provided with {{site.data.keyword.product}} platform uses the official ELK stack images that are published by Elastic. Logging is configured by default for the {{site.data.keyword.product}} platform services.
 
 ## Data access
 {: #dataaccess}
@@ -187,7 +187,7 @@ Areas of {{site.data.keyword.product}} platform to consider for support of accou
 
 Function to remove user ID and password data that is managed through an enterprise LDAP directory would be provided by the LDAP product used with {{site.data.keyword.product}} platform.
 
-Personal data that is persisted by platform logging and monitoring consists of IP addresses of cluster components and some user names and user IDs. The same mechanisms that are used for deletion of system logging or monitoring data can be used for application logging and monitoring data. Personal data that is collected by applications outside of these services require cluster provided mechanisms to delete data. For more information, see
+Personal data that is persisted by platform logging and monitoring consists of IP addresses of cluster components and some user names and user IDs. The same mechanisms that are used for deletion of system logging or monitoring data can be used for cluster logging and monitoring data. Personal data that is collected by clusters outside of these services require cluster provided mechanisms to delete data. For more information, see
 
 * [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/){:new_window}
 
@@ -258,7 +258,7 @@ For more information, see
 
 * What data is logged
   * IP address, names of pods, release, image
-  * Data scraped from client-developed applications could include personal data
+  * Data scraped from client-developed clusters could include personal data
 * When data is logged
   * When Prometheus scrapes metrics from configured targets
 * Where data is logged
@@ -279,10 +279,10 @@ For more information, see
   * User ID in api-server log
 * When data is logged
   * When you deploy a cluster
-  * When you deploy an application from the Helm catalog
+  * When you deploy a cluster from the Helm catalog
 * Where data is logged
   * Cluster deploy topology in `etcd`
-  * Configuration and secret for deployed applications in `etcd`
+  * Configuration and secret for deployed clusters in `etcd`
 * How to delete data
   * Use the {{site.data.keyword.product}} console
   * Search for and delete data by using the k8s console (`kubectl`) or `etcd` REST API
