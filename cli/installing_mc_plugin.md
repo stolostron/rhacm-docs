@@ -12,19 +12,19 @@ lastupdated: 2019-12-11
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Installing the {{site.data.keyword.cloud_pak}} CLI (cloudctl) multicluster plug-in (mc)
+# Installing the multicluster plug-in (mc)
 
-The `mc` plug-in is not in the {{site.data.keyword.cloud_pak}} CLI (cloudctl) installation. Complete the following procedure to download and install the plug-in to work with multiple clusters.
+The `mc` plug-in is required after CLI installation. Complete the following procedure to download and install the plug-in to work with multiple clusters.
 
 ## Prerequisites
 
-* You must install the {{site.data.keyword.cloud_pak}} CLI, `cloudctl`. For more information, see [Installing the {{site.data.keyword.cloud_pak}} CLI](../cloudctl/install_cli.md) to install the CLI.
+* You must install the OpenShift CLI tool. (need the prereq here)
 
-## Installing the plug-in
+## Installing the plug-in (change this for oc/acm instructions)
 
 1. Download the multicluster, or `mc` plug-in for the applicable operating system. See the list of the `mc` plug-in commands for the different operating systems:
 
-  For macOS, run the following command:
+  For macOS, run the following command: 
   
   ```
   curl -kLo cloudctl-mc-plugin https://<Cluster Master Host>:<Cluster Master API Port>/rcm/plugins/mc-darwin-amd64
@@ -95,4 +95,6 @@ The `mc` plug-in is not in the {{site.data.keyword.cloud_pak}} CLI (cloudctl) in
   ```
   {: pre}
 
-  Enter `cloudctl mc help [command]` for more information about a command.
+  Enter `cloudctl mc help [command]` for more information about a command. (This changes)
+  
+ 
