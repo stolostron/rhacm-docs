@@ -14,9 +14,9 @@ lastupdated: "2019-12-02"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.product}} Certificate Manager role-based access control (RBAC) support
+# Red Hat Advanced Cluster Management for Kubernetes Certificate Manager role-based access control (RBAC) support
 
-In {{site.data.keyword.product}} {{site.data.keyword.version}} and previous, RBAC support exists for {{site.data.keyword.product}} Certificate Manager resources. For more information, see [RBAC for Certificate Manager resources](#cm). All existing RBAC rules for other resources within {{site.data.keyword.product}} apply in addition to the Certificate Manager rules.
+In Red Hat Advanced Cluster Management for Kubernetes {{site.data.keyword.version}} and previous, RBAC support exists for Red Hat Advanced Cluster Management for Kubernetes Certificate Manager resources. For more information, see [RBAC for Certificate Manager resources](#cm). All existing RBAC rules for other resources within Red Hat Advanced Cluster Management for Kubernetes apply in addition to the Certificate Manager rules.
 
 The ability to access Certificate Manager resources differs from the open source version of cert-manager.
 
@@ -30,7 +30,7 @@ Learn what each of the following roles can do with Certificate Manager:
 ## Cluster Administrator role
 {: #clusteradmin}
 
-Cluster Administrators within {{site.data.keyword.product}} can create, read/get/list, update, and delete all Certificate Manager resources (Certificates, Issuers, ClusterIssuers) within any namespace.
+Cluster Administrators within Red Hat Advanced Cluster Management for Kubernetes can create, read/get/list, update, and delete all Certificate Manager resources (Certificates, Issuers, ClusterIssuers) within any namespace.
 
 The implications include the ability to:
 * Create Certificates that are signed by a ClusterIssuer
@@ -40,7 +40,7 @@ The implications include the ability to:
 ## Administrator role
 {: #admin}
 
-Administrators within {{site.data.keyword.product}} can create, read/get/list, update, and delete only the Certificates and Issuers within the namespaces they are Administrators in.
+Administrators within Red Hat Advanced Cluster Management for Kubernetes can create, read/get/list, update, and delete only the Certificates and Issuers within the namespaces they are Administrators in.
 
 For the namespaces that the user is an `Administrator` in, the implications include:
 * Administrators cannot create Certificates that are signed by any ClusterIssuer
@@ -58,7 +58,7 @@ For the namespaces that the user is an `Administrator` in, the implications incl
 ## Operator role
 {: #operator}
 
-Operators within {{site.data.keyword.product}} can create, read/get/list, and update only the Certificates and Issuers within the namespaces they are Operators in.
+Operators within Red Hat Advanced Cluster Management for Kubernetes can create, read/get/list, and update only the Certificates and Issuers within the namespaces they are Operators in.
 
 For the namespaces that the user is an `Operator` in, the implications include:
 * Operators cannot create Certificates that are signed by any ClusterIssuer
@@ -77,7 +77,7 @@ All other roles, including but not limited to editors, viewers, and auditors, ca
 ## RBAC for Certificate Manager resources
 {: #cm}
 
-{{site.data.keyword.product}} supports several roles. Your role determines the actions that you can perform.
+Red Hat Advanced Cluster Management for Kubernetes supports several roles. Your role determines the actions that you can perform.
 {:shortdesc}
 
 | Resource | Action | Administrator | Operator | Editor | Viewer |

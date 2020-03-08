@@ -16,7 +16,7 @@ lastupdated: "2019-12-12"
 
 # Supported operating systems and platforms
 
-You can install the {{site.data.keyword.product}} on {{site.data.keyword.IBM_notm}} Cloud, or on {{site.data.keyword.linux_bit}} with {{site.data.keyword.ocp_tm}} version 3.11 and 4.2, or on {{site.data.keyword.ppc}} with {{site.data.keyword.ocp_tm}} version 3.11.
+You can install the Red Hat Advanced Cluster Management for Kubernetes
 {:shortdesc}
 
 |Platform|Operating system| {{site.data.keyword.ocp}} version

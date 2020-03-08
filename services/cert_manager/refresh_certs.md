@@ -16,7 +16,7 @@ lastupdated: "2020-01-08"
 
 # Refreshing certificates
 
-You can refresh certificates that are created by the installer after you install {{site.data.keyword.product}}.
+You can refresh certificates that are created by the installer after you install Red Hat Advanced Cluster Management for Kubernetes.
 {:shortdesc}
 
 **Required user type or access level**: Cluster administrator or team administrator
@@ -34,7 +34,7 @@ You can refresh certificates for the following components:
 
 
 ## Before you begin:
-Verify that your {{site.data.keyword.product}} cluster is running.
+Verify that your Red Hat Advanced Cluster Management for Kubernetes cluster is running.
 
 **Note:** When you run the command to refresh a certificate, the related management services might be unavailable for a short duration of time. The command has no impact on the applications in your cluster.
 
@@ -69,7 +69,7 @@ Complete the following steps to back up the existing certificates:
     {: codeblock}
 
 3. Run the following command to refresh the `root-ca` certificates:
-   - For {{site.data.keyword.product}}:
+   - For Red Hat Advanced Cluster Management for Kubernetes:
      - For {{site.data.keyword.linux_notm}}, run the following command:
        ```bash
        sudo docker run --net=host -t -e LICENSE=accept \

@@ -32,7 +32,7 @@ You can restore certificates for the following components:
 | [Helm](#helm) | `cluster/cfc-certs/helm` |
 
 ## Before you begin:
- - Ensure that your {{site.data.keyword.product}} cluster is running.
+ - Ensure that your Red Hat Advanced Cluster Management for Kubernetes cluster is running.
  - Make sure that you have a backup of all of the certificates that you want to restore.
 
 ## Restoring root CA certificates
@@ -46,7 +46,7 @@ You can restore certificates for the following components:
      {: codeblock}
 
 2. Run the following command to restore the `root-ca` certificates:
-   - For {{site.data.keyword.product}}:
+   - For Red Hat Advanced Cluster Management for Kubernetes:
      - For Linux&reg;, run the following command:
        ```bash
        sudo docker run --net=host -t -e LICENSE=accept \
@@ -107,7 +107,7 @@ You can restore certificates for the following components:
     {: codeblock}
 
 2. Run the following command to restore the `etcd` certificates:
-  - For {{site.data.keyword.product}}:
+  - For Red Hat Advanced Cluster Management for Kubernetes:
     - For {{site.data.keyword.linux_notm}}, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
@@ -150,7 +150,7 @@ You can restore certificates for the following components:
      {: codeblock}
 
 2. Run the following command to restore the `front proxy` certificates:
-  - For {{site.data.keyword.product}}:
+  - For Red Hat Advanced Cluster Management for Kubernetes:
     - For {{site.data.keyword.linux_notm}}, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
@@ -195,7 +195,7 @@ You can restore certificates for the following components:
     {: codeblock}
 
 2. Run the following command to restore the Kubernetes certificates:
-  - For {{site.data.keyword.product}}:
+  - For Red Hat Advanced Cluster Management for Kubernetes:
     - For {{site.data.keyword.linux_notm}}, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
@@ -240,7 +240,7 @@ You can restore certificates for the following components:
     {: codeblock}
 
 2. Run the following command to restore the `ipsec` certificates:
-  - For {{site.data.keyword.product}}:
+  - For Red Hat Advanced Cluster Management for Kubernetes:
     - For {{site.data.keyword.linux_notm}}, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
@@ -285,7 +285,7 @@ You can restore certificates for the following components:
     {: codeblock}
 
 2. Run the following command to restore the `helm` certificates:
-  - For {{site.data.keyword.product}}:
+  - For Red Hat Advanced Cluster Management for Kubernetes:
     - For {{site.data.keyword.linux_notm}}, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
@@ -347,7 +347,7 @@ done
 ```
 ### Recreate image pull secrets
 {: #recreate}
-  - For {{site.data.keyword.product}}:
+  - For Red Hat Advanced Cluster Management for Kubernetes:
     - For {{site.data.keyword.linux_notm}}, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \

@@ -53,7 +53,7 @@ Create the secret after you upgrade the `key-management-hsm` Helm chart. For mor
 
 ### Symptom: Secret *hsm-secret* not found error
 
-Installing {{site.data.keyword.product}} {{site.data.keyword.version} does not work. You see error `Secret` _hsm-secret_ `not found`.
+Installing Red Hat Advanced Cluster Management for Kubernetes {{site.data.keyword.version} does not work. You see error `Secret` _hsm-secret_ `not found`.
 
 ### Cause: Secret *hsm-secret* not found error
 
@@ -75,7 +75,7 @@ You did not specify the `overrides.yaml` configuration file during Helm upgrade.
 
 ### Solution: UPGRADE FAILED error
 
-1. Create a separate `overrides.yaml` configuration file and specify the new image path for {{site.data.keyword.product}}{{site.data.keyword.version}} in the file.
+1. Create a separate `overrides.yaml` configuration file and specify the new image path for Red Hat Advanced Cluster Management for Kubernetes{{site.data.keyword.version}} in the file.
 
 Following is a sample `overrides.yaml` file:
 ```

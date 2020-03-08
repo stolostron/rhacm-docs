@@ -26,4 +26,4 @@ You can replace certain certificates that are created by the installer in your {
 
 **Required user type or access level**: Cluster administrator or team administrator
 
-**Note**: Replacing certificates is supported only on native {{site.data.keyword.product}} installations. {{site.data.keyword.icp_OpenShift}} and {{site.data.keyword.icp_notm}} with {{site.data.keyword.iks}} installations are not supported.
+**Note**: Replacing certificates is supported only on native Red Hat Advanced Cluster Management for Kubernetes installations. {{site.data.keyword.icp_OpenShift}} and {{site.data.keyword.icp_notm}} with {{site.data.keyword.iks}} installations are not supported.

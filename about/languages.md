@@ -16,7 +16,7 @@ lastupdated: "2019-08-21"
 
 # Supported languages
 
-The {{site.data.keyword.product}} {{site.data.keyword.version_cp}} product documentation is available in the following languages:
+The Red Hat Advanced Cluster Management for Kubernetes {{site.data.keyword.version_cp}} product documentation is available in the following languages:
 {:shortdesc}
 
 |Language| Language code|

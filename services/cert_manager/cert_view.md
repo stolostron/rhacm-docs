@@ -15,9 +15,9 @@ lastupdated: "2019-11-25"
 {:childlinks: .ullinks}
 
 
-# Viewing {{site.data.keyword.product}} cert-manager resources
+# Viewing Red Hat Advanced Cluster Management for Kubernetes cert-manager resources
 
-The {{site.data.keyword.product}} Certificate manager service creates five Kubernetes `CustomResourceDefinitions` (CRD):
+The Red Hat Advanced Cluster Management for Kubernetes Certificate manager service creates five Kubernetes `CustomResourceDefinitions` (CRD):
 1. Certificate
 2. Issuer
 3. ClusterIssuer
@@ -33,7 +33,7 @@ You can use the `kubectl` command to view these Kubernetes resources.
 ## View the certificates in your cluster
 {: #certs}
 
-To view all the certificates that are created and managed by {{site.data.keyword.product}} Certificate manager service, run the following command:
+To view all the certificates that are created and managed by Red Hat Advanced Cluster Management for Kubernetes Certificate manager service, run the following command:
 
   ```
   kubectl get certificate --all-namespaces

@@ -147,7 +147,7 @@ The sample curl command resembles the following code:
 
 | Variable | Description |
 | --- | --- |
-| IAM_token | Your {{site.data.keyword.product}} access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
+| IAM_token | Your Red Hat Advanced Cluster Management for Kubernetes access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
 | instance_ID | The unique identifier that is assigned to your KMS instance.|
 | correlation_ID | The unique identifier that is used to track and correlate transactions. |
 | key_alias | A unique, human-readable name for easy identification of your key. <p> **Important:** To protect your privacy, do not store your personal data as metadata for your key. </p> |
@@ -198,7 +198,7 @@ curl -X GET \
 
 | Variable | Description |
 | --- | --- |
-| ACCESS_TOKEN |  Your {{site.data.keyword.product}} access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
+| ACCESS_TOKEN |  Your Red Hat Advanced Cluster Management for Kubernetes access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
 | instance_ID | The unique identifier that is assigned to your KMS instance.|
 
 A successful response returns the number of keys and the key names. It does not return the key material.
@@ -242,7 +242,7 @@ curl -X HEAD \
 
 | Variable | Description |
 | --- | --- |
-| ACCESS_TOKEN | Your {{site.data.keyword.product}} access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
+| ACCESS_TOKEN | Your Red Hat Advanced Cluster Management for Kubernetes access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
 | instance_ID | The unique identifier that is assigned to your KMS instance.|
 
 A successful response returns the number of keys.
@@ -287,7 +287,7 @@ curl -X GET \
 | Variable | Description |
 | --- | --- |
 |ID|The v4 UUID of the key.|
-| ACCESS_TOKEN | Your {{site.data.keyword.product}} access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
+| ACCESS_TOKEN | Your Red Hat Advanced Cluster Management for Kubernetes access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
 | instance_ID | The unique identifier that is assigned to your KMS instance.|
 
 A successful response returns the details of the requested key.
@@ -337,7 +337,7 @@ curl -X POST \
 | Variable | Description |
 | --- | --- |
 |ID| The root key that is used as the wrapping key. It must be a v4 UUID for an active key.|
-| ACCESS_TOKEN |  Your {{site.data.keyword.product}} access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
+| ACCESS_TOKEN |  Your Red Hat Advanced Cluster Management for Kubernetes access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
 | instance_ID | The unique identifier that is assigned to your KMS instance.|
 | correlation_ID | The unique identifier that is used to track and correlate transactions. |
 | data_key | The data encryption key (DEK). Provide a base64 encoded plaintext during a wrap action. To generate a new DEK, omit the plaintext property. KMS generates a random plaintext of 32 bytes that is rooted in an HSM device and then wraps that value. The key length must be less than or equal to 4096 bytes. |
@@ -388,7 +388,7 @@ curl -X POST \
 | Variable | Description |
 | --- | --- |
 |ID| The root key that is used as the wrapping key. It must be a v4 UUID for an active key.|
-| ACCESS_TOKEN | Your {{site.data.keyword.product}} access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
+| ACCESS_TOKEN | Your Red Hat Advanced Cluster Management for Kubernetes access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
 | instance_ID | The unique identifier that is assigned to your KMS instance.|
 | correlation_ID | The unique identifier that is used to track and correlate transactions. |
 | data_key | The wrapped DEK (WDEK) that is used in `unwrap` actions. Provide a base64 encoded ciphertext during an unwrap action. The response is a base64 encoded plaintext in the response body. |
@@ -438,7 +438,7 @@ curl -X POST \
 | Variable | Description |
 | --- | --- |
 |ID| The root key that is used as the wrapping key. It must be a v4 UUID for an active key.|
-| ACCESS_TOKEN | Your {{site.data.keyword.product}} access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
+| ACCESS_TOKEN | Your Red Hat Advanced Cluster Management for Kubernetes access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
 | instance_ID | The unique identifier that is assigned to your KMS instance.|
 | correlation_ID | The unique identifier that is used to track and correlate transactions. |
 | data_key | <p>The base64 encoded key material, such as an existing key-wrapping key, that you want to store and manage in the service.</p><p>To rotate a key that was initially generated by KMS, omit the payload attribute and pass an empty request entity body. To rotate an imported key, provide a key material that meets the following requirements:</p><ol><li>The key must be 256, 384, or 512 bits.</li><li>The bytes of data, for example 32 bytes for 256 bits, must be encoded by using base64 encoding.</li></ol> |
@@ -483,7 +483,7 @@ curl -X DELETE \
 | Variable | Description |
 | --- | --- |
 |ID|The v4 UUID of the key.|
-| ACCESS_TOKEN |  Your {{site.data.keyword.product}} access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
+| ACCESS_TOKEN |  Your Red Hat Advanced Cluster Management for Kubernetes access token. Include the full contents of the access token, including the Bearer value, in the curl request. |
 | instance_ID | The unique identifier that is assigned to your KMS instance.|
 
 When you delete a key, the key content and associated data is permanently removed. You cannot reverse the action.

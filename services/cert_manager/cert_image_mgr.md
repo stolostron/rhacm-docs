@@ -26,7 +26,7 @@ Prepare and have your management-ingress certificates and private keys ready. Tw
 * Include the following IP addresses and domain names to your cert Subject Alternative Name (SAN) list:
   ```
   127.0.0.1
-  <cluster_CA_domain>   # The {{site.data.keyword.product}} cluster Certificate Authority (CA) domain.
+  <cluster_CA_domain>   # The Red Hat Advanced Cluster Management for Kubernetes cluster Certificate Authority (CA) domain.
   <cluster_lb_address>  # Your cluster load balancer IP address.
   <cluster_vip>         # Your Virtual IP address, if applicable. 
   ```
@@ -36,7 +36,7 @@ Prepare and have your management-ingress certificates and private keys ready. Tw
    
   If you configure a cluster load balancer (LB) and it is a hostname, include the hostname in the `DNS` setting for your certificate. If your cluster load balancer (LB) is not a hostname, include the IP address in the `IP` settings. 
 
-* Set the common name `CN` on the certificate to be your {{site.data.keyword.product}} cluster CA domain.
+* Set the common name `CN` on the certificate to be your Red Hat Advanced Cluster Management for Kubernetes cluster CA domain.
 
 The following example configuration file and OpenSSL commands provide an example for how to generate a TLS certificate by using OpenSSL.
 
@@ -152,11 +152,11 @@ Complete the following steps to replace image manager certificates.
    {: codeblock}
 
 5. After all pods are restarted, check the following:
-   - Log in to your private image registry to verify that you are able to `push` and `pull` images to and from the {{site.data.keyword.product}} private registry.
+   - Log in to your private image registry to verify that you are able to `push` and `pull` images to and from the Red Hat Advanced Cluster Management for Kubernetes private registry.
      ```
      docker login mycluster.icp:8500
      ```
      {: codeblock}
 
    - If Vulnerability Advisor (VA) is enabled, verify that images that are pushed into the registry are being scanned by VA.
-   - Verify that images that are pushed to the registry are viewable from the {{site.data.keyword.product}} console.
+   - Verify that images that are pushed to the registry are viewable from the Red Hat Advanced Cluster Management for Kubernetes console.

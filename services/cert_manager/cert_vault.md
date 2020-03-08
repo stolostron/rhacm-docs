@@ -294,4 +294,4 @@ See the [HashiCorp Vault ![Opens in a new tab](../../images/icons/launch-glyph.s
 
 If the `secret_id_ttl` is set too small and that value expires, a new `secret_id` must be created. The Issuer and the referenced Secret need to be edited to configure the new `secret_id`.
 
-See [Using {{site.data.keyword.product}} Certificate manager (cert-manager)](cert_manager.md) for more Certificate manager topics.
+See [Using Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)](cert_manager.md) for more Certificate manager topics.

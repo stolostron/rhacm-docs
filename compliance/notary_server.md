@@ -30,7 +30,7 @@ Learn more about the notary service in the following topics:
 
 ## Installation
 
-Complete the following steps to deploy the notary server and signer on {{site.data.keyword.product}}. After successful deployment, the notary server is available to the `docker client` on `https://<ClusterIP>:<ClusterPort>/notary`.
+Complete the following steps to deploy the notary server and signer on Red Hat Advanced Cluster Management for Kubernetes. After successful deployment, the notary server is available to the `docker client` on `https://<ClusterIP>:<ClusterPort>/notary`.
 
 1. Deploy the notary Helm chart in one of the following ways:
    - Run the following Helm command to install the chart.
@@ -39,7 +39,7 @@ Complete the following steps to deploy the notary server and signer on {{site.da
      ```
      {: codeblock}
 
-   - Use the {{site.data.keyword.product}} console to install a chart from the Catalog.
+   - Use the Red Hat Advanced Cluster Management for Kubernetes console to install a chart from the Catalog.
 
    The notary service is successfully deployed when the notary server and signer pods are available.      
 
@@ -56,7 +56,7 @@ Complete the following steps to add the `ca.crt` for the notary server. The foll
 
 1. Use 'ssh' to access the master node of a cluster on a {{site.data.keyword.linux_notm}} system.
 
-2. Install the {{site.data.keyword.product}} CLI. See [Installing the {{site.data.keyword.product}} CLI ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/support/knowledgecenter/SSBS6K_3.2.1/manage_cluster/install_cli.html){: new_window} to get started.
+2. Install the Red Hat Advanced Cluster Management for Kubernetes CLI. See [Installing the Red Hat Advanced Cluster Management for Kubernetes CLI ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/support/knowledgecenter/SSBS6K_3.2.1/manage_cluster/install_cli.html){: new_window} to get started.
 
 3. Get the `ca.crt` for the notary server.
    ```
@@ -165,7 +165,7 @@ Use notary CLI clients for key rotation and listing signed images. Learn more ab
 The following components are used in this example:
 
 - Docker image named `busybox`
-- {{site.data.keyword.product}} registry on port 8500
+- Red Hat Advanced Cluster Management for Kubernetes registry on port 8500
 - A notary that runs in the cluster.
 
 Pull the `busybox` image:

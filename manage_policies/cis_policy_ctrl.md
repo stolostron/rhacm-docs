@@ -215,14 +215,14 @@ For more information see, [CIS rules specifications](../compliance/cis_policy_ru
 A CIS policy can be created either from the command line by using kubectl or from the console.
 
 * [Creating a CIS policy from the command line](#create_policy_cli)
-* [Create a CIS policy from {{site.data.keyword.product}} console](#create_policy_gui)
+* [Create a CIS policy from Red Hat Advanced Cluster Management for Kubernetes console](#create_policy_gui)
 
 ### Creating a CIS policy from the command line
 {: #create_policy_cli}
 
 Complete the following steps to create a certificate policy from the command line interface (CLI):
 
-1. Create a YAML file for your CIS policy by including a set of exclude rules for master node and worker node. See [Creating a YAML file for an {{site.data.keyword.product}} policy](../compliance/create_policy.md#yaml) for more information about policy requirements.
+1. Create a YAML file for your CIS policy by including a set of exclude rules for master node and worker node. See [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](../compliance/create_policy.md#yaml) for more information about policy requirements.
 ```
 apiVersion: policies.ibm.com/v1alpha1
 kind: CisPolicy
@@ -273,10 +273,10 @@ kubectl describe cispolicy <name> -n <namespace>
 ```
 {: codeblock}
 
-### Creating a CIS policy from {{site.data.keyword.product}} console
+### Creating a CIS policy from Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_policy_gui}
 
-1. Log in to {{site.data.keyword.cloud_pak}} for {{site.data.keyword.product}} console.
+1. Log in to {{site.data.keyword.cloud_pak}} for Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Govern risk**.
 3. Click **Create Policy**.
 4. Enter the name for the CIS policy in the **Name** field.

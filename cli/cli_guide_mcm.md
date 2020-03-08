@@ -14,7 +14,7 @@ lastupdated: 2019-12-11
 
 # CLI tools guide
 
-Learn about the several command-line interface (CLI) tool options, including the {{site.data.keyword.product}} CLI (cloudctl). You can also use the Helm CLI, Kubernetes CLI, and other CLI tools.
+Learn about the several command-line interface (CLI) tool options, including the Red Hat Advanced Cluster Management for Kubernetes CLI (cloudctl). You can also use the Helm CLI, Kubernetes CLI, and other CLI tools.
 {:shortdesc}
 
 **Note:** After you install the {{site.data.keyword.cloud_pak}} CLI (cloudctl), you can use the multicluster plug-in (mc)to view information about your clusters, manage your clusters, deploy applications, and more.
