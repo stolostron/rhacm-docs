@@ -1,5 +1,5 @@
 # Summary
- * [About](about/welcome.md)
+ * [About](about/about.md)
    * [Architecture](about/architecture.md)
    * [Components](about/components.md)
  * [Release Notes](about/release_notes)
