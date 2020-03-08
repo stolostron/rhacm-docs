@@ -16,7 +16,7 @@ lastupdated: "2019-12-11"
 
 # Notices
 
-These legal notices pertain to the {{site.data.keyword.product}} product and its documentation.
+These legal notices pertain to the Red Hat Advanced Cluster Management for Kubernetes product and its documentation.
 {:shortdesc}
 
 This information was developed for products and services offered in the US. This material might be available from IBM in other languages. However, you may be required to own a copy of the product or product version in that language in order to access it.

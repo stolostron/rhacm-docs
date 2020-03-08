@@ -27,6 +27,6 @@ Top 5 changes with the new product
 
 You can now disable your policies. For more information, see _Disabling your security policy from the console_ on the [Managing a security policy page](../mcm/manage_cluster/manage_grc_policy.md).
 
-You can create and update policies on your {{site.data.keyword.product}} hub cluster for multiple namespaces. You can view only the policies and violations associated with your cluster and namespace. Update your PlacementPolicy to create policies on multiple namespaces. For more information, see [{{site.data.keyword.product}} policy example](../mcm/compliance/policy_example.md).
+You can create and update policies on your Red Hat Advanced Cluster Management for Kubernetes hub cluster for multiple namespaces. You can view only the policies and violations associated with your cluster and namespace. Update your PlacementPolicy to create policies on multiple namespaces. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy example](../mcm/compliance/policy_example.md).
 
 

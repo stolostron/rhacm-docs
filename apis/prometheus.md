@@ -16,7 +16,7 @@ lastupdated: "2019-12-10"
 
 # Prometheus API
 
-{{site.data.keyword.product}} version {{site.data.keyword.version_cp}} uses Prometheus Version 2.0 to manage the metrics from scrape targets.
+Red Hat Advanced Cluster Management for Kubernetes version {{site.data.keyword.version_cp}} uses Prometheus Version 2.0 to manage the metrics from scrape targets.
 {:shortdesc}
 
 Both the cluster administrator and team administrator can access the Prometheus API.

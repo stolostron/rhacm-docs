@@ -132,5 +132,5 @@ For more specific search results, include the property in your search. For examp
 ## Governance and risk
 {: #grc}
 
-Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [{{site.data.keyword.product}} Governance and risk](../compliance/compliance_intro.md).
+Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
 

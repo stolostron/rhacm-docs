@@ -33,11 +33,11 @@ A Kubernetes [Pod ![Opens in a new tab](../../images/icons/launch-glyph.svg "Ope
 
 All {{site.data.keyword.contain_softs}} provide detailed container security requirements. For more information, see [{{site.data.keyword.contain_soft}} Security Policy definitions ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://github.com/IBM/cloud-pak/tree/master/spec/security/psp){: new_window}.  
 
-See [Isolation on {{site.data.keyword.product}}](../../iam/3.4.0/iso_icp.md) to learn more about pod isolation.
+See [Isolation on Red Hat Advanced Cluster Management for Kubernetes](../../iam/3.4.0/iso_icp.md) to learn more about pod isolation.
 
 ## Predefined pod security policies
 
-{{site.data.keyword.product_tm}} provides predefined policies that you can apply to your pod by associating them to a namespace during namespace creation. These predefined pod security policies apply to most of the {{site.data.keyword.IBM_notm}} content charts. The following list shows the types and descriptions that range from the most restrictive to the least restrictive:
+{{site.data.keyword.product_tm}} provides predefined policies that you can apply to your pod by associating them to a namespace during namespace creation. These predefined pod security policies apply to most of the content charts. The following list shows the types and descriptions that range from the most restrictive to the least restrictive:
 
   * `ibm-restricted-psp`: This policy requires pods to run with a non-root user ID, and prevents pods from accessing the host.
   * `ibm-anyuid-psp`: This policy allows pods to run with any user ID and group ID, but prevents access to the host.
@@ -47,11 +47,11 @@ See [Isolation on {{site.data.keyword.product}}](../../iam/3.4.0/iso_icp.md) to 
 
 For more details about the policy definitions, see the [{{site.data.keyword.contain_soft}} Pod Security Policy Definitions ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://ibm.biz/cpkspec-psp){: new_window}.
 
-If you install {{site.data.keyword.product}} version {{site.data.keyword.version}} or later as a new installation, the default pod security policy setting is the `ibm-restricted-psp` policy, which is applied to all of the existing and newly created namespaces. If you upgrade to version {{site.data.keyword.version}} or later from an earlier version, the default pod security is the `ibm-anyuid-hostpath-psp` policy, which is unrestricted and is applied by default to all of the existing and newly created namespaces. The upgraded settings are unrestricted to prevent any disruptions with access issues on the applications and pods that are already running in your cluster.
+If you install Red Hat Advanced Cluster Management for Kubernetes version {{site.data.keyword.version}} or later as a new installation, the default pod security policy setting is the `ibm-restricted-psp` policy, which is applied to all of the existing and newly created namespaces. If you upgrade to version {{site.data.keyword.version}} or later from an earlier version, the default pod security is the `ibm-anyuid-hostpath-psp` policy, which is unrestricted and is applied by default to all of the existing and newly created namespaces. The upgraded settings are unrestricted to prevent any disruptions with access issues on the applications and pods that are already running in your cluster.
 
-You can also use the {{site.data.keyword.product}} CLI commands to view the current settings of the cluster, and to toggle the pod security policy between restricted and unrestricted modes. See [{{site.data.keyword.product}} CLI cm commands (cm)](../../cloudctl/3.2.3/cli_cm_commands.md) for more information about using these commands. 
+You can also use the Red Hat Advanced Cluster Management for Kubernetes CLI commands to view the current settings of the cluster, and to toggle the pod security policy between restricted and unrestricted modes. See [Red Hat Advanced Cluster Management for Kubernetes CLI cm commands (cm)](../../cloudctl/3.2.3/cli_cm_commands.md) for more information about using these commands. 
 
-You can view the PodSecurityPolicy CLI command settings information in the {{site.data.keyword.product}} console by selecting the settings icon on the Pod Security page. 
+You can view the PodSecurityPolicy CLI command settings information in the Red Hat Advanced Cluster Management for Kubernetes console by selecting the settings icon on the Pod Security page. 
 
 The *namespace overview* page shows the pod security policies for every namespace. See [Namespaces](../../iam/3.4.0/projects.md) for more information about namespaces.
 
@@ -66,5 +66,5 @@ You can also create your own pod security policies.
 See the following topics to manage your pod security policy:
 
 - {: child} [Creating pod security policies](../../pod-security/3.4.0/custom_psp.md)
-- {: child} [{{site.data.keyword.product}} CLI cm commands (cm)](../../cloudctl/3.2.3/cli_cm_commands.md)
+- {: child} [Red Hat Advanced Cluster Management for Kubernetes CLI cm commands (cm)](../../cloudctl/3.2.3/cli_cm_commands.md)
 {: childlinks}

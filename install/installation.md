@@ -24,7 +24,5 @@ There is one installer for {{site.data.keyword.icp_notm}}, which sets up either 
 The following diagram illustrates an example workflow with typical tasks that are performed to install {{site.data.keyword.icp_notm}}.
 
 - {: child} [Preparing your cluster for installation](../installing/prep.md) 
-- {: child} [Installing {{site.data.keyword.icp_notm}} Cloud Native and Enterprise](../installing/install_containers.md)
-- {: child} [Installing {{site.data.keyword.IBM_notm}} software onto {{site.data.keyword.icp_notm}}](../installing/install_entitled_workloads.md)
-- {: child} [Configuration options during installation](../installing/install_configuration.md)
+
 {: childlinks}

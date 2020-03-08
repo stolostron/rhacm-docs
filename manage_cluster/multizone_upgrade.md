@@ -21,7 +21,7 @@ lastupdated: "2019-09-21"
 Upgrade your multizone cluster.
 {: shortdesc}
 
-For more information about upgrading your {{site.data.keyword.product_tm}} cluster, see [Upgrading {{site.data.keyword.product}} ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/support/knowledgecenter/SSBS6K_3.2.1/installing/upgrade.html){: new_window}.
+For more information about upgrading your {{site.data.keyword.product_tm}} cluster, see [Upgrading Red Hat Advanced Cluster Management for Kubernetes ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/support/knowledgecenter/SSBS6K_3.2.1/installing/upgrade.html){: new_window}.
 
 Complete these steps before you complete the [Deploy your environment ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/support/knowledgecenter/SSBS6K_3.2.1/installing/upgrade.html#deploy){: new_window} step.
 

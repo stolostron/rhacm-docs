@@ -26,11 +26,11 @@ See information about services that are installed and enabled by default, as wel
 |auth-idp|Works with other Identity and Access Management services to control roles and access in the environment.|Yes, if using OIDC, service IDs, API keys, or other Identity and Access Management services.|
 |auth-pap|Works with other Identity and Access Management services to control roles and access in the environment.|Yes, if using OIDC, service IDs, API keys, or other Identity and Access Management services.|
 |auth-pdp|Works with other Identity and Access Management services to control roles and access in the environment.|Yes, if using OIDC, service IDs, API keys, or other Identity and Access Management services.|
-|catalog-ui|Discovers and deploys {{site.data.keyword.IBM_notm}} workload middleware.|Yes|
+|catalog-ui|Discovers and deploys workload middleware.|Yes|
 |cert-manager|Provides cluster services with a way to request signed certificates that are based on local hostnames and provide for the revocation or reconfiguration of the TLS certificates.|Yes|
 |cert-manager-webhook||Yes|
 |cloudctl | The `cloudctl` command line tool is installed and is required for installing {{site.data.keyword.IBM}} Passport Advantage archives. | Yes |
-|helm-api|Packages, deploys, and upgrades {{site.data.keyword.IBM_notm}} and open source software. |No|
+|helm-api|Packages, deploys, and upgrades open source software. |No|
 |helm-repo|Provides a repository to store Helm charts.|No|
 |iam-policy-controller||Yes|
 |icp-management-ingress|Unifies all management services behind a network ingress controller with predictable annotations and TLS protection. This service should not be accessed directly.|Yes|
@@ -39,7 +39,7 @@ See information about services that are installed and enabled by default, as wel
 |key-management-hsm|Enables workloads to manage the keys that are used to encrypt data and integrate with Hardware Service Modules.|No|
 |installation | Common process for preparing services and software | Yes |
 |mcm-kui|Provides the {{site.data.keyword.kui}}.|Yes|
-|metering|Supported by {{site.data.keyword.IBM_notm}} Metering. Requires content to provide the correct tags for the metering service to understand usage for licensing.|Yes|
+|metering|Requires content to provide the correct tags for the metering service to understand usage for licensing.|Yes|
 |mgmt-repo|Helm repository for common management services. **Note:** Required for dependencies. Do not access directly.|Yes|
 |mongo-db|All platform services that require a persistent data store use the MongoDB service. Highly available topologies for MongoDB are supported out of the box. This is a service that should not be accessed directly.|Yes|
 |monitoring|Supported by Prometheus, Heapster & Grafana. Collects health metrics from the platform, services, workload and application containers. Ensures that all data in transit is TLS-secured using secure ciphers that meet FIPS requirements. Ensure all data at rest is encrypted using secure ciphers that meet FIPS requirements. |Yes|

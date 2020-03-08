@@ -16,16 +16,16 @@ lastupdated: "2019-12-10"
 
 # IBM customizable offline documentation
 
-You can view the documentation for the {{site.data.keyword.product}} offline in a Helm release.
+You can view the documentation for the Red Hat Advanced Cluster Management for Kubernetes offline in a Helm release.
 {:shortdesc}
 
 ## Contents
 
 The `IBM Customizable Offline Documentation` Helm chart is available from the [IBM charts](https://github.com/IBM/charts/tree/master/stable) repository.
 
-This Helm chart contains the documentation for the current version and previous two versions of the {{site.data.keyword.product}}. You can install and view the documentation in an offline, air-gap environment. In addition to this product documentation, a feature is included for adding non-IBM custom documentation content under the _Our Content (Non-IBM)_ product.
+This Helm chart contains the documentation for the current version and previous two versions of the Red Hat Advanced Cluster Management for Kubernetes. You can install and view the documentation in an offline, air-gap environment. In addition to this product documentation, a feature is included for adding non-IBM custom documentation content under the _Our Content (Non-IBM)_ product.
 
-The Docker image for the documentation is available from [Docker Hub](https://hub.docker.com/r/ibmcom/cp4mcm-docs). With each new release for the {{site.data.keyword.product}}, the Docker image is updated to include the new release documentation. For the latest documentation, see the online [IBM Knowledge Center](https://www.ibm.com/support/knowledgecenter/SSFC4F/product_welcome_cloud_pak.html).
+The Docker image for the documentation is available from [Docker Hub](https://hub.docker.com/r/ibmcom/cp4mcm-docs). With each new release for the Red Hat Advanced Cluster Management for Kubernetes, the Docker image is updated to include the new release documentation. For the latest documentation, see the online [IBM Knowledge Center](https://www.ibm.com/support/knowledgecenter/SSFC4F/product_welcome_cloud_pak.html).
 
 ## Installing the offline documentation
 
