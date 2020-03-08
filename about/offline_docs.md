@@ -14,7 +14,7 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# IBM customizable offline documentation
+# Red Hat Advanced Cluster Management for Kubernetes customizable offline documentation
 
 You can view the documentation for the Red Hat Advanced Cluster Management for Kubernetes offline in a Helm release.
 {:shortdesc}
