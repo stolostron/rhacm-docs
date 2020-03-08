@@ -79,9 +79,9 @@ Complete the following procedure to download your packages:
 | {{site.data.keyword.IBM_notm}} Cloud App Management V2019.4.0 Agents Install Solaris Sparc | appMgtAgents_solaris_2019.4.0.tar.gz | CC4KUEN |
 | {{site.data.keyword.IBM_notm}} Cloud App Management V2019.4.0 Agents Install PLinux  | appMgtAgents_plinux_2019.4.0.tar.gz | CC4KVEN   |
 | {{site.data.keyword.IBM_notm}} Cloud App Management V2019.4.0 Agents Install PLinuxLE  | appMgtAgents_plinuxle_2019.4.0.tar.gz  | CC4KWEN  |
-| Multicluster Event Management Klusterlet on PlinuxLE | agent_ppa_2019.4.0_prod_ppc64le.tar.gz | CC4KXEN  |
+| Multicluster Event Management  multicluster-endpoint on PlinuxLE | agent_ppa_2019.4.0_prod_ppc64le.tar.gz | CC4KXEN  |
 | Multicluster Event Management Server on PlinuxLE | icam_ppa_2019.4.0_prod_lite_ppc64.tar.gz | CC4KYEN  |
-| Multicluster Event Management Klusterlet on AMD64 | agent_ppa_2019.4.0_prod_amd64.tar.gz | CC4KZEN   |
+| Multicluster Event Management  multicluster-endpoint on AMD64 | agent_ppa_2019.4.0_prod_amd64.tar.gz | CC4KZEN   |
 | Multicluster Event Management Server on AMD64 | icam_ppa_2019.4.0_prod_lite_amd64.tar.gz  | CC4L0EN  |
 | {{site.data.keyword.IBM_notm}} Cloud Unified Agent V2019.4.0 | unifiedAgent_2019.4.0.tar.gz | CC4L1EN  |
 | {{site.data.keyword.IBM_notm}} Cloud App Management V2019.4.0  Agents Install Solaris X86 | appMgtAgents_solaris_x86_2019.4.0.tar.gz| CC4L2EN |
