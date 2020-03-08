@@ -35,7 +35,7 @@ The hub cluster aggregates information from multiple clusters by using an asynch
 ## Managed cluster
 {: #managed}
 
-The managed cluster is used to define the Red Hat Advanced Cluster Management for Kubernetes {{site.data.keyword.klust}}, which is the agent that is responsible for a single Kubernetes cluster. The managed cluster initiates a connection to the hub cluster, receives work requests, applies work requests, then returns the results. The managed cluster connects to various services within the cluster for operations, including the Kubernetes API service, the Tiller service (Helm), and Weave for topology.
+The managed cluster is used to define the Red Hat Advanced Cluster Management for Kubernetes  multicluster-endpoint, which is the agent that is responsible for a single Kubernetes cluster. The managed cluster initiates a connection to the hub cluster, receives work requests, applies work requests, then returns the results. The managed cluster connects to various services within the cluster for operations, including the Kubernetes API service, the Tiller service (Helm), and Weave for topology.
 
 
 See [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](../manage_cluster/intro.md) for configuration and import information.
