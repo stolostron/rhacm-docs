@@ -2,7 +2,7 @@
  * [About](about/about.md)
    * [Architecture](about/architecture.md)
    * [Components](about/components.md)
- * [Release Notes](about/release_notes)
+ * [Release Notes](about/release_notes.md)
    * [What's new](about/whats_new.md)
    * [Known issues and limitations](about/known_issues.md)
    * [Considerations for GDPR readiness](about/gdpr_readiness.md)
