@@ -14,7 +14,7 @@ lastupdated: "2020-02-05"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# What's new in (product name here)
+# What's new in Red Hat Advanced Cluster Management for Kubernetes 
 
 Top 5 changes with the new product
 
