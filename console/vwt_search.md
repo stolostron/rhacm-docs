@@ -6,22 +6,20 @@ lastupdated: "2019-12-11"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Visual Web Terminal
 
 You can use the Visual Web Terminal to run many commands across your environment. When categorized data is returned, such as when you enter a `search` command, it is returned in an interactive tabular format.
-{:shortdesc}
 
 The Visual Web Terminal is particularly useful when troubleshooting issues that require running multiple commands, and navigating the results of the commands in an easy way. The information that is provided in the Visual Web Terminal is limited by the permissions of the user. When you run a command, only the items that you have permission to view are displayed. If there are over ten sessions that are running at the same time, there might be a slower response time when running commands.
 
+- [Starting a session](#start)
+- [Supported command list](#commands)
+- [Searching with Visual Web Terminal](#search)
+
+
 ## Starting a session
+{: #start}
 
 You can access the Visual Web Terminal by completing the following steps:
 
@@ -29,9 +27,12 @@ You can access the Visual Web Terminal by completing the following steps:
 
 2. Select the **Terminal** icon.
 
-3. Select the Visual Web Terminal to connect to your cloud and start entering commands. **Remember:** The Visual Web Terminal connects to the cloud that you are already logged into with the console.
+3. Select the Visual Web Terminal to connect to your cloud and start entering commands. 
+
+**Note:** The Visual Web Terminal connects to the cloud that you are already logged into with the console.
 
 ## Supported command list
+{: #commands}
 
 The following table provides information and examples for the command types that are supported by the Visual Web Terminal:
 
@@ -41,7 +42,6 @@ The following table provides information and examples for the command types that
 | `bash` commands | Run the following basic `bash` commands: `base64`, `basename`, `cat`, `cksum`, `cp`, `cut`, `date`, `dirname`, `echo`, `grep`, `head`, `ls`, `mkdir`, `mv`, `printf`, `readlink`, `rm`, `sed`, `tail`, `touch`, `uname`, `vi`, and `vim`  | `mkdir new_directory` |
 | `cd` | Change the current working directory for local filesystem changes | `cd dir_name` |
 | `clear` | Clear the screen of previous commands and output | `clear` |
-| `cloudctl` | Run supported `cloudctl` commands that are used with {{site.data.keyword.product}}. **Tip:** See the [Managing your cluster with the IBM Cloud Pak CLI (cloudctl)](../../cloudctl/icp_cli.md) topic in the IBM Knowledge Center for more information about the `cloudctl` commands. | `cloudctl version` |
 | `export` | Export the output of the command to an external file | `export search search_criteria` |
 | `helm` | Run supported `helm` commands. **Tip:** See the [helm commands](https://v2.helm.sh/docs/helm/#helm) topic in the Helm documentation for more information about the Helm commands. | `helm list --chart-name` |
 | `help` | Display additional information about a command that is supported in the Visual Web Terminal | `help` |
@@ -50,12 +50,13 @@ The following table provides information and examples for the command types that
 | `kubectl` | Run supported `kubectl` commands. **Tip:** See the [Kubectl reference](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands) for more information about the `kubectl` commands. | `kubectl get pods`  |
 | `oc` | Runs Red Hat OpenShift `oc` commands. **Tip:** See [Red Hat OpenShift CLI Operations](https://docs.openshift.com/enterprise/3.0/cli_reference/basic_cli_operations.html) for more information about the `oc` commands. | `oc get svc` |
 | `run` | Runs an external script | `run script_name` |
-| `search` | Searches your Kubernetes resources for the specified string **Note:** Search commands are only available when you have the Cloud Pak for Multicloud Management installed. | `search pod` |
+| `search` | Searches your Kubernetes resources for the specified string | `search pod` |
 | `savedsearches` | Displays your saved searches that you created and saved by using the management console. **Note:** The `savedsearches` command is only available when you have the Cloud Pak for Multicloud Management installed.| `savedsearches` **Tip:** You can specify a string after the `savedsearches` command to limit the data that is returned. For example, `savedsearches projectA` displays the saved searches that contain the string *projectA*. |
 | `sleep` | Pauses activity during a session. **Note:** Requires a `sleepTime` parameter that identifies the number of seconds that it pauses | `sleep 20` |
 | `themes` |  Displays the contrast theme options of the interface, which you can set to either `light` or `dark` | `themes` |
 
 ## Searching with Visual Web Terminal
+{: #search}
 
 The Visual Web Terminal search function provides visibility into your resources across all your clusters. 
 
