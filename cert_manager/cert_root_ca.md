@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-01"
+  years: 2019, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -78,7 +78,7 @@ Complete the following steps to back up the existing certificates:
 
    8. Return to your Chrome browser and refresh the console. 
 
-      You can log in to your console with access to the product. For more information, see [Requirements for trusted certificates in iOS 13 and macOS 10.15 ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://support.apple.com/en-us/HT210176){: new_window}.
+      You can log in to your console with access to the product. For more information, see [Requirements for trusted certificates in iOS 13 and macOS 10.15](https://support.apple.com/en-us/HT210176){: new_window}.
 
 ## Replacing root ca certificates
 {: #root}
