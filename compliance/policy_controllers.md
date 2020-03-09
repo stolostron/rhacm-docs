@@ -23,7 +23,7 @@ Create and customize policies with the out of the box policy templates. View the
 
 - {: child} [Configuration policy controller](../manage_policies/config_policy_ctrl.md)
 - {: child} [Certificate policy controller](../manage_policies/cert_policy_ctrl.md)
-- {: child} [IAM policy controller](../../mcm/compliance/iam_policy_ctrl.md)
-- {: child} [CIS policy controller](../../mcm/compliance/cis_policy_ctrl.md)
+- {: child} [IAM policy controller](../manage_policies/iam_policy_ctrl.md)
+- {: child} [CIS policy controller](../manage_policies/cis_policy_ctrl.md)
 
 {: childlinks}
