@@ -16,10 +16,10 @@ lastupdated: "2020-03-09"
 
 # Deploying application resources
 
-You can deploy application resources, such as Kubernetes deployable objects or Helm charts to a cluster to update existing applications or to add applications. {{site.data.keyword.mcm_notm}} supports multiple options for the deployment of deployable objects.
+You can deploy application resources, such as Kubernetes deployable objects or Helm charts to a cluster to update existing applications or to add applications. Red Hat Advanced Cluster Management for Kubernetes supports multiple options for the deployment of deployable objects.
 {:shortdesc}
 
-Within the {{site.data.keyword.mcm_notm}} application model, you use deployables (`Deployable.app.ibm.com`), which are Kubernetes resources that contain templates to wrap other Kubernetes resources or represent Helm releases for deployment. Deployables are used to wrap other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. For more information about deployables, see [Application resources](app_resources.md).
+Within the Red Hat Advanced Cluster Management for Kubernetes application model, you use deployables (`Deployable.app.ibm.com`), which are Kubernetes resources that contain templates to wrap other Kubernetes resources or represent Helm releases for deployment. Deployables are used to wrap other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. For more information about deployables, see [Application resources](app_resources.md).
 
 When you are preparing to deploy, the deployment option that you can use can depend on the following requirement:
 * You are deploying to a single cluster or multiple clusters.
