@@ -16,7 +16,7 @@ lastupdated: "2020-03-04"
 
 # Red Hat Advanced Cluster Management for Kubernetes endpoints
 
-An endpoint is a network destination address that is exposed by Kubernetes resources, such as services and ingresses. The following sections describe the available external and internal endpoints in an {{site.data.keyword.product_tm}} cluster.
+An endpoint is a network destination address that is exposed by Kubernetes resources, such as services and ingresses. The following sections describe the available external and internal endpoints in an Red Hat Advanced Cluster Management for Kubernetes cluster.
 {:shortdesc}
 
 See the endpoints that are created in your Red Hat Advanced Cluster Management for Kubernetes cluster.
