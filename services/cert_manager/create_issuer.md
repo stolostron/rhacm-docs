@@ -86,4 +86,4 @@ Specify this Secret `hello-deployment-tls-ca-key-pair` in the Issuer `.yaml` fil
 
 You can create a Certificate that is signed by this Issuer by changing the Certificate's `issuerRef.name` to the name of this Issuer `hello-deployment-tls`. For more information, see [Adding a certificate to a Kubernetes workload](create_cert.md#adding_workload).
 
-See [About {{site.data.keyword.product}} Certificate manager (cert-manager)](cert_manager.md) for more Certificate manager topics.
+See [About Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)](cert_manager.md) for more Certificate manager topics.

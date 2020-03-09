@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2020
+lastupdated: "2020-03-11"
 
 ---
 
@@ -14,7 +14,6 @@ lastupdated: "2019-12-11"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Red Hat Advanced Cluster Management for Kubernetes Release notes
+# About Red Hat Advanced Cluster Management for Kubernetes
 
-- {: child} [What's new](whats_new.md)
-<!-- add files here -->
+It is awesome and that is all you need to know

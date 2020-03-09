@@ -16,7 +16,7 @@ lastupdated: "2020-03-05"
 
 # Known issues
 
-Review the known issues for {{site.data.keyword.product}}. Additionally, see [{{site.data.keyword.product}} troubleshooting](../troubleshoot/mcm_troubleshoot.md) for troubleshooting topics.
+Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. Additionally, see [Red Hat Advanced Cluster Management for Kubernetes troubleshooting](../troubleshoot/mcm_troubleshoot.md) for troubleshooting topics.
 {:shortdesc}
 
   - [Menu and logo on the console header changes](#1527)
@@ -30,16 +30,16 @@ Review the known issues for {{site.data.keyword.product}}. Additionally, see [{{
   - [Hub cluster resources display as `local-cluster` in console search results ](#31979)
   - [Mapping error for a certificate policy](#1351_mapping)
   - [{{site.data.keyword.kui}} fails when returning over 200 KB of data](#34145)
-  - [Enabling {{site.data.keyword.product}} for the installed monitoring release](#1051)
+  - [Enabling Red Hat Advanced Cluster Management for Kubernetes for the installed monitoring release](#1051)
   - [LDAP user names are case-sensitive](#25735)
   - [Pods are not reachable from the NGINX ingress controller in multitenant isolation mode](#34414)
   
 ## Menu and logo on the console header changes
 {: #1527}
 
-When you navigate to certain pages in the {{site.data.keyword.product}} console, the menu items might shorten and the logo in the header might change from {{site.data.keyword.product}} to {{site.data.keyword.product}}.
+When you navigate to certain pages in the Red Hat Advanced Cluster Management for Kubernetes console, the menu items might shorten and the logo in the header might change from Red Hat Advanced Cluster Management for Kubernetes to Red Hat Advanced Cluster Management for Kubernetes.
 
-To return to the {{site.data.keyword.product}} context, click the button in your browser to go back until you see the {{site.data.keyword.product}} logo in the header, or replace the location of the browser with the following URL:
+To return to the Red Hat Advanced Cluster Management for Kubernetes context, click the button in your browser to go back until you see the Red Hat Advanced Cluster Management for Kubernetes logo in the header, or replace the location of the browser with the following URL:
 
 ```
 https://HOST:port/multicloud 
@@ -162,13 +162,13 @@ When you create a certificate policy without a certificate policy controller for
 
 You must unbind the certificate policy from your third-party cluster. Complete the following steps to unbind each of your certificate policies:
 
-1. Log in to your {{site.data.keyword.product}} hub cluster.
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes hub cluster.
 
 2. From the navigation menu, click **Automate infrastructure** > **Clusters**.
 
-3. Create a unique label for each of your clusters with {{site.data.keyword.product}} services installed. Select the **Options** icon (<img src="../images/icons/menu-overflow_16.svg" alt="Options icon">) > **Edit Labels**.
+3. Create a unique label for each of your clusters with Red Hat Advanced Cluster Management for Kubernetes services installed. Select the **Options** icon (<img src="../images/icons/menu-overflow_16.svg" alt="Options icon">) > **Edit Labels**.
 
-4. Add a new label for each of your clusters with {{site.data.keyword.product}} services installed by selecting the Add icon. For example, create the following label:
+4. Add a new label for each of your clusters with Red Hat Advanced Cluster Management for Kubernetes services installed by selecting the Add icon. For example, create the following label:
 
    ```
    cloud = common services
@@ -197,10 +197,10 @@ Your certificate policies are unbound from your third-party clusters.
 
 The limit for the returned content of a command that is issued with the Visual Web Terminal is 200 KB. If the returned information exceeds 200 KB, an error is displayed. The workaround is to enter the command using a terminal window that is outside of the {{site.data.keyword.kui}}.
 
-## Enabling {{site.data.keyword.product}} for the installed monitoring release
+## Enabling Red Hat Advanced Cluster Management for Kubernetes for the installed monitoring release
 {: #1051}
 
-The monitoring chart includes a `standalone` installation option that specifies whether monitoring is available on the {{site.data.keyword.product}} hub cluster. Valid values are for `standalone` are `true` or `false`. If the value is set to `true`, certain monitoring service features that are needed for the {{site.data.keyword.product}} hub cluster, are unavailable. For example, the Grafana dashboard list does not include the {site.data.keyword.mcm_notm}} dashboard that is needed to view metrics for your managed clusters.
+The monitoring chart includes a `standalone` installation option that specifies whether monitoring is available on the Red Hat Advanced Cluster Management for Kubernetes hub cluster. Valid values are for `standalone` are `true` or `false`. If the value is set to `true`, certain monitoring service features that are needed for the Red Hat Advanced Cluster Management for Kubernetes hub cluster, are unavailable. For example, the Grafana dashboard list does not include the {site.data.keyword.mcm_notm}} dashboard that is needed to view metrics for your managed clusters.
 
 Use the following Helm command to check the value of the `standalone` option.
 
@@ -217,7 +217,7 @@ If `standalone` is set as `true`, set it to `false` to enable monitoring service
    - Select `1.7.1` in the `Version` section.
    - Select `Reuse values` in the `Using previous configured values` section. 
    - In the `Parameters` section, clear the checkbox for `Standalone deployment`. 
-3. Click **Upgrade** to start the upgrade process. After the upgrade completes, the monitoring service features are enabled for the {{site.data.keyword.product}} hub cluster.
+3. Click **Upgrade** to start the upgrade process. After the upgrade completes, the monitoring service features are enabled for the Red Hat Advanced Cluster Management for Kubernetes hub cluster.
 
 
 ## LDAP user names are case-sensitive

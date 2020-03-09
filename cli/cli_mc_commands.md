@@ -15,7 +15,7 @@ lastupdated: 2019-11-20
 # {{site.data.keyword.cloud_pak}} CLI (cloudctl) multicluster commands (mc)
 {: #cli_mc_commands}
 
-Learn about the `cloudctl mc` commands that you can run to access your {{site.data.keyword.product}} cluster.
+Learn about the `cloudctl mc` commands that you can run to access your Red Hat Advanced Cluster Management for Kubernetes cluster.
 {:shortdesc}
 
 Many of the `cloudctl mc` commands correspond to `kubectl` commands that are similar. In most cases, the `cloudctl mc` command provides the same functionality as its `kubectl` counterpart, but the `cloudctl mc` commands apply to a multi-cluster environment. 

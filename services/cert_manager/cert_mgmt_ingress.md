@@ -26,7 +26,7 @@ Prepare and have your management-ingress certificates and private keys ready. If
 * Include the following IP addresses and domain names to your cert Subject Alternative Name (SAN) list:
   ```
   127.0.0.1
-  <cluster_CA_domain>   # The {{site.data.keyword.product}} cluster Certificate Authority (CA) domain.
+  <cluster_CA_domain>   # The Red Hat Advanced Cluster Management for Kubernetes cluster Certificate Authority (CA) domain.
   <cluster_lb_address>  # Your cluster load balancer IP address.
   <cluster_vip>         # Your Virtual IP address, if applicable. 
   ```
@@ -36,7 +36,7 @@ Prepare and have your management-ingress certificates and private keys ready. If
    
   If you configure a cluster load balancer (LB) and it is a hostname, include the hostname in the `DNS` setting for your certificate. If your cluster load balancer (LB) is not a hostname, include the IP address in the `IP` settings. 
 
-* Set the common name `CN` on the certificate to be your {{site.data.keyword.product}} cluster CA domain.
+* Set the common name `CN` on the certificate to be your Red Hat Advanced Cluster Management for Kubernetes cluster CA domain.
 
 The following example configuration file and OpenSSL commands provide an example for how to generate a TLS certificate by using OpenSSL.
 
@@ -118,7 +118,7 @@ The following OpenSSL commands are used with the preceding configuration file to
      ```
      {: codeblock}  
 
-     Ensure that the common name on the certificate is the {{site.data.keyword.product}} cluster CA domain.
+     Ensure that the common name on the certificate is the Red Hat Advanced Cluster Management for Kubernetes cluster CA domain.
 
 ## Replacing the management ingress certificate
 
@@ -163,7 +163,7 @@ Complete the following steps to replace a management ingress certificate.
    ```
    {: codeblock}
 
-6. After all pods are restarted, navigate to the {{site.data.keyword.product}} console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.   
+6. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.   
 
 **Note:** Several functions are affected by using your own certificate for management ingress. For example, when you use the Helm command to add a Helm repository. If you are adding the repository for your cluster, specify the management ingress CA file as the value for `--ca-file` instead of the Helm CA file. For example,
 ```
@@ -176,7 +176,7 @@ You need to use the management ingress CA file since the repository is from the 
 
 ## Restoring the default self-signed certificate for management ingress
 
-1. Retrieve your previous {{site.data.keyword.product}} management ingress certificate content from the Helm release: 
+1. Retrieve your previous Red Hat Advanced Cluster Management for Kubernetes management ingress certificate content from the Helm release: 
 
    1. Run the following command to list the management ingress Helm release: 
       ```
@@ -230,14 +230,14 @@ You need to use the management ingress CA file since the repository is from the 
 
    3. Save the retrieved certificate content to your local file system as a `icp-management-ingress-cert.yaml` file.
 
-2. Create your {{site.data.keyword.product}} management ingress certificate with the following command: 
+2. Create your Red Hat Advanced Cluster Management for Kubernetes management ingress certificate with the following command: 
 
    ```
    kubectl -n kube-system apply -f icp-management-ingress-cert.yaml
    ```
    {: codeblock}
 
-3. Delete your {{site.data.keyword.product}} management ingress secret:
+3. Delete your Red Hat Advanced Cluster Management for Kubernetes management ingress secret:
    ```
    kubectl -n kube-system delete secret icp-management-ingress-tls-secret
    ```
@@ -258,7 +258,7 @@ You need to use the management ingress CA file since the repository is from the 
    ```
    {: codeblock}   
 
-5. After all pods are restarted, navigate to the {{site.data.keyword.product}} console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
+5. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
 
 
 **Note:** Several functions are affected by using the default self-signed certificate for management ingress. For example, when you use the Helm command to add a Helm repository. If you are adding the repository for your cluster, specify the management ingress CA file as the value for `--ca-file` instead of the Helm CA file. For example,

@@ -24,7 +24,7 @@ With certificate manager, you can encrypt with the ECDSA algorithm. A certificat
 ## Creating a certificate with ECDSA
 {: #ecdsa_cert}
 
-To create a certificate that uses the ECDSA algorithm for encryption, follow the procedure in [Creating {{site.data.keyword.product}} Certificate manager (cert-manager) certificates](create_cert.md), but use the following sample where `keyAlgorithm` and `keySize` are required:
+To create a certificate that uses the ECDSA algorithm for encryption, follow the procedure in [Creating Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager) certificates](create_cert.md), but use the following sample where `keyAlgorithm` and `keySize` are required:
 
 ```
 apiVersion: certmanager.k8s.io/v1alpha1
@@ -119,4 +119,4 @@ When you create certificate resources, be sure to use a `keySize` that matches, 
   ```
   {: pre}
 
-See [Using {{site.data.keyword.product}} Certificate manager (cert-manager)](cert_manager.md) for more Certificate manager topics.
+See [Using Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)](cert_manager.md) for more Certificate manager topics.

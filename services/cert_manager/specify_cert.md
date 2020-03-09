@@ -14,19 +14,19 @@ lastupdated: "2019-12-05"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Specifying your own certificate authority for {{site.data.keyword.product}} services
+# Specifying your own certificate authority for Red Hat Advanced Cluster Management for Kubernetes services
 
-All certificates required by services that run on {{site.data.keyword.product}} are created during the installation of {{site.data.keyword.product}}. Certificates are either created and managed by the {{site.data.keyword.product}} installer or by the {{site.data.keyword.product}} Certificate manager (cert-manager). These certificates are signed by a certificate authority (CA) also created during installation.
+All certificates required by services that run on Red Hat Advanced Cluster Management for Kubernetes are created during the installation of Red Hat Advanced Cluster Management for Kubernetes. Certificates are either created and managed by the Red Hat Advanced Cluster Management for Kubernetes installer or by the Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager). These certificates are signed by a certificate authority (CA) also created during installation.
 {: shortdesc}
 
-An error message may appear when you attempt to log in to your cluster. If you are unable to access the console, see, [Cannot access the {{site.data.keyword.product}} console on macOS](troubleshoot/console_catalina.md) for more information.
+An error message may appear when you attempt to log in to your cluster. If you are unable to access the console, see, [Cannot access the Red Hat Advanced Cluster Management for Kubernetes console on macOS](troubleshoot/console_catalina.md) for more information.
 
-Before you install {{site.data.keyword.product}}, you can provide your own certificate authority (CA) to sign certificates used by {{site.data.keyword.product}} services.
+Before you install Red Hat Advanced Cluster Management for Kubernetes, you can provide your own certificate authority (CA) to sign certificates used by Red Hat Advanced Cluster Management for Kubernetes services.
 
 ## Use your own certificate authority (CA) (BYOK)
 {: #own}
 
-You can BYOK (Bring Your Own Key) to use inside your {{site.data.keyword.product}} cluster. Your BYOK certificate key must be exported in PEM (OpenSSL) format. 
+You can BYOK (Bring Your Own Key) to use inside your Red Hat Advanced Cluster Management for Kubernetes cluster. Your BYOK certificate key must be exported in PEM (OpenSSL) format. 
 
 1. Create the `cfc-certs/root-ca` directory inside your cluster directory.
     ```
@@ -55,8 +55,8 @@ You can BYOK (Bring Your Own Key) to use inside your {{site.data.keyword.product
 
 5. Install your cluster.
 
-### Accessing the {{site.data.keyword.product}} Root CA
-After you bring your own {{site.data.keyword.product}} Root CA, the {{site.data.keyword.product}} Root CA Certificate are accessible by way of the Kubernetes Secret `ibmcloud-cluster-ca-cert` in the `kube-public` namespace.
+### Accessing the Red Hat Advanced Cluster Management for Kubernetes Root CA
+After you bring your own Red Hat Advanced Cluster Management for Kubernetes Root CA, the Red Hat Advanced Cluster Management for Kubernetes Root CA Certificate are accessible by way of the Kubernetes Secret `ibmcloud-cluster-ca-cert` in the `kube-public` namespace.
 
 To retrieve and decode the certificate, run the following command:
 ```

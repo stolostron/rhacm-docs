@@ -26,7 +26,7 @@ You can replace the root CA certificate for the following components:
 ## Before you begin
 {: #bybreq3}
 
-Verify that your {{site.data.keyword.product}} cluster is running.
+Verify that your Red Hat Advanced Cluster Management for Kubernetes cluster is running.
 
 Complete the following steps to back up the existing certificates:
 
@@ -41,7 +41,7 @@ Complete the following steps to back up the existing certificates:
 
 4. If you updated your macOS system to the latest version (Catalina) or greater, you must complete the following steps to access permission for your certificate. Complete the following steps only if you are unable to reach the management console after you replace your CA.
 
-   1. Extract the {{site.data.keyword.product}} Root CA Certificate from the `cluster-ca-cert.pem` file by running the following command:
+   1. Extract the Red Hat Advanced Cluster Management for Kubernetes Root CA Certificate from the `cluster-ca-cert.pem` file by running the following command:
    
       * For macOS, run the following command:
      
@@ -57,7 +57,7 @@ Complete the following steps to back up the existing certificates:
         ```
         {: codeblock}
 
-      * When you set the `NavTLSGEnerate` parameter to `True`, in the namespace where {{site.data.keyword.product}} is installed, run the following command to extract the Root CA Certificate:
+      * When you set the `NavTLSGEnerate` parameter to `True`, in the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed, run the following command to extract the Root CA Certificate:
       
         ```
         kubectl get secret icip-navigator-tls-secret -n cp4int -o jsonpath="{.data['tls.crt']}" | base64 -D > cluster-ca-cert.pem

@@ -14,7 +14,7 @@ lastupdated: "2020-02-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.product}} platform considerations for FIPS readiness
+# Red Hat Advanced Cluster Management for Kubernetes platform considerations for FIPS readiness
 
 Federal Information Processing Standards ([FIPS ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.nist.gov/topics/federal-information-standards-fips)) are information technology standards that are developed by the United States federal government related to encoding and encrypting data. 
 

@@ -16,7 +16,7 @@ lastupdated: "2018-12-11"
 
 # Docker Registry V2 API
 
-You can run Docker API commands. {{site.data.keyword.product}} version {{site.data.keyword.version_cp}} uses a Docker distribution that implements the Docker Registry V2 API spec to manage the storage of Docker images.
+You can run Docker API commands. Red Hat Advanced Cluster Management for Kubernetes version {{site.data.keyword.version_cp}} uses a Docker distribution that implements the Docker Registry V2 API spec to manage the storage of Docker images.
 {:shortdesc}
 
 Both cluster administrator and administrator can access the Docker Registry API. However, administrators can access only resources that belong to their namespace. Cluster administrators can access all resources in the cluster.
