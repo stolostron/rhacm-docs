@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-13"
+  years: 2019, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -50,8 +50,6 @@ Based on your deployment requirements, review the details and process for the fo
 
 ## Deploy by using channels, subscriptions, and placement rules
 {: #deploy_subscriptions}
-
-<img src="../../images/appmgt_resource_subscription.svg" width="40%" alt="Diagram that shows relationship between deployables, channel, subscription, and placement rule.">
 
 To set up and use channels, subscriptions, and placement rules for deployments, complete the following procedure:
 
@@ -165,15 +163,11 @@ For more information, see [Deploying application resources with rolling update](
 ## Deploy by using only placement rules
 {: #deploy_placerules}
 
-If you do not want or need to use channels and subscriptions, you can still use placement rules. When you are deploying a deployable by using only a placement rule, the deployable definition can include a reference to a stand-alone placement rule resource as shown in the following image:
-
-<img src="../../images/appmgt_resource_placement.svg" width="40%" alt="Diagram that shows relationship between deployables and placement rule.">
+If you do not want or need to use channels and subscriptions, you can still use placement rules. When you are deploying a deployable by using only a placement rule, the deployable definition can include a reference to a stand-alone placement rule resource.
 
 In this scenario, the placement rule defines how to deploy the deployable on target clusters. This placement rule can also be referenced by other deployables so that those deployables are handled with the same deployment settings.
 
-Alternatively, a deployable can include a placement rule definition within the deployable definition. In this scenario, the deployable does not reference any stand-alone placement rule. The placement rule definition that is defined within a deployable is not referenced and shared by other deployables. The following image shows this relationship:
-
-<img src="../../images/appmgt_resource_deployable.svg" width="30%" alt="Diagram that shows relationship between deployables and application.">
+Alternatively, a deployable can include a placement rule definition within the deployable definition. In this scenario, the deployable does not reference any stand-alone placement rule. The placement rule definition that is defined within a deployable is not referenced and shared by other deployables.
 
 To deploy by using a placement rule, define the placement rule for the deployable either as a stand-alone placement rule resource or as part of the deployable definition. If you define the rule as a separate resource, include the `placementRef` field in the definition for the deployable to point to the placement rule.
 
