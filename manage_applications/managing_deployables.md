@@ -130,7 +130,7 @@ You can use the console, the Kubernetes command line interface (`kubectl`) tool,
      ```
      {: codeblock}
 
-* To use REST API, use the [deployable DELETE API](../../apis/mcm/deployables_app.json).
+* To use REST API, use the [deployable DELETE API](../apis/mcm/deployables_app.json).
 
 #### Notes:
 
