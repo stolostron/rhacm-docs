@@ -47,7 +47,7 @@ To better integrate with continuous delivery systems, you can use channel and su
 
 * Subscriptions (`Subscription.app.ibm.com`) are sets of definitions that identify deployables within channels by using annotations, labels, and versions. The subscription operator can monitor the channel for new or updated deployables, such as an updated Helm release or new Kubernetes deployable object. Then, the operator can download the Kubernetes deployable object or Helm release directly from the source location (Helm repository, GitHub repository, object store, or namespace) to the target managed clusters.
 
-Although single and multi-cluster applications both use the same Kubernetes specifications, multi-cluster applications involve more automation of the deployment and application management lifecycle. The application definition is based on the Custom Resource Definition (CRD) of the [Kubernetes SIG Application CRD definition ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://github.com/kubernetes-sigs/application). This definition is used for applications in both single and multi-cluster environments for grouping application resources. The other resource kinds for the application model (deployables, channels, subscriptions, and placement rules) are based on specifications that are created by IBM. These specifications use common Kubernetes resource fields for defining annotations, labels, metadata, and more, and support custom fields and values.
+Although single and multi-cluster applications both use the same Kubernetes specifications, multi-cluster applications involve more automation of the deployment and application management lifecycle. The application definition is based on the Custom Resource Definition (CRD) of the [Kubernetes SIG Application CRD definition](https://github.com/kubernetes-sigs/application){:new_window}. This definition is used for applications in both single and multi-cluster environments for grouping application resources. The other resource kinds for the application model (deployables, channels, subscriptions, and placement rules) are based on specifications that are created by IBM. These specifications use common Kubernetes resource fields for defining annotations, labels, metadata, and more, and support custom fields and values.
 
 For more information about these resources, see [Application resources](app_resources.md).
 
@@ -63,10 +63,6 @@ The Kubernetes apiserver is the main service for providing application managemen
 
 ## Application resource interactions and lifecycle
 {: #app_interact}
-
-When you use a combination of channels, subscriptions, and deployables, the interaction between the resources can resemble the following diagram:
-
-<img src="../../images/appmgt_overviewtop.svg" width="55%" alt="Diagram the shows interaction between application resources.">
 
 With the new application model and deployment options, the high-level flow for creating and managing applications can resemble the following steps:
 

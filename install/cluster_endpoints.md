@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-10"
+  years: 2019, 2020
+lastupdated: "2020-03-04"
 
 ---
 
@@ -106,8 +106,8 @@ For other services, following are the formats to access the service by using the
 
 For more information, see the following articles:
 
-- [DNS for Services and Pods ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/){: new_window}
-- [DNS ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/services-networking/service/#dns){: new_window}
+- [DNS for Services and Pods](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/){: new_window}
+- [DNS](https://kubernetes.io/docs/concepts/services-networking/service/#dns){: new_window}
 
 
 ### Custom ingress URLs
