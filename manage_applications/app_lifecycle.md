@@ -16,7 +16,7 @@ lastupdated: "2019-12-13"
 
 # Application management lifecycle
 
-{{site.data.keyword.mcm_notm}} provides enhanced application management capabilities through a Kubernetes resource based application model and channel and subscription based deployment options. The application model and deployment capabilities are designed to unify and simplify the deployment experience for creating and managing your application across both single cluster and multi-cluster scenarios.
+Red Hat Advanced Cluster Management for Kubernetes provides enhanced application management capabilities through a Kubernetes resource based application model and channel and subscription based deployment options. The application model and deployment capabilities are designed to unify and simplify the deployment experience for creating and managing your application across both single cluster and multi-cluster scenarios.
 {:shortdesc}
 
 With these application management capabilities, you can use channels and subscriptions to gain improved continuous and automated delivery of your deployables to target managed clusters. For more information about deployables, see [Application resources](app_lifecycle.md#deployables).
@@ -33,15 +33,15 @@ Your developers and DevOps personnel can use these resources to deploy, update, 
 
 The application model and deployment options work for, and scale, any clustered environment and application management requirements. This scalability supports both a single application developer that builds and deploys an application from their device to a multicloud environment, or a cloud operations personnel that needs to deploy and update hundreds of applications across hundreds of clusters. With this application model and deployment option, you can separate your organizations roles for developing applications and DevOps. Your application developers can focus on the developing and defining the application resources. Meanwhile, your DevOps personnel can focus on creating and managing the channels and subscriptions to ensure that resources are deployed correctly. You can use the new model and deployment options to update and deploy one or more applications to hundreds of managed clusters, each in a different physical location.
 
-Within this application model, applications are composed of multiple resources. The main foundation resources for {{site.data.keyword.mcm_notm}} applications are the `application` resource and the `deployable` resource. The overrides and dependencies for deployables are defined within the definition for the deployables. The placement rules for deployables can be defined as a stand-alone resource and referenced by the deployable.
+Within this application model, applications are composed of multiple resources. The main foundation resources for Red Hat Advanced Cluster Management for Kubernetes applications are the `application` resource and the `deployable` resource. The overrides and dependencies for deployables are defined within the definition for the deployables. The placement rules for deployables can be defined as a stand-alone resource and referenced by the deployable.
 
-* Applications (`Application.app.k8s.io`) in {{site.data.keyword.mcm_notm}} are used for grouping application components.
+* Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for grouping application components.
 
 * Deployables (`Deployable.app.ibm.com`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or to represent Helm releases for deployment to clusters.
 
 * Placement rules (`PlacementRule.app.ibm.com`) define the target clusters where deployables can be deployed. You can use placement rules to help you facilitate the multi-cluster deployment of your deployables. Placement rules can be referenced by deployables and subscriptions. Placement rules that are defined as stand-alone resources can be shared across deployables.
 
-To better integrate with continuous delivery systems, you can use channel and subscription resources. Channels and subscriptions provide you with improved continuous delivery capabilities for creating and managing your {{site.data.keyword.mcm_notm}} applications.
+To better integrate with continuous delivery systems, you can use channel and subscription resources. Channels and subscriptions provide you with improved continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications.
 
 * Channels (`Channel.app.ibm.com`) define a namespace within the hub cluster and point to a physical place where resources are stored for deployment; such as an object store, Kubernetes namespace, Helm repository, or GitHub repository. Channels are custom resource definitions that can help you streamline deployments and separate cluster access. Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables within a channel can be accessed by only the clusters that subscribe to that channel.
 
@@ -51,7 +51,7 @@ Although single and multi-cluster applications both use the same Kubernetes spec
 
 For more information about these resources, see [Application resources](app_resources.md).
 
-All of the application component resources for {{site.data.keyword.mcm_notm}} applications are defined in YAML files. When you need to create or update an application component resource, you need to create or edit the appropriate spec section to include the labels for defining your resource. For more information about creating and managing application resources, see:
+All of the application component resources for Red Hat Advanced Cluster Management for Kubernetes applications are defined in YAML files. When you need to create or update an application component resource, you need to create or edit the appropriate spec section to include the labels for defining your resource. For more information about creating and managing application resources, see:
 
 * [Creating and managing application resources](managing_apps.md)
 * [Creating and managing deployables](managing_deployables.md)
@@ -76,7 +76,7 @@ With the new application model and deployment options, the high-level flow for c
 
 3. DevOps personnel or other users for your organization can create any required subscriptions that need to be used for deploying the application and the related deployables. The labels for the subscription definition are used to associate the subscription to an application by matching the `selector` settings in the application spec.
 
-4. DevOps personnel or other users for your organization can create the set of placement rules for your clusters within {{site.data.keyword.mcm_notm}}. These users or an application developer can then update the deployables or subscriptions to reference the placement rules.
+4. DevOps personnel or other users for your organization can create the set of placement rules for your clusters within Red Hat Advanced Cluster Management for Kubernetes. These users or an application developer can then update the deployables or subscriptions to reference the placement rules.
 
    A created placement rule can be updated when needed in Git and then pushed through a continuous delivery process to update the rule on the hub cluster. After the hub cluster is updated, the change is made to the rule on the managed clusters that are connected to the hub cluster. Any subsequent change for deployables that is based on the rule change is then started.
 
@@ -93,12 +93,12 @@ To create or edit the resource definitions developers and other users can use th
 ## Deploying application resources
 {: #app_deploy}
 
-{{site.data.keyword.mcm_notm}} supports multiple options for the deployment of deployable objects and Helm charts. The deployment option that you use can depend upon whether you need to deploy to a single cluster or multiple clusters and the frequency that you need to deploy updates. For more information, see [Deploying an application resource](deployment_app.md).
+Red Hat Advanced Cluster Management for Kubernetes supports multiple options for the deployment of deployable objects and Helm charts. The deployment option that you use can depend upon whether you need to deploy to a single cluster or multiple clusters and the frequency that you need to deploy updates. For more information, see [Deploying an application resource](deployment_app.md).
   
 ## Managing applications with the console
 {: #app_gui}
 
-The console includes an applications dashboard for managing the application lifecycle. You can use the {{site.data.keyword.gui_short}} dashboard to create and manage application, subscriptions, channels, and placement rules. You can also use the {{site.data.keyword.gui_short}} view the status of your applications, channels, subscriptions, and related deployments.
+The console includes an applications dashboard for managing the application lifecycle. You can use the console dashboard to create and manage application, subscriptions, channels, and placement rules. You can also use the console to view the status of your applications, channels, subscriptions, and related deployments.
 
 The dashboard includes enhanced capabilities, which your developers and operations personnel can use to create, deploy, update, manage, visualize, and monitor applications across your clusters. With this application dashboard, you can complete the following tasks:
 
@@ -111,6 +111,6 @@ The dashboard includes enhanced capabilities, which your developers and operatio
 * When Grafana is installed, you can open the Grafana dashboard for your applications from the applications dashboard to monitor your applications.
 * Add and edit channels, subscriptions, placement rules, and applications from different views and pages.
 
-  **Note:** The application dashboard shows only the application resources that use the new custom resource definitions. Application resources that are based on the definitions that were used for previous versions of {{site.data.keyword.mcm_notm}} are not displayed. You can migrate your older style application resources to use the new definitions and have your resources display in the {{site.data.keyword.gui_short}}.
+  **Note:** The application dashboard shows only the application resources that use the new custom resource definitions. Application resources that are based on the definitions that were used for previous versions of Red Hat Advanced Cluster Management for Kubernetes are not displayed. You can migrate your older style application resources to use the new definitions and have your resources display in the console.
 
 For more information, see [Managing applications with the console](managing_apps_console.md).
