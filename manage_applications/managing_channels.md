@@ -167,7 +167,7 @@ To delete a channel, you can use the console, the Kubernetes command line interf
      ```
      {: codeblock}
 
-* To use REST API, use the [channel DELETE API](../../apis/mcm/channels.json).
+* To use REST API, use the [channel DELETE API](../apis/mcm/channels.json).
 
 ## Managing deployments with channels
 {: #channel_deployable}
