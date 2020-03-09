@@ -51,7 +51,7 @@ The following table provides information and examples for the command types that
 | `oc` | Runs Red Hat OpenShift `oc` commands. **Tip:** See [Red Hat OpenShift CLI Operations](https://docs.openshift.com/enterprise/3.0/cli_reference/basic_cli_operations.html) for more information about the `oc` commands. | `oc get svc` |
 | `run` | Runs an external script | `run script_name` |
 | `search` | Searches your Kubernetes resources for the specified string | `search pod` |
-| `savedsearches` | Displays your saved searches that you created and saved by using the management console. **Note:** The `savedsearches` command is only available when you have the Cloud Pak for Multicloud Management installed.| `savedsearches` **Tip:** You can specify a string after the `savedsearches` command to limit the data that is returned. For example, `savedsearches projectA` displays the saved searches that contain the string *projectA*. |
+| `savedsearches` | Displays your saved searches that you created and saved by using the console.| `savedsearches` **Tip:** You can specify a string after the `savedsearches` command to limit the data that is returned. For example, `savedsearches projectA` displays the saved searches that contain the string *projectA*. |
 | `sleep` | Pauses activity during a session. **Note:** Requires a `sleepTime` parameter that identifies the number of seconds that it pauses | `sleep 20` |
 | `themes` |  Displays the contrast theme options of the interface, which you can set to either `light` or `dark` | `themes` |
 
