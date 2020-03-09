@@ -6,7 +6,6 @@
    * [What's new](about/whats_new.md)
    * [Known issues and limitations](about/known_issues.md)
    * [Considerations for GDPR readiness](about/gdpr_readiness.md)
-   * [Considerations for FIPS readiness](about/fips_compliance.md)
  * [Installation](install/overview.md)
    * [Requirements and recommendations](install/requirements.md)
      * [Supported cloud providers](install/supported_clouds.md)
