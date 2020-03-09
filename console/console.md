@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-10"
+  years: 2019, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -42,7 +42,7 @@ From the _Header_, click the **Help** (?) icon to view the _About_ page, the doc
 ## Overview 
 {: #mcm_overview}
 
-Use the Overview page to view, manage, and reorganize the dashboard of your cluster information. You can view details of your clusters and other cloud service providers that {{site.data.keyword.mcm_notm}} supports. You can also view details about your applications. The Overview dashboard is continuously refreshed in real time.
+Use the Overview page to view, manage, and reorganize the dashboard of your cluster information. You can view details of your clusters and other cloud service providers that {{site.data.keyword.mcm_notm}} supports. The Overview dashboard is continuously refreshed in real time.
 {: shortdesc}
 
 ### Reorganizing your dashboard
@@ -55,16 +55,6 @@ You can personalize your view of the Overview dashboard by reorganizing the reso
 * Pod status
 * Cluster resources (VCPU/Memory usage)
 * Storage usage
-
-### Viewing application details
-
-You can view the information of each application. Click **Show details** to view the following information:
-
-* Number of clusters
-* Number of Kubernetes types
-* Number of regions
-* Number of nodes
-* Number of pods
 
 ### Viewing your pod health 
 
@@ -85,22 +75,20 @@ To reduce the graphics on the page, you can filter the view by Clusters, Namespa
 
 Learn more about the tabs that are available from the Topology page:
 
-  - Clusters: You can monitor your cluster network, object network, applications, and security policies in a graphical format. View your hub clusters, all your managed clusters, and monitor security violations.
+  - Clusters: You can monitor your cluster network, object network, and security policies in a graphical format. View your hub clusters, all your managed clusters, and monitor security violations.
 
   - Networking: View Kubernetes objects for each cluster and any networks between your Kubernetes objects. Objects display changes if they were recently started. Pods also indicate `pending` and `failed` status.
- 
-  - Applications: View the deployables, services, deployments, charts, and pods that comprise each application. You can select any component from the topology view to view more details.
 
   - Policies: View the policy, policy placement, and clusters that are being validated. Check for violations for the selected policy.
 
 ## Search 
 {: #search}
 
-For both {{site.data.keyword.icp_notm}} and {{site.data.keyword.mcm_notm}}, Search provides visibility into your resources across all your clusters. You need to install the `ibm-search-prod` chart to use Search.
+For both {{site.data.keyword.icp_notm}} and {{site.data.keyword.mcm_notm}}, Search provides visibility into your resources across all your clusters. You need to install the `search-prod` chart to use Search.
 
-**Note:** You can type any text value in the _Search box_ and results include anything with that value from any property, such as a name or namespace. For example, if you search for `IBM`, you can receive results such as `IBM123`. 
+**Note:** You can type any text value in the _Search box_ and results include anything with that value from any property, such as a name or namespace. For example, if you search for `IBM` <!--different example-->, you can receive results such as `IBM123`. 
 
-For more specific search results, include the property in your search. For example, search for `name:IBM` to search only in the `name` property.
+For more specific search results, include the property in your search. For example, search for `name:IBM` to search only in the `name` property. <!--same here--d>
 
 1. Click **Search** in the navigation menu. 
 2. Type a word in the _Search box_, then Search finds your resources that contain that value.
@@ -113,7 +101,7 @@ For more specific search results, include the property in your search. For examp
 
   - Your search options depend on your cluster objects. See the following examples: name, namespace, status, and other resource fields. Auto-complete provides suggestions to refine your search.  
   
-  - Any user can search for resources, but results are based on your role-based access control assignment. Additionally, if you save and share a Search query with another user, returned results depend on access level for that user. For more information on role access, see [role-based access control](../../user_management/assign_role.md). 
+  - Any user can search for resources, but results are based on your role-based access control assignment. Additionally, if you save and share a Search query with another user, returned results depend on access level for that user. For more information on role access, see [role-based access control](../assign_role.md). <!--will update file name-->
 
   - You can refine your results with specific fields. See the following example:
 
