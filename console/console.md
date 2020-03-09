@@ -84,11 +84,11 @@ Learn more about the tabs that are available from the Topology page:
 ## Search 
 {: #search}
 
-For both {{site.data.keyword.icp_notm}} and {{site.data.keyword.mcm_notm}}, Search provides visibility into your resources across all your clusters. You need to install the `search-prod` chart to use Search.
+For both {{site.data.keyword.mcm_notm}}, Search provides visibility into your resources across all your clusters. You need to install the `search-prod` chart to use Search.
 
 **Note:** You can type any text value in the _Search box_ and results include anything with that value from any property, such as a name or namespace. For example, if you search for `IBM` <!--different example-->, you can receive results such as `IBM123`. 
 
-For more specific search results, include the property in your search. For example, search for `name:IBM` to search only in the `name` property. <!--same here--d>
+For more specific search results, include the property in your search. For example, search for `name:IBM` to search only in the `name` property. <!--same here-->
 
 1. Click **Search** in the navigation menu. 
 2. Type a word in the _Search box_, then Search finds your resources that contain that value.
