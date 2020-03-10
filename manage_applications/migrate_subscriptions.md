@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-12"
+  years: 2019, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2019-12-12"
 
 # Migrating subscriptions from previous versions
 
-If you are upgrading to {{site.data.keyword.mcm_notm}} {{site.data.keyword.version_cp}} and you have subscriptions for deploying and managing application resources, upgrade your subscriptions to indicate whether each subscription must be deployed locally or not.
+If you are upgrading to Red Hat Advanced Cluster Management for Kubernetes {{site.data.keyword.version_cp}} <!--this file might not be applicable, not sure what to do--> and you have subscriptions for deploying and managing application resources, upgrade your subscriptions to indicate whether each subscription must be deployed locally or not.
 {:shortdesc}
 
 With version {{site.data.keyword.version_cp}}, a `spec.placement.local` field is added for the subscription resource spec. This field is used to indicate whether a subscription resource must be deployed locally (`spec.placement.local: true`) or not (`spec.placement.local: false`).
