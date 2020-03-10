@@ -21,7 +21,7 @@ The Certificate manager service is used to issue and manage certificates for ser
 
 * [Adding a certificate to a Kubernetes workload](#adding_workload)
 * [Adding a certificate to a Kubernetes Ingress](#adding_ingress)
-* {: child} [Customizing Certificate manager (cert-manager) certificates](create_cert_advance.md)
+* [Customizing Certificate manager (cert-manager) certificates](create_cert_advance.md)
 
 ## Adding a certificate to a Kubernetes workload
 {: #adding_workload}
