@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2018
-lastupdated: "2018-01-04"
+  years: 2016, 2020
+lastupdated: "2020-03-10"
 
 ---
 
@@ -43,7 +43,7 @@ CURRENT_CPU_UT < 0.9*TARGET_CPU_UT
 
 When an deployment scales down, its DESIRED, CURRENT, and READY parameter values decrease. You can check these values from the deployments home page. 
 
-- {: child} [Creating a deployment policy](../manage_policies/create_policy.md) <br />
-- {: child} [Updating a deployment policy](../manage_policies/update_policy.md) <br />
-- {: child} [Removing a deployment policy](../manage_policies/remove_policy.md) <br />
+- {: child} [Creating a deployment policy](../compliance/create_policy.md) <br />
+- {: child} [Updating a deployment policy](../compliance/update_policy.md) <br />
+- {: child} [Removing a deployment policy](../compliance/remove_policy.md) <br />
 {: childlinks}
