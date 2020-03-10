@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-09-05"
+  years: 2020
+lastupdated: "2020-03-06"
 
 ---
 
@@ -20,9 +20,5 @@ Learn how to create clusters across cloud providers with Red Hat Advanced Cluste
 {:shortdesc}
 
 
-- {: child} [Creating an IBM Kubernetes Service cluster](create_iks.md)
-- {: child} [Creating a Google Kubernetes Engine cluster](create_gke.md)
-- {: child} [Creating an Azure Kubernetes Service cluster](create_aks.md)
-- {: child} [Creating an Amazon Elastic Kubernetes Service cluster](create_eks.md)
 - {: child} [Creating an {{site.data.keyword.open_s}} on Amazon Web Services cluster](create_ocp_aws.md)  
 {: childlinks}
