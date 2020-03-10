@@ -16,26 +16,25 @@ lastupdated: "2020-03-10"
 
 # Role-based access control (RBAC)
 
-{{site.data.keyword.product_tm}} supports several roles. Your role determines the actions that you can perform.
+Red Hat Advanced Cluster Management for Kubernetes supports several roles. Your role determines the actions that you can perform.
 {:shortdesc}
 
 Kubernetes offers role-based access control (RBAC) authorization mechanisms, which are extended on the cluster. Users of the cluster platform can be grouped into teams and have namespaces dedicated to teams.
 
-With {{site.data.keyword.product}}, you can create a team and add users, user groups, and resources to that team. All users in a team have access to the team resources. A user, user group, or resource can be assigned to multiple teams.
+With Red Hat Advanced Cluster Management for Kubernetes, you can create a team and add users, user groups, and resources to that team. All users in a team have access to the team resources. A user, user group, or resource can be assigned to multiple teams.
 
-{{site.data.keyword.product}} has one _Cluster Administrator_ with cluster-wide access, while other users can be classified as _Account Administrator_, _Administrator_, _Editor_, _Operator_, _Auditor_, and _Viewer_, assigned to various namespaces. Based on the role that is assigned to a user or user group, the level of access to each logical resource on the cluster is defined.
+{{site.data.keyword.product}} has one _Cluster Administrator_ with cluster-wide access, while other users can be classified as _Account Administrator_, _Administrator_, _Editor_, _Operator_, and _Viewer_, assigned to various namespaces. Based on the role that is assigned to a user or user group, the level of access to each logical resource on the cluster is defined.
 
-  - [Platform roles and actions](#platform)
-  - [IAM roles and actions](#iam)
+  - [Platform roles and actions](#platform)<!--foundation?-->
   - [RBAC for Kubernetes resources](#kube)
   - [RBAC for IAM resources](#resources)
-  - [RBAC for resources in OpenShift clusters](#os)
+  - [RBAC for resources in your clusters](#os)
 
 
 ## Platform roles and actions
 {: #platform}
 
-{{site.data.keyword.product}} supports the Cluster Administrator role. The Cluster Administrator has complete access to the {{site.data.keyword.product}} platform. Learn about roles in the following list:
+Red Hat Advanced Cluster Management for Kubernetes supports the Cluster Administrator role. The Cluster Administrator has complete access to the Red Hat Advanced Cluster Management for Kubernetes platform. Learn about roles in the following list:
 
 **Cluster Administrator access:** The Cluster administrator has complete access for all operations.
 
@@ -63,8 +62,6 @@ With {{site.data.keyword.product}}, you can create a team and add users, user gr
 **Editor access:** The Editor has read and edit access to team resources.
 
 **Operator access:** The Operator has create, read, and edit access to team resources.
-
-**Auditor access:** The Auditor can view logs within namespaces if given access to those namespaces.
 
 **Viewer access:** The Viewer has read-only access. By default, users have Viewer access when they are added to a team.
 
@@ -97,7 +94,7 @@ An IAM role defines the actions that a user can perform on the team resources.
 ### RBAC for Kubernetes resources
 {: #kube}
 
-The IAM role that you assign to a user also defines the actions that the user can do on the Kubernetes resources that are assigned to the team. For example, if user1 is an operator in team1, and team1 has namespace1 resource, then user1 can view and update namespace1 information. User1 can also create resources, for example pods, in namespace1. If you remove user1 from team1, you remove user1's role binding for the resources in team1. If user1 is part of another team, say team2, that has the same namespace, then user1's role binding to the namespace in team2 is not affected when you remove the user from team1.
+The role that you assign to a user also defines the actions that the user can do on the Kubernetes resources that are assigned to the team. For example, if user1 is an operator in team1, and team1 has namespace1 resource, then user1 can view and update namespace1 information. User1 can also create resources, for example pods, in namespace1. If you remove user1 from team1, you remove user1's role binding for the resources in team1. If user1 is part of another team, say team2, that has the same namespace, then user1's role binding to the namespace in team2 is not affected when you remove the user from team1.
 
 | **Action**        | **Administrator**  | **Operator** | **Editor** | **Viewer** |
 |-------------------|--------------------|--------------|------------|------------|
@@ -175,71 +172,7 @@ services/proxy | X | X | X |  X
 statefulsets.apps | X | X | X |  X
 {: caption="Table 3. Allowed resource permissions by role" caption-side="top"}
 
-### RBAC for IAM resources
-{: #resources}
-
-| **IAM resource** | **Action**  | **Administrator**    | **Operator**    | **Editor**     | **Auditor** | **Viewer** |
-|-----------|-------------|----------------------|-----------------|----------------|-------------|------------|
-|| Identity Management API explorer | X | X | X | X | X |
-| **Certificate: /idmgmt/identity/api/v1/certificates** |
-|| Create user certificate | X | X | X | X | X |
-|| Read user certificate | X | X | X | X | X |
-|| Delete user certificate | X | X | X | X | X |
-| **Account: /idmgmt/identity/api/v1/account** |
-|| Read {{site.data.keyword.product}} default account | X | X | X | X | X |
-|| Create {{site.data.keyword.product}} default account | X |  |  |  |  |
-|| Update {{site.data.keyword.product}} default account | X |  |  |  |  |
-|| Delete {{site.data.keyword.product}} default account | X |  |  |  |  |
-| **Directory: /idmgmt/identity/api/v1/directory/ldap** |
-|| Read LDAP directory details| X |  |  |  |  |
-| **User: /idmgmt/identity/api/v1/users** |
-|| Create user details | X |  |  |  |  |
-|| Read user details | X | X | X | X | X |
-|| Update user details | X |  |  |  |  |
-|| Delete user details | X |  |  |  |  |
-| **User group: /idmgmt/identity/api/v1/usergroup** |
-|| Create user group details | X |  |  |  |  |
-|| Read user group details | X | X | X | X | X |
-|| Update user group details | X |  |  |  |  |
-|| Delete user group details | X |  |  |  |  |
-| **Team: /idmgmt/identity/api/v1/teams** |
-|| Create team details | X |  |  |  |  |
-|| Read team details | X | X | X | X | X |
-|| Update team details | X |  |  |  |  |
-|| Delete team details | X |  |  |  |  |
-| **Resource: /idmgmt/identity/api/v1/resources** |
-|| Create resource details | X |  |  |  |  |
-|| Read resource details | X | |  |  |  |
-|| Update resource details | X |  |  |  |  |
-|| Delete resource details | X |  |  |  |  |
-| **User Preferences: /idmgmt/identity/api/v1/userpreferences** |
-|| Create user preferences | X | X | X | X | X |
-|| Read user preferences | X | X | X | X | X |
-|| Update user preferences | X | X | X | X | X |
-| **Security Assertion Markup Language (SAML) authentication: /idmgmt/v1/saml** |
-|| Get SAML status | X |  |  |  |  |
-|| Update or reconfigure SAML authentication | X |  |  |  |  |
-|| Create or configure SAML authentication | X |  |  |  |  |
-| **Service ID: /iam-token/serviceids** |
-|| Create a service ID | X | X | X | X | X |
-|| List Service ID details | X | X | X | X | X |
-|| Update a service ID | X | X | X | X | X |
-|| Delete a service ID  | X | X | X | X | X |
-| **API key: /iam-token/apikeys** |
-|| Create an API key | X | X | X | X | X |
-|| List all API keys | X | X | X | X | X |
-|| Update an API key | X | X | X | X | X |
-|| Delete an API key | X | X | X | X | X |
-| **Service policy: /v1/scopes/{scope}/service_ids/{serviceId}/policies** |
-|| Create service policy details | X | X | X | X | X |
-|| Read service policy details | X | X | X | X | X |
-|| Update service policy details | X | X | X | X | X |
-|| Delete service policy details | X | X | X | X | X |
-{: caption="Table 4. RBAC for IAM resources" caption-side="top"}
-
-**Note:** A user can create Service ID policies with the same level of access that the user has. The user cannot create or assign policies with a higher role to a service ID.
-
-### RBAC for resources in OpenShift clusters
+### RBAC for resources in your clusters
 {: #os}
 
 OpenShift clusters use the Cluster Administrator, Administrator, Operator or Editor, and Viewer roles. The Cluster Administrator has complete access to all the resources. For the Administrator, Operator or Editor, and Viewer roles, the following tables list the resources and the actions that are allowed on the resources.
