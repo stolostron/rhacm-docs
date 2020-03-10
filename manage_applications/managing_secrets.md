@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-13" 
+  years: 2019, 2020
+lastupdated: "2020-03-09" 
 
 ---
 
@@ -44,7 +44,7 @@ When you use Kubernetes secrets with your subscriptions to access channel source
 
 1. Compose the definition YAML content for your secret resource. For more information about the YAML structure, including the required fields, see [Secret definition](#secret_compose).
 
-2. Create the secret within {{site.data.keyword.mcm_notm}}. You can use Kubernetes command line interface (`kubectl`) tool or REST API:
+2. Create the secret within Red Hat Advanced Cluster Management for Kubernetes. You can use Kubernetes command line interface (`kubectl`) tool or REST API:
 
    - To use the Kubernetes CLI tool, complete the following steps:
      1. Compose and save your secret YAML file with your preferred editing tool.
@@ -64,7 +64,7 @@ When you use Kubernetes secrets with your subscriptions to access channel source
 
         Ensure that your new secret is listed in the resulting output.
 
-   - To use REST API, you need to use the Kubernetes API. For more information, see [Secrets ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/configuration/secret/).
+   - To use REST API, you need to use the Kubernetes API. For more information, see [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/).
 
 ### Limitations
 
@@ -96,7 +96,7 @@ When you use Kubernetes secrets with your subscriptions to access channel source
          {: codeblock}
        2. Update any fields or annotations that you need to change.
 
-   - To use REST API, you need to use the Kubernetes API. For more information, see [Secrets ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/configuration/secret/).
+   - To use REST API, you need to use the Kubernetes API. For more information, see [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/).
 
 When your changes are saved, the changes are not automatically detected. The updated version is not deployed to any destination clusters where the version was previously deployed until the secret is required.
 
