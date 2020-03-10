@@ -19,8 +19,6 @@ lastupdated: "2019-12-05"
 All certificates required by services that run on Red Hat Advanced Cluster Management for Kubernetes are created during the installation of Red Hat Advanced Cluster Management for Kubernetes. Certificates are either created and managed by the Red Hat Advanced Cluster Management for Kubernetes installer or by the Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager). These certificates are signed by a certificate authority (CA) also created during installation.
 {: shortdesc}
 
-An error message may appear when you attempt to log in to your cluster. If you are unable to access the console, see, [Cannot access the Red Hat Advanced Cluster Management for Kubernetes console on macOS](troubleshoot/console_catalina.md) for more information.
-
 Before you install Red Hat Advanced Cluster Management for Kubernetes, you can provide your own certificate authority (CA) to sign certificates used by Red Hat Advanced Cluster Management for Kubernetes services.
 
 ## Use your own certificate authority (CA) (BYOK)
