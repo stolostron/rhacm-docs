@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-11-25"
+  years: 2018, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -51,7 +51,7 @@ The command output provides the following information:
 | Age | When the certificate resource was first created in Kubernetes. |
 | Expiration | When the certificate expires. |
 
-For more information about certificates, see [kubectl flags ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/reference/kubectl/kubectl/){: new_window}.
+For more information about certificates, see [kubectl flags](https://kubernetes.io/docs/reference/kubectl/kubectl/){: new_window}.
 
 For example, a `kubectl describe` gives you more information about the certificate:
   ```

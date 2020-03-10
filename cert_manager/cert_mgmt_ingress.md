@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-02-19"
+lastupdated: "2020-03-09"
 
 ---
 
@@ -171,7 +171,7 @@ helm repo add mgmt-charts https://mycluster.icp:8443/mgmt-repo/charts --ca-file 
 ```
 {: codeblock}
 
-You need to use the management ingress CA file since the repository is from the cluster itself `https://mycluster.icp:8443/mgmt-repo/charts` and the Helm command to add the Helm repository requires the CA of that repository. For more information about this command, see [Helm documentation ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://helm.sh/docs/howto/chart_repository_sync_example/){: new_window}.
+You need to use the management ingress CA file since the repository is from the cluster itself `https://mycluster.icp:8443/mgmt-repo/charts` and the Helm command to add the Helm repository requires the CA of that repository. For more information about this command, see [Helm documentation](https://helm.sh/docs/howto/chart_repository_sync_example/){: new_window}.
 
 
 ## Restoring the default self-signed certificate for management ingress
@@ -267,7 +267,7 @@ helm repo add mgmt-charts https://mycluster.icp:8443/mgmt-repo/charts --ca-file 
 ```
 {: codeblock}
 
-You need to use the management ingress CA file since the repository is from the cluster itself `https://mycluster.icp:8443/mgmt-repo/charts` and the Helm command to add the Helm repository requires the CA of that repository. For more information about this command, see [Helm documentation ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://helm.sh/docs/howto/chart_repository_sync_example/){: new_window}.
+You need to use the management ingress CA file since the repository is from the cluster itself `https://mycluster.icp:8443/mgmt-repo/charts` and the Helm command to add the Helm repository requires the CA of that repository. For more information about this command, see [Helm documentation](https://helm.sh/docs/howto/chart_repository_sync_example/){: new_window}.
 
 
 

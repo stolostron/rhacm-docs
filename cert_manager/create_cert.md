@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-01-07"
+lastupdated: "2020-03-09"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2020-01-07"
 
 # Creating Certificate manager (cert-manager) certificates
 
-The Certificate manager service is used to issue and manage certificates for services. Certificate manager is based on the [jetstack/cert-manager project ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://github.com/jetstack/cert-manager).
+The Certificate manager service is used to issue and manage certificates for services. Certificate manager is based on the [jetstack/cert-manager project](https://github.com/jetstack/cert-manager).
 {: shortdesc}
 
 * [Adding a certificate to a Kubernetes workload](#adding_workload)
@@ -68,7 +68,7 @@ The Certificate manager service is used to issue and manage certificates for ser
 
 3. Mount the Secret to the Deployment, DaemonSet, or StatefulSet.
 
-  The Kubernetes Secret that contains the certificate is mounted to the file system in the same manner as any other secret. For more information, see the [Kubernetes documentation ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod).
+  The Kubernetes Secret that contains the certificate is mounted to the file system in the same manner as any other secret. For more information, see the [Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod).
 
 ## Adding a certificate to Kubernetes Ingress  
 {: #adding_ingress}

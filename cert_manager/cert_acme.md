@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-11-26"
+  years: 2018, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -19,10 +19,10 @@ lastupdated: "2019-11-26"
 
 Use the ACME protocol to issue certificates when you need proof of domain ownership. The ACME HTTP issuer sends an HTTP request to the domains specified in the certificate request. The ACME server expects a certain web page to be published on each domain name requested in the certificate. The `cert-manager` service publishes the expected web page by creating a temporary pod and ingress. When validation is completed, the temporary pod and ingress are cleaned up. Then, the ACME server issues the certificate.
 
-The issuer is used primarily with the ACME server that is hosted at [Let's Encrypt ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://letsencrypt.org/). For more information about the ACME HTTP issuer and the letsencrypt.org certificate authority, see:
+The issuer is used primarily with the ACME server that is hosted at [Let's Encrypt](https://letsencrypt.org/). For more information about the ACME HTTP issuer and the letsencrypt.org certificate authority, see:
 
-* [Let's Encrypt certificate authority documentation ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://letsencrypt.org/docs/).
-* [Certificate manager ACME HTTP issuer tutorial ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.cert-manager.io/en/latest/tutorials/acme/http-validation.html)
+* [Let's Encrypt certificate authority documentation](https://letsencrypt.org/docs/).
+* [Certificate manager ACME HTTP issuer tutorial](https://docs.cert-manager.io/en/latest/tutorials/acme/http-validation.html)
 
 The following `Issuer` example uses a staging server that is provided by Let's Encrypt. The important details are the `server` name and the `email` address. The `solvers` field indicates which challenge provider it's using. The following example uses the `HTTP01` challenge provider.
 ```

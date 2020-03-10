@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-04"
+lastupdated: "2020-03-09"
 
 ---
 
@@ -16,12 +16,10 @@ lastupdated: "2020-03-04"
 
 # Security
 
-Manage security and role-based access control (RBAC) of {{site.data.keyword.mcm_notm}} components.
+Manage security and role-based access control (RBAC) of Red Hat Advanced Cluster Management for Kubernetes components.
 
-- {: child} [Certificates in {{site.data.keyword.mcm_notm}}](../../cert-manager/3.4.0/certificates.md)
-- {: child} [{{site.data.keyword.mcm_notm}} Governance and risk](compliance_intro.md)
-- {: child} [Pod isolation](../../pod-security/3.4.0/iso_pod.md)
-- {: child} [Audit logging adoption guide](../../audit-logging/3.3.0/audit_log_guide.md)
-- {: child} [IAM guide](../../iam/3.4.0/admin.md)
+- {: child} [Certificates in Red Hat Advanced Cluster Management for Kubernetes](../cert_manager/certificates.md)
+- {: child} [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md)
+- {: child} [IAM guide](../../iam/3.4.0/admin.md) <!--will this be applicable? I believe it should be removed, but i am not sure. I know that only IAM controller will be used-->
 - {: child} [Key Management Service adoption guide](../mcm_user_management/kms_guide.md)
 {: childlinks}

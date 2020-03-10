@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-11-18"
+  years: 2018, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -17,7 +17,7 @@ lastupdated: "2019-11-18"
 
 # Using Vault to issue certificates
 
-Certificate manager Issuer supports using the [HashiCorp Vault ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.vaultproject.io/docs/install/) server to create and issue certificates. To use the Vault Issuer, you must have setup a Vault server that is accessible to Certificate manager.
+Certificate manager Issuer supports using the [HashiCorp Vault](https://www.vaultproject.io/docs/install/) server to create and issue certificates. To use the Vault Issuer, you must have setup a Vault server that is accessible to Certificate manager.
 
 **Important:** Certificate manager attempts to create certificates with a 90 day expiration when using the Vault Issuer, so the _max_ttl_ needs to be at least 90 days (2160 hours). Do not use a _max_ttl_ that is less than 30 days because Certificate Manager attempts to renew certificates when the expiration is within 30 days.
 
@@ -70,14 +70,14 @@ The Vault Server support in Certificate manager supports two authentication meth
 
    - AppRole Authentication
 
-   **Note**: If TLS is enabled on your Vault server, include the `caBundle` parameter under the `vault` section. Set the `caBundle` value to the base64 encoded CA cert in PEM format. For more information, see the [HashiCorp Vault Server TLS Listener ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.vaultproject.io/docs/configuration/listener/tcp.html) documentation.
+   **Note**: If TLS is enabled on your Vault server, include the `caBundle` parameter under the `vault` section. Set the `caBundle` value to the base64 encoded CA cert in PEM format. For more information, see the [HashiCorp Vault Server TLS Listener](https://www.vaultproject.io/docs/configuration/listener/tcp.html) documentation.
 
 
 ### Create Issuers by using the Token Authentication
 
 Using Vault with token authentication requires a Kubernetes Secret that contains the Vault authentication token. The authentication token must be `base64` encoded when stored in the Secret. Create this resource in the same namespace where you want the Issuer. If you are using a ClusterIssuer, you must create this Secret in the `kube-system` namespace.
 
-Tokens can be created by using the Vault APIs. Be aware that you need to renew tokens that expire, since Certificate manager is not aware of token expirations. The [HashiCorp Vault ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.vaultproject.io/docs/auth/token.html) documentation contains more details on token authentication.
+Tokens can be created by using the Vault APIs. Be aware that you need to renew tokens that expire, since Certificate manager is not aware of token expirations. The [HashiCorp Vault](https://www.vaultproject.io/docs/auth/token.html) documentation contains more details on token authentication.
 
 Complete the following configuration on your Vault server:
 
@@ -175,7 +175,7 @@ Complete the following configuration on your Vault server:
 
 Vault supports AppRole authentication, which allows Certificate manager to connect to Vault by using an AppRole secret identifier instead of a token. Complete the following configuration on your Vault server to configure AppRole authentication.  
 
-See the [HashiCorp Vault ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.vaultproject.io/docs/auth/approle.html) documentation for more information.
+See the [HashiCorp Vault](https://www.vaultproject.io/docs/auth/approle.html) documentation for more information.
 
 1. Enable AppRole Authentication with the following command:
 

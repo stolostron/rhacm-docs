@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-03"
+lastupdated: "2020-03-09"
 
 ---
 
@@ -22,7 +22,7 @@ lastupdated: "2020-03-03"
 You can use the Red Hat Advanced Cluster Management for Kubernetes cert-manager to create and mount a certificate to a Kubernetes Deployment, StatefulSet, or DaemonSet. You can also create and add a certificate to a Kubernetes Ingress.
 {:shortdesc}
 
-_Issuer_, _ClusterIssuer_, and _Certificate_ are Kubernetes resource types that were introduced to support certificate generation and lifecycle management. For more information about cert-manager, see the [cert-manager community documentation ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://cert-manager.readthedocs.io/en/latest/).
+_Issuer_, _ClusterIssuer_, and _Certificate_ are Kubernetes resource types that were introduced to support certificate generation and lifecycle management. For more information about cert-manager, see the [cert-manager community documentation](https://cert-manager.readthedocs.io/en/latest/).
 
 See the following list to learn how Red Hat Advanced Cluster Management for Kubernetes cert-manager works:
 
