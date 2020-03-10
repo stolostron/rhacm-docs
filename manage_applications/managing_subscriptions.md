@@ -42,7 +42,7 @@ For more information about deployables and other application resources, see [App
 
 1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription_compose).
 
-2. Create the subscription within {{site.data.keyword.mcm_notm}}. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
+2. Create the subscription within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
 
    * To use the console:
 
@@ -136,7 +136,7 @@ For more information about the resource definition for an application, see [Crea
 
 1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription_compose.md).
 
-2. Create the subscription within {{site.data.keyword.mcm_notm}}. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
+2. Create the subscription within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
 
    * To use the console:
        1. Open the console.
