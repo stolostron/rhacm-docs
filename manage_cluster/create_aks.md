@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-09-12"
+  years: 2019, 2020
+lastupdated: "2020-03-11"
 
 ---
 
@@ -16,14 +16,14 @@ lastupdated: "2019-09-12"
 
 # Creating an Azure Kubernetes Service cluster
 
-Follow the procedure to create an Azure Kubernetes Service cluster. You can create a cluster from the Red Hat Advanced Cluster Management for Kubernetes console, or from the CLI. See [Azure Kubernetes Service ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://azure.microsoft.com/en-us/services/kubernetes-service/){:new_window} for more information about the public Kubernetes service. 
+Follow the procedure to create an Azure Kubernetes Service cluster. You can create a cluster from the Red Hat Advanced Cluster Management for Kubernetes console, or from the CLI. See [Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/){:new_window} for more information about the public Kubernetes service. 
 {:shortdesc}
 
 ## Supported architectures
 
 The following hardware architectures are supported:
 
-{{site.data.keyword.linux_bit_notm}}
+* Linux x86_64 <!--may require trademark-->
   
 **Required user type or access level**: Cluster administrator
 
@@ -37,15 +37,13 @@ The following hardware architectures are supported:
 
 * You must have an Red Hat Advanced Cluster Management for Kubernetes hub deployed.
 
-* You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md). 
-
 * You need internet access so that your Red Hat Advanced Cluster Management for Kubernetes cluster can create a remote Kubernetes cluster by using Azure Kubernetes Service.
 
-* You need Azure login credentials, which include user name and password. See [azure.microsoft.com ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://azure.microsoft.com/en-ca/features/azure-portal).
+* You need Azure login credentials, which include user name and password. See [azure.microsoft.com](https://azure.microsoft.com/en-ca/features/azure-portal).
 
-* You need Azure service principals, which include `clientId`, `clientSecret`, and `tenantId`. See [azure.microsoft.com ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli?view=azure-cli-latest#password-based-authentication).
+* You need Azure service principals, which include `clientId`, `clientSecret`, and `tenantId`. See [azure.microsoft.com](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli?view=azure-cli-latest#password-based-authentication){:new_window}.
 
-* To create clusters across cloud providers with {{site.data.keyword.open_s}}, run the following command to enable the namespace to pull the image from the private registry:
+* To create clusters across cloud providers with OpenShift Container Platform, run the following command to enable the namespace to pull the image from the private registry:
 
   ```
   oc policy add-role-to-user system:image-puller system:serviceaccount:<namespace>:default --namespace=ibmcom
@@ -93,7 +91,7 @@ clusters.
 
 Complete the following procedure to create a cluster with kubectl:
 
-1. Install the Azure CLI if you did not install previously. See [Install the Azure CLI ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) for the installation procedure.
+1. Install the Azure CLI if you did not install previously. See [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest){:new_window} for the installation procedure.
 
 2. Create and save the following `.yaml` files that you need to complete the procedure:
    
@@ -106,7 +104,7 @@ Complete the following procedure to create a cluster with kubectl:
   
    - From the `data` specification, the `clientId`, `clientSecret`, and `tenantId` is retrieved from the Azure service principals, which is listed in prerequesites for this procedure. 
   
-  See an example at [Azure Provider: Authenticating using a Service Principal with a Client Secret ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.terraform.io/docs/providers/azurerm/auth/service_principal_client_secret.html).
+  See an example at [Azure Provider: Authenticating using a Service Principal with a Client Secret](https://www.terraform.io/docs/providers/azurerm/auth/service_principal_client_secret.html){:new_window}.
 
   - To get the base64 encoded clientId value, run the following command:
   
@@ -212,7 +210,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 |spec:resourceGroupName|Required, name of resource group|none|
 |spec:nodeCount|Optional; number of nodes in the Kubernetes node pool|none|
 |spec:kubeVersion|Optional value of the Kubernetes version for the cluster master node, from: `az aks get-versions` versions; if not specified, defaults to supported Kubernetes versions|supported version|
-|spec:nodeVMSize:|Optional, size of virtual machines to create as Kubernetes nodes; see [General purpose virtual machine sizes ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general)|none|
+|spec:nodeVMSize:|Optional, size of virtual machines to create as Kubernetes nodes; see [General purpose virtual machine sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general)|none|
 |spec:nodeOsdiskSize|Optional; size in GB of the OS disk for each node in the node pool, minimum 30 GB|none|
 |spec:dnsServiceIP|Optional IP address assigned to the Kubernetes DNS service; value must be in the range of the services cidrBlocks value|none|
 {: caption="Table 1. YAML file parameters and descriptions" caption-side="top"}

@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-09-12"
+  years: 2019, 2020
+lastupdated: "2020-03-11"
 
 ---
 
@@ -16,16 +16,16 @@ lastupdated: "2019-09-12"
 
 # Creating a Google Kubernetes Engine cluster
 
-Follow the procedure to create a Google Kubernetes Engine (Kubernetes Engine) cluster. For more information about Kubernetes Engine, see [Google Kubernetes Engine ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://cloud.google.com/kubernetes-engine/).
+Follow the procedure to create a Google Kubernetes Engine (Kubernetes Engine) cluster. For more information about Kubernetes Engine, see [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/){:new_window}.
 {:shortdesc}
 
 ## Supported architectures
 
 The following hardware architectures are supported:
 
-* {{site.data.keyword.linux_bit_notm}}
-* {{site.data.keyword.ppc_notm}}
-* {{site.data.keyword.s390_notm}}
+* Linux 
+* Linux on Power (ppc64le)
+* Linux on IBM Z and LinuxONE
 
 **Required user type or access level**: Cluster administrator
 
@@ -38,15 +38,13 @@ The following hardware architectures are supported:
 ## Prerequisites
 {: #prereq}
 
-* You must have an Red Hat Advanced Cluster Management for Kubernetes hub deployed.
-
-* You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md). 
+* You must have an Red Hat Advanced Cluster Management for Kubernetes hub deployed. 
 
 * You need internet access so that your Red Hat Advanced Cluster Management for Kubernetes cluster can create a remote Kubernetes cluster by using Google Kubernetes Engine.
 
 * You need Google Cloud Platform login credentials and access to create a Google Kubernetes Engine cluster.
 
-* To create clusters across cloud providers with {{site.data.keyword.open_s}}, run the following command to enable the namespace to pull the image from the private registry:
+* To create clusters across cloud providers with OpenShift Container Platform, run the following command to enable the namespace to pull the image from the private registry:
 
   ```
   oc policy add-role-to-user system:image-puller system:serviceaccount:<namespace>:default --namespace=ibmcom
@@ -98,7 +96,7 @@ Complete the following procedure to create a cluster with kubectl:
   * Create and name your `apikey.yaml` file.
   * Create and name your `cluster.yaml` file.
 
-2. Create a service account to obtain Google identity credentials. See [Creating a service account ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount) in the [Google Developers Console](https://console.developers.google.com/). <!-- why both links here? -->
+2. Create a service account to obtain Google identity credentials. See _Creating a service account_ in the [Google Developers Console](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount){:new_window}.
 
 3. Download the corresponding JSON key file. Encode key with base64 and add it to the `apikey.yaml` privateKey field. Run the following command:
 
@@ -277,7 +275,7 @@ View your cluster in the Red Hat Advanced Cluster Management for Kubernetes cons
 
 When the `access-token` in `kubeconfig` expires, you need to manually update the `kubeconfig` file so that you can access the cluster.
 
-1. [Install Google Cloud SDK ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://cloud.google.com/sdk/install){: new_window}.
+1. [Install Google Cloud SDK](https://cloud.google.com/sdk/install){: new_window}.
 
 2. Authorize Google Cloud SDK tools. Choose one of the following authorization types:
 
@@ -288,7 +286,7 @@ When the `access-token` in `kubeconfig` expires, you need to manually update the
     ```
     {: codeblock}
 
-  * [Service account ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount){: new_window}.
+  * [Service account](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount){: new_window}.
 
     ```
     gcloud auth activate-service-account --key-file [KEY_FILE]

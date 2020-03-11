@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-11-05"
+  years: 2019, 2020
+lastupdated: "2020-03-11"
 
 ---
 
@@ -16,14 +16,14 @@ lastupdated: "2019-11-05"
 
 # Creating an Amazon Elastic Kubernetes Service cluster
 
-Follow the procedure to create an Amazon Elastic Kubernetes Service cluster. You can create a cluster from the console, or from the CLI. See [Amazon Elastic Kubernetes Service ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://aws.amazon.com/eks/){:new_window} for more information about the public Kubernetes service.
+Follow the procedure to create an Amazon Elastic Kubernetes Service cluster. You can create a cluster from the console, or from the CLI. See [Amazon Elastic Kubernetes Service](https://aws.amazon.com/eks/){:new_window} for more information about the public Kubernetes service.
 {:shortdesc}
 
 ## Supported architectures
 
 The following hardware architectures are supported:
 
-{{site.data.keyword.linux_bit_notm}}
+Linux x86_64 <!--trademark may be required-->
   
 **Required user type or access level**: Cluster administrator
 
@@ -37,15 +37,13 @@ The following hardware architectures are supported:
 
 * You must have an hub cluster deployed.
 
-* You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md).
-
-* You need to install the `aws-iam-authenticator` to access your targeted managed cluster with the kubeconfig. See [Installing aws-iam-authenticator ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html){:new_window}.
+* You need to install the `aws-iam-authenticator` to access your targeted managed cluster with the kubeconfig. See [Installing aws-iam-authenticator](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html){:new_window}.
 
 * You need internet access so that your hub cluster can create a remote Amazon Elastic Kubernetes Service cluster.
 
-* You need Amazon Web Services (AWS) login credentials, which include user name, password, access key ID, and secret access key. See [Understanding and Getting Your Security Credentials ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html){:new_window}.
+* You need Amazon Web Services (AWS) login credentials, which include user name, password, access key ID, and secret access key. See [Understanding and Getting Your Security Credentials](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html){:new_window}.
 
-* To create clusters across cloud providers with {{site.data.keyword.open_s}}, run the following command to enable the namespace to pull the image from the private registry:
+* To create clusters across cloud providers with OpenShift Container Platform, run the following command to enable the namespace to pull the image from the private registry:
 
   ```
   oc policy add-role-to-user system:image-puller system:serviceaccount:<namespace>:default --namespace=ibmcom
@@ -98,7 +96,7 @@ Complete the following procedure to create a cluster with kubectl:
   * Create and name your `apikey.yaml` file.
   * Create and name your `cluster.yaml` file.
   
-2. In the `apikey.yaml` file, enter the Amazon Web Services (AWS) cloud API key information to ensure that you have permission to create a cluster with the API key. Here, `awsAccessKeyID` is your AWS access key ID and `awsSecretAccessKey` is your AWS secret access key. See [Access Keys (Access Key ID and Secret Access Key) ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys){:new_window}. See [_Table 1. YAML file parameters and description_](#table_1) for details about each parameter. See the following sample file:
+2. In the `apikey.yaml` file, enter the Amazon Web Services (AWS) cloud API key information to ensure that you have permission to create a cluster with the API key. Here, `awsAccessKeyID` is your AWS access key ID and `awsSecretAccessKey` is your AWS secret access key. See [Access Keys (Access Key ID and Secret Access Key)](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys){:new_window}. See [_Table 1. YAML file parameters and description_](#table_1) for details about each parameter. See the following sample file:
    
   ```
   apiVersion: v1
