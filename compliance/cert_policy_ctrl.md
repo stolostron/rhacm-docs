@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-05"
+lastupdated: "2020-03-11"
 
 ---
 
@@ -29,9 +29,9 @@ You must create a certificate policy controller to create a certificate policy. 
 
 ### Parent policy for the certificate policy 
 
-A certificate policy can be either created directly on your managed cluster, or on your hub cluster if it manages your managed cluster. Your managed cluster must be an {{site.data.keyword.mcm_notm}} with the required services. For more information about the services, see [Administering](../../admin/intro.md). If {{site.data.keyword.mcm_notm}} is not installed, you can create a certificate policy directly on your managed cluster by running the following command: `kubectl create -f certificatePolicyFile.yaml`.
+A certificate policy can be either created directly on your managed cluster, or on your hub cluster if it manages your managed cluster. Your managed cluster must be a Red Hat Advanced Cluster Management for Kubernetes with the required services. If Red Hat Advanced Cluster Management for Kubernetes is not installed, you can create a certificate policy directly on your managed cluster by running the following command: `kubectl create -f certificatePolicyFile.yaml`. <!--need to validate this-->
 
-If {{site.data.keyword.mcm_notm}} is installed, create a parent policy that includes the certificate policy to be propagated to the managed cluster.
+If Red Hat Advanced Cluster Management for Kubernetes <!--thinking the product name should be removed here and we should just tell the user to create a parent policy--> is installed, create a parent policy that includes the certificate policy to be propagated to the managed cluster.
 
   View the following example description of a certificate policy and review the element descriptions of the certificate policy:
 
@@ -115,7 +115,7 @@ You can create a YAML file for your certificate policy or create a certificate p
 
 Complete the following steps to create a certificate policy from the command line interface (CLI):
 
-1. Create a YAML file for your certificate policy. See [Creating a YAML file for an {{site.data.keyword.mcm_notm}} policy](../compliance/create_policy.md#yaml) for more information on policy requirements. 
+1. Create a YAML file for your certificate policy. See [Creating a YAML file for a Red Hat Advanced Cluster Management for Kubernetes policy](../compliance/create_policy.md#yaml) for more information on policy requirements. 
 
     Your certificate policy might resemble the following policy:
 
@@ -225,7 +225,7 @@ You can view any certificate policy and its status from the console.
 4. Select one of your policies.
 
 
-For more information about other policy controllers, see [{{site.data.keyword.mcm_notm}} policy controllers](../compliance/policy_controllers.md). See [{{site.data.keyword.mcm_notm}} Governance and risk](../compliance/compliance_intro.md) for more information about policies.
+For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../compliance/policy_controllers.md). See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md) for more information about policies.
 
 ## Bringing your own certificates
 
