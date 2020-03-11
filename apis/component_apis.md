@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-12-11"
+  years: 2016, 2020
+lastupdated: "2020-03-11"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2019-12-11"
 
 # Component APIs
 
-You can access APIs for several of the components that {{site.data.keyword.product_tm}} uses.
+You can access APIs for several of the components that Red Hat Advanced Cluster Management for Kubernetes uses.
 {:shortdesc}
 
 - {: child} [Kubernetes API](../iam/3.4.0/apis/k8s_api.md) <br />

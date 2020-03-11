@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-12-10"
+  years: 2016, 2020
+lastupdated: "2020-03-11"
 
 ---
 
@@ -51,7 +51,7 @@ curl -k -H "Authorization: Bearer $ID_TOKEN" https://<Cluster Master Host>:<Clus
 
 <dl>
 <dt><b>API version</b></dt>
-<dd>{{site.data.keyword.version}}</dd>
+<dd>4.4.0</dd>
 <dt><b>API URI components</b></dt>
 <dd>
 <dl>
@@ -68,32 +68,6 @@ curl -k -H "Authorization: Bearer $ID_TOKEN" https://<Cluster Master Host>:<Clus
 <dt><b>Command output format</b></dt>
 <dd><pre>application/json</pre></dd>
 </dl>
-
-<!-- **API version**
-
-{{site.data.keyword.version}}
-
-**API URI components**
-
- **Scheme**
-
-   `HTTPS`
-
- **Host name**
-
-   `<Cluster Master Host>`
-
- **Port number**
-
-   `<Cluster Master API Port>`
-
- **Base path**
-
-  `/image-manager/api/v1`
-
-**Command output format**
-
-  `application/json` -->
 
 - {: child} [Delete repositories](../apis/cfc_api_files/delete_repo.md) <br />  
 - {: child} [Get JWT tokens](../apis/cfc_api_files/get_tokens.md) <br />  

@@ -2,7 +2,7 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-06"
+lastupdated: "2020-03-11"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2020-03-06"
 
 # APIs
 
-Access and modify your {{site.data.keyword.product_tm}} cluster by using APIs.
+Access and modify your Red Hat Advanced Cluster Management for Kubernetes cluster by using APIs.
 {:shortdesc}
 
 - {: child} [Preparing to run component or management API commands](../iam/3.4.0/apis/access_api.md) <br />

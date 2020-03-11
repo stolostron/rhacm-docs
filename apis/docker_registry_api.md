@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2018-12-11"
+  years: 2016, 2020
+lastupdated: "2020-03-11"
 
 ---
 
@@ -16,15 +16,15 @@ lastupdated: "2018-12-11"
 
 # Docker Registry V2 API
 
-You can run Docker API commands. Red Hat Advanced Cluster Management for Kubernetes version {{site.data.keyword.version_cp}} uses a Docker distribution that implements the Docker Registry V2 API spec to manage the storage of Docker images.
+You can run Docker API commands. Red Hat Advanced Cluster Management for Kubernetes version 4.4.0 uses a Docker distribution that implements the Docker Registry V2 API spec to manage the storage of Docker images.
 {:shortdesc}
 
 Both cluster administrator and administrator can access the Docker Registry API. However, administrators can access only resources that belong to their namespace. Cluster administrators can access all resources in the cluster.
 
 For details about the Docker Registry V2 API, refer to the official documentation:
 
-* [Docker Registry HTTP API V2 ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.docker.com/registry/spec/api){: new_window}
-* [Docker Registry v2 authentication via central service ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://github.com/docker/distribution/blob/master/docs/spec/auth/token.md){: new_window}
+* [Docker Registry HTTP API V2](https://docs.docker.com/registry/spec/api){: new_window}
+* [Docker Registry v2 authentication via central service](https://github.com/docker/distribution/blob/master/docs/spec/auth/token.md){: new_window}
 
 ## Running Docker API commands
 
@@ -32,7 +32,7 @@ When you run a Docker API command, you must obtain an authentication certificate
 
 You must copy the `/etc/docker/certs.d/<Cluster Master Host>:8500/ca.crt` file, the authentication certificate, from a cluster node to the node that runs the API commands.
 
-`<Cluster Master Host>:<Cluster Master API Port>` are used to access the APIs. The parameters are defined in [Master endpoints](../installer/3.2.2/cluster_endpoints.md#master).
+`<Cluster Master Host>:<Cluster Master API Port>` are used to access the APIs. The parameters are defined in [Master endpoints](../install/cluster_endpoints.md#master).
 
 You can store the authentication token in the `ID_TOKEN` variable by running the following commands:
 
