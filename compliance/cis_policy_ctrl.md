@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-05"
+lastupdated: "2020-03-12"
 
 ---
 
@@ -24,7 +24,7 @@ You can use the Center for Internet Security (CIS) policy controller to receive 
 * [Creating a CIS policy](#create_policy)
 * [Viewing a CIS policy](#view_policy)
 * [CIS risk score](#risk_score)
-* [CIS policy controller components](#contr_comp)
+* [CIS policy controller components](#contr_comp) <!--suggest the the controller components be placed before CIS policy section 03/12/2020 MD-->
 
 The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list. CIS Kubernetes Benchmark Version 1.4.0 is used.
 
@@ -33,11 +33,11 @@ The CIS policy controller monitors the nodes in a cluster for compliance against
 
 The CIS policy controller watches policies of `kind:` `CISPolicy` and updates the status of the policy by checking whether the managed cluster is compliant or not. The policy itself includes a list of CIS controls that need to be excluded from checking. All the CIS controls that are not listed in the policy are checked for compliance. The controller uses `aqua-security` `kube-bench` tool for checking the master and worker nodes in the managed cluster for compliance.
 
-The CIS policy can be created at the {{site.data.keyword.mcm_notm}} hub or on the managed cluster itself. When created at the {{site.data.keyword.mcm_notm}} hub, it is embedded into a parent policy. The policy can then be propagated to managed clusters in the {{site.data.keyword.mcm_notm}} hub based on the placement policy.
+The CIS policy can be created at the Red Hat Advanced Cluster Management for Kubernetes hub or on the managed cluster itself. When created at the Red Hat Advanced Cluster Management for Kubernetes hub, it is embedded into a parent policy. The policy can then be propagated to managed clusters in the Red Hat Advanced Cluster Management for Kubernetes hub based on the placement policy.
 
-The set of rules that constitute CIS controls is different on an {{site.data.keyword.ocp}} cluster. On {{site.data.keyword.open_s}}, the kube-bench tools use rules based on the Red Hat {{site.data.keyword.open_s}} Hardening Guide.
+The set of rules that constitute CIS controls is different on an OpenShift Container Platform cluster. On OpenShift, the kube-bench tools use rules based on the Red Hat OpenShift Hardening Guide.
 
-### Sample CIS policy (non-{{site.data.keyword.ocp}})
+### Sample CIS policy (non-OpnShift Container Platform)
 ```
 apiVersion: policies.ibm.com/v1alpha1
 kind: CisPolicy
@@ -129,7 +129,7 @@ spec:
 ```
 {: codeblock}
 
-### Sample CIS policy ({{site.data.keyword.ocp}})
+### Sample CIS policy 
 ```
 apiVersion: policies.ibm.com/v1alpha1
 kind: CisPolicy
@@ -276,7 +276,7 @@ kubectl describe cispolicy <name> -n <namespace>
 ### Creating a CIS policy from Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_policy_gui}
 
-1. Log in to {{site.data.keyword.cloud_pak}} for Red Hat Advanced Cluster Management for Kubernetes console.
+1. Log in to Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Govern risk**.
 3. Click **Create Policy**.
 4. Enter the name for the CIS policy in the **Name** field.
@@ -531,7 +531,7 @@ spec:
 {: #view_policy}
 
 View any CIS Policy and its status from the console.
-1. Log in to the {{site.data.keyword.cloud-pak_mcm}} console.
+1. Log in to the Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Govern risk**.
 3. Click the _Policies_ tab to view a summary of your policies and a table list of your policies.
 
@@ -571,6 +571,21 @@ The CIS policy controller consists of the following four components.
 
 ### cis-controller-minio
 The `cis-controller-minio` object store is used to store the artifacts that are collected by the CIS crawler that runs on all the master and worker nodes. The results from running the aqua-security kube-bench tool are also stored in the CIS Minio object store.
+
+**Important:** You must create a secret that contains configuration credentials for the MinIO instance. Your secret might resemble the following YAML file: 
+
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cis-controller-secret
+type: Opaque
+data:
+  secret_key: <base64-encoded username for MinIO>
+  access_key: <base64-encoded username for MinIO>
+  location: <base64-encoded label for controller location>
+```
+{: codeblock}
 
 ### cis-crawler
 The `cis-crawler` collects information about Kubernetes processes, binary files, and configuration files and stores them in the Minio object store. The crawler runs on the master and worker nodes. By default, it runs every 24 hours. To change the crawler frequency, complete the following steps.
@@ -620,4 +635,4 @@ The `cis-controller` scans the `cis-controller-minio` object store for results t
 **Note: Frequency**
 The `cis-controller` depends on the results that are posted by `drishti-cis`, which in turn depends upon the data that is collected by the `cis-crawler`. `cis-crawler`, `drishti-cis`, and `cis-controller` run at frequent intervals. The default interval for all three components is 24 hours. Staggering the frequencies helps the `cis-controller` evaluate the compliance status based on more recent data.
 
-For more information about other policy controllers, see [{{site.data.keyword.mcm_notm}} policy controllers](../compliance/policy_controllers.md). For more information about policies, see [{{site.data.keyword.mcm_notm}} Governance and risk](../compliance/compliance_intro.md).
+For more information about other policy controllers, see [{Red Hat Advanced Cluster Management for Kubernetes policy controllers](../compliance/policy_controllers.md). For more information about policies, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
