@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-11-18"
+  years: 2019, 2020
+lastupdated: "2020-03-12"
 
 ---
 
@@ -118,7 +118,7 @@ The following OpenSSL commands are used with the preceding configuration file to
      ```
      {: codeblock}  
 
-     Ensure that the common name on the certificate is the {{site.data.keyword.icp_notm}} cluster CA domain.
+     Ensure that the common name on the certificate is the Red Hat Advanced Cluster Management for Kubernetes cluster CA domain.
 
 ## Replace image manager certificates
 
