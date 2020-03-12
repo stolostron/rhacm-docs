@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-03-12"
 
 ---
 
@@ -50,7 +50,7 @@ Complete the following steps to back up the existing certificates:
         ```
         {: codeblock}
 
-      * For {{site.data.keyword.linux_notm}}, run the following command:
+      * For Linux, run the following command:
 
         ```
         kubectl get secret cluster-ca-cert -n kube-system -o jsonpath="{.data['tls\.crt']}" | base64 --decode > cluster-ca-cert.pem
@@ -108,7 +108,7 @@ Complete the following steps to back up the existing certificates:
 
 4. Replace the `root-ca` certificates.
 
- - For {{site.data.keyword.linux&reg}} x86_64, run the following command:
+ - For Linux x86_64, run the following command:
    ```bash
    sudo docker run --net=host -t -e LICENSE=accept \
    -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.0-ee \
@@ -181,7 +181,7 @@ done
 ### Recreate image pull secret
 {: #recreate}
 
- - For {{site.data.keyword.linux&reg}} x86_64, run this command:
+ - For Linux x86_64, run this command:
    ```bash
    sudo docker run --net=host -t -e LICENSE=accept \
    -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.0-ee \

@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-05"
+  years: 2019, 2020
+lastupdated: "2020-03-12"
 
 ---
 
@@ -71,13 +71,6 @@ You can restore certificates for the following components:
        ```
        {: codeblock}
 
-  - For {{site.data.keyword.icp_ce_notm}}:
-    ```bash
-    sudo docker run --net=host -t -e LICENSE=accept \
-    -v "$(pwd)":/installer/clusteribmcom/icp-inception:3.2.2 \
-    replace-certificates --tags "root-ca-certs"
-    ```
-     {: codeblock}
 
      **Note**: When you restore the Root CA, all certificates that are signed by the Root CA will automatically be refreshed as well. These certificates include the Kubernetes, IPSec, and Helm.
 
@@ -108,7 +101,7 @@ You can restore certificates for the following components:
 
 2. Run the following command to restore the `etcd` certificates:
   - For Red Hat Advanced Cluster Management for Kubernetes:
-    - For {{site.data.keyword.linux_notm}}, run the following command:
+    - For Linux, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -132,14 +125,6 @@ You can restore certificates for the following components:
       ```
         {: codeblock}
 
-  - For {{site.data.keyword.icp_ce_notm}}, run the following command:
-    ```bash
-    sudo docker run --net=host -t -e LICENSE=accept \
-    -v "$(pwd)":/installer/clusteribmcom/icp-inception:3.2.2 \
-    replace-certificates --tags "etcd-certs"
-    ```
-     {: codeblock}
-
 ## Restoring front proxy certificates
 {: #front}
 
@@ -151,7 +136,7 @@ You can restore certificates for the following components:
 
 2. Run the following command to restore the `front proxy` certificates:
   - For Red Hat Advanced Cluster Management for Kubernetes:
-    - For {{site.data.keyword.linux_notm}}, run the following command:
+    - For Linux, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -175,14 +160,6 @@ You can restore certificates for the following components:
       ```
         {: codeblock}
 
-  - For {{site.data.keyword.icp_ce_notm}}, run the following command:
-    ```bash
-    sudo docker run --net=host -t -e LICENSE=accept \
-    -v "$(pwd)":/installer/clusteribmcom/icp-inception:3.2.2 \
-    replace-certificates --tags "front-proxy-certs"
-    ```
-     {: codeblock}
-
 ## Restoring Kubernetes certificates
 {: #kube}
 
@@ -196,7 +173,7 @@ You can restore certificates for the following components:
 
 2. Run the following command to restore the Kubernetes certificates:
   - For Red Hat Advanced Cluster Management for Kubernetes:
-    - For {{site.data.keyword.linux_notm}}, run the following command:
+    - For Linux, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -219,14 +196,6 @@ You can restore certificates for the following components:
       replace-certificates --tags "kubernetes-certs"
       ```
         {: codeblock}
-
-  - For {{site.data.keyword.icp_ce_notm}}, run the following command:
-    ```bash
-    sudo docker run --net=host -t -e LICENSE=accept \
-    -v "$(pwd)":/installer/clusteribmcom/icp-inception:3.2.2 \
-    replace-certificates --tags "kubernetes-certs"
-    ```
-     {: codeblock}
 
 ## Restoring IPsec certificates
 {: #ipsec}
@@ -241,7 +210,7 @@ You can restore certificates for the following components:
 
 2. Run the following command to restore the `ipsec` certificates:
   - For Red Hat Advanced Cluster Management for Kubernetes:
-    - For {{site.data.keyword.linux_notm}}, run the following command:
+    - For Linux, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -264,14 +233,6 @@ You can restore certificates for the following components:
       replace-certificates --tags "ipsec-certs"
       ```
         {: codeblock}
-
-  - For {{site.data.keyword.icp_ce_notm}}, run the following command:
-    ```bash
-    sudo docker run --net=host -t -e LICENSE=accept \
-    -v "$(pwd)":/installer/clusteribmcom/icp-inception:3.2.2 \
-    replace-certificates --tags "ipsec-certs"
-    ```
-     {: codeblock}
 
 ## Restoring Helm certificates
 {: #helm}
@@ -286,7 +247,7 @@ You can restore certificates for the following components:
 
 2. Run the following command to restore the `helm` certificates:
   - For Red Hat Advanced Cluster Management for Kubernetes:
-    - For {{site.data.keyword.linux_notm}}, run the following command:
+    - For Linux, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -309,14 +270,6 @@ You can restore certificates for the following components:
       replace-certificates --tags "helm-certs"
       ```
         {: codeblock}
-
-  - For {{site.data.keyword.icp_ce_notm}}, run the following command:
-    ```bash
-    sudo docker run --net=host -t -e LICENSE=accept \
-    -v "$(pwd)":/installer/clusteribmcom/icp-inception:3.2.2 \
-    replace-certificates --tags "helm-certs"
-    ```
-     {: codeblock}
 
 ## Reloading services
 {: #reload}
@@ -348,7 +301,7 @@ done
 ### Recreate image pull secrets
 {: #recreate}
   - For Red Hat Advanced Cluster Management for Kubernetes:
-    - For {{site.data.keyword.linux_notm}}, run the following command:
+    - For Linux, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -368,14 +321,6 @@ done
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-s390x:3.2.2-rhel-ee \
-      image-pull-secret
-      ```
-      {: codeblock}
-
-  - For {{site.data.keyword.icp_ce_notm}}, run the following command:
-      ```bash
-      sudo docker run --net=host -t -e LICENSE=accept \
-      -v "$(pwd)":/installer/clusteribmcom/icp-inception:3.2.2 \
       image-pull-secret
       ```
       {: codeblock}

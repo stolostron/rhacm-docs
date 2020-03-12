@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-05"
+lastupdated: "2020-03-11"
 
 ---
 
@@ -22,14 +22,14 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
   - [Menu and logo on the console header changes](#1527)
   - [Cannot create a Helm release on a managed cluster](#helm_issue)
   - [Applications fail to install during Helm deployment](#load_error)
-  - [Missing data in Grafana for {{site.data.keyword.open_s}}](#31754)
+  - [Missing data in Grafana for OpenShift Container Platform ](#31754)
   - [Subscription status remains healthy when deployable source is deleted](#29445)
   - [ObjectBucket channels support including only one resource in each object](#194)
   - [Subscriptions that use a secret must be changed before updates to dependency resources can be detected](#611)
   - [Permission issue with Docker Version 18.03 with Ubuntu 16.04 LTS](#31947)
   - [Hub cluster resources display as `local-cluster` in console search results ](#31979)
   - [Mapping error for a certificate policy](#1351_mapping)
-  - [{{site.data.keyword.kui}} fails when returning over 200 KB of data](#34145)
+  - [Visual Web Terminal fails when returning over 200 KB of data](#34145)
   - [Enabling Red Hat Advanced Cluster Management for Kubernetes for the installed monitoring release](#1051)
   - [LDAP user names are case-sensitive](#25735)
   - [Pods are not reachable from the NGINX ingress controller in multitenant isolation mode](#34414)
@@ -111,10 +111,10 @@ To fix this error, reinstall your application by following the tasks:
 
 For more details, see the [Helm community issue ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")]( https://github.com/helm/helm/issues/3353){: new_window}.
 
-## Missing data in Grafana for {{site.data.keyword.open_s}}
+## Missing data in Grafana for OpenShift Container Platform 
 {: #31754}
 
-If any of your managed clusters are {{site.data.keyword.ocp}} clusters, data for the clusters can be missing within the Grafana dashboard for cluster monitoring.
+If any of your managed clusters are OpenShift Container Platform clusters, data for the clusters can be missing within the Grafana dashboard for cluster monitoring.
 
 ## Subscription status remains healthy when deployable source is deleted
 {: #29445}
@@ -192,10 +192,10 @@ You must unbind the certificate policy from your third-party cluster. Complete t
 
 Your certificate policies are unbound from your third-party clusters.
 
-## {{site.data.keyword.kui}} fails when returning over 200 KB of data
+## Visual Web Terminal fails when returning over 200 KB of data
 {: #34145}
 
-The limit for the returned content of a command that is issued with the Visual Web Terminal is 200 KB. If the returned information exceeds 200 KB, an error is displayed. The workaround is to enter the command using a terminal window that is outside of the {{site.data.keyword.kui}}.
+The limit for the returned content of a command that is issued with the Visual Web Terminal is 200 KB. If the returned information exceeds 200 KB, an error is displayed. The workaround is to enter the command using a terminal window that is outside of the Visual Web Terminal.
 
 ## Enabling Red Hat Advanced Cluster Management for Kubernetes for the installed monitoring release
 {: #1051}

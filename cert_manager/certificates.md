@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-11-25"
+  years: 2019, 2020
+lastupdated: "2020-03-12"
 
 ---
 
@@ -31,9 +31,7 @@ You can bring your own key to use inside your Red Hat Advanced Cluster
 
 All certificates required by services that run on Red Hat Advanced Cluster Management for Kubernetes are created during the installation of Red Hat Advanced Cluster Management for Kubernetes. Certificates are either created and managed by the Red Hat Advanced Cluster Management for Kubernetes installer or by the Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager).
 
-<!-- Use the certificate policy controller to create and manage certificate policies. For more information, see [Certificate policy controller](../manage_policies/cert_policy_ctrl.md). -->
-
-<!--might need remove the previous statement bc it will point the user to CP4MCM; consider checking for a doc that explains creating policy resources, or remove entire statement--LC 11/18/19 removed prev statement-->
+Use the certificate policy controller to create and manage certificate policies. For more information, see [Certificate policy controller](../compliance/cert_policy_ctrl.md).
 
 ## Red Hat Advanced Cluster Management for Kubernetes Certificates
 These are the certificates that are automatically created during the installation of Red Hat Advanced Cluster Management for Kubernetes. 
@@ -59,7 +57,7 @@ Certificates are located in the `<install_directory>/cluster/cfc-certs/` directo
 | Kubernetes | Kubectl CLI | `kubecfg.crt` | `kubecfg.key` | kubernetes/ | Red Hat Advanced Cluster Management for Kubernetes Root CA | 2 |
 | Kubernetes | Kubelet | `kubelet-<master ip>.crt` | `kubelet-<master ip>.key` | kubernetes/ | Red Hat Advanced Cluster Management for Kubernetes Root CA | 2 |
 | Kubernetes | Kubelet Client for Kubernetes API Server | `kubelet-client.crt` | `kubelet-client.key` | kubernetes/ | Red Hat Advanced Cluster Management for Kubernetes Root CA | 2 |
-| Kubernetes | Kubernetes Proxy Client | `kube-proxy.crt` | `kube-proxy.key` | kubernetes/ | {{site.data.keyword.iproduct}} Root CA | 2 |
+| Kubernetes | Kubernetes Proxy Client | `kube-proxy.crt` | `kube-proxy.key` | kubernetes/ | Red Hat Advanced Cluster Management for Kubernetes Root CA | 2 |
 | Kubernetes | Kubernetes Scheduler | `kube-scheduler.crt` | `kube-scheduler.key` | kubernetes/ | Red Hat Advanced Cluster Management for Kubernetes Root CA | 2 |
 | Kubernetes | Kubernetes Control Manager | `kube-controller-manager.crt` | `kube-controller-manager.key` | kubernetes/ | Red Hat Advanced Cluster Management for Kubernetes Root CA | 2 |
 | Helm-Tiller | Helm-Tiller Server | `tiller.crt` | `tiller.key` | helm/ | Red Hat Advanced Cluster Management for Kubernetes Root CA | 2 |
