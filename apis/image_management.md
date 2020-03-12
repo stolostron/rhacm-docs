@@ -21,7 +21,7 @@ The image management API commands list, update, and delete images in the image r
 
 Both Cluster administrator and Administrator can access all image management APIs commands for all resources.	
 
-To use these APIs, you must add an authorization header to your request. See [Preparing to run component or management API commands](../iam/3.4.0/apis/access_api.md).	
+To use these APIs, you must add an authorization header to your request. See [Preparing to run component or management API commands](../iam/3.4.0/apis/access_api.md).	<!--need to verify link-->
 
 For example,	
 
@@ -35,7 +35,7 @@ In this command:
 
 * `$ID_TOKEN` is the variable that stores the identity token for your cluster	
 
-* `<Cluster Master Host>` and `<Cluster Master API Port>` are defined in [Master endpoints](../installer/3.2.2/cluster_endpoints.md#master)	
+* `<Cluster Master Host>` and `<Cluster Master API Port>` are defined in [Master endpoints](../install/cluster_endpoints.md#master)	
 If you have not set a CA domain, you can continue the request with an insecure connection.	
 
 For example,	
