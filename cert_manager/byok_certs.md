@@ -21,7 +21,6 @@ You can replace certain certificates that are created by the installer in your R
 
 - {: child} [Root CA certificates](cert_root_ca.md) <br />
 - {: child} [Management ingress certificates](cert_mgmt_ingress.md) <br />
-- {: child} [Image manager certificates](cert_image_mgr.md) <br /> <!--need to verify that this is applicable in meeting on Friday-->
 {: childlinks}
 
 **Required user type or access level**: Cluster administrator or team administrator
