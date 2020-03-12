@@ -109,14 +109,12 @@ For more specific search results, include the property in your search. For examp
    
   - Your search results are grouped by `kind`, and each resource `kind` is grouped in a table. 
 
-  - Your search options depend on your cluster objects. See the following examples: name, namespace, status, and other resource fields. Auto-complete provides suggestions to refine your search.  
-  
-  **Note:** Any user can search for resources, but results are based on your role-based access control assignment. Additionally, if you save and share a Search query with another user, returned results depend on access level for that user. For more information on role access, see _Using RBAC Authorization_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/){:new_window}.
-
-  - You can refine your results with specific fields. See the following example:
+  - Your search options depend on your cluster objects. You can refine your results with specific labels. Search is case-sensitive when you query labels. See the following examples: name, namespace, status, and other resource fields. Auto-complete provides suggestions to refine your search. See the following example:
 
     - Search for a single field, such as `kind:pod` to find all pod resources.
-    - Search for multiple fields, such as `kind:pod namespace:default` to find the pods in the default namespace.
+    - Search for multiple fields, such as `kind:pod namespace:default` to find the pods in the default namespace. 
+  
+  **Note:** Any user can search for resources, but results are based on your role-based access control assignment. Additionally, if you save and share a Search query with another user, returned results depend on access level for that user. For more information on role access, see _Using RBAC Authorization_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/){:new_window}.
 
   - You can also search with conditions by using characters, such as `>, >=, <, <=, !=`.
 
