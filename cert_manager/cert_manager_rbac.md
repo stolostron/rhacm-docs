@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-02"
+  years: 2019, 2020
+lastupdated: "2020-03-12"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2019-12-02"
 
 # Red Hat Advanced Cluster Management for Kubernetes Certificate Manager role-based access control (RBAC) support
 
-In Red Hat Advanced Cluster Management for Kubernetes {{site.data.keyword.version}} and previous, RBAC support exists for Red Hat Advanced Cluster Management for Kubernetes Certificate Manager resources. For more information, see [RBAC for Certificate Manager resources](#cm). All existing RBAC rules for other resources within Red Hat Advanced Cluster Management for Kubernetes apply in addition to the Certificate Manager rules.
+In Red Hat Advanced Cluster Management for Kubernetes 4.4.0, RBAC support exists for Red Hat Advanced Cluster Management for Kubernetes Certificate Manager resources. For more information, see [RBAC for Certificate Manager resources](#cm). All existing RBAC rules for other resources within Red Hat Advanced Cluster Management for Kubernetes apply in addition to the Certificate Manager rules.
 
 The ability to access Certificate Manager resources differs from the open source version of cert-manager.
 

@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-05"
+lastupdated: "2020-03-12"
 
 ---
 
@@ -42,7 +42,7 @@ Each _policy_ within the policy document contains the following elements.
 
     - An `object-template` is used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. An example of object can be a pod security policy, an image policy, or a limit range.
     
-    - A `policy-template` is used to create one or more policies for third party or external security controls. For example, you can create a certificate expiration policy with the certificate policy controller. For more information about other policy and their  controllers, see [{{site.data.keyword.mcm_notm}} policy controllers](../compliance/policy_controllers.md).
+    - A `policy-template` is used to create one or more policies for third party or external security controls. For example, you can create a certificate expiration policy with the certificate policy controller. For more information about other policy and their  controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../compliance/policy_controllers.md).
 
 ## Creating a configuration policy
 
@@ -56,7 +56,7 @@ You can create a YAML file for your configuration policy or create a configurati
 
 Complete the following steps to create a configuration policy from the command line interface (CLI):
 
-1. Create a YAML file for your configuration policy. See [Creating a YAML file for an {{site.data.keyword.mcm_notm}} policy](../compliance/create_policy.md#yaml) for more information on policy requirements. 
+1. Create a YAML file for your configuration policy. See [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](../compliance/create_policy.md#yaml) for more information on policy requirements. 
 
     Your configuration policy might resemble the following policy:
 
@@ -166,4 +166,4 @@ You can view any configuration policy and its status from the console.
 4. Select one of your policies.
 
 
-For more information, see [Policy samples](../manage_policies/policy_samples.md) to view policy samples that can be applied with the configuration policy controller.
+For more information, see [Policy samples](..compliance/policy_samples.md) to view policy samples that can be applied with the configuration policy controller.

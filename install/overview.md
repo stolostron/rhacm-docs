@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-12"
+  years: 2019, 2020
+lastupdated: "2020-03-12"
 
 ---
 
@@ -21,13 +21,13 @@ This section provides all the details to install and validate, uninstall, and up
 
 Before you install the Red Hat Advanced Cluster Management for Kubernetes, review the required hardware and system configuration for each product.
 
-You can install the Red Hat Advanced Cluster Management for Kubernetes either online or offline on IBM Cloud, {{site.data.keyword.linux_bit}}, and {{site.data.keyword.ppc}} with a supported version of {{site.data.keyword.ocp_tm}}.
+You can install the Red Hat Advanced Cluster Management for Kubernetes either online or offline on Linux, and Linux on Power (ppc64le) with a supported version of OpenShift Container Platform.
 
 High-level installation flow:
 
 <img src="../images/install_cp4mcm.svg" width="70%" alt="High-level installation">
 
-1. You must have a supported version of {{site.data.keyword.ocp}} installed on premise.
+1. You must have a supported version of OpenShift Container Platform installed on premise.
 2. Complete either an offline or online installation:
 3. Optionally, install modules or products that you require for your cluster.
 

@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2019, 2020
+lastupdated: "2020-03-12"
 
 ---
 
@@ -14,7 +14,7 @@ lastupdated: "2019-12-11"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} policy samples
+# Red Hat Advanced Cluster Management for Kubernetes policy samples
 
 View a description of the the policy samples that are included in your Red Hat Advanced Cluster Management for Kubernetes installation.
 {:shortdesc}
@@ -358,4 +358,4 @@ Complete the following steps to apply the role binding policy from the console:
 4. Select **Rolebinding** from the _Specifications_ field.
           
           
-  See [{{site.data.keyword.mcm_notm}} Governance and risk](../compliance/compliance_intro.md) for more information about policies.
+  See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md) for more information about policies.

@@ -60,7 +60,6 @@
      * [Replacing certificates](cert_manager/refresh_cert.md)
        * [Replacing the root CA certificate](cert_manager/cert_root_ca.md)
        * [Replacing management ingress certificates](cert_manager/cert_mgmt_ingress.md)
-       * [Replacing image manager certificates](cert_manager/cert_image_mgr.md)
      * [Restoring certificates](cert_manager/restore_certs.md)
      * [Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)](cert_manager/cert_manager.md)
        * [Creating your own self-signed and CA Issuers](cert_manager/create_issuer.md)

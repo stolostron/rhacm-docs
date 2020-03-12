@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-04"
+lastupdated: "2020-03-12"
 
 ---
 
@@ -19,21 +19,21 @@ lastupdated: "2020-03-04"
 Before you install the Red Hat Advanced Cluster Management for Kubernetes, review the system requirements for each of the products and the footprint sizing for the entire Cloud Pak.
 {:shortdesc}
 
-  - [{{site.data.keyword.ocp_tm}}](#ocp)
+  - [OpenShift Container Platform](#ocp)
   - [Red Hat Advanced Cluster Management for Kubernetes](#cloud_pak)
   - [IBM Cloud App Management](#app)
   - [IBM Cloud Automation Manager](#auto)
   - [Sizing for the multicluster-endpoint](#mc_endpoint)
   - [Sizing for the management hub services](#management_services)
 
-## {{site.data.keyword.ocp_tm}}
+## OpenShift Container Platform
 {: #ocp}
 
-* {{site.data.keyword.ocp}} compute or worker nodes: 16 Core | 32 GB RAM
-**Note:** The required resources are the allocatable resources on the {{site.data.keyword.open_s}} nodes. If you want to install Cloud Paks on top of the Red Hat Advanced Cluster Management for Kubernetes, you need to add the additional required resources.
+* OpenShift Container Platform compute or worker nodes: 16 Core | 32 GB RAM
+**Note:** The required resources are the allocatable resources on the OpenShift nodes. If you want to install Cloud Paks on top of the Red Hat Advanced Cluster Management for Kubernetes, you need to add the additional required resources.
 
 * Storage requirements:
-  - For offline installation, the {{site.data.keyword.ocp}} image registry requires at least 100 GB.
+  - For offline installation, the OpenShift Container Platform image registry requires at least 100 GB.
   - The management services MongoDB and logging each require 20 GB through the storage class.
 
 ## Red Hat Advanced Cluster Management for Kubernetes
@@ -41,19 +41,19 @@ Before you install the Red Hat Advanced Cluster Management for Kubernetes, revie
 
 Sizing is available for entry, standard, and enterprise footprints.
 
-**Notes:** A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu){: new_window}.
+**Notes:** A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu){: new_window}.
 
-### Deployment topology for {{site.data.keyword.open_s}} and the Red Hat Advanced Cluster Management for Kubernetes
+### Deployment topology for OpenShift and the Red Hat Advanced Cluster Management for Kubernetes
 
-| Deployment topology | Description of usage | {{site.data.keyword.open_s}} 3.11 node configuration  | {{site.data.keyword.open_s}} 4.2 node configuration |
+| Deployment topology | Description of usage | OpenShift 3.11 node configuration  | OpenShift 4.2 node configuration |
 | :--- | :--- | :--- | :---|
-| Development | For development, test, and POC | Both {{site.data.keyword.open_s}} and the Cloud Pak on a single node | |
-| Minimal | Small cluster deployment | <p>{{site.data.keyword.open_s}}:<br>&nbsp; 1 master node <br>&nbsp; 1 or 2 infra nodes <br>&nbsp; 2 or more worker nodes </p><p>Cloud Pak: <br> &nbsp; 1 dedicated worker node (see note) </p> | <p>{{site.data.keyword.open_s}}: <br> &nbsp; 3 master nodes <br> &nbsp; 2 or more worker nodes </p><p>Cloud Pak:<br> &nbsp; 1 dedicated Cloud Pak worker node </p> |
-| Standard | Regular production deployment | <p> {{site.data.keyword.open_s}}: <br>&nbsp; 3 master nodes (native HA) <br> &nbsp; 2 infra nodes <br>&nbsp; 4 or more worker nodes </pr><pr> <br><br> Cloud Pak: <br>&nbsp; 1 Cloud Pak master node <br>&nbsp; 1 Cloud Pak management node <br> &nbsp; 1 Cloud Pak proxy node </p> | <p> {{site.data.keyword.open_s}}: <br>&nbsp; 3 master nodes (native HA) <br>&nbsp; 4 or more worker nodes </p><p> Cloud Pak:<br>&nbsp; 1 Cloud Pak master node <br> &nbsp; 1 Cloud Pak management node <br>&nbsp; 1 Cloud Pak proxy node </p>|
-| Enterprise	| Medium and large-scale production deployment| <p></p>{{site.data.keyword.open_s}}: <br>&nbsp; 3 master nodes (native HA) <br> &nbsp; 2 or more infra nodes <br>&nbsp; 8 or more worker nodes </p><p><br> Cloud Pak: <br> &nbsp; 3 Cloud Pak master nodes <br> &nbsp; 2 Cloud Pak management nodes <br>&nbsp; 2 Cloud Pak proxy nodes </p> |{{site.data.keyword.open_s}}: <br> &nbsp; 3 master nodes (native HA) <br>&nbsp; 8 or more worker nodes </p><p> <br> Cloud Pak: <br> &nbsp; 3 Cloud Pak master nodes <br> &nbsp; 2  Cloud Pak management nodes <br>&nbsp; 2 Cloud Pak proxy nodes </p> |
+| Development | For development, test, and POC | Both OpenShift and the Cloud Pak on a single node | |
+| Minimal | Small cluster deployment | <p>OpenShift:<br>&nbsp; 1 master node <br>&nbsp; 1 or 2 infra nodes <br>&nbsp; 2 or more worker nodes </p><p>Cloud Pak: <br> &nbsp; 1 dedicated worker node (see note) </p> | <p>OpenShift: <br> &nbsp; 3 master nodes <br> &nbsp; 2 or more worker nodes </p><p>Cloud Pak:<br> &nbsp; 1 dedicated Cloud Pak worker node </p> |
+| Standard | Regular production deployment | <p> OpenShift: <br>&nbsp; 3 master nodes (native HA) <br> &nbsp; 2 infra nodes <br>&nbsp; 4 or more worker nodes </pr><pr> <br><br> Cloud Pak: <br>&nbsp; 1 Cloud Pak master node <br>&nbsp; 1 Cloud Pak management node <br> &nbsp; 1 Cloud Pak proxy node </p> | <p> OpenShift: <br>&nbsp; 3 master nodes (native HA) <br>&nbsp; 4 or more worker nodes </p><p> Cloud Pak:<br>&nbsp; 1 Cloud Pak master node <br> &nbsp; 1 Cloud Pak management node <br>&nbsp; 1 Cloud Pak proxy node </p>|
+| Enterprise	| Medium and large-scale production deployment| <p></p>OpenShift: <br>&nbsp; 3 master nodes (native HA) <br> &nbsp; 2 or more infra nodes <br>&nbsp; 8 or more worker nodes </p><p><br> Cloud Pak: <br> &nbsp; 3 Cloud Pak master nodes <br> &nbsp; 2 Cloud Pak management nodes <br>&nbsp; 2 Cloud Pak proxy nodes </p> |OpenShift: <br> &nbsp; 3 master nodes (native HA) <br>&nbsp; 8 or more worker nodes </p><p> <br> Cloud Pak: <br> &nbsp; 3 Cloud Pak master nodes <br> &nbsp; 2  Cloud Pak management nodes <br>&nbsp; 2 Cloud Pak proxy nodes </p> |
 {: caption="Table 1. Deployment topology configurations for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
-**Note:** For one dedicated Cloud Pak worker node, set the master, management, and proxy nodes to one {{site.data.keyword.open_s}} worker node.
+**Note:** For one dedicated Cloud Pak worker node, set the master, management, and proxy nodes to one OpenShift worker node.
 
 ### Default configurations
 
@@ -70,14 +70,14 @@ Sizing is available for entry, standard, and enterprise footprints.
 ### Development sizing
 | Configuration | Number of nodes | vCPUs | Memory | Persistent volumes (GB) | Disk Space (GB) | Note |
 | :--- | :---: | :---: | :---: | :---: |:---: |:--- |
-| master, management, proxy	| 1| 8	| 16	| 20  | 100  | The Cloud Pak runs on the same node as {{site.data.keyword.open_s}}
-{: caption="Table 3. Development, test, and POC {{site.data.keyword.open_s}} node sizing for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
+| master, management, proxy	| 1| 8	| 16	| 20  | 100  | The Cloud Pak runs on the same node as OpenShift
+{: caption="Table 3. Development, test, and POC OpenShift node sizing for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
 ### Minimal sizing
 | Configuration | Number of nodes | vCPUs | Memory | Persistent volumes (GB) | Disk Space (GB) |
 | :--- | :---: | :---: | :---: | :---: |:---: |
 | master, management, proxy	| 1| 16	| 32	| 20  | 100  |
-{: caption="Table 4. Minimal {{site.data.keyword.open_s}} node sizing for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
+{: caption="Table 4. Minimal OpenShift node sizing for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
 ### Standard sizing
 
@@ -86,7 +86,7 @@ Sizing is available for entry, standard, and enterprise footprints.
 | master | 1| 16	| 32	| 20 | 100  |
 | management | 1| 12	| 24	| - | 100 |
 | proxy| 1| 4	| 8	| - | 100  |
-{: caption="Table 5. Standard {{site.data.keyword.open_s}} node sizing for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
+{: caption="Table 5. Standard OpenShift node sizing for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
 ### Enterprise sizing
 
@@ -95,7 +95,7 @@ Sizing is available for entry, standard, and enterprise footprints.
 | master | 3| 48	| 96	| 60 | 200  |
 | management | 2| 24	| 48	| - | 200  |
 | proxy| 2| 8	| 16	| - | 200  |
-{: caption="Table 6. Enterprise {{site.data.keyword.open_s}} node sizing for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
+{: caption="Table 6. Enterprise OpenShift node sizing for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
 ## IBM Cloud App Management
 {: #app}
