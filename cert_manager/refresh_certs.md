@@ -2,7 +2,7 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-01-08"
+lastupdated: "2020-03-12"
 
 ---
 
@@ -70,7 +70,7 @@ Complete the following steps to back up the existing certificates:
 
 3. Run the following command to refresh the `root-ca` certificates:
    - For Red Hat Advanced Cluster Management for Kubernetes:
-     - For {{site.data.keyword.linux_notm}}, run the following command:
+     - For Linux, run the following command:
        ```bash
        sudo docker run --net=host -t -e LICENSE=accept \
        -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -126,7 +126,7 @@ All default tokens and related services must reload. For more information, see [
 
 2. Run the following command to replace the `etcd` certificates:
 
-  - For {{site.data.keyword.linux_notm}}, run the following command:
+  - For Linux, run the following command:
     ```bash
     sudo docker run --net=host -t -e LICENSE=accept \
     -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -161,7 +161,7 @@ All default tokens and related services must reload. For more information, see [
 
 2. Run the following command to replace the `front proxy` certificates:
 
-    - For {{site.data.keyword.linux_notm}}, run the following command:
+    - For Linux, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -196,7 +196,7 @@ All default tokens and related services must reload. For more information, see [
 
 2. Run the following command to replace the `kubernetes` certificates:
 
-    - For {{site.data.keyword.linux_notm}}, run the following command:
+    - For Linux, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -231,7 +231,7 @@ All default tokens and related services must reload. For more information, see [
 
 2. Run the following command to replace the `ipsec` certificates:
 
-    - For {{site.data.keyword.linux_notm}}, run the following command:
+    - For Linux, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -264,7 +264,7 @@ All default tokens and related services must reload. For more information, see [
 
 2. Run the following command to replace the `helm` certificates:
 
-    - For {{site.data.keyword.linux_notm}}, run the following command:
+    - For Linux, run the following command:
       ```bash
       sudo docker run --net=host -t -e LICENSE=accept \
       -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \
@@ -320,7 +320,7 @@ done
 ### Recreate image pull secret
 {: #recreate}
 
-  - For {{site.data.keyword.linux_notm}}, run the following command:
+  - For Linux, run the following command:
     ```bash
     sudo docker run --net=host -t -e LICENSE=accept \
     -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.2.2-rhel-ee \

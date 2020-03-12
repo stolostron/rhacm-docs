@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-11-25"
+  years: 2018, 2020
+lastupdated: "2020-03-12"
 
 ---
 
@@ -17,7 +17,7 @@ lastupdated: "2019-11-25"
 
 # Creating your own self-signed and CA Issuers
 
-To create certificates in {{site.data.keyword.product_tm}} that are managed by Certificate manager, you must first create an Issuer.
+To create certificates in Red Hat Advanced Cluster Management for Kubernetes that are managed by Certificate manager, you must first create an Issuer.
 
 Create a self-signed Issuer, then use that Issuer to create a CA certificate. Your CA certificate can be managed by Certificate manager.
 
