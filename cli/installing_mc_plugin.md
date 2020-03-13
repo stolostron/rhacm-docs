@@ -1,7 +1,7 @@
 ---
 copyright:
   years: 2019
-lastupdated: 2019-12-11
+lastupdated: 2020-03-12
 ---
 
 {:new_window: target="_blank"}
@@ -12,57 +12,32 @@ lastupdated: 2019-12-11
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Installing the {{site.data.keyword.cloud_pak}} CLI (cloudctl) multicluster plug-in (mc)
+# Installing the multicluster plug-in (mc)
 
-The `mc` plug-in is not in the {{site.data.keyword.cloud_pak}} CLI (cloudctl) installation. Complete the following procedure to download and install the plug-in to work with multiple clusters.
+The `mc` plug-in is installed after you install the OpenShift Container Platform command-line interface (CLI) tool. You can use the multicluster plug-in (mc) to view information about your clusters, manage your clusters, deploy applications, and more.
+{:shortdesc}
 
 ## Prerequisites
 
-* You must install the {{site.data.keyword.cloud_pak}} CLI, `cloudctl`. For more information, see [Installing the {{site.data.keyword.cloud_pak}} CLI](../cloudctl/install_cli.md) to install the CLI.
+* You must install the CLI [installation documentation](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.3/html/cli_tools/openshift-cli-oc) to install the OpenShift Container Platform command-line interface (CLI).
 
 ## Installing the plug-in
 
 1. Download the multicluster, or `mc` plug-in for the applicable operating system. See the list of the `mc` plug-in commands for the different operating systems:
 
-  For macOS, run the following command:
-  
+  For macOS, run the following command: < list of os and commands needed >
+   
+2. Install the `mc` plugin for `oc`. Run the following command to install the plug-in:
+
   ```
-  curl -kLo cloudctl-mc-plugin https://<Cluster Master Host>:<Cluster Master API Port>/rcm/plugins/mc-darwin-amd64
+  oc plugin install -f oc-mc-plugin
   ```
   {: codeblock}
 
-  For {{site.data.keyword.ppc_notm}}, run the following command:
-  
-  ```
-  curl -kLo cloudctl-mc-plugin https://<Cluster Master Host>:<Cluster Master API Port>/rcm/plugins/mc-linux-ppc64le
-  ```
-  {: codeblock}
-
-  For {{site.data.keyword.linux_notm}}, run the following command:
-  
-  ```
-  curl -kLo cloudctl-mc-plugin https://<Cluster Master Host>:<Cluster Master API Port>/rcm/plugins/mc-linux-amd64
-  ```
-  {: codeblock}
-
-  For {{site.data.keyword.s390_notm}}, run the following command:
-  
-  ```
-  curl -kLo cloudctl-mc-plugin https://<Cluster Master Host>:<Cluster Master API Port>/rcm/plugins/mc-linux-s390x
-  ```
-  {: codeblock}
-    
-2. Install the `mc` plugin for `cloudctl`. Run the following command to install the plug-in:
+3. Verify that the `mc` plugin for `oc` was successfully installed. Run the following command:
 
   ```
-  cloudctl plugin install -f cloudctl-mc-plugin
-  ```
-  {: codeblock}
-
-3. Verify that the `mc` plugin for `cloudctl` was successfully installed. Run the following command:
-
-  ```
-  cloudctl mc -help
+  oc mc -help
   ```
   {: codeblock}
 
@@ -70,10 +45,10 @@ The `mc` plug-in is not in the {{site.data.keyword.cloud_pak}} CLI (cloudctl) in
 
   ```
   NAME:
-     cloudctl mc
+     oc mc
 
   USAGE:
-     cloudctl mc command [arguments...] [command options]
+     oc mc command [arguments...] [command options]
 
   COMMANDS:
      apply                Apply a configuration to a resource by `filename` or `stdin`.
@@ -95,4 +70,4 @@ The `mc` plug-in is not in the {{site.data.keyword.cloud_pak}} CLI (cloudctl) in
   ```
   {: pre}
 
-  Enter `cloudctl mc help [command]` for more information about a command.
+  Enter `oc mc help [command]` for more information about a command.
