@@ -2,7 +2,7 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-12"
+lastupdated: "2020-03-13"
 
 ---
 
@@ -34,7 +34,8 @@ You can refresh certificates for the following components:
 
 
 ## Before you begin:
-Verify that your Red Hat Advanced Cluster Management for Kubernetes cluster is running.
+
+Verify that your Red Hat Advanced Cluster Management for Kubernetes cluster is running. <!--not sure if it was removed before but is there a command to display-->
 
 **Note:** When you run the command to refresh a certificate, the related management services might be unavailable for a short duration of time. The command has no impact on the applications in your cluster.
 

@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-12"
+lastupdated: "2020-03-13"
 
 ---
 
@@ -18,6 +18,7 @@ lastupdated: "2020-03-12"
 
 Various certificates are created and used throughout Red Hat Advanced Cluster Management for Kubernetes.
 {:shortdesc}
+
 More information about managing certificates created by the installer can be found in the following documents:
 * [Refreshing certificates](refresh_certs.md)
 * [Replacing certificates](byok_certs.md)
@@ -29,15 +30,17 @@ You can bring your own key to use inside your Red Hat Advanced Cluster
 
 ## Creating a certificate
 
-All certificates required by services that run on Red Hat Advanced Cluster Management for Kubernetes are created during the installation of Red Hat Advanced Cluster Management for Kubernetes. Certificates are either created and managed by the Red Hat Advanced Cluster Management for Kubernetes installer or by the Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager).
+All certificates required by services that run on Red Hat Advanced Cluster Management for Kubernetes are created during the installation of Red Hat Advanced Cluster Management for Kubernetes. Certificates are either created and managed by the Red Hat Advanced Cluster Management for Kubernetes installer or by the Red Hat Advanced Cluster Management for Kubernetes Certificate manager (`cert-manager`).
 
 Use the certificate policy controller to create and manage certificate policies. For more information, see [Certificate policy controller](../compliance/cert_policy_ctrl.md).
 
 ## Red Hat Advanced Cluster Management for Kubernetes Certificates
-These are the certificates that are automatically created during the installation of Red Hat Advanced Cluster Management for Kubernetes. 
+
+These are the certificates that are automatically created during the installation of Red Hat Advanced Cluster Management for Kubernetes. <!--validate-->
 
 ### Created and managed by Installer
-Certificates are located in the `<install_directory>/cluster/cfc-certs/` directory. All certificates have a key size of 2048 bits, except for the Red Hat Advanced Cluster Management for Kubernetes Root CA, which has a key size of 4096 bits. 
+
+Certificates are located in the `<install_directory>/cluster/cfc-certs/` directory. All certificates have a key size of 2048 bits, except for the Red Hat Advanced Cluster Management for Kubernetes Root CA, which has a key size of 4096 bits. <!--verify-->
 
 #### Certificates that can be updated after installation
 
@@ -65,16 +68,20 @@ Certificates are located in the `<install_directory>/cluster/cfc-certs/` directo
 | IPSec | IPSec (Strong Swan or Libre Swan) | `ipsec-mesh.crt` | `ipsec-mesh.key` | ipsec/ | Red Hat Advanced Cluster Management for Kubernetes Root CA | 2 |
 
 #### Accessing the Red Hat Advanced Cluster Management for Kubernetes Root CA Certificate
-The Red Hat Advanced Cluster Management for Kubernetes Root CA Certificate is stored within the Kubernetes Secret `ibmcloud-cluster-ca-cert` in the `kube-public` namespace. The certificate can be imported into your client truststores to access Red Hat Advanced Cluster Management for Kubernetes Platform APIs.
 
-To retrieve and decode the certificate, run the following command:
+The Red Hat Advanced Cluster Management for Kubernetes Root CA Certificate is stored within the Kubernetes Secret `cloud-cluster-ca-cert` in the `kube-public` namespace. The certificate can be imported into your client truststores to access Red Hat Advanced Cluster Management for Kubernetes Platform APIs.
+
+To retrieve and decode the certificate, run the following command: <!--verify the command-->
+
 ```
-kubectl get secret -n kube-public ibmcloud-cluster-ca-cert -o jsonpath='{.data.ca\.crt}' | base64 --decode
+kubectl get secret -n kube-public rcm-cluster-ca-cert -o jsonpath='{.data.ca\.crt}' | base64 --decode
 ```
 {: codeblock}
 
-### Created and managed by Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)
-The following internal services use cert-manager to create and manage their certificates.
+### Created and managed by Red Hat Advanced Cluster Management for Kubernetes Certificate manager (_cert-manager_)
+
+The following internal services use `cert-manager` to create and manage their certificates: <!--verify-->
+
 * IAM
 * MongoDB
 * Key Management Service
@@ -85,6 +92,6 @@ The following internal services use cert-manager to create and manage their cert
 * Audit Logging
 * Image Manager (Docker Registry) and Management ingress
 
-All certificates managed by cert-manager for example, Management ingress, are managed (created, refreshed, and watched) by cert-manager.
+All certificates managed by `cert-manager` for example, Management ingress, are managed (created, refreshed, and watched) by `cert-manager`.
 
 For more information about cert-manager, see [Using Red Hat Advanced Cluster Management for Kubernetes Certificate manager](cert_manager.md).
