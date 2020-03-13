@@ -1,16 +1,10 @@
 ---
-copyright:
-  years: 2016, 2019
-lastupdated: 2019-11-20
----
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
+copyright:
+  years: 2020
+lastupdated: "2020-03-09"
+
+---
 
 # Multicluster commands (mc)
 {: #cli_mc_commands}
