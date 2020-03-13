@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-13"
+  years: 2019, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2019-12-13"
 
 # Creating and managing channels
 
-Create and use channels when you need to improve the continuous integration and delivery capabilities for creating and managing your {{site.data.keyword.mcm_notm}} applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access.
+Create and use channels when you need to improve the continuous integration and delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access.
 {:shortdesc}
 
 Channels (`Channel.app.ibm.com`) define a namespace within the hub cluster and point to a physical place where resources are stored for deployment. There are four types of channels. Each channel differs based on the type of source location where resources are stored:  
@@ -28,7 +28,7 @@ Channels (`Channel.app.ibm.com`) define a namespace within the hub cluster and p
   Stores Kubernetes resource YAML files. Each YAML file includes the template portion for one resource, not the full deployable object. An object store can be populated with a deployable object that is on the hub cluster or directly from a continuous integration pipeline, or by including the required YAML files into the object store.
 
 * Helm repository (`HelmRepo`)  
-  Stores Helm charts. For information about how to structure your charts, see [Helm documentation ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://helm.sh/docs/).
+  Stores Helm charts. For information about how to structure your charts, see [Helm documentation](https://helm.sh/docs/).
 
 * GitHub repository (`GitHub`)  
   Stores Kubernetes resources YAML files and unpackaged Helm charts. These resources do not need to be wrapped or represented as deployables. The channel controllers synchronize resources as deployables automatically.
@@ -72,7 +72,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    You can use a secret for authentication with only `HelmRepo`, `ObjectBucket`, and `GitHub` type channels. To associate a secret with a channel, include the `spec.secretRef.name` setting in your channel YAML definition.
 
-4. Create the channel within {{site.data.keyword.mcm_notm}}. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
+4. Create the channel within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
 
    * To use the console,
 
@@ -110,7 +110,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
         Ensure that your new channel is listed in the resulting output.
 
-   * To use REST API, you need to use the [channel POST API](../../apis/mcm/channels.json).
+   * To use REST API, you need to use the [channel POST API](../apis/mcm/channels.json).
 
 ## Updating a channel
 {: #channel_update}
@@ -137,7 +137,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a channel.
 
-   * To use REST API, use the [channel PATCH API](../../apis/mcm/channels.json).
+   * To use REST API, use the [channel PATCH API](../apis/mcm/channels.json).
 
 ## Deleting a channel
 {: #channel_delete}
@@ -167,7 +167,7 @@ To delete a channel, you can use the console, the Kubernetes command line interf
      ```
      {: codeblock}
 
-* To use REST API, use the [channel DELETE API](../../apis/mcm/channels.json).
+* To use REST API, use the [channel DELETE API](../apis/mcm/channels.json).
 
 ## Managing deployments with channels
 {: #channel_deployable}

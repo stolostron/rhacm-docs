@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-04"
+lastupdated: "2020-03-12"
 
 ---
 
@@ -14,9 +14,9 @@ lastupdated: "2020-03-04"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} policy overview
+# Red Hat Advanced Cluster Management for Kubernetes policy overview
 
-An {{site.data.keyword.mcm_notm}} template is defined within a policy document. Each policy document can have at least one or multiple templates. 
+An Red Hat Advanced Cluster Management for Kubernetes template is defined within a policy document. Each policy document can have at least one or multiple templates. 
 {:shortdesc}
 
 **Important**: Each client and cloud provider is responsible for ensuring that the cloud environment that they manage meets their enterprise security standards and any regulatory compliance requirements.
@@ -42,6 +42,6 @@ Each _policy_ within the policy document contains the following elements:
     
     - A `policy-template` is used to create one or more policies for third party or external security controls. For example, you can create a certificate expiration policy with the certificate policy controller. 
     
-    For more information about other policy controllers, see [{{site.data.keyword.mcm_notm}} policy controllers](../compliance/policy_controllers.md).
+    For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../compliance/policy_controllers.md).
 
-See [{{site.data.keyword.mcm_notm}} Governance and risk](compliance_intro.md) for more policy topics.
+See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](compliance_intro.md) for more policy topics.

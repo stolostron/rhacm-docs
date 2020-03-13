@@ -33,7 +33,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
 * You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md).
 
-* You must install the {{site.data.keyword.product}} CLI, `cloudctl`. For more information, see [Installing the {{site.data.keyword.product}} CLI](../../cloudctl/install_cli.md) to install the CLI.
+* You must install the Red Hat Advanced Cluster Management for Kubernetes CLI, `cloudctl`. For more information, see [Installing the Red Hat Advanced Cluster Management for Kubernetes CLI](../../cloudctl/install_cli.md) to install the CLI.
 
   **Note:** Download the installation file for CLI tools from the console.
   
@@ -46,7 +46,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 ## Prepare for import 
 {: #prep}
 
-To learn more about the `import` command and see [options] that are available, see [{{site.data.keyword.product}} CLI multicluster commands (mc)](../../cli/cli_mc_commands.md).
+To learn more about the `import` command and see [options] that are available, see [Red Hat Advanced Cluster Management for Kubernetes CLI multicluster commands (mc)](../../cli/cli_mc_commands.md).
 
 **Note:** By default, the `multicluster-endpoint` deployment pulls all of the required images from Docker Hub. You only need to install images from DockerHub if you are working in an air gapped environment.
 

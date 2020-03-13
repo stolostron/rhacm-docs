@@ -2,7 +2,7 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-04"
+lastupdated: "2020-03-13"
 
 ---
 
@@ -14,9 +14,9 @@ lastupdated: "2020-03-04"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Sizing your {{site.data.keyword.icp}} cluster
+# Sizing your Red Hat Advanced Cluster Management for Kubernetes cluster
 
-Each {{site.data.keyword.icp_notm}} cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.
+Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.
 
 **Note:** The requirements that are listed aren’t minimum requirements.
 
@@ -34,7 +34,6 @@ View the following considerations before you size your cluster.
 - [Proxy nodes](#proxy)
 - [Management nodes](#manage)
 - [Large cluster considerations](#large_consider)
-- [{{site.data.keyword.edge_servers_notm}} considerations](https://www.ibm.com/support/knowledgecenter/SSFKVV_3.2.1/servers/install_edge_planning.html)
 
 ### Worker nodes (workloads)
 {: #workload}
@@ -75,7 +74,7 @@ If monitoring and other optional components are enabled, you might not have enou
 ### Large cluster considerations
 {: #large_consider}
 
-Consider the capabilities of {{site.data.keyword.icp_notm}} when you plan for a large cluster. {{site.data.keyword.icp_notm}} has extra enterprise capability workloads in addition to Vanilla Kubernetes, adding more services, such as Calico (node to node MeSH). Also, consider monitoring and logging assessment.
+Consider the capabilities of Red Hat Advanced Cluster Management for Kubernetes when you plan for a large cluster. Red Hat Advanced Cluster Management for Kubernetes has extra enterprise capability workloads in addition to Vanilla Kubernetes, adding more services, such as Calico (node to node MeSH). Also, consider monitoring and logging assessment.
 
 The following are more considerations:
 
@@ -91,11 +90,11 @@ The following are more considerations:
 
 View the following sample deployments of different sized environments.
 
-- [Small {{site.data.keyword.icp_notm}} environment (resilience medium)](#small)
-- [Medium {{site.data.keyword.icp_notm}} environment (resilience medium)](#medium)
-- [Large {{site.data.keyword.icp_notm}} environment (resilience high)](#large)
+- [Small Red Hat Advanced Cluster Management for Kubernetes environment (resilience medium)](#small)
+- [Medium Red Hat Advanced Cluster Management for Kubernetes environment (resilience medium)](#medium)
+- [Large Red Hat Advanced Cluster Management for Kubernetes environment (resilience high)](#large)
 
-### Small {{site.data.keyword.icp_notm}} environment (resilience medium)
+### Small Red Hat Advanced Cluster Management for Kubernetes environment (resilience medium)
 {: #small}
 
 | Node type | Number of nodes | vCPU | Memory (GB) | Disk (GB) |
@@ -108,7 +107,7 @@ View the following sample deployments of different sized environments.
 
 To create a testing environment with this particular cluster, you can deploy a single master node and decrease the proxy nodes (resilience low). To provide the most flexibility for your environment, you must not combine node types. The workers included are shaped for Java workloads. See the [Worker nodes](#workload) section.
 
-### Medium {{site.data.keyword.icp_notm}} environment (resilience medium)
+### Medium Red Hat Advanced Cluster Management for Kubernetes environment (resilience medium)
 {: #medium}
 
 | Node type | Number of nodes | vCPU | Memory (GB) | Disk (GB) |
@@ -122,7 +121,7 @@ To create a testing environment with this particular cluster, you can deploy a s
 
 To increase your cluster's resilience level, add two extra master nodes.
 
-### Large {{site.data.keyword.icp_notm}} environment (resilience high)
+### Large Red Hat Advanced Cluster Management for Kubernetes environment (resilience high)
 {: #large}
 
 **Sizing cluster for 500 worker nodes**:
@@ -145,6 +144,6 @@ To increase your cluster's resilience level, add two extra master nodes.
 |	Proxy |	2	| 4	| 16	| 256 |
 |	Worker | 1000| 8	| 32	|400 |
 
-To increase your cluster resilience level, you must deploy and manage workloads across multiple {{site.data.keyword.icp_notm}} clusters.
+To increase your cluster resilience level, you must deploy and manage workloads across multiple clusters.
 
- * A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu){: new_window}.
+ * A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu){: new_window}.

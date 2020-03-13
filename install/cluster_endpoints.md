@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-10"
+  years: 2019, 2020
+lastupdated: "2020-03-04"
 
 ---
 
@@ -14,12 +14,12 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.product}} endpoints
+# Red Hat Advanced Cluster Management for Kubernetes endpoints
 
-An endpoint is a network destination address that is exposed by Kubernetes resources, such as services and ingresses. The following sections describe the available external and internal endpoints in an {{site.data.keyword.product_tm}} cluster.
+An endpoint is a network destination address that is exposed by Kubernetes resources, such as services and ingresses. The following sections describe the available external and internal endpoints in an Red Hat Advanced Cluster Management for Kubernetes cluster.
 {:shortdesc}
 
-See the endpoints that are created in your {{site.data.keyword.product}} cluster.
+See the endpoints that are created in your Red Hat Advanced Cluster Management for Kubernetes cluster.
 
 - [External endpoints](cluster_endpoints.md#external)
   - [Master endpoint](cluster_endpoints.md#master)
@@ -31,7 +31,7 @@ See the endpoints that are created in your {{site.data.keyword.product}} cluster
 ## External endpoints
 {: #external}
 
-The Master and Proxy endpoints are the external endpoints that are used for access from outside the cluster. <!--You define these endpoints in the `config.yaml` during installation.--> Typically, you create a fully qualified domain name (FQDN), which is a DNS entry and CA-signed certificate, and apply it to the {{site.data.keyword.product}} master node. The master node applies the FQDN to all master endpoints.
+The Master and Proxy endpoints are the external endpoints that are used for access from outside the cluster. <!--You define these endpoints in the `config.yaml` during installation.--> Typically, you create a fully qualified domain name (FQDN), which is a DNS entry and CA-signed certificate, and apply it to the Red Hat Advanced Cluster Management for Kubernetes master node. The master node applies the FQDN to all master endpoints.
 
 The external endpoints can be defined in one of the following ways:
 
@@ -67,7 +67,7 @@ Where:
 ### Proxy endpoint
 {: #proxy}
 
-The proxy endpoint is one or more ingress proxies that are exposed by workloads that are deployed on {{site.data.keyword.product}} through the ingress resource.  
+The proxy endpoint is one or more ingress proxies that are exposed by workloads that are deployed on Red Hat Advanced Cluster Management for Kubernetes through the ingress resource.  
 
 Following is the format of the URL:
 
@@ -93,7 +93,7 @@ Workloads can define services that are exposed as NodePorts. If a service uses t
 ## Internal Endpoints
 {: #internal}
 
-Your {{site.data.keyword.product}} cluster has an internal network for workloads. Services must communicate with the workloads on the internal cluster network.
+Your Red Hat Advanced Cluster Management for Kubernetes cluster has an internal network for workloads. Services must communicate with the workloads on the internal cluster network.
 
 Services that need to communicate within the cluster to platform services do so by using the internal management ingress service on the internal cluster network, unless otherwise specified by the service API documentation.
 
@@ -106,8 +106,8 @@ For other services, following are the formats to access the service by using the
 
 For more information, see the following articles:
 
-- [DNS for Services and Pods ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/){: new_window}
-- [DNS ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/services-networking/service/#dns){: new_window}
+- [DNS for Services and Pods](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/){: new_window}
+- [DNS](https://kubernetes.io/docs/concepts/services-networking/service/#dns){: new_window}
 
 
 ### Custom ingress URLs

@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-12"
+  years: 2019, 2020
+lastupdated: "2020-03-13"
 
 ---
 
@@ -19,33 +19,32 @@ lastupdated: "2019-12-12"
 Before you install Red Hat Advanced Cluster Management for Kubernetes, review the following installation requirements.
 {:shortdesc}
 
-## {{site.data.keyword.ocp_tm}}
+## OpenShift Container Platform
 
-* You must have a supported {{site.data.keyword.ocp}} version, including the registry and storage services, installed and working in your cluster.
-* To ensure that the {{site.data.keyword.ocp}} cluster is set up correctly, access the {{site.data.keyword.ocp}} web console.
+* You must have a supported OpenShift Container Platform version, including the registry and storage services, installed and working in your cluster.
+* To ensure that the OpenShift Container Platform cluster is set up correctly, access the OpenShift Container Platform web console.
 
-  The {{site.data.keyword.ocp}} web console can be found by running the `kubectl -n openshift-console get route` command. You can see a similar output to the following example:
+  The OpenShift Container Platform web console can be found by running the `kubectl -n openshift-console get route` command. You can see a similar output to the following example:
     ```
     openshift-console          console             console-openshift-console.apps.new-coral.purple-chesterfield.com                       console                  https   reencrypt/Redirect     None
     ```
     {:codeblock}
-    The console URL in this example is `https:// console-openshift-console.apps.new-coral.purple-chesterfield.com`. Open the URL in your browser and check the result. If the console URl is like `console-openshift-console.router.default.svc.cluster.local`, set `openshift_master_default_subdomain` when you install the {{site.data.keyword.ocp}}. For more information, see [Configuring Your Inventory File for OpenShift Container Platform 3.11 ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.openshift.com/container-platform/3.11/install/configuring_inventory_file.html).
-* For an {{site.data.keyword.ocp_ibmcloud}} cluster, you must have a supported {{site.data.keyword.ocp}} version installed by using {{site.data.keyword.iks}} so that the managed {{site.data.keyword.ocp}} service is supported. For more information, see [Tutorial: Creating an IBM Cloud Red Hat OpenShift Container Platform Cluster ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://cloud.ibm.com/docs/containers?topic=containers-openshift_tutorial).
+    The console URL in this example is `https:// console-openshift-console.apps.new-coral.purple-chesterfield.com`. Open the URL in your browser and check the result. If the console URl is like `console-openshift-console.router.default.svc.cluster.local`, set `openshift_master_default_subdomain` when you install the OpenShift Container Platform. For more information, see [Configuring Your Inventory File for OpenShift Container Platform 3.11](https://docs.openshift.com/container-platform/3.11/install/configuring_inventory_file.html).
 
-* For a metrics server, you must ensure that the {{site.data.keyword.ocp}} metrics server has been installed before you install the Red Hat Advanced Cluster Management for Kubernetes. For more information about creating the {{site.data.keyword.ocp}} metrics server, see [install the OpenShift Container Platform 3.11 metrics server ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.openshift.com/container-platform/3.11/dev_guide/pod_autoscaling.html).
+* For a metrics server, you must ensure that the OpenShift Container Platform metrics server has been installed before you install the Red Hat Advanced Cluster Management for Kubernetes. For more information about creating the OpenShift Container Platform metrics server, see [install the OpenShift Container Platform 3.11 metrics server](https://docs.openshift.com/container-platform/3.11/dev_guide/pod_autoscaling.html).
 
-* {: #auth} If you are installing your cluster on a public cloud, such as {{site.data.keyword.iks_ocp}}, you can enable authentication with Red Hat OpenShift. By default, your cluster uses OpenID Connect (OIDC) to authenticate users with Kubernetes. To enable authentication with OpenShift, add the authentication parameters to the `config.yaml` file. For more information, see [Authentication settings](../installer/3.2.2/config_yaml.md#auth).
+* {: #auth} If you are installing your cluster on a public cloud, you can enable authentication with Red Hat OpenShift. By default, your cluster uses OpenID Connect (OIDC) to authenticate users with Kubernetes. To enable authentication with OpenShift, add the authentication parameters to the `config.yaml` file. For more information, see [Authentication settings](../install/config_yaml.md#auth).
 
 ### Admission webhooks
 
-Ensure that the admission webhooks are enabled on the {{site.data.keyword.ocp}} master node.
+Ensure that the admission webhooks are enabled on the OpenShift Container Platform master node.
 {: #admission_webhooks}
 
-  * Option 1: Before you install {{site.data.keyword.ocp}}:
+  * Option 1: Before you install OpenShift Container Platform:
 
-    To enable the `Admission and Validating Webhooks` on your {{site.data.keyword.ocp}} installation, follow these steps:
+    To enable the `Admission and Validating Webhooks` on your OpenShift Container Platform installation, follow these steps:
 
-    1. Add the following customization to the `openshift_master_admission_plugin_config ` variable in your openshift `hosts` file before installing {{site.data.keyword.ocp}}. For more information, see the [Configuring Cluster Variables ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.openshift.com/container-platform/3.11/install/configuring_inventory_file.html#configuring-cluster-variables).
+    1. Add the following customization to the `openshift_master_admission_plugin_config ` variable in your openshift `hosts` file before installing OpenShift Container Platform. For more information, see the [Configuring Cluster Variables](https://docs.openshift.com/container-platform/3.11/install/configuring_inventory_file.html#configuring-cluster-variables){:new_window}.
        ```
        openshift_master_admission_plugin_config={"MutatingAdmissionWebhook":{"configuration": {"apiVersion": "apiserver.config.k8s.io/v1alpha1","kubeConfigFile": "/dev/null","kind": "WebhookAdmission"}},"ValidatingAdmissionWebhook": {"configuration": {"apiVersion": "apiserver.config.k8s.io/v1alpha1","kubeConfigFile": "/dev/null","kind": "WebhookAdmission"}},"BuildDefaults": {"configuration": {"apiVersion": "v1","env": [],"kind": "BuildDefaultsConfig","resources": {"limits": {},"requests": {}}}},"BuildOverrides": {"configuration": {"apiVersion": "v1","kind": "BuildOverridesConfig"}},"openshift.io/ImagePolicy": {"configuration": {"apiVersion": "v1","executionRules": [{"matchImageAnnotations": [{"key": "images.openshift.io/deny-execution","value": "true"}],"name": "execution-denied","onResources": [{"resource": "pods"},{"resource": "builds"}],"reject": true,"skipOnResolutionFailure": true}],"kind": "ImagePolicyConfig"}}}
        ```
@@ -53,9 +52,9 @@ Ensure that the admission webhooks are enabled on the {{site.data.keyword.ocp}} 
 
         **Note**: The default configuration that gets created during installation as well as any custom configuration (MutatingAdmissionWebhook and ValidatingAdmissionWebhook) are added to this variable. The variable requires that any default configuration be present since the variable completely overrides the resulting value.
 
-    2. Run the {{site.data.keyword.ocp}} installer to install.
+    2. Run the OpenShift Container Platform installer to install.
 
-       During the {{site.data.keyword.ocp}} installation, the file `/etc/origin/master/master-config.yaml` is created on your master node. The additional configurations in the file for the variable `openshift_master_admission_plugin_config` can look like the following example:
+       During the OpenShift Container Platform installation, the file `/etc/origin/master/master-config.yaml` is created on your master node. The additional configurations in the file for the variable `openshift_master_admission_plugin_config` can look like the following example:
        ```
        admissionConfig:
          pluginConfig:
@@ -71,7 +70,7 @@ Ensure that the admission webhooks are enabled on the {{site.data.keyword.ocp}} 
                kind: WebhookAdmission
        ```
        {: codeblock}
-  * Option 2: After you install {{site.data.keyword.ocp}}:
+  * Option 2: After you install OpenShift Container Platform:
     1. Add the following to your `/etc/origin/master/master-config.yaml` file on your master node:
         ```
         admissionConfig:
@@ -97,12 +96,12 @@ Ensure that the admission webhooks are enabled on the {{site.data.keyword.ocp}} 
 
 ## Storage
 
-Ensure that you have a pre-configured StorageClass in {{site.data.keyword.ocp}} that can be used for creating storage for {{site.data.keyword.mcm_notm}}. For an {{site.data.keyword.ocp_ibmcloud}} cluster, `ibmc-file-gold` is always available.
+Ensure that you have a pre-configured StorageClass in OpenShift Container Platform that can be used for creating storage for Red Hat Advanced Cluster Management for Kubernetes.
 
 ## Networking
 
 * The port number 8445 is required to be open on every node in the OS environment for the node exporter in the monitoring service. This port is configurable and 8445 is the default value.
-* If {{site.data.keyword.ocp}} master nodes are used for {{site.data.keyword.mcm_notm}} master nodes, you must have different ports for the nginx ingress controller if you deploy nginx ingress to the {{site.data.keyword.ocp}} master node. Ports 80 and 443 are used by {{site.data.keyword.ocp}} services. Ports for the nginx ingress controller can be set in the `config.yaml` file.
+* If OpenShift Container Platform master nodes are used for Red Hat Advanced Cluster Management for Kubernetes master nodes, you must have different ports for the nginx ingress controller if you deploy nginx ingress to the OpenShift Container Platform master node. Ports 80 and 443 are used by OpenShift Container Platform services. Ports for the nginx ingress controller can be set in the `config.yaml` file.
 For example:
   ```
   ingress_http_port: 3080
@@ -111,8 +110,8 @@ For example:
   {: codeblock}
 
 ## Image registry
-
-Expose the {{site.data.keyword.ocp}} image registry with a route. Taking the {{site.data.keyword.ocp}} on {{site.data.keyword.iks}} as an example, you can use the following command to expose the `docker-registry` service:
+<!--I believe this section should be removed-->
+Expose the OpenShift Container Platform image registry with a route. Taking the OpenShift Container Platform as an example, you can use the following command to expose the `docker-registry` service:
   ```
   oc -n default create route --service=docker-registry --hostname=<your-image-registry-hostname> reencrypt
   ```
@@ -124,7 +123,7 @@ If the Docker registry has multiple pods, add the annotation `haproxy.router.ope
   ```
   {: codeblock}
 
-For more information about creating an {{site.data.keyword.ocp}} image registry route, see [OpenShift 3.11 route documentation ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html).
+For more information about creating an OpenShift Container Platform image registry route, see [OpenShift 3.11 route documentation](https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html).
 
 ## Elasticsearch
 

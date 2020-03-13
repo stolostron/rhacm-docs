@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-12-12"
+  years: 2018, 2020
+lastupdated: "2020-03-12"
 
 ---
 
@@ -16,6 +16,7 @@ lastupdated: "2019-12-12"
 
 # Creating a storage class for the IBM PowerVC FlexVolume Driver (IBM Power only)
 
+<!--i believe this file will be remooved--> 
 If you have an {{site.data.keyword.IBM}} Power environment and want to use a FlexVolume Driver, you must configure a FlexVolume Driver storage class.
 
 The FlexVolume Driver can be used to manage the virtual components in your environments. Complete the following steps to configure the FlexVolume Driver storage class:
