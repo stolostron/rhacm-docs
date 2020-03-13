@@ -2,7 +2,7 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-06"
+lastupdated: "2020-03-13"
 
 ---
 
@@ -318,4 +318,21 @@ For more information, see
 
 ### Red Hat Advanced Cluster Management for Kubernetes Service Broker
 
-
+* What data is logged	
+  * User ID (only at debug log level 10, not at default log level)	
+* When data is logged	
+  * When API requests are made to the service broker	
+  * When the service broker accesses the service catalog	
+* Where data is logged	
+  * Service broker container log, Elasticsearch	
+* How to delete data	
+  * Search for and delete the api-server log using Elasticsearch API	
+  * Search for and delete the log from the api-server container	
+      
+      ```	
+      kubectl logs $(kubectl get pods -n kube-system | grep  service-catalogapiserver | awk '{print $1}') -n kube-system | grep admin	
+      ```	
+      {: codeblock}	
+      
+  For more information, see:	
+  * [Kubernetes kubectl](https://kubernetes.io/docs/reference/kubectl/overview/){:new_window}
