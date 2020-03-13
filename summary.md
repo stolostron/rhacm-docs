@@ -27,6 +27,7 @@
    * [Managing your cluster with the Visual Web Terminal](console/vwt_search.md)
    * [Configuring your logo](console/logo.md)
    * [Managing cluster labels](console/cluster_label.md)
+ * [CLI tools](cli/multicluster_cli.md)
  * [Cluster management](manage_cluster/intro.md)
    * [Creating a cluster](manage_cluster/create.md)
      * [Creating an IBM Kubernetes Service cluster](manage_cluster/create_iks..md)
