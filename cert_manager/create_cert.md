@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-03-13"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2020-03-09"
 
 # Creating Certificate manager (cert-manager) certificates
 
-The Certificate manager service is used to issue and manage certificates for services. Certificate manager is based on the [jetstack/cert-manager project](https://github.com/jetstack/cert-manager).
+<!--Gus created an issue to test #898-->The Certificate manager service is used to issue and manage certificates for services. Certificate manager is based on the [jetstack/cert-manager project](https://github.com/jetstack/cert-manager).
 {: shortdesc}
 
 * [Adding a certificate to a Kubernetes workload](#adding_workload)
