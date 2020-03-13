@@ -16,7 +16,7 @@ lastupdated: "2020-03-13"
 
 # Importing an Alibaba Cloud cluster
 
-**Important: This content is a technical preview, and should not be relied on in a production environment.**
+**Important: This content is a technical preview, and should not be relied on in a production environment.** <!--this is expected to be removed, but waiting on confirmation-->
 
 You can import existing Alibaba Cloud clusters.
 
