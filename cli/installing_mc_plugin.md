@@ -1,16 +1,10 @@
 ---
-copyright:
-  years: 2019
-lastupdated: 2020-03-12
----
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
+copyright:
+  years: 2020
+lastupdated: "2020-03-09"
+
+---
 
 # Installing the multicluster plug-in (mc)
 
