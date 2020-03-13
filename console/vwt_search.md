@@ -13,10 +13,9 @@ You can use the Visual Web Terminal to run many commands across your environment
 
 The Visual Web Terminal is particularly useful when troubleshooting issues that require running multiple commands, and navigating the results of the commands in an easy way. The information that is provided in the Visual Web Terminal is limited by the permissions of the user. When you run a command, only the items that you have permission to view are displayed. If there are over ten sessions that are running at the same time, there might be a slower response time when running commands.
 
-- [Visual Web Terminal](#visual-web-terminal)
-  - [Starting a session](#starting-a-session)
-  - [Supported command list](#supported-command-list)
-  - [Searching with Visual Web Terminal](#searching-with-visual-web-terminal)
+  - [Starting a session](#start)
+  - [Supported command list](#commands)
+  - [Searching with Visual Web Terminal](#search)
 
 ## Starting a session
 {: #start}
