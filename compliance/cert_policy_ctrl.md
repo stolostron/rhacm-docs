@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-11"
+lastupdated: "2020-03-13"
 
 ---
 
@@ -25,13 +25,11 @@ The certificate policy controller communicates with the local Kubernetes API ser
   
 A `CertificatePolicy` is a CustomResourceDefinition (CRD) instance that contains the specifications of which certificates to monitor and refresh. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/){: new_window}.
 
-You must create a certificate policy controller to create a certificate policy. For more information, see the known issue topic, [Mapping error for a certificate policy](../about/known_issues.md#mappingcert).
-
 ### Parent policy for the certificate policy 
 
-A certificate policy can be either created directly on your managed cluster, or on your hub cluster if it manages your managed cluster. Your managed cluster must be a Red Hat Advanced Cluster Management for Kubernetes with the required services. If Red Hat Advanced Cluster Management for Kubernetes is not installed, you can create a certificate policy directly on your managed cluster by running the following command: `kubectl create -f certificatePolicyFile.yaml`. <!--need to validate this-->
+A certificate policy can be either created directly on your managed cluster, or on your hub cluster if it manages your managed cluster. Your managed cluster must be a Red Hat Advanced Cluster Management for Kubernetes with the required services. If Red Hat Advanced Cluster Management for Kubernetes is not installed, you can create a certificate policy directly on your managed cluster by running the following command: `kubectl create -f certificatePolicyFile.yaml`. 
 
-If Red Hat Advanced Cluster Management for Kubernetes <!--thinking the product name should be removed here and we should just tell the user to create a parent policy--> is installed, create a parent policy that includes the certificate policy to be propagated to the managed cluster.
+Create a parent policy that includes the certificate policy to be propagated to the managed cluster.
 
   View the following example description of a certificate policy and review the element descriptions of the certificate policy:
 
