@@ -28,6 +28,8 @@
    * [Configuring your logo](console/logo.md)
    * [Managing cluster labels](console/cluster_label.md)
  * [CLI tools](cli/multicluster_cli.md)
+   * [Installing the multicluster plug-in (mc)](cli/installing_mc_plugin.md)
+   * [Multicluster commands (mc)](cli/cli_mc_commands.md)
  * [Cluster management](manage_cluster/intro.md)
    * [Creating a cluster](manage_cluster/create.md)
      * [Creating an IBM Kubernetes Service cluster](manage_cluster/create_iks..md)
