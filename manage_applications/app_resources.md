@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-01-27" 
+lastupdated: "2020-03-13" 
 
 ---
 
@@ -14,22 +14,21 @@ lastupdated: "2020-01-27"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Application resources
+# Application resources (Technology preview)
 
-Within {{site.data.keyword.mcm_notm}}, applications are composed of multiple application resources. The main foundation resources for {{site.data.keyword.mcm_notm}} applications are the `application` resource and the `deployable` resource.
-
+Within Red Hat Advanced Cluster Management for Kubernetes, applications are composed of multiple application resources. The main foundation resources for Red Hat Advanced Cluster Management for Kubernetes applications are the `application` resource and the `deployable` resource.
 {:shortdesc}
 
 In addition, you can use channel, subscription, and placement rule resources to help you deploy, update, and manage your overall applications.
 
 Both single and multi-cluster applications use the same Kubernetes specifications, but multi-cluster applications involve more automation of the deployment and application management lifecycle.
 
-All of the application component resources for {{site.data.keyword.mcm_notm}} applications are defined in YAML file spec sections. When you need to create or update an application component resource, you need to create or edit the appropriate spec section to include the labels for defining your resource.
+All of the application component resources for Red Hat Advanced Cluster Management for Kubernetes applications are defined in YAML file spec sections. When you need to create or update an application component resource, you need to create or edit the appropriate spec section to include the labels for defining your resource.
 
 ## Application
 {: #application}
 
-Applications (`Application.app.k8s.io`) in {{site.data.keyword.mcm_notm}} are used for viewing the application components.
+Applications (`Application.app.k8s.io`) in {Red Hat Advanced Cluster Management for Kubernetes are used for viewing the application components.
 
 The definition structure for an application can resemble the following example YAML content:
 
@@ -133,7 +132,7 @@ For more information about creating and managing secrets, see [Managing secrets]
 ## Channels
 {: #channel}
 
-Channels (`Channel.app.ibm.com`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your {{site.data.keyword.mcm_notm}} applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access.
+Channels (`Channel.app.ibm.com`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access.
 
 Channels define a namespace within the Hub cluster and point to a physical place where resources are stored for deployment, such as an object store, Kubernetes namespace, Helm repository, or GitHub repository. Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables within a channel can be accessed by only the clusters that subscribe to that channel.
 
@@ -196,7 +195,7 @@ For more information about creating and managing subscriptions, see [Managing su
 
 Placement rules (`PlacementRule.mcm.ibm.com`) define the target clusters where deployables can be deployed. Use placement rules to help you facilitate the multi-cluster deployment of your deployables.
 
-The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used for applications in previous versions of {{site.data.keyword.mcm_notm}}. Placement policies are still used for governance and risk policies.
+The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used for applications in previous versions of Red Hat Advanced Cluster Management for Kubernetes. Placement policies are still used for governance and risk policies.
 
 Placement rules can be defined for subscriptions and for deployables. Define the placement rule at the subscription level for multi-cluster deployments. Define the placement rule for a specific deployable for single-cluster deployments or to override placement settings.  
 
