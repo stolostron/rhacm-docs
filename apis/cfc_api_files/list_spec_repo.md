@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-12-11"
+  years: 2016, 2020
+lastupdated: "2020-03-10"
 
 ---
 
@@ -21,12 +21,12 @@ Get details on a specific repository.
 
 Base path: `https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/repositories/<repo>`
 
-Where `repo` is the name of an image, including tags. For example, if you push the image `mycluster.icp:8500/default/tomcat` to the image registry, then `default/tomcat` is the name of the repository. The `<Cluster Master Host>` and `<Cluster Master API Port>` parameters are defined in [Master endpoints](../../installer/3.2.2/cluster_endpoints.md#master).
+Where `repo` is the name of an image, including tags. For example, if you push the image `mycluster.icp:8500/default/tomcat` to the image registry, then `default/tomcat` is the name of the repository. The `<Cluster Master Host>` and `<Cluster Master API Port>` parameters are defined in [Master endpoints](../install/cluster_endpoints.md#master).
 
 
 <dl>
 <dt><b>API version</b></dt>
-<dd>{{site.data.keyword.version}}</dd>
+<dd>4.4.0</dd>
 <dt><b>API URI components</b></dt>
 <dd>
 <dl>

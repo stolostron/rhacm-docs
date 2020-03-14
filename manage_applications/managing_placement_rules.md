@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-13"
+  years: 2019, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -19,7 +19,7 @@ lastupdated: "2019-12-13"
 You can create and manage placement rules to define where and how Helm charts and deployables are deployed. Use placement rules to help you facilitate multi-cluster deployments of your deployables.
 {:shortdesc}
 
-**Note:** The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used in previous versions of {{site.data.keyword.mcm_notm}} for deployables. Placement policies are still used for governance and risk policies.
+**Note:** The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used in previous versions of Red Hat Advanced Cluster Management for Kubernetes for deployables. Placement policies are still used for governance and risk policies.
 
   * [Create a placement rule](#placement_create)
   * [Assign a placement rule](#placement_assign)
@@ -37,7 +37,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
 1. Compose the definition YAML content for your placement rule. For more information about the YAML structure, including the required fields, see [Placement rule definition](#placement_compose).
 
-2. Create the placement rule within {{site.data.keyword.mcm_notm}}. You can define a placement rule as a separate resource or define the rule within the definition for a deployable or subscription. As a best practice, define placement rules as a separate resource when the rule might need to be referenced by multiple resources.
+2. Create the placement rule within Red Hat Advanced Cluster Management for Kubernetes. You can define a placement rule as a separate resource or define the rule within the definition for a deployable or subscription. As a best practice, define placement rules as a separate resource when the rule might need to be referenced by multiple resources.
 
    For more information about creating the definition for a deployable or subscriptions, see:
     * [Creating and managing deployables](managing_deployables.md)
@@ -71,7 +71,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
         Ensure that your new placement rule is listed in the resulting output.
 
-   * To use REST API, you need to use the [placement rule POST API](../../apis/mcm/placementRules.json).
+   * To use REST API, you need to use the [placement rule POST API](../apis/mcm/placementRules.json).
 
 ## Assigning a placement rule
 {: #placement_assign}
@@ -130,7 +130,7 @@ To view the status fields for a placement rule, you can use the console, the Kub
 
   2. Review the fields and values within the `status` section of the YAML content.
 
-* To use REST API, you need to use the [placement rule GET API](../../apis/mcm/placementRules.json).
+* To use REST API, you need to use the [placement rule GET API](../apis/mcm/placementRules.json).
 
 ## Updating a placement rule
 {: #placement_update}
@@ -156,7 +156,7 @@ To update a placement rule that is a separate resource, you can use the console,
 
 * To use the Kubernetes CLI tool, the steps are the same as for creating a placement rule.
 
-* To use REST API, you need to use the [placement rule PATCH API](../../apis/mcm/placementRules.json).
+* To use REST API, you need to use the [placement rule PATCH API](../apis/mcm/placementRules.json).
 
 To update a placement rule that is defined within the definition for a deployable or subscription, the steps are the same as for updating that resource. For more information, see:
 
@@ -193,7 +193,7 @@ To delete a placement rule that is a separate resource, you can use the console,
      {: codeblock}
 
 * To use REST API, you need to use the placement rule DELETE API:
-  * [Placement rule APIs](../../apis/mcm/placementRules.json).
+  * [Placement rule APIs](../apis/mcm/placementRules.json).
 
 To delete a placement rule that is defined within the definition for a deployable or subscription, edit the definition for that resource to remove the placement rule definition. The steps are the same as for updating that resource. For more information, see:
 

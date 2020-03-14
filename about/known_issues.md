@@ -1,45 +1,36 @@
 ---
 
 copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-05"
+  years: 2020
+lastupdated: "2020-03-09"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Known issues
 
-Review the known issues for {{site.data.keyword.product}}. Additionally, see [{{site.data.keyword.product}} troubleshooting](../troubleshoot/mcm_troubleshoot.md) for troubleshooting topics.
+Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. Additionally, see [Red Hat Advanced Cluster Management for Kubernetes troubleshooting](../troubleshoot/mcm_troubleshoot.md) for troubleshooting topics.
 {:shortdesc}
 
   - [Menu and logo on the console header changes](#1527)
   - [Cannot create a Helm release on a managed cluster](#helm_issue)
   - [Applications fail to install during Helm deployment](#load_error)
-  - [Missing data in Grafana for {{site.data.keyword.open_s}}](#31754)
+  - [Missing data in Grafana for OpenShift Container Platform ](#31754)
   - [Subscription status remains healthy when deployable source is deleted](#29445)
   - [ObjectBucket channels support including only one resource in each object](#194)
   - [Subscriptions that use a secret must be changed before updates to dependency resources can be detected](#611)
   - [Permission issue with Docker Version 18.03 with Ubuntu 16.04 LTS](#31947)
   - [Hub cluster resources display as `local-cluster` in console search results ](#31979)
-  - [Mapping error for a certificate policy](#1351_mapping)
-  - [{{site.data.keyword.kui}} fails when returning over 200 KB of data](#34145)
-  - [Enabling {{site.data.keyword.product}} for the installed monitoring release](#1051)
+  - [Visual Web Terminal fails when returning over 200 KB of data](#34145)
+  - [Enabling Red Hat Advanced Cluster Management for Kubernetes for the installed monitoring release](#1051)
   - [LDAP user names are case-sensitive](#25735)
   - [Pods are not reachable from the NGINX ingress controller in multitenant isolation mode](#34414)
   
 ## Menu and logo on the console header changes
 {: #1527}
 
-When you navigate to certain pages in the {{site.data.keyword.product}} console, the menu items might shorten and the logo in the header might change from {{site.data.keyword.product}} to {{site.data.keyword.product}}.
+When you navigate to certain pages in the Red Hat Advanced Cluster Management for Kubernetes console, the menu items might shorten and the logo in the header might change from Red Hat Advanced Cluster Management for Kubernetes to Red Hat Advanced Cluster Management for Kubernetes.
 
-To return to the {{site.data.keyword.product}} context, click the button in your browser to go back until you see the {{site.data.keyword.product}} logo in the header, or replace the location of the browser with the following URL:
+To return to the Red Hat Advanced Cluster Management for Kubernetes context, click the button in your browser to go back until you see the Red Hat Advanced Cluster Management for Kubernetes logo in the header, or replace the location of the browser with the following URL:
 
 ```
 https://HOST:port/multicloud 
@@ -111,10 +102,10 @@ To fix this error, reinstall your application by following the tasks:
 
 For more details, see the [Helm community issue ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")]( https://github.com/helm/helm/issues/3353){: new_window}.
 
-## Missing data in Grafana for {{site.data.keyword.open_s}}
+## Missing data in Grafana for OpenShift Container Platform 
 {: #31754}
 
-If any of your managed clusters are {{site.data.keyword.ocp}} clusters, data for the clusters can be missing within the Grafana dashboard for cluster monitoring.
+If any of your managed clusters are OpenShift Container Platform clusters, data for the clusters can be missing within the Grafana dashboard for cluster monitoring.
 
 ## Subscription status remains healthy when deployable source is deleted
 {: #29445}
@@ -150,57 +141,15 @@ If you use Docker Version 18.03 or higher with Ubuntu 16.04 LTS, containers that
 
 Search returns and lists each cluster with the resource that you search. For resources in the _hub_ cluster, the cluster name is displayed as _local-cluster_.
 
-## Mapping error for a certificate policy
-{: #1351_mapping}
-
-When you create a certificate policy without a certificate policy controller for a third-party cluster, you might receive the following violation message:
-
-   ```
-   mapping error from raw object: no matches for kind "CertificatePolicy" in version "policies.ibm.com/v1alpha1"
-   ```
-   {: pre}
-
-You must unbind the certificate policy from your third-party cluster. Complete the following steps to unbind each of your certificate policies:
-
-1. Log in to your {{site.data.keyword.product}} hub cluster.
-
-2. From the navigation menu, click **Automate infrastructure** > **Clusters**.
-
-3. Create a unique label for each of your clusters with {{site.data.keyword.product}} services installed. Select the **Options** icon (<img src="../images/icons/menu-overflow_16.svg" alt="Options icon">) > **Edit Labels**.
-
-4. Add a new label for each of your clusters with {{site.data.keyword.product}} services installed by selecting the Add icon. For example, create the following label:
-
-   ```
-   cloud = common services
-   ```
-   {: pre}
-
-5. From the navigation menu, click **Govern risk** > **Policies tab** to view your policies.
-
-6. Edit your certificate policy by updating the placement policy. Update the `spec.clusterLabels` parameter by removing and adding labels. Your placement policy might resemble the following content:
-
-   ```yaml
-   spec:
-     clusterLabels:
-       matchExpressions:
-         - key: cloud
-           operator: In
-           values:
-             - common-services
-   ```
-   {: pre}
-
-Your certificate policies are unbound from your third-party clusters.
-
-## {{site.data.keyword.kui}} fails when returning over 200 KB of data
+## Visual Web Terminal fails when returning over 200 KB of data
 {: #34145}
 
-The limit for the returned content of a command that is issued with the Visual Web Terminal is 200 KB. If the returned information exceeds 200 KB, an error is displayed. The workaround is to enter the command using a terminal window that is outside of the {{site.data.keyword.kui}}.
+The limit for the returned content of a command that is issued with the Visual Web Terminal is 200 KB. If the returned information exceeds 200 KB, an error is displayed. The workaround is to enter the command using a terminal window that is outside of the Visual Web Terminal.
 
-## Enabling {{site.data.keyword.product}} for the installed monitoring release
+## Enabling Red Hat Advanced Cluster Management for Kubernetes for the installed monitoring release
 {: #1051}
 
-The monitoring chart includes a `standalone` installation option that specifies whether monitoring is available on the {{site.data.keyword.product}} hub cluster. Valid values are for `standalone` are `true` or `false`. If the value is set to `true`, certain monitoring service features that are needed for the {{site.data.keyword.product}} hub cluster, are unavailable. For example, the Grafana dashboard list does not include the {site.data.keyword.mcm_notm}} dashboard that is needed to view metrics for your managed clusters.
+The monitoring chart includes a `standalone` installation option that specifies whether monitoring is available on the Red Hat Advanced Cluster Management for Kubernetes hub cluster. Valid values are for `standalone` are `true` or `false`. If the value is set to `true`, certain monitoring service features that are needed for the Red Hat Advanced Cluster Management for Kubernetes hub cluster, are unavailable. For example, the Grafana dashboard list does not include the {site.data.keyword.mcm_notm}} dashboard that is needed to view metrics for your managed clusters.
 
 Use the following Helm command to check the value of the `standalone` option.
 
@@ -217,7 +166,7 @@ If `standalone` is set as `true`, set it to `false` to enable monitoring service
    - Select `1.7.1` in the `Version` section.
    - Select `Reuse values` in the `Using previous configured values` section. 
    - In the `Parameters` section, clear the checkbox for `Standalone deployment`. 
-3. Click **Upgrade** to start the upgrade process. After the upgrade completes, the monitoring service features are enabled for the {{site.data.keyword.product}} hub cluster.
+3. Click **Upgrade** to start the upgrade process. After the upgrade completes, the monitoring service features are enabled for the Red Hat Advanced Cluster Management for Kubernetes hub cluster.
 
 
 ## LDAP user names are case-sensitive

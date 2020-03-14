@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-12-12"
+  years: 2016, 2020
+lastupdated: "2020-03-10"
 
 ---
 
@@ -21,7 +21,7 @@ Remove specific repositories from the private image registry.
 
 Base path: `https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/repositories/<repo>`
 
-- The `<Cluster Master Host>` and `<Cluster Master API Port>` parameters are defined in [Master endpoints](../../installer/3.2.2/cluster_endpoints.md#master).
+- The `<Cluster Master Host>` and `<Cluster Master API Port>` parameters are defined in [Master endpoints](../install/cluster_endpoints.md#master).
 
 - `repo` is the full name of the repository image, including the namespace. For example, `default/alpine`. The private image registry creates individual repositories for images that are assigned the same name. When you remove an image repository, you remove all the images in that repository. You cannot remove a specific image within the repository.
 
@@ -30,7 +30,7 @@ Base path: `https://<Cluster Master Host>:<Cluster Master API Port>/image-manage
 
 <dl>
 <dt><b>API version</b></dt>
-<dd>{{site.data.keyword.version}}</dd>
+<dd>4.4.0</dd>
 <dt><b>API URI components</b></dt>
 <dd>
 <dl>

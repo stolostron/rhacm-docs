@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-13"
+  years: 2019, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2019-12-13"
 
 # Creating and managing application resources
 
-Create application resources to group and view the application components that make up your overall {{site.data.keyword.mcm_notm}} multi-cluster applications.
+Create application resources to group and view the application components that make up your overall Red Hat Advanced Cluster Management for Kubernetes multi-cluster applications.
 {:shortdesc}
 
   * [Create an application](#app_create)
@@ -31,7 +31,7 @@ Create application resources to group and view the application components that m
 
 1. Compose your application definition YAML content. To create or update an application resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
 
-2. Create the application within {{site.data.keyword.mcm_notm}}. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
+2. Create the application within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
 
    * To use the console,
      1. Open the console.
@@ -58,7 +58,7 @@ Create application resources to group and view the application components that m
 
         Ensure that your new application is listed in the resulting output. 
 
-   * To use REST API, use the [application POST API](../../apis/mcm/applications.json).
+   * To use REST API, use the [application POST API](../apis/mcm/applications.json).
 
 ## Matching a subscription to an application
 {: #subscription_app}
@@ -97,7 +97,7 @@ For more information about the resource definition for an application, see [Crea
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating an application.
 
-   * To use REST API, use the [application PATCH API](../../apis/mcm/applications.json).
+   * To use REST API, use the [application PATCH API](../apis/mcm/applications.json).
 
 ## Delete an application
 {: #app_delete}
@@ -130,7 +130,7 @@ To delete an application, you can use the console, the Kubernetes command line i
      ```
      {: codeblock}
 
-* To use REST API, use the [application DELETE API](../../apis/mcm/applications.json).
+* To use REST API, use the [application DELETE API](../apis/mcm/applications.json).
 
 ## Application definition YAML structure
 {: #app_compose}
@@ -181,34 +181,10 @@ spec:
 | spec.selector.matchExpressions.values | Required when defining label selectors. The Kubernetes label values that a resource needs to match. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-The spec for defining these applications is based on the Application metadata descriptor custom resource definition that is provided by the Kubernetes Special Interest Group (SIG). You can use this definition to help you compose your own application YAML content. For more information about this definition, see [Kubernetes SIG Application CRD community specification ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://github.com/kubernetes-sigs/application).
+The spec for defining these applications is based on the Application metadata descriptor custom resource definition that is provided by the Kubernetes Special Interest Group (SIG). You can use this definition to help you compose your own application YAML content. For more information about this definition, see [Kubernetes SIG Application CRD community specification](https://github.com/kubernetes-sigs/application).
 
 ## Example application
 {: #app_example}
-<!--The following YAML content defines an example guest book application:
-
-```yaml
-apiVersion: app.k8s.io/v1beta1
-kind: Application
-metadata:
-  name: {{ template "guestbookapplication.fullname" . }}
-  labels:
-    app: {{ template "guestbookapplication.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-spec:
-  selector:
-    matchExpressions:
-    - key: app
-      operator: In
-      values:
-      - gbapp
-  componentKinds:
-  - group: core
-    kind: Pods
-```
-{: codeblock}-->
 
 ```YAML
 apiVersion: app.k8s.io/v1beta1

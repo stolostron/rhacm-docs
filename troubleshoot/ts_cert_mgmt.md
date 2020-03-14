@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-09-23"
+  years: 2019, 2020 
+lastupdated: "2020-03-13"
 
 ---
 
@@ -16,6 +16,7 @@ lastupdated: "2019-09-23"
 
 # Troubleshooting certificate management service
 
+<!--review this-->
 Troubleshoot common certificate management service issues.
 {:shortdesc}
 

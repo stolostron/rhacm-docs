@@ -16,16 +16,16 @@ lastupdated: "2019-10-03"
 
 # CIS rules specifications
 
-Refer to the Center for Internet Security (CIS) rules when you create CIS policies for non-{{site.data.keyword.ocp}} environments. When creating rules for {{site.data.keyword.ocp}} environments, refer to the Red Hat {{site.data.keyword.open_s}} Hardening rules.
+Refer to the Center for Internet Security (CIS) rules when you create CIS policies for non-OpenShift Container Platform environments. When creating rules for OpenShift Container Platform environments, refer to the Red Hat OpenShift Hardening rules.
 {:shortdesc}
 
-* [CIS rules for non-{{site.data.keyword.ocp}}](#cis-rule1)
-* [CIS rules for {{site.data.keyword.ocp}}](#cis-rule2)
+* [CIS rules for non-OpenShift Container Platform](#cis-rule1)
+* [CIS rules for OpenShift Container Platform](#cis-rule2)
 
-## CIS rules for non-{{site.data.keyword.ocp}}
+## CIS rules for non-OpenShift Container Platform
 {: #cis-rule1}
 
-### Master node rules for non-{{site.data.keyword.ocp}}
+### Master node rules for non-OpenShift Container Platform
 ```
 1.1.1 Ensure that the --anonymous-auth argument is set to false
 1.1.2 Ensure that the --basic-auth-file argument is not set
@@ -121,7 +121,7 @@ Refer to the Center for Internet Security (CIS) rules when you create CIS polici
 ```
 {: codeblock}
 
-### Worker node rules for non-{{site.data.keyword.ocp}}
+### Worker node rules for non-OpenShift Container Platform
 ```
 2.1.1 Ensure that the --anonymous-auth argument is set to false
 2.1.2 Ensure that the --authorization-mode argument is not set to AlwaysAllow
@@ -150,10 +150,10 @@ Refer to the Center for Internet Security (CIS) rules when you create CIS polici
 ```
 {: codeblock}
 
-## CIS rules for {{site.data.keyword.ocp}}
+## CIS rules for OpenShift Container Platform
 {: #cis-rule2}
 
-### Master node rules for {{site.data.keyword.ocp}}
+### Master node rules for OpenShift Container Platform
 ```
 1.1 Maintain default behavior for anonymous access
 1.2 Verify that the basic-auth-file method is not enabled
@@ -239,7 +239,7 @@ Refer to the Center for Internet Security (CIS) rules when you create CIS polici
 ```
 {: codeblock}
 
-### Worker node rules for {{site.data.keyword.ocp}}
+### Worker node rules for OpenShift Container Platform
 ```
 7.1 Use Security Context Constraints to manage privileged containers as needed
 7.2 Ensure anonymous-auth is not disabled

@@ -1,16 +1,10 @@
 ---
-copyright:
-  years: 2019
-lastupdated: 2019-12-11
----
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
+copyright:
+  years: 2020
+lastupdated: "2020-03-09"
+
+---
 
 # Installing the multicluster plug-in (mc)
 
@@ -24,45 +18,19 @@ The `mc` plug-in is required after CLI installation. Complete the following proc
 
 1. Download the multicluster, or `mc` plug-in for the applicable operating system. See the list of the `mc` plug-in commands for the different operating systems:
 
-  For macOS, run the following command: 
-  
+  For macOS, run the following command: < list of os and commands needed >
+   
+2. Install the `mc` plugin for `oc`. Run the following command to install the plug-in:
+
   ```
-  curl -kLo cloudctl-mc-plugin https://<Cluster Master Host>:<Cluster Master API Port>/rcm/plugins/mc-darwin-amd64
+  oc plugin install -f oc-mc-plugin
   ```
   {: codeblock}
 
-  For {{site.data.keyword.ppc_notm}}, run the following command:
-  
-  ```
-  curl -kLo cloudctl-mc-plugin https://<Cluster Master Host>:<Cluster Master API Port>/rcm/plugins/mc-linux-ppc64le
-  ```
-  {: codeblock}
-
-  For {{site.data.keyword.linux_notm}}, run the following command:
-  
-  ```
-  curl -kLo cloudctl-mc-plugin https://<Cluster Master Host>:<Cluster Master API Port>/rcm/plugins/mc-linux-amd64
-  ```
-  {: codeblock}
-
-  For {{site.data.keyword.s390_notm}}, run the following command:
-  
-  ```
-  curl -kLo cloudctl-mc-plugin https://<Cluster Master Host>:<Cluster Master API Port>/rcm/plugins/mc-linux-s390x
-  ```
-  {: codeblock}
-    
-2. Install the `mc` plugin for `cloudctl`. Run the following command to install the plug-in:
+3. Verify that the `mc` plugin for `oc` was successfully installed. Run the following command:
 
   ```
-  cloudctl plugin install -f cloudctl-mc-plugin
-  ```
-  {: codeblock}
-
-3. Verify that the `mc` plugin for `cloudctl` was successfully installed. Run the following command:
-
-  ```
-  cloudctl mc -help
+  oc mc -help
   ```
   {: codeblock}
 
@@ -70,10 +38,10 @@ The `mc` plug-in is required after CLI installation. Complete the following proc
 
   ```
   NAME:
-     cloudctl mc
+     oc mc
 
   USAGE:
-     cloudctl mc command [arguments...] [command options]
+     oc mc command [arguments...] [command options]
 
   COMMANDS:
      apply                Apply a configuration to a resource by `filename` or `stdin`.
@@ -95,6 +63,5 @@ The `mc` plug-in is required after CLI installation. Complete the following proc
   ```
   {: pre}
 
-  Enter `cloudctl mc help [command]` for more information about a command. (This changes)
-  
- 
+  Enter `oc mc help [command]` for more information about a command.
+
