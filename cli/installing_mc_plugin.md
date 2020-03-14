@@ -8,14 +8,13 @@ lastupdated: "2020-03-09"
 
 # Installing the multicluster plug-in (mc)
 
-The `mc` plug-in is installed after you install the OpenShift Container Platform command-line interface (CLI) tool. You can use the multicluster plug-in (mc) to view information about your clusters, manage your clusters, deploy applications, and more.
-{:shortdesc}
+The `mc` plug-in is required after CLI installation. Complete the following procedure to download and install the plug-in to work with multiple clusters.
 
 ## Prerequisites
 
-* You must install the CLI [installation documentation](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.3/html/cli_tools/openshift-cli-oc) to install the OpenShift Container Platform command-line interface (CLI).
+* You must install the OpenShift CLI tool. (need the prereq here)
 
-## Installing the plug-in
+## Installing the plug-in (change this for oc/acm instructions)
 
 1. Download the multicluster, or `mc` plug-in for the applicable operating system. See the list of the `mc` plug-in commands for the different operating systems:
 
@@ -65,3 +64,4 @@ The `mc` plug-in is installed after you install the OpenShift Container Platform
   {: pre}
 
   Enter `oc mc help [command]` for more information about a command.
+
