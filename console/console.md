@@ -1,7 +1,7 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-11"
 
 ---
@@ -18,27 +18,27 @@ lastupdated: "2020-03-11"
 
 Learn more about a few of the console components that you can use to view, manage, or customize your console. 
 
-See [Accessing your cluster by using the console](../installing/url.md) to access your cluster console. 
+Access your console with the following URL: (need to add this)
 
 ## Red Hat Advanced Cluster Management for Kubernetes console components
 
 Red Hat Advanced Cluster Management for Kubernetes console components:
 
-* [Getting started](#get_started)
-* [Overview](#mcm_overview)
-* [Topology](#mcm_topology)
+* [Welcome page](#welcome)
+* [Overview](#overview)
+* [Topology](#topology)
 * [Search](#search)
 * [Governance and risk dashboard](#grc)
 
 ## Getting started 
-{: #get_started}
+{: #welcome}
 
 From the Red Hat Advanced Cluster Management for Kubernetes getting started page, you can view descriptions and tasks, and you can install various CLI tools.
 
 From the _Header_, click the **Help** (?) icon to view the _About_ page, the documentation, and more. From the _User_ menu, you can access the _Configure Client_ page.
 
 ## Overview 
-{: #mcm_overview}
+{: #overview}
 
 Use the Overview page to view, manage, and reorganize the dashboard of your cluster information. You can view details of your clusters and other cloud service providers that Red Hat Advanced Cluster Management for Kubernetes supports. The Overview dashboard is continuously refreshed in real time.
 {: shortdesc}
@@ -77,7 +77,7 @@ Click **Show details** to view the map. The size of the color-coordinated boxes 
 You can personalize the Overview page more with the filtering feature. Click **Filter results** to specify what information is displayed on your page.
 
 ## Topology page
-{: #mcm_topology}
+{: #topology}
 
 The Topology page uses information from Weave Scope probe to display Kubernetes objects within a cluster. You can view hub cluster resources. As you configure managed clusters, you see more clusters in the Topology view. 
 
