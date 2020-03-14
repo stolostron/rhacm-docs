@@ -1,7 +1,7 @@
 ---
 
 copyright:
-  years: 2019
+  years: 2020
 lastupdated: "2019-12-11"
 
 ---
@@ -59,7 +59,7 @@ You can only search for resources based on your role-based access control level 
 
 1. Start a Visual Web Terminal session.
 2. In the command entry field of the Visual Web Terminal, type: `search`. When you run a `search` command, the Visual Web Terminal verifies that the search function is available. If it is not available, a message indicates that either the search function is not installed, or that it is just not available. If it is installed, but not available, it might be a network issue.
-3. Add a space after the `search` command. The list of filters that are available for the search is displayed. **Remember:** The list of filters might be empty, because it is dependent on the resources that are available in your environment and your role permissions.
+3. Add a space after the `search` command. The list of filters that are available for the search is displayed. The list of filters might be empty because it is dependent on the resources that are available in your environment and your role permissions.
 4. Select one of the filters from the list. The selected filter is added to the search criteria on your command line, and the next level of filters for that selection are displayed. **Tip:** You can also enter a string after the `search` command, rather than selecting a filter from the list.
 5. Optional: Add filters by entering a single space after each filter entry until your command contains all of the required filters.
 6. When you are finished adding your search criteria, press **Enter** to run the search.
