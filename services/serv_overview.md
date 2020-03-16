@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-06-07"
+  years: 2019, 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -14,11 +14,11 @@ lastupdated: "2019-06-07"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} services overview
+# Red Hat Advanced Cluster Management for Kubernetes services overview
 
-An {{site.data.keyword.mcm_notm}} service can be one of the following types: Kubernetes service, Kubernetes ingress, or Istio Gateway. An {{site.data.keyword.mcm_notm}} service runs on a single managed cluster or on multiple managed clusters. They support Kubernetes services, Kubernetes ingress services, and Istio Gateway services.
+An Red Hat Advanced Cluster Management for Kubernetes service can be one of the following types: Kubernetes service, Kubernetes ingress, or Istio Gateway. An Red Hat Advanced Cluster Management for Kubernetes service runs on a single managed cluster or on multiple managed clusters. They support Kubernetes services, Kubernetes ingress services, and Istio Gateway services.
 
-The following sections provide a summary of the types of services that are available for {{site.data.keyword.mcm_notm}}.
+The following sections provide a summary of the types of services that are available for Red Hat Advanced Cluster Management for Kubernetes.
 
 ## Kubernetes service
 
@@ -97,4 +97,4 @@ See the following sample gateway service:
 
 
 
-See [Working with {{site.data.keyword.mcm_notm}} service discovery](working_serv_intro.md) for more information about the services. 
+See [Working with Red Hat Advanced Cluster Management for Kubernetes service discovery](working_serv_intro.md) for more information about the services. 

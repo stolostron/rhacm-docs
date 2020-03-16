@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019 
-lastupdated: "2019-12-10"
+  years: 2016, 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -14,9 +14,9 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} troubleshooting
+# Red Hat Advanced Cluster Management for Kubernetes troubleshooting
 
-Learn how to isolate and resolve problems with {{site.data.keyword.mcm_notm}}.
+Learn how to isolate and resolve problems with Red Hat Advanced Cluster Management for Kubernetes.
 {:shortdesc}
 
 Verify that your issues are not related to operating system requirements, such as disk, memory, and CPU capacities. For more information, see [System requirements](../../install/requirements.md).
@@ -33,11 +33,3 @@ To get support, see [Support](support.md) in the product documentation.
 - {: child} [Troubleshooting audit logging](../../audit-logging/3.3.0/troubleshoot/audit-ts.md)
 - {: child} [Events, logs, and error codes](events_logs.md)
 {: childlinks}
-
-For troubleshooting with integrated modules, see the following product documentation:
-
-[IBM Cloud App Management troubleshooting ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/support/knowledgecenter/SS8G7U_19.3.0/com.ibm.app.mgmt.doc/content/trouble_intro.html?cp=SSFC4F_1.1.0){: new_window}
-
-[IBM Cloud Event Management troubleshooting ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/support/knowledgecenter/SSURRN/com.ibm.cem.doc/ts_index.html?cp=SSFC4F_1.1.0){: new_window}
-
-[IBM Cloud Automation Manager troubleshooting ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/support/knowledgecenter/SS2L37_3.2.1.0/cam_ts.html?cp=SSFC4F_1.1.0){: new_window}
