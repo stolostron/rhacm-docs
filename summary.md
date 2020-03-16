@@ -11,7 +11,6 @@
    * [Requirements and recommendations](install/requirements.md)
      * [Supported cloud providers](install/supported_clouds.md)
      * [Hardware requirements and recommendations](install/hardware_reqs.md)
-     * [Components](install/components.md)
      * [Supported operating systems and platforms](install/supported_os.md)
      * [Supported browsers](install/supported_browsers.md)
      * [Supported environments](install/environments_overview.md)  
