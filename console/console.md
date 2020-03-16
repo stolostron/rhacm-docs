@@ -25,10 +25,12 @@ Access your console with the following URL: (need to add this)
 Red Hat Advanced Cluster Management for Kubernetes console components:
 
 * [Welcome page](#welcome)
-* [Overview](#overview)
-* [Observe enviroments with the Topology page](#topology)
-* [Search](#search)
+* [Overview](#overview) (GET RID OF THIS?)
+* [Observe enviroments > Topology](#topology)
+* [Automate Infrastructure](#cluster)
+* [Manage application](#application)
 * [Governance and risk dashboard](#grc)
+* [Search](#search) (THIS IS THE ONLY PLACE IN THE DOCS WE TALK ABOUT SEARCH SO WE NEED TO LEAVE IT)
 
 ## Welcome page
 {: #welcome}
@@ -36,7 +38,6 @@ Red Hat Advanced Cluster Management for Kubernetes console components:
 From the Red Hat Advanced Cluster Management for Kubernetes getting started page, you can view descriptions and tasks, and you can install various CLI tools.
 
 From the _Header_, click the **Help** (?) icon to view the _About_ page, the documentation, and more. From the _User_ menu, you can access the _Configure Client_ page.
-
 
 Reorganizing your dashboard (IS THIS STILL A FEATURE?)
 
@@ -49,7 +50,12 @@ You can personalize your view of the Overview dashboard by reorganizing the reso
 * Cluster resources (VCPU/Memory usage)
 * Storage usage
 
-### Viewing application details (Technology preview)
+## Automate infrastructure
+{: #cluster}
+
+
+## Manage applications (Technology preview)
+{: #manage}
 
 You can view the information of each application. Click **Show details** to view the following information:
 
@@ -61,13 +67,13 @@ You can view the information of each application. Click **Show details** to view
 
 For more information about your application resources, see [Application management (Technical preview)](../manage_applications/overview.md).
 
-### Viewing your pod health 
+### Viewing your pod health (IS THIS PART OF TOPOLOGY AND SHOULD IT MOVE?)
 
 View the pod health for all of your clusters by expanding the Heatmap. The Heatmap displays color-coordinated boxes that represent the VCPU usage threshold of your nodes. 
 
 Click **Show details** to view the map. The size of the color-coordinated boxes represents the number of nodes on your cluster. Hover your cursor over the box to view the response time of your cluster. 
 
-### Filtering your results
+### Filtering your results (WHERE TO PUT THIS)
 
 You can personalize the Overview page more with the filtering feature. Click **Filter results** to specify what information is displayed on your page.
 
@@ -85,6 +91,11 @@ Learn more about the tabs that are available from the Topology page:
   - Networking: View Kubernetes objects for each cluster and any networks between your Kubernetes objects. Objects display changes if they were recently started. Pods also indicate `pending` and `failed` status.
 
   - Policies: View the policy, policy placement, and clusters that are being validated. Check for violations for the selected policy.
+
+## Governance and risk
+{: #grc}
+
+Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
 
 ## Search 
 {: #search}
@@ -119,9 +130,4 @@ For more specific search results, include the property in your search. For examp
     - Search for `kind:pod restarts:>1` to find all pods that restarted at least twice.
 
 3. If you want to save your search, click the **Save disk** icon.  
-
-## Governance and risk
-{: #grc}
-
-Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
 
