@@ -18,7 +18,7 @@ lastupdated: "2020-03-16"
 
 After you install Red Hat Advanced Cluster Management for Kubernetes, you are ready to import a cluster to manage. 
 {:shortdesc}
-
+<!--Links need to be revisited here-->
   - [Prerequisites](#prereq)
   - [Preparing for import](#prep)
   - [Importing a cluster](#import)
