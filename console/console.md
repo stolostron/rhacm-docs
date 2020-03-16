@@ -26,24 +26,19 @@ Red Hat Advanced Cluster Management for Kubernetes console components:
 
 * [Welcome page](#welcome)
 * [Overview](#overview)
-* [Topology](#topology)
+* [Observe enviroments with the Topology page](#topology)
 * [Search](#search)
 * [Governance and risk dashboard](#grc)
 
-## Getting started 
+## Welcome page
 {: #welcome}
 
 From the Red Hat Advanced Cluster Management for Kubernetes getting started page, you can view descriptions and tasks, and you can install various CLI tools.
 
 From the _Header_, click the **Help** (?) icon to view the _About_ page, the documentation, and more. From the _User_ menu, you can access the _Configure Client_ page.
 
-## Overview 
-{: #overview}
 
-Use the Overview page to view, manage, and reorganize the dashboard of your cluster information. You can view details of your clusters and other cloud service providers that Red Hat Advanced Cluster Management for Kubernetes supports. The Overview dashboard is continuously refreshed in real time.
-{: shortdesc}
-
-### Reorganizing your dashboard
+Reorganizing your dashboard (IS THIS STILL A FEATURE?)
 
 You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
 
