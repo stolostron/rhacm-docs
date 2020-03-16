@@ -53,7 +53,7 @@ Create clusters or bare metal assets, or import existing clusters. Scale up or d
 ## Manage applications (Technology preview)
 {: #manage}
 
-Click **New application** to edit a .yaml file and create your application. Click Resources to view the information of each application. For more information about application resources, see [Application management (Technology preview)](../manage_applications/overview.md).
+Click **New application** to edit a `.yaml` file and create your application. Click Resources to view the information of each application. For more information about application resources, see [Application management (Technology preview)](../manage_applications/overview.md).
 
 ### Viewing your pod health (IS THIS PART OF TOPOLOGY AND SHOULD IT MOVE? I cannot test as topology page not up in my cluster -- bcs)
 
