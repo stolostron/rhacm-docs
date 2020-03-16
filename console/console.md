@@ -53,6 +53,8 @@ You can personalize your view of the Overview dashboard by reorganizing the reso
 ## Automate infrastructure
 {: #cluster}
 
+Create clusters or import existing clusters. Scale up or down and delete clusters as needed. For more information, see [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](manage_cluster/intro.md)
+
 
 ## Manage applications (Technology preview)
 {: #manage}
