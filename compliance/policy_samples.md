@@ -115,7 +115,7 @@ Complete the following steps to apply the memory usage policy from the console:
 ## Network
 {: #network}
 
-Apply the network policy to define which network request to deny. For more information about network policies, see _Network Policy_ from the [Kubernetes documentation ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")]( https://kubernetes.io/docs/concepts/services-networking/network-policies/){: new_window}.
+Apply the network policy to define which network request to deny. For more information about network policies, see _Network Policy_ from the [Kubernetes documentation]( https://kubernetes.io/docs/concepts/services-networking/network-policies/){: new_window}.
 
 Your network policy might resemble the following YAML file:
 
@@ -265,7 +265,7 @@ Complete the following steps to apply the pod security policy from the console:
 ## Role policy
 {: #role}
 
-Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](../../iam/3.4.0/assign_role.md). Your role policy might resemble the following YAML file:
+Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](../compliance/security.md). Your role policy might resemble the following YAML file:
 
    ```
    apiVersion: policy.mcm.ibm.com/v1alpha1

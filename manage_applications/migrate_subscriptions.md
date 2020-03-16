@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-13"
+lastupdated: "2020-03-16"
 
 ---
 
@@ -46,6 +46,6 @@ To update any subscription that you are migrating so that the subscription is co
    ```
    {: codeblock}
 
-2. Upgrade your Hub cluster and managed clusters. For more information, see [Upgrading](../install/upgrade_offline.md).
+2. Upgrade your Hub cluster and managed clusters. For more information, see [Upgrading multicluster endpoint](../manage_cluster/upgrade_mc_endpoint.md).
 
 3. When your upgrade is complete for each managed cluster, edit your subscriptions again to remove the override settings.
