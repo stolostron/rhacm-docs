@@ -6,42 +6,33 @@ lastupdated: "2020-03-11"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Observability in the console 
 
-Learn more about a few of the console components that you can use to view, manage, or customize your console. 
+Learn more about console components that you can use to view, manage, or customize your console. 
 
-Access your console with the following URL: (need to add this)
+Access your console with the following URL: **(need to add this--how does user access the console after install -- from OCP? -bcs)**
 
 ## Red Hat Advanced Cluster Management for Kubernetes console components
 
 Red Hat Advanced Cluster Management for Kubernetes console components:
 
 * [Welcome page](#welcome)
-* [Overview](#overview) (GET RID OF THIS?)
+* [Overview](#overview) **(I CANNOT DOC TEST THIS -- NOT UP)**
 * [Observe enviroments > Topology](#topology)
 * [Automate Infrastructure](#cluster)
 * [Manage application](#application)
 * [Governance and risk dashboard](#grc)
-* [Search](#search) (THIS IS THE ONLY PLACE IN THE DOCS WE TALK ABOUT SEARCH SO WE NEED TO LEAVE IT)
+* [Search](#search) **(THIS IS THE ONLY PLACE IN THE DOCS WE TALK ABOUT SEARCH SO WE NEED TO LEAVE IT)**
 
 ## Welcome page
 {: #welcome}
 
-From the Red Hat Advanced Cluster Management for Kubernetes getting started page, you can view descriptions and tasks, and you can install various CLI tools.
+From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you get more information about the product and you can access header features, such as _Search_ and _Create resource_. Also from the _Header_, you can click the **Help** (?) icon to view the _About_ page and the documentation. From the _User_ menu, you can access the _Configure Client_ page. Additionally, you can use the [Visual Web Terminal](vwt_search.md). 
 
-From the _Header_, click the **Help** (?) icon to view the _About_ page, the documentation, and more. From the _User_ menu, you can access the _Configure Client_ page.
+## Overview
 
-Reorganizing your dashboard (IS THIS STILL A FEATURE?)
-
-You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
+Reorganize your dashboard **(IS THIS STILL A FEATURE?)**. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
 
 * Name of the cloud service with the number of clusters
 * Cluster compliance
@@ -50,36 +41,27 @@ You can personalize your view of the Overview dashboard by reorganizing the reso
 * Cluster resources (VCPU/Memory usage)
 * Storage usage
 
+### Filtering your results (WHERE TO PUT THIS?)
+
+You can personalize the Overview page more with the filtering feature. Click **Filter results** to specify what information is displayed on your page.
+
 ## Automate infrastructure
 {: #cluster}
 
-Create clusters or import existing clusters. Scale up or down and delete clusters as needed. For more information, see [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](manage_cluster/intro.md)
-
+Create clusters or bare metal assets, or import existing clusters. Scale up or down and delete clusters as needed. For more information, see [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](manage_cluster/intro.md)
 
 ## Manage applications (Technology preview)
 {: #manage}
 
-You can view the information of each application. Click **Show details** to view the following information:
+Click **New application** to edit a .yaml file and create your application. Click Resources to view the information of each application. For more information about application resources, see [Application management (Technology preview)](../manage_applications/overview.md).
 
-* Number of clusters
-* Number of Kubernetes types
-* Number of regions
-* Number of nodes
-* Number of pods
-
-For more information about your application resources, see [Application management (Technical preview)](../manage_applications/overview.md).
-
-### Viewing your pod health (IS THIS PART OF TOPOLOGY AND SHOULD IT MOVE?)
+### Viewing your pod health (IS THIS PART OF TOPOLOGY AND SHOULD IT MOVE? I cannot test as topology page not up in my cluster -- bcs)
 
 View the pod health for all of your clusters by expanding the Heatmap. The Heatmap displays color-coordinated boxes that represent the VCPU usage threshold of your nodes. 
 
 Click **Show details** to view the map. The size of the color-coordinated boxes represents the number of nodes on your cluster. Hover your cursor over the box to view the response time of your cluster. 
 
-### Filtering your results (WHERE TO PUT THIS)
-
-You can personalize the Overview page more with the filtering feature. Click **Filter results** to specify what information is displayed on your page.
-
-## Topology page
+## Topology page (Need dev help on this)
 {: #topology}
 
 The Topology page uses information from Weave Scope probe to display Kubernetes objects within a cluster. You can view hub cluster resources. As you configure managed clusters, you see more clusters in the Topology view. 
