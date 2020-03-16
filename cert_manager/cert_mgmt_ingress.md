@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-03-16"
 
 ---
 
@@ -199,7 +199,7 @@ You need to use the management ingress CA file since the repository is from the 
       Output:
       ```
       # Source: icp-management-ingress/templates/cert-crd.yaml
-      apiVersion: certmanager.k8s.io/v1alpha1
+      apiVersion: certmanager.io/v1alpha1
       kind: Certificate
       metadata:
       name: icp-management-ingress-cert

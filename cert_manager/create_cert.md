@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-13"
+lastupdated: "2020-03-16"
 
 ---
 
@@ -34,7 +34,7 @@ lastupdated: "2020-03-13"
 2. To define the Certificate, edit the `metadata` where `<name>` is associated with the certificate and the `<namespace>` is where the certificate is created. Additionally, edit the `spec` section of the following example. The following example defines a certificate that uses the Self-signed Issuer from the Self-signed Issuer instructions in step one. Notice that the `<namespace>` of the certificate matches the `<namespace>` of the Issuer:
 
    ```
-   apiVersion: certmanager.k8s.io/v1alpha1
+   apiVersion: certmanager.io/v1alpha1
    kind: Certificate
    metadata:
      name: hello-deployment-tls-1
@@ -89,7 +89,7 @@ Complete the following procedure to secure the Kubernetes Ingress:
 2. To define the Certificate, edit the `metadata` where `<name>` is associated with the Certificate and the `<namespace>` is where the Certificate is created. Additionally, edit the `spec` section of the following sample, which defines a Certificate that uses the CA Issuer from the CA Issuer instructions in step one. Notice the `<namespace>` of the Certificate matches the `<namespace>` of the Issuer:
 
   ```
-  apiVersion: certmanager.k8s.io/v1alpha1
+  apiVersion: certmanager.io/v1alpha1
   kind: Certificate
   metadata:
     name: hello-k8s-ingress-tls-1

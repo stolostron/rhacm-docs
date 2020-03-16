@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-03-16"
 
 ---
 
@@ -137,7 +137,7 @@ Complete the following configuration on your Vault server:
 4. Create the Vault Issuer that uses the Vault token Secret. The Vault Issuer references the Secret that you just created, the URL for the Vault server, and the path to a role:
 
     ```
-    apiVersion: certmanager.k8s.io/v1alpha1
+    apiVersion: certmanager.io/v1alpha1
     kind: Issuer
     metadata:
       name: my-vault-issuer
@@ -156,7 +156,7 @@ Complete the following configuration on your Vault server:
 5. Create a certificate that uses the Vault Issuer. The following example defines a certificate that uses the Issuer, which is referenced in the previous step:
 
     ```
-    apiVersion: certmanager.k8s.io/v1alpha1
+    apiVersion: certmanager.io/v1alpha1
     kind: Certificate
     metadata:
       name: my-cert1-com
@@ -249,7 +249,7 @@ See the [HashiCorp Vault](https://www.vaultproject.io/docs/auth/approle.html) do
 7. Next, create the Vault Issuer that uses the AppRole Secret. Edit the following YAML sample.
 
    ```
-   apiVersion: certmanager.k8s.io/v1alpha1
+   apiVersion: certmanager.io/v1alpha1
    kind: Issuer
    metadata:
      name: cm-vault-issuer
@@ -277,7 +277,7 @@ See the [HashiCorp Vault](https://www.vaultproject.io/docs/auth/approle.html) do
    The following sample defines a certificate that uses the Issuer, which is referenced in the previous step:
 
    ```
-   apiVersion: certmanager.k8s.io/v1alpha1
+   apiVersion: certmanager.io/v1alpha1
    kind: Certificate
    metadata:
      name: vault-approle-aludel1-cert

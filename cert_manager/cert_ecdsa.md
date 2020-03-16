@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-11-18"
+  years: 2018, 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -27,7 +27,7 @@ With certificate manager, you can encrypt with the ECDSA algorithm. A certificat
 To create a certificate that uses the ECDSA algorithm for encryption, follow the procedure in [Creating Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager) certificates](create_cert.md), but use the following sample where `keyAlgorithm` and `keySize` are required:
 
 ```
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: certmanager.io/v1alpha1
 kind: Certificate
 metadata:
   name: ecdsa-ca-cert
@@ -54,7 +54,7 @@ spec:
 1. See the following sample YAML, which uses Certificate manager to create a CA Issuer that uses ECDSA:
 
    ```
-   apiVersion: certmanager.k8s.io/v1alpha1
+   apiVersion: certmanager.io/v1alpha1
    kind: Issuer
    metadata:
      name: ss-issuer
@@ -67,7 +67,7 @@ spec:
 2. Next, create a CA certificate that is issued from the self-signed Issuer and using the ECDSA key algorithm. See the following sample:
 
    ```
-   apiVersion: certmanager.k8s.io/v1alpha1
+   apiVersion: certmanager.io/v1alpha1
    kind: Certificate
    metadata:
      name: ecdsa-ca-cert
@@ -89,7 +89,7 @@ spec:
 3. Edit the following sample to create the CA Issuer with the CA certificate:
 
    ```
-   apiVersion: certmanager.k8s.io/v1alpha1
+   apiVersion: certmanager.io/v1alpha1
    kind: Issuer
    metadata:
      name: ecdsa-ca-issuer

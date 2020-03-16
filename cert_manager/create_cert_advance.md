@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018,2019
-lastupdated: "2019-11-06"
+  years: 2018, 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -37,7 +37,7 @@ The Certificate manager service offers custom expiration times. The feature is o
 The following example of a Certificate definition has a validity period of 30 days (720 hours). Certificate manager service begins trying to renew this certificate 10 days (240 hours) before it expires.
 
   ```yaml
-  apiVersion: certmanager.k8s.io/v1alpha1
+  apiVersion: certmanager.io/v1alpha1
   kind: Certificate
   metadata:
     name: hello-world-cert-1
@@ -67,7 +67,7 @@ The following example of a Certificate definition has a validity period of 30 da
 This version of cert-manager supports an extra format (PKCS#8) for private key encoding. If you want your certificates to encode their private keys in PKCS#8 format, specify the `keyEncoding` parameter in the `spec` field. For example:
 
 ````yaml
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: certmanager.io/v1alpha1
 kind: Certificate
 metadata:
   name: example-pkcs8-certificate
@@ -94,7 +94,7 @@ In addition, CA issuers can also have their private keys encoded in PKCS#8 forma
 Following is a sample spec where the CA issuer is using a secret that contains a certificate and its private key. The private key is encoded in PKCS#8.
 
 ````yaml
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: certmanager.io/v1alpha1
 kind: Issuer
 metadata:
   name: pkcs8-ca-issuer
@@ -112,7 +112,7 @@ Certificates can now specify x509 actions are allowed/enabled for its key (key u
 Specify the actions that you want enabled by using the `usages` field. For example:
 
 ````yaml
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: certmanager.io/v1alpha1
 kind: Certificate
 metadata:
   name: example-key-usage-certificate
