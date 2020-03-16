@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-13"
+lastupdated: "2020-03-16"
 
 ---
 
@@ -16,8 +16,6 @@ lastupdated: "2020-03-13"
 
 
 # Using Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)
-
-**Note:** The apiVersion `certmanager.k8s.io/v1alpha1` in all cert-manager Custom Resources (Certificates, Issuers, and ClusterIssuers) are deprecated. It is replaced by `certmanager.io/v1alpha2` for all cert-manager custom resources in a future release. New apiVersion not yet available in this release.
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes cert-manager to create and mount a certificate to a Kubernetes Deployment, StatefulSet, or DaemonSet. You can also create and add a certificate to a Kubernetes Ingress.
 {:shortdesc}

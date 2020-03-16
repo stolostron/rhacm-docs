@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-03-16"
 
 ---
 
@@ -26,7 +26,7 @@ The issuer is used primarily with the ACME server that is hosted at [Let's Encry
 
 The following `Issuer` example uses a staging server that is provided by Let's Encrypt. The important details are the `server` name and the `email` address. The `solvers` field indicates which challenge provider it's using. The following example uses the `HTTP01` challenge provider.
 ```
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: certmanager.io/v1alpha1
 kind: Issuer
 metadata:
   name: letsencrypt-staging
@@ -54,7 +54,7 @@ spec:
 
 The following `Certificate` example uses the `Issuer` defined in the previous step. The certificate `commonName` and `dnsNames` are challenged by the ACME server. The certificate manager service automatically creates a pod and ingress rules to resolve the challenges for the two `hostnames` listed in the following example.
 ```
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: certmanager.io/v1alpha1
 kind: Certificate
 metadata:
   name: cm-aws-example-com
