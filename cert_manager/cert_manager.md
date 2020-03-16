@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-03-16"
 
 ---
 
@@ -17,12 +17,10 @@ lastupdated: "2020-03-09"
 
 # Using Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)
 
-**Note:** Beginning with release 1.3.0, apiVersion `certmanager.k8s.io/v1alpha1` in all cert-manager Custom Resources (Certificates, Issuers, and ClusterIssuers) is deprecated. Replaced by `certmanager.io/v1alpha2` for all cert-manager custom resources in a future release. New apiVersion not yet available in this release.
-
 You can use the Red Hat Advanced Cluster Management for Kubernetes cert-manager to create and mount a certificate to a Kubernetes Deployment, StatefulSet, or DaemonSet. You can also create and add a certificate to a Kubernetes Ingress.
 {:shortdesc}
 
-_Issuer_, _ClusterIssuer_, and _Certificate_ are Kubernetes resource types that were introduced to support certificate generation and lifecycle management. For more information about cert-manager, see the [cert-manager community documentation](https://cert-manager.readthedocs.io/en/latest/).
+_Issuer_, _ClusterIssuer_, and _Certificate_ are Kubernetes resource types that were introduced to support certificate generation and lifecycle management. For more information about cert-manager, see the [cert-manager community documentation](https://cert-manager.readthedocs.io/en/latest/){:new_window}.
 
 See the following list to learn how Red Hat Advanced Cluster Management for Kubernetes cert-manager works:
 
@@ -45,8 +43,9 @@ For more information about Certificate manager and other configuration tools, se
 - {: child} [Adding certificates by using the Acme Issuer](cert_acme.md)
 - {: child} [Adding certificates by using the ECDSA algorithm for encryption](cert_ecdsa.md)
 - {: child} [Red Hat Advanced Cluster Management for Kubernetes Certificate Manager role-based access control (RBAC) support](cert_manager_rbac.md)
+{: childlinks}
 
 For information about refreshing, replacing, and restoring certificates that are created and managed by Installer, see [Certificates in Red Hat Advanced Cluster Management for Kubernetes](certificates.md)  
 
 
-{: childlinks}
+

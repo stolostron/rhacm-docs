@@ -1,48 +1,42 @@
 ---
+
 copyright:
-  years: 2016, 2019
-lastupdated: 2019-11-20
+  years: 2020
+lastupdated: "2020-03-09"
+
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
-# {{site.data.keyword.cloud_pak}} CLI (cloudctl) multicluster commands (mc)
+# Multicluster commands (mc)
 {: #cli_mc_commands}
 
-Learn about the `cloudctl mc` commands that you can run to access your Red Hat Advanced Cluster Management for Kubernetes cluster.
+Learn about the `oc mc` commands that you can run to access your Red Hat Advanced Cluster Management for Kubernetes cluster.
 {:shortdesc}
 
-Many of the `cloudctl mc` commands correspond to `kubectl` commands that are similar. In most cases, the `cloudctl mc` command provides the same functionality as its `kubectl` counterpart, but the `cloudctl mc` commands apply to a multi-cluster environment. 
+Many of the `oc mc` commands correspond to `kubectl` commands that are similar. In most cases, the `oc mc` command provides the same functionality as its `kubectl` counterpart, but the `oc mc` commands apply to a multi-cluster environment. 
 
-For example, the `cloudctl mc get pods` command lists the pods on one or more managed clusters, while the `kubectl get pods` command lists the pods in the current namespace. 
+For example, the `oc mc get pods` command lists the pods on one or more managed clusters, while the `kubectl get pods` command lists the pods in the current namespace. 
 
-The options that are available for the `cloudctl mc` commands are generally a subset of the options that are available with the `kubectl` commands, but the content and format of the results that are returned from the `cloudctl mc` commands should be similar to the results from the `kubectl` commands.
+The options that are available for the `oc mc` commands are generally a subset of the options that are available with the `kubectl` commands, but the content and format of the results that are returned from the `oc mc` commands should be similar to the results from the `kubectl` commands.
 
-## cloudctl mc
+## oc mc
 {: #mc}
 
- * [cloudctl mc apply](#apply)
- * [cloudctl mc cluster import](#cluster_import)
- * [cloudctl mc cluster list](#cluster_list)
- * [cloudctl mc cluster remove](#cluster_remove)
- * [cloudctl mc cluster template](#cluster_template)
- * [cloudctl mc create](#create)
- * [cloudctl mc create helmrepo](#create_helmrepo)
- * [cloudctl mc delete](#delete)
- * [cloudctl mc deploy application](#deploy_application)
- * [cloudctl mc describe](#describe)
- * [cloudctl mc edit](#edit)
- * [cloudctl mc get](#get)
- * [cloudctl mc label](#label)
- * [cloudctl mc logs](#logs)
+ * [oc mc apply](#apply)
+ * [oc mc cluster import](#cluster_import)
+ * [oc mc cluster list](#cluster_list)
+ * [oc mc cluster remove](#cluster_remove)
+ * [oc mc cluster template](#cluster_template)
+ * [oc mc create](#create)
+ * [oc mc create helmrepo](#create_helmrepo)
+ * [oc mc delete](#delete)
+ * [oc mc deploy application](#deploy_application)
+ * [oc mc describe](#describe)
+ * [oc mc edit](#edit)
+ * [oc mc get](#get)
+ * [oc mc label](#label)
+ * [oc mc logs](#logs)
 
-## cloudctl mc apply
+## oc mc apply
 {: #apply}
 
 Apply a configuration to a resource by `filename` or `stdin`.
@@ -50,7 +44,7 @@ Apply a configuration to a resource by `filename` or `stdin`.
 - Example
   
 ```
-cloudctl mc apply -f FILENAME [options]
+oc mc apply -f FILENAME [options]
 
 OPTIONS:
    --alsologtostderr    Log to standard error, as well as files
@@ -70,7 +64,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc cluster import
+## oc mc cluster import
 {: #cluster_import}
 
 Import a cluster
@@ -78,7 +72,7 @@ Import a cluster
 - Example
   
 ```
-cloudctl mc cluster import -f {config.yaml} [-C|--cluster-context {context}] [-K|--cluster-kubeconfig {path}] [-b|--bootstrap-namespace {namespace}] [-t|--timeout {time}]
+oc mc cluster import -f {config.yaml} [-C|--cluster-context {context}] [-K|--cluster-kubeconfig {path}] [-b|--bootstrap-namespace {namespace}] [-t|--timeout {time}]
 
 OPTIONS:
    --alsologtostderr          Log to standard error, as well as files
@@ -100,7 +94,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc cluster list
+## oc mc cluster list
 {: #cluster_list}
 
 List the clusters imported
@@ -108,7 +102,7 @@ List the clusters imported
 - Example
   
 ```
-cloudctl mc cluster list
+oc mc cluster list
 
 OPTIONS:
    --alsologtostderr   Log to standard error, as well as files
@@ -122,7 +116,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc cluster remove
+## oc mc cluster remove
 {: #cluster_remove}
 
 Remove an imported cluster
@@ -130,7 +124,7 @@ Remove an imported cluster
 - Example
   
 ```
-cloudctl mc cluster remove {name} [-n|--namespace {namespace}] [-C|--cluster-context {context}] [-K|--cluster-kubeconfig {path}] [-b|--bootstrap-namespace {namespace}]
+oc mc cluster remove {name} [-n|--namespace {namespace}] [-C|--cluster-context {context}] [-K|--cluster-kubeconfig {path}] [-b|--bootstrap-namespace {namespace}]
 
 OPTIONS:
    --alsologtostderr         Log to standard error, as well as files
@@ -149,7 +143,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc cluster template
+## oc mc cluster template
 {: #cluster_template}
 
 Output a template config.yaml file used for cluster import
@@ -157,7 +151,7 @@ Output a template config.yaml file used for cluster import
 - Example
   
 ```
-cloudctl mc cluster template {name} [-n|--namespace {namespace}]
+oc mc cluster template {name} [-n|--namespace {namespace}]
 
 OPTIONS:
    --alsologtostderr   Log to standard error, as well as files
@@ -172,7 +166,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc create
+## oc mc create
 {: #create}
 
 Create a resource from a file or from stdin
@@ -180,7 +174,7 @@ Create a resource from a file or from stdin
 - Example
   
 ```
-cloudctl mc create -f FILENAME [options]
+oc mc create -f FILENAME [options]
 
 OPTIONS:
    --alsologtostderr    Log to standard error, as well as files
@@ -200,7 +194,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc create helmrepo
+## oc mc create helmrepo
 {: #create_helmrepo}
 
 Create a Helm repository
@@ -208,7 +202,7 @@ Create a Helm repository
 - Example
   
 ```
-cloudctl mc create helmrepo --repo-name <repo_name> --repo-url <repo_url>
+oc mc create helmrepo --repo-name <repo_name> --repo-url <repo_url>
 
 OPTIONS:
    --alsologtostderr    Log to standard error, as well as files
@@ -228,7 +222,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc delete
+## oc mc delete
 {: #delete}
 
 Delete resources by file names, stdin, resources and names, or by resources and label selector
@@ -236,7 +230,7 @@ Delete resources by file names, stdin, resources and names, or by resources and 
 - Example
   
 ```
-cloudctl mc delete ([-f FILENAME] | TYPE [(NAME | -l label | --all)]) [options]
+oc mc delete ([-f FILENAME] | TYPE [(NAME | -l label | --all)]) [options]
 
 OPTIONS:
    --all                Delete all resources, including uninitialized ones, in the namespace of the specified resource types.
@@ -260,7 +254,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc deploy application
+## oc mc deploy application
 {: #deploy_application}
 
 Deploy an application
@@ -268,7 +262,7 @@ Deploy an application
 - Example
   
 ```
-cloudctl mc deploy application <app_name> --cluster-replica <number_of_clusters> --cluster-selector <key=value>
+oc mc deploy application <app_name> --cluster-replica <number_of_clusters> --cluster-selector <key=value>
 
 OPTIONS:
    --alsologtostderr    Log to standard error, as well as files
@@ -288,7 +282,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc describe
+## oc mc describe
 {: #describe}
 
 Show details of a specific resource or group of resources
@@ -296,7 +290,7 @@ Show details of a specific resource or group of resources
 - Example
   
 ```
-cloudctl mc describe (-f FILENAME | TYPE [NAME_PREFIX | -l label] | TYPE/NAME) [options]
+oc mc describe (-f FILENAME | TYPE [NAME_PREFIX | -l label] | TYPE/NAME) [options]
 
 OPTIONS:
    --all-namespaces         If present, list the requested object(s) across all namespaces; namespace in current context is ignored even if specified with --namespace
@@ -320,7 +314,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc edit
+## oc mc edit
 {: #edit}
 
 Edit a resource from the default editor
@@ -328,7 +322,7 @@ Edit a resource from the default editor
 - Example
   
 ```
-cloudctl mc edit (<resource_type/resource_name> | -f <filename>)
+oc mc edit (<resource_type/resource_name> | -f <filename>)
 
 OPTIONS:
    --alsologtostderr       Log to standard error, as well as files
@@ -349,7 +343,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc get
+## oc mc get
 {: #get}
 
 Display one or many resources
@@ -357,7 +351,7 @@ Display one or many resources
 - Example
   
 ```
-cloudctl mc get [(-o|--output=)json|yaml|wide|go-template=...|go-template-file=...|jsonpath=...|jsonpath-file=...] (TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...) [flags]
+oc mc get [(-o|--output=)json|yaml|wide|go-template=...|go-template-file=...|jsonpath=...|jsonpath-file=...] (TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...) [flags]
 
 OPTIONS:
    --all-namespaces               If present, list the requested object(s) across all namespaces; namespace in current context is ignored even if specified with --namespace
@@ -387,7 +381,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc label
+## oc mc label
 {: #label}
 
 Update the labels on a resource
@@ -395,7 +389,7 @@ Update the labels on a resource
 - Example
   
 ```
-cloudctl mc label [--overwrite] (-f FILENAME | TYPE NAME) KEY_1=VAL_1 ... KEY_N=VAL_N [--resource-version=version] [options]
+oc mc label [--overwrite] (-f FILENAME | TYPE NAME) KEY_1=VAL_1 ... KEY_N=VAL_N [--resource-version=version] [options]
 
 OPTIONS:
    --all                Select all resources, including uninitialized ones, in the namespace of the specified resource types
@@ -416,7 +410,7 @@ OPTIONS:
 ```
 {: codeblock}
 
-## cloudctl mc logs
+## oc mc logs
 {: #logs}
 
 Print the logs for a container in a pod
@@ -424,7 +418,7 @@ Print the logs for a container in a pod
 - Example
   
 ```
-cloudctl mc logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER] [options]
+oc mc logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER] [options]
 
 OPTIONS:
    --alsologtostderr    Log to standard error, as well as files

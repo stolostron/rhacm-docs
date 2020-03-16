@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-12"
+lastupdated: "2020-03-16"
 
 ---
 
@@ -24,7 +24,7 @@ Create a self-signed Issuer, then use that Issuer to create a CA certificate. Yo
 1. Create a self-signed Issuer. Use the following `.yaml` file to define a self-signed Issuer.
 
   ```
-  apiVersion: certmanager.k8s.io/v1alpha1
+  apiVersion: certmanager.io/v1alpha1
   kind: Issuer
   metadata:
     name: hello-myself-tls
@@ -37,7 +37,7 @@ Create a self-signed Issuer, then use that Issuer to create a CA certificate. Yo
 2. After you create the self-signed Issuer, create a CA certificate that references the self-signed Issuer and specifies the `isCA` field.
 
   ```
-  apiVersion: certmanager.k8s.io/v1alpha1
+  apiVersion: certmanager.io/v1alpha1
   kind: Certificate
   metadata:
     name: hello-ca-tls
@@ -62,7 +62,7 @@ Create a self-signed Issuer, then use that Issuer to create a CA certificate. Yo
 3. Edit the following sample of an Issuer that references the previous secret. Edit the `name` and `namespace` from the _metadata_ section of the `.yaml` file. Be sure that `secretName` from the _spec_ section matches the `secretName` from the previous step:
 
   ```
-  apiVersion: certmanager.k8s.io/v1alpha1
+  apiVersion: certmanager.io/v1alpha1
   kind: Issuer
   metadata:
     name: hello-deployment-tls

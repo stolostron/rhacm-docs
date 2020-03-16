@@ -1,18 +1,10 @@
 ---
 
 copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-11"
+  years: 2020
+lastupdated: "2020-03-09"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Known issues
 
@@ -28,7 +20,6 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
   - [Subscriptions that use a secret must be changed before updates to dependency resources can be detected](#611)
   - [Permission issue with Docker Version 18.03 with Ubuntu 16.04 LTS](#31947)
   - [Hub cluster resources display as `local-cluster` in console search results ](#31979)
-  - [Mapping error for a certificate policy](#1351_mapping)
   - [Visual Web Terminal fails when returning over 200 KB of data](#34145)
   - [Enabling Red Hat Advanced Cluster Management for Kubernetes for the installed monitoring release](#1051)
   - [LDAP user names are case-sensitive](#25735)
@@ -149,48 +140,6 @@ If you use Docker Version 18.03 or higher with Ubuntu 16.04 LTS, containers that
 {: #31979}
 
 Search returns and lists each cluster with the resource that you search. For resources in the _hub_ cluster, the cluster name is displayed as _local-cluster_.
-
-## Mapping error for a certificate policy
-{: #1351_mapping}
-
-When you create a certificate policy without a certificate policy controller for a third-party cluster, you might receive the following violation message:
-
-   ```
-   mapping error from raw object: no matches for kind "CertificatePolicy" in version "policies.ibm.com/v1alpha1"
-   ```
-   {: pre}
-
-You must unbind the certificate policy from your third-party cluster. Complete the following steps to unbind each of your certificate policies:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes hub cluster.
-
-2. From the navigation menu, click **Automate infrastructure** > **Clusters**.
-
-3. Create a unique label for each of your clusters with Red Hat Advanced Cluster Management for Kubernetes services installed. Select the **Options** icon (<img src="../images/icons/menu-overflow_16.svg" alt="Options icon">) > **Edit Labels**.
-
-4. Add a new label for each of your clusters with Red Hat Advanced Cluster Management for Kubernetes services installed by selecting the Add icon. For example, create the following label:
-
-   ```
-   cloud = common services
-   ```
-   {: pre}
-
-5. From the navigation menu, click **Govern risk** > **Policies tab** to view your policies.
-
-6. Edit your certificate policy by updating the placement policy. Update the `spec.clusterLabels` parameter by removing and adding labels. Your placement policy might resemble the following content:
-
-   ```yaml
-   spec:
-     clusterLabels:
-       matchExpressions:
-         - key: cloud
-           operator: In
-           values:
-             - common-services
-   ```
-   {: pre}
-
-Your certificate policies are unbound from your third-party clusters.
 
 ## Visual Web Terminal fails when returning over 200 KB of data
 {: #34145}
