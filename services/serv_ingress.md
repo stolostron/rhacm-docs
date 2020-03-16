@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-06-07"
+  years: 2019, 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -16,10 +16,10 @@ lastupdated: "2019-06-07"
 
 # Enabling a Kubernetes ingress for discovery
 
-You can configure the {{site.data.keyword.mcm_notm}} service registry to discover Kubernetes ingresses that are on different {{site.data.keyword.mcm_notm}} managed clusters.
+You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Kubernetes ingresses that are on different Red Hat Advanced Cluster Management for Kubernetes managed clusters.
 {: shortdesc}
 
-When you have multiple Kubernetes ingresses that are managed by {{site.data.keyword.mcm_notm}}, it is challenging to maintain them. The {{site.data.keyword.mcm_notm}} service discovery function discovers Kubernetes ingresses that are configured to be discovered.
+When you have multiple Kubernetes ingresses that are managed by Red Hat Advanced Cluster Management for Kubernetes, it is challenging to maintain them. The Red Hat Advanced Cluster Management for Kubernetes service discovery function discovers Kubernetes ingresses that are configured to be discovered.
 
 **Required user type or access level:** Cluster administrator.
 
@@ -31,7 +31,7 @@ The plugin for the Kubernetes ingress discovery must be enabled if you want to d
 
 2. Navigate to **Workloads** -> **Helm Releases**.
 
-3. Select your `ibm-klusterlet` release.
+3. Select your `rm-klusterlet` release.
 
 4. Expand **All parameters**.
 
