@@ -2,7 +2,7 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-13"
+lastupdated: "2020-03-16"
 
 ---
 
@@ -67,16 +67,13 @@ The following sections describe aspects of data management within the Red Hat Ad
 ## Data Life Cycle
 {: #datalifecycle}
 
-Red Hat Advanced Cluster Management for Kubernetes is an application platform for developing and managing on-premises, containerized applications. It is an integrated environment for managing containers that includes the container orchestrator Kubernetes, a private image registry, a management console, and monitoring frameworks.
+Red Hat Advanced Cluster Management for Kubernetes is an application platform for developing and managing on-premises, containerized applications. It is an integrated environment for managing containers that includes the container orchestrator Kubernetes, cluster lifecycle, application lifecycle, and Governance, Risk, and Compliance frameworks <!--can this be changed to security frameworks?-->.
 
 As such, the Red Hat Advanced Cluster Management for Kubernetes platform deals primarily with technical data that is related to the configuration and management of the platform, some of which might be subject to GDPR. The Red Hat Advanced Cluster Management for Kubernetes platform also deals with information about users who manage the platform. This data will be described throughout this document for the awareness of clients responsible for meeting GDPR requirements.
 
 This data is persisted on the platform on local or remote file systems as configuration files or in databases. Applications that are developed to run on the Red Hat Advanced Cluster Management for Kubernetes platform might deal with other forms of personal data subject to GDPR. The mechanisms that are used to protect and manage platform data are also available to applications that run on the platform. Additional mechanisms might be required to manage and protect personal data that is collected by applications run on the Red Hat Advanced Cluster Management for Kubernetes platform.
 
-To best understand the Red Hat Advanced Cluster Management for Kubernetes platform and its data flows, you must understand how Kubernetes, Docker, and Helm work. These open source components are fundamental to the Red Hat Advanced Cluster Management for Kubernetes platform. You use Kubernetes deployments to place instances of applications, which are built into Helm charts that reference Docker images. The Helm charts contain the details about your application, and the Docker images contain all the software packages that your applications need to run.
-
-Red Hat Advanced Cluster Management for Kubernetes includes a catalog of containerized software and services from IBM in the default Red Hat Advanced Cluster Management for Kubernetes repository list. To view a list of all the Red Hat Advanced Cluster Management for Kubernetes charts, see [IBM/charts ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://github.com/IBM/charts/tree/master/stable){:new_window}. For considerations regarding GDPR for the products in the catalog, consult the documentation for those products.
-Some of the applications available in the catalog are open source software. It is the client’s responsibility to determine and implement any appropriate GDPR controls for open source software. Information on these packages is included in the catalog entry.
+To best understand the Red Hat Advanced Cluster Management for Kubernetes platform and its data flows, you must understand how Kubernetes, Docker, and the Operator work. These open source components are fundamental to the Red Hat Advanced Cluster Management for Kubernetes platform. You use Kubernetes deployments to place instances of applications, which are built into Operators that reference Docker images. The Operator contain the details about your application, and the Docker images contain all the software packages that your applications need to run.
 
 ### What types of data flow through Red Hat Advanced Cluster Management for Kubernetes platform
 
@@ -122,11 +119,6 @@ The following items highlight the areas where data is stored, which you might wa
 * **Kubernetes Configuration Data:** Kubernetes cluster state data is stored in a distributed key-value store, `etcd`. 
 * **User Authentication Data, including User IDs and passwords:** User ID and password management are handled through a client enterprise LDAP directory. Users and groups that are defined in LDAP can be added to Red Hat Advanced Cluster Management for Kubernetes platform teams and assigned access roles. Red Hat Advanced Cluster Management for Kubernetes platform stores the email address and user ID from LDAP, but does not store the password. Red Hat Advanced Cluster Management for Kubernetes platform stores the group name and upon login, caches the available groups to which a user belongs. Group membership is not persisted in any long-term way. Securing user and group data at rest in the enterprise LDAP must be considered. Red Hat Advanced Cluster Management for Kubernetes platform also includes an authentication service, Open ID Connect (OIDC) that interacts with the enterprise directory and maintains access tokens. This service uses MongoDB as a backing store.
 * **Service authentication data, including user IDs and passwords:** Credentials that are used by Red Hat Advanced Cluster Management for Kubernetes platform components for inter-component access are defined as Kubernetes Secrets. All Kubernetes resource definitions are persisted in the `etcd` key-value data store. Initial credentials values are defined in the platform configuration data as Kubernetes Secret configuration YAML files. For more information, see [Managing Secrets](../applications/managing_secrets.md).
-* **Helm chart data:** Red Hat Advanced Cluster Management for Kubernetes platform includes a catalog of containerized software and services that you can browse and install in your cluster from Helm charts. The Helm service persists configuration data in a MongoDB backing store.
-* **GlusterFS storage file system:** You can use GlusterFS storage in your clusters. Consideration must be given to encrypting the volumes where GlusterFS storage is deployed. 
-* **Monitoring Data:** You can use Red Hat Advanced Cluster Management for Kubernetes platform monitoring to monitor the status of your cluster and applications. This service uses Grafana and Prometheus to present detailed information about cluster nodes and containers. Additional monitoring stacks can be deployed for application monitoring. Monitoring data might be persisted using Kubernetes `PersistentVolumes`.
-* **Metering Data:** You can use the Red Hat Advanced Cluster Management for Kubernetes metering service to view and download detailed usage metrics for your applications and cluster. The metering service uses MongoDB as a backing data store to persist metric data.
-* **Logging Data:** Red Hat Advanced Cluster Management for Kubernetes platform uses an ELK stack for system logs. ELK is an abbreviation for three products, Elasticsearch, Logstash, and Kibana, that are built by Elastic and together comprise a stack of tools that you can use to stream, store, search, and monitor logs. The ELK stack that is provided with Red Hat Advanced Cluster Management for Kubernetes platform uses the official ELK stack images that are published by Elastic. Logging is configured by default for the Red Hat Advanced Cluster Management for Kubernetes platform services. Additional ELK stacks can be deployed for application logging.
 
 ## Data access
 {: #dataaccess}
@@ -135,7 +127,7 @@ Red Hat Advanced Cluster Management for Kubernetes platform data can be accessed
 * Web user interface (the console)
 * Kubernetes `kubectl` CLI
 * Red Hat Advanced Cluster Management for Kubernetes CLI
-* Helm CLI
+* oc CLI
 
 These interfaces are designed to allow you to make administrative changes to your Red Hat Advanced Cluster Management for Kubernetes cluster. Administration access to Red Hat Advanced Cluster Management for Kubernetes can be secured and involves three logical, ordered stages when a request is made: authentication, role-mapping, and authorization.
 
@@ -147,9 +139,7 @@ For all subsequent authentication requests made from the console, the front-end 
 
 The Red Hat Advanced Cluster Management for Kubernetes platform CLI requires the user to provide credentials to log in.
 
-The `kubectl` CLI also requires credentials to access the cluster. These credentials can be obtained from the management console and expire after 12 hours. Access through service accounts is supported.
-
-Helm CLI access utilizes certificates to access the cluster.
+The `kubectl` and `oc` CLI also requires credentials to access the cluster. These credentials can be obtained from the management console and expire after 12 hours. Access through service accounts is supported.
 
 ### Role Mapping
 
