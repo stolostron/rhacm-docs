@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2019, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2019-12-11"
 
 # Passport Advantage part numbers
 
-Use these tables to find the files you need from [Passport Advantage ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/software/passportadvantage/) and the corresponding part numbers.
+Use these tables to find the files you need from [Passport Advantage](https://www.ibm.com/software/passportadvantage/) and the corresponding part numbers.
 {: shortdesc}
 
   - [Downloading packages](#download)
@@ -31,7 +31,7 @@ Use these tables to find the files you need from [Passport Advantage ![Opens in 
 
 Complete the following procedure to download your packages:
 
-1. Go to the IBM Passport Advantage Online tab at [IBM Passport Advantage![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/software/passportadvantage/) and log in with your IBM ID.
+1. Go to the IBM Passport Advantage Online tab at [IBM Passport Advantage](https://www.ibm.com/software/passportadvantage/) and log in with your IBM ID.
 2. Find your part number.
 3. Search for your files by using the part numbers that are listed in the tables.
 4. Download the files to a directory on your computer.

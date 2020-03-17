@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019 
-lastupdated: "2019-12-10"
+  years: 2016, 2020 
+lastupdated: "2020-03-17"
 
 ---
 
@@ -14,12 +14,12 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} troubleshooting for cluster management
+# Red Hat Advanced Cluster Management for Kubernetes troubleshooting for cluster management
 
-Learn how to isolate and resolve problems with {{site.data.keyword.mcm_notm}}.
+Learn how to isolate and resolve problems with Red Hat Advanced Cluster Management for Kubernetes.
 {:shortdesc}
 
-Verify that your issues are not related to operating system requirements, such as disk, memory, and CPU capacities. For more information, see [System requirements](../../install/requirements.md).
+Verify that your issues are not related to operating system requirements, such as disk, memory, and CPU capacities. For more information, see [System requirements](../../install/requirements.md). <!--file is not present, revisit this entire file; might end up removing the troubleshoot-->
 
 To get support, see [Support](support.md) in the product documentation.
 

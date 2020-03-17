@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-05-16"
+  years: 2019, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -42,4 +42,4 @@ By default, Docker stores the login password unencrypted within the `/root/.dock
 
 ## Resolving the problem
 
-You can store your user credentials in an external credentials store instead of within the Docker configuration file. Storing your credentials in a credentials store is more secure than storing the credentials in the Docker configuration file. For more information, see the [Docker community credentials store documentation ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.docker.com/engine/reference/commandline/login/#credentials-store).
+You can store your user credentials in an external credentials store instead of within the Docker configuration file. Storing your credentials in a credentials store is more secure than storing the credentials in the Docker configuration file. For more information, see the [Docker community credentials store documentation](https://docs.docker.com/engine/reference/commandline/login/#credentials-store).

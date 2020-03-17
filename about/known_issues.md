@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-03-17"
 
 ---
 
@@ -100,7 +100,7 @@ To fix this error, reinstall your application by following the tasks:
    ```
    {: codeblock}
 
-For more details, see the [Helm community issue ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")]( https://github.com/helm/helm/issues/3353){: new_window}.
+For more details, see the [Helm community issue]( https://github.com/helm/helm/issues/3353){: new_window}.
 
 ## Missing data in Grafana for OpenShift Container Platform 
 {: #31754}

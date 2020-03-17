@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019 
-lastupdated: "2019-12-10"
+  years: 2019, 2020 
+lastupdated: "2020-03-17"
 
 ---
 
@@ -14,15 +14,14 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} troubleshooting for application management
+# Red Hat Advanced Cluster Management for Kubernetes troubleshooting for application management
 
-Learn how to isolate and resolve problems with {{site.data.keyword.mcm_notm}} that are related to managing your applications.
+Learn how to isolate and resolve problems with Red Hat Advanced Cluster Management for Kubernetes that are related to managing your applications.
 {:shortdesc}
 
-Verify that your issues are not related to operating system requirements, such as disk, memory, and CPU capacities. For more information, see [System requirements](../../install/requirements.md).
+Verify that your issues are not related to operating system requirements, such as disk, memory, and CPU capacities. For more information, see [System requirements](../install/requirements.md).
 
-To get support, see [Support](support.md) in the product documentation.
-
+<!--validate that this troubleshoot topic is valid for ACM -MD -->
 - {: child} [Pods are not deployed on managed clusters for created application resources](app_manage_podmissing.md)
 
 {: childlinks}
