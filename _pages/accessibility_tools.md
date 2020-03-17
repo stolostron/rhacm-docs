@@ -1,4 +1,5 @@
 ---
+layout: page
 permalink: /accessibility_tools
 title: "Accessibility tools"
 ---
