@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2018, 2019
-lastupdated: "2019-02-21"
+  years: 2016, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -19,7 +19,7 @@ lastupdated: "2019-02-21"
 Learn how to update and monitor your applications, configurations, services, and policies.
 {:shortdesc}
 
-This guide assumes that users are familiar with Kubernetes concepts and terminology. Key Kubernetes terms and components are not defined. For more information about Kubernetes concepts, see the [Kubernetes Documentation ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/home/).
+This guide assumes that users are familiar with Kubernetes concepts and terminology. Key Kubernetes terms and components are not defined. For more information about Kubernetes concepts, see the [Kubernetes Documentation](https://kubernetes.io/docs/home/).
 
 - {: child} [Creating DaemonSets](../manage_applications/create_daemonset.md)
 - {: child} [Managing deployments](../manage_applications/manage_apps.md)

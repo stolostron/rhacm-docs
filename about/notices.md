@@ -73,7 +73,7 @@ This information contains sample application programs in source language, which 
 
 ## Trademarks
 
-IBM, the IBM logo, and ibm.com are trademarks or registered trademarks of International Business Machines Corp., registered in many jurisdictions worldwide. Other product and service names might be trademarks of IBM or other companies. A current list of IBM trademarks is available on the web at [Copyright and trademark information ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](http://www.ibm.com/legal/copytrade.shtml){: new_window}.
+IBM, the IBM logo, and ibm.com are trademarks or registered trademarks of International Business Machines Corp., registered in many jurisdictions worldwide. Other product and service names might be trademarks of IBM or other companies. A current list of IBM trademarks is available on the web at [Copyright and trademark information](http://www.ibm.com/legal/copytrade.shtml){: new_window}.
 
 Red Hat®, JBoss®, OpenShift®, Fedora®, Hibernate®, Ansible®, CloudForms®, RHCA®, RHCE®, RHCSA®, Ceph®, and Gluster® are trademarks or registered trademarks of Red Hat, Inc. or its subsidiaries in the United States and other countries.
 
@@ -107,4 +107,4 @@ IBM MAKES NO GUARANTEE ABOUT THE CONTENT OF THESE PUBLICATIONS. THE PUBLICATIONS
 
 ## Licensing
 
-For full details, see the [IBM Cloud Pak for Multicloud Management license documentation ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](http://www-03.ibm.com/software/sla/sladb.nsf/displaylis/01EFCF23B575B710852584A900482C63?OpenDocument){: new_window}.
+For full details, see the [IBM Cloud Pak for Multicloud Management license documentation](http://www-03.ibm.com/software/sla/sladb.nsf/displaylis/01EFCF23B575B710852584A900482C63?OpenDocument){: new_window}.

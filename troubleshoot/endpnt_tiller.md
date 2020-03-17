@@ -1,7 +1,7 @@
 ---
 copyright:
-  years: 2019
-lastupdated: "2019-10-17"
+  years: 2019, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -54,9 +54,9 @@ Complete only one of the following options:
 
 1. Remove the deployed Tiller from the `kube-system` namespace and redeploy it in another namespace.
 
-  For more information about how to remove a Tiller deployment, see [Deleting or Reinstalling Tiller ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://helm.sh/docs/install/#deleting-or-reinstalling-tiller){: new_window}
+  For more information about how to remove a Tiller deployment, see [Deleting or Reinstalling Tiller](https://helm.sh/docs/install/#deleting-or-reinstalling-tiller){: new_window}
 
-  For more information about how to install Tiller in a specific namespace, see [Easy In-Cluster Installation ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://helm.sh/docs/install/#easy-in-chttps://github.ibm.com/ibmprivatecloud/cp4mcm/issues/422luster-installation){: new_window}
+  For more information about how to install Tiller in a specific namespace, see [Easy In-Cluster Installation](https://helm.sh/docs/install/#easy-in-chttps://github.ibm.com/ibmprivatecloud/cp4mcm/issues/422luster-installation){: new_window}
 
 2. Disable Tiller integration feature of the multicluster-endpoint.
 

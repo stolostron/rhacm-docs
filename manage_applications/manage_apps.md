@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2018
-lastupdated: "2018-01-15"
+  years: 2016, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -19,7 +19,7 @@ lastupdated: "2018-01-15"
 Learn how to update and monitor your deployments.
 {:shortdesc}
 
-This guide assumes that users are familiar with Kubernetes concepts and terminology. Key Kubernetes terms and components are not defined. For more information about Kubernetes concepts, see [https://kubernetes.io/docs/home/ ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/home/)
+This guide assumes that users are familiar with Kubernetes concepts and terminology. Key Kubernetes terms and components are not defined. For more information about Kubernetes concepts, see [https://kubernetes.io/docs/home/](https://kubernetes.io/docs/home/)
 
 - {: child} [Creating deployments](../manage_applications/create_apps.md) <br />
 - {: child} [Modifying a deployment](../manage_applications/modify_app.md) <br />
