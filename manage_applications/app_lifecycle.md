@@ -1,18 +1,11 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-13"
+  years: 2020
+lastupdated: "2020-03-13"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Application management lifecycle
 
@@ -31,7 +24,7 @@ Your developers and DevOps personnel can use these resources to deploy, update, 
 ## Application model
 {: #app_model}
 
-The application model and deployment options work for, and scale, any clustered environment and application management requirements. This scalability supports both a single application developer that builds and deploys an application from their device to a multicloud environment, or a cloud operations personnel that needs to deploy and update hundreds of applications across hundreds of clusters. With this application model and deployment option, you can separate your organizations roles for developing applications and DevOps. Your application developers can focus on the developing and defining the application resources. Meanwhile, your DevOps personnel can focus on creating and managing the channels and subscriptions to ensure that resources are deployed correctly. You can use the new model and deployment options to update and deploy one or more applications to hundreds of managed clusters, each in a different physical location.
+The application model and deployment options work for, and scale, any clustered environment and application management requirements. This scalability supports both a single application developer that builds and deploys an application from their device to a multicloud environment, or a cloud operations personnel that needs to deploy and update hundreds of applications across hundreds of clusters. With this application model and deployment option, you can separate your organizations roles for developing applications and DevOps. Your application developers can focus on developing and defining the application resources. Meanwhile, your DevOps personnel can focus on creating and managing the channels and subscriptions to ensure that resources are deployed correctly. You can use the new model and deployment options to update and deploy one or more applications to hundreds of managed clusters, each in a different physical location.
 
 Within this application model, applications are composed of multiple resources. The main foundation resources for Red Hat Advanced Cluster Management for Kubernetes applications are the `application` resource and the `deployable` resource. The overrides and dependencies for deployables are defined within the definition for the deployables. The placement rules for deployables can be defined as a stand-alone resource and referenced by the deployable.
 
