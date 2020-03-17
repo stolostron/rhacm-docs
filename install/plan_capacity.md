@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-06-06"
+  years: 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -14,11 +14,11 @@ lastupdated: "2019-06-06"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Sizing your {{site.data.keyword.icp}} cluster
+# Sizing your Red Hat Advanced Cluster Management for Kubernetes cluster
 
-Each {{site.data.keyword.icp_notm}} cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.
+Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.
 
-**Note:** The requirements that are listed aren’t minimum requirements.
+**Note:** The requirements that are listed are not minimum requirements.
 
 {:shortdesc}
 

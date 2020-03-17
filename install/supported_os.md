@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-12"
+  years: 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -16,13 +16,13 @@ lastupdated: "2019-12-12"
 
 # Supported operating systems and platforms
 
-You can install the {{site.data.keyword.product}} on {{site.data.keyword.IBM_notm}} Cloud, or on {{site.data.keyword.linux_bit}} with {{site.data.keyword.ocp_tm}} version 3.11 and 4.2, or on {{site.data.keyword.ppc}} with {{site.data.keyword.ocp_tm}} version 3.11.
+You can install Red Hat Advanced Cluster Management for Kubernetes on Linux x86_64 with Red Hat OpenShift Container Platform version 3.11, 4.2, or 4.3.
 {:shortdesc}
 
-|Platform|Operating system| {{site.data.keyword.ocp}} version
+|Platform|Operating system| OpenShift Container Platform version
 |--------|----------------|---|
-|{{site.data.keyword.linux_bit}} |{{site.data.keyword.rhel}} ({{site.data.keyword.rhel_short}}) 7.5 and 7.6| 3.11 |
-|                           | {{site.data.keyword.rhel}} 7.6 and 7.7 | 4.2 |
-| | {{site.data.keyword.rhel}} CoreOS 4.2 | 4.2 |
-|{{site.data.keyword.ppc}} <br/> POWER8&reg; or later |{{site.data.keyword.rhel}} 7.5, 7.5-Alt, 7.6, and 7.6-Alt| 3.11 |
+| Linux x86_64 | Red Hat Enterprise Linux 7.5 and 7.6| 3.11 |
+|                           | Red Hat Enterprise Linux 7.6 and 7.7 | 4.2 |
+|                           | Red Hat Enterprise Linux 7.6 and 7.7 | 4.3 |
+| | Red Hat Enterprise Linux CoreOS 4.2 | 4.2 |
 {: caption="Table 1. Supported operating systems" caption-side="top"}

@@ -1,4 +1,4 @@
-# Installing Red Hat Advanced Cluster Management when connected
+# Installing Red Hat Advanced Cluster Management for Kubernetes when connected
 
 Red Hat Advanced Cluster Management for Kubernetes is installed using a main operator that deploys all of the required sub-operators such as etcd, multicloud subscription, Apache Hive, and so on.  
 
@@ -142,9 +142,10 @@ The following prerequisites must be met before installing Red Hat Advanced Clust
   oc apply -f local/operators.multicloud.ibm.com_v1alpha1_multicloudhub_cr.yaml
   ```
   
-  **Note:** If step 18 fails with the following error, the resources are still being created and applied:. run the command again in a few minutes when the resources are:
+  **Note:** If step 18 fails with the following error, the resources are still being created and applied:
   
   ```
   error: unable to recognize "operators.multicloud.ibm.com_v1alpha1_multicloudhub_cr.yaml": no matches for kind "MultiCloudHub" in version "operators.multicloud.ibm.com/v1alpha1"
   ```
   
+  Run the command again in a few minutes when the resources are created.
