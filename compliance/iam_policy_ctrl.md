@@ -2,26 +2,17 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-11"
+lastupdated: "2020-03-18"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # IAM policy controller
 
 Identity and Access Management (IAM) policy controller can be used to receive notifications about IAM policy non-compliance.
-{:shortdesc}
 
 The IAM policy controller checks for compliance of the number of cluster administrators that you allow in your cluster, and ensures parity between the IAM role-based access control (RBAC) and Kubernetes RBAC role bindings. The compliance check is based on the parameters that you configure in the IAM policy, and on any backend change that you did to the role bindings in your cluster. The IAM policy controller verifies compliance of the role bindings based on the RBAC that you configure in your cluster. The controller reports whether a role binding is compliant or not. For more information about RBAC in Red Hat Advanced Cluster Management for Kubernetes, see [Role-based access control (RBAC)](../compliance/security.md).
 
-- You must create an IAM policy, which is a CustomResourceDefinition (CRD) instance that contains the specification of the number of cluster administrators that can be configured in your cluster, and role bindings. The controller uses this policy to verify compliance. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/){:new_window}.
+- You must create an IAM policy, which is a CustomResourceDefinition (CRD) instance that contains the specification of the number of cluster administrators that can be configured in your cluster, and role bindings. The controller uses this policy to verify compliance. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
 
 - You must add the namespaces in the policy in the `namespaceSelector.include` section for which the controller needs to verify compliance. You can also add the namespaces that you do not want the controller to verify compliance for in the `namespaceSelector.exclude` section.
 
@@ -33,8 +24,9 @@ The IAM policy controller checks for compliance of the number of cluster adminis
 The IAM policy controller watches the namespaces that are included in the `namespaceSelector.include` section and reports whether the role binding in the namespaces and the policy itself are compliant or not.
 
 Following is a sample IAM policy definition:
+
 ```yaml
-apiVersion: iam.policies.ibm.com/v1alpha1
+apiVersion: iam.policies.rhacm.com/v1alpha1
 kind: IamPolicy
 metadata:
   name: iam-grc-policy
@@ -55,8 +47,6 @@ spec:
   # Maximum number of IAM role binding violations that are still valid before a namespace is considered as non-compliant.
   maxRoleBindingViolationsPerNamespace: 2
 ```
-{: codeblock}
-
 
 ## Creating an IAM policy
 
