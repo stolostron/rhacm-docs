@@ -1,51 +1,38 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-11"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Observability in the console 
 
-Learn more about a few of the console components that you can use to view, manage, or customize your console. 
+Learn more about console components that you can use to view, manage, or customize your console. 
 
-See [Accessing your cluster by using the console](../installing/url.md) to access your cluster console. 
+Access your console with the following URL: **(need to add this--how does user access the console after install -- from OCP? -bcs)**
 
 ## Red Hat Advanced Cluster Management for Kubernetes console components
 
 Red Hat Advanced Cluster Management for Kubernetes console components:
 
-* [Getting started](#get_started)
-* [Overview](#mcm_overview)
-* [Topology](#mcm_topology)
-* [Search](#search)
+* [Welcome page](#welcome)
+* [Overview](#overview) **(I CANNOT DOC TEST THIS -- NOT UP)**
+* [Observe enviroments > Topology](#topology)
+* [Automate Infrastructure](#cluster)
+* [Manage application](#application)
 * [Governance and risk dashboard](#grc)
+* [Search](#search) **(THIS IS THE ONLY PLACE IN THE DOCS WE TALK ABOUT SEARCH SO WE NEED TO LEAVE IT)**
 
-## Getting started 
-{: #get_started}
+## Welcome page
+{: #welcome}
 
-From the Red Hat Advanced Cluster Management for Kubernetes getting started page, you can view descriptions and tasks, and you can install various CLI tools.
+From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you get more information about the product and you can access header features, such as _Search_ and _Create resource_. Also from the _Header_, you can click the **Help** (?) icon to view the _About_ page and the documentation. From the _User_ menu, you can access the _Configure Client_ page. Additionally, you can use the [Visual Web Terminal](vwt_search.md). 
 
-From the _Header_, click the **Help** (?) icon to view the _About_ page, the documentation, and more. From the _User_ menu, you can access the _Configure Client_ page.
+## Overview
 
-## Overview 
-{: #mcm_overview}
-
-Use the Overview page to view, manage, and reorganize the dashboard of your cluster information. You can view details of your clusters and other cloud service providers that Red Hat Advanced Cluster Management for Kubernetes supports. The Overview dashboard is continuously refreshed in real time.
-{: shortdesc}
-
-### Reorganizing your dashboard
-
-You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
+Reorganize your dashboard. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
 
 * Name of the cloud service with the number of clusters
 * Cluster compliance
@@ -54,30 +41,28 @@ You can personalize your view of the Overview dashboard by reorganizing the reso
 * Cluster resources (VCPU/Memory usage)
 * Storage usage
 
-### Viewing application details (Technology preview)
+### Filtering your results
 
-You can view the information of each application. Click **Show details** to view the following information:
+You can personalize the Overview page more with the filtering feature. Click **Filter results** to specify what information is displayed on your page.
 
-* Number of clusters
-* Number of Kubernetes types
-* Number of regions
-* Number of nodes
-* Number of pods
+## Automate infrastructure
+{: #cluster}
 
-For more information about your application resources, see [Application management (Technical preview)](../manage_applications/overview.md).
+Create clusters or bare metal assets, or import existing clusters. Scale up or down and delete clusters as needed. For more information, see [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](manage_cluster/intro.md)
 
-### Viewing your pod health 
+## Manage applications (Technology preview)
+{: #manage}
+
+Click **New application** to edit a `.yaml` file and create your application. Click Resources to view the information of each application. For more information about application resources, see [Application management (Technology preview)](../manage_applications/overview.md).
+
+### Viewing your pod health (IS THIS PART OF TOPOLOGY AND SHOULD IT MOVE? I cannot test as topology page not up in my cluster -- bcs)
 
 View the pod health for all of your clusters by expanding the Heatmap. The Heatmap displays color-coordinated boxes that represent the VCPU usage threshold of your nodes. 
 
 Click **Show details** to view the map. The size of the color-coordinated boxes represents the number of nodes on your cluster. Hover your cursor over the box to view the response time of your cluster. 
 
-### Filtering your results
-
-You can personalize the Overview page more with the filtering feature. Click **Filter results** to specify what information is displayed on your page.
-
-## Topology page
-{: #mcm_topology}
+## Topology page (Need dev help on this)
+{: #topology}
 
 The Topology page uses information from Weave Scope probe to display Kubernetes objects within a cluster. You can view hub cluster resources. As you configure managed clusters, you see more clusters in the Topology view. 
 
@@ -90,6 +75,11 @@ Learn more about the tabs that are available from the Topology page:
   - Networking: View Kubernetes objects for each cluster and any networks between your Kubernetes objects. Objects display changes if they were recently started. Pods also indicate `pending` and `failed` status.
 
   - Policies: View the policy, policy placement, and clusters that are being validated. Check for violations for the selected policy.
+
+## Governance and risk
+{: #grc}
+
+Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
 
 ## Search 
 {: #search}
@@ -124,9 +114,4 @@ For more specific search results, include the property in your search. For examp
     - Search for `kind:pod restarts:>1` to find all pods that restarted at least twice.
 
 3. If you want to save your search, click the **Save disk** icon.  
-
-## Governance and risk
-{: #grc}
-
-Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
 
