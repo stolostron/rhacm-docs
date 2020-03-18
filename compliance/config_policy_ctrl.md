@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-12"
+lastupdated: "2020-03-18"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Configuration policy controller
 
 Configuration policy controller can be used to configure any Kubernetes resource and apply security policies across your clusters.
-{:shortdesc}
 
 
 ## Configuration policy elements
@@ -26,7 +17,7 @@ The configuration policy controller communicates with the local Kubernetes API s
 
 ## Configuration policy
   
-A `Policy` is a CustomResourceDefinition (CRD) instance that contains the specifications of the configuration policy elements section. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/){: new_window}.
+A `Policy` is a CustomResourceDefinition (CRD) instance that contains the specifications of the configuration policy elements section. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
 
 ### Policy elements
 
@@ -61,7 +52,7 @@ Complete the following steps to create a configuration policy from the command l
     Your configuration policy might resemble the following policy:
 
     ```yaml
-    apiVersion: policy.mcm.ibm.com/v1alpha1
+    apiVersion: policy.mcm.rhacm.com/v1alpha1
     kind: Policy
     metadata:
       name: policy-1
@@ -135,7 +126,7 @@ Complete the following steps to view your configuration policy from the CLI:
 A configuration policy is created and the `Policy` definition might resemble the following YAML:
 
    ```yaml
-   apiVersion: policy.mcm.ibm.com/v1alpha1
+   apiVersion: policy.mcm.rhacm.com/v1alpha1
    kind: Policy
    metadata:
      name: policy-1
