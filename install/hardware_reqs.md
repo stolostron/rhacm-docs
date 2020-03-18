@@ -16,20 +16,20 @@ lastupdated: "2020-03-12"
 
 # Hardware requirements and recommendations
 
-Before you install the Red Hat Advanced Cluster Management for Kubernetes, review the system requirements for each of the products and the footprint sizing for the entire Cloud Pak.
+Before you install the Red Hat Advanced Cluster Management for Kubernetes, review the system requirements.
 {:shortdesc}
 
   - [OpenShift Container Platform](#ocp)
   - [Red Hat Advanced Cluster Management for Kubernetes](#rhacm)
-  - [Sizing for the multicluster-endpoint](#mc_endpoint)
   - [Sizing for the management hub services](#management_services)
+  - [Sizing for the multicluster-endpoint](#mc_endpoint)
 
 ## OpenShift Container Platform
 {: #ocp}
 
 * OpenShift Container Platform compute or worker nodes: 16 Core | 32 GB RAM
 
-**Note:** The required resources are the allocatable resources on the OpenShift nodes. If you want to install Cloud Paks on top of the Red Hat Advanced Cluster Management for Kubernetes, you need to add the additional required resources.
+**Note:** The required resources are the allocatable resources on the OpenShift nodes. 
 
 * Storage requirements:
   - For offline installation, the OpenShift Container Platform image registry requires at least 100 GB.
@@ -94,6 +94,23 @@ Sizing is available for entry, standard, and enterprise footprints.
 | proxy| 2| 8	| 16	| - | 200  |
 {: caption="Table 6. Enterprise OpenShift node sizing for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
+## Sizing for management hub services
+{: #management_services}
+
+| Service Name                 | Optional | CPU Request | CPU Limit | Memory Request | Memory Limit | Persistent Volume (value is default) | Additional considerations |
+|-------------------------------- |---------- |------------- |------------ |----------------- |-------------- |----------------- |-------------- |
+| Catalog-ui, Common-web-ui, iam-policy-controller, key-management, mcm-kui, metering, monitoring, multicluster-hub,nginx-ingress, search | Default | 9,025 m | 29,289 m | 16,857 Mi | 56,963 Mi | 20 GiB | |
+| Audit Logging | Optional | 125 m | 500 m | 250 Mi | 700 Mi | | |
+| CIS Policy Controller | Optional | 525 m | 1,450 m | 832 Mi | 2,560 Mi | | |
+| Image Security Enforcement | Optional | 128 m | 256 m | 128 Mi | 256 Mi | | |
+| Licensing | Optional | 200 m | 500 m | 256 Mi | 512 Mi | | |
+| Logging | Optional | 1,500 m | 3,000 m | 9,940 Mi | 10,516 Mi | 20 GiB | |
+| Multitenancy Account Quota Enforcement | Optional | 25 m | 100 m | 64 Mi | 64 Mi | | |
+| Notary | Optional | 600 m | 600 m  | 1,024 Mi | 1,024 Mi | | |
+| Secret Encryption Policy Controller | Optional | 50 m | 100 m  | 100 Mi | 200 Mi | 110 GiB | |
+| Secure Token Service (STS) | Optional | 410 m | 600 m  | 94 Mi  | 314 Mi | | Requires Red Hat OpenShift Service Mesh (Istio) |
+{: caption="Table 10. Hub services sizing" caption-side="top"
+
 ## Sizing for multicluster-endpoint
 {: #mc_endpoint}
 
@@ -118,20 +135,3 @@ Sizing is available for entry, standard, and enterprise footprints.
 | TopologyCollector              	| True     	| 50 mCore    	| 100 mCore  	| 20 MiB          	| 50 MiB       	|
 | MulticlusterEndpointOperator   	| False    	| 100 mCore   	| 500 mCore  	| 100 MiB         	| 500 MiB      	|
 {: caption="Table 9. Multicluster-endpoint instructions" caption-side="top"}
-
-## Sizing for management hub services
-{: #management_services}
-
-| Service Name                 | Optional | CPU Request | CPU Limit | Memory Request | Memory Limit | Persistent Volume (value is default) | Additional considerations |
-|-------------------------------- |---------- |------------- |------------ |----------------- |-------------- |----------------- |-------------- |
-| Catalog-ui, Common-web-ui, iam-policy-controller, key-management, mcm-kui, metering, monitoring, multicluster-hub,nginx-ingress, search | Default | 9,025 m | 29,289 m | 16,857 Mi | 56,963 Mi | 20 GiB | |
-| Audit Logging | Optional | 125 m | 500 m | 250 Mi | 700 Mi | | |
-| CIS Policy Controller | Optional | 525 m | 1,450 m | 832 Mi | 2,560 Mi | | |
-| Image Security Enforcement | Optional | 128 m | 256 m | 128 Mi | 256 Mi | | |
-| Licensing | Optional | 200 m | 500 m | 256 Mi | 512 Mi | | |
-| Logging | Optional | 1,500 m | 3,000 m | 9,940 Mi | 10,516 Mi | 20 GiB | |
-| Multitenancy Account Quota Enforcement | Optional | 25 m | 100 m | 64 Mi | 64 Mi | | |
-| Notary | Optional | 600 m | 600 m  | 1,024 Mi | 1,024 Mi | | |
-| Secret Encryption Policy Controller | Optional | 50 m | 100 m  | 100 Mi | 200 Mi | 110 GiB | |
-| Secure Token Service (STS) | Optional | 410 m | 600 m  | 94 Mi  | 314 Mi | | Requires Red Hat OpenShift Service Mesh (Istio) |
-{: caption="Table 10. Hub services sizing" caption-side="top"}
