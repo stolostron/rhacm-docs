@@ -1,6 +1,6 @@
 # GitHub pages content
 
-Repo for the Information Development Playbook.
+Repo for the Playbook.
 
 ## Installing Jekyll
 
@@ -14,15 +14,15 @@ Once installed:
 
     1. Run: `bundle`
     2. Run: 
-       * Mac: `export PAGES_REPO_NWO=IBMPrivateCloud/CP4MCM-docs`
-       * Windows: `set PAGES_REPO_NWO=IBMPrivateCloud/CP4MCM-docs` 
+       * Mac: `export PAGES_REPO_NWO=open-cluster-management/rhacm-docs`
+       * Windows: `set PAGES_REPO_NWO=cluster-management/rhacm-docs` 
     3. To serve content: `bundle exec jekyll serve`
 
 Any change you make appear in the URL provided in the command. You can check your work before you do a PR. 
 
 ## Adding content
 
-1. Add a new markdown file in the `pages` folder.
+1. Add a new markdown file in the `_pages` folder.
 2. Update the `navigation.yml` file to add the new file, following the structure that is there. For example: 
 
 - title: "topic name"
