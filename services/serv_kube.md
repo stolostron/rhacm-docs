@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-06-07"
+  years: 2019, 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -16,10 +16,10 @@ lastupdated: "2019-06-07"
 
 # Enabling a Kubernetes service for discovery
 
-You can configure the {{site.data.keyword.mcm_notm}} service registry to discover Kubernetes services that are in different {{site.data.keyword.mcm_notm}} managed clusters. 
+You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Kubernetes services that are in different Red Hat Advanced Cluster Management for Kubernetes managed clusters. 
 {: shortdesc}
 
-A Kubernetes service exposes a group of pods that are running on a managed cluster. The {{site.data.keyword.mcm_notm}} service discovery function only discovers Kubernetes services that are configured to be discovered. 
+A Kubernetes service exposes a group of pods that are running on a managed cluster. The Red Hat Advanced Cluster Management for Kubernetes service discovery function only discovers Kubernetes services that are configured to be discovered. 
 
 **Required user type or access level:** Cluster administrator.
 

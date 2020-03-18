@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-05"
+lastupdated: "2020-03-12"
 
 ---
 
@@ -14,7 +14,7 @@ lastupdated: "2020-03-05"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} Governance and risk
+# Red Hat Advanced Cluster Management for Kubernetes Governance and risk
 
 Use the Governance and risk dashboard to view and manage the number of security risks and policy violations in your clusters and applications. 
 {:shortdesc}
@@ -31,12 +31,12 @@ From the _Policies_ tab, you can view a summary of cluster and policy violations
 View a table list of violations. The following details are provided in the table: description, resources, severity, cluster, standards, controls, categories, and update time. You can filter the violation table view by policies or cluster violations.
 
 
-Learn about the structure of an {{site.data.keyword.mcm_notm}} policy, and how to use {{site.data.keyword.mcm_notm}} Governance and risk dashboard.
+Learn about the structure of an Red Hat Advanced Cluster Management for Kubernetes policy, and how to use the Red Hat Advanced Cluster Management for Kubernetes Governance and risk dashboard.
 
-- {: child} [{{site.data.keyword.mcm_notm}} policy overview](policy_overview.md)
-- {: child} [{{site.data.keyword.mcm_notm}} policy controllers](policy_controllers.md)
-- {: child} [{{site.data.keyword.mcm_notm}} policy example](policy_example.md)
-- {: child} [{{site.data.keyword.mcm_notm}} policy samples](../manage_policies/policy_samples.md)
-- {: child} [Creating an {{site.data.keyword.mcm_notm}} policy](create_policy.md)
-- {: child} [Managing a security policy](../manage_cluster/manage_grc_policy.md)
+- {: child} [Red Hat Advanced Cluster Management for Kubernetes policy overview](policy_overview.md)
+- {: child} [Red Hat Advanced Cluster Management for Kubernetes policy controllers](policy_controllers.md)
+- {: child} [Red Hat Advanced Cluster Management for Kubernetes policy example](policy_example.md)
+- {: child} [Red Hat Advanced Cluster Management for Kubernetes policy samples](policy_samples.md)
+- {: child} [Creating an Red Hat Advanced Cluster Management for Kubernetes policy](create_policy.md)
+- {: child} [Managing a security policy](manage_grc_policy.md)
 {: childlinks}

@@ -1,24 +1,16 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-12-11"
+  years: 2020
+lastupdated: "2020-03-09"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Multicluster architecture
 
 Red Hat Advanced Cluster Management for Kubernetes consists of several multicluster components, which are used to access and manage your clusters. Learn more about the following components for Red Hat Advanced Cluster Management for Kubernetes:
 
-  <img src="../../images/hub_managed.svg" width="50%" alt="Major common components of the hub cluster and managed cluster">
+<img src="../../images/hub_managed.svg" width="50%" alt="Major common components of the hub cluster and managed cluster">
 
   - [Hub cluster](#hub)
   - [Managed cluster](#managed)
@@ -35,7 +27,7 @@ The hub cluster aggregates information from multiple clusters by using an asynch
 ## Managed cluster
 {: #managed}
 
-The managed cluster is used to define the Red Hat Advanced Cluster Management for Kubernetes {{site.data.keyword.klust}}, which is the agent that is responsible for a single Kubernetes cluster. The managed cluster initiates a connection to the hub cluster, receives work requests, applies work requests, then returns the results. The managed cluster connects to various services within the cluster for operations, including the Kubernetes API service, the Tiller service (Helm), and Weave for topology.
+The managed cluster is used to define the Red Hat Advanced Cluster Management for Kubernetes  multicluster-endpoint, which is the agent that is responsible for a single Kubernetes cluster. The managed cluster initiates a connection to the hub cluster, receives work requests, applies work requests, then returns the results. The managed cluster connects to various services within the cluster for operations, including the Kubernetes API service, the Tiller service (Helm), and Weave for topology.
 
 
 See [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](../manage_cluster/intro.md) for configuration and import information.
@@ -52,4 +44,4 @@ See [Managing applications](../applications/overview.md) for more application to
 
 After you configure an Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can define Red Hat Advanced Cluster Management for Kubernetes security risk and create policies with templates from the _Governance and risk_ page. For more information see, [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
 
-See [Red Hat Advanced Cluster Management for Kubernetes installation](../../install/overview.md) to prepare your cluster and get configuration information.
+See [Red Hat Advanced Cluster Management for Kubernetes installation](../install/overview.md) to prepare your cluster and get configuration information.

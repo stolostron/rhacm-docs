@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2020
-lastupdated: "2020-03-06"
+  years: 2019, 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -19,6 +19,5 @@ lastupdated: "2020-03-06"
 Learn how to create clusters across cloud providers with Red Hat Advanced Cluster Management for Kubernetes.
 {:shortdesc}
 
-
-- {: child} [Creating an {{site.data.keyword.open_s}} on Amazon Web Services cluster](create_ocp_aws.md)  
+- {: child} [Creating an OpenShift cluster on Amazon Web Services cluster](create_ocp_aws.md)  
 {: childlinks}

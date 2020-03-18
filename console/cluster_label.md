@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-09-14"
+  years: 2018, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -17,14 +17,14 @@ lastupdated: "2019-09-14"
 
 # Managing cluster labels
 
-Add a label to your cluster to select group resources. See [Labels and Selectors ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) for more information.
+Add a label to your cluster to select group resources. See [Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) for more information.
 {:shortdesc}
 
 You can add new labels, remove existing labels, and edit existing labels for your clusters. Complete the following steps to manage your labels:
 
 1. From the navigation menu, click **Clusters**.
 
-2. Click **Options** icon (<img src="../images/icons/menu-overflow_16.svg" alt="Options icon">). 
+2. Click **Options** icon. 
 
 3. Click **Edit Labels**.
 

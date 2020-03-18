@@ -1,7 +1,7 @@
 ---
 copyright:
-  years: 2019
-lastupdated: "2019-09-23"
+  years: 2019, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -13,7 +13,7 @@ lastupdated: "2019-09-23"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} managed cluster cannot access the external hub cluster Kubernetes API server 
+# Red Hat Advanced Cluster Management for Kubernetes managed cluster cannot access the external hub cluster Kubernetes API server 
 
 The managed cluster cannot access the hub cluster external Kubernetes API server. <!--#25273-->
 {:shortdesc}

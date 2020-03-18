@@ -14,9 +14,9 @@ lastupdated: "2019-12-12"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.product}} APIs
+# Red Hat Advanced Cluster Management for Kubernetes APIs
 
-You can access APIs for {{site.data.keyword.product}} to create and manage application resources, policies, placement policies, placement bindings, relationships, and query information.
+You can access APIs for Red Hat Advanced Cluster Management for Kubernetes to create and manage application resources, policies, placement policies, placement bindings, relationships, and query information.
 {:shortdesc}
 
 For more information, review the API documentation for each of the following resources:

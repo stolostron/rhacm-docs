@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2019, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -26,7 +26,7 @@ A `default backend - 404` error is displayed in the browser when you attempt to 
 
 an `HTTP/2` connection reuse, also called `HTTP/2 keep-alive` causes the problem.
 
-Environment:{{site.data.keyword.open_s}} 3.11 on IBM Kubernetes Service.
+Environment: OpenShift 3.11 on IBM Kubernetes Service.
 
 ## Solution
 

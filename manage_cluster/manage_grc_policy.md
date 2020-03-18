@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-05" 
+lastupdated: "2020-03-16" 
 
 ---
 
@@ -73,11 +73,11 @@ After you create a security policy, it is enabled by default. Complete the follo
 
 Your policy is disbaled. 
 
-## Deleting an {{site.data.keyword.mcm_notm}} policy
+## Deleting an Red Hat Advanced Cluster Management for Kubernetes policy
 
-Delete your {{site.data.keyword.mcm_notm}} security policy.
+Delete your Red Hat Advanced Cluster Management for Kubernetes security policy.
 
-### Deleting an {{site.data.keyword.mcm_notm}} policy from the command line (CLI)
+### Deleting an Red Hat Advanced Cluster Management for Kubernetes policy from the command line (CLI)
 
 Complete the following steps to delete your policy:
 
@@ -97,7 +97,7 @@ Complete the following steps to delete your policy:
     ```
     {: codeblock}
 
-### Deleting an {{site.data.keyword.mcm_notm}} policy from the console
+### Deleting an Red Hat Advanced Cluster Management for Kubernetes policy from the console
 
 Complete the following steps to delete your policy:
 
@@ -109,7 +109,7 @@ Complete the following steps to delete your policy:
 
 Your policy is deleted.
 
-See [{{site.data.keyword.mcm_notm}} Governance and risk](compliance_intro.md) for more policy topics.
+See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](compliance_intro.md) for more policy topics.
 
 
 

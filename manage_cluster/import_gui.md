@@ -35,9 +35,9 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
   
 ## Supported architecture
 
-* {{site.data.keyword.linux_bit_notm}}
-* {{site.data.keyword.ppc_notm}}
-* {{site.data.keyword.s390_notm}}
+* Linux
+* Linux on Power (ppc64le)
+* Linux on LinuxONE
 
 ## Prepare for import 
 {: #prep}

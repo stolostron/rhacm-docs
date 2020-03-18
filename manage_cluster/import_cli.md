@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2019, 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -18,7 +18,7 @@ lastupdated: "2019-12-11"
 
 After you install Red Hat Advanced Cluster Management for Kubernetes, you are ready to import a cluster to manage. 
 {:shortdesc}
-
+<!--Links need to be revisited here-->
   - [Prerequisites](#prereq)
   - [Preparing for import](#prep)
   - [Importing a cluster](#import)
@@ -33,20 +33,20 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
 * You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md).
 
-* You must install the {{site.data.keyword.product}} CLI, `cloudctl`. For more information, see [Installing the {{site.data.keyword.product}} CLI](../../cloudctl/install_cli.md) to install the CLI.
+* You must install the Red Hat Advanced Cluster Management for Kubernetes CLI, `cloudctl`. For more information, see [Installing the Red Hat Advanced Cluster Management for Kubernetes CLI](../../cloudctl/install_cli.md) to install the CLI.
 
   **Note:** Download the installation file for CLI tools from the console.
   
 ## Supported architecture
 
-* {{site.data.keyword.linux_bit_notm}}
-* {{site.data.keyword.ppc_notm}}
-* {{site.data.keyword.s390_notm}}
+* Linux
+* Linux on Power (ppc64le)
+* Linux on LinuxONE
 
 ## Prepare for import 
 {: #prep}
 
-To learn more about the `import` command and see [options] that are available, see [{{site.data.keyword.product}} CLI multicluster commands (mc)](../../cli/cli_mc_commands.md).
+To learn more about the `import` command and see [options] that are available, see [Red Hat Advanced Cluster Management for Kubernetes CLI multicluster commands (mc)](../../cli/cli_mc_commands.md).
 
 **Note:** By default, the `multicluster-endpoint` deployment pulls all of the required images from Docker Hub. You only need to install images from DockerHub if you are working in an air gapped environment.
 
@@ -73,7 +73,7 @@ To learn more about the `import` command and see [options] that are available, s
   ```
   {: codeblock}
   
-  See [kubernetes/cluster-registry ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://github.com/kubernetes/cluster-registry) in the hub cluster. 
+  See [kubernetes/cluster-registry](https://github.com/kubernetes/cluster-registry) in the hub cluster. 
   
 4. Generate the `cluster-import.yaml`
   
@@ -108,7 +108,6 @@ Table 1: The following table lists the parameters and descriptions that are avai
 | private_registry_enabled| Enable if using a private Docker registry | false|
 | docker_username| User name for the private Docker registry | None|
 | docker_password| Password for the private Docker registry | none|
-| imageRegistry | The image registry from which to pull the multicluster-endpoint|ibmcom|
 | imageNamePostfix| Postfix for the image name | none |
 | migrateFrom320|Migration from 3.2.0 multicluster-endpoint|false|
 {: caption="Table 1. Table of YAML file parameters and descriptions for import" caption-side="}

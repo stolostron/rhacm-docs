@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2019, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2019-12-11"
 
 # Passport Advantage part numbers
 
-Use these tables to find the files you need from [Passport Advantage ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/software/passportadvantage/) and the corresponding part numbers.
+Use these tables to find the files you need from [Passport Advantage](https://www.ibm.com/software/passportadvantage/) and the corresponding part numbers.
 {: shortdesc}
 
   - [Downloading packages](#download)
@@ -31,7 +31,7 @@ Use these tables to find the files you need from [Passport Advantage ![Opens in 
 
 Complete the following procedure to download your packages:
 
-1. Go to the IBM Passport Advantage Online tab at [IBM Passport Advantage![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.ibm.com/software/passportadvantage/) and log in with your IBM ID.
+1. Go to the IBM Passport Advantage Online tab at [IBM Passport Advantage](https://www.ibm.com/software/passportadvantage/) and log in with your IBM ID.
 2. Find your part number.
 3. Search for your files by using the part numbers that are listed in the tables.
 4. Download the files to a directory on your computer.
@@ -79,9 +79,9 @@ Complete the following procedure to download your packages:
 | IBM Cloud App Management V2019.4.0 Agents Install Solaris Sparc | appMgtAgents_solaris_2019.4.0.tar.gz | CC4KUEN |
 | IBM Cloud App Management V2019.4.0 Agents Install PLinux  | appMgtAgents_plinux_2019.4.0.tar.gz | CC4KVEN   |
 | IBM Cloud App Management V2019.4.0 Agents Install PLinuxLE  | appMgtAgents_plinuxle_2019.4.0.tar.gz  | CC4KWEN  |
-| Multicluster Event Management Klusterlet on PlinuxLE | agent_ppa_2019.4.0_prod_ppc64le.tar.gz | CC4KXEN  |
+| Multicluster Event Management  multicluster-endpoint on PlinuxLE | agent_ppa_2019.4.0_prod_ppc64le.tar.gz | CC4KXEN  |
 | Multicluster Event Management Server on PlinuxLE | icam_ppa_2019.4.0_prod_lite_ppc64.tar.gz | CC4KYEN  |
-| Multicluster Event Management Klusterlet on AMD64 | agent_ppa_2019.4.0_prod_amd64.tar.gz | CC4KZEN   |
+| Multicluster Event Management  multicluster-endpoint on AMD64 | agent_ppa_2019.4.0_prod_amd64.tar.gz | CC4KZEN   |
 | Multicluster Event Management Server on AMD64 | icam_ppa_2019.4.0_prod_lite_amd64.tar.gz  | CC4L0EN  |
 | IBM Cloud Unified Agent V2019.4.0 | unifiedAgent_2019.4.0.tar.gz | CC4L1EN  |
 | IBM Cloud App Management V2019.4.0  Agents Install Solaris X86 | appMgtAgents_solaris_x86_2019.4.0.tar.gz| CC4L2EN |

@@ -1,9 +1,8 @@
 ---
 
 copyright:
-  years: 2020
-lastupdated: "2020-03-06"
-
+  years: 2019, 2020
+lastupdated: "2020-03-16"
 ---
 
 {:new_window: target="_blank"}
@@ -30,12 +29,15 @@ Red Hat OpenShift 4.2 is supported for the hub cluster and managed clusters.
 ## Supported Cluster API cloud providers
 {: #providers} 
 
-- See [Red Hat OpenShift on AWS](https://www.openshift.com/learn/partners/amazon-web-services).
+- See [OpenShift Container Platform on AWS](https://www.openshift.com/learn/partners/amazon-web-services){: new_window}.
 
 ## Supported managed cluster cloud providers
-{: #providers-managed} 
+{: #providers-managed}
 
-- See [Red Hat OpenShift on IBM Cloud](https://cloud.ibm.com/docs/openshift?topic=openshift-clusters).
+- See [OpenShift Container Platform on AWS](https://www.openshift.com/learn/partners/amazon-web-services){: new_window}. 
+
+## Configuring kubectl
+{: #kubectl} 
 
 - See [Red Hat OpenShift on AWS](https://www.openshift.com/learn/partners/amazon-web-services).
 

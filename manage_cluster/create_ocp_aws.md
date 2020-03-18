@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2020
-lastupdated: "2020-03-06"
+  years: 2019, 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -20,12 +20,12 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console or CL
 {:shortdesc}
 
 ## Supported architectures
-
+<!--Links need to be revisisted here-->
 The following hardware architectures are supported:
 
-* {{site.data.keyword.linux_bit_notm}}
-* {{site.data.keyword.ppc_notm}}
-* {{site.data.keyword.s390_notm}}
+* Linux
+* Linux on Power (ppc64le)
+* Linux on LinuxONE
 
 **Required user type or access level**: Cluster administrator
 
@@ -149,7 +149,7 @@ Complete the following procedure to create a cluster with kubectl:
   ``` 
   {:codeblock}
 
-4. In the `pullsecret.yaml` file, enter the {{site.data.keyword.open_s}} pull secret information to ensure that the images can be pulled. 
+4. In the `pullsecret.yaml` file, enter the OpenShift  pull secret information to ensure that the images can be pulled. 
 
 See the following sample `.yaml` file, where `name` is your pull secret name and `pullSecret` is your pull secret value:
 
@@ -257,8 +257,8 @@ Table 1: The following table lists the parameters and descriptions that are avai
 |value:apiVersion|Version of cloud provider api|ocpprovider/v1alpha1|
 |value:kind|Cloud provider specific resource type|OCPClusterProviderSpec|
 |platform:aws|Default platform information for your cluster||
-|aws:region|Required; AWS zone ID where you want to create your cluster, from [AWS General Reference  ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://docs.aws.amazon.com/general/latest/gr/rande.html)|none|
-|aws:type|Optional, the EC2 instance type for the machines from [Amazon EC2 Instance Types ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://aws.amazon.com/ec2/instance-types/); use this information for every `type` specification||
+|aws:region|Required; AWS zone ID where you want to create your cluster, from [AWS General Reference](https://docs.aws.amazon.com/general/latest/gr/rande.html)|none|
+|aws:type|Optional, the EC2 instance type for the machines from [Amazon EC2 Instance Types](https://aws.amazon.com/ec2/instance-types/); use this information for every `type` specification||
 |baseDomain|Required; The base domain of your cloud provider|purple-chesterfield.com|
 |sshPublicKey|Optional. The SSH key to use to access your cluster machines.||
 |secretName|Required; the same as the name value in apikey.yaml|none|
@@ -278,7 +278,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 ## Accessing your cluster 
 {: #access}
 
-After you installed your cluster, you can access your cluster by using the `kubeconfig` file or {{site.data.keyword.open_s}} cluster portal.
+After you installed your cluster, you can access your cluster by using the `kubeconfig` file or OpenShift  cluster portal.
 
 1. Run the following command to get the secret:
 
