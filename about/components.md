@@ -11,7 +11,7 @@ lastupdated: "2020-03-13"
 
 See the following tables for information about components that are installed and enabled on the hub cluster by default.
 
-|Service|Description|Required|
+|Service|Description|Required--need dev input|
 |--------|-----------|-------------------|
 |management-ingress|Unifies all management services behind a network ingress controller with predictable annotations and TLS protection. This service should not be accessed directly.|Yes - common service|
 |ibm-cert-manager||Yes - common service|
@@ -21,8 +21,8 @@ See the following tables for information about components that are installed and
 |etcd||Yes - common service|
 {: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes default enabled common services" caption-side="top"}
 
-|Service|Description|Required|
-|--------|-----------|-------------------|
+|Service|Description|Required need dev input|
+|--------|-----------|---------------------|
 |apiserver|||
 |application-ui|||
 |console|Provide a view of the resources available in the cluster with support for creation, modification, or removal.|Yes|
@@ -50,7 +50,7 @@ See the following tables for information about components that are installed and
 
 There are some services that are installed on the managed clusters, but not enabled by default. You can enable them by activating them in the `config.yaml` file. The following table shows the services that are installed, but not enabled by default:
 
-|Service|Description|Required|
+|Service|Description|Required need dev input|
 |--------|-----------|-------------------|
 |Empty|Empty|Empty|
 {: caption="Table 3. Red Hat Advanced Cluster Management for Kubernetes disabled services" caption-side="top"}
