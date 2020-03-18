@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-10"
+lastupdated: "2020-03-18"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Security
 
 Manage security and role-based access control (RBAC) of Red Hat Advanced Cluster Management for Kubernetes components.
-{:shortdesc}
 
 ## Authentication
 
@@ -32,6 +23,6 @@ Red Hat Advanced Cluster Management for Kubernetes supports several roles. Your 
 
 View the following sections for information about managing your cluster security:
 
-- {: child} [Certificates in Red Hat Advanced Cluster Management for Kubernetes](../cert_manager/certificates.md)
-- {: child} [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md)
-{: childlinks}
+- [Certificates in Red Hat Advanced Cluster Management for Kubernetes](../cert_manager/certificates.md)
+- [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md)
+
