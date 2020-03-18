@@ -32,7 +32,7 @@ From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you ge
 
 ## Overview
 
-Reorganize your dashboard **(IS THIS STILL A FEATURE?)**. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
+Reorganize your dashboard. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
 
 * Name of the cloud service with the number of clusters
 * Cluster compliance
@@ -41,7 +41,7 @@ Reorganize your dashboard **(IS THIS STILL A FEATURE?)**. You can personalize yo
 * Cluster resources (VCPU/Memory usage)
 * Storage usage
 
-### Filtering your results (WHERE TO PUT THIS?)
+### Filtering your results
 
 You can personalize the Overview page more with the filtering feature. Click **Filter results** to specify what information is displayed on your page.
 
