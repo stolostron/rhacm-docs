@@ -14,11 +14,11 @@ See the following tables for information about components that are installed and
 |Service|Description|Required--need dev input|
 |--------|-----------|-------------------|
 |management-ingress|Unifies all management services behind a network ingress controller with predictable annotations and TLS protection. This service should not be accessed directly.|Yes - common service|
-|ibm-cert-manager||Yes - common service|
-|cert-manager-webhook||Yes - common service|
-|configmap-watcher||Yes - common service|
+|ibm-cert-manager||Yes|
+|cert-manager-webhook||Yes|
+|configmap-watcher||Yes|
 |mongo-db|All platform services that require a persistent data store use the MongoDB service. Highly available topologies for MongoDB are supported out of the box. This is a service that should not be accessed directly.|Yes|
-|etcd||Yes - common service|
+|etcd||Yes|
 {: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes default enabled common services" caption-side="top"}
 
 |Service|Description|Required need dev input|
