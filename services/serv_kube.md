@@ -59,7 +59,7 @@ To discover a Kubernetes service on your managed clusters, complete the followin
 
   **Note:** The Kubernetes service that you want to discover must be either a `LoadBalancer` or `NodePort` type.
 
-2. By default, the annotated ingress can be discovered on all managed clusters, if you want to discover the service on certain of managed clusters, you need add the `target-clusters` in the annotation, for example:
+2. By default, the annotated service can be discovered on all managed clusters, if you want to discover the service on certain of managed clusters, you need add the `target-clusters` in the annotation, for example:
 
   ```
   mcm.ibm.com/service-discovery: '{"target-clusters": ["clutser1", "cluster2"]}'
