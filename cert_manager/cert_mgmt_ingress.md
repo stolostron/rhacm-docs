@@ -2,81 +2,74 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-19"
 
 ---
-
-{:new_window: target="blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Replacing management ingress certificates
 
 You can replace management ingress certificates.
-{: shortdesc}
 
 ## Before you begin
 
-Prepare and have your management-ingress certificates and private keys ready. If needed, you can generate a TLS certificate by using OpenSSL. If you are generating the certificate, include the following settings:
+Prepare and have your `management-ingress` certificates and private keys ready. If needed, you can generate a TLS certificate by using OpenSSL. If you are generating the certificate, include the following settings:
 
 * Include the following IP addresses and domain names to your cert Subject Alternative Name (SAN) list:
-  ```
-  127.0.0.1
-  <cluster_CA_domain>   # The Red Hat Advanced Cluster Management for Kubernetes cluster Certificate Authority (CA) domain.
-  <cluster_lb_address>  # Your cluster load balancer IP address.
-  <cluster_vip>         # Your Virtual IP address, if applicable. 
-  ```
-  {: codeblock}
+  * The service name for the management ingress: `management-ingress`.
+  * Include the route name for Red Hat Advanced Cluster Management for Kubernetes. Recieve the route name by running the following command: 
+  
+     ```
+     oc get route -n open-cluster-management
+     ```
 
-  The cluster certificate authority (CA) domain is set in the `config.yaml` file during installation. The default value is `mycluster.icp`. This value can be the same as the <cluster_lb_address> if you use the domain name of your load balancer as the CA domain.  
+     You might receieve the following response:
+
+     ```
+     multicloud-console.apps.grchub2.dev08.red-chesterfield.com
+     ```
+  * Add the localhost IP address: `127.0.0.1`.
+  * Add the localhost entry: `localhost`.   
+
+  <!--The cluster certificate authority (CA) domain is set in the `config.yaml` file during installation. The default value is `mycluster.mcm`. This value can be the same as the <cluster_lb_address> if you use the domain name of your load balancer as the CA domain.  
    
-  If you configure a cluster load balancer (LB) and it is a hostname, include the hostname in the `DNS` setting for your certificate. If your cluster load balancer (LB) is not a hostname, include the IP address in the `IP` settings. 
-
-* Set the common name `CN` on the certificate to be your Red Hat Advanced Cluster Management for Kubernetes cluster CA domain.
-
-The following example configuration file and OpenSSL commands provide an example for how to generate a TLS certificate by using OpenSSL.
+  If you configure a cluster load balancer (LB) and it is a hostname, include the hostname in the `DNS` setting for your certificate. If your cluster load balancer (LB) is not a hostname, include the IP address in the `IP` settings. -->
 
 ### Example configuration file for generating a certificate
   
-The following `csr.cnf` configuration file defines the configuration settings for generating certificates with OpenSSL. 
-  ```
-  # cat csr.cnf
-  [ req ]               # Main settings
-  default_bits = 2048       # Default key size in bits.
-  prompt = no               # Disables prompting for certificate values so the configuration file values are used.
-  default_md = sha256       # Specifies the digest algorithm.
-  req_extensions = req_ext  # Specifies the configuration file section that includes any extensions.
-  distinguished_name = dn   # Specifies the section that includes the distinguished name information.
+The following example configuration file and OpenSSL commands provide an example for how to generate a TLS certificate by using OpenSSL. View the following `csr.cnf` configuration file,which defines the configuration settings for generating certificates with OpenSSL. 
+  
+   ```
+   [ req ]               # Main settings
+   default_bits = 2048       # Default key size in bits.
+   prompt = no               # Disables prompting for certificate values so the configuration file values are used.
+   default_md = sha256       # Specifies the digest algorithm.
+   req_extensions = req_ext  # Specifies the configuration file section that includes any extensions.
+   distinguished_name = dn   # Specifies the section that includes the distinguished name information.
 
-  [ dn ]               # Distinguished name settings
-  C = US                    # Country
-  ST = New York             # State or province
-  L = Armonk                # Locality
-  O = IBM Cloud Private     # Organization
-  OU = IBM Cloud Pak        # Organizational unit
-  CN = <cluster_CA_domain>  # Common name. 
+   [ dn ]               # Distinguished name settings
+   C = US                    # Country
+   ST = North Carolina             # State or province
+   L = Raleigh                # Locality
+   O = Red Hat Open Shift     # Organization
+   OU = Red Hat Advanced Container Management        # Organizational unit
+   CN = management-ingress  # Common name.
 
-  [ req_ext ]          # Extensions
-  subjectAltName = @alt_names # Subject alternative names
+   [ req_ext ]          # Extensions
+   subjectAltName = @alt_names # Subject alternative names
 
-  [ alt_names ]        # Subject alternative names
-  DNS.1 = <cluster_CA_domain>   
-  IP.1 = <cluster_vip>          
-  IP.2 = <cluster_lb_address> 
-  IP.3 = 127.0.0.1
+   [ alt_names ]        # Subject alternative names
+   DNS.1 = management-ingress
+   DNS.2 = multicloud-console.apps.grchub2.dev08.red-chesterfield.com
+   DNS.3 = localhost
+   DNS.4 = 127.0.0.1
 
-  [ v3_ext ]          # x509v3 extensions
-  authorityKeyIdentifier=keyid,issuer:always  # Specifies the public key that corresponds to the private key that is used to sign a certificate.
-  basicConstraints=CA:FALSE                   # Indicates whether the certificate is a CA certificate during the certificate chain verification process. 
-  keyUsage=keyEncipherment,dataEncipherment   # Defines the purpose of the key that is contained in the certificate. 
-  extendedKeyUsage=serverAuth,clientAuth      # Defines the purposes for which the public key can be used. 
-  subjectAltName=@alt_names                   # Identifies the subject alternative names for the identify that is bound to the public key by the CA.
-  ```
-  {: codeblock}
+   [ v3_ext ]          # x509v3 extensions
+   authorityKeyIdentifier=keyid,issuer:always  # Specifies the public key that corresponds to the private key that is used to sign a certificate.
+   basicConstraints=CA:FALSE                   # Indicates whether the certificate is a CA certificate during the certificate chain verification process.
+   #keyUsage=keyEncipherment,dataEncipherment   # Defines the purpose of the key that is contained in the certificate.
+   extendedKeyUsage=serverAuth                 # Defines the purposes for which the public key can be used.
+   subjectAltName=@alt_names                   # Identifies the subject alternative names for the identify that is bound to the public key by the CA.
+   ```
 
 ### OpenSSL commands for generating a certificate
 
@@ -84,73 +77,87 @@ The following OpenSSL commands are used with the preceding configuration file to
 
   1. Generate your certificate authority (CA) RSA private key:
      ```
-     openssl genrsa -out ca.key 2048
+     openssl genrsa -out ca.key 4096
      ```
-     {: codeblock}
 
   2. Generate a self-signed CA certificate by using your CA key:
      ```
-     openssl req -x509 -new -nodes -key ca.key -subj "/C=US/ST=New York/L=Armonk/O=IBM Cloud  Private" -days 100 -out ca.crt
+     openssl req -x509 -new -nodes -key ca.key -subj "/C=US/ST=North Carolina/L=Raleigh/O=Red Hat OpenShift" -days 400 -out ca.crt
      ```
-     {: codeblock}
 
   3. Generate the RSA private key for your certificate:
      ```
-     openssl genrsa -out icp-router.key 2048
+     openssl genrsa -out icp-router.key 4096
      ```
-     {: codeblock}
 
   4. Generate the Certificate Signing request (CSR) by using the private key:
      ```
-     openssl req -new -key icp-router.key -out icp-router.csr -config csr.cnf
+     openssl req -new -key ingress.key -out ingress.csr -config csr.cnf
      ```
-     {: codeblock}
 
   5. Generate a signed certificate by using your CA certificate and key and CSR: 
+     
      ```
-     openssl x509 -req -in icp-router.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out icp-router.crt -days 1000 -extensions v3_ext -extfile csr.cnf
+     openssl x509 -req -in ingress.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out ingress.crt -sha256 -days 300 -extensions v3_ext -extfile csr.cnf
      ```
-     {: codeblock}
 
   6. Examine the certificate contents: 
+     
      ```
-     openssl x509  -noout -text -in ./icp-router.crt
+     openssl x509  -noout -text -in ./ingress.crt
      ```
-     {: codeblock}  
 
-     Ensure that the common name on the certificate is the Red Hat Advanced Cluster Management for Kubernetes cluster CA domain.
+  7. Create a secret containing the CA certificate by running the following command:
 
-## Replacing the management ingress certificate
+     ```
+     kubectl -n open-cluster-management create secret tls multicloud-ca-cert --cert ./ca.crt --key ./ca.key
+     ```
+     
+     <!--Ensure that the common name on the certificate is the Red Hat Advanced Cluster Management for Kubernetes cluster CA domain.-->
 
-Complete the following steps to replace a management ingress certificate.
+## Backup the existing certificate for the ingress
 
-1. Delete the icp-management-ingress cert-manager certificate.
+Create a file with a copy of your existing certificates by completing the following steps:
+
+1. Get the certificate and secret names for the ingress by running the following command:
+
    ```
-   kubectl -n kube-system delete cert icp-management-ingress-cert
+    oc get cert -n open-cluster-management | grep ingress
+    ```
+    
+2. Backup the `management-ingress` certifcate by running the following command:
+
+   ```
+   oc get cert -n open-cluster-management management-ingress-c38ac-cert -o yaml > ingress-cert-backup.yaml
+   ```
+
+## Replace the management ingress certificate
+
+Complete the following steps to replace a management ingress certificate:
+
+1. Delete the management-ingress certificate and secret by running the following command:
+
+   ```
+   kubectl delete cert -n [open-cluster-management] management-ingress-c38ac-cert
    ```
    {: codeblock}
 
-2. Delete the icp-management-ingress secret that contains the certificate.
+2. Create the management-ingress secret by using your certificate and private key.
+   
    ```
-   kubectl -n kube-system delete secret icp-management-ingress-tls-secret
+   kubectl -n [open-cluster-management] create secret tls management-ingress-c38ac-tls-secret --cert ./ingress.crt --key ./ingress.key
    ```
-   {: codeblock}
 
-3. Create the icp-management-ingress secret by using your certificate and private key.
+3. Verify that the secret is created in the correct namespace.
+   
    ```
-   kubectl -n kube-system create secret tls icp-management-ingress-tls-secret --cert ./icp-router.crt --key ./icp-router.key
+   kubectl get secret -n [open-cluster-management] | grep management-ingress | grep tls
    ```
-   {: codeblock}
 
-4. Verify that the secret is created in the correct namespace.
+4. Restart all pods by using the `management-ingress` secret.
+   
    ```
-   kubectl get secret -n kube-system | grep icp-management-ingress-tls-secret
-   ```
-   {: codeblock}
-
-5. Restart all pods by using the icp-management-ingress secret.
-   ```
-	secretName=icp-management-ingress-tls-secret
+	secretName=multicloud-ca-cert tls-secret
 	kubectl get po --field-selector=status.phase!=Completed,status.phase!=Succeeded,status.phase!=Unknow --no-headers -o=custom-columns=:metadata.name,:metadata.namespace --all-namespaces | while read pod; do
 	   podName=$(echo $pod | awk '{print $1}')
 	   namespace=$(echo $pod | awk '{print $2}')
@@ -161,64 +168,55 @@ Complete the following steps to replace a management ingress certificate.
 		fi
 	done
    ```
-   {: codeblock}
 
-6. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.   
+5. After the management ingress pod has restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same. 
 
-**Note:** Several functions are affected by using your own certificate for management ingress. For example, when you use the Helm command to add a Helm repository. If you are adding the repository for your cluster, specify the management ingress CA file as the value for `--ca-file` instead of the Helm CA file. For example,
-```
-helm repo add mgmt-charts https://mycluster.icp:8443/mgmt-repo/charts --ca-file <installer directory>/cluster/cfc-certs/router/icp-router-ca.crt --cert-file ~/.helm/cert.pem --key-file ~/.helm/key.pem
-```
-{: codeblock}
+## Restore the default self-signed certificate for management ingress
 
-You need to use the management ingress CA file since the repository is from the cluster itself `https://mycluster.icp:8443/mgmt-repo/charts` and the Helm command to add the Helm repository requires the CA of that repository. For more information about this command, see [Helm documentation](https://helm.sh/docs/howto/chart_repository_sync_example/){: new_window}.
+1. Retrieve the certificate backup file that you created when you replaced the management ingress: 
 
-
-## Restoring the default self-signed certificate for management ingress
-
-1. Retrieve your previous Red Hat Advanced Cluster Management for Kubernetes management ingress certificate content from the Helm release: 
-
-   1. Run the following command to list the management ingress Helm release: 
+   1. Run the following command to restore the management ingress certificate from the backup: 
+      
       ```
-      helm list --tls | grep icp-management-ingress
+      oc create -f ingress-cert-backup.yaml
       ```
-      {: codeblock}
+      
+      The secret is automatically updated. You might receive the following output:
 
-      Output: 
       ```
-      icp-management-ingress     	1       	Tue Oct 29 09:42:37 2019	DEPLOYED	icp-management-ingress-3.3.0    	3.2.1         	kube-system
+      management-ingress     	1       	Tue Oct 29 09:42:37 2019	DEPLOYED	management-ingress-3.3.0    	4.4.0         	kube-system
       ```
-      {: codeblock}
+      
 
-   2. Run the following command to retrieve the Helm release content and locate the management ingress certificate content:
+   2. Edit the management ingress deployment by running the following command:
+      
       ```
-      helm get icp-management-ingress --tls
+      helm get management-ingress --tls
       ```
-      {: codeblock}
 
       Output:
       ```
-      # Source: icp-management-ingress/templates/cert-crd.yaml
+      # Source: management-ingress/templates/cert-crd.yaml
       apiVersion: certmanager.io/v1alpha1
       kind: Certificate
       metadata:
-      name: icp-management-ingress-cert
+      name: management-ingress-cert
       namespace: kube-system
       labels:
-         app: icp-management-ingress
-         chart: icp-management-ingress-3.3.0
+         app: management-ingress
+         chart: management-ingress-3.3.0
          heritage: Tiller
-         release: icp-management-ingress
+         release: management-ingress
       spec:
-      secretName: icp-management-ingress-tls-secret
+      secretName: management-ingress-tls-secret
       issuerRef:
          name: icp-ca-issuer
          kind: ClusterIssuer
-      commonName: "byotest.icp"
+      commonName: "management-ingress"
       dnsNames:
-      - icp-management-ingress
-      - icp-management-ingress.kube-system
-      - icp-management-ingress.kube-system.svc
+      - management-ingress
+      - management-ingress.kube-system
+      - management-ingress.kube-system.svc
       ipAddresses:
       - 127.0.0.1
       - 9.30.249.231
@@ -226,26 +224,25 @@ You need to use the management ingress CA file since the repository is from the 
       duration: 2160h
       renewBefore: 24h
       ```
-      {: codeblock}
 
-   3. Save the retrieved certificate content to your local file system as a `icp-management-ingress-cert.yaml` file.
+   3. Save the retrieved certificate content to your local file system as a `management-ingress-cert.yaml` file.
 
 2. Create your Red Hat Advanced Cluster Management for Kubernetes management ingress certificate with the following command: 
 
    ```
-   kubectl -n kube-system apply -f icp-management-ingress-cert.yaml
+   kubectl -n kube-system apply -f management-ingress-cert.yaml
    ```
-   {: codeblock}
 
 3. Delete your Red Hat Advanced Cluster Management for Kubernetes management ingress secret:
+   
    ```
-   kubectl -n kube-system delete secret icp-management-ingress-tls-secret
+   kubectl -n kube-system delete secret management-ingress-tls-secret
    ```
-   {: codeblock2}
 
-4. Restart all pods by using the icp-management-ingress secret.
+4. Restart all pods by using the management-ingress secret.
+   
    ```
-    secretName=icp-management-ingress-tls-secret
+    secretName=management-ingress-tls-secret
     kubectl get po --field-selector=status.phase!=Completed,status.phase!=Succeeded,status.phase!=Unknow --no-headers -o=custom-columns=:metadata.name,:metadata.namespace --all-namespaces | while read pod; do
        podName=$(echo $pod | awk '{print $1}')
        namespace=$(echo $pod | awk '{print $2}')
@@ -255,19 +252,9 @@ You need to use the management ingress CA file since the repository is from the 
  	   kubectl delete pod -n $namespace $podName --grace-period=0 --force &>/dev/null
  	   fi
     done
-   ```
-   {: codeblock}   
+   ```  
 
 5. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
-
-
-**Note:** Several functions are affected by using the default self-signed certificate for management ingress. For example, when you use the Helm command to add a Helm repository. If you are adding the repository for your cluster, specify the management ingress CA file as the value for `--ca-file` instead of the Helm CA file. For example,
-```
-helm repo add mgmt-charts https://mycluster.icp:8443/mgmt-repo/charts --ca-file <installer directory>/cluster/cfc-certs/router/icp-router-ca.crt --cert-file ~/.helm/cert.pem --key-file ~/.helm/key.pem
-```
-{: codeblock}
-
-You need to use the management ingress CA file since the repository is from the cluster itself `https://mycluster.icp:8443/mgmt-repo/charts` and the Helm command to add the Helm repository requires the CA of that repository. For more information about this command, see [Helm documentation](https://helm.sh/docs/howto/chart_repository_sync_example/){: new_window}.
 
 
 
