@@ -2,7 +2,7 @@
 
 copyright:	
   years: 2019, 2020	
-lastupdated: "2020-03-17"	
+lastupdated: "2020-03-19"	
 
 ---	
 
@@ -34,8 +34,8 @@ The plug-in for the Istio discovery must be enabled if you want to discover an I
 5. In the *Multicloud Manager service registry configuration* section, you can enable the plug-in that you want to use by entering it in the **Enabled Plugins** field. Your entry must be comma-separated, like the following example:	
 
     ```	
-	kube-service,istio	
-	```	
+    kube-service,istio	
+    ```	
     {: codeblock}
 
     **Note:** If you enable the Istio plug-in, you need to install the [Multicluster service mesh](https://istio.io/docs/concepts/multicluster-deployments/#multicluster-service-mesh){: new_window}. The mesh must include individually deployed Istio control planes in every cluster and must use gateways to connect services across clusters.
@@ -47,7 +47,7 @@ To discover an Istio service within the managed clusters, complete the following
 1. Add a service discovery annotation to the Istio service. You must add the annotation to your Istio service definition YAML file for the service that you want to discover.
 
   ```
-  mcm.rcm.com/service-discovery	
+  mcm.ibm.com/service-discovery	
   ```
   {: codeblock}
 
@@ -58,7 +58,7 @@ To discover an Istio service within the managed clusters, complete the following
   kind: Service	
   metadata:	
    annotations:	
-     mcm.rcm.com/service-discovery: "{}"	
+     mcm.ibm.com/service-discovery: "{}"	
    name: dbservice	
    namespace: database	
   spec:	
@@ -72,48 +72,11 @@ To discover an Istio service within the managed clusters, complete the following
   ```	
   {: codeblock}
 
-2. If the Istio application that you added the discovery annotation for has other applications that depend on it, add the annotated service to the entry of the application as a deployable dependency.
+2. By default, the annotated service can be discovered on all managed clusters, if you want to discover the service on certain of managed clusters, you need add the `target-clusters` in the annotation, for example:
 
-  The following example shows how to add this dependency:
-<!--YAML example needs to be reviewed MD -->
-  ```	
-  apiVersion: apps.rcm.com/v1alpha1	
-  kind: Deployable	
-  metadata:	
-   name: name1	
-   namespace: workspace	
-  spec:	
-   template:	
-     apiVersion: extensions/v1beta1	
-     kind: Deployment	
-     metadata:	
-       name: ibm-websphere	
-       labels:	
-         app: ibm-websphere	
-     spec:	
-       replicas: 1	
-       selector:	
-         matchLabels:	
-           app: ibm-websphere	
-       template:	
-         metadata:	
-           labels:	
-             app: ibm-websphere	
-         spec:	
-           containers:	
-           - name: ibm-websphere	
-             image: "registry.ng.bluemix.net/seed/ibm-websphere-sample"	
-             imagePullPolicy: Always	
-   dependencies:	
-   - name: dbgateway	
-     namespace: database	
-     kind: Service	
-  placement:	
-     clusterNames:	
-     - managed cluster1	
-  ```	
-  {: codeblock} 
+  ```
+  mcm.ibm.com/service-discovery: '{"target-clusters": ["clutser1", "cluster2"]}'
+  ```
+  {: codeblock}
 
-  After you apply this deployable to an Istio system, its dependent service is automatically discovered in the cluster (`managed cluster1`) in which the application is deployed.
-  	
-3. Access the discovered service by using the service hostname. In this example, the hostname is `mydb.database.global`.
+3. Access the discovered service by using the service hostname. In this example, the hostname is `dbservice.database`.
