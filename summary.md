@@ -24,7 +24,6 @@
  * [Console](console/console_intro.md)
    * [Observability from the console](console/console.md)
    * [Managing your cluster with the Visual Web Terminal](console/vwt_search.md)
-   * [Configuring your logo](console/logo.md)
    * [Managing cluster labels](console/cluster_label.md)
  * [CLI tools](cli/multicluster_cli.md)
    * [Installing the multicluster plug-in (mc)](cli/installing_mc_plugin.md)
