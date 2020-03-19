@@ -10,7 +10,7 @@
  * [Installation](install/overview.md)
    * [Requirements and recommendations](install/requirements.md)
      * [Supported cloud providers](install/supported_clouds.md)
-     * [Hardware requirements and recommendations](install/hardware_reqs.md)
+     * [System requirements and recommendations](install/system_reqs.md)
      * [Supported operating systems and platforms](install/supported_os.md)
      * [Supported browsers](install/supported_browsers.md)
      * [Supported environments](install/environments_overview.md)  

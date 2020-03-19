@@ -1,11 +1,15 @@
 ---
 
 copyright:
+<<<<<<< HEAD:install/hardware_reqs.md
 <<<<<<< HEAD
   years: 2020
 lastupdated: "2020-03-16"
 =======
   years: 2019, 2020
+=======
+  years: 2020
+>>>>>>> a7d5a437b9b2b137392926fda1917e5aec61001b:install/system_reqs.md
 lastupdated: "2020-03-12"
 >>>>>>> doc_stage
 
@@ -19,8 +23,9 @@ lastupdated: "2020-03-12"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Hardware requirements and recommendations
+# System requirements and recommendations
 
+<<<<<<< HEAD:install/hardware_reqs.md
 <<<<<<< HEAD
 Before you install Red Hat Advanced Cluster Management for Kubernetes, review the system requirements and the footprint sizing.
 {:shortdesc}
@@ -37,7 +42,15 @@ Before you install the Red Hat Advanced Cluster Management for Kubernetes, revie
   - [IBM Cloud App Management](#app)
   - [IBM Cloud Automation Manager](#auto)
   - [Sizing for the multicluster-endpoint](#mc_endpoint)
+=======
+Before you install the Red Hat Advanced Cluster Management for Kubernetes, review the system requirements.
+{:shortdesc}
+
+  - [OpenShift Container Platform](#ocp)
+  - [Red Hat Advanced Cluster Management for Kubernetes](#rhacm)
+>>>>>>> a7d5a437b9b2b137392926fda1917e5aec61001b:install/system_reqs.md
   - [Sizing for the management hub services](#management_services)
+  - [Sizing for the multicluster-endpoint](#mc_endpoint)
 
 <<<<<<< HEAD
 ## Red Hat OpenShift Container Platform
@@ -73,14 +86,15 @@ Sizing is available for entry, standard, and enterprise footprints.
 {: #ocp}
 
 * OpenShift Container Platform compute or worker nodes: 16 Core | 32 GB RAM
-**Note:** The required resources are the allocatable resources on the OpenShift nodes. If you want to install Cloud Paks on top of the Red Hat Advanced Cluster Management for Kubernetes, you need to add the additional required resources.
+
+**Note:** The required resources are the allocatable resources on the OpenShift nodes. 
 
 * Storage requirements:
   - For offline installation, the OpenShift Container Platform image registry requires at least 100 GB.
   - The management services MongoDB and logging each require 20 GB through the storage class.
 
 ## Red Hat Advanced Cluster Management for Kubernetes
-{: #cloud_pak}
+{: #rhacm}
 
 Sizing is available for entry, standard, and enterprise footprints.
 
@@ -96,9 +110,12 @@ Sizing is available for entry, standard, and enterprise footprints.
 | Enterprise	| Medium and large-scale production deployment| <p></p>OpenShift: <br>&nbsp; 3 master nodes (native HA) <br> &nbsp; 2 or more infra nodes <br>&nbsp; 8 or more worker nodes </p><p><br> Cloud Pak: <br> &nbsp; 3 Cloud Pak master nodes <br> &nbsp; 2 Cloud Pak management nodes <br>&nbsp; 2 Cloud Pak proxy nodes </p> |OpenShift: <br> &nbsp; 3 master nodes (native HA) <br>&nbsp; 8 or more worker nodes </p><p> <br> Cloud Pak: <br> &nbsp; 3 Cloud Pak master nodes <br> &nbsp; 2  Cloud Pak management nodes <br>&nbsp; 2 Cloud Pak proxy nodes </p> |
 {: caption="Table 1. Deployment topology configurations for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
+<<<<<<< HEAD:install/hardware_reqs.md
 **Note:** For one dedicated Cloud Pak worker node, set the master, management, and proxy nodes to one OpenShift worker node.
 >>>>>>> doc_stage
 
+=======
+>>>>>>> a7d5a437b9b2b137392926fda1917e5aec61001b:install/system_reqs.md
 ### Default configurations
 
 | Topology | vCPUs | Memory | Persistent volumes (GB)  | Disk Space (GB) |
@@ -161,32 +178,27 @@ Sizing is available for entry, standard, and enterprise footprints.
 =======
 {: caption="Table 6. Enterprise OpenShift node sizing for the Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
-## IBM Cloud App Management
-{: #app}
+## Sizing for management hub services
+{: #management_services}
 
-| Topology | vCPUs | Memory | Persistent volumes (GB) | Resources monitored | Max metrics per minute |
-| :--- | :---: | :---: | :---: | :---: |:---: |
-| Development | 10 | 32	| 75	| 50 | 25,000 |
-| Minimal | 35| 55	| 1,200	| 3,000 | 1,000,000 |
-| Standard | 90| 180	| 7,000	| 6,000 | 2,000,000  |
-| Enterprise | 105| 230	| 10,500	| 9,000 | 3,000,000  |
-{: caption="Table 7. IBM Cloud Automation Manager sizing" caption-side="top"}
-
-For more information, see [Planning hardware and sizing](https://www.ibm.com/support/knowledgecenter/SS8G7U_19.4.0/com.ibm.app.mgmt.doc/content/planning_scaling.html?cp=SSFC4F_1.2.0).
-
-## IBM Cloud Automation Manager
-{: #auto}
-
-| Topology | vCPUs | Memory | Persistent volumes (GB)  |
-| :--- | :---: | :---: | :---: |
-| Development | 12 | 20 | 65 |
-| Minimal | 12| 30 | 65 |
-| Standard | 15|48 | 65 |
-| Enterprise | 18| 60 | 65 |
-{: caption="Table 8. IBM Cloud App Management sizing" caption-side="top"}
-
+<<<<<<< HEAD:install/hardware_reqs.md
 For more information, see [System requirements](https://www.ibm.com/support/knowledgecenter/SS2L37_4.1.0.0/cam_requirements.html?cp=SSFC4F_1.2.0).
 >>>>>>> doc_stage
+=======
+| Service Name                 | Optional | CPU Request | CPU Limit | Memory Request | Memory Limit | Persistent Volume (value is default) | Additional considerations |
+|-------------------------------- |---------- |------------- |------------ |----------------- |-------------- |----------------- |-------------- |
+| Catalog-ui, Common-web-ui, iam-policy-controller, key-management, mcm-kui, metering, monitoring, multicluster-hub,nginx-ingress, search | Default | 9,025 m | 29,289 m | 16,857 Mi | 56,963 Mi | 20 GiB | |
+| Audit Logging | Optional | 125 m | 500 m | 250 Mi | 700 Mi | | |
+| CIS Policy Controller | Optional | 525 m | 1,450 m | 832 Mi | 2,560 Mi | | |
+| Image Security Enforcement | Optional | 128 m | 256 m | 128 Mi | 256 Mi | | |
+| Licensing | Optional | 200 m | 500 m | 256 Mi | 512 Mi | | |
+| Logging | Optional | 1,500 m | 3,000 m | 9,940 Mi | 10,516 Mi | 20 GiB | |
+| Multitenancy Account Quota Enforcement | Optional | 25 m | 100 m | 64 Mi | 64 Mi | | |
+| Notary | Optional | 600 m | 600 m  | 1,024 Mi | 1,024 Mi | | |
+| Secret Encryption Policy Controller | Optional | 50 m | 100 m  | 100 Mi | 200 Mi | 110 GiB | |
+| Secure Token Service (STS) | Optional | 410 m | 600 m  | 94 Mi  | 314 Mi | | Requires Red Hat OpenShift Service Mesh (Istio) |
+{: caption="Table 10. Hub services sizing" caption-side="top"
+>>>>>>> a7d5a437b9b2b137392926fda1917e5aec61001b:install/system_reqs.md
 
 ## Sizing for multicluster-endpoint
 {: #mc_endpoint}
@@ -212,6 +224,7 @@ For more information, see [System requirements](https://www.ibm.com/support/know
 | TopologyCollector              	| True     	| 50 mCore    	| 100 mCore  	| 20 MiB          	| 50 MiB       	|
 | MulticlusterEndpointOperator   	| False    	| 100 mCore   	| 500 mCore  	| 100 MiB         	| 500 MiB      	|
 {: caption="Table 9. Multicluster-endpoint instructions" caption-side="top"}
+<<<<<<< HEAD:install/hardware_reqs.md
 
 ## Sizing for management hub services
 {: #management_services}
@@ -227,3 +240,5 @@ For more information, see [System requirements](https://www.ibm.com/support/know
 | Secure Token Service (STS) | Optional | 410 m | 600 m  | 94 Mi  | 314 Mi | | Requires Red Hat OpenShift Service Mesh (Istio) |
 >>>>>>> doc_stage
 {: caption="Table 10. Hub services sizing" caption-side="top"}
+=======
+>>>>>>> a7d5a437b9b2b137392926fda1917e5aec61001b:install/system_reqs.md

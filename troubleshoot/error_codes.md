@@ -1,23 +1,14 @@
 ---
 
 copyright:
-  years: 2016, 2018
-lastupdated: "2018-07-23"
+  years: 2016, 2020
+lastupdated: "2020-03-18"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Error codes
 
-Review a list of error codes that you might encounter when working with the {{site.data.keyword.product_tm}} console.
-{:shortdesc}
+Review a list of error codes that you might encounter when working with the {Red Hat Advanced Cluster Management for Kubernetes console.
 
 
 |Error code|Meaning|Notes|
