@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-12"
+  years: 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -14,6 +14,22 @@ lastupdated: "2019-12-12"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
+<<<<<<< HEAD
+# Uninstalling Red Hat Advanced Cluster Management for Kubernetes
+
+Uninstall Red Hat Advanced Cluster Management for Kubernetes by removing the CR for the product.
+{:shortdesc}
+
+1. Log in to the boot node as a user with root permissions. During installation, you specified the IP addresses for each node type.
+
+2. Change to the `cluster` directory within your Advanced Cluster Management for Kubernetes installation directory:
+    ```
+    cd /<installation_directory>/cluster
+    ```
+    {: codeblock}
+
+3. Uninstall Advanced Cluster Management for Kubernetes by running the `uninstall-with-openshift` command:
+=======
 # Uninstalling the Red Hat Advanced Cluster Management for Kubernetes offline
 
 Uninstall Red Hat Advanced Cluster Management for Kubernetes by removing all deployed platform Helm charts.
@@ -22,6 +38,7 @@ Uninstall Red Hat Advanced Cluster Management for Kubernetes by removing all dep
 1. If applicable, uninstall any optional modules. 
 
 2. Uninstall Red Hat Advanced Cluster Management for Kubernetes by running the `uninstall-with-openshift` command:
+>>>>>>> doc_stage
     ```
     sudo docker run -t --net=host -e LICENSE=accept -v $(pwd):/installer/cluster:z -v /var/run:/var/run:z -v /etc/docker:/etc/docker:z --security-opt label:disable ibmcom/mcm-inception-amd64:3.2.3-rhel-ee uninstall-with-openshift
     ```

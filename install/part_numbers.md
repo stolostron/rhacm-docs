@@ -1,8 +1,13 @@
 ---
 
 copyright:
+<<<<<<< HEAD
+  years: 2020
+lastupdated: "2020-03-16"
+=======
   years: 2019, 2020
 lastupdated: "2020-03-17"
+>>>>>>> doc_stage
 
 ---
 
@@ -14,31 +19,52 @@ lastupdated: "2020-03-17"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Passport Advantage part numbers
+# Part numbers
 
+<<<<<<< HEAD
+Use these tables to find the files you need from [Red Hat Customer Portal](https://access.redhat.com/downloads) and the corresponding part numbers.
+=======
 Use these tables to find the files you need from [Passport Advantage](https://www.ibm.com/software/passportadvantage/) and the corresponding part numbers.
+>>>>>>> doc_stage
 {: shortdesc}
 
   - [Downloading packages](#download)
   - [Red Hat Advanced Cluster Management for Kubernetes Core packages](#core)
+<<<<<<< HEAD
+  - [IBM Red Hat Software for Advanced Cluster Management for Kubernetes packages](#rhel)
+=======
   - [IBM Red Hat Software for Red Hat Advanced Cluster Management for Kubernetes packages](#rhel)
   - [IBM Cloud App Management for Red Hat Advanced Cluster Management for Kubernetes packages](#cloud_app)
   - [IBM Cloud App Management Extension Pack for Red Hat Advanced Cluster Management for Kubernetes packages](#ext)
   - [IBM Cloud Automation Manager packages](#cloud_auto)
+>>>>>>> doc_stage
 
 ## Downloading packages
 {: #download}
 
 Complete the following procedure to download your packages:
 
+<<<<<<< HEAD
+1. Go to the [Red Hat Customer Portal](https://access.redhat.com/downloads). 
+2. Find the entry for *Red Hat Advanced Cluster Management for Kubernetes*.
+2. Select the product name.
+3. Log in with your Red Hat ID.
+=======
 1. Go to the IBM Passport Advantage Online tab at [IBM Passport Advantage](https://www.ibm.com/software/passportadvantage/) and log in with your IBM ID.
 2. Find your part number.
 3. Search for your files by using the part numbers that are listed in the tables.
+>>>>>>> doc_stage
 4. Download the files to a directory on your computer.
 
 ## Red Hat Advanced Cluster Management for Kubernetes Core packages
 {: #core}
 
+<<<<<<< HEAD
+| Description                              | File name                               | Red Hat part number |
+|-------------------------------|----------------------------------|-------------------------|
+| Red Hat Advanced Cluster Management for Kubernetes image for AMD64      | TBD       | TBD                        |
+{: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes package" caption-side="top"}
+=======
 | Description                                                                      | File name                               | Passport Advantage part number |
 |----------------------------------------------------------------------------------|-----------------------------------------|--------------------------------|
 | Red Hat Advanced Cluster Management for Kubernetes Core 1.2 Kubernetes image for AMD64      | ibm-cp4mcm-core-1.2-x86_64.tar.gz       | CC4L8EN                        |
@@ -109,3 +135,4 @@ Complete the following procedure to download your packages:
 | IBM Cloud Private 3.2.1 for IBM Cloud Automation Manager 4.1 for Power Linux LE (64-bit) | icp-cam-ppc-4.1.tar.gz    | CC4E3EN                        |
 | IBM Cloud Private 3.2.1 Product ID for IBM Cloud Automation Manager 4.1 Product ID  | icp-cam-prod-id-4.1.txt   | CC4E4EN                        |
 {: caption="Table 5. IBM Cloud Automation Manager packages" caption-side="top"}
+>>>>>>> doc_stage

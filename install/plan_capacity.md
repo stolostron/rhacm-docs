@@ -1,8 +1,13 @@
 ---
 
 copyright:
+<<<<<<< HEAD
+  years: 2020
+lastupdated: "2020-03-16"
+=======
   years: 2016, 2020
 lastupdated: "2020-03-13"
+>>>>>>> doc_stage
 
 ---
 
@@ -18,7 +23,7 @@ lastupdated: "2020-03-13"
 
 Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.
 
-**Note:** The requirements that are listed aren’t minimum requirements.
+**Note:** The requirements that are listed are not minimum requirements.
 
 {:shortdesc}
 
