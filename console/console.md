@@ -11,19 +11,39 @@ lastupdated: "2020-03-11"
 
 Learn more about console components that you can use to view, manage, or customize your console. 
 
-Access your console with the following URL: **(need to add this--how does user access the console after install -- from OCP? -bcs)**
-
 ## Red Hat Advanced Cluster Management for Kubernetes console components
 
 Red Hat Advanced Cluster Management for Kubernetes console components:
 
+* [Access your console](#access )
 * [Welcome page](#welcome)
-* [Overview](#overview) **(I CANNOT DOC TEST THIS -- NOT UP)**
+* [Overview](#overview) 
 * [Observe enviroments > Topology](#topology)
 * [Automate Infrastructure](#cluster)
 * [Manage application](#application)
 * [Governance and risk dashboard](#grc)
-* [Search](#search) **(THIS IS THE ONLY PLACE IN THE DOCS WE TALK ABOUT SEARCH SO WE NEED TO LEAVE IT)**
+* [Search](#search) 
+
+## Access your console
+{: #access}
+
+- Access from the Red Hat OpenShift console:
+
+1. Left Nav > Networking > Routes
+
+2. Select project/namespace where ACM is installed
+
+3. Find multicloud-console and Click the URL under Location column
+
+
+- Access the console from the Red Hat OpenShift CLI:
+
+1. Run the following command to find the route, where `namespace-from-install` is the namespace where you installed Red Hat Advanced Cluster Management for Kubernetes.
+
+```
+oc get routes -n <namespace-from-install>
+```
+2. Find the `multicloud-console` route and the Host and Port column to get your URL.
 
 ## Welcome page
 {: #welcome}
