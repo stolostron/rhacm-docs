@@ -75,12 +75,12 @@ To discover a Kubernetes ingress within your managed clusters, complete the foll
            servicePort: 8000
   ```
 
-  **Tip:** You can append the service registry DNS suffix (mcm.svc) to your ingress host name, thus you can access the ingress host directly using the host name.
+  **Tip:** You can append the service registry DNS suffix (mcm.svc) to your ingress host name, then you can access the ingress host directly using the host name.
 
-2. By default, the annotated ingress can be discovered on all managed clusters, if you want to discover the service on certain of managed clusters, you need add the `target-clusters` in the annotation, for example:
+2. By default, the annotated ingress can be discovered on all managed clusters. If you want to discover the service on specific managed clusters, add the `target-clusters` in the annotation, as shown in the following example:
 
   ```
-  mcm.ibm.com/service-discovery: '{"target-clusters": ["clutser1", "cluster2"]}'
+  mcm.ibm.com/service-discovery: '{"target-clusters": ["cluster1", "cluster2"]}'
   ```
   {: codeblock}
 
