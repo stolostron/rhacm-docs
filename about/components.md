@@ -14,7 +14,7 @@ See the following tables for information about components that are installed and
 |Service|Description|Required--need dev input|
 |--------|-----------|-------------------|
 |management-ingress|Unifies all management services behind a network ingress controller with predictable annotations and TLS protection. This service should not be accessed directly.|Yes|
-|ibm-cert-manager||Yes|
+|cert-manager||Yes|
 |cert-manager-webhook||Yes|
 |configmap-watcher||Yes|
 |mongo-db|All platform services that require a persistent data store use the MongoDB service. Highly available topologies for MongoDB are supported out of the box. This is a service that should not be accessed directly.|Yes|
