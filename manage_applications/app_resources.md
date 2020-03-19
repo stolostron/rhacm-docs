@@ -1,7 +1,7 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-13" 
 
 ---
@@ -16,7 +16,7 @@ lastupdated: "2020-03-13"
 
 # Application resources (Technology preview)
 
-Within Red Hat Advanced Cluster Management for Kubernetes, applications are composed of multiple application resources. The main foundation resources for Red Hat Advanced Cluster Management for Kubernetes applications are the `application` resource and the `deployable` resource.
+Within Red Hat Advanced Cluster Management for Kubernetes, applications are composed of multiple application resources. The foundational resources for Red Hat Advanced Cluster Management for Kubernetes applications are the `application` resource and the `deployable` resource.
 {:shortdesc}
 
 In addition, you can use channel, subscription, and placement rule resources to help you deploy, update, and manage your overall applications.
@@ -28,7 +28,7 @@ All of the application component resources for Red Hat Advanced Cluster Manageme
 ## Application
 {: #application}
 
-Applications (`Application.app.k8s.io`) in {Red Hat Advanced Cluster Management for Kubernetes are used for viewing the application components.
+Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for viewing the application components.
 
 The definition structure for an application can resemble the following example YAML content:
 
@@ -134,7 +134,7 @@ For more information about creating and managing secrets, see [Managing secrets]
 
 Channels (`Channel.app.ibm.com`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access.
 
-Channels define a namespace within the Hub cluster and point to a physical place where resources are stored for deployment, such as an object store, Kubernetes namespace, Helm repository, or GitHub repository. Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables within a channel can be accessed by only the clusters that subscribe to that channel.
+Channels define a namespace within the hub cluster and point to a physical place where resources are stored for deployment, such as an object store, Kubernetes namespace, Helm repository, or GitHub repository. Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables within a channel can be accessed by only the clusters that subscribe to that channel.
 
 For `Namespace` and `ObjectBucket` channel types, the spec for each channel can define conditions that a deployable must match to be included in the channel. These conditions are defined as Kubernetes labels for the channel, such as the source namespace, package name, labels, and annotations. A deployable must have the same labels for the deployable to be included in the channel. A deployable can be included in a channel only when the deployable is labeled with the same labels as the channel.
 
