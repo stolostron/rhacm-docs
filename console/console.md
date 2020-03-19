@@ -29,12 +29,11 @@ Red Hat Advanced Cluster Management for Kubernetes console components:
 
 - Access from the Red Hat OpenShift console:
 
-1. Left Nav > Networking > Routes
+1. From the left-hand navigation, click **Networking** > **Routes**
 
-2. Select project/namespace where ACM is installed
+2. Select the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed
 
-3. Find multicloud-console and Click the URL under Location column
-
+3. Find `multicloud-console` and click the URL from the `Location` column.
 
 - Access the console from the Red Hat OpenShift CLI:
 
@@ -50,7 +49,8 @@ oc get routes -n <namespace-from-install>
 
 From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you get more information about the product and you can access header features, such as _Search_ and _Create resource_. Also from the _Header_, you can click the **Help** (?) icon to view the _About_ page and the documentation. From the _User_ menu, you can access the _Configure Client_ page. Additionally, you can use the [Visual Web Terminal](vwt_search.md). 
 
-## Overview
+## Observe enviroments > Topology
+{: #overview}
 
 Reorganize your dashboard. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
 
@@ -60,6 +60,8 @@ Reorganize your dashboard. You can personalize your view of the Overview dashboa
 * Pod status
 * Cluster resources (VCPU/Memory usage)
 * Storage usage
+
+Additionally, the Heatmap displays color-coordinated boxes that represent the VCPU usage threshold of your nodes. 
 
 ### Filtering your results
 
@@ -75,14 +77,13 @@ Create clusters or bare metal assets, or import existing clusters. Scale up or d
 
 Click **New application** to edit a `.yaml` file and create your application. Click Resources to view the information of each application. For more information about application resources, see [Application management (Technology preview)](../manage_applications/overview.md).
 
-### Viewing your pod health (IS THIS PART OF TOPOLOGY AND SHOULD IT MOVE? I cannot test as topology page not up in my cluster -- bcs)
+### Viewing your pod health 
 
-View the pod health for all of your clusters by expanding the Heatmap. The Heatmap displays color-coordinated boxes that represent the VCPU usage threshold of your nodes. 
+View the pod health for all of your clusters by expanding the Heatmap.
 
 Click **Show details** to view the map. The size of the color-coordinated boxes represents the number of nodes on your cluster. Hover your cursor over the box to view the response time of your cluster. 
 
-## Topology page (Need dev help on this)
-{: #topology}
+## Topology page 
 
 The Topology page uses information from Weave Scope probe to display Kubernetes objects within a cluster. You can view hub cluster resources. As you configure managed clusters, you see more clusters in the Topology view. 
 
