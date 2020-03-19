@@ -72,7 +72,7 @@ To discover an Istio service within the managed clusters, complete the following
   ```	
   {: codeblock}
 
-2. By default, the annotated service can be discovered on all managed clusters, if you want to discover the service on certain of managed clusters, you need add the `target-clusters` in the annotation, for example:
+2. By default, the annotated service can be discovered on all managed clusters. If you want to discover the service on specific managed clusters, add `target-clusters` in the annotation, as shown in the following example:
 
   ```
   mcm.ibm.com/service-discovery: '{"target-clusters": ["clutser1", "cluster2"]}'
