@@ -14,7 +14,7 @@ lastupdated: "2020-03-12"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Hardware requirements and recommendations
+# System requirements and recommendations
 
 Before you install the Red Hat Advanced Cluster Management for Kubernetes, review the system requirements.
 {:shortdesc}
