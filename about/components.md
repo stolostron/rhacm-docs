@@ -6,12 +6,11 @@ lastupdated: "2020-03-13"
 
 ---
 
-
 # Services and components
 
 See the following tables for information about components that are installed and enabled on the hub cluster by default.
 
-|Service|Description|Required--need dev input|
+|Service|Description|Required|
 |--------|-----------|-------------------|
 |management-ingress|Unifies all management services behind a network ingress controller with predictable annotations and TLS protection. This service should not be accessed directly.|Yes|
 |cert-manager||Yes|
@@ -53,4 +52,4 @@ There are some services that are installed on the managed clusters, but not enab
 |Service|Description|Required need dev input|
 |--------|-----------|-------------------|
 |Empty|Empty|Empty|
-{: caption="Table 3. Red Hat Advanced Cluster Management for Kubernetes managed cluster enabled components" caption-side="top"}
+{: caption="Table 3. Red Hat Advanced Cluster Management for Kubernetes enabled components on the managed cluster" caption-side="top"}
