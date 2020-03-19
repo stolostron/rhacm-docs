@@ -39,11 +39,11 @@ Configure the DNS for each managed cluster by completing these steps:
 2. Configure your cluster DNS configuration by entering the following command:
 
   ```
-  kubectl edit -n kube-system configmap kube-dns
+  kubectl edit -n openshift-dns configmap dns-default
   ```
   {: codeblock}
 
-3. Enable the forwarding plugin in the `kube-dns` configuration, similar to the following example, where *<mcm-svc-registry-dns-service-cluster-ip>* is the IP address that you identified in step 1:
+3. Enable the forwarding plugin in the `dns-default` configuration, similar to the following example, where *<mcm-svc-registry-dns-service-cluster-ip>* is the IP address that you identified in step 1:
 
   ```
   Corefile: |
@@ -58,12 +58,12 @@ Configure the DNS for each managed cluster by completing these steps:
 
   The value `mcm.svc` is the default DNS domain suffix for the service registry. If you want to set it to another value, complete the following steps:
 
-    1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
+  1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
-	2. Navigate to **Workloads** -> **Helm Releases**.
+  2. Navigate to **Workloads** -> **Helm Releases**.
 
-	3. Select your `rcm-klusterlet` release.
+  3. Select your `rcm-klusterlet` release.
 
-	4. Expand **All parameters**.
+  4. Expand **All parameters**.
 
-	5. In the *Multicloud Manager service registry configuration* section, set the DNS suffix in the *DNS Suffix* field.
+  5. In the *Multicloud Manager service registry configuration* section, set the DNS suffix in the *DNS Suffix* field.
