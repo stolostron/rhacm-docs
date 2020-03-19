@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-19"
 
 ---
 
@@ -77,48 +77,11 @@ To discover a Kubernetes ingress within your managed clusters, complete the foll
 
   **Tip:** You can append the service registry DNS suffix (mcm.svc) to your ingress host name, thus you can access the ingress host directly using the host name.
 
-2. If the ingress that you added the discovery annotation to has other applications that depend on it, add the ingress to the application's entry as a deployable dependency.
-
-  The following example shows how to add this dependency:
+2. By default, the annotated ingress can be discovered on all managed clusters, if you want to discover the service on certain of managed clusters, you need add the `target-clusters` in the annotation, for example:
 
   ```
-  apiVersion: apps.ibm.com/v1alpha1
-  kind: Deployable
-  metadata:
-    name: name1
-    namespace: workspace
-  spec:
-    template:
-      apiVersion: extensions/v1beta1
-      kind: Deployment
-      metadata:
-        name: ibm-websphere
-        labels:
-          app: ibm-websphere
-      spec:
-        replicas: 1
-        selector:
-          matchLabels:
-            app: ibm-websphere
-        template:
-          metadata:
-            labels:
-              app: ibm-websphere
-          spec:
-            containers:
-            - name: ibm-websphere
-              image: "registry.ng.bluemix.net/seed/ibm-websphere-sample"
-              imagePullPolicy: Always
-    dependencies:
-    - name: dbing
-      namespace: database
-      kind: Ingress
-      apiGroup: extensions/v1beta1
-    placement:
-      clusterNames:
-      - managed cluster1
+  mcm.ibm.com/service-discovery: '{"target-clusters": ["clutser1", "cluster2"]}'
   ```
-
-  After applying this deployable, its dependent ingress is automatically discovered in the cluster (`managed cluster1`) in which the application is deployed.
+  {: codeblock}
 
 3. Access the discovered ingress by using the ingress host name. In this example, the host name is `mydb.database.mcm.svc`.
