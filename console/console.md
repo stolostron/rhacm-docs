@@ -29,20 +29,20 @@ Red Hat Advanced Cluster Management for Kubernetes console components:
 
 - Access from the Red Hat OpenShift console:
 
-1. From the left-hand navigation, click **Networking** > **Routes**
+  1. From the left-hand navigation, click **Networking** > **Routes**
 
-2. From the _Project_ menu, select the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.
+  2. From the _Project_ menu, select the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.
 
-3. Find `multicloud-console` and click the URL from the `Location` column.
+  3. Find `multicloud-console` and click the URL from the `Location` column.
 
 - Access the console from the Red Hat OpenShift CLI:
 
-1. While logged in to OpenShift, run the following command to find the route, where `<namespace-from-install>` is the namespace where you installed Red Hat Advanced Cluster Management for Kubernetes:
+  1. While logged in to OpenShift, run the following command to find the route, where `<namespace-from-install>` is the namespace where you installed Red Hat Advanced Cluster Management for Kubernetes:
 
   ```
   oc get routes -n <namespace-from-install>
   ```
-2. Find the `multicloud-console` name and the `Host/Port` columns to get your URL.
+  2. Find the `multicloud-console` name and the `Host/Port` columns to get your URL.
 
 ## Welcome page
 {: #welcome}
