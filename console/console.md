@@ -15,14 +15,14 @@ Learn more about console components that you can use to view, manage, or customi
 
 Red Hat Advanced Cluster Management for Kubernetes console components:
 
-* [Access your console](#access )
-* [Welcome page](#welcome)
-* [Overview](#overview) 
-* [Observe enviroments > Topology](#topology)
-* [Automate Infrastructure](#cluster)
-* [Manage application](#application)
-* [Governance and risk dashboard](#grc)
-* [Search](#search) 
+- [Access your console](#access)
+- [Welcome page](#welcome)
+- [Overview](#overview) 
+- [Observe enviroments > Topology](#topology)
+- [Automate Infrastructure](#cluster)
+- [Manage application](#application)
+- [Governance and risk dashboard](#grc)
+- [Search](#search) 
 
 ## Access your console
 {: #access}
