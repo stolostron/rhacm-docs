@@ -19,7 +19,7 @@ lastupdated: "2019-12-13"
 This section provides all the configuration options that you can do during installation. <!-- ALL NEED TO BE REPLACED OR UPDATED BASED ON 1Q PRODUCT AT RED HAT, POSSIBLE TO USE THIS AS ONE CONFIG OPTIONS TOPIC -- BRANDI>
 {:shortdesc}
 
-After you install {{site.data.keyword.cloud_pak_mcm}}, you can enable or disable services that are comprised in a component. For more information, see [Enabling and disabling services](disable_and_enable_services.md).
+After you install Red Hat Advanced Cluster Management for Kubernetes, you can enable or disable services that are comprised in a component. For more information, see [Enabling and disabling services](disable_and_enable_services.md).
 
 - {: child} [Customizing the cluster with the config.yaml file](../installer/3.2.2/config_yaml.md)
 - {: child} [Multicluster config.yaml file settings](config_mcm.md)

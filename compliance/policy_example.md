@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-12-10"
+  years: 2018, 2020
+lastupdated: "2020-03-12"
 
 ---
 
@@ -14,12 +14,12 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} policy example
+# Red Hat Advanced Cluster Management for Kubernetes policy example
 
-Each {{site.data.keyword.mcm_notm}} policy can have at least one or multiple templates. For more details about the policy elements, see [{{site.data.keyword.mcm_notm}} policy overview](../compliance/policy_overview.md). 
+Each Red Hat Advanced Cluster Management for Kubernetes policy can have at least one or multiple templates. For more details about the policy elements, see [Red Hat Advanced Cluster Management for Kubernetes policy overview](../compliance/policy_overview.md). 
 {:shortdesc}
   
-The policy requires a _PlacementPolicy_ that defines the clusters that the policy document is applied to, and a _PlacementBinding_ that binds the {{site.data.keyword.mcm_notm}} policy to the `PlacementPolicy`. You can create vulnerability and mutation policies for multiple namespaces on your hub cluster, and only can view the policies, violations, and security findings associated with your cluster and namespace. View the example placement policy and placement binding: 
+The policy requires a _PlacementPolicy_ that defines the clusters that the policy document is applied to, and a _PlacementBinding_ that binds the Red Hat Advanced Cluster Management for Kubernetes policy to the `PlacementPolicy`. View the example placement policy and placement binding: 
 
    * Example placement policy that selects clusters based on a label:
       
@@ -67,7 +67,7 @@ metadata:
   annotations:
     policy.mcm.ibm.com/standards: NIST
     policy.mcm.ibm.com/categories: SystemAndInformationIntegrity, RBAC
-    policy.mcm.ibm.com/controls: MutationAdvisor
+    policy.mcm.ibm.com/controls: DifferentControl
   namespace: mcm
 spec:
   remediationAction: "enforce" # enforce or inform
@@ -171,4 +171,4 @@ spec:
 ```
 {: codeblock}
 
-See [{{site.data.keyword.mcm_notm}} Governance and risk](compliance_intro.md) for more policy topics.
+See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](compliance_intro.md) for more policy topics.

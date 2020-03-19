@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-12"
+  years: 2019, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -42,11 +42,11 @@ For more information about deployables and other application resources, see [App
 
 1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription_compose).
 
-2. Create the subscription within {{site.data.keyword.mcm_notm}}. You can use the {{site.data.keyword.gui}}, the Kubernetes CLI (`kubectl`) tool, or REST API:  
+2. Create the subscription within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
 
-   * To use the {{site.data.keyword.gui}}:
+   * To use the console:
 
-     1. Open the {{site.data.keyword.gui}}.
+     1. Open the console.
      2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
      3. Click the **Resources** tab.
      4. Scroll to the _Resource pipeline_ section. From the list of buttons to the right of the resource summary cards, click **Susbcription**. The _Create a Susbcription_ editor is displayed.
@@ -81,7 +81,7 @@ For more information about deployables and other application resources, see [App
 
         Ensure that your new subscription is listed in the resulting output.
 
-   * To use REST API, you need to use the [subscription POST API](../../apis/mcm/subscriptions.json).
+   * To use REST API, you need to use the [subscription POST API](../apis/mcm/subscriptions.json).
 
 After your subscription is created, your subscription can have one of the following statuses:
 
@@ -136,10 +136,10 @@ For more information about the resource definition for an application, see [Crea
 
 1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription_compose.md).
 
-2. Create the subscription within {{site.data.keyword.mcm_notm}}. You can use the {{site.data.keyword.gui}}, the Kubernetes CLI (`kubectl`) tool, or REST API:  
+2. Create the subscription within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
 
-   * To use the {{site.data.keyword.gui}}:
-       1. Open the {{site.data.keyword.gui}}.
+   * To use the console:
+       1. Open the console.
        2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
        3. Click the **Resources** tab.
        4. Scroll down the page to **Resource pipeline** section. Expand the row for the application that uses the subscription that you want to edit.
@@ -156,7 +156,7 @@ For more information about the resource definition for an application, see [Crea
        5. Edit the YAML.
        6. When you are finished, click **Save** to update the subscription.
 
-     You can also use the {{site.data.keyword.gui}} search to find and edit a subscription:
+     You can also use the console search to find and edit a subscription:
 
        1. Click the **Search** icon in the Header.  
        2. Within the search box, filter by `kind:subscription` to view all subscriptions.
@@ -166,7 +166,7 @@ For more information about the resource definition for an application, see [Crea
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a subscription.
 
-   * To use REST API, use the [subscription PATCH API](../../apis/mcm/subscriptions.json).
+   * To use REST API, use the [subscription PATCH API](../apis/mcm/subscriptions.json).
 
 ## Scheduling resource deployments for a subscription
 {: #subscription_timewindow}
@@ -201,11 +201,11 @@ To define a time window for a subscription, you need to add the required fields 
 ## Deleting subscriptions
 {: #subscription_delete}
 
-To delete a subscription, you can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
+To delete a subscription, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
 
-* To use the {{site.data.keyword.gui}}, use the {{site.data.keyword.gui}} search to find and delete a subscription:
+* To use the console, use the console search to find and delete a subscription:
 
-   1. Open the {{site.data.keyword.gui}}.
+   1. Open the console.
    2. Click the **Search** icon in the Header.  
    3. Within the search box, filter by `kind:subscription` to view all subscriptions.
    4. Within the list of all subscriptions, expand the _Options_ menu for the subscription that you want to delete. Click **Delete subscription**.
@@ -227,7 +227,7 @@ To delete a subscription, you can use the {{site.data.keyword.gui}}, the Kuberne
      ```
      {: codeblock}
 
-* To use REST API, use the [subscription DELETE API](../../apis/mcm/subscriptions.json).
+* To use REST API, use the [subscription DELETE API](../apis/mcm/subscriptions.json).
 
 ## Subscription definition YAML structure
 {: #subscription_compose}
@@ -311,11 +311,11 @@ spec:
 | spec.overrides.clusterOverrides | Optional. The configuration of parameters and values to override. |
 | spec.timeWindow | Optional. Defines the settings for configuring a time window when the subscription is active or blocked. |
 | spec.timeWindow.type | Optional, but required for configuring a time window. Indicates whether the subscription is active or blocked during the configured time window. Deployments for the subscription occur only when the subscription is active. |
-| spec.timeWindow.location | Optional, but required for configuring a time window. The time zone of the configured time range for the time window. All time zones must use the Time Zone (tz) database name format. For more information, see [Time Zone Database ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://www.iana.org/time-zones). |
+| spec.timeWindow.location | Optional, but required for configuring a time window. The time zone of the configured time range for the time window. All time zones must use the Time Zone (tz) database name format. For more information, see [Time Zone Database](https://www.iana.org/time-zones){:new_window}. |
 | spec.timeWindow.weekdays | Optional, but required for configuring a time window. Indicates the days of the week when the time range is applied to create a time window. The list of days must be defined as an array, such as `weekdays: ["Monday", "Wednesday", "Friday"]`. |
 | spec.timeWindow.hours | Optional, but required for configuring a time window. Defined the time range for the time window. A start time and end time for the hour range must be defined for each time window. You can define multiple time window ranges for a subscription. |
-| spec.timeWindow.hours.start | Optional, but required for configuring a time window. The timestamp that defines the beginning of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://godoc.org/time#pkg-constants). |  
-| spec.timeWindow.hours.end | Optional, but required for configuring a time window. The timestamp that defines the ending of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://godoc.org/time#pkg-constants). |
+| spec.timeWindow.hours.start | Optional, but required for configuring a time window. The timestamp that defines the beginning of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants){:new_window}. |  
+| spec.timeWindow.hours.end | Optional, but required for configuring a time window. The timestamp that defines the ending of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants){:new_window}. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 **Notes:**

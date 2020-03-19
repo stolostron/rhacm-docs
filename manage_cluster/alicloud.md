@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-10-24"
+  years: 2019, 2020
+lastupdated: "2020-03-13"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2019-10-24"
 
 # Importing an Alibaba Cloud cluster
 
-**{{site.data.keyword.tech_prev}}**
+**Important: This content is a technical preview, and should not be relied on in a production environment.** <!--this is expected to be removed, but waiting on confirmation-->
 
 You can import existing Alibaba Cloud clusters.
 
@@ -34,7 +34,7 @@ You can import existing Alibaba Cloud clusters.
 
    See [_Table 1. YAML file parameters and description_](#table_1) for details about each parameter.
 
-   **Note:** Do not remove parameters, as the {{site.data.keyword.gui}} might not properly render.
+   **Note:** Do not remove parameters, as the console might not properly render.
    
 6. Click **Generate Command** to retrieve the command to deploy the `multicluster-endpoint`.
 
@@ -46,7 +46,7 @@ You can import existing Alibaba Cloud clusters.
 
 9. Prepare the `import.yaml` file for the Alibaba Cloud cluster.
 
-    **Note:** If your managed Alibaba Cloud cluster cannot resolve the domain name of your {{site.data.keyword.cloud_pak_mcm}} hub cluster, you must manually download the `import.yaml` file and change the domain name to IP from bootstrap secret.
+    **Note:** If your managed Alibaba Cloud cluster cannot resolve the domain name of your Red Hat Advanced Cluster Management for Kubernetes hub cluster, you must manually download the `import.yaml` file and change the domain name to IP from bootstrap secret.
 
     1. Paste the following command in the terminal, then modify the command to download the `import.yaml` file:
 
@@ -55,7 +55,7 @@ You can import existing Alibaba Cloud clusters.
     ```
     {:codeblock}
 
-    2. Change domain name to IP from bootstrap secret. Modify the `import.yaml` file and copy the kubeconfig data from `klusterlet-bootstrap` secret section.
+    2. Change domain name to IP from bootstrap secret. Modify the `import.yaml` file and copy the kubeconfig data from ` multicluster-endpoint-bootstrap` secret section.
     
     Run the following command to decode the kubeconfig data:
     
@@ -73,7 +73,7 @@ You can import existing Alibaba Cloud clusters.
     ```
     {:codeblock}
 
-    Replace the data of `klusterlet-bootstrap` secret with your kubeconfig data. 
+    Replace the data of ` multicluster-endpoint-bootstrap` secret with your kubeconfig data. 
     
     **Note:** If your managed Alibaba Cloud cluster ingress type is `LoadBalancer`, you can predefine the `service type` of `work-manager` in endpoint section.
 

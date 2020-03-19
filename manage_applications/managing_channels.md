@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-13"
+  years: 2019, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -16,7 +16,7 @@ lastupdated: "2019-12-13"
 
 # Creating and managing channels
 
-Create and use channels when you need to improve the continuous integration and delivery capabilities for creating and managing your {{site.data.keyword.mcm_notm}} applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access.
+Create and use channels when you need to improve the continuous integration and delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access.
 {:shortdesc}
 
 Channels (`Channel.app.ibm.com`) define a namespace within the hub cluster and point to a physical place where resources are stored for deployment. There are four types of channels. Each channel differs based on the type of source location where resources are stored:  
@@ -28,7 +28,7 @@ Channels (`Channel.app.ibm.com`) define a namespace within the hub cluster and p
   Stores Kubernetes resource YAML files. Each YAML file includes the template portion for one resource, not the full deployable object. An object store can be populated with a deployable object that is on the hub cluster or directly from a continuous integration pipeline, or by including the required YAML files into the object store.
 
 * Helm repository (`HelmRepo`)  
-  Stores Helm charts. For information about how to structure your charts, see [Helm documentation ![Opens in a new tab](../../images/icons/launch-glyph.svg "Opens in a new tab")](https://helm.sh/docs/).
+  Stores Helm charts. For information about how to structure your charts, see [Helm documentation](https://helm.sh/docs/).
 
 * GitHub repository (`GitHub`)  
   Stores Kubernetes resources YAML files and unpackaged Helm charts. These resources do not need to be wrapped or represented as deployables. The channel controllers synchronize resources as deployables automatically.
@@ -72,11 +72,11 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    You can use a secret for authentication with only `HelmRepo`, `ObjectBucket`, and `GitHub` type channels. To associate a secret with a channel, include the `spec.secretRef.name` setting in your channel YAML definition.
 
-4. Create the channel within {{site.data.keyword.mcm_notm}}. You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
+4. Create the channel within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
 
-   * To use the {{site.data.keyword.gui}},
+   * To use the console,
 
-     1. Open the {{site.data.keyword.gui}}.
+     1. Open the console.
      2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
      3. Click the **Resources** tab.
      4. Scroll to the _Resource pipeline_ section. From the list of buttons to the right of the resource summary cards, click **Channel**. The _Create a Channel_ editor is displayed.
@@ -110,25 +110,25 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
         Ensure that your new channel is listed in the resulting output.
 
-   * To use REST API, you need to use the [channel POST API](../../apis/mcm/channels.json).
+   * To use REST API, you need to use the [channel POST API](../apis/mcm/channels.json).
 
 ## Updating a channel
 {: #channel_update}
 
 1. Compose the definition updates for your channel. For more information about the YAML structure, including the required fields, see [Channel definition](#channel_compose).
 
-2. Update the definition. You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API:
+2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
-   * To use the {{site.data.keyword.gui}},
+   * To use the console,
 
-       1. Open the {{site.data.keyword.gui}}.
+       1. Open the console.
        2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
        3. Click the **Resources** tab.
        4. Scroll down the page to **Resource pipeline** section. Click the **YAML** edit icon for channel that you want to update. The __Edit channel__ window opens.
        5. Edit the YAML for the channel.
        6. When you are finished, click **Save** to update the channel.
 
-     You can also use the {{site.data.keyword.gui}} search to find and edit a channel:
+     You can also use the console search to find and edit a channel:
        1. From the Navigation menu, click **Search**.  
        2. Within the search box, filter by `kind:channel` to view all channels.
        3. Within the list of all channels, click the channel that you want to update. The YAML for the channel is displayed.
@@ -137,16 +137,16 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a channel.
 
-   * To use REST API, use the [channel PATCH API](../../apis/mcm/channels.json).
+   * To use REST API, use the [channel PATCH API](../apis/mcm/channels.json).
 
 ## Deleting a channel
 {: #channel_delete}
 
-To delete a channel, you can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
+To delete a channel, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
 
-* To use the {{site.data.keyword.gui}}, use the {{site.data.keyword.gui}} search to find and delete a channel:
+* To use the console, use the console search to find and delete a channel:
 
-  1. Open the {{site.data.keyword.gui}}.
+  1. Open the console.
   2. Click the _Search_ icon in the Header to open the _Search_ page.
   3. Within the search box, filter by `kind:channel` to view all channels.
   4. Within the list of all channels, select the _Options_ menu for the channel that you want to delete. Click **Delete channel**.
@@ -167,7 +167,7 @@ To delete a channel, you can use the {{site.data.keyword.gui}}, the Kubernetes c
      ```
      {: codeblock}
 
-* To use REST API, use the [channel DELETE API](../../apis/mcm/channels.json).
+* To use REST API, use the [channel DELETE API](../apis/mcm/channels.json).
 
 ## Managing deployments with channels
 {: #channel_deployable}

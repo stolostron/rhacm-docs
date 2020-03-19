@@ -25,7 +25,7 @@ The deployable controller acts as the default propagation engine and synchronize
 
 You do not need to wrap or represent all resources as deployables before you deploy the resources. Depending on the resource type and the type of channel where you promote the resource, you might not need to create a deployable for the resource. For instance, you do not need to directly create deployables for resources that are included in Helm repository and GitHub repository channels. For more information, see [Creating and managing channels](managing_channels.md).
 
-**Note:** The `Deployable.app.ibm.com` Kind is a replacement for the `Deployable.mcm.ibm.com` kind that is used in previous versions of {{site.data.keyword.mcm_notm}}.
+**Note:** The `Deployable.app.ibm.com` Kind is a replacement for the `Deployable.mcm.ibm.com` kind that is used in previous versions of Red Hat Advanced Cluster Management for Kubernetes.
 
   * [Create a deployable](#deployable_create)
   * [Update a deployable](#deployable_update)
@@ -39,7 +39,7 @@ You do not need to wrap or represent all resources as deployables before you dep
 
 1. Compose the definition YAML content for your deployable. For more information about the YAML structure, including the required fields, see [Deployable definition](#deployable_compose).
 
-2. Create the deployable within {{site.data.keyword.mcm_notm}}. You can use Kubernetes command line interface (`kubectl`) tool or REST API:
+2. Create the deployable within Red Hat Advanced Cluster Management for Kubernetes. You can use Kubernetes command line interface (`kubectl`) tool or REST API:
 
    * To use the Kubernetes CLI tool, complete the following steps:
 
@@ -61,7 +61,7 @@ You do not need to wrap or represent all resources as deployables before you dep
 
         Ensure that your new deployable is listed in the resulting output.
 
-   * To use REST API, you need to use the [deployable POST API](../../apis/mcm/deployables_app.json).
+   * To use REST API, you need to use the [deployable POST API](../apis/mcm/deployables_app.json).
 
 ## Update a deployable
 {: #deployable_update}
@@ -70,11 +70,11 @@ To update a deployable with a new version, you can change the deployed resource 
 
 1. Compose the definition updates for your deployable. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
 
-2. Update the definition. You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API:
+2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
-   * To use the {{site.data.keyword.gui}} search to find and edit a deployable,
+   * To use the console search to find and edit a deployable,
 
-     1. Open the {{site.data.keyword.gui}}.
+     1. Open the console.
      2. Click the _Search_ icon in the Header to open the _Search_ page.
      3. Within the search box, filter by `kind:deployable` to view all deployables.
      4. Within the list of all deployables, click the deployable that you want to update. The YAML for that deployable is displayed.
@@ -92,7 +92,7 @@ To update a deployable with a new version, you can change the deployed resource 
 
        2. Update any fields or annotations that you need to change.
 
-   * To use REST API, use the [deployable PATCH API](../../apis/mcm/deployables_app.json).
+   * To use REST API, use the [deployable PATCH API](../apis/mcm/deployables_app.json).
 
 When your changes are saved, the changes can be automatically detected by the channel controller for any channel that subscribes to the deployable. If the updated deployable no longer meets the channel requirements, the deployable is removed from the channel. If the deployable still meets the requirements, the updated version can be deployed to any destination clusters where the version was previously deployed.
 
@@ -103,11 +103,11 @@ To delete a deployable, delete the source Kubernetes resource or Helm release fr
 
 If the deployable was deployed to a managed cluster through a subscription, the deployable is not removed from the managed cluster. The deployable remains on the managed cluster until the subscription is deleted or is updated to remove or replace the subscribed deployable. When the subscription is deleted or updated, the deleted deployable is deleted from the managed clusters where it was deployed.
 
-You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API to delete a deployable:
+You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API to delete a deployable:
 
-* To use the {{site.data.keyword.gui}} search to find and delete a deployable,
+* To use the console search to find and delete a deployable,
 
-  1. Open the {{site.data.keyword.gui}}.
+  1. Open the console.
   2. Click the _Search_ icon in the Header to open the _Search_ page.
   3. Within the search box, filter by `kind:deployable` to view all deployables.
   4. Within the list of all deployables, find the row for the deployable that you want to delete. For that row, expand the _Options_ menu and click **Delete deployable**. A confirmation window opens.
@@ -130,7 +130,7 @@ You can use the {{site.data.keyword.gui}}, the Kubernetes command line interface
      ```
      {: codeblock}
 
-* To use REST API, use the [deployable DELETE API](../../apis/mcm/deployables_app.json).
+* To use REST API, use the [deployable DELETE API](../apis/mcm/deployables_app.json).
 
 #### Notes:
 
@@ -198,43 +198,6 @@ spec:
 
 ## Example deployable YAML
 {: #deployable_example}
-<!-- The following YAML content defines an example guest book application:
-
-```yaml
-apiVersion: app.ibm.com/v1alpha1
-kind: Deployable
-metadata:
-  name: {{ template "guestbookchannel.fullname" . }}-service
-  annotations:
-    app.ibm.com/is-local-deployable: "false"
-  labels:
-    app: {{ template "guestbookchannel.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    component: main
-    package: guestbook
-spec:
-  template:
-    kind: Service
-    apiVersion: v1
-    metadata:
-      name: {{ template "guestbookchannel.fullname" . }}
-      labels:
-        app: {{ template "guestbookchannel.name" . }}
-        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-        release: {{ .Release.Name }}
-        heritage: {{ .Release.Service }}
-    spec:
-      type: {{ .Values.frontend.service.type }}
-      ports:
-        - port: 80
-      selector:
-        app: {{ template "guestbookchannel.name" . }}
-        release: {{ .Release.Name }}
-        tier: frontend
-```
-{: codeblock} -->
 
 ```YAML
 apiVersion: app.ibm.com/v1alpha1

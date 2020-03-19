@@ -14,9 +14,9 @@ lastupdated: "2019-12-11"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Importing a cluster with the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}
+# Importing a cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 
-You can use the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} to import a cluster. You will need your terminal for authentication.
+You can use the Red Hat Advanced Cluster Management for Kubernetes console to import a cluster. You will need your terminal for authentication.
 {:shortdesc}
 
 - [Prerequisites](#prereq)
@@ -29,15 +29,15 @@ You can use the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} to
 ## Prerequisites
 {: #prereq}
 
-* You need an {{site.data.keyword.cloud_pak_mcm}} hub cluster deployed. See [{{site.data.keyword.cloud_pak_mcm}}](../../cloudctl/install_cli.md) for installation information.
+* You need an Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. See [Red Hat Advanced Cluster Management for Kubernetes](../../cloudctl/install_cli.md) for installation information.
   
 * You need a cluster that you want to manage.
   
 ## Supported architecture
 
-* {{site.data.keyword.linux_bit_notm}}
-* {{site.data.keyword.ppc_notm}}
-* {{site.data.keyword.s390_notm}}
+* Linux
+* Linux on Power (ppc64le)
+* Linux on LinuxONE
 
 ## Prepare for import 
 {: #prep}
@@ -49,7 +49,7 @@ From your terminal, authenticate to your managed cluster based on your cloud pro
 ## Importing a cluster
 {: #import}
 
-You can import existing clusters from the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} for each of the available cloud providers.
+You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
 
 **Note:** By default, the `multicluster-endpoint` deployment pulls all of the required images from Docker Hub. You only need to install images from DockerHub if you are working in an air gapped environment.
 
@@ -65,7 +65,7 @@ You can import existing clusters from the {{site.data.keyword.cloud_pak_mcm}} {{
 
    See [_Table 1. YAML file parameters and description_](#table_1) for details about each parameter.
 
-   **Note:** Do not remove parameters, as the {{site.data.keyword.gui}} might not properly render.
+   **Note:** Do not remove parameters, as the console might not properly render.
    
 6. Click **Generate Command** to retrieve the command to deploy the `multicluster-endpoint`.
 

@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2018, 2019
-lastupdated: "2019-10-08"
+  years: 2018, 2020
+lastupdated: "2020-03-12"
 
 ---
 
@@ -14,9 +14,9 @@ lastupdated: "2019-10-08"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# {{site.data.keyword.mcm_notm}} policy overview
+# Red Hat Advanced Cluster Management for Kubernetes policy overview
 
-An {{site.data.keyword.mcm_notm}} template is defined within a policy document. Each policy document can have at least one or multiple templates. 
+An Red Hat Advanced Cluster Management for Kubernetes template is defined within a policy document. Each policy document can have at least one or multiple templates. 
 {:shortdesc}
 
 **Important**: Each client and cloud provider is responsible for ensuring that the cloud environment that they manage meets their enterprise security standards and any regulatory compliance requirements.
@@ -30,7 +30,7 @@ Each _policy_ within the policy document contains the following elements:
       * `policy.mcm.ibm.com/categories` - The security control category the policy applies to. For example, Access Control, System and Information Integrity.
       * `policy.mcm.ibm.com/controls` - The name of the security control that is being checked. For example, Center of Internet Security (CIS) and certificate policy controller.
       
-        **Note**: Use your internal security standards or industry standards for the `annotations` field. You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, from the {{site.data.keyword.gui}}.
+        **Note**: Use your internal security standards or industry standards for the `annotations` field. You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, from the console.
 
   - A `namespace` selector that specifies which namespaces within the cluster that the policy is applied to.
 
@@ -40,8 +40,8 @@ Each _policy_ within the policy document contains the following elements:
 
     - An `object-template` is used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. An example of object can be a pod security policy, an image policy, or a limit range.
     
-    - A `policy-template` is used to create one or more policies for third party or external security controls. For example, you can create a mutation policy with the mutation policy controller. 
+    - A `policy-template` is used to create one or more policies for third party or external security controls. For example, you can create a certificate expiration policy with the certificate policy controller. 
     
-    For more information about other policy controllers, see [{{site.data.keyword.mcm_notm}} policy controllers](../compliance/policy_controllers.md).
+    For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../compliance/policy_controllers.md).
 
-See [{{site.data.keyword.mcm_notm}} Governance and risk](compliance_intro.md) for more policy topics.
+See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](compliance_intro.md) for more policy topics.

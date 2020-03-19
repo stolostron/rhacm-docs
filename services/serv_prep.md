@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-06-07"
+  years: 2019, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -14,25 +14,25 @@ lastupdated: "2019-06-07"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Preparing your {{site.data.keyword.mcm_notm}} to discover services
+# Preparing your Red Hat Advanced Cluster Management for Kubernetes to discover services
 
-You can configure the {{site.data.keyword.mcm_notm}} service registry to discover Kubernetes services, Kubernetes ingress services, and Istio services that are in different {{site.data.keyword.mcm_notm}} managed clusters.
+You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Kubernetes services, Kubernetes ingress services, and Istio services that are in different Red Hat Advanced Cluster Management for Kubernetes managed clusters.
 {: shortdesc}
 
-When you have multiple instances of a Kubernetes service, a Kubernetes ingress service, or an Istio service that are managed by {{site.data.keyword.mcm_notm}}, it is challenging to maintain them. The {{site.data.keyword.mcm_notm}} service discovery function only discovers Kubernetes services, Kubernetes ingress services, and Istio services that are configured to be discovered.
+When you have multiple instances of a Kubernetes service, a Kubernetes ingress service, or an Istio service that are managed by Red Hat Advanced Cluster Management for Kubernetes, it is challenging to maintain them. The Red Hat Advanced Cluster Management for Kubernetes service discovery function only discovers Kubernetes services, Kubernetes ingress services, and Istio services that are configured to be discovered.
 
 **Required user type or access level:** Cluster administrator.
 
-After the {{site.data.keyword.mcm_notm}} hub cluster and managed cluster are configured, you need complete the following steps to configure your service registry component:
+After the Red Hat Advanced Cluster Management for Kubernetes hub cluster and managed cluster are configured, you need complete the following steps to configure your service registry component:
 
 ## Configure DNS
 
 Configure the DNS for each managed cluster by completing these steps:
 
-1. Find the `mcm-svc-registry-dns` service cluster IP by entering the following command, where *<ibm-klusterlet-namespace>* is the namespace that contains your registry component:
+1. Find the `mcm-svc-registry-dns` service cluster IP by entering the following command, where *<rcm-klusterlet-namespace>* is the namespace that contains your registry component:
 
   ```
-  kubectl get -n <ibm-klusterlet-namespace> service mcm-svc-registry-dns -o jsonpath='{.spec.clusterIP}'
+  kubectl get -n <rcm-klusterlet-namespace> service mcm-svc-registry-dns -o jsonpath='{.spec.clusterIP}'
   ```
   {: codeblock}
 
@@ -58,19 +58,12 @@ Configure the DNS for each managed cluster by completing these steps:
 
   The value `mcm.svc` is the default DNS domain suffix for the service registry. If you want to set it to another value, complete the following steps:
 
-    1. Log in to your {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}.
+    1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
 	2. Navigate to **Workloads** -> **Helm Releases**.
 
-	3. Select your `ibm-klusterlet` release.
+	3. Select your `rcm-klusterlet` release.
 
 	4. Expand **All parameters**.
 
 	5. In the *Multicloud Manager service registry configuration* section, set the DNS suffix in the *DNS Suffix* field.
-
-      **Tip**: If your managed cluster is an IBM Cloud Kubernetes Service, you can also configure your cluster DNS by running the following command:
-
-	  ```
-	  kubectl edit -n kube-system configmap coredns
-	  ```
-	  {: codeblock}

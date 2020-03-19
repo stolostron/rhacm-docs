@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-13"
+  years: 2019, 2020
+lastupdated: "2020-03-09"
 
 ---
 
@@ -19,7 +19,7 @@ lastupdated: "2019-12-13"
 You can create and manage placement rules to define where and how Helm charts and deployables are deployed. Use placement rules to help you facilitate multi-cluster deployments of your deployables.
 {:shortdesc}
 
-**Note:** The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used in previous versions of {{site.data.keyword.mcm_notm}} for deployables. Placement policies are still used for governance and risk policies.
+**Note:** The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used in previous versions of Red Hat Advanced Cluster Management for Kubernetes for deployables. Placement policies are still used for governance and risk policies.
 
   * [Create a placement rule](#placement_create)
   * [Assign a placement rule](#placement_assign)
@@ -37,17 +37,17 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
 1. Compose the definition YAML content for your placement rule. For more information about the YAML structure, including the required fields, see [Placement rule definition](#placement_compose).
 
-2. Create the placement rule within {{site.data.keyword.mcm_notm}}. You can define a placement rule as a separate resource or define the rule within the definition for a deployable or subscription. As a best practice, define placement rules as a separate resource when the rule might need to be referenced by multiple resources.
+2. Create the placement rule within Red Hat Advanced Cluster Management for Kubernetes. You can define a placement rule as a separate resource or define the rule within the definition for a deployable or subscription. As a best practice, define placement rules as a separate resource when the rule might need to be referenced by multiple resources.
 
    For more information about creating the definition for a deployable or subscriptions, see:
     * [Creating and managing deployables](managing_deployables.md)
     * [Creating and managing subscriptions](managing_subscriptions.md)
 
-   To create a placement rule as a separate resource, you can use the {{site.data.keyword.gui}}, the Kubernetes CLI (`kubectl`) tool, or REST API:
+   To create a placement rule as a separate resource, you can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:
 
-   * To use the {{site.data.keyword.gui}}:
+   * To use the console:
 
-     1. Open the {{site.data.keyword.gui}}.
+     1. Open the console.
      2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
      3. Click the **Resources** tab.
      4. Scroll to the _Resource pipeline_ section. From the list of buttons to the right of the resource summary cards, click **Placement Rule**. The _Create a placement rule_ editor is displayed.
@@ -71,7 +71,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
         Ensure that your new placement rule is listed in the resulting output.
 
-   * To use REST API, you need to use the [placement rule POST API](../../apis/mcm/placementRules.json).
+   * To use REST API, you need to use the [placement rule POST API](../apis/mcm/placementRules.json).
 
 ## Assigning a placement rule
 {: #placement_assign}
@@ -96,9 +96,9 @@ For more information about updating the definition for a deployable or subscript
 * [Creating and managing deployables](managing_deployables.md)
 * [Creating and managing subscriptions](managing_subscriptions.md)
 
-When a placement rule is assigned to a subscription, you can view the assignment on the Applications dashboard within the {{site.data.keyword.gui}}. To view the assignment:  
+When a placement rule is assigned to a subscription, you can view the assignment on the Applications dashboard within the console. To view the assignment:  
 
-1. Open the {{site.data.keyword.gui}}.
+1. Open the console.
 2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
 3. Click the **Resources** tab.
 4. Scroll to the **Resource pipeline** section. Within the table that lists your applications, expand the row for the application that includes the subscription that is assigned the placement rule.
@@ -109,11 +109,11 @@ When a placement rule is assigned to a subscription, you can view the assignment
 
 When a placement rule is created and in use, you can view the status details for the rule. This status is appended to the YAML definition for a placement rule and indicates the target clusters where the rule is used for placing deployables. For more information about the available status fields, see [Placement rule status definition](#placement_statusdef).
 
-To view the status fields for a placement rule, you can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API.
+To view the status fields for a placement rule, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.
 
-* To use the {{site.data.keyword.gui}},
+* To use the console,
 
-  1. Open the {{site.data.keyword.gui}}.
+  1. Open the console.
   2. Click the **Search** icon in the Header.
   3. Within the search box, filter by `kind:placementrule` to view all placement rules.
   4. Within the list of all placement rules, click the placement rule that you want review. The YAML for that rule is displayed.
@@ -130,16 +130,16 @@ To view the status fields for a placement rule, you can use the {{site.data.keyw
 
   2. Review the fields and values within the `status` section of the YAML content.
 
-* To use REST API, you need to use the [placement rule GET API](../../apis/mcm/placementRules.json).
+* To use REST API, you need to use the [placement rule GET API](../apis/mcm/placementRules.json).
 
 ## Updating a placement rule
 {: #placement_update}
 
-To update a placement rule that is a separate resource, you can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
+To update a placement rule that is a separate resource, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
 
-* To use the {{site.data.keyword.gui}} to edit a placement rule, complete the following steps:
+* To use the console to edit a placement rule, complete the following steps:
 
-  1. Open the {{site.data.keyword.gui}}.
+  1. Open the console.
   2. Click the **Search** icon in the Header.
   3. Within the search box, filter by `kind:placementrule` to view all placement rules.
   4. Within the list of all placement rules, click the placement rule that you want to update. The YAML for the rule is displayed.
@@ -156,7 +156,7 @@ To update a placement rule that is a separate resource, you can use the {{site.d
 
 * To use the Kubernetes CLI tool, the steps are the same as for creating a placement rule.
 
-* To use REST API, you need to use the [placement rule PATCH API](../../apis/mcm/placementRules.json).
+* To use REST API, you need to use the [placement rule PATCH API](../apis/mcm/placementRules.json).
 
 To update a placement rule that is defined within the definition for a deployable or subscription, the steps are the same as for updating that resource. For more information, see:
 
@@ -166,11 +166,11 @@ To update a placement rule that is defined within the definition for a deployabl
 ## Deleting a placement rule
 {: #placement_delete}
 
-To delete a placement rule that is a separate resource, you can use the {{site.data.keyword.gui}}, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
+To delete a placement rule that is a separate resource, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
 
-* To use the {{site.data.keyword.gui}}, use the {{site.data.keyword.gui}} search to find and delete a placement rule:
+* To use the console, use the console search to find and delete a placement rule:
 
-   1. Open the {{site.data.keyword.gui}}.
+   1. Open the console.
    2. Click the **Search** icon in the Header.  
    3. Within the search box, filter by `kind:placementrule` to view all placement rules.
    4. Within the list of all placement rules, expand the _Options_ menu for the placement rule that you want to delete. Click **Delete placement rules**.
@@ -193,7 +193,7 @@ To delete a placement rule that is a separate resource, you can use the {{site.d
      {: codeblock}
 
 * To use REST API, you need to use the placement rule DELETE API:
-  * [Placement rule APIs](../../apis/mcm/placementRules.json).
+  * [Placement rule APIs](../apis/mcm/placementRules.json).
 
 To delete a placement rule that is defined within the definition for a deployable or subscription, edit the definition for that resource to remove the placement rule definition. The steps are the same as for updating that resource. For more information, see:
 

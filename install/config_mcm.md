@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-12-12"
+  years: 2016, 2020
+lastupdated: "2020-03-04"
 
 ---
 
@@ -29,8 +29,6 @@ You can set or update the following parameters by modifying the `config.yaml` fi
 2. Add or modify the parameters and values. The format for defining a parameter and values is `<parameter_name>:<value>`.
 
   * Table 1. [Multicluster-hub settings](#mcm-hub)
-  * Table 2. [Vulnerability Advisor (VA) settings](#va)
-  * Table 3. [Mutation Advisor (MA) settings](#ma)
 
 ## Multicluster-hub settings
 {: #mcm-hub}
@@ -43,23 +41,3 @@ You can set or update the following parameters by modifying the `config.yaml` fi
 |&nbsp;&nbsp;&nbsp;&nbsp;`localPath:`|The local directory for persistence volume in all management nodes for etcd. |/var/lib/etcd-mcm |
 {: caption="Table 1. Multicluster-hub settings for the IBM Cloud Pak for Multicloud Management" caption-side="top"}
 
-## Vulnerability Advisor (VA) settings
-{: #va}
-
-|Parameter|Description|Default value|
-|---------|-----------|-------------|
-|`vulnerability-advisor.runtimeEngine:`|<ul><li>Set to `cri-o` when you use {{site.data.keyword.product}}.</li><li>For {{site.data.keyword.open_s}} version 3.0, set to `docker`.</li><li>For {{site.data.keyword.open_s}} version 4.0, set to `cri-o`.</li></ul>|`cri-o`|
-|`esServiceName:`|<ul><li>Set to `elasticsearch` when you use {{site.data.keyword.product}} logging.</li><li>When you use {{site.data.keyword.open_s}} version 3.0, set to `logging-es.openshift-logging.svc.cluster.local`.</li><li>When you use {{site.data.keyword.open_s}} version 4.0, set to `elasticsearch.openshift-logging.svc.cluster.local`.</li></ul> | `elasticsearch` |
-|`es_secret.name:`|<ul><li>Set to `logging-elk-certs` when you use {{site.data.keyword.product}} logging.</li><li>For {{site.data.keyword.open_s}} version 3.0, set to `logging-elasticsearch`.</li><li>For {{site.data.keyword.open_s}} version 4.0, set to `elasticsearch`.</li></ul> | `logging-elk-certs` |
-|`es_secret.ca:`|<ul><li>Set to `ca-crt` when you use {{site.data.keyword.product}} logging For {{site.data.keyword.open_s}} version 3.0 and 4.0, set to `admin-ca`.</li></ul> | `ca.cert` |
-|`es_secret.cert:`|<ul><li>Set to `curator.crt` to when you use {{site.data.keyword.product}} logging.</li><li>For {{site.data.keyword.open_s}} version 3.0 and 4.0, set to `admin-cert`.</li></ul>  |`curator.crt`|
-|`es_secret.key:`|<ul><li>Set to `curator.key` when you use {{site.data.keyword.product}} logging.</li><li>For {{site.data.keyword.open_s}} version 3.0 and 4.0, set to `admin-key`.</li></ul> | `curator.key`|
-{: caption="Table 2. Vulnerability Advisor settings" caption-side="top"}
-
-## Mutation Advisor (MA) settings
-{: #ma}
-
-|Parameter|Description|Default value|
-|---------|-----------|-------------|
-|`mutation-advisor.runtimeEngine:`|<ul><li>Set to `cri-o` when you use {{site.data.keyword.product}}.</li><li>For {{site.data.keyword.open_s}} version 3.0, set to `docker`.</li><li>For {{site.data.keyword.open_s}} version 4.0, set to `cri-o`.</li></ul>|None|
-{: caption="Table 3. Mutation Advisor settings" caption-side="top"}

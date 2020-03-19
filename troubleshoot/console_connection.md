@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2019, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -14,9 +14,9 @@ lastupdated: "2019-12-11"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Log in to {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} causes default backend 404 error from IBM Kubernetes Service
+# Log in to Red Hat Advanced Cluster Management for Kubernetes console causes default backend 404 error from IBM Kubernetes Service
 
-An error appears when you log in to the {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}} because of a connection reuse problem.
+An error appears when you log in to the Red Hat Advanced Cluster Management for Kubernetes console because of a connection reuse problem.
 
 ## Symptom
 
@@ -26,7 +26,7 @@ A `default backend - 404` error is displayed in the browser when you attempt to 
 
 an `HTTP/2` connection reuse, also called `HTTP/2 keep-alive` causes the problem.
 
-Environment:{{site.data.keyword.open_s}} 3.11 on IBM Kubernetes Service.
+Environment: OpenShift 3.11 on IBM Kubernetes Service.
 
 ## Solution
 

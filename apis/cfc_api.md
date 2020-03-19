@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2016, 2019
-lastupdated: "2019-12-10"
+  years: 2016, 2020
+lastupdated: "2020-03-11"
 
 ---
 
@@ -16,16 +16,13 @@ lastupdated: "2019-12-10"
 
 # APIs
 
-Access and modify your {{site.data.keyword.product_tm}} cluster by using APIs.
+Access and modify your Red Hat Advanced Cluster Management for Kubernetes cluster by using APIs.
 {:shortdesc}
 
 - {: child} [Preparing to run component or management API commands](../iam/3.4.0/apis/access_api.md) <br />
 - {: child} [Component APIs](../apis/component_apis.md) <br />
-- {: child} [{{site.data.keyword.product}} APIs](../apis/mcm_apis.md) <br />
+- {: child} [Red Hat Advanced Cluster Management for Kubernetes APIs](../apis/mcm_apis.md) <br />
 - {: child} [IAM APIs](../iam/3.4.0/apis/apis_iam.md) <br />
 - {: child} [Image management API](../apis/image_management.md) <br />
-- {: child} [Vulnerability Advisor API](../apis/va_api.md) <br />
 - {: child} [Key Management Service APIs](../apis/kms_apis.md) <br />
-- {: child} [Security findings APIs](../apis/sa_api.json) <br />
-- {: child} [{{site.data.keyword.product}} system healthcheck service API](../apis/system_hc_api.json) <br />
 {: childlinks}

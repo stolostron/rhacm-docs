@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-06-07"
+  years: 2019, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -14,13 +14,13 @@ lastupdated: "2019-06-07"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Working with {{site.data.keyword.mcm_notm}} service discovery
+# Working with Red Hat Advanced Cluster Management for Kubernetes service discovery
 
-Configure {{site.data.keyword.mcm_notm}} so that your {{site.data.keyword.mcm_notm}} managed cluster can discover Kubernetes services, Ingress services, and Istio services. 
+Configure Red Hat Advanced Cluster Management for Kubernetes so that your Red Hat Advanced Cluster Management for Kubernetes managed cluster can discover Kubernetes services, Ingress services, and Istio services. 
 {:shortdesc}
 
-- {: child} [{{site.data.keyword.mcm_notm}} service discovery overview](serv_overview.md)
-- {: child} [Preparing your {{site.data.keyword.mcm_notm}} to discover services](mcm_serv_prep.md)
+- {: child} [Red Hat Advanced Cluster Management for Kubernetes service discovery overview](serv_overview.md)
+- {: child} [Preparing your Red Hat Advanced Cluster Management for Kubernetes to discover services](mcm_serv_prep.md)
 - {: child} [Enabling a Kubernetes service for discovery](serv_kube.md)
 - {: child} [Enabling a Kubernetes ingress for discovery](serv_ingress.md)
 - {: child} [Enabling an Istio service for discovery](serv_istio.md)

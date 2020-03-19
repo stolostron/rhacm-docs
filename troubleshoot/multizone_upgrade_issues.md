@@ -57,7 +57,7 @@ PLAY RECAP *********************************************************************
 
 Log in to the Network File System (NFS) server node and release disk space. Then, run the command to upgrade.
 
-For more information, see [Upgrading the {{site.data.keyword.cloud_pak_mcm}}](../../install/upgrade_offline.md).
+For more information, see [Upgrading the Red Hat Advanced Cluster Management for Kubernetes](../../install/upgrade_offline.md).
 
 ## Upgrading web-terminal chart failed 
 
@@ -72,7 +72,7 @@ Error: Get https://n.n.n.n:8001/api/v1/namespaces/kube-system/pods?labelSelector
 
 The API server might not be stable. Run the `upgrade-chart` command again.
 
-For more information, see [Upgrading the {{site.data.keyword.cloud_pak_mcm}}](../../install/upgrade_offline.md).
+For more information, see [Upgrading the Red Hat Advanced Cluster Management for Kubernetes](../../install/upgrade_offline.md).
 
 
 

@@ -16,7 +16,11 @@ lastupdated: "2020-03-16"
 
 # System requirements
 
+<<<<<<< HEAD
 Before you install Red Hat Advanced Cluster Management for Kubernetes, review the required hardware and system configuration settings.
+=======
+Before you install the Red Hat Advanced Cluster Management for Kubernetes, review the required hardware and system configuration settings.
+>>>>>>> doc_stage
 {:shortdesc}
 
 - {: child} [Hardware requirements and recommendations](hardware_reqs.md)

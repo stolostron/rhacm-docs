@@ -16,7 +16,7 @@ lastupdated: "2018-07-23"
 
 # Error codes
 
-Review a list of error codes that you might encounter when working with the {{site.data.keyword.product_tm}} {{site.data.keyword.gui}}.
+Review a list of error codes that you might encounter when working with the {{site.data.keyword.product_tm}} console.
 {:shortdesc}
 
 
@@ -26,4 +26,4 @@ Review a list of error codes that you might encounter when working with the {{si
 |403|**Forbidden** - The requested access is not allowed for this user.||
 |500|**Internal server error**- An issue occurred on the server.||
 |502|**Service unavailable** -  The requested response has timed out.||
-{: caption="Table 1. {{site.data.keyword.product}} {{site.data.keyword.gui}} error codes" caption-side="top"}
+{: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes console error codes" caption-side="top"}

@@ -14,12 +14,12 @@ lastupdated: "2019-12-10"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Managing applications with the {{site.data.keyword.gui}}
+# Managing applications with the console
 
-You can use the {{site.data.keyword.gui}} to create, manage, view details, and troubleshoot application resources, including applications, deployables, channels, subscriptions, and placement rules.
+You can use the console to create, manage, view details, and troubleshoot application resources, including applications, deployables, channels, subscriptions, and placement rules.
 {:shortdesc}
 
-The {{site.data.keyword.gui}} includes different tools that each provide different application management capabilities. These capabilities allow you to easily create, find, update, deploy, and monitor applications resources.
+The console includes different tools that each provide different application management capabilities. These capabilities allow you to easily create, find, update, deploy, and monitor applications resources.
 
   * [Application dashboards](#applications)
   * [Search](#search)
@@ -94,7 +94,7 @@ From the _Logs_ tab, you can complete the following tasks:
 ## Search
 {: #search}
 
-The {{site.data.keyword.gui}} search page supports searching for application resources by the component kind for each resource. To search for resources, use the following values:
+The console search page supports searching for application resources by the component kind for each resource. To search for resources, use the following values:
 
 | Application resource | Kind (search parameter) |
 |-- | -- |
@@ -112,7 +112,7 @@ From the search results, you can view identifying details for each resource, inc
 
 By clicking the resource name in the search results, a YAML editor opens and displays the YAML definition for the resource. You can choose to edit the definition within the editor. Any changes that you save are applied to the resource immediately.  
 
-For more information about using search, see [{{site.data.keyword.gui}} components](../getting_started/console.md#search).
+For more information about using search, see [console components](../getting_started/console.md#search).
 
 ## Topology
 {: #topology}
@@ -121,9 +121,9 @@ The Topology page provides you with a visualization of your applications, cluste
 
 You can select any component from the topology view to view more details. You can also hover your cursor over a resource to view the component kind, name, and namespace and links to view the search results for the resource or namespace. When you are viewing the details for a pod, you can select to view the logs for that pod.
 
-The _Topology_ page is available from the _Observe environments_ sub-menu within the {{site.data.keyword.gui}} main menu. For more information about using the topology page, see [{{site.data.keyword.gui}} components](../getting_started/console.md#mcm_topology).
+The _Topology_ page is available from the _Observe environments_ sub-menu within the console main menu. For more information about using the topology page, see [console components](../getting_started/console.md#mcm_topology).
 
 ## Monitoring
 {: #monitoring}
 
-You can open the Grafana dashboard for your applications to monitor by selecting **Grafana** from the _Monitor health_ sub-menu of the {{site.data.keyword.gui}} main menu. From this page, you can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.
+You can open the Grafana dashboard for your applications to monitor by selecting **Grafana** from the _Monitor health_ sub-menu of the console main menu. From this page, you can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.

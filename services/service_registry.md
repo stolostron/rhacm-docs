@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-06-05"
+  years: 2019, 2020
+lastupdated: "2020-03-17"
 
 ---
 
@@ -14,25 +14,25 @@ lastupdated: "2019-06-05"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Configuring {{site.data.keyword.mcm_notm}} service discovery and registry
+# Configuring Red Hat Advanced Cluster Management for Kubernetes service discovery and registry
 
-You can configure the {{site.data.keyword.mcm}} service registry to discover Kubernetes, ingress, and Istio services that are in different {{site.data.keyword.mcm_notm}} managed clusters.
+You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Kubernetes, ingress, and Istio services that are in different Red Hat Advanced Cluster Management for Kubernetes managed clusters.
 {: shortdesc}
 
-When you have multiple instances of a Kubernetes, ingress, or Istio service that are managed by {{site.data.keyword.mcm_notm}}, it is challenging to maintain them. The {{site.data.keyword.mcm_notm}} service discovery and registry function discovers Kubernetes, ingress, and Istio services that are configured to be discovered.
+When you have multiple instances of a Kubernetes, ingress, or Istio service that are managed by Red Hat Advanced Cluster Management for Kubernetes, it is challenging to maintain them. The Red Hat Advanced Cluster Management for Kubernetes service discovery and registry function discovers Kubernetes, ingress, and Istio services that are configured to be discovered.
 
 **Required user type or access level:** Cluster administrator.
 
-After the {{site.data.keyword.mcm_notm}} hub cluster and managed cluster are configured, you need complete the following steps to configure your service registry component:
+After the Red Hat Advanced Cluster Management for Kubernetes hub cluster and managed cluster are configured, you need complete the following steps to configure your service registry component:
 
 ## Configure DNS
 
 Configure the DNS for each managed cluster by completing these steps for each managed cluster:
 
-1. Find the `mcm-svc-registry-dns` service cluster IP by entering the following command, where *<ibm-klusterlet-namespace>* is the namespace that contains your Klusterlet:
+1. Find the `mcm-svc-registry-dns` service cluster IP by entering the following command, where *<rcm-klusterlet-namespace>* is the namespace that contains your Klusterlet:
 
   ```
-  kubectl get -n <ibm-klusterlet-namespace> service mcm-svc-registry-dns -o jsonpath='{.spec.clusterIP}'
+  kubectl get -n <rcm-klusterlet-namespace> service mcm-svc-registry-dns -o jsonpath='{.spec.clusterIP}'
   ```
   {: codeblock}
 
@@ -58,42 +58,35 @@ Configure the DNS for each managed cluster by completing these steps for each ma
 
   The value `mcm.svc` is the default DNS domain suffix for the service registry. If you want to set it to another value, complete the following steps:
 
-    1. Log in to your {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}.
+    1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
 	2. Navigate to **Workloads** -> **Helm Releases**.
 
-	3. Select your `ibm-klusterlet` release.
+	3. Select your `rcm-klusterlet` release.
 
 	4. Expand **All parameters**.
 
 	5. In the *Multicloud Manager service registry configuration* section, set the DNS suffix in the *DNS Suffix* field.
 
-      **Tip**: If your managed cluster is an IBM Cloud Kubernetes Service, you can also configure your cluster DNS by running the following command:
-
-	  ```
-	  kubectl edit -n kube-system configmap coredns
-	  ```
-	  {: codeblock}
-
 ## (Optional) Enable the kube-ingress and Istio discovery plugin
 
 The `kube-service` plugin is enabled by default in the service registry component. You can discover Kubernetes services in the managed clusters that are using the `kube-service` plugin. The plugins for the ingress and Istio discovery must be enabled if you want to discover a Kubernetes ingress or Istio service in your managed clusters. Complete the following steps to enable ingress and Istio plugins:
 
-1. Log in to your {{site.data.keyword.cloud_pak_mcm}} {{site.data.keyword.gui}}.
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
 2. Navigate to **Workloads** -> **Helm Releases**.
 
-3. Select your `ibm-klusterlet` release.
+3. Select your `rcm-klusterlet` release.
 
 4. Expand **All parameters**.
 
 5. In the *Multicloud Manager service registry configuration* section, you can enable the plugin that you want to use by entering it in the **Enabled Plugins** field. Your entry should be comma-separated, like the following example:
 
     ```
-	kube-service,kube-ingress,istio
-	```
+	  kube-service,kube-ingress,istio
+	  ```
 
-    **Note:** If you enable the Istio plugin, you need to install the [istio-coredns-plugin ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://github.com/istio-ecosystem/istio-coredns-plugin){: new_window} onto your Istio system and make sure your Istio system has an external load balancer.
+    **Note:** If you enable the Istio plugin, you need to install the [istio-coredns-plugin](https://github.com/istio-ecosystem/istio-coredns-plugin){: new_window} onto your Istio system and make sure your Istio system has an external load balancer.
 
 ## Discover the Kubernetes service
 
@@ -104,7 +97,7 @@ To discover a Kubernetes service on your managed clusters, complete the followin
   You must enable the service in the managed cluster to be discovered by adding the following annotation to the `config.yaml` file for the service that you want to discover:
 
   ```
-  mcm.ibm.com/service-discovery
+  mcm.rcm.com/service-discovery
   ```
   {: codeblock}
 
@@ -115,7 +108,7 @@ To discover a Kubernetes service on your managed clusters, complete the followin
   kind: Service
   metadata:
     annotations:
-      mcm.ibm.com/service-discovery: "{}"
+      mcm.rcm.com/service-discovery: "{}"
     name: dbservice
     namespace: database
   spec:
@@ -136,7 +129,7 @@ To discover a Kubernetes service on your managed clusters, complete the followin
   The following example shows how to add this dependency:
 
   ```
-  apiVersion: apps.ibm.com/v1alpha1
+  apiVersion: apps.mcm.com/v1alpha1
   kind: Deployable
   metadata:
     name: name1
@@ -194,7 +187,7 @@ To discover a Kubernetes ingress within your managed clusters, complete the foll
   You must enable the ingress in the managed cluster to be discovered by adding the following annotation to the `config.yaml` file for the ingress that you want to discover:
 
   ```
-  mcm.ibm.com/service-discovery
+  mcm.rcm.com/service-discovery
   ```
   {: codeblock}
 
@@ -226,7 +219,7 @@ To discover a Kubernetes ingress within your managed clusters, complete the foll
   The following example shows how to add this dependency:
 
   ```
-  apiVersion: apps.ibm.com/v1alpha1
+  apiVersion: apps.rcm.com/v1alpha1
   kind: Deployable
   metadata:
     name: name1
@@ -236,21 +229,21 @@ To discover a Kubernetes ingress within your managed clusters, complete the foll
       apiVersion: extensions/v1beta1
       kind: Deployment
       metadata:
-        name: ibm-websphere
+        name: rcm-websphere
         labels:
-          app: ibm-websphere
+          app: rcm-websphere
       spec:
         replicas: 1
         selector:
           matchLabels:
-            app: ibm-websphere
+            app: rcm-websphere
         template:
           metadata:
             labels:
-              app: ibm-websphere
+              app: rcm-websphere
           spec:
             containers:
-            - name: ibm-websphere
+            - name: rcm-websphere
               image: "registry.ng.bluemix.net/seed/ibm-websphere-sample"
               imagePullPolicy: Always
     dependencies:
@@ -273,7 +266,7 @@ To discover an Istio service within the managed clusters, complete the following
 
 1. Expose an Istio service outside of the service mesh by using an Istio gateway.
 
-  See [Control Ingress Traffic ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://istio.io/docs/tasks/traffic-management/ingress/){: new_window} for information about how to use the Istio Gateway to expose your Istio Service.
+  See [Control Ingress Traffic](https://istio.io/docs/tasks/traffic-management/ingress/){: new_window} for information about how to use the Istio Gateway to expose your Istio Service.
 
 2. The Istio gateway that you added should look similar to the following example:
 
@@ -302,7 +295,7 @@ To discover an Istio service within the managed clusters, complete the following
   You must enable the Istio gateway in the managed cluster to be discovered by adding the following annotation to the `config.yaml` file for the gateway that you want to discover:
 
   ```
-  mcm.ibm.com/service-discovery
+  mcm.rcm.com/service-discovery
   ```
   {: codeblock}
 
@@ -315,7 +308,7 @@ To discover an Istio service within the managed clusters, complete the following
     name: dbgateway
     namespace:
     annotations:
-      mcm.ibm.com/service-discovery: "{}"
+      mcm.rcm.com/service-discovery: "{}"
   spec:
     selector:
       istio: ingressgateway
@@ -333,7 +326,7 @@ To discover an Istio service within the managed clusters, complete the following
   The following example shows how to add this dependency:
 
   ```
-  apiVersion: apps.ibm.com/v1alpha1
+  apiVersion: apps.rcm.com/v1alpha1
   kind: Deployable
   metadata:
     name: name1
@@ -343,22 +336,22 @@ To discover an Istio service within the managed clusters, complete the following
       apiVersion: extensions/v1beta1
       kind: Deployment
       metadata:
-        name: ibm-websphere
+        name: rcm-websphere
         labels:
-          app: ibm-websphere
+          app: rcm-websphere
       spec:
         replicas: 1
         selector:
           matchLabels:
-            app: ibm-websphere
+            app: rcm-websphere
         template:
           metadata:
             labels:
-              app: ibm-websphere
+              app: rcm-websphere
           spec:
             containers:
-            - name: ibm-websphere
-              image: "registry.ng.bluemix.net/seed/ibm-websphere-sample"
+            - name: rcm-websphere
+              image: "registry.ng.bluemix.net/seed/rcm-websphere-sample"
               imagePullPolicy: Always
     dependencies:
     - name: dbgateway
