@@ -23,22 +23,9 @@ When you have multiple instances of an Istio service that are managed by Red Hat
 
 **Required user type or access level:** Cluster administrator.
 
-## Enable the Istio discovery plug-in	
+The plug-in for the Istio discovery must be enabled when you import your target managed cluster if you want to discover an Istio service in your managed clusters.
 
-The plug-in for the Istio discovery must be enabled if you want to discover an Istio service in your managed clusters. Complete the following steps to enable an Istio plug-in:	
-<!--steps need to be reviewed and verified-->
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.	
-2. Navigate to **Workloads** -> **Helm Releases**.	
-3. Select your `klusterlet` release.	
-4. Expand **All parameters**.	
-5. In the *Multicloud Manager service registry configuration* section, you can enable the plug-in that you want to use by entering it in the **Enabled Plugins** field. Your entry must be comma-separated, like the following example:	
-
-    ```	
-    kube-service,istio	
-    ```	
-    {: codeblock}
-
-    **Note:** If you enable the Istio plug-in, you need to install the [Multicluster service mesh](https://istio.io/docs/concepts/multicluster-deployments/#multicluster-service-mesh){: new_window}. The mesh must include individually deployed Istio control planes in every cluster and must use gateways to connect services across clusters.
+**Note:** If you enable the Istio plug-in, you need to install the [Multicluster service mesh](https://istio.io/docs/concepts/multicluster-deployments/#multicluster-service-mesh){: new_window}. The mesh must include individually deployed Istio control planes in every cluster and must use gateways to connect services across clusters.
 
 ## Discover the Istio service
 
