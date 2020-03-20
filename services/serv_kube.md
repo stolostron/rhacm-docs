@@ -29,7 +29,7 @@ To discover a Kubernetes service on your managed clusters, complete the followin
 
 1. Annotate the service to enable the service discovery.
 
-  You must enable the service in the managed cluster to be discovered by adding the following annotation to your service definition `yaml` file for the service that you want to discover:
+  You must enable the service in the managed cluster to be discovered by adding the following annotation to your service definition for the service that you want to discover:
 
   ```
   mcm.ibm.com/service-discovery
