@@ -22,7 +22,7 @@ The following sections provide a summary of the types of services that are avail
 
 ## Kubernetes service
 
-A _service_ resource is a Kubernetes service resource. Edit the `metadata` section of your service definition `yaml` file to add the service discovery annotation. The following example shows a Kubernetes service resource:
+A _service_ resource is a Kubernetes service resource. Edit the `metadata` section of your service definition to add the service discovery annotation. The following example shows a Kubernetes service resource:
 
 <!-- CD: Where will you find the YAML for the service? -->
 
@@ -48,7 +48,7 @@ A _service_ resource is a Kubernetes service resource. Edit the `metadata` secti
 
 ## Ingress service
 
-An _Ingress_ service is a Kubernetes ingress that defines the criteria where the services on the managed cluster can communicate with other managed clusters. Edit the `metadata` section of your ingress service definition `yaml` file to add the service discovery annotation. See the following sample of an Ingress service definition: 
+An _Ingress_ service is a Kubernetes ingress that defines the criteria where the services on the managed cluster can communicate with other managed clusters. Edit the `metadata` section of your ingress service definition to add the service discovery annotation. See the following sample of an Ingress service definition: 
 
   ```
   apiVersion: extensions/v1beta1
@@ -72,7 +72,7 @@ An _Ingress_ service is a Kubernetes ingress that defines the criteria where the
 
 ## Istio service
 
-An Istio _service_ is a Kubernetes service resource. Edit the `metadata` section of your Istio service definition `yaml` file to add the service discovery annotation. See the following sample gateway service:
+An Istio _service_ is a Kubernetes service resource. Edit the `metadata` section of your Istio service definition to add the service discovery annotation. See the following sample gateway service:
 
   ```
   apiVersion: v1
