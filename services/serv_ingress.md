@@ -23,23 +23,7 @@ When you have multiple Kubernetes ingresses that are managed by Red Hat Advanced
 
 **Required user type or access level:** Cluster administrator.
 
-## Enable the kube-ingress discovery plugin
-
-The plugin for the Kubernetes ingress discovery must be enabled if you want to discover a Kubernetes ingress in your managed clusters. Complete the following steps to enable the ingress plugin:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
-
-2. Navigate to **Workloads** -> **Helm Releases**.
-
-3. Select your `rm-klusterlet` release.
-
-4. Expand **All parameters**.
-
-5. In the *Multicloud Manager service registry configuration* section, you can enable the plugin that you want to use by entering it in the **Enabled Plugins** field. Your entry should be comma-separated, like the following example:
-
-  ```
-  kube-service,kube-ingress
-  ```
+The plugin for the Kubernetes ingress discovery must be enabled when you import your target managed cluster if you want to discover a Kubernetes ingress in your managed clusters.
 
 ## Discover the Kubernetes ingress
 
