@@ -82,7 +82,7 @@
      * [Enabling a Kubernetes service for discovery](services/serv_kube.md)
      * [Enabling a Kubernetes ingress for discovery](services/serv_ingress.md)
      * [Enabling an Istio service for discovery](services/serv_istio.md)
-   * [APIs](apis/apis.md)
+   * [APIs](apis/product_apis.md)
      * [Application](apis/applications.json)
      * [Application relationship](apis/applicationRel.json)
      * [Channels](apis/channels.json)
