@@ -235,7 +235,7 @@ To delete a subscription, you can use the console, the Kubernetes command line i
 The following YAML structure shows the required fields for a subscription and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name:
@@ -283,7 +283,7 @@ spec:
 
 |Field|Description|
 |-- | -- |
-| apiVersion | Required. Set the value to `app.ibm.com/v1alpha1`. |
+| apiVersion | Required. Set the value to `apps.open-cluster-management.io/v1`. |
 | kind | Required. Set the value to `Subscription` to indicate that the resource is a subscription. |
 | metadata.name | Required. The name for identifying the subscription. |
 | metadata.namespace | Required. The namespace resource to use for the subscription. |
@@ -381,7 +381,7 @@ The following YAML content defines example subscriptions:
 {: #channel_example}
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: my-channel-subscription
@@ -399,7 +399,7 @@ spec:
 The following example subscription includes multiple configured time windows. A time window occurs between 10:20 AM and 10:30 AM occurs every Monday, Wednesday, and Friday. A time window also occurs between 12:40 PM and 1:40 PM every Monday, Wednesday, and Friday. The subscription is active only during these six weekly time windows for deployments to begin.  
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: nginx
@@ -433,7 +433,7 @@ spec:
 The following example includes package overrides to define a different release name of the Helm release for Helm chart. A package override setting is used to set the name `my-nginx-ingress-releaseName` as the different release name for the  `nginx-ingress` Helm release.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: simple
@@ -463,7 +463,7 @@ The following subscription automatically pulls the latest `nginx` Helm release f
 The `spec.packageOverrides` section shows optional parameters for overriding values for the Helm release. The override values are merged into the Helm release `values.yaml` file, which is used to retrieve the configurable variables for the Helm release.
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: my-helm-subscription

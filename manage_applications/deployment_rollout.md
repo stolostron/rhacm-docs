@@ -186,7 +186,7 @@ kind: Namespace
 metadata:
   name: development-ns
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name: development-ch
@@ -201,7 +201,7 @@ spec:
 
 ```yaml
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
   annotations:
@@ -221,7 +221,7 @@ spec:
     data:
       purpose: For testing purposes
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
   annotations:
@@ -246,7 +246,7 @@ spec:
 - The following YAML content includes the definition for the initial subscription to the channel and initial deployable. This YAML content also includes the definition for the target subscription to the channel for rolling out the updated deployable. The definition for the initial subscription also includes the `placement` definition to list the target clusters where the deployables must be placed instead of referencing an associated placement rule.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: subscription-initial
@@ -263,7 +263,7 @@ spec:
     - name: cluster51
     - name: cluster52
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: subscription-target
@@ -293,7 +293,7 @@ kubectl annotate --overwrite subscriptions.app.ibm.com subscription-initial -n d
 With the annotations added, the definition for the initial subscription resembles the following YAML content:
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   annotations:
@@ -319,7 +319,7 @@ spec:
 ### Example 2: Rolling out a deployable resource
  - Target deployable YAML definition
     ```yaml
-    apiVersion: app.ibm.com/v1alpha1
+    apiVersion: apps.open-cluster-management.io/v1
     kind: Deployable
     metadata:
       annotations:

@@ -46,7 +46,7 @@ spec:
       values:
       - mq-advanced-server-prod
   componentKinds:
-  - group: app.ibm.com/v1alpha1
+  - group: apps.open-cluster-management.io/v1
     kind: Subscription
 ```
 {: codeblock}
@@ -65,7 +65,7 @@ The placement, overrides, and dependencies for deployables are defined within th
 The definition structure for a deployable can resemble the following YAML content:
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
   name: {{ template "guestbookchannel.fullname" . }}-service
@@ -141,7 +141,7 @@ For `Namespace` and `ObjectBucket` channel types, the spec for each channel can 
 The definition structure for a channel can resemble the following YAML content, which defines a namespace type channel:
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name: {{ .Release.Name }}
@@ -168,7 +168,7 @@ Subscriptions are sets of definitions that identify Helm charts, deployables, an
 The definition structure for a subscription can resemble the following YAML content:
 
 ```yaml
-  apiVersion: app.ibm.com/v1alpha1
+  apiVersion: apps.open-cluster-management.io/v1
   kind: Subscription
   metadata:
       name: nginx-public
@@ -202,7 +202,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 The definition structure for a placement rule can resemble the following YAML content:
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: {{ template "guestbookapplication.fullname" . }}-redismaster
