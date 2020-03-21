@@ -1,3 +1,27 @@
+# Red Hat Advanced Cluster Management for Kubernetes documentation
+
+The documentation for Red Hat Advanced Cluster Management for Kubernetes is provided in this repository in markdown (MD) format. Markdown is a lightweight markup language with plain text formatting syntax. If you've created an Issue in GitHub, you've used MD. MD is flexible and easy to use for basic tasks, but it’s not the best for complicated topics. Simplify your topic hierarchy wherever possible. To learn more about MD and its syntax, see [Getting started with writing and formatting on GitHub](https://help.github.com/articles/markdown-basics/). 
+
+**Note:** This documentation is still a work in progress. Frequent changes and improvements are expected. 
+
+## Structure of the documentation
+
+The [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file is the table of contents of all of the product documentation. Use it as your guide through the documentation. The ```summary.md``` file provides direct linking within the repository to the corresponding files.
+
+## Submitting feedback and change requests to the documentation
+
+As mentioned earlier, this documentation is still a work in progress. If you have suggestions for improvements, feel free to open a documentation issue in the GitHub repository. 
+
+1. Select the *Issues* tab. 
+2. Select **New issue**. 
+3. Provide as much information as you can for our team to understand the issue. If you provide your contact information, we can contact you with any questions related to your issue. 
+4. Add a *documentation* label to the issue, so it is routed to the correct team. 
+5. Submit the issue. 
+
+
+
+
+Remove all below of the existing content.
 # Information from and for the doc team
 
 Please take a minute or two to read!
