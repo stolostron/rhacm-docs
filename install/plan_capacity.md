@@ -1,13 +1,8 @@
 ---
 
 copyright:
-<<<<<<< HEAD
   years: 2020
 lastupdated: "2020-03-16"
-=======
-  years: 2016, 2020
-lastupdated: "2020-03-13"
->>>>>>> doc_stage
 
 ---
 
