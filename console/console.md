@@ -125,7 +125,7 @@ For more specific search results, include the property in your search. For examp
     - Search for a single field, such as `kind:pod` to find all pod resources.
     - Search for multiple fields, such as `kind:pod namespace:default` to find the pods in the default namespace. 
   
-  **Note:** Any user can search for resources, but results are based on your role-based access control assignment. Additionally, if you save and share a Search query with another user, returned results depend on access level for that user. For more information on role access, see _Using RBAC Authorization_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/){:new_window}.
+  **Note:** Any user can search for resources, but results are based on your role-based access control assignment. Additionally, if you save and share a Search query with another user, returned results depend on access level for that user. For more information on role access, see _Using RBAC Authorization_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 
   - You can also search with conditions by using characters, such as `>, >=, <, <=, !=`.
 
