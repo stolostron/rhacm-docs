@@ -32,7 +32,6 @@
    * [Importing a target managed cluster](manage_cluster/import.md)
      * [Importing a cluster with the console](manage_cluster/import_gui.md)
      * [Importing a cluster with the CLI](manage_cluster/import_cli.md)
-     * [Importing a managed cluster in an air gapped environment](manage_cluster/offline_endpoint.md)
      * [Modifying multicluster endpoint](manage_cluster/modify_endpoint.md)
  * [Application management (Technology preview)](manage_applications/overview.md)
    * [Application lifecycle](manage_applications/app_lifecycle.md)
