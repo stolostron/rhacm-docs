@@ -25,7 +25,6 @@ Choose from the following instructions to set up your managed cluster:
 
 - {: child} [Importing a cluster with the Red Hat Advanced Cluster Management for Kubernetes console](import_gui.md)
 - {: child} [Importing a cluster with the CLI](import_cli.md)
-- {: child} [Importing a managed cluster in an air gapped environment](offline_endpoint.md)
 - {: child} [Modifying multicluster endpoint](modify_endpoint.md)
 
 
