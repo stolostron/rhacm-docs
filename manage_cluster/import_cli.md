@@ -30,8 +30,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 {: #arch}
 
 * Linux
-* Linux on Power (ppc64le)
-* Linux on LinuxONE
+* macOS
 
 ## Prepare for import
 {: #prep}
@@ -42,10 +41,10 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
   ```
 
-2. Run the following command on the hub cluster to create the `oc create ns cluster-controller-test` namespace:
+2. Run the following command on the hub cluster to create the `oc create ns <cluster_namespace>` namespace:
 
   ```
-  oc create -n cluster-controller-test secret docker-registry quay-secret --docker-server=quay.io --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS}
+  oc create -n ${CLUSTER_NAMESPACE} secret docker-registry quay-secret --docker-server=quay.io --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS}
   ```
   
 3. Edit the example ClusterRegistry cluster in the `/test/resources/test_cluster.yaml` file of the `open-cluster-management` [repository](https://github.com/open-cluster-management/rcm-controller/blob/master/test/resources/test_cluster.yaml)
