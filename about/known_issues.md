@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-19"
+lastupdated: "2020-03-23"
 
 ---
 
@@ -23,6 +23,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
   - [Enabling Red Hat Advanced Cluster Management for Kubernetes for the installed monitoring release](#1051)
   - [LDAP user names are case-sensitive](#25735)
   - [Pods are not reachable from the NGINX ingress controller in multitenant isolation mode](#34414)
+  - [CIS policy controller is not installed](#1087)
   
 ## Menu and logo on the console header changes
 {: #1527}
@@ -240,3 +241,13 @@ To resolve the issue, disable network isolation in the `kube-system` project.
     oc get netnamespaces kube-system 
     ```
 
+## CIS policy controller is not installed
+{: #1087}
+
+The CIS policy controller is disabled by default when you install Red Hat Advanced Cluster Management for Kubernetes, If you create a CIS policy, you might receive the following message:
+
+   ```
+   CIS policy controller is not installed
+   ```
+
+You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../compliance/cis_policy_ctrl.md#cisc).
