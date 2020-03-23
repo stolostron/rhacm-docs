@@ -18,7 +18,7 @@ As mentioned earlier, this documentation is still a work in progress. If you hav
 4. Add _squad-doc_ label to the issue. 
 5. Submit the issue. 
 
-## Internal process for doc and dev team
+## Internal dev and doc process
 
 Please take a minute or two to read!
 
