@@ -73,7 +73,7 @@ Please `squad doc` issues where we have a known issue or limitation in the produ
 - We don't have a master branch because devs and doc team should target changes by opening branches from a release branch.
 - Hold all changes that you cannot merge on your own branch.
 - Please start your branch with a letter so your branch is not confused with a release branch:
-    good: `josh-update` creates craziness: `3.1.1-update`
+    good: `josh-update` not great: `3.1.1-update`
 - Place all changes that are relevant for the next release in the `doc_stage` (our default branch).
 - "Be kind; delete your branch." Delete your branch after you have merged your changes.
 
@@ -97,7 +97,7 @@ GA and integration with Red Hat docs:
 
 **Note: Moving to [AsciiDoc is a text document format](http://asciidoc.org/).** 
 
-## Doc writer internal processes (doc team only unless you are just curious)
+## Doc writer internal processes (doc team only)
 
 ### Writer assignments
 
@@ -119,11 +119,11 @@ Use the following milestones to triage issues:
 
 - Keep directories as short as possible.
    Example: `manage_apps/subscriptions.md` is easy for linking, readability, usability, etc...
-   Without some regulation, things can get out of control with extra folders (we have all seen this): `managing/manage_all_the_things/manage_this_specific_thing/subscriptions.md`.
-- File names, let's not get crazy here, too. Keep product abbreviations out of file names; we jus thave to keep changing them. And keep them as short and as intuitive as possible.  
+   Without some regulation, things can get out of control with extra folders. For example: `managing/manage_all_the_things/manage_this_specific_thing/subscriptions.md`.
+- File names. Keep product abbreviations out of file names. Keep filenames as short and as intuitive as possible.  
 - If you create a new file, remember to add a link to it in its parent/container topic and add a reference to it in the navigation file.
-- Remember to include necessary build tags (not needed until the transition)
-- If you refer to a product name, use a conref from the `conrefs.yml` file. (not needed until the transition-hard code instead)
+- Remember to include necessary build tags. (not needed until the transition).
+- If you refer to a product name, use a conref from the `conrefs.yml` file. (not needed until the transition-hard code instead
 
 ### Transforming the docs (doc team future)
 
