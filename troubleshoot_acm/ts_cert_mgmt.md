@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020 
-lastupdated: "2020-03-18"
+lastupdated: "2020-03-23"
 
 ---
 
@@ -10,12 +10,13 @@ lastupdated: "2020-03-18"
 
 Troubleshoot common certificate management service issues.
 
-Install the Kubernetes CLI to run the troubleshooting commands. For more information, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md). <!--verify this-->
+Install the Kubernetes CLI to run the troubleshooting commands. For more information, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/).
 
 ## Troubleshooting cert-manager-webhook
 {: #webhook}
 
 Cert-manager is deployed with a webhook to support RBAC and provide extra validation when `cert-manager` resources are created.
+
 ### Symptom
 
 You might see one of the following errors.

@@ -39,6 +39,7 @@ Red Hat OpenShift 4.2 is supported for the hub cluster and managed clusters.
 ## Configuring kubectl
 {: #kubectl} 
 
+- See _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/).
 - See [Red Hat OpenShift on AWS](https://www.openshift.com/learn/partners/amazon-web-services).
 
 ## Configuring oc

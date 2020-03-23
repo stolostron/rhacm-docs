@@ -39,7 +39,7 @@ The following hardware architectures are supported:
 
 * You must have a Red Hat Advanced Cluster Management for Kubernetes hub deployed.
   
-* You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md). 
+* You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/). 
 
 * You need Internet access so your Red Hat Advanced Cluster Management for Kubernetes cluster can create a remote Kubernetes cluster by using Amazon Web Services.
 
@@ -103,7 +103,7 @@ clusters.
 ## Creating your cluster with kubectl
 {: #create_cli}
 
-Complete the following procedure to create a cluster with kubectl:
+Complete the following procedure to create a cluster with `kubectl`:
 
 1. Create and save the following  `.yaml` files that you need to complete the procedure:
    
