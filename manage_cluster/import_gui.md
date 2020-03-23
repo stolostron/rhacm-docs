@@ -1,23 +1,15 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2020
+lastupdated: "2019-03-11"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Importing a cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to import a cluster. You will need your terminal for authentication.
-{:shortdesc}
+
 
 - [Prerequisites](#prereq)
 - [Preparing for import](#prep)
@@ -29,14 +21,12 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 ## Prerequisites
 {: #prereq}
 
-* You need an Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. See [Red Hat Advanced Cluster Management for Kubernetes](../../cloudctl/install_cli.md) for installation information.
-  
+* You need an Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. 
 * You need a cluster that you want to manage.
   
 ## Supported architecture
 
 * Linux
-* Linux on Power (ppc64le)
 * Linux on LinuxONE
 
 ## Prepare for import 
@@ -118,7 +108,6 @@ Table 1: The following table lists the parameters and descriptions that are avai
 | docker_password| Password for the private Docker registry | none|
 | imageRegistry | The image registry from which to pull the multicluster-endpoint|ibmcom|
 | imageNamePostfix| Postfix for the image name | none |
-| migrateFrom320|Migration from 3.2.0 multicluster-endpoint|false|
 {: caption="Table 1. Table of YAML file parameters and descriptions for import" caption-side="}
 
 ## Deleting an imported cluster
