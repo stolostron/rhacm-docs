@@ -220,6 +220,11 @@ spec:
 ## CIS policy elements
 {: #cis_elements}
 
+### Policy enforcement 
+
+CIS policy controller can inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. View an example of a policy in the [Creating a CIS policy]({#create_policy) section.
+
+
 ### masterNodeExcludeRules
 The rules applicable to master nodes that are to be exempted from checking. In order for master node to be compliant, this list must include any rules that must be checked manually or those rules that require extra configuration.
 
@@ -237,9 +242,6 @@ The CIS policy controller consists of the following four components.
 ### cis-controller-minio
 
 The `cis-controller-minio` object store is used to store the artifacts that are collected by the CIS crawler that runs on all the master and worker nodes. The results from running the aqua-security kube-bench tool are also stored in the CIS Minio object store.
-
-
-
 
 ### cis-crawler
 

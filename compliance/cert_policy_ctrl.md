@@ -82,12 +82,19 @@ The `namespaceSelector` defines which namespaces are subject to the enforcement 
 The `minimumDuration` parameter specifies the smallest duration before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. View the following YAML example of the `minimumDuration` parameter in a certificate policy: 
 
   ```yaml
-  remediationAction: enforce
   disabled: false
   minimumDuration: 200h
   ```
 
   The default value for `minimumDuration` is 30 days (672h).
+
+### Policy enforcement 
+
+Certificate policy controller can inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. Your parameter might resemble the following content:
+
+   ```
+   remediationAction: inform
+   ```
 
 ## Creating a certificate policy
 
