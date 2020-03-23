@@ -17,6 +17,7 @@ As mentioned earlier, this documentation is still a work in progress. If you hav
 3. Provide detailed descriptions of the changes. If you provide your contact information, we can contact you with any questions related to your issue. 
 4. Add _squad-doc_ label to the issue. 
 5. Submit the issue. 
+______________________________________________________________________________________________________________________________
 
 ## Internal dev and doc process
 
