@@ -12,13 +12,6 @@ To submit feedback and change requests, see the [documentation issue template](h
 
 As mentioned earlier, this documentation is still a work in progress. If you have suggestions for improvements, feel free to open a documentation issue in the GitHub repository. 
 
-If you do not use the template, follow this process to open a GitHub issue:
-
-1. Select the _Issues_ tab. 
-2. Select **New issue**. 
-3. Provide detailed descriptions of the changes. If you provide your contact information, we can contact you with any questions related to your issue. 
-4. Add `squad-doc` label to the issue. 
-5. Submit the issue. 
 ______________________________________________________________________________________________________________________________
 
 ## For Red Hat Advanced Cluster Management for Kubernetes documentation and developers only
