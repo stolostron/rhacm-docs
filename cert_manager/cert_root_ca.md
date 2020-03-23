@@ -20,7 +20,7 @@ Back up the existing Red Hat Advanced Cluster Management for Kubernetes certific
    oc get cert multicloud-ca-cert -n open-cluster-management -o yaml > multicloud-ca-cert-backup.yaml
    ```
 
-## Creating the root CA certificate
+## Creating the root CA certificate with OpenSSL
 
 Complete the following steps to create a root CA certificate with OpenSSL:
 
@@ -79,7 +79,7 @@ Complete the following steps to create a root CA certificate with OpenSSL:
 ## Refreshing _cert-manager_ certificates
 {: #refresh}
 
-After the Root CA is replaced, all certificates that are signed by the Root CA must be refreshed and the services that use those certificates must be restarted. Cert-manager creates the default Issuer from the Root CA so all of the certificates issued by `cert-manager`, and signed by the default ClusterIssuer must also be refreshed.
+After the root CA is replaced, all certificates that are signed by the root CA must be refreshed and the services that use those certificates must be restarted. Cert-manager creates the default Issuer from the root CA so all of the certificates issued by `cert-manager`, and signed by the default ClusterIssuer must also be refreshed.
 
 Delete the Kubernetes secrets associated with each `cert-manager` certificate to refresh the certificate and restart the services that use the certificate. Run the following command: 
 
@@ -87,9 +87,9 @@ Delete the Kubernetes secrets associated with each `cert-manager` certificate to
    oc delete secret -n open-cluster-management $(oc get cert -n open-cluster-management -o wide | grep multicloud-ca-issuer | awk '{print $3}’)
    ```
 
-## Restoring Root CA certificates
+## Restoring root CA certificates
 
-Before you restore the Root CA certificate, create a backup file of the Root CA certificate. Run the following command: 
+Before you restore the root CA certificate, create a backup file of the root CA certificate. Run the following command: 
 
    ```
    oc create -f multicloud-ca-cert-backup.yaml
