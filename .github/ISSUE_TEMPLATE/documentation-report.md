@@ -8,22 +8,22 @@ assignees: ''
 ---
 
 <!--
-Please add `squad:doc` label.
 
-**Note:** You cannot close your issue until the ID team has completed the work. If the issue does not contain sufficient information, the ID team may return your issue.
+Use the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file as the table of contents. The `summary.md` file provides direct linking within the repository to the corresponding files. 
 
-The ID team adds the `doc:ready for review` label when it is time to start reviewing the changes.
+1. Provide detailed descriptions of the changes. If you provide your contact information, we can contact you with any questions related to your issue. 
+2. Add _squad-doc_ label to the issue. 
+3. Submit the issue. Please add `squad:doc` label.
+
+The ID team adds the `in-review` label when it is time to start reviewing the changes.
 -->
 
 ## Documentation Report
 
 ## Product release(s)
--[] [ACM 4.4] 
-
-Note: For Common services and IBM Cloud Private version 3.2.1 and earlier defects, open up an issue in the [roadmap repo](https://github.ibm.com/IBMPrivateCloud/roadmap/issues/new?template=documentation-report.md).
+- [ ] [ACM 4.4] 
 
 **Note:** ID will update the current version and the two previous versions (n-2). For earlier versions, we will address only P1 & P2 Doc APARS for releases in support.
-
 
 ## Type of documentation change
 
@@ -32,7 +32,7 @@ Note: For Common services and IBM Cloud Private version 3.2.1 and earlier defect
 
 ## Link to the topic(s) that require an update
 
-<!--If a new topic is required you can leave this section blank.-->
+<!--If a new topic is required you can leave this section blank. Use a link from the summary.md file.-->
 
 *
 *
