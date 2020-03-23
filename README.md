@@ -38,7 +38,7 @@ Identify documentation content updates (features, enhancements, and bug fixes) a
    - For a Dev issue where doc work is required - open up a **separate** ID issue in the open-cluster-management backlog. If you are not ready for a doc issue but you know you eventually need one, you can label `doc_needed`.
    - Describe the changes that you are making or want the Doc team to make; keep it in _untriaged_ stage.
    - Add tags such as `bug` or `priority`.
-   - Doc team can use the `help wanted` label if we are waiting for input late in the release.
+   - Doc team can use the `doc-awaiting-input` label if we are waiting for input late in the release.
    
 **Link issues to commits** This is important for file history and if something has to be undone. Link an issue to a commit, add a reference to the issue to the commit message and a quick note about the update. See the following syntax:
 
