@@ -31,6 +31,6 @@ OpenShift 4.2 is supported for the hub cluster and managed clusters.
 ## Configuring kubectl
 {: #kubectl} 
 
-From each cloud provider documentation, you might need to learn how configure your `kubectl`. You must have `kubectl` installed. 
+From each cloud provider documentation, you might need to learn how configure your `kubectl`. You must have `kubectl` installed. For more information, see the _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/). 
 
 Each cloud provider process to configure `kubectl` is different, so view the product documentation for details.
