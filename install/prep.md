@@ -29,15 +29,16 @@ Before you install Red Hat Advanced Cluster Management for Kubernetes, review th
   
 * To ensure that the OpenShift Container Platform cluster is set up correctly, access the OpenShift Container Platform web console.
 
-  The OpenShift Container Platform web console can be found by running the `kubectl -n openshift-console get route` command. You can see a similar output to the following example:
+  Run the `kubectl -n openshift-console get route` command to access the OpenShift Container Platform web console. See the following example output:
+  
     ```
     openshift-console          console             console-openshift-console.apps.new-coral.purple-chesterfield.com                       console                  https   reencrypt/Redirect     None
     ```
     {:codeblock}
 
-	The console URL in this example is `https:// console-openshift-console.apps.new-coral.purple-chesterfield.com`. Open the URL in your browser and check the result. If the console URL is like `console-openshift-console.router.default.svc.cluster.local`, set `openshift_master_default_subdomain` when you install the OpenShift Container Platform. 
+	The console URL in this example is `https:// console-openshift-console.apps.new-coral.purple-chesterfield.com`. Open the URL in your browser and check the result. If the console URL is displays `console-openshift-console.router.default.svc.cluster.local`, set `openshift_master_default_subdomain` when you install the OpenShift Container Platform. 
 
-* For a metrics server, you must ensure that the OpenShift Container Platform metrics server has been installed before you install the Red Hat Advanced Cluster Management for Kubernetes. For more information about creating the OpenShift Container Platform metrics server, see [install the OpenShift Container Platform 3.11 metrics server](https://docs.openshift.com/container-platform/3.11/dev_guide/pod_autoscaling.html).
+* For a metrics server, you must ensure that the OpenShift Container Platform metrics server is installed before you install the Red Hat Advanced Cluster Management for Kubernetes. For more information about creating the OpenShift Container Platform metrics server, see [install the OpenShift Container Platform 3.11 metrics server](https://docs.openshift.com/container-platform/3.11/dev_guide/pod_autoscaling.html).
 
 * {: #auth} If you are installing your cluster on a public cloud, you can enable authentication with Red Hat OpenShift. By default, your cluster uses OpenID Connect (OIDC) to authenticate users with Kubernetes. To enable authentication with OpenShift, add the authentication parameters to the `config.yaml` file. For more information, see [Authentication settings](../install/config_yaml.md#auth).
 
