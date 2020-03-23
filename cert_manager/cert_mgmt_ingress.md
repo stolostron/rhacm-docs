@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-20"
+lastupdated: "2020-03-23"
 
 ---
 
@@ -12,7 +12,7 @@ You can replace management ingress certificates.
 
 ## Before you begin
 
-Prepare and have your `management-ingress` certificates and private keys ready. If needed, you can generate a TLS certificate by using OpenSSL. If you are generating the certificate, include the following settings:
+Prepare and have your `management-ingress` certificates and private keys ready. If needed, you can generate a TLS certificate by using OpenSSL. Set the common name parameter,`CN`, on the certificate to `manangement-ingress`. If you are generating the certificate, include the following settings:
 
 * Include the following IP addresses and domain names to your cert Subject Alternative Name (SAN) list:
   * The service name for the management ingress: `management-ingress`.
@@ -21,8 +21,6 @@ Prepare and have your `management-ingress` certificates and private keys ready. 
      ```
      oc get route -n open-cluster-management
      ```
-
-     Set the common name parameter,`CN`, on the certificate to `manangement-ingress`.
 
      You might receieve the following response:
 
@@ -194,12 +192,4 @@ Complete the following steps to replace a management ingress certificate:
          oc edit deployment management-ingress -n open-cluster-management
          ```
 
-   3. Save the retrieved certificate content to your local file system as a `management-ingress-cert.yaml` file.
-
-2. Create your Red Hat Advanced Cluster Management for Kubernetes management ingress certificate with the following command:
-
-   ```
-   kubectl -n kube-system apply -f management-ingress-cert.yaml
-   ```
-
-3. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
+2. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
