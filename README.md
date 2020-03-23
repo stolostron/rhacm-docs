@@ -22,7 +22,7 @@ To ensure product documentation is accessible, accurate, tested, complete, and f
 
 To see the content, (until a link is available), please rely on the table of contents/navigation draft found in the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file.
 
-**RHACM developers:** Please open an issue as normal with the file/content that needs to be added. Label your issue `squad doc` and give a detailed description of your change. The clearer you are in the description, the quicker we can make the updates. **Please open an issue, not a PR** so that we can make updates as we transition into ASCII doc.
+**RHACM developers:** Please open an issue as normal with the file/content that needs to be added. Label your issue `squad:doc` and give a detailed description of your change. The clearer you are in the description, the quicker we can make the updates. **Please open an issue, not a PR** so that we can make updates as we transition into ASCII doc.
 
 ### Issue and Pull request process
 
@@ -54,11 +54,11 @@ It is very important to get the doc team to help with UI content.
  
 ### Known issues or limitations
 
-Please `squad doc` issues where we have a known issue or limitation in the product that you want us to document in the [Known issues](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/about/known_issues.md) section.
+Please `squad:doc` issues where we have a known issue or limitation in the product that you want us to document in the [Known issues](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/about/known_issues.md) section.
 
 ### Branch strategy
 
-- Work in the _stage_ branch. The _production_ branch will be updated regulary by the doc team.
+- Work from the _doc_stage_ branch. The _doc_prod_ (production) branch will be updated regulary by the doc team.
 - We don't have a master branch because devs and doc team should target changes by opening branches from a release branch.
 - Hold all changes that you cannot merge on your own branch.
 - Please start your branch with a letter so your branch is not confused with a release branch:
