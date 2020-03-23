@@ -90,7 +90,7 @@ The `minimumDuration` parameter specifies the smallest duration before a certifi
 
 ### Policy enforcement 
 
-Certificate policy controller can inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. Your parameter might resemble the following content:
+Certificate policy controller can only inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. Your parameter might resemble the following content:
 
    ```
    remediationAction: inform

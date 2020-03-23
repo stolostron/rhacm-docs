@@ -20,7 +20,7 @@ The IAM policy controller checks for compliance of the number of cluster adminis
 
 **Policy enforcement** 
 
-IAM policy controller can inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. View an example of an IAM policy in the following section.
+IAM policy controller can only inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. View an example of an IAM policy in the following section.
 
 ## IAM policy
 {: #iam-policy}

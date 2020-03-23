@@ -222,7 +222,7 @@ spec:
 
 ### Policy enforcement 
 
-CIS policy controller can inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. View an example of a policy in the [Creating a CIS policy]({#create_policy) section.
+CIS policy controller can only inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. View an example of a policy in the [Creating a CIS policy]({#create_policy) section.
 
 
 ### masterNodeExcludeRules
