@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-23"
 
 ---
 
@@ -35,7 +35,11 @@ OpenShift Container Platform 4.2 is supported for the hub cluster and managed cl
 ## Supported managed cluster cloud providers
 {: #providers-managed}
 
-- See [OpenShift Container Platform on AWS](https://www.openshift.com/learn/partners/amazon-web-services){: new_window}. 
+- See [OpenShift Container Platform on AWS](https://www.openshift.com/learn/partners/amazon-web-services){: new_window}.
+
+- See [Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/){: new_window}.
+
+- See [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/){: new_window}.
 
 ## Configuring kubectl
 {: #kubectl} 
