@@ -36,7 +36,7 @@ Before you install Red Hat Advanced Cluster Management for Kubernetes, review th
     ```
     {:codeblock}
 
-	The console URL in this example is `https:// console-openshift-console.apps.new-coral.purple-chesterfield.com`. Open the URL in your browser and check the result. If the console URL is displays `console-openshift-console.router.default.svc.cluster.local`, set `openshift_master_default_subdomain` when you install the OpenShift Container Platform. 
+	The console URL in this example is `https:// console-openshift-console.apps.new-coral.purple-chesterfield.com`. Open the URL in your browser and check the result. If the console URL displays `console-openshift-console.router.default.svc.cluster.local`, set `openshift_master_default_subdomain` when you install the OpenShift Container Platform. 
 
 * For a metrics server, you must ensure that the OpenShift Container Platform metrics server is installed before you install the Red Hat Advanced Cluster Management for Kubernetes. For more information about creating the OpenShift Container Platform metrics server, see [install the OpenShift Container Platform 3.11 metrics server](https://docs.openshift.com/container-platform/3.11/dev_guide/pod_autoscaling.html).
 
@@ -103,7 +103,6 @@ Ensure that the admission webhooks are enabled on the OpenShift Container Platfo
         {: codeblock}
 
 ## Storage
-
 
 Ensure that you have a pre-configured StorageClass in OpenShift Container Platform that can be used for creating storage for Advanced Cluster Management for Kubernetes.
 
