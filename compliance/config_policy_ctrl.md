@@ -52,7 +52,7 @@ Complete the following steps to create a configuration policy from the command l
     Your configuration policy might resemble the following policy:
 
     ```yaml
-    apiVersion: policy.mcm.rhacm.com/v1alpha1
+    apiVersion: policy.mcm.ibm.com/v1alpha1
     kind: Policy
     metadata:
       name: policy-1
@@ -68,22 +68,19 @@ Complete the following steps to create a configuration policy from the command l
       complianceType: musthave
       object-templates:
        ...
-     ```
-     {: codeblock} 
+     ``` 
     
 2. Apply the policy by running the following command:
    
    ```
-   kubectl apply -f <policy-file-name>  --namespace=<mcm_namespace>
+   kubectl apply -f <policy-file-name>  --namespace=<namespace>
    ```
-   {: codeblock}
    
 3. Verify and list the policies by running the following command:
 
    ```
-   kubectl get policy --namespace=<mcm_namespace>
+   kubectl get policy --namespace=<namespace>
    ```
-   {: codeblock}
    
 Your configuration policy is created.
 
@@ -94,16 +91,14 @@ Complete the following steps to view your configuration policy from the CLI:
 1. View details for a specific configuration policy by running the following command:
    
    ```
-   kubectl get policy <policy-name> -n <mcm_namespace> -o yaml
+   kubectl get policy <policy-name> -n <namespace> -o yaml
    ```
-   {: codeblock}
    
 2. View a description of your configuration policy by running the following command:
 
    ```
    kubectl describe policy <name> -n <namespace>
    ```
-   {: codeblock}
 
 ### Create a configuration policy from the console
 {: #policy_gui}
@@ -126,7 +121,7 @@ Complete the following steps to view your configuration policy from the CLI:
 A configuration policy is created and the `Policy` definition might resemble the following YAML:
 
    ```yaml
-   apiVersion: policy.mcm.rhacm.com/v1alpha1
+   apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
      name: policy-1
@@ -144,7 +139,6 @@ A configuration policy is created and the `Policy` definition might resemble the
       ...
      
    ```
-   {: codeblock}
 
 #### View your configuration policy
 

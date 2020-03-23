@@ -28,11 +28,11 @@ Create a parent policy that includes the certificate policy to be propagated to 
   Name:         certificate-policy-example
   Namespace:    default
   Labels:       category=system-and-information-integrity
-  APIVersion:  policies.rhacm.com/v1alpha1
+  APIVersion:  policies.ibm.com/v1alpha1
   Kind:         CertificatePolicy
   Metadata:
     Finalizers:
-      finalizer.mcm.rhacm.com
+      finalizer.mcm.ibm.com
   Spec:
     Conditions:
       Ownership:
@@ -106,7 +106,7 @@ Complete the following steps to create a certificate policy from the command lin
     Your certificate policy might resemble the following policy:
 
     ```yaml
-    apiVersion: policies.rhacm.com/v1alpha1
+    apiVersion: policies.ibm.com/v1alpha1
     kind: CertificatePolicy
     metadata:
       name: certificate-policy-1
@@ -127,13 +127,13 @@ Complete the following steps to create a certificate policy from the command lin
 2. Apply the policy by running the following command:
    
    ```
-   kubectl apply -f <certificate-policy-file-name>  --namespace=<mcm_namespace>
+   kubectl apply -f <certificate-policy-file-name>  --namespace=<namespace>
    ```
    
 3. Verify and list the policies by running the following command:
 
    ```
-   kubectl get certificatepolicy --namespace=<mcm_namespace>
+   kubectl get certificatepolicy --namespace=<namespace>
    ```
    
 Your certificate policy is created.
@@ -145,7 +145,7 @@ Complete the following steps to view your certificate policy from the CLI:
 1. View details for a specific certificate policy by running the following command:
    
    ```
-   kubectl get certificatepolicy <policy-name> -n <mcm_namespace> -o yaml
+   kubectl get certificatepolicy <policy-name> -n <namespace> -o yaml
    ```
    
 2. View a description of your certificate policy by running the following command:
@@ -175,7 +175,7 @@ Complete the following steps to view your certificate policy from the CLI:
 A certificate policy is created and the `CertificatePolicy` definition within it will look similar to the following YAML.
 
    ```yaml
-   apiVersion: policies.rhacm.com/v1alpha1
+   apiVersion: policies.ibm.com/v1alpha1
    kind: CertificatePolicy
    metadata:
      name: certificate-policy-1

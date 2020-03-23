@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-18"
+lastupdated: "2020-03-23"
 
 ---
 
@@ -21,7 +21,7 @@ You can use the Center for Internet Security (CIS) policy controller to receive 
 ## Enable the CIS policy controller
 {: #cisc}
 
-The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list. CIS Kubernetes Benchmark Version 1.4.0 is used.
+The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list. 
 
 When you install the Klusterlet, the CIS policy controller is disabled by default. 
 
@@ -59,7 +59,7 @@ The set of rules that constitute CIS controls is different on an OpenShift Conta
 ### Sample CIS policy (non-OpnShift Container Platform)
 
 ```yaml
-apiVersion: policies.rhacm.com/v1alpha1
+apiVersion: policies.ibm.com/v1alpha1
 kind: CisPolicy
 metadata:
   labels:
@@ -151,7 +151,7 @@ spec:
 ### Sample CIS policy 
 
 ```yaml
-apiVersion: policies.rhacm.com/v1alpha1
+apiVersion: policies.ibm.com/v1alpha1
 kind: CisPolicy
 metadata:
   labels:
@@ -260,7 +260,7 @@ The `cis-crawler` collects information about Kubernetes processes, binary files,
 
 ### drishti-cis
 
-The `drishti-cis` component runs the aqua-security kube-bench tool against the artifacts that are collected by the `cis-crawler` and stores the results in `cis-controller-mino` object store. By default, it scans the artifacts every 24 hours. To change the frequency, complete the following steps:
+The `drishti-cis` component runs the aqua-security kube-bench tool against the artifacts that are collected by the `cis-crawler` and stores the results in `cis-controller-minio` object store. By default, it scans the artifacts every 24 hours. To change the frequency, complete the following steps:
 
 1. Edit the configmap, `<helm-release>-drishti-cis-config`.
    ```
@@ -314,7 +314,7 @@ Complete the following steps to create a certificate policy from the command lin
 1. Create a YAML file for your CIS policy by including a set of exclude rules for master node and worker node. See [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](../compliance/create_policy.md#yaml) for more information about policy requirements.
 
 ```yaml
-apiVersion: policies.rhacm.com/v1alpha1
+apiVersion: policies.ibm.com/v1alpha1
 kind: CisPolicy
 metadata:
   labels:
@@ -338,13 +338,13 @@ spec:
 2. Apply the policy by running the following command:
    
    ```
-   kubectl apply -f <cis-policy-file> --namespace=<mcm_namespace>
+   kubectl apply -f <cis-policy-file> --namespace=<namespace>
    ```
 
 3. Verify and list the policies by running the following command:
 
    ```
-   kubectl get cispolicy --namespace=<mcm_namespace>
+   kubectl get cispolicy --namespace=<namespace>
    ```
 
 ### Viewing a CIS policy from command line interface (CLI)
@@ -354,7 +354,7 @@ Complete the following steps to view the CIS policy from the CLI:
 1. View details for a specific CIS policy by running the following command:
 
    ```
-   kubectl get cispolicy <policy-name> -n <mcm_namespace> -o yaml
+   kubectl get cispolicy <policy-name> -n <namespace> -o yaml
    ```
 
 2. View a description of your CIS policy by running the following command:
@@ -381,19 +381,19 @@ Complete the following steps to view the CIS policy from the CLI:
 A policy is created and the CIS policy is embedded into the parent policy. The `.yaml` resembles the following example.
 
 ```yaml
-apiVersion: policy.mcm.rhacm.com/v1alpha1
+apiVersion: policy.mcm.ibm.com/v1alpha1
 kind: Policy
 metadata:
   name: cis-sample-policy
   namespace: kube-system
   annotations:
-    policy.mcm.rhacm.com/categories: SystemAndInformationIntegrity
-    policy.mcm.rhacm.com/controls: ''
-    policy.mcm.rhacm.com/standards: PCI
+    policy.mcm.ibm.com/categories: SystemAndInformationIntegrity
+    policy.mcm.ibm.com/controls: ''
+    policy.mcm.ibm.com/standards: PCI
     seed-generation: '1'
   finalizers:
-    - finalizer.policies.rhacm.com
-    - propagator.finalizer.mcm.rhacm.com
+    - finalizer.policies.ibm.com
+    - propagator.finalizer.mcm.ibm.com
   generation: 1
   resourceVersion: '1906605'
 spec:
@@ -405,7 +405,7 @@ spec:
       - default
   policy-templates:
     - objectDefinition:
-        apiVersion: policies.rhacm.com/v1alpha1
+        apiVersion: policies.ibm.com/v1alpha1
         kind: CisPolicy
         metadata:
           name: cis-sample-policy-pci-example
