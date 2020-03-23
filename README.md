@@ -72,9 +72,9 @@ Please `squad:doc` issues where we have a known issue or limitation in the produ
 
 ### Writer assignments
 
-Chris: Lead, Cluster Lifecycle and all squads within, Foundation, Install (please add what is missing)
-Brandi: Architect for doc, UI Guild writer, Cluster application and all squads within, (please add what is missing)
-Mikela: Support doc focal, GRC (GDPR readiness included), and all squads within.
+- Chris: Lead, Cluster Lifecycle and all squads within, Foundation, Install
+- Brandi: Architect for doc, UI Guild writer, Cluster application and all squads within
+- Mikela: Support doc focal, GRC (GDPR readiness included), and all squads within.
 
 ### Understanding the board
 
