@@ -2,29 +2,21 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-23"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Red Hat Advanced Cluster Management for Kubernetes platform considerations for GDPR readiness
 
 ## Notice
-{: #notice}
+
 <!-- This is boilerplate text provided by the GDPR team. It cannot be changed. -->
 
 This document is intended to help you in your preparations for General Data Protection Regulation (GDPR) readiness. It provides information about features of the Red Hat Advanced Cluster Management for Kubernetes platform that you can configure, and aspects of the product's use, that you should consider to help your organization with GDPR readiness. This information is not an exhaustive list, due to the many ways that clients can choose and configure features, and the large variety of ways that the product can be used in itself and with third-party clusters and systems.
 
 **Clients are responsible for ensuring their own compliance with various laws and regulations, including the European Union General Data Protection Regulation. Clients are solely responsible for obtaining advice of competent legal counsel as to the identification and interpretation of any relevant laws and regulations that may affect the clients' business and any actions the clients may need to take to comply with such laws and regulations.**
 
-**The products, services, and other capabilities described herein are not suitable for all client situations and may have restricted availability. IBM does not provide legal, accounting, or auditing advice or represent or warrant that its services or products will ensure that clients are in compliance with any law or regulation.**
+**The products, services, and other capabilities described herein are not suitable for all client situations and may have restricted availability. Red Hat does not provide legal, accounting, or auditing advice or represent or warrant that its services or products will ensure that clients are in compliance with any law or regulation.**
 
 ## Table of Contents
 
@@ -56,8 +48,8 @@ GDPR establishes a stronger data protection regulatory framework for processing 
 * Compulsory data breach notification
 
 ### Read more about GDPR
-* [EU GDPR Information Portal](https://www.eugdpr.org/){:new_window}
-* [Red Hat GDPR website](https://www.redhat.com/en/gdpr){:new_window}
+* [EU GDPR Information Portal](https://www.eugdpr.org/)
+* [Red Hat GDPR website](https://www.redhat.com/en/gdpr)
 
 ## Product Configuration – considerations for GDPR Readiness
 {: #productconfig}
@@ -89,7 +81,7 @@ Customers can submit online comments/feedback/requests for information about in 
 * The public comments or tickets on the product documentation
 * The public conversations in a technical community
 
-Typically, only the client name and email address are used, to enable personal replies for the subject of the contact, and the use of personal data conforms to the [Red Hat Online Privacy Statement](https://www.redhat.com/en/about/privacy-policy){:new_window}.
+Typically, only the client name and email address are used, to enable personal replies for the subject of the contact, and the use of personal data conforms to the [Red Hat Online Privacy Statement](https://www.redhat.com/en/about/privacy-policy).
 
 ## Data Collection
 {: #datacollection}
@@ -164,8 +156,6 @@ Users of Red Hat Advanced Cluster Management for Kubernetes can control the way 
 
 **Data-at-rest** protection is supported by using `dm-crypt` to encrypt data.
 
-**Data retention** periods for logging (ELK) and monitoring (Prometheus) are configurable and deletion of data is supported through provided APIs.
-
 These same platform mechanisms that are used to manage and secure Red Hat Advanced Cluster Management for Kubernetes platform technical data can be used to manage and secure personal data for user-developed or user-provided applications. Clients can develop their own capabilities to implement further controls.
 
 ## Data Deletion
@@ -174,29 +164,13 @@ These same platform mechanisms that are used to manage and secure Red Hat Advanc
 Red Hat Advanced Cluster Management for Kubernetes platform provides commands, application programming interfaces (APIs), and user interface actions to delete data that is created or collected by the product. These functions enable users to delete technical data, such as service user IDs and passwords, IP addresses, Kubernetes node names, or any other platform configuration data, as well as information about users who manage the platform.
 
 Areas of Red Hat Advanced Cluster Management for Kubernetes platform to consider for support of data deletion:
-* The data retention period for logging data (ELK) is configurable.
-* The data retention period for monitoring data (Prometheus) is configurable.
-* Logging data can be deleted from the ELK stack by using Elasticsearch APIs.
-* Monitoring data can be deleted from Prometheus by using Prometheus APIs.
+
 * All technical data that is related to platform configuration can be deleted through the management console or the Kubernetes `kubectl` API.
 
 Areas of Red Hat Advanced Cluster Management for Kubernetes platform to consider for support of account data deletion:
 * All technical data that is related to platform configuration can be deleted through the Red Hat Advanced Cluster Management for Kubernetes or the Kubernetes `kubectl` API.
 
 Function to remove user ID and password data that is managed through an enterprise LDAP directory would be provided by the LDAP product used with Red Hat Advanced Cluster Management for Kubernetes platform.
-
-Personal data that is persisted by platform logging and monitoring consists of IP addresses of cluster components and some user names and user IDs. The same mechanisms that are used for deletion of system logging or monitoring data can be used for cluster logging and monitoring data. Personal data that is collected by clusters outside of these services require cluster provided mechanisms to delete data. For more information, see
-
-* [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/){:new_window}
-
-
-## Data monitoring
-{: #datamonitoring}
-
-* Red Hat Advanced Cluster Management for Kubernetes platform provides a monitoring service to monitor the status of your cluster and applications. This service uses Grafana and Prometheus to present detailed information about cluster nodes and containers. Monitoring can be configured to generate alerts or integrated with external alert providers. Platform monitoring is enabled by default. Additional monitoring stacks can be deployed for application monitoring. 
-* Red Hat Advanced Cluster Management for Kubernetes provides a metering service to view and download detailed usage metrics for your applications and cluster. Metering is enabled by default for all deployed container applications.
-* Red Hat Advanced Cluster Management for Kubernetes platform provides a logging service that is based on the ELK stack to stream, store, search, and monitor logs. The ELK stack that is provided with Red Hat Advanced Cluster Management for Kubernetes platform uses the official ELK stack images that are published by Elastic. Logging is configured by default to collect system logs for the Red Hat Advanced Cluster Management for Kubernetes platform services. Additional ELK stacks can be deployed for application logging.
-
 
 ## Capability for Restricting Use of Personal Data
 {: #datasubjectrights}
@@ -220,109 +194,21 @@ As a platform, Red Hat Advanced Cluster Management for Kubernetes deals with sev
 
 This appendix includes details on data that is logged by the platform services.
 
-### Red Hat Advanced Cluster Management for Kubernetes security
-
-* What data is logged
-  * User ID, user name, and IP address of logged in users
-* When data is logged
-  * With login requests
-* Where data is logged
-  * In the audit logs at `/var/lib/icp/audit` <!--need to update directory path possibly?-->
-  * In the audit logs at `/var/log/audit`
-* How to delete data
-  * Search for the user specific data and delete the record from the audit log
-
-  For more information, see:
-* [High availability Red Hat Advanced Cluster Management for Kubernetes clusters](../install/mcm_ha.md)
-
-### Red Hat Advanced Cluster Management for Kubernetes platform API
-
-* What data is logged
-  * User ID, user name, and IP address of client in container logs
-  * Kubernetes cluster state data in the `etcd` server
-  * OpenStack and VMware credentials in the `etcd` server
-* When data is logged
-  * With API requests
-  * Credentials stored from `credentials-set` command
-* Where data is logged
-  * In container logs, Elasticsearch, and `etcd` server.
-* How to delete data
-  * Delete container logs (`platform-api`, `platform-deploy`) from containers or delete the user specific log entries from Elasticsearch.
-  * Clear the selected `etcd` key-value pairs by using the `etcdctl rm` command.
-  * Remove credentials by calling the `credentials-unset` command.
-
-
-For more information, see
-  * [Kubernetes Logging](https://kubernetes.io/docs/concepts/cluster-administration/logging/){:new_window}
-  * [etcdctl](https://github.com/coreos/etcd/blob/master/etcdctl/READMEv2.md){:new_window}
-
-### Red Hat Advanced Cluster Management for Kubernetes monitoring
-
-* What data is logged
-  * IP address, names of pods, release, image
-  * Data scraped from client-developed clusters could include personal data
-* When data is logged
-  * When Prometheus scrapes metrics from configured targets
-* Where data is logged
-  * In the Prometheus server or configured persistent volumes
-* How to delete data
-  * Search for and delete data by using the Prometheus API
-
-  For more information, see:
-  
-  * [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/){:new_window}
- <!--according to issue https://github.com/open-cluster-management/backlog/issues/730 Prometheus is no longer a focus. will come back and remove this section-->
-
 ### Red Hat Advanced Cluster Management for Kubernetes Kubernetes
 
 * What data is logged
-  * Cluster deploy topology (node information for master, worker, proxy, va)
+  * Cluster deploy topology (node information for master and worker)
   * Service configuration (k8s configuration map) and secrets (k8s secrets)
-  * User ID in api-server log
 * When data is logged
   * When you deploy a cluster
-  * When you deploy a cluster from the Helm catalog
 * Where data is logged
   * Cluster deploy topology in `etcd`
   * Configuration and secret for deployed clusters in `etcd`
 * How to delete data
   * Use the Red Hat Advanced Cluster Management for Kubernetes console
   * Search for and delete data by using the k8s console (`kubectl`) or `etcd` REST API
-  * Search for and delete api-server log data by using the Elasticsearch API
 
   Use caution when modifying Kubernetes cluster configuration or deleting cluster data.
 
-  For more information, see:
-  * [Kubernetes kubectl](https://kubernetes.io/docs/reference/kubectl/overview/){:new_window}
+  For more information, see [Kubernetes kubectl](https://kubernetes.io/docs/reference/kubectl/overview/).
 
-### Red Hat Advanced Cluster Management for Kubernetes Helm API
-
-* What data is logged
-  * User name and role
-* When data is logged
-  * When a user retrieves charts or repositories that are added to a team
-* Where data is logged
-  * `helm-api` deployment logs, Elasticsearch
-* How to delete data
-  * Search for and delete `helm-api` log data by using the Elasticsearch API
-
-### Red Hat Advanced Cluster Management for Kubernetes Service Broker
-
-* What data is logged	
-  * User ID (only at debug log level 10, not at default log level)	
-* When data is logged	
-  * When API requests are made to the service broker	
-  * When the service broker accesses the service catalog	
-* Where data is logged	
-  * Service broker container log, Elasticsearch	
-* How to delete data	
-  * Search for and delete the api-server log using Elasticsearch API	
-  * Search for and delete the log from the api-server container	
-      
-      ```	
-      kubectl logs $(kubectl get pods -n kube-system | grep  service-catalogapiserver | awk '{print $1}') -n kube-system | grep admin	
-      ```	
-      {: codeblock}	
-      
-  For more information, see:	
-  * [Kubernetes kubectl](https://kubernetes.io/docs/reference/kubectl/overview/){:new_window}
