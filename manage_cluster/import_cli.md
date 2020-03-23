@@ -51,6 +51,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 3. Edit the example ClusterRegistry cluster in the `/test/resources/test_cluster.yaml` file of the `open-cluster-management` [repository](https://github.com/open-cluster-management/rcm-controller/blob/master/test/resources/test_cluster.yaml)
 
 4. Add the following `imagePullSecret`: `quay-secret in test_endpoint_config.yaml`
+
    - Create a ClusterRegistry cluster: `oc apply -f test_cluster.yaml`
    - Refer to the [cluster-registry](https://github.com/kubernetes/cluster-registry/blob/master/pkg/apis/clusterregistry/v1alpha1/types.go) for API definition
   
@@ -60,9 +61,9 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   
 7. Create a Multicloud EndpointConfig. Run the following command: 
 
-```
-oc apply -f test_endpoint_config.yaml
-```
+  ```
+  oc apply -f test_endpoint_config.yaml
+  ```
 
 The ClusterController takes the following actions:
 
