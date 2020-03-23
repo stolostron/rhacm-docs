@@ -35,7 +35,6 @@ This document is intended to help you in your preparations for General Data Prot
 ## GDPR
 {: #overview}
 
-<!-- This is boilerplate text provided by the GDPR team. It cannot be changed. -->
 General Data Protection Regulation (GDPR) has been adopted by the European Union ("EU") and applies from May 25, 2018.
 
 ### Why is GDPR important?
@@ -59,7 +58,7 @@ The following sections describe aspects of data management within the Red Hat Ad
 ## Data Life Cycle
 {: #datalifecycle}
 
-Red Hat Advanced Cluster Management for Kubernetes is an application platform for developing and managing on-premises, containerized applications. It is an integrated environment for managing containers that includes the container orchestrator Kubernetes, cluster lifecycle, application lifecycle, and Governance, Risk, and Compliance frameworks <!--can this be changed to security frameworks?-->.
+Red Hat Advanced Cluster Management for Kubernetes is an application platform for developing and managing on-premises, containerized applications. It is an integrated environment for managing containers that includes the container orchestrator Kubernetes, cluster lifecycle, application lifecycle, and security frameworks (governance, risk, and compliance).
 
 As such, the Red Hat Advanced Cluster Management for Kubernetes platform deals primarily with technical data that is related to the configuration and management of the platform, some of which might be subject to GDPR. The Red Hat Advanced Cluster Management for Kubernetes platform also deals with information about users who manage the platform. This data will be described throughout this document for the awareness of clients responsible for meeting GDPR requirements.
 
