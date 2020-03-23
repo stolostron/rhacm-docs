@@ -15,7 +15,7 @@ As mentioned earlier, this documentation is still a work in progress. If you hav
 1. Select the *Issues* tab. 
 2. Select **New issue**. 
 3. Provide detailed descriptions of the changes. If you provide your contact information, we can contact you with any questions related to your issue. 
-4. Add a *documentation* label to the issue, so it is routed to the correct team. 
+4. Add _squad-doc_ label to the issue. 
 5. Submit the issue. 
 
 
