@@ -6,7 +6,7 @@ The documentation for Red Hat Advanced Cluster Management for Kubernetes is prov
 
 ## Structure of the documentation
 
-The [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file is the table of contents of all of the product documentation. Use it as your guide through the documentation. The ```summary.md``` file provides direct linking within the repository to the corresponding files.
+The [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file is the table of contents of all of the product documentation. Use it as your guide through the documentation. The `summary.md` file provides direct linking within the repository to the corresponding files.
 
 ## Submitting feedback and change requests to the documentation
 
@@ -106,7 +106,7 @@ GA and integration with Red Hat docs:
 
 Chris: Lead, Cluster Lifecycle and all squads within, Foundation, Install (please add what is missing)
 Brandi: Architect for doc, UI Guild writer, Cluster application and all squads within, (please add what is missing)
-Mikela: Support doc focal, GRC and all squads withing, (please add what is missing)
+Mikela: Support doc focal, GRC (GDPR readiness included), and all squads within.
 
 ### Using the board
 
@@ -123,7 +123,7 @@ Use the following milestones to triage issues:
 - Keep directories as short as possible.
    Example: `manage_apps/subscriptions.md` is easy for linking, readability, usability, etc...
    Without some regulation, things can get out of control with extra folders (we have all seen this): `managing/manage_all_the_things/manage_this_specific_thing/subscriptions.md`.
-- File names, let's not get craxy here, too. Keep product abbreviations out of file names; we jus thave to keep changing them. And keep them as short and as intuitive as possible.  
+- File names, let's not get crazy here, too. Keep product abbreviations out of file names; we jus thave to keep changing them. And keep them as short and as intuitive as possible.  
 - If you create a new file, remember to add a link to it in its parent/container topic and add a reference to it in the navigation file.
 - Remember to include necessary build tags (not needed until the transition)
 - If you refer to a product name, use a conref from the `conrefs.yml` file. (not needed until the transition-hard code instead)
