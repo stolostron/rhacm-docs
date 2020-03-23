@@ -10,30 +10,11 @@ lastupdated: "2020-03-23"
 
 Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. Additionally, see [Red Hat Advanced Cluster Management for Kubernetes troubleshooting](../troubleshoot/mcm_troubleshoot.md) for troubleshooting topics.
 
-  - [Cannot create a Helm release on a managed cluster](#helm_issue)
   - [Applications fail to install during Helm deployment](#load_error)
   - [ObjectBucket channels support including only one resource in each object](#194)
   - [Subscriptions that use a secret must be changed before updates to dependency resources can be detected](#611)
   - [Hub cluster resources display as `local-cluster` in console search results ](#31979)
   - [LDAP user names are case-sensitive](#25735)
-
-## Cannot create a Helm release on a managed cluster
-{: #helm_issue}
-<!--moving to troubleshoot folder possibly-->
-You are unable to deploy Helm charts that contain images on a managed cluster. To fix this error, you must configure `ClusterImagePolicy`. Run the following command to configure `ClusterImagePolicy`:
-
-```
-apiVersion: securityenforcement.admission.cloud.mcm.com/v1beta1
-kind: ClusterImagePolicy
-metadata:
-  annotations:
-    helm.sh/hook: post-install
-    helm.sh/hook-weight: "1"
-  name: mcm-default-cluster-image-policy
-spec:
-  repositories:
-  - name: <repo_name>
-```
 
 ## Applications fail to install during Helm deployment
 {: #load_error}
