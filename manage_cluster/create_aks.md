@@ -6,17 +6,10 @@ lastupdated: "2020-03-23"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Creating an Azure Kubernetes Service cluster
 
-Follow the procedure to create an Azure Kubernetes Service cluster. You can create a cluster from the Red Hat Advanced Cluster Management for Kubernetes console, or from the CLI. See [Azure Kubernetes Service ](https://azure.microsoft.com/en-us/services/kubernetes-service/){:new_window} for more information about the public Kubernetes service. 
+Follow the procedure to create an Azure Kubernetes Service cluster. You can create a cluster from the Red Hat Advanced Cluster Management for Kubernetes console, or from the CLI. See [Azure Kubernetes Service ](https://azure.microsoft.com/en-us/services/kubernetes-service/) for more information about the public Kubernetes service. 
 {:shortdesc}
 
 ## Supported architectures
@@ -36,7 +29,7 @@ Linux x86
 ## Prerequisites
 {: #prereq}
 
-* You must have a Red Hat OpenShift Container Platform hub deployed.
+* You must have a Red Hat OpenShift Container Platform hub cluster deployed.
 
 * You need to install the Kubernetes CLI, `kubectl`. 
 
@@ -117,7 +110,7 @@ Complete the following procedure to create a cluster with kubectl commands:
   
    - From the `data` specification, the `clientId`, `clientSecret`, and `tenantId` is retrieved from the Azure service principals, which is listed in prerequesites for this procedure. 
   
-  See an example at [Azure Provider: Authenticating using a Service Principal with a Client Secret](https://www.terraform.io/docs/providers/azurerm/auth/service_principal_client_secret.html){:new_window}.
+  See an example at [Azure Provider: Authenticating using a Service Principal with a Client Secret](https://www.terraform.io/docs/providers/azurerm/auth/service_principal_client_secret.html).
 
   - To get the base64 encoded clientId value, run the following command:
   
@@ -223,7 +216,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 |spec:resourceGroupName|Required, name of resource group|none|
 |spec:nodeCount|Optional; number of nodes in the Kubernetes node pool|none|
 |spec:kubeVersion|Optional value of the Kubernetes version for the cluster master node, from: `az aks get-versions` versions; if not specified, defaults to supported Kubernetes versions|supported version|
-|spec:nodeVMSize:|Optional, size of virtual machines to create as Kubernetes nodes; see [General purpose virtual machine sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general){:new_window}|none|
+|spec:nodeVMSize:|Optional, size of virtual machines to create as Kubernetes nodes; see [General purpose virtual machine sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general)|none|
 |spec:nodeOsdiskSize|Optional; size in GB of the OS disk for each node in the node pool, minimum 30 GB|none|
 |spec:dnsServiceIP|Optional IP address assigned to the Kubernetes DNS service; value must be in the range of the services cidrBlocks value|none|
 {: caption="Table 1. YAML file parameters and descriptions" caption-side="top"}
