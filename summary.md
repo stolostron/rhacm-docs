@@ -66,7 +66,7 @@
        * [Configuration policy controller](compliance/config_policy_ctrl.md)
        * [Certificate policy controller](compliance/cert_policy_ctrl.md)
        * [IAM policy controller](compliance/iam_policy_ctrl.md) 
-       * [CIS policy controller](compliance/cis_policy.md)
+       * [CIS policy controller](compliance/cis_policy_ctrl.md)
      * [Policy example](compliance/policy_example.md)
      * [Policy samples](compliance/policy_samples.md)
      * [Creating a policy](compliance/create_policy.md)
