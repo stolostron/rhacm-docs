@@ -14,20 +14,10 @@ lastupdated: "2020-03-16"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Creating an OpenShift  cluster in Amazon Web Services (AWS)
+# Creating an OpenShift  cluster in Amazon Web Services (AWS) <!--title change-->
 
-You can use the Red Hat Advanced Cluster Management for Kubernetes console or CLI to deploy an OpenShift  on Amazon Web Services (AWS) cluster. 
+You can use the Red Hat Advanced Cluster Management for Kubernetes console to deploy an OpenShift cluster on Amazon Web Services (AWS). 
 {:shortdesc}
-
-## Supported architectures
-<!--Links need to be revisisted here-->
-The following hardware architectures are supported:
-
-* Linux
-* Linux on Power (ppc64le)
-* Linux on LinuxONE
-
-**Required user type or access level**: Cluster administrator
 
   - [Prerequisites](#prereq)
   - [Creating your cluster with kubectl](#create_cli)
@@ -38,59 +28,42 @@ The following hardware architectures are supported:
 {: #prereq}
 
 * You must have an Red Hat Advanced Cluster Management for Kubernetes hub deployed.
-  
-* You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md). 
 
-* You need internet access so that your Red Hat Advanced Cluster Management for Kubernetes cluster can create a remote Kubernetes cluster by using Amazon Web Services.
+* Your <!--RHACM4K hub--> need internet access so that your Red Hat Advanced Cluster Management for Kubernetes cluster can create a remote Kubernetes cluster by using Amazon Web Services.
 
-* You need Amazon Web Services (AWS) login credentials, which include user name, password, access key ID, and secret access key. See [Understanding and Getting Your Security Credentials](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html){:new_window}.
+<!-- move this into prereq for cloud connection --> * You need Amazon Web Services (AWS) login credentials, which include user name, password, access key ID, and secret access key. See [Understanding and Getting Your Security Credentials](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html){:new_window}.
 
-* You need an OpenShift  image pull secret. See [Image Pull Secrets](https://docs.openshift.com/enterprise/3.0/dev_guide/image_pull_secrets.html){:new_window}.
+<!--prereq u you need to create an AWS cloud connection and link to AWS cloud connection doc-->
+<!--prereq configure a domain in AWS https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html-->
 
-* To create clusters across cloud providers with OpenShift , run the following command to enable the namespace to pull the image from the private registry:
-
-  ```
-  oc policy add-role-to-user system:image-puller system:serviceaccount:<namespace>:default --namespace=ibmcom
-  ```
-  {:codeblock}
-
-<!-- ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
+## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_gui}
 
-You can create clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
+You can create clusters from the Red Hat Advanced Cluster Management for Kubernetes console for <!--AWS-->.
 
-1. From the navigation menu, click **Clusters**.
-2. Click **Add Cluster**.
-3. Choose from one of the options.
+1. From the navigation menu, navigate to **Automated infrastructure** than click **Clusters**.
+2. On the Clusters page, Click **Add Cluster**.
+3. Choose from one of the options. <!-- u have the option of creating and importing cluster if user wish to import than link them to import doc-->
    
    You can choose to create a cluster as a managed service from a cloud provider, or you can create a cluster from infrastructure, which is a Cloud Automation Manager feature. 
 
    **Note:** If you already have an cluster that you want to import into a managed cluster, click the import option.
 
-4. To create as a managed cluster, choose a cloud provider. See (new topic link here) to learn more about available cloud providers.
-5. Enter a _Connection name_ and a _Connection description_. 
-6. Choose a _Namespace_. The namespaces that are listed are already connected to a cloud provider. 
+4. To create as a managed cluster, click on **Create cluster**
+5. provide cluster name
+6. provide base domain (https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html)
+<!--cluster name and base domain need to be use for the hostname of the OpenShift cluster-->
+
+5. choose AWS for infrastructure platform. See (new topic link here) to learn more about available cloud providers.
+
+7. choose your cloud connection. (if you dont have a cloud connection configured link to AWS cloud connection doc)
    
-  **Note** If you do not have a namespace that is connected to a cloud provider, you can  Add click **Add connection** from the _Cloud connection_ field.
+8. Configure your Node pool <- min you need to pick zone?
+9. (optional) configure cluster networking options.
+10. (optional) configure label for the cluster.
+11. Click **Create**. When you create a cluster your cluster will automatically be managed by RHOCM4K. You can view your cluster details after the create and import process is complete. -->
 
-7. Configure your cloud connection. (what is service account)
-   
-8. Save your cloud configuration if you want to return to that configuration later. 
-
-9. Click **Add** and continue to configure your cluster.
-    
-10. Enter details about your cluster in the _Configure your cluster_ details.
-
-11. Choose a default size or customize in the YAML file. (new topic link here)
-
-12. **Optional**: Configure advanced parameters. You can assign labels to later identify 
-clusters. 
-
-  You must add a label even if the label belongs to another cluster. Labels are not assigned automatically across clusters.
-
-13. Click **Create**. When you create a cluster, you also import a cluster. You can view your cluster details after the create and import process is complete. -->
-
-## Creating your cluster with kubectl
+## Creating your cluster with kubectl <!--not correct... remove this whole thing?-->
 {: #create_cli}
 
 Complete the following procedure to create a cluster with kubectl:
@@ -265,7 +238,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 |compute:hyperthreading|Optional, whether to enable or disable simultaneous multithreading, or hyperthreading on compute machines|enabled|
 {: caption="Table 1. YAML file parameters and descriptions" caption-side="top"}
 
-## Accessing your cluster 
+## Accessing your cluster <!--empty this section out new content coming once the UI code is dropped...-->
 {: #access}
 
 After you installed your cluster, you can access your cluster by using the `kubeconfig` file or OpenShift  cluster portal.
@@ -311,6 +284,7 @@ After you installed your cluster, you can access your cluster by using the `kube
 ## Deleting your cluster
 {: #delete}
 
+<!-- on cluster UI just go and select the cluster you want to delete and hit delete cluster...-->
 1. Run the following command to get your cluster:
    
   ```
