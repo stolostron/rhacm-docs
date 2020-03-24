@@ -1,28 +1,18 @@
 ---
 
 copyright:
-  years: 2016, 2018
-lastupdated: "2018-01-04"
+  years: 2016, 2020
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Delete user
 
 Delete a specific user.
-{:shortdesc}
 
 ```
 DELETE /users/{uid}
 ```
-{: codeblock}
 
 ## Description
 

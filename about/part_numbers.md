@@ -1,23 +1,14 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2019, 2020
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Passport Advantage part numbers
 
 Use these tables to find the files you need and the corresponding part (skew?) numbers.
-{: shortdesc}
 
   - [Downloading packages](#download)
   - [aPckages](#packages)
