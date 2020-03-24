@@ -21,3 +21,4 @@ Learn how to create clusters across cloud providers with Red Hat Advanced Cluste
 
 - {: child} [Creating an OpenShift cluster on Amazon Web Services cluster](create_ocp_aws.md)  
 {: childlinks}
+<!--missing links-->
