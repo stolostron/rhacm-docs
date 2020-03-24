@@ -2,22 +2,13 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-10"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # List specified repository
 
 Get details on a specific repository.
-{:shortdesc}
 
 Base path: `https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/repositories/<repo>`
 
@@ -52,7 +43,6 @@ The sample curl command resembles the following code:
 ```
 curl -k -H GET --header "Authorization: Bearer $ID_TOKEN" https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/repositories/<repo> --insecure
 ```
-{: codeblock}
 
 The response resembles the following code:
 
@@ -66,7 +56,6 @@ vnd.docker.container.image.v1+json","size":1512,"digest":\
 "sha256:053cde6e8953ebd834df8f6382e68be83adb39bfc063e40b0fc61b4b333938f1"},"layers":[{"mediaType":"application/vnd.docker.image.rootfs.diff.tar.gzip","size":1991435,\
 "digest":"sha256:b56ae66c29370df48e7377c8f9baa744a3958058a766793f821dadcb144a4647"}]}}]}root@master:~#
 ```
-{: pre}
 
 ## Parameters
 
