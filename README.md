@@ -4,45 +4,34 @@ The documentation for Red Hat Advanced Cluster Management for Kubernetes is prov
 
 **Note:** This documentation is still a work in progress. Frequent changes and improvements are expected. 
 
-## Structure of the documentation
+## How to use the Red Hat Advanced Cluster Management for Kubernetes documentation
 
 Use the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file as the table of contents. The `summary.md` file provides direct linking within the repository to the corresponding files.
 
-## Submitting feedback and change requests
+To submit feedback and change requests, see the [documentation issue template](https://github.com/open-cluster-management/rhacm-docs/issues/new/choose).
 
 As mentioned earlier, this documentation is still a work in progress. If you have suggestions for improvements, feel free to open a documentation issue in the GitHub repository. 
 
-1. Select the *Issues* tab. 
-2. Select **New issue**. 
-3. Provide detailed descriptions of the changes. If you provide your contact information, we can contact you with any questions related to your issue. 
-4. Add _squad-doc_ label to the issue. 
-5. Submit the issue. 
 ______________________________________________________________________________________________________________________________
 
-## Internal dev and doc process
-
-Please take a minute or two to read!
+## For Red Hat Advanced Cluster Management for Kubernetes documentation and developers only
 
 **IMPORTANT:** DOC SHUT DOWN three days before GA; please give us time to finalize our documentation and deliver on time.
 
 To ensure product documentation is accessible, accurate, tested, complete, and follows corporate style manual, we need to shut down incoming work three days before GA. Please open issues early and doc test early.
 
-## Contributing to the repository
-
-**Please open an issue, not a PR** so that we can make updates as we transition into ASCII doc.
-
 To see the content, (until a link is available), please rely on the table of contents/navigation draft found in the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file.
 
-**RHACM developers:** Please open an issue as normal with the file/content that needs to be added. Label your issue `squad doc` and give a detailed description of your change. The clearer you are in the description, the quicker we can make the updates. 
+**RHACM developers:** Please open an issue as normal with the file/content that needs to be added. Label your issue `squad:doc` and give a detailed description of your change. The clearer you are in the description, the quicker we can make the updates. **Please open an issue, not a PR** so that we can make updates as we transition into ASCII doc.
 
-## Issue and Pull request process
+### Issue and Pull request process
 
 Identify documentation content updates (features, enhancements, and bug fixes) and open issues.
 
    - For a Dev issue where doc work is required - open up a **separate** ID issue in the open-cluster-management backlog. If you are not ready for a doc issue but you know you eventually need one, you can label `doc_needed`.
    - Describe the changes that you are making or want the Doc team to make; keep it in _untriaged_ stage.
    - Add tags such as `bug` or `priority`.
-   - Doc team can use the `help wanted` label if we are waiting for input late in the release.
+   - Doc team can use the `doc-awaiting-input` label if we are waiting for input late in the release.
    
 **Link issues to commits** This is important for file history and if something has to be undone. Link an issue to a commit, add a reference to the issue to the commit message and a quick note about the update. See the following syntax:
 
@@ -65,11 +54,11 @@ It is very important to get the doc team to help with UI content.
  
 ### Known issues or limitations
 
-Please `squad doc` issues where we have a known issue or limitation in the product that you want us to document in the [Known issues](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/about/known_issues.md) section.
+Please `squad:doc` issues where we have a known issue or limitation in the product that you want us to document in the [Known issues](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/about/known_issues.md) section.
 
-## Branch strategy
+### Branch strategy
 
-- Work in the _stage_ branch. The _production_ branch will be updated regulary by the doc team.
+- Work from the _doc_stage_ branch. The _doc_prod_ (production) branch will be updated regulary by the doc team.
 - We don't have a master branch because devs and doc team should target changes by opening branches from a release branch.
 - Hold all changes that you cannot merge on your own branch.
 - Please start your branch with a letter so your branch is not confused with a release branch:
@@ -77,27 +66,9 @@ Please `squad doc` issues where we have a known issue or limitation in the produ
 - Place all changes that are relevant for the next release in the `doc_stage` (our default branch).
 - "Be kind; delete your branch." Delete your branch after you have merged your changes.
 
-## Doc schedule (draft, input from DE and architect) 
-Limited release:
-
-- 3/2: Doc repo and navigation is ready for development input
-- 3/9: Development issues all created in the open_cluster repository and labeled `squad doc`
-- 3/11: Dev input required for doc issues
-- 3/24: Doc freeze to allow time to complete required processes (See Doc team shutdown)
-- 3/27: Verizon LA
-
-GA and integration with Red Hat docs:
-
-- 4/2: Conversion to AsciiDoc complete
-- 4/15: Builds running AsciiDoc
-- 4/17: Doc freeze
-- 4/23: GA to RH decided format
-
 **Note for UI guild:** We have set up numerous doc links from the UI in the course of the product evolution. For LR, these docs will not be live. Brandi will follow up with how these icons/links will be updated for GA. Ping for questions.
 
 **Note: Moving to [AsciiDoc is a text document format](http://asciidoc.org/).** 
-
-## Doc writer internal processes (doc team only)
 
 ### Writer assignments
 
@@ -105,9 +76,9 @@ Chris: Lead, Cluster Lifecycle and all squads within, Foundation, Install (pleas
 Brandi: Architect for doc, UI Guild writer, Cluster application and all squads within, (please add what is missing)
 Mikela: Support doc focal, GRC (GDPR readiness included), and all squads within.
 
-### Using the board
+### Understanding the board
 
-Use the following milestones to triage issues:
+We use the following milestones to triage issues:
 
  - Product: Next release/future issues
  - Release: GA after any limited or beta issues

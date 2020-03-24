@@ -23,7 +23,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
 * You must have an Red Hat Advanced Cluster Management for Kubernetes hub that is deployed and cluster that you want to manage.
 
-* You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see [Installing the Kubernetes CLI (kubectl)](../../kubectl/install_kubectl.md).
+* You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/).
 
 * You must install the Red Hat Advanced Cluster Management for Kubernetes CLI, `cloudctl`. For more information, see [Installing the Red Hat Advanced Cluster Management for Kubernetes CLI](../../cloudctl/install_cli.md) to install the CLI.
 
