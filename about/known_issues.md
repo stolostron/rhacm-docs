@@ -10,55 +10,11 @@ lastupdated: "2020-03-23"
 
 Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. Additionally, see [Red Hat Advanced Cluster Management for Kubernetes troubleshooting](../troubleshoot/mcm_troubleshoot.md) for troubleshooting topics.
 
-  - [Applications fail to install during Helm deployment](#load_error)
   - [ObjectBucket channels support including only one resource in each object](#194)
   - [Subscriptions that use a secret must be changed before updates to dependency resources can be detected](#611)
   - [Hub cluster resources display as `local-cluster` in console search results ](#31979)
   - [LDAP user names are case-sensitive](#25735)
-  - [Pods are not reachable from the NGINX ingress controller in multitenant isolation mode](#34414)
   - [CIS policy controller is not installed](#1087)
-  
-
-## Applications fail to install during Helm deployment
-{: #load_error}
-
-Applications fail to install during deployment when the ClusterImagePolicy is not configured.
-
-**Note:** Be sure to configure ClusterImagePolicy. View the _Cannot create a Helm release on a remote cluster_ section for information about configuring the policy.
-
-To fix this error, reinstall your application by following the tasks:
-
-1. Verify the status of your application by running the following command:
-
-   ```
-   helm list --tls
-   ```
-
-2. To delete your application, run the following command:
-
-   ```
-   helm delete releaseName --purge
-   ```
-
-3. Edit and locate the `ClusterImagePolicy` to push your images to your application. Run the following command:
-
-   ```
-   kubectl get clusterimagepolicy
-   ```
-
-4. Edit the ClusterImagePolicy by running the following command:
-
-   ```
-   kubectl edit clusterimagepolicy <policyname>
-   ```
-
-5. Reinstall your application. Run the following command:
-
-   ```
-   helm install chartName
-   ```
-
-For more details, see the [Helm community issue](https://github.com/helm/helm/issues/3353).
 
 ## ObjectBucket channels support including only one resource in each object
 {: #194}
