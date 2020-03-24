@@ -2,22 +2,13 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-04"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Multicluster config.yaml file settings
 
 The `config.yaml` file contains all the configuration settings that are needed to deploy your cluster.
-{:shortdesc}
 
 From the `config.yaml` file, you can customize your installation by using various parameters.
 
