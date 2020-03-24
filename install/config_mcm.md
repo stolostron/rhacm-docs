@@ -27,8 +27,8 @@ You can set or update the following parameters by modifying the `config.yaml` fi
 |Parameter|Description|Default value|
 |---------|-----------|-------------|
 |`multicluster-hub:`|Configure multicluster hub parameters. | |
-|&nbsp;&nbsp;`etcd:`|Configure etcd parameters for multicluster hub. ||
-|&nbsp;&nbsp;&nbsp;&nbsp;`persistence:`|Enable or disable the persistence volume for etcd. |false |
-|&nbsp;&nbsp;&nbsp;&nbsp;`localPath:`|The local directory for persistence volume in all management nodes for etcd. |/var/lib/etcd-mcm |
+|`etcd:`|Configure etcd parameters for multicluster hub. ||
+|`persistence:`|Enable or disable the persistence volume for etcd. |false |
+|`localPath:`|The local directory for persistence volume in all management nodes for etcd. |/var/lib/etcd-mcm |
 {: caption="Table 1. Multicluster-hub settings for the IBM Cloud Pak for Multicloud Management" caption-side="top"}
 
