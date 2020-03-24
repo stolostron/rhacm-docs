@@ -7,7 +7,7 @@ lastupdated: "2020-03-15"
 
 # What's new in Red Hat Advanced Cluster Management for Kubernetes 
 
-Get an overivew of Red Hat Advanced Cluster Management for Kubernetes from 
+Get an overivew of Red Hat Advanced Cluster Management for Kubernetes from (link arch/welcome page here)
 
 ## Installation
 
@@ -17,11 +17,11 @@ See [Installing  Red Hat Advanced Cluster Management for Kubernetes](install/ins
 
 ## Cluster management
 
-  * Create clusters to manage. Red Hat Advanced Cluster Management for Kubernetes offers a cloud-like experience for Red Hat OpenShift Container Platform clusters on your cloud infrastructure of choice. The product supports lifecycle management for multiple cloud environments, such as <example of cloud provider> cluster. See [Amazon Elastic Kubernetes Service ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://aws.amazon.com/eks/)or more information about the public Kubernetes service. <Chris can add/edit content here, --pulled old link as an example>
+  - Create clusters to manage. Red Hat Advanced Cluster Management for Kubernetes offers a cloud-like experience for Red Hat OpenShift Container Platform clusters on your cloud infrastructure of choice. The product supports lifecycle management for multiple cloud environments, such as <example of cloud provider> cluster. See [Amazon Elastic Kubernetes Service ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://aws.amazon.com/eks/)or more information about the public Kubernetes service. <Chris can add/edit content here, --pulled old link as an example>
   
-  * Import and manage any Red Hat OpenShift Container Platform and other managed Kubernetes clusters as a Service. You can import clusters from different Kubernetes cloud providers, such as <need examples here>. After you import, the targeted cluster becomes a managed cluster for the Red Hat Advanced Cluster Management for Kubernetes hub cluster.
+  - Import and manage any Red Hat OpenShift Container Platform and other managed Kubernetes clusters as a Service. You can import clusters from different Kubernetes cloud providers, such as <need examples here>. After you import, the targeted cluster becomes a managed cluster for the Red Hat Advanced Cluster Management for Kubernetes hub cluster.
 
-  * Manage cluster upgrade all of your clusters from one simple control plane. <Chris can add his upgrade content>
+  - Manage cluster upgrade all of your clusters from one simple control plane. <Chris can add his upgrade content>
 
 ## Application management
 
