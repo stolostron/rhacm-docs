@@ -11,7 +11,7 @@ Get an overivew of Red Hat Advanced Cluster Management for Kubernetes from (link
 
 ## Installation
 
-From a Red Hat OpenShift Container Platform cluster, you can create a hub cluster in 10 minutes or less. <Chris adds his install blurb here>**. 
+From a Red Hat OpenShift Container Platform cluster, you can create a hub cluster in 10 minutes or less. <Chris adds his install blurb here>. 
   
 See [Installing  Red Hat Advanced Cluster Management for Kubernetes](install/installation.md) for information about the operator-based install, which streamlines setup and ongoing cluster lifecycle.
 
