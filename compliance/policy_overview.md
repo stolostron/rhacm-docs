@@ -2,22 +2,13 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-12"
+lastupdated: "2020-03-24"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Red Hat Advanced Cluster Management for Kubernetes policy overview
 
-An Red Hat Advanced Cluster Management for Kubernetes template is defined within a policy document. Each policy document can have at least one or multiple templates. 
-{:shortdesc}
+An Red Hat Advanced Cluster Management for Kubernetes template is defined within a policy document. Each policy document can have at least one or multiple templates.
 
 **Important**: Each client and cloud provider is responsible for ensuring that the cloud environment that they manage meets their enterprise security standards and any regulatory compliance requirements.
 
