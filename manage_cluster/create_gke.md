@@ -6,14 +6,6 @@ lastupdated: "2020-03-23"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Creating a Google Kubernetes Engine cluster
 
 Follow the procedure to create a Google Kubernetes Engine (Kubernetes Engine) cluster. For more information about Kubernetes Engine, see [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/){:new_window}.
@@ -108,7 +100,7 @@ Complete the following procedure to create a cluster with kubectl:
   * Create and name your `apikey.yaml` file.
   * Create and name your `cluster.yaml` file.
 
-2. Create a service account to obtain Google identity credentials. See [Creating a service account](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount){:new_window} in the Google Developers Console.
+2. Create a service account to obtain Google identity credentials. See [Creating a service account](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount) in the Google Developers Console.
 
 3. Download the corresponding JSON key file. Encode key with base64 and add it to the `apikey.yaml` privateKey field. Run the following command:
 
