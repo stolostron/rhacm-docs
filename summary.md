@@ -59,7 +59,6 @@
        * [Using ACME to issue certificates](cert_manager/cert_acme.md)
        * [Adding certificates by using the ECDSA algorithm for encryption](cert_manager/cert_ecdsa.md)
        * [Certificate Manager role-based access control (RBAC) support](cert_manager/cert_manager_rbac.md)
-       * [Configmap watcher service](cert_manager/configmap_watcher.md)
    * [Governance and risk](compliance/compliance_intro.md)
      * [Policy overview](compliance/policy_overview.md)
      * [Policy controllers](compliance/policy_controllers.md)
