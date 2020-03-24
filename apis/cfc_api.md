@@ -12,4 +12,3 @@ Access and modify your Red Hat Advanced Cluster Management for Kubernetes cluste
 
 - [Preparing to run component or management API commands](../apis/access_api.md)
 - [Component APIs](../apis/component_apis.md)
-- [Red Hat Advanced Cluster Management for Kubernetes APIs](../apis/mcm_apis.md) 
