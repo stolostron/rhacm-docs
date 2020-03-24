@@ -21,7 +21,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
 <!--not sure if this should be removed-->
 When you are including resources into the object store, do not include multiple resources in a single object. Object stores are used to store Kubernetes resource YAML files as objects. These files define the Kubernetes resource without wrapping the resource. To include these objects in a channel, each file can define only a single Kubernetes resource.
 
-## Subscriptions that use a secret must be changed before updates to dependency resources can be detected
+## Subscriptions that use a secret must be resynchronized before updates to dependent resources can be detected
 {: #611}
 
 For a subscription that uses a secret to access a channel, the secret that exists on the Hub cluster. If the secret is updated, the subscription is not able to detect and retrieve the changes for the secret by default. This behavior can result in the secret becoming out of sync between the subscription and the actual secret resource. When changes are then made for the dependency resources for the subscribed channel, such as ConfigMaps or secrets, the subscription does not able to detect the changes by default. <!--James will make suggestions here-->
@@ -54,4 +54,3 @@ The CIS policy controller is disabled by default when you install Red Hat Advanc
    ```
 
 You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../compliance/cis_policy_ctrl.md#cisc).
-
