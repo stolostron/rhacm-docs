@@ -54,7 +54,6 @@
        * [Creating Certificate manager (cert-manager) certificates](cert_manager/create_cert.md)
          * [Customizing cert-manager certificates](cert_manager/create_cert_advance.md)
        * [Viewing (product name) cert-manager resources](cert_manager/cert_view.md)
-       * [Refreshing cert-manager certificates](cert_manager/refresh_cert.md)
        * [Using Vault to issue certificates](cert_manager/cert_vault.md)
        * [Using ACME to issue certificates](cert_manager/cert_acme.md)
        * [Adding certificates by using the ECDSA algorithm for encryption](cert_manager/cert_ecdsa.md)
