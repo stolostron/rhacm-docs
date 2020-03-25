@@ -85,7 +85,7 @@ To promote a deployable to a channel, you can use any of the following methods:
     The `spec.channels` parameter is available for deployable (`Deployable.app.ibm.com`) resources to identify the channels where the deployable is to be promoted. The following example shows a deployable that defines the channels where the deployable is to be included.
 
     ```yaml
-    apiVersion: app.ibm.com/v1alpha1
+    apiVersion: apps.open-cluster-management.io/v1
     kind: Deployable
     metadata:
         name: deployable1
@@ -105,7 +105,7 @@ To promote a deployable to a channel, you can use any of the following methods:
   As an example, the following channel automatically pull the most recent, or latest, `nginx` chart when a new chart is published to the source Helm repository for the channel. The chart deployable must have a matching version `1.x` to be promoted to the channel.
 
     ```yaml
-    apiVersion: app.ibm.com/v1alpha1
+    apiVersion: apps.open-cluster-management.io/v1
     kind: Channel
     metadata:
         name: dev
@@ -114,7 +114,7 @@ To promote a deployable to a channel, you can use any of the following methods:
         type: HelmRepo
         pathname: https://kubernetes-charts.storage.googleapis.com/
     ---
-    apiVersion: app.ibm.com/v1alpha1
+    apiVersion: apps.open-cluster-management.io/v1
     kind: Subscription
     metadata:
         name: mydevsub
@@ -134,7 +134,7 @@ To promote a deployable to a channel, you can use any of the following methods:
   The following example subscription indicates that the most recent `nginx` version `1.x` chart is to be promoted through the channel for deployment with the subscription.
 
     ```yaml
-    apiVersion: app.ibm.com/v1alpha1
+    apiVersion: apps.open-cluster-management.io/v1
     kind: Subscription
     metadata:
         name: mydevsub
