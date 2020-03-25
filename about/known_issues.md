@@ -2,42 +2,31 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-23"
+lastupdated: "2020-03-25"
 
 ---
 
 # Known issues
 
-Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. Additionally, see [Red Hat Advanced Cluster Management for Kubernetes troubleshooting](../troubleshoot/mcm_troubleshoot.md) for troubleshooting topics.
+Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
 
-  - [ObjectBucket channels support including only one resource in each object](#194)
-  - [Subscriptions that use a secret must be changed before updates to dependency resources can be detected](#611)
-  - [Hub cluster resources display as `local-cluster` in console search results ](#31979)
+  - [Certificate manager must not exist during an installation](#678)
   - [LDAP user names are case-sensitive](#25735)
   - [CIS policy controller is not installed](#1087)
 
-## ObjectBucket channels support including only one resource in each object
-{: #194}
-<!--not sure if this should be removed-->
-When you are including resources into the object store, do not include multiple resources in a single object. Object stores are used to store Kubernetes resource YAML files as objects. These files define the Kubernetes resource without wrapping the resource. To include these objects in a channel, each file can define only a single Kubernetes resource.
+## Certificate manager must not exist during an installation
+{: #678}
 
-## Subscriptions that use a secret must be resynchronized before updates to dependent resources can be detected
-{: #611}
+Certificate manager must not exist on a cluster when you install Red Hat Advanced Cluster Management for Kubernetes.
 
-For a subscription that uses a secret on the hub cluster to access a channel, when the secret is updated, the subscription is not able to detect and retrieve the changes to the secret by default. This behavior can result in the secret desynchronizing  between the subscription and the actual secret resource. After, changes are made to the dependent resources for the subscribed channel, such as ConfigMaps or secrets, the subscription is not able to detect the changes by default.
 
-To synchronize the subscription with the updated resources, you must edit the subscription. To update a subscription, you can add a label to the subscription, such as with the following command:
+When certificate manager already exists on the cluster, Red Hat Advanced Cluster Management for Kubernetes installation fails. 
 
-```
-kubectl label subscription <subscription-name> -n <subscription-namespace> <label-name>=<any-content>
-```
+To resolve this issue, verify if the certificate manager is present in your cluster by running the following command: 
 
-When the subscription is changed, the subscription controller is triggered to synchronize with the referenced secret and the subscribed channel resources.
-
-## Hub cluster resources display as `local-cluster` in console search results
-{: #31979}
-
-Search returns and lists each cluster with the resource that you search. For resources in the _hub_ cluster, the cluster name is displayed as _local-cluster_.
+   ```
+   kubectl get crd | grep certificates.certmanager
+   ```
 
 ## LDAP user names are case-sensitive
 {: #25735}
