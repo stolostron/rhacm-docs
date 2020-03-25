@@ -2,23 +2,14 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-25"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Part numbers
 
 
 Use these tables to find the files you need from [Red Hat Customer Portal](https://access.redhat.com/downloads) and the corresponding part numbers.
-{: shortdesc}
 
   - [Downloading packages](#download)
   - [Red Hat Advanced Cluster Management for Kubernetes Core packages](#core)

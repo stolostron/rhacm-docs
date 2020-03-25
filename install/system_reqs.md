@@ -2,23 +2,14 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-25"
 
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # System requirements and recommendations
 
 Before you install Red Hat Advanced Cluster Management for Kubernetes, review the system requirements and the footprint sizing.
-{:shortdesc}
 
   - [Red Hat OpenShift Container Platform](#ocp)
   - [Red Hat Advanced Cluster Management for Kubernetes](#rhacm)

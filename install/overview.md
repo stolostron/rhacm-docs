@@ -2,22 +2,13 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-25"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Installation
 
 This section provides all the details required to install and uninstall your installation of Red Hat Advanced Cluster Management for Kubernetes.
-{:shortdesc}
 
 Before you install Red Hat Advanced Cluster Management for Kubernetes, review the required hardware and system configuration for each product.
 
@@ -30,7 +21,6 @@ High-level installation flow:
 
 After you install and deploy the Red Hat Advanced Cluster Management for Kubernetes, view the documentation on how to use the many features in each of the components.
 
-   - {: child} [System requirements](requirements.md)
-   - {: child} [Online](install_connected.md)
-   - {: child} [Uninstalling](uninstall.md)
-   {: childlinks}
+   - [System requirements](requirements.md)
+   - [Online](install_connected.md)
+   - [Uninstalling](uninstall.md)
