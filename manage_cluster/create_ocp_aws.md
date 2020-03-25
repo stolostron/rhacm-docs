@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-25"
 
 ---
 
@@ -14,7 +14,7 @@ lastupdated: "2020-03-16"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Creating an OpenShift  cluster in Amazon Web Services (AWS) <!--title change-->
+# Creating an OpenShift cluster in Amazon Web Services
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to deploy an OpenShift cluster on Amazon Web Services (AWS). 
 {:shortdesc}
@@ -27,180 +27,54 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to de
 ## Prerequisites
 {: #prereq}
 
-* You must have an Red Hat Advanced Cluster Management for Kubernetes hub deployed.
+You must have the following prerequisites before creating a cluster on AWS:
 
-* Your <!--RHACM4K hub--> need internet access so that your Red Hat Advanced Cluster Management for Kubernetes cluster can create a remote Kubernetes cluster by using Amazon Web Services.
+* A deployed Red Hat Advanced Cluster Management for Kubernetes hub cluster
 
-<!-- move this into prereq for cloud connection --> * You need Amazon Web Services (AWS) login credentials, which include user name, password, access key ID, and secret access key. See [Understanding and Getting Your Security Credentials](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html){:new_window}.
+* Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create a remote Kubernetes cluster by using Amazon Web Services
 
-<!--prereq u you need to create an AWS cloud connection and link to AWS cloud connection doc-->
-<!--prereq configure a domain in AWS https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html-->
+* AWS cloud connection created. See [Setting up a cloud connection for AWS](cloud_conn_aws.md) for more information.
+
+* A configured domain in AWS. See [Configuring an AWS account](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html) for instructions on how to configure a domain. 
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_gui}
 
-You can create clusters from the Red Hat Advanced Cluster Management for Kubernetes console for <!--AWS-->.
+To create clusters from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
-1. From the navigation menu, navigate to **Automated infrastructure** than click **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
+
 2. On the Clusters page, Click **Add Cluster**.
-3. Choose from one of the options. <!-- u have the option of creating and importing cluster if user wish to import than link them to import doc-->
+
+3. Select **Create a cluster**. 
    
-   You can choose to create a cluster as a managed service from a cloud provider, or you can create a cluster from infrastructure, which is a Cloud Automation Manager feature. 
+  **Note:** This procedure is for creating a cluster. If you have an existing cluster that you want to import, see [Importing a cluster in AWS](import_cluster_aws) for those steps.
+  
+4. Enter a name for your cluster. This name is used in the hostname of the cluster.
 
-   **Note:** If you already have an cluster that you want to import into a managed cluster, click the import option.
+  **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**. 
 
-4. To create as a managed cluster, click on **Create cluster**
-5. provide cluster name
-6. provide base domain (https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html)
-<!--cluster name and base domain need to be use for the hostname of the OpenShift cluster-->
+5. Enter the base domain information that you configured for your AWS account. See [Configuring an AWS account](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html) for more information. This name is used in the hostname of the cluster.
 
-5. choose AWS for infrastructure platform. See (new topic link here) to learn more about available cloud providers.
+6. Select Amazon Web Services for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available cloud providers.
 
-7. choose your cloud connection. (if you dont have a cloud connection configured link to AWS cloud connection doc)
+7. Select your cloud connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a cloud connection on AWS](conn_cloud_aws.md).
    
-8. Configure your Node pool <- min you need to pick zone?
-9. (optional) configure cluster networking options.
-10. (optional) configure label for the cluster.
-11. Click **Create**. When you create a cluster your cluster will automatically be managed by RHOCM4K. You can view your cluster details after the create and import process is complete. -->
+8. Configure the *Node pools* for your cluster. 
 
-## Creating your cluster with kubectl <!--not correct... remove this whole thing?-->
-{: #create_cli}
+  The node pools define the location and size of the nodes that are used for your cluster. 
 
-Complete the following procedure to create a cluster with kubectl:
+  The *Region* specifies where the nodes are located geographically. A closer region might provide faster performance, but a more distant region might be more distributed. 
 
-1. Create and save the following  `.yaml` files that you need to complete the procedure:
-   
-   * Create and name your `apikey.yaml` file.
-   * Create and name your `pullsecret.yaml` file.
-   * Create and name your `cluster.yaml` file.
+  * Master pool: There are three Master nodes that are created for your cluster in the master pool. The master nodes share the management of the cluster activity. You can select multiple zones within the region for a more distributed group of master nodes. You can change the type and size of your instance after it is created, but you can also specify it in this section. The default values are *mx4.xlarge - 4 vCPU, 16 GiB RAM - General Purpose* with 500 GiB of root storage. 
 
-2. In the `apikey.yaml` file, enter the Amazon Web Services (AWS) cloud API key information to ensure that you have permission to create a cluster with the API key. Here, `awsAccessKeyID` is your AWS ID and `awsSecretAccessKey` is your AWS key. See [_Table 1. YAML file parameters and description_](#table_1) for details about each parameter. See the following sample file:
-   
-  ```
-  apiVersion: v1
-  kind: Secret
-  metadata:
-    name: <cloud-access-secret-name>
-  namespace: ocp-provider-system
-  labels:
-    cloud-provider: ocp
-    purpose: cloud-connection
-  type: Opaque
-  data:
-    awsAccessKeyID: <base64-encoded-key-id> # echo -n your-aws-id | base64
-    awsSecretAccessKey: <base64-encoded-access-key> # echo -n your-aws-key | base64
-  ```
-  {:codeblock}
-  
-  - For `<cloud-access-secret-name>`, enter your secret name.
-  
-  - From the `data` specification, the `awsAccessKeyID` and `awsSecretAccessKey` are the base64 encoded AWS API keys.
-   
-  - To get the base64 encoded `awsAccessKeyID` and `awsSecretAccessKey` values, run the following command:
-  
-  ```
-  printf <apikey> | base64
-  ```
-  {:codeblock}
+  * Worker pools: You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.  
 
-  - Use the encoded value to replace the `<base64-encoded-key-id>` and `<base64-encoded-access-key>`.
-  
-3. Run the following command to apply the configuration:
+9. Optional: Configure the cluster networking options.
 
-  ```
-  kubectl apply -f <directory>/apikey.yaml -n <namespace>
-  ``` 
-  {:codeblock}
+10. Optional: configure label for the cluster.
 
-4. In the `pullsecret.yaml` file, enter the OpenShift  pull secret information to ensure that the images can be pulled. 
-
-See the following sample `.yaml` file, where `name` is your pull secret name and `pullSecret` is your pull secret value:
-
-  ```
-  apiVersion: v1
-  kind: Secret
-  metadata:
-    name: <pull-secret-name>
-    namespace: ocp-provider-system
-    labels:
-      cloud-provider: ocp
-  type: Opaque
-  data:
-    pullSecret: <base64-encoded-pull-secret> # echo -n your-pull-secret | base64
-  ```
-  {:codeblock}
- 
-  The `<pull-secret-name>` is your pull secret name, which is similar to apikey and must be base64 encoded.
-  
-5. Run the following command to apply the pull secret:
-
-  ```
-  kubectl apply -f <directory>/pullsecret.yaml -n <namespace>
-  ```
-  {:codeblock}
-
-6. Edit the cluster object that is defined in `cluster.yaml` with your Amazon Web Services (AWS) cluster configuration. Replace the `<cloud-access-secret-name>` and `<pull-secret-name>` with the value of the name in `apikey.yaml` and `pullsecret.yaml`. See [_Table 1. YAML file parameters and description_](#table_1) for details about each parameter. See the following sample file:
- 
-  ```
-  apiVersion: "cluster.k8s.io/v1alpha1"
-  kind: Cluster
-  metadata:
-    name: ocp-cluster
-    namespace: ocp-provider-system
-    labels:
-      cloud-provider: ocp
-  spec:
-    clusterNetwork:
-      services:
-        cidrBlocks: ["10.96.0.0/16"]
-      pods:
-        cidrBlocks: ["192.168.0.0/16"]
-    providerSpec:
-      value:
-        apiVersion: ocpprovider/v1alpha1
-        kind: OCPClusterProviderSpec
-        platform:
-          aws:
-            region: us-west-1
-            type: m5.xlarge
-        baseDomain: example.com  
-        sshPublicKey: 
-        secretName: <cloud-access-secret-name>
-        pullSecretName: <pull-secret-name>
-        networkType: OpenShiftSDN
-        machineCIDR: 10.0.0.0/16
-        controlplane:
-          replicas: 3
-          hyperthreading: Enabled
-          name: master
-          platform:
-              aws:
-                type: m5.xlarge
-        compute:
-          - replicas: 3
-            hyperthreading: Enabled
-            name: worker
-            platform:
-              aws:
-                type: m5.xlarge
-  ```
-  {: codeblock}
-
-7. Run the following command to apply the cluster object:
-
-  ```
-  kubectl apply -f <directory>/cluster.yaml -n <namespace>
-  ```
-  {: codeblock}
-
-8. Depending on your specifications, it can take up to 30 minutes to create a cluster. Run the following command to see the status:
-
-  ```
-  kubectl describe cluster.cluster.k8s.io/<cluster-name> -n <namespace>
-  ```
-  {: codeblock}
-
-  You see `CreateClusterSuccessful` in the `Event` list when the cluster is created.
+11. Click **Create**. When you create the  cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
 ### YAML Parameters and descriptions
 {: #table_1}
@@ -238,67 +112,20 @@ Table 1: The following table lists the parameters and descriptions that are avai
 |compute:hyperthreading|Optional, whether to enable or disable simultaneous multithreading, or hyperthreading on compute machines|enabled|
 {: caption="Table 1. YAML file parameters and descriptions" caption-side="top"}
 
-## Accessing your cluster <!--empty this section out new content coming once the UI code is dropped...-->
+## Accessing your cluster 
 {: #access}
 
-After you installed your cluster, you can access your cluster by using the `kubeconfig` file or OpenShift  cluster portal.
+After you installed your cluster, you can access your cluster by using the `kubeconfig` file or OpenShift cluster portal.
 
-1. Run the following command to get the secret:
-
-  ```
-  $ kubectl get secret -n <namespace>
-  ```
-  {: codeblock}
-  
-  See the following example output:
-  
-  ```
-  NAME                      TYPE                                  DATA   AGE
-  <cluster-name>-<cluster-id>  Opaque                                3      4m41s
-  ```
-  {: pre}
-
-2. Generate the Kubeconfig to access the cluster that you created. Run the following command:
-
-  ```
-  kubectl get secrets/<cluster-name>-<cluster-id> -o 'go-template={{index .data "kubeconfig"}}' | base64 --decode > <directory>/kubeconfig
-  ```
-  {: codeblock}
-
-3. Run the following command to access your cluster by endpoint:
-   
-  ```
-  kubectl describe cluster.cluster.k8s.io/<cluster-name> -n <namespace>
-  ```
-  {: codeblock}
-
-  URL example: `https://<Cluster Master Host>:<Cluster Master API Port>`
-
-4. Set the `KUBECONFIG` environment variable with the following command:
-
-  ```
-  $ export KUBECONFIG=<directory>/kubeconfig
-  ```
-  {: codeblock}
+????? Information coming ??????
 
 ## Deleting your cluster
 {: #delete}
 
-<!-- on cluster UI just go and select the cluster you want to delete and hit delete cluster...-->
-1. Run the following command to get your cluster:
-   
-  ```
-  $ kubectl get cluster.cluster.k8s.io/<cluster-name> -n <namespace>
-  ```
-  {: codeblock}
+1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
 
-2. Run the following command to delete the cluster:
+2. Select **...** beside the cluster that you want to delete.
 
-  ```
-  kubectl delete cluster.cluster.k8s.io/<cluster-name> -n <namespace>
-  ```
-  {: codeblock}
-
-  For more information about the delete command options, run `kubectl delete --help`.
+3. Select **Delete cluster**. 
 
 View your cluster in the Red Hat Advanced Cluster Management for Kubernetes console. To scale your cluster, see [Scaling your cluster](scale_mcm.md).
