@@ -2,22 +2,13 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-13" 
+lastupdated: "2020-03-25" 
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Application resources (Technology preview)
 
 Within Red Hat Advanced Cluster Management for Kubernetes, applications are composed of multiple application resources. The foundational resources for Red Hat Advanced Cluster Management for Kubernetes applications are the `application` resource and the `deployable` resource.
-{:shortdesc}
 
 In addition, you can use channel, subscription, and placement rule resources to help you deploy, update, and manage your overall applications.
 
@@ -49,7 +40,6 @@ spec:
   - group: apps.open-cluster-management.io/v1
     kind: Subscription
 ```
-{: codeblock}
 
 For more information about creating and managing applications, see [Creating and managing applications](managing_apps.md).
 
@@ -98,7 +88,6 @@ spec:
         release: {{ .Release.Name }}
         tier: frontend
 ```
-{: codeblock}
 
 For more information about creating and managing deployables, see [Managing deployables](managing_deployables.md).
 
@@ -125,7 +114,6 @@ data:
   AccessKeyID: ABCdeF1=
   SecretAccessKey: gHIjk2lmnoPQRST3uvw==
 ```
-{: codeblock}
 
 For more information about creating and managing secrets, see [Managing secrets](managing_secrets.md).
 
@@ -154,7 +142,6 @@ spec:
   type: Namespace
   pathname: {{ .Release.Namespace }}
 ```
-{: codeblock}
 
 For more information about creating and managing channels, see [Managing channels](managing_channels.md).
 
@@ -186,7 +173,6 @@ The definition structure for a subscription can resemble the following YAML cont
         value: |
           replicaCount: 2
 ```
-{: codeblock}
 
 For more information about creating and managing subscriptions, see [Managing subscriptions](managing_subscriptions.md).
 
@@ -215,6 +201,5 @@ spec:
   clusterReplicas: {{ .Values.clusterReplicas }}
   clusterLabels:
 ```
-{: codeblock}
 
 For more information about creating and managing placement rules, see [Managing placement rules](managing_placement_rules.md).
