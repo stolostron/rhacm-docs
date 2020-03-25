@@ -288,8 +288,9 @@ spec:
 | spec.packageFilter.version | Optional. The version or versions for the deployable. You can use a range of versions in the form `>1.0`, or `<3.0`. By default, the version with the most recent "creationTimestamp" value is used. |
 | spec.packageFilter.annotations | Optional. The annotations for the deployable. |
 | spec.packageOverrides | Optional. Section for defining overrides for the Kubernetes resource that is subscribed to by the subscription, such as a Helm chart, deployable, or other Kubernetes resource within a channel. |
-| spec.packageOverrides.packageName <!--mike please confirm removal?-->| Optional, but required for setting an override. Identifies the Kubernetes resource that is being overwritten. |  
-| spec.packageOverrides.packageOverrides | Optional, but required for setting an override. The configuration of parameters and replacement values to use to override the Kubernetes resource. For more information, see [Package overrides](#package_overrides). |  
+| spec.packageOverrides.packageName  | Optional, but required for setting an override. Identifies the Kubernetes resource that is being overwritten. |
+| spec.packageOverrides.packageAlias | Optional. Gives an alias to the Kubernetes resource that is being overwritten. |
+| spec.packageOverrides.packageOverrides | Optional. The configuration of parameters and replacement values to use to override the Kubernetes resource. For more information, see [Package overrides](#package_overrides). |
 | spec.placement | Required. Identifies the subscribing clusters where deployables need to be placed, or the placement rule that defines the clusters. Use the placement configuration to define values for multi-cluster deployments. |
 | spec.local | Optional, but required for a stand-alone cluster or cluster that you want to manage directly. Defines whether the subscription must be deployed locally. Set the value to `true` to have the subscription synchronize with the specified channel. Set the value to `false` to prevent the subscription from subscribing to any resources from the specified channel. Use this field when your cluster is a stand-alone cluster or you are managing this cluster directly. If your cluster is part of a multi-cluster and you do not want to manage the cluster directly, use only one of `clusters`, `clusterSelector`, or `placementRef` to define where your subscription is to be placed. If your cluster is the Hub of a multi-cluster and you want to manage the cluster directly, you must register the Hub as a managed cluster before the subscription operator can subscribe to resources locally. |
 | spec.placement.clusters | Optional. Defines the clusters where the subscription is to be placed. Use only one of `clusters`, `clusterSelector`, or `placementRef` to define where your subscription is to be placed for a multi-cluster. If your cluster is a stand-alone cluster that is not your Hub cluster, you can also use `local`. |
@@ -321,41 +322,38 @@ spec:
   2. `clusters`
   3. `clusterSelector`
 
-### Package overrides <!--mike, we can remove this section? -->
+### Package overrides
 {: #package_overrides}
 
 Package overrides for a subscription override values for the Helm chart or Kubernetes resource that is subscribed to by the subscription.
 
 To configure a package override, specify the field within the Kubernetes resource spec to override as the value for the `path` field. Specify the replacement value as the value for the `value` field.
 
-For example, if you need to override the values field within the spec for a Helm release (`HelmRelease.app.ibm.com`) for a subscribed Helm chart, you need to set the value for the `path` field in your subscription definition to `spec.values`.
+For example, if you need to override the values field within the spec for a Helm release (`HelmRelease.app.ibm.com`) for a subscribed Helm chart, you need to set the value for the `path` field in your subscription definition to `spec`.
 
 ```
 packageOverrides:
 - packageName: nginx-ingress
   packageOverrides:
-  - path: spec.values
+  - path: spec
     value: my-override-values
 ```
 {: codeblock}
 
-The contents for the `value` field are used to override the values within the `spec.values` field of the `HelmRelease` spec.
+The contents for the `value` field are used to override the values within the `spec` field of the `HelmRelease` spec.
 
-* For a Helm release, override values for the `spec.values` field are merged into the Helm release `values.yaml` file to override the existing values. This file is used to retrieve the configurable variables for the Helm release.
+* For a Helm release, override values for the `spec` field are merged into the Helm release `values.yaml` file to override the existing values. This file is used to retrieve the configurable variables for the Helm release.
 
-* If you need to override the release name for a Helm release, include the `packageOverride` section within your definition. Define the `packageOverride` for the Helm release by including the following fields:
-  * `packageName` to identify the Helm chart
-  * `packageOverrides.path: spec.releaseName` to indicate that you are overriding the release name field in the Helm release spec.
-  * `packageOverrides.value:` with your new release name as the value.
+* If you need to override the release name for a Helm release, include the `packageOverride` section within your definition. Define the `packageAlias` for the Helm release by including the following fields:
+  * `packageName` to identify the Helm chart.
+  * `packageAlias` to indicate that you are overriding the release name.
 
    By default, if no Helm release name is specified, the Helm chart name is used to identify the release. In some cases, such as when there are multiple releases subscribed to the same chart, conflicts can occur. The release name must be unique among the subscriptions within a namespace. If the release name for a subscription that you are creating is not unique, an error occurs. You must set a different release name for your subscription by defining a `packageOverride`. If you want to change the name within an existing subscription, you must first delete that subscription and then recreate the subscription with the preferred release name.
 
   ```
   packageOverrides:
   - packageName: nginx-ingress
-    packageOverrides:
-    - path: spec.releaseName
-      value: my-helm-release-name
+    packageAlias: my-helm-release-name
   ```
   {: codeblock}
 
@@ -435,9 +433,8 @@ spec:
   name: nginx-ingress
   packageOverrides:
   - packageName: nginx-ingress
-    packageAlias:
-    - path: spec.releaseName
-      value: my-nginx-ingress-releaseName
+    packageAlias: my-nginx-ingress-releaseName
+    packageOverrides:
     - path: spec
       value: 
         defaultBackend:
@@ -470,9 +467,9 @@ spec:
     - name: my-development-cluster-1
   packageOverrides:
   - packageName: my-server-integration-prod
-    packageAlias::
+    packageOverrides:
     - path: spec
-      value: 
+      value:
         persistence:
           enabled: false
           useDynamicProvisioning: false

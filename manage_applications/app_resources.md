@@ -183,7 +183,7 @@ The definition structure for a subscription can resemble the following YAML cont
     - packageName: nginx-ingress
       packageAlias:
       - path: spec
-        value: 
+        value:
           replicaCount: 2
 ```
 {: codeblock}
