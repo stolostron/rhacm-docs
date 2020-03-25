@@ -19,7 +19,6 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
 
 Certificate manager must not exist on a cluster when you install Red Hat Advanced Cluster Management for Kubernetes.
 
-
 When certificate manager already exists on the cluster, Red Hat Advanced Cluster Management for Kubernetes installation fails. 
 
 To resolve this issue, verify if the certificate manager is present in your cluster by running the following command: 
