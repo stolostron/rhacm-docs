@@ -2,17 +2,9 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-22"
+lastupdated: "2020-03-25"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Uninstalling Red Hat Advanced Cluster Management for Kubernetes
 

@@ -2,22 +2,13 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-25"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Preparing to install Red Hat Advanced Cluster Management for Kubernetes
 
 Before you install Red Hat Advanced Cluster Management for Kubernetes, review the following installation requirements.
-{:shortdesc}
 
 ## Red Hat OpenShift Container Platform
 
@@ -34,7 +25,6 @@ Before you install Red Hat Advanced Cluster Management for Kubernetes, review th
     ```
     openshift-console          console             console-openshift-console.apps.new-coral.purple-chesterfield.com                       console                  https   reencrypt/Redirect     None
     ```
-    {:codeblock}
 
 	The console URL in this example is `https:// console-openshift-console.apps.new-coral.purple-chesterfield.com`. Open the URL in your browser and check the result. If the console URL displays `console-openshift-console.router.default.svc.cluster.local`, set `openshift_master_default_subdomain` when you install the Red Hat OpenShift Container Platform. 
 
@@ -56,7 +46,6 @@ Ensure that the admission webhooks are enabled on the Red Hat OpenShift Containe
        ```
        openshift_master_admission_plugin_config={"MutatingAdmissionWebhook":{"configuration": {"apiVersion": "apiserver.config.k8s.io/v1alpha1","kubeConfigFile": "/dev/null","kind": "WebhookAdmission"}},"ValidatingAdmissionWebhook": {"configuration": {"apiVersion": "apiserver.config.k8s.io/v1alpha1","kubeConfigFile": "/dev/null","kind": "WebhookAdmission"}},"BuildDefaults": {"configuration": {"apiVersion": "v1","env": [],"kind": "BuildDefaultsConfig","resources": {"limits": {},"requests": {}}}},"BuildOverrides": {"configuration": {"apiVersion": "v1","kind": "BuildOverridesConfig"}},"openshift.io/ImagePolicy": {"configuration": {"apiVersion": "v1","executionRules": [{"matchImageAnnotations": [{"key": "images.openshift.io/deny-execution","value": "true"}],"name": "execution-denied","onResources": [{"resource": "pods"},{"resource": "builds"}],"reject": true,"skipOnResolutionFailure": true}],"kind": "ImagePolicyConfig"}}}
        ```
-       {: codeblock}
 
         **Note**: The default configuration that gets created during installation as well as any custom configuration (MutatingAdmissionWebhook and ValidatingAdmissionWebhook) are added to this variable. The variable requires that any default configuration be present since the variable completely overrides the resulting value.
 
@@ -77,7 +66,7 @@ Ensure that the admission webhooks are enabled on the Red Hat OpenShift Containe
                kubeConfigFile: /dev/null
                kind: WebhookAdmission
        ```
-       {: codeblock}
+  
   * Option 2: After you install Red Hat OpenShift Container Platform:
     1. Add the following to your `/etc/origin/master/master-config.yaml` file on your master node:
         ```
@@ -100,7 +89,6 @@ Ensure that the admission webhooks are enabled on the Red Hat OpenShift Containe
         /usr/local/bin/master-restart api
         /usr/local/bin/master-restart controllers
         ```
-        {: codeblock}
 
 ## Storage
 
@@ -116,5 +104,4 @@ For example:
   ingress_http_port: 3080
   ingress_https_port: 3443
   ```
-  {: codeblock}
 
