@@ -2,7 +2,7 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-24"
+lastupdated: "2020-03-25"
 
 ---
 
@@ -10,10 +10,9 @@ lastupdated: "2020-03-24"
 
 Use the Governance and risk dashboard to view and manage the number of security risks and policy violations in your clusters and applications. 
 
-
 From the _Overview_ tab, you can view the total number of policy violations and cluster violations in the _Recent activity_ section. View the _Top violations_ card to view specific violations and the amount of clusters with the violation. You can filter the view of the _Top violations_ by policies or clusters. 
 
-View the _Most impacted controls_ radar chart of the policy violations. You can filter the radar chart to view all standards, specific standards, or other standards. You can customize your radar chart by showing more or less controls.
+View the _Most impacted controls_ radar chart of the policy violations. You can filter the radar chart to view all standards, specific standards, or other standards. You can customize your radar chart by showing more or less controls. <!--is this feature still available-->
 
 View the _Policy summary_ card to see the total number of standards, categories, policies, and controls.
 

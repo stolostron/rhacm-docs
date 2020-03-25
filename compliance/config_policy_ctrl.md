@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-12"
+lastupdated: "2020-03-18"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Configuration policy controller
 
 Configuration policy controller can be used to configure any Kubernetes resource and apply security policies across your clusters.
-{:shortdesc}
 
 
 ## Configuration policy elements
@@ -26,7 +17,7 @@ The configuration policy controller communicates with the local Kubernetes API s
 
 ## Configuration policy
   
-A `Policy` is a CustomResourceDefinition (CRD) instance that contains the specifications of the configuration policy elements section. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/){: new_window}.
+A `Policy` is a CustomResourceDefinition (CRD) instance that contains the specifications of the configuration policy elements section. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
 
 ### Policy elements
 
@@ -34,7 +25,7 @@ Each _policy_ within the policy document contains the following elements.
 
   - A `namespace` selector that specifies which namespaces within the cluster that the policy is applied to.
   
-  - A `remediationAction` specifies the remediation. The parameter values are `enforce` and `inform`.
+  - A `remediationAction` specifies the remediation of your policy. The parameter values are `enforce` and `inform`. 
 
   - A list of `templates`, such as `role-templates`, `object-templates`, and `policy-templates` within the policy that describes how a resource in Kubernetes might be defined, and whether it is allowed to exist.
 
@@ -77,22 +68,19 @@ Complete the following steps to create a configuration policy from the command l
       complianceType: musthave
       object-templates:
        ...
-     ```
-     {: codeblock} 
+     ``` 
     
 2. Apply the policy by running the following command:
    
    ```
-   kubectl apply -f <policy-file-name>  --namespace=<mcm_namespace>
+   kubectl apply -f <policy-file-name>  --namespace=<namespace>
    ```
-   {: codeblock}
    
 3. Verify and list the policies by running the following command:
 
    ```
-   kubectl get policy --namespace=<mcm_namespace>
+   kubectl get policy --namespace=<namespace>
    ```
-   {: codeblock}
    
 Your configuration policy is created.
 
@@ -103,16 +91,14 @@ Complete the following steps to view your configuration policy from the CLI:
 1. View details for a specific configuration policy by running the following command:
    
    ```
-   kubectl get policy <policy-name> -n <mcm_namespace> -o yaml
+   kubectl get policy <policy-name> -n <namespace> -o yaml
    ```
-   {: codeblock}
    
 2. View a description of your configuration policy by running the following command:
 
    ```
    kubectl describe policy <name> -n <namespace>
    ```
-   {: codeblock}
 
 ### Create a configuration policy from the console
 {: #policy_gui}
@@ -153,7 +139,6 @@ A configuration policy is created and the `Policy` definition might resemble the
       ...
      
    ```
-   {: codeblock}
 
 #### View your configuration policy
 

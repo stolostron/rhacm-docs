@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-24"
+lastupdated: "2020-03-25"
 
 ---
 
@@ -82,12 +82,19 @@ The `namespaceSelector` defines which namespaces are subject to the enforcement 
 The `minimumDuration` parameter specifies the smallest duration before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. View the following YAML example of the `minimumDuration` parameter in a certificate policy: 
 
   ```yaml
-  remediationAction: enforce
   disabled: false
   minimumDuration: 200h
   ```
 
   The default value for `minimumDuration` is 30 days (672h).
+
+### Policy enforcement 
+
+Certificate policy controller can only inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. Your parameter might resemble the following content:
+
+   ```
+   remediationAction: inform
+   ```
 
 ## Creating a certificate policy
 
@@ -122,18 +129,18 @@ Complete the following steps to create a certificate policy from the command lin
       remediationAction: inform
       # minimum duration is the least amount of time the certificate is still valid from the time the controller checks the policy compliance
       minimumDuration: 100h
-    ``` 
+    ```
     
 2. Apply the policy by running the following command:
    
    ```
-   kubectl apply -f <certificate-policy-file-name>  --namespace=<mcm_namespace>
+   kubectl apply -f <certificate-policy-file-name>  --namespace=<namespace>
    ```
    
 3. Verify and list the policies by running the following command:
 
    ```
-   kubectl get certificatepolicy --namespace=<mcm_namespace>
+   kubectl get certificatepolicy --namespace=<namespace>
    ```
    
 Your certificate policy is created.
@@ -145,7 +152,7 @@ Complete the following steps to view your certificate policy from the CLI:
 1. View details for a specific certificate policy by running the following command:
    
    ```
-   kubectl get certificatepolicy <policy-name> -n <mcm_namespace> -o yaml
+   kubectl get certificatepolicy <policy-name> -n <namespace> -o yaml
    ```
    
 2. View a description of your certificate policy by running the following command:
@@ -153,7 +160,6 @@ Complete the following steps to view your certificate policy from the CLI:
    ```
    kubectl describe certificatepolicy <name> -n <namespace>
    ```
-   
 
 ### Create a certificate policy from the console
 {: #policy_gui}
@@ -258,5 +264,3 @@ Update the `metadata` parameter in your TLS Secret by adding the `certificate_ke
      cert: <Certificate Data>
      key: <Private Key Data>
    ```
-   
-The certificate policy controller can monitor your own certificates. 

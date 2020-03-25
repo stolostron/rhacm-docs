@@ -2,14 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-24"
+lastupdated: "2020-03-25"
 
 ---
 
 # Security
 
 Manage security and role-based access control (RBAC) of Red Hat Advanced Cluster Management for Kubernetes components.
-{:shortdesc}
 
 ## Authentication
 
