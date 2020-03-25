@@ -26,8 +26,18 @@
    * [Managing your cluster with the Visual Web Terminal](console/vwt_search.md)
    * [Managing cluster labels](console/cluster_label.md)
  * [Cluster management](manage_cluster/intro.md)
+   * [Creating a cloud connection]
+     * AWS
+     * Azure
+     * GCP
    * [Creating a cluster](manage_cluster/create.md)
-     * [Creating an OpenShift on Amazon Web Services cluster](manage_cluster/create_ocp_aws.md)
+     <!--incorrect titles for all the child, we are not creating AKS EKS and GKE clusters-->
+     <!--Creating an Red Hat OpenShift Cluster on Amazon Web Service-->
+     * [Creating an Amazon Web Services cluster](manage_cluster/create_ocp_aws.md)
+     <!--Creating an Red Hat OpenShift Cluster on Microsoft Azure Cloud Computing Services-->
+     * [Creating an Azure Kubernetes Service cluster](manage_cluster/create_aks.md)
+     <!--Creating an Red Hat OpenShift Cluster on Google Cloud Platform-->
+     * [Creating an Google Kubernetes Engine cluster](manage_cluster/create_gke.md)
    * [Importing a target managed cluster](manage_cluster/import.md)
      * [Importing a cluster with the console](manage_cluster/import_gui.md)
      * [Importing a cluster with the CLI](manage_cluster/import_cli.md)
