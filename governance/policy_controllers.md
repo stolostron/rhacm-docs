@@ -15,4 +15,4 @@ Create and customize policies with the out of the box policy templates. View the
 - [Configuration policy controller](../governance/config_policy_ctrl.md)
 - [Certificate policy controller](../governance/cert_policy_ctrl.md)
 - [IAM policy controller](../governance/iam_policy_ctrl.md)
-- [CIS policy controller](../complinace/cis_policy_ctrl.md)
+- [CIS policy controller](../governance/cis_policy_ctrl.md)
