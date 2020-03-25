@@ -38,9 +38,15 @@ For more information, see [Managing applications](manage_applications/overview.m
 
 ## Security and compliance
 
-With the Governance and risk compliance dashboard, you can view and manage the number of security risks and policy violations in your clusters and applications. 
- 
-(Mikela can add a blurb here about the following (requested from elder): IAM RBAC controller, templates, categorization (controls map to framework for compliance)). (Micheal says do not yet highlight CIS since it does not yet work with current OCP.)
+With the Governance and risk compliance dashboard, you can view and manage the number of security risks and policy violations in your clusters and applications. Create custom policy controllers to report and validate the compliance of your policies on your cluster. Create and manage the following policy controllers that are installed by default:
+
+* [Certificate policy controller](../compliance/cert_policy_ctrl.md)
+* [Configuration policy controller](../compliance/config_policy_ctrl.md)
+* [IAM policy controller](../compliance/iam_policy_ctrl.md)
+
+See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md) to learn more about the dashboard and the policy framework.
+
+As you create policies, use the policy element, `templates` to describe how your resource is defined. For more information about the policy elements, see [Red Hat Advanced Cluster Management for Kubernetes policy overview](../compliance/policy_overview.md). 
 
 
 
