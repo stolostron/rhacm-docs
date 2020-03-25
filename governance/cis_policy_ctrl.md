@@ -231,7 +231,7 @@ The rules applicable to master nodes that are to be exempted from checking. In o
 ### workerNodeExcludeRules
 The rules applicable to worker nodes that are to be exempted from checking. In order for worker node to be compliant, this list must include any rules that must be checked manually or those rules that require more configuration.
 
-For more information see, [CIS rules specifications](../compliance/cis_policy_rules.md)
+For more information see, [CIS rules specifications](../governance/cis_policy_rules.md).
 
 
 ## CIS policy controller components
@@ -313,7 +313,7 @@ A CIS policy can be created either from the command line by using kubectl or fro
 
 Complete the following steps to create a certificate policy from the command line interface (CLI):
 
-1. Create a YAML file for your CIS policy by including a set of exclude rules for master node and worker node. See [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](../compliance/create_policy.md#yaml) for more information about policy requirements.
+1. Create a YAML file for your CIS policy by including a set of exclude rules for master node and worker node. See [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](../governance/create_policy.md#yaml) for more information about policy requirements.
 
 ```yaml
 apiVersion: policies.ibm.com/v1alpha1
@@ -656,4 +656,4 @@ You can assign a custom risk score to each CIS rule:
     kubectl -n <namespace> delete pod pod_name
     ```
 
-For more information about other policy controllers, see [{Red Hat Advanced Cluster Management for Kubernetes policy controllers](../compliance/policy_controllers.md). For more information about policies, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
+For more information about other policy controllers, see [{Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md). For more information about policies, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).

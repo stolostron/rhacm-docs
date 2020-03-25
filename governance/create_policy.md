@@ -202,6 +202,6 @@ Complete the following steps to create a policy:
 
 A cluster policy is created.
 
-To manage your policies, see [Managing a security policy](../manage_cluster/manage_grc_policy.md) for more information. You can also create custom policy controllers to enforce specific policies. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../compliance/policy_controllers.md).
+To manage your policies, see [Managing a security policy](../manage_cluster/manage_grc_policy.md) for more information. You can also create custom policy controllers to enforce specific policies. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
 
-See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md) for more information about policies.
+See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more information about policies.
