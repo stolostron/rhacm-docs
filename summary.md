@@ -1,9 +1,8 @@
 # Summary
 
  * [About Red Hat Advanced Cluster Management for Kubernetes](about/welcome.md)
-   * [Architecture](about/architecture.md)
-   * [Components](about/components.md)
-   * [Scaling your clusters](manage_cluster/scale_mcm.md)
+   * [Red Hat Advanced Cluster Management for Kubernetes Architecture](about/architecture.md)
+   * [Components](about/components.md)  
  * [Release Notes](about/release_notes.md)
    * [What's new](about/whats_new.md)
    * [Known issues and limitations](about/known_issues.md)
@@ -12,6 +11,7 @@
    * [Requirements and recommendations](install/requirements.md)
      * [Supported cloud providers](install/supported_clouds.md)
      * [System requirements and recommendations](install/system_reqs.md)
+     * [Scaling your clusters](manage_cluster/scale_mcm.md)
      * [Supported operating systems and platforms](install/supported_os.md)
      * [Supported browsers](install/supported_browsers.md) 
    * [Preparing for installation](install/prep.md)
