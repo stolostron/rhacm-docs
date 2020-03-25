@@ -247,7 +247,7 @@ spec:
     annotations:  
   packageOverrides:
   - packageName:
-    packageOverrides:
+    packageAlias:
     - path:
       value:
   placement:
@@ -288,7 +288,7 @@ spec:
 | spec.packageFilter.version | Optional. The version or versions for the deployable. You can use a range of versions in the form `>1.0`, or `<3.0`. By default, the version with the most recent "creationTimestamp" value is used. |
 | spec.packageFilter.annotations | Optional. The annotations for the deployable. |
 | spec.packageOverrides | Optional. Section for defining overrides for the Kubernetes resource that is subscribed to by the subscription, such as a Helm chart, deployable, or other Kubernetes resource within a channel. |
-| spec.packageOverrides.packageName | Optional, but required for setting an override. Identifies the Kubernetes resource that is being overwritten. |  
+| spec.packageOverrides.packageName <!--mike please confirm removal?-->| Optional, but required for setting an override. Identifies the Kubernetes resource that is being overwritten. |  
 | spec.packageOverrides.packageOverrides | Optional, but required for setting an override. The configuration of parameters and replacement values to use to override the Kubernetes resource. For more information, see [Package overrides](#package_overrides). |  
 | spec.placement | Required. Identifies the subscribing clusters where deployables need to be placed, or the placement rule that defines the clusters. Use the placement configuration to define values for multi-cluster deployments. |
 | spec.local | Optional, but required for a stand-alone cluster or cluster that you want to manage directly. Defines whether the subscription must be deployed locally. Set the value to `true` to have the subscription synchronize with the specified channel. Set the value to `false` to prevent the subscription from subscribing to any resources from the specified channel. Use this field when your cluster is a stand-alone cluster or you are managing this cluster directly. If your cluster is part of a multi-cluster and you do not want to manage the cluster directly, use only one of `clusters`, `clusterSelector`, or `placementRef` to define where your subscription is to be placed. If your cluster is the Hub of a multi-cluster and you want to manage the cluster directly, you must register the Hub as a managed cluster before the subscription operator can subscribe to resources locally. |
@@ -321,7 +321,7 @@ spec:
   2. `clusters`
   3. `clusterSelector`
 
-### Package overrides
+### Package overrides <!--mike, we can remove this section? -->
 {: #package_overrides}
 
 Package overrides for a subscription override values for the Helm chart or Kubernetes resource that is subscribed to by the subscription.
@@ -435,11 +435,11 @@ spec:
   name: nginx-ingress
   packageOverrides:
   - packageName: nginx-ingress
-    packageOverrides:
+    packageAlias:
     - path: spec.releaseName
       value: my-nginx-ingress-releaseName
-    - path: spec.values
-      value: |
+    - path: spec
+      value: 
         defaultBackend:
           replicaCount: 3
   placement:
@@ -470,9 +470,9 @@ spec:
     - name: my-development-cluster-1
   packageOverrides:
   - packageName: my-server-integration-prod
-    packageOverrides:
-    - path: spec.values
-      value: |
+    packageAlias::
+    - path: spec
+      value: 
         persistence:
           enabled: false
           useDynamicProvisioning: false
