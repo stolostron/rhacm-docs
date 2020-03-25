@@ -195,7 +195,7 @@ data:
   AccessKeyID: <access ID>
   SecretAccessKey: <access key>
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name: ns
@@ -209,7 +209,7 @@ spec:
     name: secret-ns
     namespace: ch-ns
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: sub-a

@@ -2,30 +2,20 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-12"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Creating an Red Hat Advanced Cluster Management for Kubernetes security policy
 
 Create a security policy to report and validate your cluster compliance based on your specified security standards, categories, and controls. To create a policy for Red Hat Advanced Cluster Management for Kubernetes, you must create a YAML file to create a policy for managed clusters.
-{: shortdesc}
 
 **Required access level**: Cluster administrator 
 
 As you create your new policy from the console, a YAML file is also created.
 
-- [Creating an Red Hat Advanced Cluster Management for Kubernetes security policy](#creating-an-sitedatakeywordmcmnotm-security-policy)
-  - [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](#creating-a-yaml-file-for-an-sitedatakeywordmcmnotm-policy)
-  - [Creating a cluster security policy from the Red Hat Advanced Cluster Management for Kubernetes console](#creating-a-cluster-security-policy-from-the-sitedatakeywordmcmnotm-sitedatakeywordgui)
+  - [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](#yaml)
+  - [Creating a cluster security policy from the Red Hat Advanced Cluster Management for Kubernetes console](#policy_gui)
 
 The following objects are required for your Red Hat Advanced Cluster Management for Kubernetes policy:
 
@@ -47,7 +37,6 @@ Complete the following steps to create a policy:
    ```
    kubectl create -f -policy
    ```
-   {: codeblock}
 
 2. Define the template that the policy uses. Edit your `.yaml` file by adding a `templates` field to define a template. Your policy might resemble the following YAML file:
 
@@ -80,7 +69,6 @@ Complete the following steps to create a policy:
                resources: ["deployments"]
                verbs: ["get", "list", "watch", "create", "delete","patch"]
    ```
-   {: codeblock}
 
   - The `disabled` parameter provides the ability to enable and disable your policies.
   - The value _enforce_ provides automatic remediation based on the policies.
@@ -106,7 +94,6 @@ Complete the following steps to create a policy:
        matchLabels:
          cloud: IBM
    ```
-   {: codeblock}
 
 4. Define a `PlacementBinding` to bind your policy and your `PlacementPolicy`. Your `PlacementBinding` might resemble the following YAML sample:
 
@@ -125,7 +112,6 @@ Complete the following steps to create a policy:
      apiGroup: policy.mcm.ibm.com
      kind: Policy
    ```
-   {: codeblock}
 
 ## Creating a cluster security policy from the Red Hat Advanced Cluster Management for Kubernetes console
 {: #policy_gui}
@@ -207,7 +193,6 @@ Complete the following steps to create a policy:
         matchLabels:
           cloud: "IBM"
     ```
-    {: codeblock}
 
  **Important**: Be sure to add values for the `policy.mcm.ibm.com/controls` and `policy.mcm.ibm.com/standards` to display modal cards of what controls and standards are violated in the _Policy Overview_ section.
 
@@ -217,6 +202,6 @@ Complete the following steps to create a policy:
 
 A cluster policy is created.
 
-To manage your policies, see [Managing a security policy](../manage_cluster/manage_grc_policy.md) for more information. You can also create custom policy controllers to enforce specific policies. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../compliance/policy_controllers.md).
+To manage your policies, see [Managing a security policy](../manage_cluster/manage_grc_policy.md) for more information. You can also create custom policy controllers to enforce specific policies. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
 
-See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md) for more information about policies.
+See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more information about policies.

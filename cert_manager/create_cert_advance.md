@@ -2,22 +2,13 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Customizing cert-manager certificates
 
 Certificate manager service offers features that you can use to customize your certificates.
-{: shortdesc}
 
 - [Customizing certificate expiration](#expiration)
 - [Customizing certificate private key encoding](#encoding)
@@ -53,7 +44,6 @@ The following example of a Certificate definition has a validity period of 30 da
     duration: 720h
     renewBefore: 240h
   ```
-  {: codeblock}
 
 #### Notes:
 * The `duration` field must be no less than `1h`.
@@ -66,7 +56,7 @@ The following example of a Certificate definition has a validity period of 30 da
 
 This version of cert-manager supports an extra format (PKCS#8) for private key encoding. If you want your certificates to encode their private keys in PKCS#8 format, specify the `keyEncoding` parameter in the `spec` field. For example:
 
-````yaml
+```yaml
 apiVersion: certmanager.io/v1alpha1
 kind: Certificate
 metadata:
@@ -80,8 +70,7 @@ spec:
   dnsNames:
   - foo2.bar2
   keyEncoding: pkcs8
-````
-{: codeblock}
+```
 
 **Notes**:
 1. The issuer does not have to have its key encoded in PKCS#8. In the previous example, the issuer that is created in section, Creating your own self-signed and CA issuers which has its key encoded in PKCS#1 format is used.
@@ -93,7 +82,7 @@ In addition, CA issuers can also have their private keys encoded in PKCS#8 forma
 
 Following is a sample spec where the CA issuer is using a secret that contains a certificate and its private key. The private key is encoded in PKCS#8.
 
-````yaml
+```yaml
 apiVersion: certmanager.io/v1alpha1
 kind: Issuer
 metadata:
@@ -101,8 +90,7 @@ metadata:
 spec:
   ca:
     secretName: pk8-ca
-````
-{: codeblock}
+```
 
 ## Customizing certificate key usage
 {: #keyUsage}
@@ -111,7 +99,7 @@ Certificates can now specify x509 actions are allowed/enabled for its key (key u
 
 Specify the actions that you want enabled by using the `usages` field. For example:
 
-````yaml
+```yaml
 apiVersion: certmanager.io/v1alpha1
 kind: Certificate
 metadata:
@@ -129,14 +117,13 @@ spec:
   - digital signature
   - key encipherment
   - timestamping
-````
-{: codeblock}
+```
 
 **Notes**:
 1. The `usages` field is optional. If you do not specify a value in the `usages` field, the certificate includes default values, `key encipherment`, and `digital signature`.
 2. However, if the field `isCA` is set to `true`, then the certificate includes `cert sign` as a default `usages` value.
 3. Only the following values can be used in the `usages` field. Failure to issue the certificate occurs when you do not use the specified values.
-````
+  ```
   - signing
   - digital signature
   - content commitment
@@ -160,4 +147,4 @@ spec:
   - ocsp signing
   - microsoft sgc
   - netscape sgc
-  ````
+  ```

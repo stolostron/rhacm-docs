@@ -4,8 +4,6 @@ copyright:
   years: 2020
 lastupdated: "2020-03-25"
 
----
-
 {:new_window: target="_blank"}
 {:shortdesc: .shortdesc}
 {:screen: .screen}
@@ -22,9 +20,9 @@ Learn about the cloud providers that are available with Red Hat Advanced Cluster
   - [Supported cluster creation](#providers)
   - [Supported managed cluster cloud providers](#providers-managed)
 
-OpenShift Container Platform 4.2 is supported for the hub cluster and managed clusters.
+Red Hat OpenShift 4.2 is supported for the hub cluster and managed clusters.
 
-**Best practice:** For managed cluster cloud providers, use latest version of Kubernetes.
+**Best practice:** For managed cluster cloud providers, use the latest version of Kubernetes.
 
 ## Supported cluster creation
 {: #providers} 
@@ -46,3 +44,4 @@ You can also import and manage clusters that are already provisioned on various 
 - [OpenShift Container Platform on AWS](https://www.openshift.com/learn/partners/amazon-web-services).
 - [Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/).
 - [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/).
+

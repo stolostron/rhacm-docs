@@ -2,18 +2,9 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 
 # Using ACME to issue certificates
 
@@ -48,7 +39,6 @@ spec:
          ingress:
            class: nginx
 ```
-{: codeblock}
 
 **Note**: The `DNS-01` challenge provider is not supported.
 
@@ -67,8 +57,7 @@ spec:
   commonName: evolving-moray-master.purple-chesterfield.com
   dnsNames:
   - www.evolving-moray.purple-chesterfield.com
-```
-{: codeblock}  
+``` 
 
 Each of the `hostnames` listed in the certificate under `dnsNames` and the `commonName` must also be present in the list of ACME domains.
 

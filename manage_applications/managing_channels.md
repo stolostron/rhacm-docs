@@ -205,7 +205,7 @@ For subscriptions to Helm repository and object store type channels, the subscri
 The following YAML structures show the required fields for a channel and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name:
@@ -224,7 +224,7 @@ spec:
 
 |Field|Description|
 |-- | -- |
-| apiVersion | Required. Set the value to `app.ibm.com/v1alpha1`. |
+| apiVersion | Required. Set the value to `apps.open-cluster-management.io/v1`. |
 | kind | Required. Set the value to `Channel` to indicate that the resource is a channel. |
 | metadata.name | Required. The name of the channel. |
 | metadata.namespace | Required. The namespace for the channel. |
@@ -253,7 +253,7 @@ The following YAML content defines an example for each channel type:
 The following example channel definition abstracts a namespace as a channel that holds deployable resources. When this YAML is applied, a namespace `ch-qa` is created for the channel that is named `qa`. When created, this channel points to the source default namespace for identifying deployables. The channel controller maintains the resources at the actual namespace location and ensures that the resources are kept up-to-date.
 
   ```yaml
-  apiVersion: app.ibm.com/v1alpha1
+  apiVersion: apps.open-cluster-management.io/v1
   kind: Channel
   metadata:
     name: qa
@@ -275,7 +275,7 @@ The following example channel definition abstracts a namespace as a channel that
 The following example channel definition abstracts an object store bucket as a channel:
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
  name: devChannel
@@ -302,7 +302,7 @@ kind: Namespace
 metadata:
   name: hub-repo
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name: ibm-production-charts
@@ -326,7 +326,7 @@ metadata:
 The following channel definition shows another example of a Helm repository channel:
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name: predev-ch
@@ -344,7 +344,7 @@ spec:
 The following example channel definition shows an example of a channel for the IBM Cloud Charts Helm GitHub Repository:
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name: ibm-charts-github
@@ -367,7 +367,7 @@ data:
   user: dXNlcgo=
   accessToken: cGFzc3dvcmQK
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name: ibm-charts-github

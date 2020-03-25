@@ -20,7 +20,7 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to de
 {:shortdesc}
 
   - [Prerequisites](#prereq)
-  - [Creating your cluster with kubectl](#create_cli)
+  - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#create_gui)
   - [Accessing your cluster](#access)
   - [Deleting your cluster](#delete)
  
@@ -31,11 +31,15 @@ You must have the following prerequisites before creating a cluster on AWS:
 
 * A deployed Red Hat Advanced Cluster Management for Kubernetes hub cluster
 
-* Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create a remote Kubernetes cluster by using Amazon Web Services
+* Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster on Amazon Web Services
 
 * AWS cloud connection created. See [Setting up a cloud connection for AWS](cloud_conn_aws.md) for more information.
 
 * A configured domain in AWS. See [Configuring an AWS account](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html) for instructions on how to configure a domain. 
+
+* Amazon Web Services (AWS) login credentials, which include user name, password, access key ID, and secret access key. See [Understanding and Getting Your Security Credentials](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html).
+
+* You need an OpenShift image pull secret. See [Image Pull Secrets](https://docs.openshift.com/enterprise/3.0/dev_guide/image_pull_secrets.html).
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_gui}
@@ -72,45 +76,9 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 9. Optional: Configure the cluster networking options.
 
-10. Optional: configure label for the cluster.
+10. Optional: Configure label for the cluster.
 
-11. Click **Create**. When you create the  cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
-
-### YAML Parameters and descriptions
-{: #table_1}
-
-Table 1: The following table lists the parameters and descriptions that are available in the YAML file:
-
-|Parameter|Description|Default value|
-|---|---|---|
-|apiVersion|Red Hat Advanced Cluster Management for Kubernetes api; do not edit|cluster.k8s.io/v1alpha1|
-|kind|Resource type; do not edit|Cluster|
-|Name|Required; your cluster name|ocp-cluster|
-|labels: cloud-provider|Required name of your cloud provider; do not edit|ocp|
-|spec:clusterNetwork|Cluster network information||
-|services:cidrBlocks|Required; A block of IP addresses|[172.30.0.0/16]
-|Pods:cidrBlocks|Required; A block of IP addresses|[10.128.0.0/14]|
-|providerSpec:value|Cloud provider specific information||
-|value:apiVersion|Version of cloud provider api|ocpprovider/v1alpha1|
-|value:kind|Cloud provider specific resource type|OCPClusterProviderSpec|
-|platform:aws|Default platform information for your cluster||
-|aws:region|Required; AWS zone ID where you want to create your cluster, from [AWS General Reference](https://docs.aws.amazon.com/general/latest/gr/rande.html)|none|
-|aws:type|Optional, the EC2 instance type for the machines from [Amazon EC2 Instance Types](https://aws.amazon.com/ec2/instance-types/); use this information for every `type` specification||
-|baseDomain|Required; The base domain of your cloud provider|purple-chesterfield.com|
-|sshPublicKey|Optional. The SSH key to use to access your cluster machines.||
-|secretName|Required; the same as the name value in apikey.yaml|none|
-|pullsecretName|Required; the same as the name value in pullsecret.yaml|none|
-|networkType|Required. The network plug-in to deploy.|OpenShiftSDN|
-|machineCIDR|Required. A block of IP addresses used by the OpenShift Container Platform installation program while installing the cluster.|10.0.0.0/16|
-|controlplane|Required for cloud provider to host the control plane machines; this parameter value must match the `compute.platform`parameter value|none|
-|controlplane:replicas|Optional; a positive integer greater than or equal to three|3|
-|controlplane:hyperthreading|Optional, whether to enable or disable simultaneous multithreading, or hyperthreading on compute machines|enabled|
-|controlplane:name|Required;|master|
-|controlplane:hyperthreading|Optional, whether to enable or disable simultaneous multithreading, or hyperthreading on compute machines|enabled|
-|compute|Required; the cloud provider to host the worker machines| This parameter value must match the `controlPlane.platform` parameter value|none|
-|compute:replicas|Optional; a positive integer greater than or equal to 2, different from controlPlane|3|
-|compute:hyperthreading|Optional, whether to enable or disable simultaneous multithreading, or hyperthreading on compute machines|enabled|
-{: caption="Table 1. YAML file parameters and descriptions" caption-side="top"}
+11. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
 ## Accessing your cluster 
 {: #access}

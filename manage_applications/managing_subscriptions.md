@@ -2,17 +2,9 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Creating and managing subscriptions
 
@@ -235,7 +227,7 @@ To delete a subscription, you can use the console, the Kubernetes command line i
 The following YAML structure shows the required fields for a subscription and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name:
@@ -274,7 +266,7 @@ spec:
   timeWindow:
     type:
     location:
-    weekdays:
+    daysofweek:
     hours:
       - start:
         end:
@@ -283,7 +275,7 @@ spec:
 
 |Field|Description|
 |-- | -- |
-| apiVersion | Required. Set the value to `app.ibm.com/v1alpha1`. |
+| apiVersion | Required. Set the value to `apps.open-cluster-management.io/v1`. |
 | kind | Required. Set the value to `Subscription` to indicate that the resource is a subscription. |
 | metadata.name | Required. The name for identifying the subscription. |
 | metadata.namespace | Required. The namespace resource to use for the subscription. |
@@ -311,11 +303,11 @@ spec:
 | spec.overrides.clusterOverrides | Optional. The configuration of parameters and values to override. |
 | spec.timeWindow | Optional. Defines the settings for configuring a time window when the subscription is active or blocked. |
 | spec.timeWindow.type | Optional, but required for configuring a time window. Indicates whether the subscription is active or blocked during the configured time window. Deployments for the subscription occur only when the subscription is active. |
-| spec.timeWindow.location | Optional, but required for configuring a time window. The time zone of the configured time range for the time window. All time zones must use the Time Zone (tz) database name format. For more information, see [Time Zone Database](https://www.iana.org/time-zones){:new_window}. |
-| spec.timeWindow.weekdays | Optional, but required for configuring a time window. Indicates the days of the week when the time range is applied to create a time window. The list of days must be defined as an array, such as `weekdays: ["Monday", "Wednesday", "Friday"]`. |
+| spec.timeWindow.location | Optional, but required for configuring a time window. The time zone of the configured time range for the time window. All time zones must use the Time Zone (tz) database name format. For more information, see [Time Zone Database](https://www.iana.org/time-zones). |
+| spec.timeWindow.daysofweek | Optional, but required for configuring a time window. Indicates the days of the week when the time range is applied to create a time window. The list of days must be defined as an array, such as `daysofweek: ["Monday", "Wednesday", "Friday"]`. |
 | spec.timeWindow.hours | Optional, but required for configuring a time window. Defined the time range for the time window. A start time and end time for the hour range must be defined for each time window. You can define multiple time window ranges for a subscription. |
-| spec.timeWindow.hours.start | Optional, but required for configuring a time window. The timestamp that defines the beginning of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants){:new_window}. |  
-| spec.timeWindow.hours.end | Optional, but required for configuring a time window. The timestamp that defines the ending of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants){:new_window}. |
+| spec.timeWindow.hours.start | Optional, but required for configuring a time window. The timestamp that defines the beginning of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |  
+| spec.timeWindow.hours.end | Optional, but required for configuring a time window. The timestamp that defines the ending of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 **Notes:**
@@ -381,7 +373,7 @@ The following YAML content defines example subscriptions:
 {: #channel_example}
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: my-channel-subscription
@@ -399,7 +391,7 @@ spec:
 The following example subscription includes multiple configured time windows. A time window occurs between 10:20 AM and 10:30 AM occurs every Monday, Wednesday, and Friday. A time window also occurs between 12:40 PM and 1:40 PM every Monday, Wednesday, and Friday. The subscription is active only during these six weekly time windows for deployments to begin.  
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: nginx
@@ -418,7 +410,7 @@ spec:
   timeWindow:
     type: "block"/"active"
     location: "America/Los_Angeles"
-    weekdays: ["Monday", "Wednesday", "Friday"]
+    daysofweek: ["Monday", "Wednesday", "Friday"]
     hours:
       - start: "10:20AM"
         end: "10:30AM"
@@ -433,7 +425,7 @@ spec:
 The following example includes package overrides to define a different release name of the Helm release for Helm chart. A package override setting is used to set the name `my-nginx-ingress-releaseName` as the different release name for the  `nginx-ingress` Helm release.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: simple
@@ -463,7 +455,7 @@ The following subscription automatically pulls the latest `nginx` Helm release f
 The `spec.packageOverrides` section shows optional parameters for overriding values for the Helm release. The override values are merged into the Helm release `values.yaml` file, which is used to retrieve the configurable variables for the Helm release.
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: my-helm-subscription
