@@ -19,7 +19,7 @@ View a description of the the policy samples that are included in your Red Hat A
 * [Rolebinding policy](#rbind_policy)
 
 
-**Note**: You must create a placement policy and placement binding policy to apply your policies on to your cluster. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy example](../compliance/policy_example.md).
+**Note**: You must create a placement policy and placement binding policy to apply your policies on to your cluster. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy example](../governance/policy_example.md).
 
 ## Memory usage policy
 {: #limit_mem}
@@ -251,7 +251,7 @@ Complete the following steps to apply the pod security policy from the console:
 ## Role policy
 {: #role}
 
-Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](../compliance/security.md). Your role policy might resemble the following YAML file:
+Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](../governance/security.md). Your role policy might resemble the following YAML file:
 
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
@@ -342,4 +342,4 @@ Complete the following steps to apply the role binding policy from the console:
 4. Select **Rolebinding** from the _Specifications_ field.
           
           
-  See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md) for more information about policies.
+  See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more information about policies.

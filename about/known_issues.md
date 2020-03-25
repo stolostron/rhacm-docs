@@ -53,4 +53,4 @@ The CIS policy controller is disabled by default when you install Red Hat Advanc
    CIS policy controller is not installed
    ```
 
-You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../compliance/cis_policy_ctrl.md#cisc).
+You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../governance/cis_policy_ctrl.md#cisc).

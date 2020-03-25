@@ -108,7 +108,7 @@ You can create a YAML file for your certificate policy or create a certificate p
 
 Complete the following steps to create a certificate policy from the command line interface (CLI):
 
-1. Create a YAML file for your certificate policy. See [Creating a YAML file for a Red Hat Advanced Cluster Management for Kubernetes policy](../compliance/create_policy.md#yaml) for more information on policy requirements. 
+1. Create a YAML file for your certificate policy. See [Creating a YAML file for a Red Hat Advanced Cluster Management for Kubernetes policy](../governance/create_policy.md#yaml) for more information on policy requirements. 
 
     Your certificate policy might resemble the following policy:
 
@@ -212,7 +212,7 @@ You can view any certificate policy and its status from the console.
 4. Select one of your policies.
 
 
-For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../compliance/policy_controllers.md). See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md) for more information about policies.
+For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md). See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more information about policies.
 
 ## Bringing your own certificates
 

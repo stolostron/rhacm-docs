@@ -20,7 +20,7 @@ More information about managing certificates created by the installer can be fou
 
 All certificates required by services that run on Red Hat Advanced Cluster Management for Kubernetes are created during the installation of Red Hat Advanced Cluster Management for Kubernetes. Certificates are either created and managed by the Red Hat Advanced Cluster Management for Kubernetes installer or by the Red Hat Advanced Cluster Management for Kubernetes Certificate manager (`cert-manager`).
 
-Use the certificate policy controller to create and manage certificate policies. For more information, see [Certificate policy controller](../compliance/cert_policy_ctrl.md).
+Use the certificate policy controller to create and manage certificate policies. For more information, see [Certificate policy controller](../governance/cert_policy_ctrl.md).
 
 ## Red Hat Advanced Cluster Management for Kubernetes Certificates
 
