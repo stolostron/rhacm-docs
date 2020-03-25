@@ -30,7 +30,7 @@ Application lifecycle management offers the following capabilities:
 
   - Create and edit application placement rules from the console.
   - View your applications and resources from the topology page
-  - Create subscriptions for GitHub channel repositories to store Kubernetes resource YAML files and unpackaged Helm charts.
+  - Use subscription annotations, labels, and versions, which are Kubernetes resources that serve as sets of definitions for identifying resources and Helm charts within channels.
   - Schedule subscription activity for specific times to control deployments and upgrades to your managed clusters.
   - Store and deploy Kubernetes secrets through subscriptions.
 
