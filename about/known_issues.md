@@ -24,7 +24,7 @@ When you are including resources into the object store, do not include multiple 
 ## Subscriptions that use a secret must be resynchronized before updates to dependent resources can be detected
 {: #611}
 
-For a subscription that uses a secret on the hub cluster to access a channel, when the secret is updated, the subscription is not able to detect and retrieve the changes to the secret by default. This behavior can result in the secret desynchronizing  between the subscription and the actual secret resource. After, when changes are made to the dependent resources for the subscribed channel, such as ConfigMaps or secrets, the subscription is not able to detect the changes by default.
+For a subscription that uses a secret on the hub cluster to access a channel, when the secret is updated, the subscription is not able to detect and retrieve the changes to the secret by default. This behavior can result in the secret desynchronizing  between the subscription and the actual secret resource. After, changes are made to the dependent resources for the subscribed channel, such as ConfigMaps or secrets, the subscription is not able to detect the changes by default.
 
 To synchronize the subscription with the updated resources, you must edit the subscription. To update a subscription, you can add a label to the subscription, such as with the following command:
 
