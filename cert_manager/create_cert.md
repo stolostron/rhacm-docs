@@ -2,22 +2,13 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Creating Certificate manager (cert-manager) certificates
 
 <!--Gus created an issue to test #898-->The Certificate manager service is used to issue and manage certificates for services. Certificate manager is based on the [jetstack/cert-manager project](https://github.com/jetstack/cert-manager).
-{: shortdesc}
 
 * [Adding a certificate to a Kubernetes workload](#adding_workload)
 * [Adding a certificate to a Kubernetes Ingress](#adding_ingress)
@@ -59,7 +50,6 @@ lastupdated: "2020-03-16"
      - 0.0.0.0
      - 127.0.0.1
    ```
-   {: codeblock}
 
    **Notes**:
    - If the `commonName` field is specified, then the `dnsNames` field is not mandatory and vice-versa.
@@ -110,7 +100,6 @@ Complete the following procedure to secure the Kubernetes Ingress:
      # can be defined here
     - foo1.bar1
   ```
-  {: codeblock}
 
   Cert-manager creates the certificate based on the certificate resource definition and stores it as a Kubernetes Secret.
 
@@ -148,9 +137,8 @@ Complete the following procedure to secure the Kubernetes Ingress:
              servicePort: 80
            path: /fb
    ```
-   {: codeblock}
 
 
-**Note**: Certificates that are created by cert-manager are automatically renewed before expiration. For more information, see [Refreshing Certificate manager (cert-manager) Certificates](refresh_certs.md).
+**Note**: Certificates that are created by cert-manager are automatically renewed before expiration. For more information, see [Replacing the root CA certificate](cert_root_ca.md).
 
 For more Certificate manager topics, see [Using Certificate manager (cert-manager)](cert_manager.md).

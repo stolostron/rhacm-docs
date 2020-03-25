@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-05-20"
+  years: 2019, 2020
+lastupdated: "2020-03-23"
 
 ---
 
@@ -27,7 +27,7 @@ If cluster deletion is unsuccessful, you can force removal of the `multicluster-
 
 1. Open your terminal and configure your `kubectl` for your managed cluster.
 
-  See [Supported cloud providers](../manage_cluster/cloud_providers.md) to learn how to configure your `kubectl`.
+  See _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/) to learn how to configure your `kubectl`.
   
 2. Run the following `self-destruct` command to remove the multicluster-endpoint from your managed cluster:
   

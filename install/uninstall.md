@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-12"
+  years: 2020
+lastupdated: "2020-03-22"
 
 ---
 
@@ -14,17 +14,60 @@ lastupdated: "2019-12-12"
 {:child: .link .ulchildlink}
 {:childlinks: .ullinks}
 
-# Uninstalling the Red Hat Advanced Cluster Management for Kubernetes offline
+# Uninstalling Red Hat Advanced Cluster Management for Kubernetes
 
-Uninstall Red Hat Advanced Cluster Management for Kubernetes by removing all deployed platform Helm charts.
-{:shortdesc}
+When you uninstall Red Hat Advanced Cluster Management for Kubernetes, you must delete both the MultiClusterHub Instance and the multiclusterhub-operator.
 
-1. If applicable, uninstall any optional modules. 
+There is a script that is provided in the [`open-cluster-management/deploy` GitHub repository](https://github.com/open-cluster-management/deploy) that simplifies the procedures. You can also uninstall them manually by using the `oc` commands.
 
-2. Uninstall Red Hat Advanced Cluster Management for Kubernetes by running the `uninstall-with-openshift` command:
-    ```
-    sudo docker run -t --net=host -e LICENSE=accept -v $(pwd):/installer/cluster:z -v /var/run:/var/run:z -v /etc/docker:/etc/docker:z --security-opt label:disable ibmcom/mcm-inception-amd64:3.2.3-rhel-ee uninstall-with-openshift
-    ```
-    {: codeblock}
+## Deleting both components by using the uninstall script file
 
-**Note:** If `multicluster-hub.etcd.persistence` is set to `true` in the `config.yaml` file, the persistence volume for etcd is retained after you uninstall. The `config.yaml` file is located in the `/<installation_directory>/cluster` folder. You must back up the data of the persistence volume and then delete the persistence volume manually.
+When you run the `uninstall.sh` script file that is in the root directory of the [`open-cluster-management/deploy` GitHub repository](https://github.com/open-cluster-management/deploy), it deletes both the MultiClusterHub and the multiclusterhub-operator. To run this script file, run the following command in the root directory of the cloned repository:
+
+```
+./uninstall.sh
+```
+
+## Deleting a MultiClusterHub Instance by using commands  
+
+1. Delete the `yaml` definitions that are contained in the `multiclusterhub` directory by entering the following command:
+
+```
+kubectl delete -k multiclusterhub/
+```
+
+This removes the *example-multiclusterhub* objects. 
+
+2. Run the `unistall.sh` script in the `multiclusterhub` directory to ensure that all of the objects are removed:
+
+```
+./multiclusterhub/uninstall.sh
+```
+
+**Tip:** You can redeploy the `multiclusterhub` instance by running the following command:
+
+```
+kubectl apply -k multiclusterhub/
+```
+
+## Deleting the multiclusterhub-operator by using commands
+
+1. Delete the `yaml` definitions that are contained in the `multiclusterhub` directory by entering the following command:
+
+```
+kubectl delete -k multiclusterhub-operator/
+```
+
+This removes the *multiclusterhub-operator* objects. 
+
+2. Run the `unistall.sh` script in the `multiclusterhub` directory to ensure that all of the objects are removed:
+
+```
+./multiclusterhub-operator/uninstall.sh
+```
+
+**Tip:** You can redeploy the `multiclusterhub-operator` by running the following command:
+
+```
+kubectl apply -k multiclusterhub-operator/
+```

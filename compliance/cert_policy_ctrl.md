@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-18"
+lastupdated: "2020-03-25"
 
 ---
 
@@ -264,5 +264,3 @@ Update the `metadata` parameter in your TLS Secret by adding the `certificate_ke
      cert: <Certificate Data>
      key: <Private Key Data>
    ```
-
-The certificate policy controller can monitor your own certificates. 

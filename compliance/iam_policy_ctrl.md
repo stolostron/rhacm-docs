@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-18"
+lastupdated: "2020-03-25"
 
 ---
 
@@ -78,8 +78,6 @@ Complete the following steps to create an IAM policy from the command-line inter
    ```
    kubectl get <iam-policy-file-name> --namespace=<mcm_namespace>
    ```
-   {: codeblock}
-
 
 ### Create an IAM policy from the console
 {: #policy_gui}

@@ -1,8 +1,8 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-09-25"
+  years: 2020
+lastupdated: "2020-03-16"
 
 ---
 
@@ -21,4 +21,7 @@ Before you install the Red Hat Advanced Cluster Management for Kubernetes, revie
 
 - {: child} [Hardware requirements and recommendations](hardware_reqs.md)
 - {: child} [Supported operating systems and platforms](supported_os.md)
+- {: child} [Supported browsers](supported_browsers.md)
+- {: child} [Supported environment](environment_overviews.md)
+- {: child} [Supported cloud providers](supported_clouds.md)
 {: childlinks}

@@ -2,22 +2,13 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-10"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Update repository metadata
 
 Update a repository's metadata.
-{:shortdesc}
 
 Base path: `https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/repositories/<repo>`
 
@@ -53,7 +44,6 @@ The sample curl command resembles the following code:
 ```
 curl -X PUT -d '{"scope": "global"}' -H "Authorization: Bearer $ID_TOKEN" https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/repositories/<repo> --insecure
 ```
-{: codeblock}
 
 The response resembles the following code:
 
@@ -62,7 +52,6 @@ curl -X PUT -d '{"scope": "global"}' -H "Authorization:Bearer $ID_TOKEN" https:/
 
 OK
 ```
-{: pre}
 
 ## Parameters
 

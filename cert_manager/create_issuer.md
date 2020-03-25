@@ -2,18 +2,9 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 
 # Creating your own self-signed and CA Issuers
 
@@ -32,7 +23,6 @@ Create a self-signed Issuer, then use that Issuer to create a CA certificate. Yo
   spec:
     selfSigned: {}
   ```
-  {: codeblock}
 
 2. After you create the self-signed Issuer, create a CA certificate that references the self-signed Issuer and specifies the `isCA` field.
 
@@ -57,7 +47,6 @@ Create a self-signed Issuer, then use that Issuer to create a CA certificate. Yo
     # can be defined here
     - foo1.bar1
   ```
-  {: pre}
 
 3. Edit the following sample of an Issuer that references the previous secret. Edit the `name` and `namespace` from the _metadata_ section of the `.yaml` file. Be sure that `secretName` from the _spec_ section matches the `secretName` from the previous step:
 
@@ -71,7 +60,6 @@ Create a self-signed Issuer, then use that Issuer to create a CA certificate. Yo
     ca:
       secretName: hello-deployment-tls-ca-key-pair
   ```
-  {: codeblock}
 
 The `hello-deployment-tls-ca-key-pair` secret was created by Certificate manager and is managed, along with other certificates. This CA certificate can be used by the `hello-deployment-tls` Issuer.
 
@@ -80,7 +68,6 @@ Alternatively, you can also provide the CA certificate and private key instead o
 ```
 kubectl create secret tls hello-deployment-tls-ca-key-pair --cert=ca.crt --key=ca.key --namespace=foobar
 ```
-{: codeblock}
 
 Specify this Secret `hello-deployment-tls-ca-key-pair` in the Issuer `.yaml` file that you created earlier in step 3.
 

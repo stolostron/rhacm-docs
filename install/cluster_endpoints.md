@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-04"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Red Hat Advanced Cluster Management for Kubernetes endpoints
 
 An endpoint is a network destination address that is exposed by Kubernetes resources, such as services and ingresses. The following sections describe the available external and internal endpoints in an Red Hat Advanced Cluster Management for Kubernetes cluster.
-{:shortdesc}
 
 See the endpoints that are created in your Red Hat Advanced Cluster Management for Kubernetes cluster.
 
@@ -118,7 +109,6 @@ Add the domains to the ingress. See the following example:
 ```
 add_header "Access-Control-Allow-Origin" "http://test.com, https://example.com"
 ```
-{: pre}
 
 
 

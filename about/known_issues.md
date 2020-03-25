@@ -2,14 +2,13 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-17"
+lastupdated: "2020-03-23"
 
 ---
 
 # Known issues
 
 Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. Additionally, see [Red Hat Advanced Cluster Management for Kubernetes troubleshooting](../troubleshoot/mcm_troubleshoot.md) for troubleshooting topics.
-{:shortdesc}
 
   - [Menu and logo on the console header changes](#1527)
   - [Cannot create a Helm release on a managed cluster](#helm_issue)
@@ -24,6 +23,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
   - [Enabling Red Hat Advanced Cluster Management for Kubernetes for the installed monitoring release](#1051)
   - [LDAP user names are case-sensitive](#25735)
   - [Pods are not reachable from the NGINX ingress controller in multitenant isolation mode](#34414)
+  - [CIS policy controller is not installed](#1087)
   
 ## Menu and logo on the console header changes
 {: #1527}
@@ -35,7 +35,6 @@ To return to the Red Hat Advanced Cluster Management for Kubernetes context, cli
 ```
 https://HOST:port/multicloud 
 ```
-{: codeblock}
 
 ## Cannot create a Helm release on a managed cluster
 {: #helm_issue}
@@ -43,18 +42,17 @@ https://HOST:port/multicloud
 You are unable to deploy Helm charts that contain images on a managed cluster. To fix this error, you must configure `ClusterImagePolicy`. Run the following command to configure `ClusterImagePolicy`:
 
 ```
-apiVersion: securityenforcement.admission.cloud.ibm.com/v1beta1
+apiVersion: securityenforcement.admission.cloud.mcm.com/v1beta1
 kind: ClusterImagePolicy
 metadata:
   annotations:
     helm.sh/hook: post-install
     helm.sh/hook-weight: "1"
-  name: ibmcloud-default-cluster-image-policy
+  name: mcm-default-cluster-image-policy
 spec:
   repositories:
   - name: <repo_name>
 ```
-{: codeblock}
 
 ## Applications fail to install during Helm deployment
 {: #load_error}
@@ -70,37 +68,32 @@ To fix this error, reinstall your application by following the tasks:
    ```
    helm list --tls
    ```
-   {: codeblock}
 
 2. To delete your application, run the following command:
 
    ```
    helm delete releaseName --purge
    ```
-   {: codeblock}
 
 3. Edit and locate the `ClusterImagePolicy` to push your images to your application. Run the following command:
 
    ```
    kubectl get clusterimagepolicy
    ```
-   {: codeblock}
 
 4. Edit the ClusterImagePolicy by running the following command:
 
    ```
    kubectl edit clusterimagepolicy <policyname>
    ```
-   {: codeblock}
 
 5. Reinstall your application. Run the following command:
 
    ```
    helm install chartName
    ```
-   {: codeblock}
 
-For more details, see the [Helm community issue]( https://github.com/helm/helm/issues/3353){: new_window}.
+For more details, see the [Helm community issue](https://github.com/helm/helm/issues/3353).
 
 ## Missing data in Grafana for OpenShift Container Platform 
 {: #31754}
@@ -127,7 +120,6 @@ To synchronize the subscription with the updated resources, you must edit the su
 ```
 kubectl label subscription <subscription-name> -n <subscription-namespace> <label-name>=<any-content>
 ```
-{: codeblock}
 
 When the subscription is changed, the subscription controller is triggered to synchronize with the referenced secret and the subscribed channel resources.
 
@@ -187,13 +179,11 @@ To resolve the issue, disable network isolation in the `kube-system` project.
     ```
     oc adm pod-network make-projects-global kube-system
     ```
-    {: codeblock}
     
   2. Verify that the `kube-system` NETID is set to `0`.
     ```
     oc get netnamespaces kube-system
     ```
-    {: codeblock}
     
 - For OpenShift Version 4.2, complete the following steps:
 
@@ -201,13 +191,11 @@ To resolve the issue, disable network isolation in the `kube-system` project.
     ```
     oc get pods -n openshift-network-operator | grep network-operator
     ```
-    {: codeblock}
     
   2. Get the default multitenant network settings information.
     ```
     oc exec -n openshift-network-operator -it <network-operator-pod-name> cat /bindata/network/openshift-sdn/004-multitenant.yaml > 004-multitenant.yaml
     ```
-    {: codeblock}
     
   3. Edit the `004-multitenant.yaml` file and set the `kube-system` NETID to `0`.
     ```
@@ -218,19 +206,16 @@ To resolve the issue, disable network isolation in the `kube-system` project.
       netid: 0
       netname: kube-system
     ```
-    {: codeblock}
     
   4. Generate a configmap by using the updated `004-multitenant.yaml` file.  
     ```
     oc create configmap 004-multitenant -n openshift-network-operator --from-file=./004-multitenant.yaml
     ```
-    {: codeblock}
     
   5. Open the `network-operator` deployment for editing.
     ```
     oc edit deploy -n openshift-network-operator network-operator
     ```
-    {: codeblock}
 
   6. Add the following content in the `volumes` section.
     ```
@@ -239,7 +224,6 @@ To resolve the issue, disable network isolation in the `kube-system` project.
           name: 004-multitenant
         name: 004-multitenant
     ```
-    {: codeblock}
     
   7. Add the following content in the `volumeMounts` section.
     ```
@@ -248,8 +232,7 @@ To resolve the issue, disable network isolation in the `kube-system` project.
         subPath: 004-multitenant.yaml
         name: 004-multitenant
         readOnly: true
-    ``` 
-    {: codeblock}
+    ```
     
   8. Wait for the `network-operator` deployment to restart. 
   
@@ -257,5 +240,14 @@ To resolve the issue, disable network isolation in the `kube-system` project.
     ```
     oc get netnamespaces kube-system 
     ```
-    {: codeblock}
 
+## CIS policy controller is not installed
+{: #1087}
+
+The CIS policy controller is disabled by default when you install Red Hat Advanced Cluster Management for Kubernetes, If you create a CIS policy, you might receive the following message:
+
+   ```
+   CIS policy controller is not installed
+   ```
+
+You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../compliance/cis_policy_ctrl.md#cisc).

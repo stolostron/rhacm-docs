@@ -23,9 +23,9 @@ Choose from the following instructions to set up your managed cluster:
 
 **Required user type or access level**: Cluster administrator
 
-- {: child} [Importing a cluster with the Red Hat Advanced Cluster Management for Kubernetes console](../manage_cluster/import_gui.md)
-- {: child} [Importing a cluster with the CLI](../manage_cluster/import_cli.md)
-- {: child} [Importing a managed cluster in an air gapped environment](offline_endpoint.md)
+- {: child} [Importing a cluster with the Red Hat Advanced Cluster Management for Kubernetes console](import_gui.md)
+- {: child} [Importing a cluster with the CLI](import_cli.md)
+- {: child} [Modifying multicluster endpoint](modify_endpoint.md)
 
 
 **Note:** See the _Delete with force_ section of each importing topic if you are not able to delete your imported cluster resources.

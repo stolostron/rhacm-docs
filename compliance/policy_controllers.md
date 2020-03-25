@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-18"
+lastupdated: "2020-03-25"
 
 ---
 
@@ -12,8 +12,7 @@ Use the Red Hat Advanced Cluster Management for Kubernetes governance and risk p
 
 Create and customize policies with the out of the box policy templates. View the following topics to learn more about the following Red Hat Advanced Cluster Management for Kubernetes policy controllers to enforce policies:
 
-- [Configuration policy controller](../manage_policies/config_policy_ctrl.md)
-- [Certificate policy controller](../manage_policies/cert_policy_ctrl.md)
-- [IAM policy controller](../manage_policies/iam_policy_ctrl.md)
-- [CIS policy controller](../manage_policies/cis_policy_ctrl.md)
-
+- [Configuration policy controller](../compliance/config_policy_ctrl.md)
+- [Certificate policy controller](../complinace/cert_policy_ctrl.md)
+- [IAM policy controller](../compliance/iam_policy_ctrl.md)
+- [CIS policy controller](../complinace/cis_policy_ctrl.md)

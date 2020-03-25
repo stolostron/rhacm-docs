@@ -2,17 +2,9 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Creating and managing subscriptions
 
@@ -311,11 +303,11 @@ spec:
 | spec.overrides.clusterOverrides | Optional. The configuration of parameters and values to override. |
 | spec.timeWindow | Optional. Defines the settings for configuring a time window when the subscription is active or blocked. |
 | spec.timeWindow.type | Optional, but required for configuring a time window. Indicates whether the subscription is active or blocked during the configured time window. Deployments for the subscription occur only when the subscription is active. |
-| spec.timeWindow.location | Optional, but required for configuring a time window. The time zone of the configured time range for the time window. All time zones must use the Time Zone (tz) database name format. For more information, see [Time Zone Database](https://www.iana.org/time-zones){:new_window}. |
+| spec.timeWindow.location | Optional, but required for configuring a time window. The time zone of the configured time range for the time window. All time zones must use the Time Zone (tz) database name format. For more information, see [Time Zone Database](https://www.iana.org/time-zones). |
 | spec.timeWindow.weekdays | Optional, but required for configuring a time window. Indicates the days of the week when the time range is applied to create a time window. The list of days must be defined as an array, such as `weekdays: ["Monday", "Wednesday", "Friday"]`. |
 | spec.timeWindow.hours | Optional, but required for configuring a time window. Defined the time range for the time window. A start time and end time for the hour range must be defined for each time window. You can define multiple time window ranges for a subscription. |
-| spec.timeWindow.hours.start | Optional, but required for configuring a time window. The timestamp that defines the beginning of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants){:new_window}. |  
-| spec.timeWindow.hours.end | Optional, but required for configuring a time window. The timestamp that defines the ending of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants){:new_window}. |
+| spec.timeWindow.hours.start | Optional, but required for configuring a time window. The timestamp that defines the beginning of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |  
+| spec.timeWindow.hours.end | Optional, but required for configuring a time window. The timestamp that defines the ending of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 **Notes:**
