@@ -48,7 +48,7 @@ For more information, see [Managing applications](manage_applications/overview.m
 
 ## Security and compliance
 
-With the Governance and risk compliance dashboard, you can view and manage the number of security risks and policy violations in your clusters and applications. Create custom policy controllers to report and validate the compliance of your policies on your cluster. Create and manage the following policy controllers that are installed by default:
+With the Governance and risk dashboard, you can view and manage the number of security risks and policy violations in your clusters and applications. Create custom policy controllers to report and validate the compliance of your policies on your cluster. Create and manage the following policy controllers that are installed by default:
 
 * [Certificate policy controller](../governance/cert_policy_ctrl.md)
 * [Configuration policy controller](../governance/config_policy_ctrl.md)
