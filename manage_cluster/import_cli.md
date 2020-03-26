@@ -8,6 +8,8 @@ lastupdated: "2020-03-16"
 
 # Importing a managed cluster with the CLI
 
+Under construction.
+
 After you install Red Hat Advanced Cluster Management for Kubernetes, you are ready to import a cluster to manage.
 
 
