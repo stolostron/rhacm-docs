@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-19"
+lastupdated: "2020-03-26"
 
 ---
 
@@ -40,21 +40,17 @@ kubectl get secret -n open-cluster-management multicloud-ca-cert -o jsonpath='{.
 
 The following internal services use `cert-manager` to create and manage their certificates: 
 
-| Certificate Name | Issuer Name | Secret Name | Installed On | Usage |
-| ---------------- | ----------- | ----------- | ------------ | ----- |
-| console-chart-ef680-ca-cert | multicluster-hub-mcm-server-ca-issuer | console-chart-ef680-uiapi-secrets | Hub, Red Hat Advanced Cluster Management for Kubernetes namespace | Red Hat Advanced Cluster Management for Kubernetes Console CA cert |
-| grc-59010-ca-cert | multicluster-hub-mcm-server-ca-issuer | grc-59010-grc-secrets | Hub, Red Hat Advanced Cluster Management for Kubernetes namespace | Red Hat Advanced Cluster Management for Kubernetes Govern and risk CA cert |
-| kui-proxy | multicloud-ca-issuer | kui-proxy-secret | Hub, Red Hat Advanced Cluster Management for Kubernetes namespace | kui-web-terminal |
-| management-ingress-a0ae5-cert | multicloud-ca-issuer | management-ingress-c38ac-tls-secret | Hub, Red Hat Advanced Cluster Management for Kubernetes namespace | Ingress |
-| multicloud-ca-cert | cert-manager-rhacm-selfsign | multicloud-ca-cert | Hub, Red Hat Advanced Cluster Management for Kubernetes namespace | Red Hat Advanced Cluster Management for Kubernetes Root CA |
-| search-prod-c62a6-aggregator-ca-cert | multicloud-ca-issuer | search-prod-95fcc-search-secrets | Hub, Red Hat Advanced Cluster Management for Kubernetes namespace | Search |
-| search-prod-c62a6-redis-ca-cert | multicloud-ca-issuer | search-prod-95fcc-redisgraph-secrets | Hub, Red Hat Advanced Cluster Management for Kubernetes namespace | Search |
-| search-prod-c62a6-search-ca-cert | multicloud-ca-issuer | search-prod-95fcc-search-api-secrets | Hub, Red Hat Advanced Cluster Management for Kubernetes namespace | Search |
-| topology-276c4-ca-cert | multicluster-hub-mcm-server-ca-issuer | topology-b24e0-topology-secrets | Hub, Red Hat Advanced Cluster Management for Kubernetes namespace | Topology |
-| endpoint-monitoring-ca-cert | endpoint-self-signed | endpoint-monitoring-ca-cert | Endpoint | Monitoring |
-| endpoint-topology-ca-cert | endpoint-self-signed | endpoint-topology-ca-cert | Endpoint | Topology |
-| endpoint-topology-client-cert | endpoint-topology | endpoint-topology-client-secret | Endpoint | Topology |
-| endpoint-topology-server-cert | endpoint-topology | endpoint-topology-server-secret | Endpoint | Topoloy |
+| Certificate Name | Issuer Name | Secret Name | Usage |
+| ---------------- | ----------- | ----------- | ----- |
+| console-chart-ef680-ca-cert | multicluster-hub-mcm-server-ca-issuer | console-chart-ef680-uiapi-secrets | Red Hat Advanced Cluster Management for Kubernetes Console CA cert |
+| grc-59010-ca-cert | multicluster-hub-mcm-server-ca-issuer | grc-59010-grc-secrets | Red Hat Advanced Cluster Management for Kubernetes Govern and risk CA cert |
+| kui-proxy | multicloud-ca-issuer | kui-proxy-secret | kui-web-terminal |
+| management-ingress-a0ae5-cert | multicloud-ca-issuer | management-ingress-c38ac-tls-secret | Ingress |
+| multicloud-ca-cert | cert-manager-rhacm-selfsign | multicloud-ca-cert | Red Hat Advanced Cluster Management for Kubernetes Root CA |
+| search-prod-c62a6-aggregator-ca-cert | multicloud-ca-issuer | search-prod-95fcc-search-secrets | Search |
+| search-prod-c62a6-redis-ca-cert | multicloud-ca-issuer | search-prod-95fcc-redisgraph-secrets | Search |
+| search-prod-c62a6-search-ca-cert | multicloud-ca-issuer | search-prod-95fcc-search-api-secrets | Search |
+| topology-276c4-ca-cert | multicluster-hub-mcm-server-ca-issuer | topology-b24e0-topology-secrets | Topology |
 {: caption="Table 1. Certificates Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
 All certificates managed by `cert-manager` for example, MongoDB, are managed (created, refreshed, and watched) by `cert-manager`. For more information about `cert-manager`, see [Using Red Hat Advanced Cluster Management for Kubernetes Certificate manager](cert_manager.md).
