@@ -93,4 +93,4 @@ Complete the following procedure to remove an imported cluster and the `multiclu
 
 1. From the _Clusters_ page, find your imported cluster in the table.
    
-2. Click **Options** > **Delete cluster**.
+2. Click **Options** > **Detach cluster**.
