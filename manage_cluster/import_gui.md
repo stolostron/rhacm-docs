@@ -82,6 +82,9 @@ Table 1: The following table lists the parameters and descriptions that are avai
 | ApplicationManager.enabled| Enables multicluster manager application deployment, deploys subscription controller and deployable controller | true | 
 | searchCollector.enabled| Enables search collection and indexing | true|
 | policyController.enabled| Enable the Governance and risk dashboard policy feature|true, updateInterval: 15|  
+| certPolicyController.enabled||true|
+| cisController.enabled||true|
+| iamPolicyController||true|
 | serviceRegistry.enabled| Service registry that is used to discover services that are deployed by Application Deployable among managed clusters.| false | 
 | serviceRegistry.dnsSuffix| The suffix of the registry DNS name, which is added to the end of the target clusters dns domain name.|mcm.svc| 
 | serviceRegistry.plugins| Comma-separated list of enabled plugins. Supported plugins: `kube-service`, `kube-ingress`, and `istio`. |kube-service|
