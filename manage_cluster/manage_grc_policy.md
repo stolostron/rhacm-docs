@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-16" 
+lastupdated: "2020-03-26" 
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Managing a security policy
 
 Manage your cluster policy to remediate and edit your security policy. 
-{:shortdesc}
 
 ## Updating your security policy from the console
 
@@ -86,7 +77,6 @@ Complete the following steps to delete your policy:
     ```
     kubectl delete policy <policy-name> -n <mcm namespace>  
     ```
-    {: codeblock}
 
     After your policy is deleted, it is removed from your target cluster or clusters.
 
@@ -95,7 +85,6 @@ Complete the following steps to delete your policy:
     ```
     kubectl get policy <policy-name> -n <mcm namespace>
     ```
-    {: codeblock}
 
 ### Deleting an Red Hat Advanced Cluster Management for Kubernetes policy from the console
 
