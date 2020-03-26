@@ -29,7 +29,9 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 ## Importing a cluster
 {: #import}
 
-You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers. <!-- IKS EKS GKE AKS ROKS and any OpenShift 4X or 311 cluster -->
+You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers. 
+
+<!-- Ensure cloud provider topic has: IKS EKS GKE AKS ROKS and any OpenShift 4X or 311 cluster -->
 
 1. From the navigation menu, hover over Automate infrastructure and click **Clusters**.
 
