@@ -6,7 +6,7 @@ lastupdated: "2020-03-13"
 
 ---
 
-# Services and components
+# Services and components (Please review hub and managed cluster components -- thank you!)
 
 See the following tables for information about components that are installed and enabled on the hub cluster by default and the managed cluster.
 
