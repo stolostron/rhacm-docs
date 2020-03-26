@@ -12,17 +12,16 @@ Get an overivew of Red Hat Advanced Cluster Management for Kubernetes from (link
 
 ## Installation
 
-From a Red Hat OpenShift Container Platform cluster, you can create a hub cluster in 10 minutes or less. <Chris adds his install blurb here for Thurs>. 
+* Operator-based installation can install a working Red Hat OpenShift cluster on a configured cloud provider, like Amazon Web Services, in less than 10 minutes. See [Installing Red Hat Advanced Cluster Management for Kubernetes when connected](../install/install_connected.md) for more information.  
   
-See [Installing  Red Hat Advanced Cluster Management for Kubernetes](install/installation.md) for information about the operator-based install, which streamlines setup and ongoing cluster lifecycle.
-
 ## Cluster management
 
-  - Create clusters to manage. Red Hat Advanced Cluster Management for Kubernetes offers a cloud-like experience for Red Hat OpenShift Container Platform clusters on your cloud infrastructure of choice. The product supports lifecycle management for multiple cloud environments, such as <example of cloud provider> cluster. See [Amazon Elastic Kubernetes Service ![Opens in a new tab](../images/icons/launch-glyph.svg "Opens in a new tab")](https://aws.amazon.com/eks/)or more information about the public Kubernetes service. <Chris can add/edit content here, as well -- I pulled old link as an example, needs redone for current content>
-  
-  - Import and manage any Red Hat OpenShift Container Platform and other managed Kubernetes clusters as a Service. You can import clusters from different Kubernetes cloud providers, such as <need examples here>. After you import, the targeted cluster becomes a managed cluster for the Red Hat Advanced Cluster Management for Kubernetes hub cluster.
+* Create clusters on various Kubernetes cloud service providers. You can provision and manage Red Hat OpenShift Container Platform clusters on selected Kubernetes cloud service providers. See [Creating a cluster with Red Hat Advanced Cluster Management for Kubernetes](../manage_cluster/create.md) for more information. 
+* Import existing Kubernetes clusters. Import your existing Kubernetes clusters that are hosted on popular cloud service providers or on private clouds to manage your clusters conveniently in one place. See [Importing a target managed cluster to the hub cluster](../manage_cluster/import.md) for more information.
+* Manage all of your Red Hat OpenShift Container Platform cluster upgrades in one interface. You can upgrade imported and provisioned Red Hat OpenShift Container Platform clusters either individually or in groups by using the console.
+ Import existing Kubernetes clusters. Import your existing Kubernetes clusters that are hosted on popular cloud service providers or on private clouds to manage your clusters conveniently in one place. See [Importing a target managed cluster to the hub cluster](../manage_cluster/import.md) for more information.
+* Manage all of your Red Hat OpenShift Container Platform cluster upgrades in one interface. You can upgrade imported and provisioned Red Hat OpenShift Container Platform clusters either individually or in groups by using the console.
 
-  - Manage cluster upgrade all of your clusters from one simple control plane. <Chris can add his upgrade content--I have no idea what to put here>
 
 ## Application management
 
