@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-23"
+lastupdated: "2020-03-26"
 
 ---
 
@@ -33,10 +33,10 @@ Complete the following steps to create a root CA certificate with OpenSSL:
 2. Generate a self-signed CA certificate by using your CA key. Run the following command:
 
    ```
-   openssl req -x509 -new -nodes -key ca.key -subj "/C=US/ST=North Carolina/L=Raleigh/O=Red Hat" -days 400 -out ca.crt -config csr.cnf
+   openssl req -x509 -new -nodes -key ca.key -days 400 -out ca.crt -config req.cnf
    ```
 
-   Your `csr.cnf` file might resemble the following file:
+   Your `req.cnf` file might resemble the following file:
 
       ```
       [ req ]               # Main settings
@@ -84,12 +84,12 @@ After the root CA is replaced, all certificates that are signed by the root CA m
 Delete the Kubernetes secrets associated with each `cert-manager` certificate to refresh the certificate and restart the services that use the certificate. Run the following command: 
 
    ```
-   oc delete secret -n open-cluster-management $(oc get cert -n open-cluster-management -o wide | grep multicloud-ca-issuer | awk '{print $3}’)
+   oc delete secret -n open-cluster-management $(oc get cert -n open-cluster-management -o wide | grep multicloud-ca-issuer | awk '{print $3}')
    ```
 
 ## Restoring root CA certificates
 
-Before you restore the root CA certificate, create a backup file of the root CA certificate. Run the following command: 
+To restore the root CA certificate, obtain the previously created backup file of the root CA certificate. Run the following command: 
 
    ```
    oc create -f multicloud-ca-cert-backup.yaml
