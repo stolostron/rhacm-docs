@@ -206,7 +206,7 @@ To delete a placement rule that is defined within the definition for a deployabl
 The following YAML structure shows the required fields for a placement rule and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
   name:
   namespace:
@@ -234,7 +234,7 @@ spec:
 
 |Field|Description|
 |-- | -- |
-| apiVersion | Required. Set the value to `app.ibm.com/v1alpha1`. |
+| apiVersion | Required. Set the value to `apps.open-cluster-management.io/v1`. |
 | kind | Required. Set the value to `PlacementRule` to indicate that the resource is a placement rule. |
 | metadata.name | Required. The name for identifying the placement rule. |
 | metadata.namespace | Required. The namespace resource to use for the placement rule. |
@@ -282,7 +282,7 @@ The following YAML content defines example placement rules:
 ### Example 1
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: gbapp-gbapp
@@ -293,7 +293,7 @@ metadata:
     chart: gbapp-0.1.0
     heritage: Tiller
     release: gbapp
-  selfLink: /apis/app.ibm.com/v1alpha1/namespaces/development/placementrules/gbapp-gbapp
+  selfLink: /apis/apps.open-cluster-management.io/v1/namespaces/development/placementrules/gbapp-gbapp
   uid: d5b3cafa-c361-11e9-9fc2-0016ac101aef
 spec:
   clusterLabels:
@@ -310,7 +310,7 @@ status:
 ### Example 2
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: towhichcluster

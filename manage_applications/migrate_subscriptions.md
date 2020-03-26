@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-26"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Migrating subscriptions from previous versions
 
 Upgrade your subscriptions to indicate whether each subscription must be deployed locally or not.
-{:shortdesc}
 
 With version 4.4.0, a `spec.placement.local` field is added for the subscription resource spec. This field is used to indicate whether a subscription resource must be deployed locally (`spec.placement.local: true`) or not (`spec.placement.local: false`).
 
@@ -44,7 +35,6 @@ To update any subscription that you are migrating so that the subscription is co
        - path: "spec.placement"
          value:
    ```
-   {: codeblock}
 
 2. Upgrade your Hub cluster and managed clusters. For more information, see [Upgrading multicluster endpoint](../manage_cluster/upgrade_mc_endpoint.md).
 

@@ -2,22 +2,13 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-12"
+lastupdated: "2020-03-24"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Red Hat Advanced Cluster Management for Kubernetes policy example
 
-Each Red Hat Advanced Cluster Management for Kubernetes policy can have at least one or multiple templates. For more details about the policy elements, see [Red Hat Advanced Cluster Management for Kubernetes policy overview](../compliance/policy_overview.md). 
-{:shortdesc}
+Each Red Hat Advanced Cluster Management for Kubernetes policy can have at least one or multiple templates. For more details about the policy elements, see [Red Hat Advanced Cluster Management for Kubernetes policy overview](../governance/policy_overview.md).
   
 The policy requires a _PlacementPolicy_ that defines the clusters that the policy document is applied to, and a _PlacementBinding_ that binds the Red Hat Advanced Cluster Management for Kubernetes policy to the `PlacementPolicy`. View the example placement policy and placement binding: 
 
@@ -34,7 +25,6 @@ The policy requires a _PlacementPolicy_ that defines the clusters that the polic
           matchLabels:
             cloud: IBM
       ```
-      {: pre}
  
    * Example placement binding that binds the placement policy and the policy document:
      
@@ -53,7 +43,6 @@ The policy requires a _PlacementPolicy_ that defines the clusters that the polic
        kind: Policy
        apiGroup: policy.mcm.ibm.com
      ```
-     {: pre}
 
   **Important**: The `PlacementPolicy` and `PlacementBinding` can be included in the same `.yaml` file or separate `.yaml` files.
 
@@ -169,6 +158,5 @@ spec:
             type: Container
                
 ```
-{: codeblock}
 
 See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](compliance_intro.md) for more policy topics.

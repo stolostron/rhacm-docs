@@ -2,22 +2,13 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-10"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Delete repositories
 
 Remove specific repositories from the private image registry.
-{:shortdesc}
 
 Base path: `https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/repositories/<repo>`
 
@@ -56,7 +47,6 @@ The sample curl command resembles the following code:
 ```
 curl -X DELETE -H "Authorization:Bearer $ID_TOKEN" https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/repositories/<repo> --insecure
 ```
-{: codeblock}
 
 
 The command does not return any messages.
@@ -65,7 +55,6 @@ The command does not return any messages.
 root@master:~# curl -X DELETE -H "Authorization: Bearer $ID_TOKEN" https://mycluster.icp:8443/image-manager/api/v1/repositories/default/alpine --insecure
 
 ```
-{: pre}
 
 ## Parameters
 

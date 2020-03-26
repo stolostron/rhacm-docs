@@ -1,23 +1,14 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-05"
+  years: 2019, 2020
+lastupdated: "2020-03-25"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Deploying application resources with a rolling update
 
 If you want to roll out an update for a subscription<!-- or deployable--> to your managed clusters, you can configure the deployment to occur on only a percentage of your managed clusters at a time. When the deployment on those clusters is successful, the deployment is rolled out incrementally to the remaining clusters.
-{:shortdesc}
 
 When you run a percentage rollout, the rolling update happens on only the specified percentage of clusters. As the deployment completes on one cluster, the deployment begins on another cluster while maintaining the percentage of clusters that are made unavailable. If an error occurs during the deployment to one cluster, the deployment to that cluster is stopped. The cluster remains unavailable until the error is resolved and the deployment can complete on that cluster. Meanwhile, the overall deployment continues on the remaining clusters. The cluster or clusters where an error occurred are still counted towards the percentage of clusters where the rolling update occurs. If the number of clusters where occurred matches the specified percentage for the rolling update, the overall rollout for the deployment is stopped until the errors are resolved.
 
@@ -83,7 +74,6 @@ At this stage no rolling update is configured and any change to the initial vers
      app.ibm.com/rollingupdate-target:
      app.ibm.com/rollingupdate-maxunavailable:
    ```
-   {: codeblock}
 
    - The `app.ibm.com/rollingupdate-target` annotation identifies the target subscription.
    - The `app.ibm.com/rollingupdate-maxunavailable` annotation identifies the maximum percentage of clusters that can be deployed at a time and rendered unavailable during the update. The actual number of clusters is determined by rounding down to an absolute value. By default, the maximum percentage is 25%.
@@ -99,7 +89,6 @@ At this stage no rolling update is configured and any change to the initial vers
    name: initial-subscription-name
    namespace: default
    ```
-   {: codeblock}
 
    In the preceding example, the rolling update includes 30% of clusters.
 
@@ -108,7 +97,6 @@ At this stage no rolling update is configured and any change to the initial vers
    ```yaml
    kubectl annotate --overwrite subscriptions.app.ibm.com initial-subscription-name -n default app.ibm.com/rollingupdate-target=target-subscription-name app.ibm.com/rollingupdate-maxunavaialble=30
    ```
-   {: codeblock}
 
 For example definitions of resources that use a rolling update, see [Examples](#example_rollout).
 
@@ -128,7 +116,6 @@ With the subscription resources created or updated, the rolling update begins an
        app.ibm.com/rollingupdate-target: 
        app.ibm.com/rollingupdate-maxunavailable: 
      ```
-     {: codeblock}
 
      - The `app.ibm.com/rollingupdate-target` annotation identifies the target deployable. 
      - The `app.ibm.com/rollingupdate-maxunavailable` annotation identifies the maximum percentage of clusters that can be deployed at a time and rendered unavailable during the update. The actual number of clusters is determined by rounding down to an absolute value. By default, the maximum percentage is 25%.
@@ -144,7 +131,6 @@ With the subscription resources created or updated, the rolling update begins an
      name: initial-deployable-name
      namespace: default
      ```
-     {: codeblock}
 
      In the preceding example, the rolling update includes 30% of clusters. 
 
@@ -156,7 +142,6 @@ With the subscription resources created or updated, the rolling update begins an
           kind: PlacementRule
           name: placement-rule-name
       ```
-      {: codeblock}
 
       - The `spec.placement.placementRef.name` field identifies the name of the placement rule for deploying the initial and target deployables.
       - The `spec.placement.placementRef.kind` field indicates that the named resource is a placement rule. This value must be set to `PlacementRule`.
@@ -186,7 +171,7 @@ kind: Namespace
 metadata:
   name: development-ns
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name: development-ch
@@ -195,13 +180,12 @@ spec:
     type: Namespace
     pathname: development-ns
 ```
-{: codeblock}
 
 - The following definitions create the initial deployable resource and the updated version of that deployable. Both of these deployable resources are configMap templates as an example.
 
 ```yaml
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
   annotations:
@@ -221,7 +205,7 @@ spec:
     data:
       purpose: For testing purposes
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
   annotations:
@@ -241,12 +225,11 @@ spec:
     data:
       purpose: For testing a rolling update
 ```
-{: codeblock}
 
 - The following YAML content includes the definition for the initial subscription to the channel and initial deployable. This YAML content also includes the definition for the target subscription to the channel for rolling out the updated deployable. The definition for the initial subscription also includes the `placement` definition to list the target clusters where the deployables must be placed instead of referencing an associated placement rule.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: subscription-initial
@@ -263,7 +246,7 @@ spec:
     - name: cluster51
     - name: cluster52
 ---
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: subscription-target
@@ -273,7 +256,6 @@ spec:
   packageFilter:
     version: "=1.2.4"
 ```
-{: codeblock}
 
 The definition for the initial subscription does not include the required fields for using a rolling update:
 
@@ -281,19 +263,17 @@ The definition for the initial subscription does not include the required fields
 app.ibm.com/rollingupdate-maxunavaialble: 20
 app.ibm.com/rollingupdate-target: subscription-target
 ```
-{: codeblock}
 
 These annotations can be added to the initial subscription with the following command:
 
 ```yaml
 kubectl annotate --overwrite subscriptions.app.ibm.com subscription-initial -n default app.ibm.com/rollingupdate-target=subscription-target app.ibm.com/rollingupdate-maxunavaialble=20
 ```
-{: codeblock}
 
 With the annotations added, the definition for the initial subscription resembles the following YAML content:
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   annotations:
@@ -313,13 +293,12 @@ spec:
     - name: cluster51
     - name: cluster52
 ```
-{: codeblock}
 
 <!--
 ### Example 2: Rolling out a deployable resource
  - Target deployable YAML definition
     ```yaml
-    apiVersion: app.ibm.com/v1alpha1
+    apiVersion: apps.open-cluster-management.io/v1
     kind: Deployable
     metadata:
       annotations:
@@ -333,5 +312,4 @@ spec:
         metadata:
           namespace: default
     ```
-    {: codeblock}
 -->

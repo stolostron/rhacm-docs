@@ -2,17 +2,9 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Adding certificates by using the ECDSA algorithm for encryption
 
@@ -43,8 +35,7 @@ spec:
   commonName: foo1.bar1
   dnsNames:
   - foo1.bar1
-```  
-{: codeblock}
+``` 
 
 ## Using ECDSA with Issuers
 {: #ecdsa_issuer}
@@ -62,7 +53,6 @@ spec:
    spec:
      selfSigned: {}
    ```
-   {: codeblock}
 
 2. Next, create a CA certificate that is issued from the self-signed Issuer and using the ECDSA key algorithm. See the following sample:
 
@@ -84,7 +74,6 @@ spec:
      dnsNames:
      - foo1.bar1
     ```
-    {: codeblock}
 
 3. Edit the following sample to create the CA Issuer with the CA certificate:
 
@@ -98,7 +87,6 @@ spec:
      ca:
        secretName: ecdsa-ca-secret
    ```
-   {: codeblock}
 
 ### Vault Issuer
 
@@ -109,7 +97,6 @@ Go to your Vault server and run the following configuration command and edit the
   ```
   vault write auth/approle/role/my-role secret_id_ttl=8760h token_num_uses=0 token_ttl=20m token_max_ttl=30m secret_id_num_uses=0 policies=pki_policy key_type=ec key_bits=521
   ```
-  {: codeblock}
 
 When you create certificate resources, be sure to use a `keySize` that matches, or is greater than, the `key_bits` that you specify in your Vault server:
 
@@ -117,6 +104,5 @@ When you create certificate resources, be sure to use a `keySize` that matches, 
   key_type=ec
   key_bits=256, 384 or 521
   ```
-  {: pre}
 
 See [Using Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)](cert_manager.md) for more Certificate manager topics.

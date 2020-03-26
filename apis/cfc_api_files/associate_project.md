@@ -1,28 +1,18 @@
 ---
 
 copyright:
-  years: 2016, 2018
-lastupdated: "2018-01-04"
+  years: 2016, 2020
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Associate namespace
 
 Associate a user to a namespace.
-{:shortdesc}
 
 ```
 PUT /namespaces/{projectid}/{uid}
 ```
-{: codeblock}
 
 ## Description
 
@@ -46,4 +36,4 @@ This endpoint is used to associate a user to a namespace.
 
 ## Tags
 
-* namespaces
+* Namespaces

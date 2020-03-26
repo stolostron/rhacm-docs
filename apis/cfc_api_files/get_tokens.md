@@ -2,22 +2,13 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-10"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Get JWT tokens
 
 Get the JWT token that is to be used with the Docker client.
-{:shortdesc}
 
 Base path: `https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/auth/token`
 
@@ -53,7 +44,7 @@ The sample curl command resembles the following code:
 ```
 curl -k -H GET --header "Authorization: Bearer $ID_TOKEN" https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/auth/token
 ```
-{: codeblock}
+
 
 The response resembles the following code:
 
@@ -62,7 +53,6 @@ root@master:~# curl -k -H GET --header "Authorization: Bearer $ID_TOKEN" https:/
 {"expires_in":1800,"issued_at":"2017-11-30T05:24:21Z","token":\
 "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjZMUDY6SFFJUjozVkg0OlZIUUk6TTRNMjpMSEFWOldGS0M6Mk9aQTpSTjRMOlQ3UUs6RzVLUTpKNkg1In0.eyJpc3MiOiJyZWdpc3RyeS10b2tlbi1pc3N1ZXIiLCJzdWIiOiIiLCJhdWQiOiIiLCJleHAiOjE1MTIwMjEyNjEsIm5iZiI6MTUxMjAxOTQ2MSwiaWF0IjoxNTEyMDE5NDYxLCJqdGkiOiJsYzVkRzVPVTI0anhjemVLIiwiYWNjZXNzIjpudWxsfQ.F2D6VjwhQRlRvU-da2zHDzDbck8avh1lxc8B4hAVrIhEY8orcqwYhocjxnFk3kXdNm3yihMwi17lYySEnet3_p7jWOJ0XGTF6_m7DeUsNd-YqtGGv7FTycTG_10Xnm7zuknBhpsbMx_Eq4gKRBM1ndwdkhhOLG135r97BbTcT_GlHcnmyKfFLXfmhVgiAhBeTn1_phmSO-Olys0bhbKl2M_jIiCGLwleKQpa3dFsJ3JsYGSQcB7dEVZuSAmzc3OmlYXmvl8oCnjyM-RIkQk8-uGkI_7cjhXOY8rORGMgp0r6f8LXky5K_XH1mIG7BARKr1E-9SKyyIGwRWMUIs3fwA"}
 ```
-{: pre}
 
 ## Responses
 

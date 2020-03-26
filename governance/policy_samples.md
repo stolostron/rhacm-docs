@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-12"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Red Hat Advanced Cluster Management for Kubernetes policy samples
 
 View a description of the the policy samples that are included in your Red Hat Advanced Cluster Management for Kubernetes installation.
-{:shortdesc}
 
 * [Memory usage policy](#limit_mem) 
 * [Namespace policy](#namespace)
@@ -28,7 +19,7 @@ View a description of the the policy samples that are included in your Red Hat A
 * [Rolebinding policy](#rbind_policy)
 
 
-**Note**: You must create a placement policy and placement binding policy to apply your policies on to your cluster. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy example](../compliance/policy_example.md).
+**Note**: You must create a placement policy and placement binding policy to apply your policies on to your cluster. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy example](../governance/policy_example.md).
 
 ## Memory usage policy
 {: #limit_mem}
@@ -63,7 +54,6 @@ Apply the limit range policy to limit your memory usage. Your memory usage polic
                type: Container
            ...
    ```
-   {: pre}
    
 ### Applying the memory usage policy
 
@@ -100,7 +90,6 @@ Apply the namespace policy to define specific rules for your namespace. Your nam
              name: prod
         ...
    ```
-   {: pre}
    
 ### Applying the namespace policy
 
@@ -115,7 +104,7 @@ Complete the following steps to apply the memory usage policy from the console:
 ## Network
 {: #network}
 
-Apply the network policy to define which network request to deny. For more information about network policies, see _Network Policy_ from the [Kubernetes documentation]( https://kubernetes.io/docs/concepts/services-networking/network-policies/){: new_window}.
+Apply the network policy to define which network request to deny. For more information about network policies, see _Network Policy_ from the [Kubernetes documentation]( https://kubernetes.io/docs/concepts/services-networking/network-policies/).
 
 Your network policy might resemble the following YAML file:
 
@@ -146,7 +135,6 @@ Your network policy might resemble the following YAML file:
             - podSelector: {} # accept ingress from all pods within this namespace only
        ...     
    ```
-   {: pre}
  
 ### Applying the network policy
 
@@ -189,7 +177,6 @@ Apply the pod policy to define the container rules for your pods. A nginx pod mu
                - containerPort: 80
         ...
    ```
-   {: pre}
 
 ### Applying the pod policy
 
@@ -203,7 +190,7 @@ Complete the following steps to apply the pod policy from the console:
 ## Pod security policy
 {: #psp}
 
-Apply a pod security policy to secure pods and containers. For more information, see [Pod security](../manage_cluster/security.md).
+Apply a pod security policy to secure pods and containers. For more information, see _Pod Security Policies_ in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/policy/pod-security-policy/).
 
 Your pod security policy might resemble the following YAML file:
  
@@ -251,7 +238,6 @@ Your pod security policy might resemble the following YAML file:
                rule: 'RunAsAny'
         ...
    ```
-   {: pre}
    
 ### Applying a pod security policy
 
@@ -265,9 +251,9 @@ Complete the following steps to apply the pod security policy from the console:
 ## Role policy
 {: #role}
 
-Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](../compliance/security.md). Your role policy might resemble the following YAML file:
+Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](../governance/security.md). Your role policy might resemble the following YAML file:
 
-   ```
+   ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
@@ -301,7 +287,6 @@ Apply a role policy to set rules and permissions for specific roles in your clus
               verbs: ["get", "list", "watch","delete", "create", "update", "patch"]
          ...
    ```
-   {: pre}
 
 ### Applying a role policy
 
@@ -317,7 +302,7 @@ Complete the following steps to apply the role policy from the console:
 
 Apply a role binding policy to bind a policy to a namespace in your cluster. Your role binding policy might resemble the following YAML file:
 
-   ```
+   ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
@@ -346,7 +331,6 @@ Apply a role binding policy to bind a policy to a namespace in your cluster. You
              apiGroup: rbac.authorization.k8s.io
        ...
    ```
-   {: pre}
    
 ### Apply a role policy
 
@@ -358,4 +342,4 @@ Complete the following steps to apply the role binding policy from the console:
 4. Select **Rolebinding** from the _Specifications_ field.
           
           
-  See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md) for more information about policies.
+  See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more information about policies.

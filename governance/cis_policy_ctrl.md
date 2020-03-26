@@ -2,31 +2,50 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-12"
+lastupdated: "2020-03-23"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # CIS policy controller
 
 You can use the Center for Internet Security (CIS) policy controller to receive notifications about non-compliant clusters.
-{:shortdesc}
 
+* [Enable the CIS policy controller](#cisc)
 * [CIS policy](#cis_policy)
 * [CIS policy elements](#cis_elements)
+* [CIS policy controller components](#contr_comp)
 * [Creating a CIS policy](#create_policy)
 * [Viewing a CIS policy](#view_policy)
 * [CIS risk score](#risk_score)
-* [CIS policy controller components](#contr_comp) <!--suggest the the controller components be placed before CIS policy section 03/12/2020 MD-->
 
-The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list. CIS Kubernetes Benchmark Version 1.4.0 is used.
+## Enable the CIS policy controller
+{: #cisc}
+
+The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list. 
+
+When you install the Klusterlet, the CIS policy controller is disabled by default. 
+
+**Important:** You must create a secret that contains configuration credentials for the MinIO instance before you enable the CIS controller. Your secret might resemble the following YAML file: 
+
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: cis-controller-secret
+   type: Opaque
+   data:
+     secret_key: <base64-encoded username for MinIO>
+     access_key: <base64-encoded username for MinIO>
+     location: <base64-encoded label for controller location>
+   ```
+   
+   For more information about the `cis-controller-minio`, see the [CIS policy controller components](#contr_comp).
+   
+Enable the controller after your cluster is imported by running the following command: 
+
+   ```
+   kubectl patch endpointconfig $CLUSTER_NAME -n $CLUSTER_NAMESPACE --type='json' -p='[{"op": "replace", "path": "/spec/cisController/enabled", "value":true}]'
+   ```
 
 ## CIS policy
 {: #cis_policy}
@@ -38,7 +57,8 @@ The CIS policy can be created at the Red Hat Advanced Cluster Management for Kub
 The set of rules that constitute CIS controls is different on an OpenShift Container Platform cluster. On OpenShift, the kube-bench tools use rules based on the Red Hat OpenShift Hardening Guide.
 
 ### Sample CIS policy (non-OpnShift Container Platform)
-```
+
+```yaml
 apiVersion: policies.ibm.com/v1alpha1
 kind: CisPolicy
 metadata:
@@ -127,10 +147,10 @@ spec:
     - 2.2.9 Ensure that the kubelet configuration file ownership is set to root:root
     - 2.2.10 Ensure that the kubelet configuration file has permissions set to 644 or more restrictive
 ```
-{: codeblock}
 
 ### Sample CIS policy 
-```
+
+```yaml
 apiVersion: policies.ibm.com/v1alpha1
 kind: CisPolicy
 metadata:
@@ -196,10 +216,14 @@ spec:
     - 8.6 Verify the proxy kubeconfig file ownership of root:root
     - 8.8 Verify the client certificate authorities file ownership of root:root
 ```
-{: codeblock}
 
 ## CIS policy elements
 {: #cis_elements}
+
+### Policy enforcement 
+
+CIS policy controller can only inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. View an example of a policy in the [Creating a CIS policy]({#create_policy) section.
+
 
 ### masterNodeExcludeRules
 The rules applicable to master nodes that are to be exempted from checking. In order for master node to be compliant, this list must include any rules that must be checked manually or those rules that require extra configuration.
@@ -207,7 +231,74 @@ The rules applicable to master nodes that are to be exempted from checking. In o
 ### workerNodeExcludeRules
 The rules applicable to worker nodes that are to be exempted from checking. In order for worker node to be compliant, this list must include any rules that must be checked manually or those rules that require more configuration.
 
-For more information see, [CIS rules specifications](../compliance/cis_policy_rules.md)
+For more information see, [CIS rules specifications](../governance/cis_policy_rules.md).
+
+
+## CIS policy controller components
+{: #contr_comp}
+
+The CIS policy controller consists of the following four components.
+
+### cis-controller-minio
+
+The `cis-controller-minio` object store is used to store the artifacts that are collected by the CIS crawler that runs on all the master and worker nodes. The results from running the aqua-security kube-bench tool are also stored in the CIS Minio object store.
+
+### cis-crawler
+
+The `cis-crawler` collects information about Kubernetes processes, binary files, and configuration files and stores them in the Minio object store. The crawler runs on the master and worker nodes. By default, it runs every 24 hours. To change the crawler frequency, complete the following steps.
+
+1. Edit configmap, `<helm-release>-cis-crawler-config`.
+   
+   ```
+   kubectl -n <namespace> edit configmap <helm-release>-cis-crawler-config
+   ```
+
+2. Change the value of the `FREQUENCY` property to the wanted number of seconds and save the changes.
+3. Restart the CIS crawler pods by deleting them.
+   
+   ```
+   kubectl -n <namespace> delete pod <pod_name>
+   ```
+
+### drishti-cis
+
+The `drishti-cis` component runs the aqua-security kube-bench tool against the artifacts that are collected by the `cis-crawler` and stores the results in `cis-controller-minio` object store. By default, it scans the artifacts every 24 hours. To change the frequency, complete the following steps:
+
+1. Edit the configmap, `<helm-release>-drishti-cis-config`.
+   ```
+   kubectl -n <namespace> edit configmap <helm-release>-drishti-cis-config
+   ```
+
+2. Change the value of the `CIS_CHECK_FREQUENCY` property to the wanted number of seconds and save the changes.
+3. Restart the `drishti-cis` pod by deleting it.
+   
+   ```
+   kubectl -n <namespace> delete pod <pod_name>
+   ```
+  
+
+### cis-controller
+
+The `cis-controller` scans the `cis-controller-minio` object store for results that are generated by the aqua-security kube-bench tool and updates the CIS policy status. By default, it scans the results every 24 hours or whenever the policy is updated. To change the frequency, complete the following steps:
+
+1. Edit configmap, `<helm-release>-cis-controller-config`.
+   
+   ```
+   kubectl -n <namespace> edit configmap <helm-release>-cis-controller-config
+   ```
+
+2. Change the value of the `UPDATE_FREQUENCY` property to the wanted number of seconds and save the changes.
+3. Restart the cis-controller pod by deleting it.
+   
+   ```
+   kubectl -n <namespace> delete pod <pod_name>
+   ```
+   
+
+**Note: Frequency**
+The `cis-controller` depends on the results that are posted by `drishti-cis`, which in turn depends upon the data that is collected by the `cis-crawler`. `cis-crawler`, `drishti-cis`, and `cis-controller` run at frequent intervals. The default interval for all three components is 24 hours. Staggering the frequencies helps the `cis-controller` evaluate the compliance status based on more recent data.
+
+
 
 ## Creating a CIS policy
 {: #create_policy}
@@ -222,8 +313,9 @@ A CIS policy can be created either from the command line by using kubectl or fro
 
 Complete the following steps to create a certificate policy from the command line interface (CLI):
 
-1. Create a YAML file for your CIS policy by including a set of exclude rules for master node and worker node. See [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](../compliance/create_policy.md#yaml) for more information about policy requirements.
-```
+1. Create a YAML file for your CIS policy by including a set of exclude rules for master node and worker node. See [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](../governance/create_policy.md#yaml) for more information about policy requirements.
+
+```yaml
 apiVersion: policies.ibm.com/v1alpha1
 kind: CisPolicy
 metadata:
@@ -244,34 +336,34 @@ spec:
     - 1.1.17 Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate
     - 1.1.18 Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate
 ```
-{: codeblock}
 
 2. Apply the policy by running the following command:
-```
-kubectl apply -f <cis-policy-file> --namespace=<mcm_namespace>
-```
-{: codeblock}
+   
+   ```
+   kubectl apply -f <cis-policy-file> --namespace=<namespace>
+   ```
 
 3. Verify and list the policies by running the following command:
-```
-kubectl get cispolicy --namespace=<mcm_namespace>
-```
-{: codeblock}
+
+   ```
+   kubectl get cispolicy --namespace=<namespace>
+   ```
 
 ### Viewing a CIS policy from command line interface (CLI)
+
 Complete the following steps to view the CIS policy from the CLI:
 
 1. View details for a specific CIS policy by running the following command:
-```
-kubectl get cispolicy <policy-name> -n <mcm_namespace> -o yaml
-```
-{: codeblock}
+
+   ```
+   kubectl get cispolicy <policy-name> -n <namespace> -o yaml
+   ```
 
 2. View a description of your CIS policy by running the following command:
-```
-kubectl describe cispolicy <name> -n <namespace>
-```
-{: codeblock}
+
+   ```
+   kubectl describe cispolicy <name> -n <namespace>
+   ```
 
 ### Creating a CIS policy from Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_policy_gui}
@@ -289,7 +381,8 @@ kubectl describe cispolicy <name> -n <namespace>
 7. Click **Create**.
 
 A policy is created and the CIS policy is embedded into the parent policy. The `.yaml` resembles the following example.
-```
+
+```yaml
 apiVersion: policy.mcm.ibm.com/v1alpha1
 kind: Policy
 metadata:
@@ -525,7 +618,6 @@ spec:
   remediationAction: inform
   disabled: false
 ```
-{: codeblock}
 
 ## Viewing a CIS policy
 {: #view_policy}
@@ -551,88 +643,17 @@ The risk score is on a scale of 1 to 10.
 You can assign a custom risk score to each CIS rule:
 
 1. Edit configmap, `<helm-release>-cis-controller-config`.
+   
    ```
    kubectl -n <namespace> edit configmap <helm-release>-cis-controller-config
    ```
-   {: codeblock}
 
 2. In the `cis_risk_score.yaml` section, locate the rule for which you want to assign a custom risk score.
 3. Replace the existing score with the custom score and save the changes.
 4. Restart the `cis-controller pod` by deleting it.
+    
     ```
     kubectl -n <namespace> delete pod pod_name
     ```
-    {: codeblock}
 
-## CIS policy controller components
-{: #contr_comp}
-
-The CIS policy controller consists of the following four components.
-
-### cis-controller-minio
-The `cis-controller-minio` object store is used to store the artifacts that are collected by the CIS crawler that runs on all the master and worker nodes. The results from running the aqua-security kube-bench tool are also stored in the CIS Minio object store.
-
-**Important:** You must create a secret that contains configuration credentials for the MinIO instance. Your secret might resemble the following YAML file: 
-
-```
-apiVersion: v1
-kind: Secret
-metadata:
-  name: cis-controller-secret
-type: Opaque
-data:
-  secret_key: <base64-encoded username for MinIO>
-  access_key: <base64-encoded username for MinIO>
-  location: <base64-encoded label for controller location>
-```
-{: codeblock}
-
-### cis-crawler
-The `cis-crawler` collects information about Kubernetes processes, binary files, and configuration files and stores them in the Minio object store. The crawler runs on the master and worker nodes. By default, it runs every 24 hours. To change the crawler frequency, complete the following steps.
-
-1. Edit configmap, `<helm-release>-cis-crawler-config`.
-   ```
-   kubectl -n <namespace> edit configmap <helm-release>-cis-crawler-config
-   ```
-   {: codeblock}
-
-2. Change the value of the `FREQUENCY` property to the wanted number of seconds and save the changes.
-3. Restart the CIS crawler pods by deleting them.
-   ```
-   kubectl -n <namespace> delete pod <pod_name>
-   ```
-   {: codeblock}
-
-### drishti-cis
-The `drishti-cis` component runs the aqua-security kube-bench tool against the artifacts that are collected by the `cis-crawler` and stores the results in `cis-controller-mino` object store. By default, it scans the artifacts every 24 hours. To change the frequency, complete the following steps.
-1. Edit the configmap, `<helm-release>-drishti-cis-config`.
-   ```
-   kubectl -n <namespace> edit configmap <helm-release>-drishti-cis-config
-   ```
-   {: codeblock}
-
-2. Change the value of the `CIS_CHECK_FREQUENCY` property to the wanted number of seconds and save the changes.
-3. Restart the `drishti-cis` pod by deleting it.
-   ```
-   kubectl -n <namespace> delete pod <pod_name>
-   ```
-   {: codeblock}
-
-### cis-controller
-The `cis-controller` scans the `cis-controller-minio` object store for results that are generated by the aqua-security kube-bench tool and updates the CIS policy status. By default, it scans the results every 24 hours or whenever the policy is updated. To change the frequency, complete the following steps.
-1. Edit configmap, `<helm-release>-cis-controller-config`.
-   ```
-   kubectl -n <namespace> edit configmap <helm-release>-cis-controller-config
-   ```
-   {: codeblock}
-2. Change the value of the `UPDATE_FREQUENCY` property to the wanted number of seconds and save the changes.
-3. Restart the cis-controller pod by deleting it.
-   ```
-   kubectl -n <namespace> delete pod <pod_name>
-   ```
-   {: codeblock}
-
-**Note: Frequency**
-The `cis-controller` depends on the results that are posted by `drishti-cis`, which in turn depends upon the data that is collected by the `cis-crawler`. `cis-crawler`, `drishti-cis`, and `cis-controller` run at frequent intervals. The default interval for all three components is 24 hours. Staggering the frequencies helps the `cis-controller` evaluate the compliance status based on more recent data.
-
-For more information about other policy controllers, see [{Red Hat Advanced Cluster Management for Kubernetes policy controllers](../compliance/policy_controllers.md). For more information about policies, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
+For more information about other policy controllers, see [{Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md). For more information about policies, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).

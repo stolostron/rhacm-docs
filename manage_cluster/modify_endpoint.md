@@ -1,23 +1,14 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-09-27"
+  years: 2019, 2020
+lastupdated: "2020-03-26"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Modifying the multicluster endpoint settings of your cluster
 
 You can modify the settings of `multicluster endpoint` to change your configuration either by using the hub cluster or the managed cluster.
-{:shortdesc}
 
 The `multicluster endpoint` operator manages the functions that are enabled and disabled according to the settings in the `endpoint.multicloud.ibm.com` Kubernetes resource.
 
@@ -66,7 +57,6 @@ You must have access to the `multicluster endpoint` namespace to modify your set
   ```
   kubectl edit endpoint.multicloud.ibm.com endpoint -n multicluster -endpoint
   ```
-  {: codeblock}
 
 3. Find the `spec` section.
 

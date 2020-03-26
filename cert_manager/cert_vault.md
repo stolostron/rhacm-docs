@@ -2,18 +2,9 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 
 # Using Vault to issue certificates
 
@@ -30,21 +21,18 @@ Complete the following configuration on your Vault server:
    ```
    vault secrets enable pki
    ```
-   {: codeblock}
 
 2. Run the following command to tune the secret engine so that your certificates satisfy the Certificate manager 90-day duration request:
 
     ```
     vault secrets tune -max-lease-ttl=8760h pki
     ```
-    {: codeblock}
 
 3. Run the following command to create a self-signed CA certificate and key pair with a customized expiration.
 
     ```
     vault write pki/root/generate/internal common_name=ibm.com ttl=8760h
     ```
-    {: codeblock}
 
     The previous command is used for root CA, but can be extended to use an intermediate CA. The HashiCorp Vault product documentation provides more information on this scenario.
 
@@ -52,13 +40,12 @@ Complete the following configuration on your Vault server:
     ```
      vault write pki/config/urls issuing_certificates="http://<vault_server>:8200/v1/pki/ca" crl_distribution_points="http://<vault_server>:8200/v1/pki/crl"
     ```
-    {: codeblock}
+    
 5. Create a role that can process the certificate signing requests. Run the following command:
 
    ```
    vault write pki/roles/my-role allowed_domains=ibm.com allow_subdomains=true allow_any_name=true allow_localhost=true enforce_hostnames=false max_ttl=8760h
    ```
-   {: codeblock}
 
 After the Vault server is configured to issue certificates, Kubernetes resources can be created that refer to the Vault server for certificate creation.
 
@@ -88,28 +75,24 @@ Complete the following configuration on your Vault server:
     ```
     path "pki*" {  capabilities = ["create", "read", "update", "delete", "list", "sudo"]}
     ```
-    {: codeblock}
 
   - Run the following command to create the policy where `pki_policy` is the policy name and `pki_policy.hcl` is the file name:
 
     ```
     vault policy write pki_policy pki_policy.hcl
     ```
-    {: codeblock}
 
 2. Create a token that uses the policy that you just created. Run the following command, where `pki_policy` is the name of the policy that you just created. Be sure that the `ttl` setting is longer than the period that you want to issue renewals against the token that you created:
 
     ```
     vault write /auth/token/create policies=<"pki_policy"> no_parent=true no_default_policy=true renewable=true ttl=767h num_uses=0
     ```
-    {: codeblock}
 
 3. Create a Kubernetes Secret that contains your base64 encoded authentication token. You can encode the token with the following command, where `abe02917-7494-c94c-a4f1-99890caf06d7` is your token:
 
     ```
     echo abe02917-7494-c94c-a4f1-99890caf06d7 | base64
     ```
-    {: codeblock}
 
     See the following YAML sample, which defines a Secret with a Vault token:
 
@@ -123,16 +106,14 @@ Complete the following configuration on your Vault server:
     data:
       token: "YWJlMDI5MTctNzQ5NC1jOTRjLWE0ZjEtOTk4OTBjYWYwNmQ3Cg=="
     ```
-    {: pre}
 
-  Important: Tokens in Vault will expire. Certificate manager does not refresh the token to keep it from expiring, so be sure to address token renewals. A root token does not expire, but should not be used except in a development or test environment.
+  **Important**: Tokens in Vault will expire. Certificate manager does not refresh the token to keep it from expiring, so be sure to address token renewals. A root token does not expire, but should not be used except in a development or test environment.
 
   To renew the token, run a Vault command similar to the following command, where `abe02917-7494-c94c-a4f1-99890caf06d7` is your token:
 
   ```
   vault write /auth/token/renew token=abe02917-7494-c94c-a4f1-99890caf06d7
   ```
-  {: codeblock}
 
 4. Create the Vault Issuer that uses the Vault token Secret. The Vault Issuer references the Secret that you just created, the URL for the Vault server, and the path to a role:
 
@@ -151,7 +132,6 @@ Complete the following configuration on your Vault server:
             name: my-vault-token
             key: token
     ```
-    {: codeblock}
 
 5. Create a certificate that uses the Vault Issuer. The following example defines a certificate that uses the Issuer, which is referenced in the previous step:
 
@@ -169,7 +149,6 @@ Complete the following configuration on your Vault server:
       dnsNames:
       - myhostname.ibm.com
     ```
-    {: codeblock}
 
 ### Create issuers by using AppRole authentication
 
@@ -182,7 +161,6 @@ See the [HashiCorp Vault](https://www.vaultproject.io/docs/auth/approle.html) do
    ```
    vault auth enable approle
    ```
-   {: codeblock}
 
 2. Create a policy that enables usage of the PKI Vault APIs. Your policy must include the following capabilities: _create_, _read_, _update_, _delete_, _list_, and _sudo_.
 
@@ -191,21 +169,18 @@ See the [HashiCorp Vault](https://www.vaultproject.io/docs/auth/approle.html) do
     ```
     path "pki*" {  capabilities = ["create", "read", "update", "delete", "list", "sudo"]}
     ```
-    {: codeblock}
 
   - Run the following command to create the policy where `pki_policy` is the policy name and `pki_policy.hcl` is the file name:
 
     ```
     vault policy write pki_policy pki_policy.hcl
     ```
-    {: codeblock}
 
 3. Run the following command to create a named role that uses the policy that you created:
 
     ```
     vault write auth/approle/role/my-role secret_id_ttl=8760h token_num_uses=0 token_ttl=20m token_max_ttl=30m secret_id_num_uses=0 policies=pki_policy
     ```
-    {: codeblock}
 
     Important: The _secret_id_ttl_ expiration is similar to token expiration except the secret_id cannot be renewed.
 
@@ -214,14 +189,12 @@ See the [HashiCorp Vault](https://www.vaultproject.io/docs/auth/approle.html) do
     ```
     vault read auth/approle/role/my-role/role-id
     ```
-    {: codeblock}
 
 5. Get a _secret_id_ for the AppRole with the following command:
 
     ```
     vault write -f auth/approle/role/my-role/secret-id
     ```
-    {: codeblock}
 
 6. Next, you need to create a Kubernetes Secret that contains your base64 encoded AppRole secret_id. Using Vault with AppRole authentication requires a Kubernetes Secret that contains the Vault AppRole `secret_id`.
 
@@ -230,7 +203,7 @@ See the [HashiCorp Vault](https://www.vaultproject.io/docs/auth/approle.html) do
    ```
    echo abe02917-7494-c94c-a4f1-99890caf06d7 | base64
    ```
-   {: codeblock}
+   
 
    See the following YAML sample, which defines a Kubernetes Secret that contains your base64 encoded AppRole `secret_id`:
 
@@ -244,7 +217,6 @@ See the [HashiCorp Vault](https://www.vaultproject.io/docs/auth/approle.html) do
    data:
      secretId: "ZmNlODI5OWUtNjlkNi1hZjY1LWRhYTItYWYxODI4OWZkYjVjCg=="
    ```
-   {: pre}
 
 7. Next, create the Vault Issuer that uses the AppRole Secret. Edit the following YAML sample.
 
@@ -266,7 +238,6 @@ See the [HashiCorp Vault](https://www.vaultproject.io/docs/auth/approle.html) do
              name: cm-vault-approle
              key: secretId
    ```
-   {: codeblock}
 
    Here, the Certificate manager Vault Issuer references the Secret that you just created, which contains the `secret_id` of the AppRole authentication. The Issuer specifies the `role_id`. The Vault server and URL path for processing certificate signing requests is also provided.
 
@@ -290,7 +261,6 @@ See the [HashiCorp Vault](https://www.vaultproject.io/docs/auth/approle.html) do
      dnsNames:
      - myhostname.ibm.com
    ```
-   {: codeblock}
 
 If the `secret_id_ttl` is set too small and that value expires, a new `secret_id` must be created. The Issuer and the referenced Secret need to be edited to configure the new `secret_id`.
 
