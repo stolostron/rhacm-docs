@@ -227,7 +227,7 @@ To delete a subscription, you can use the console, the Kubernetes command line i
 The following YAML structure shows the required fields for a subscription and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name:
@@ -247,7 +247,7 @@ spec:
     annotations:  
   packageOverrides:
   - packageName:
-    packageOverrides:
+    packageAlias:
     - path:
       value:
   placement:
@@ -266,7 +266,7 @@ spec:
   timeWindow:
     type:
     location:
-    weekdays:
+    daysofweek:
     hours:
       - start:
         end:
@@ -275,7 +275,7 @@ spec:
 
 |Field|Description|
 |-- | -- |
-| apiVersion | Required. Set the value to `app.ibm.com/v1alpha1`. |
+| apiVersion | Required. Set the value to `apps.open-cluster-management.io/v1`. |
 | kind | Required. Set the value to `Subscription` to indicate that the resource is a subscription. |
 | metadata.name | Required. The name for identifying the subscription. |
 | metadata.namespace | Required. The namespace resource to use for the subscription. |
@@ -288,8 +288,9 @@ spec:
 | spec.packageFilter.version | Optional. The version or versions for the deployable. You can use a range of versions in the form `>1.0`, or `<3.0`. By default, the version with the most recent "creationTimestamp" value is used. |
 | spec.packageFilter.annotations | Optional. The annotations for the deployable. |
 | spec.packageOverrides | Optional. Section for defining overrides for the Kubernetes resource that is subscribed to by the subscription, such as a Helm chart, deployable, or other Kubernetes resource within a channel. |
-| spec.packageOverrides.packageName | Optional, but required for setting an override. Identifies the Kubernetes resource that is being overwritten. |  
-| spec.packageOverrides.packageOverrides | Optional, but required for setting an override. The configuration of parameters and replacement values to use to override the Kubernetes resource. For more information, see [Package overrides](#package_overrides). |  
+| spec.packageOverrides.packageName  | Optional, but required for setting an override. Identifies the Kubernetes resource that is being overwritten. |
+| spec.packageOverrides.packageAlias | Optional. Gives an alias to the Kubernetes resource that is being overwritten. |
+| spec.packageOverrides.packageOverrides | Optional. The configuration of parameters and replacement values to use to override the Kubernetes resource. For more information, see [Package overrides](#package_overrides). |
 | spec.placement | Required. Identifies the subscribing clusters where deployables need to be placed, or the placement rule that defines the clusters. Use the placement configuration to define values for multi-cluster deployments. |
 | spec.local | Optional, but required for a stand-alone cluster or cluster that you want to manage directly. Defines whether the subscription must be deployed locally. Set the value to `true` to have the subscription synchronize with the specified channel. Set the value to `false` to prevent the subscription from subscribing to any resources from the specified channel. Use this field when your cluster is a stand-alone cluster or you are managing this cluster directly. If your cluster is part of a multi-cluster and you do not want to manage the cluster directly, use only one of `clusters`, `clusterSelector`, or `placementRef` to define where your subscription is to be placed. If your cluster is the Hub of a multi-cluster and you want to manage the cluster directly, you must register the Hub as a managed cluster before the subscription operator can subscribe to resources locally. |
 | spec.placement.clusters | Optional. Defines the clusters where the subscription is to be placed. Use only one of `clusters`, `clusterSelector`, or `placementRef` to define where your subscription is to be placed for a multi-cluster. If your cluster is a stand-alone cluster that is not your Hub cluster, you can also use `local`. |
@@ -304,7 +305,7 @@ spec:
 | spec.timeWindow | Optional. Defines the settings for configuring a time window when the subscription is active or blocked. |
 | spec.timeWindow.type | Optional, but required for configuring a time window. Indicates whether the subscription is active or blocked during the configured time window. Deployments for the subscription occur only when the subscription is active. |
 | spec.timeWindow.location | Optional, but required for configuring a time window. The time zone of the configured time range for the time window. All time zones must use the Time Zone (tz) database name format. For more information, see [Time Zone Database](https://www.iana.org/time-zones). |
-| spec.timeWindow.weekdays | Optional, but required for configuring a time window. Indicates the days of the week when the time range is applied to create a time window. The list of days must be defined as an array, such as `weekdays: ["Monday", "Wednesday", "Friday"]`. |
+| spec.timeWindow.daysofweek | Optional, but required for configuring a time window. Indicates the days of the week when the time range is applied to create a time window. The list of days must be defined as an array, such as `daysofweek: ["Monday", "Wednesday", "Friday"]`. |
 | spec.timeWindow.hours | Optional, but required for configuring a time window. Defined the time range for the time window. A start time and end time for the hour range must be defined for each time window. You can define multiple time window ranges for a subscription. |
 | spec.timeWindow.hours.start | Optional, but required for configuring a time window. The timestamp that defines the beginning of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |  
 | spec.timeWindow.hours.end | Optional, but required for configuring a time window. The timestamp that defines the ending of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |
@@ -328,34 +329,31 @@ Package overrides for a subscription override values for the Helm chart or Kuber
 
 To configure a package override, specify the field within the Kubernetes resource spec to override as the value for the `path` field. Specify the replacement value as the value for the `value` field.
 
-For example, if you need to override the values field within the spec for a Helm release (`HelmRelease.app.ibm.com`) for a subscribed Helm chart, you need to set the value for the `path` field in your subscription definition to `spec.values`.
+For example, if you need to override the values field within the spec for a Helm release (`HelmRelease.app.ibm.com`) for a subscribed Helm chart, you need to set the value for the `path` field in your subscription definition to `spec`.
 
 ```
 packageOverrides:
 - packageName: nginx-ingress
   packageOverrides:
-  - path: spec.values
+  - path: spec
     value: my-override-values
 ```
 {: codeblock}
 
-The contents for the `value` field are used to override the values within the `spec.values` field of the `HelmRelease` spec.
+The contents for the `value` field are used to override the values within the `spec` field of the `HelmRelease` spec.
 
-* For a Helm release, override values for the `spec.values` field are merged into the Helm release `values.yaml` file to override the existing values. This file is used to retrieve the configurable variables for the Helm release.
+* For a Helm release, override values for the `spec` field are merged into the Helm release `values.yaml` file to override the existing values. This file is used to retrieve the configurable variables for the Helm release.
 
-* If you need to override the release name for a Helm release, include the `packageOverride` section within your definition. Define the `packageOverride` for the Helm release by including the following fields:
-  * `packageName` to identify the Helm chart
-  * `packageOverrides.path: spec.releaseName` to indicate that you are overriding the release name field in the Helm release spec.
-  * `packageOverrides.value:` with your new release name as the value.
+* If you need to override the release name for a Helm release, include the `packageOverride` section within your definition. Define the `packageAlias` for the Helm release by including the following fields:
+  * `packageName` to identify the Helm chart.
+  * `packageAlias` to indicate that you are overriding the release name.
 
    By default, if no Helm release name is specified, the Helm chart name is used to identify the release. In some cases, such as when there are multiple releases subscribed to the same chart, conflicts can occur. The release name must be unique among the subscriptions within a namespace. If the release name for a subscription that you are creating is not unique, an error occurs. You must set a different release name for your subscription by defining a `packageOverride`. If you want to change the name within an existing subscription, you must first delete that subscription and then recreate the subscription with the preferred release name.
 
   ```
   packageOverrides:
   - packageName: nginx-ingress
-    packageOverrides:
-    - path: spec.releaseName
-      value: my-helm-release-name
+    packageAlias: my-helm-release-name
   ```
   {: codeblock}
 
@@ -373,7 +371,7 @@ The following YAML content defines example subscriptions:
 {: #channel_example}
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: my-channel-subscription
@@ -391,7 +389,7 @@ spec:
 The following example subscription includes multiple configured time windows. A time window occurs between 10:20 AM and 10:30 AM occurs every Monday, Wednesday, and Friday. A time window also occurs between 12:40 PM and 1:40 PM every Monday, Wednesday, and Friday. The subscription is active only during these six weekly time windows for deployments to begin.  
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: nginx
@@ -410,7 +408,7 @@ spec:
   timeWindow:
     type: "block"/"active"
     location: "America/Los_Angeles"
-    weekdays: ["Monday", "Wednesday", "Friday"]
+    daysofweek: ["Monday", "Wednesday", "Friday"]
     hours:
       - start: "10:20AM"
         end: "10:30AM"
@@ -425,7 +423,7 @@ spec:
 The following example includes package overrides to define a different release name of the Helm release for Helm chart. A package override setting is used to set the name `my-nginx-ingress-releaseName` as the different release name for the  `nginx-ingress` Helm release.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: simple
@@ -435,11 +433,10 @@ spec:
   name: nginx-ingress
   packageOverrides:
   - packageName: nginx-ingress
+    packageAlias: my-nginx-ingress-releaseName
     packageOverrides:
-    - path: spec.releaseName
-      value: my-nginx-ingress-releaseName
-    - path: spec.values
-      value: |
+    - path: spec
+      value: 
         defaultBackend:
           replicaCount: 3
   placement:
@@ -455,7 +452,7 @@ The following subscription automatically pulls the latest `nginx` Helm release f
 The `spec.packageOverrides` section shows optional parameters for overriding values for the Helm release. The override values are merged into the Helm release `values.yaml` file, which is used to retrieve the configurable variables for the Helm release.
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: my-helm-subscription
@@ -471,8 +468,8 @@ spec:
   packageOverrides:
   - packageName: my-server-integration-prod
     packageOverrides:
-    - path: spec.values
-      value: |
+    - path: spec
+      value:
         persistence:
           enabled: false
           useDynamicProvisioning: false

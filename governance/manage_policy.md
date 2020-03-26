@@ -32,6 +32,6 @@ CURRENT_CPU_UT < 0.9*TARGET_CPU_UT
 
 When an deployment scales down, its DESIRED, CURRENT, and READY parameter values decrease. You can check these values from the deployments home page. 
 
-- [Creating a deployment policy](../compliance/create_policy.md)
-- [Updating a deployment policy](../compliance/update_policy.md)
-- [Removing a deployment policy](../compliance/remove_policy.md)
+- [Creating a deployment policy](../governance/create_policy.md)
+- [Updating a deployment policy](../governance/update_policy.md)
+- [Removing a deployment policy](../governance/remove_policy.md)

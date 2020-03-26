@@ -109,7 +109,7 @@ Complete the following steps to delete your policy:
 
 Your policy is deleted.
 
-See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](compliance_intro.md) for more policy topics.
+See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more policy topics.
 
 
 
