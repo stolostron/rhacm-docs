@@ -168,9 +168,9 @@ The definition structure for a subscription can resemble the following YAML cont
       version: '>=0.3.1'
     packageOverrides:
     - packageName: nginx-ingress
-      packageOverrides:
-      - path: spec.values
-        value: |
+      packageAlias:
+      - path: spec
+        value:
           replicaCount: 2
 ```
 
