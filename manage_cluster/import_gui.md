@@ -1,23 +1,14 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-11"
+  years: 2019, 2020
+lastupdated: "2020-03-26"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Importing a cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to import a cluster. You will need your terminal for authentication.
-{:shortdesc}
 
 - [Prerequisites](#prereq)
 - [Preparing for import](#prep)
@@ -84,7 +75,6 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
   ```
   error: unable to recognize "STDIN": no matches for kind "Endpoint" in version "multicloud.ibm.com/v1beta1"
   ```
-  {: pre}
 
 10. Click **View cluster** to view the _Overview_ page and a summary of your cluster. 
 
