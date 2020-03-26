@@ -13,7 +13,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [Certificate manager must not exist during an installation](#678)
   - [LDAP user names are case-sensitive](#25735)
   - [CIS policy controller is not installed](#1087)
-  - [Some console features might not display in Firefox earlier versions](#1100)
+  - [Console might not display in Firefox earlier versions](#1100)
 
 ## Certificate manager must not exist during an installation
 {: #678}
@@ -47,4 +47,4 @@ You must enable the CIS policy controller. For more information, see _Enable the
 ## Some console features might not display in Firefox earlier versions
 {: #1100}
 
-The product supports Mozilla Firefox 74.0 or the latest version that is available for Linux, macOS, and windows. Upgrade to the latest version for the best console compatibility. 
+The product supports Mozilla Firefox 74.0 or the latest version that is available for Linux, macOS, and Windows. Upgrade to the latest version for the best console compatibility. 
