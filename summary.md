@@ -1,7 +1,7 @@
 # Summary
 
  * [About Red Hat Advanced Cluster Management for Kubernetes](about/welcome.md)
-   * [Red Hat Advanced Cluster Management for Kubernetes Architecture](about/architecture.md)
+   * [Architecture](about/architecture.md)
    * [Components](about/components.md)  
  * [Release Notes](about/release_notes.md)
    * [What's new](about/whats_new.md)
