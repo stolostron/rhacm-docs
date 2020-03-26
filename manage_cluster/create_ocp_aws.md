@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-25"
+lastupdated: "2020-03-26"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Creating an OpenShift cluster on Amazon Web Services
 
-You can use the Red Hat Advanced Cluster Management for Kubernetes console to deploy an OpenShift cluster on Amazon Web Services (AWS). 
-{:shortdesc}
+You can use the Red Hat Advanced Cluster Management for Kubernetes console to deploy an OpenShift cluster on Amazon Web Services (AWS).
 
   - [Prerequisites](#prereq)
   - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#create_gui)
@@ -46,7 +37,7 @@ You must have the following prerequisites before creating a cluster on AWS:
 
 To create clusters from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
-1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
 2. On the Clusters page, Click **Add Cluster**.
 
@@ -90,7 +81,7 @@ After you installed your cluster, you can access your cluster by using the `kube
 ## Deleting your cluster
 {: #delete}
 
-1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
 2. Select **...** beside the cluster that you want to delete.
 
