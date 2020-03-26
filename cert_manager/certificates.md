@@ -38,19 +38,19 @@ kubectl get secret -n open-cluster-management multicloud-ca-cert -o jsonpath='{.
 
 ### Created and managed by Red Hat Advanced Cluster Management for Kubernetes Certificate manager (_cert-manager_)
 
-The following internal services use `cert-manager` to create and manage their certificates: 
+View the following table of the internal services that use `cert-manager` to create and manage their certificates: 
 
 | Certificate Name | Issuer Name | Secret Name | Usage |
 | ---------------- | ----------- | ----------- | ----- |
-| console-chart-ef680-ca-cert | multicluster-hub-mcm-server-ca-issuer | console-chart-ef680-uiapi-secrets | Red Hat Advanced Cluster Management for Kubernetes Console CA cert |
-| grc-59010-ca-cert | multicluster-hub-mcm-server-ca-issuer | grc-59010-grc-secrets | Red Hat Advanced Cluster Management for Kubernetes Govern and risk CA cert |
-| kui-proxy | multicloud-ca-issuer | kui-proxy-secret | kui-web-terminal |
-| management-ingress-a0ae5-cert | multicloud-ca-issuer | management-ingress-c38ac-tls-secret | Ingress |
-| multicloud-ca-cert | cert-manager-rhacm-selfsign | multicloud-ca-cert | Red Hat Advanced Cluster Management for Kubernetes Root CA |
-| search-prod-c62a6-aggregator-ca-cert | multicloud-ca-issuer | search-prod-95fcc-search-secrets | Search |
-| search-prod-c62a6-redis-ca-cert | multicloud-ca-issuer | search-prod-95fcc-redisgraph-secrets | Search |
-| search-prod-c62a6-search-ca-cert | multicloud-ca-issuer | search-prod-95fcc-search-api-secrets | Search |
-| topology-276c4-ca-cert | multicluster-hub-mcm-server-ca-issuer | topology-b24e0-topology-secrets | Topology |
+| `console-chart-ef680-ca-cert` | `multicluster-hub-mcm-server-ca-issuer` | `console-chart-ef680-uiapi-secrets` | Red Hat Advanced Cluster Management for Kubernetes Console CA cert |
+| `grc-59010-ca-cert` | `multicluster-hub-mcm-server-ca-issuer` | `grc-59010-grc-secrets` | Red Hat Advanced Cluster Management for Kubernetes Govern and risk CA cert |
+| `kui-proxy` | `multicloud-ca-issuer` | `kui-proxy-secret` | Visual Web Terminal |
+| `management-ingress-a0ae5-cert` | `multicloud-ca-issuer` | `management-ingress-c38ac-tls-secret` | Ingress |
+| `multicloud-ca-cert` | `cert-manager-rhacm-selfsign` | `multicloud-ca-cert` | Red Hat Advanced Cluster Management for Kubernetes root CA |
+| `search-prod-c62a6-aggregator-ca-cert` | `multicloud-ca-issuer` | `search-prod-95fcc-search-secrets` | Search |
+| `search-prod-c62a6-redis-ca-cert` | `multicloud-ca-issuer` | `search-prod-95fcc-redisgraph-secrets` | Search |
+| `search-prod-c62a6-search-ca-cert` | `multicloud-ca-issuer` | `search-prod-95fcc-search-api-secrets` | Search |
+| `topology-276c4-ca-cert` | `multicluster-hub-mcm-server-ca-issuer` | `topology-b24e0-topology-secrets` | Topology |
 {: caption="Table 1. Certificates Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
 All certificates managed by `cert-manager` for example, MongoDB, are managed (created, refreshed, and watched) by `cert-manager`. For more information about `cert-manager`, see [Using Red Hat Advanced Cluster Management for Kubernetes Certificate manager](cert_manager.md).
