@@ -8,7 +8,7 @@ lastupdated: "2020-03-02"
 
 # What's new in Red Hat Advanced Cluster Management for Kubernetes 
 
-Get an overivew of Red Hat Advanced Cluster Management for Kubernetes from the [Product Welcome page](about/welcome.md). See the [architecture page](about/architecture.md) to learn more about major components of the product. 
+Get an overivew of Red Hat Advanced Cluster Management for Kubernetes from the [Product Welcome page](../about/welcome.md). See the [architecture page](../about/architecture.md) to learn more about major components of the product. 
 
 To learn about the Red Hat Advanced Cluster Management for Kubernetes console capabilities, see [Observability in the console](console.md).
 
@@ -44,7 +44,7 @@ Create and manage applications across environments through channel and subscript
   
   - Store and deploy Kubernetes secrets through subscriptions.
 
-For more information, see [Managing applications](manage_applications/overview.md).
+For more information, see [Managing applications](../manage_applications/overview.md).
 
 ## Security and compliance
 
