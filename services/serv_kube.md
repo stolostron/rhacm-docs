@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-19"
+lastupdated: "2020-03-26"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Enabling a Kubernetes service for discovery
 
 You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Kubernetes services that are in different Red Hat Advanced Cluster Management for Kubernetes managed clusters. 
-{: shortdesc}
 
 A Kubernetes service exposes a group of pods that are running on a managed cluster. The Red Hat Advanced Cluster Management for Kubernetes service discovery function only discovers Kubernetes services that are configured to be discovered. 
 
@@ -34,7 +25,6 @@ To discover a Kubernetes service on your managed clusters, complete the followin
   ```
   mcm.ibm.com/service-discovery
   ```
-  {: codeblock}
   
   The following example shows the format for the `dbservice`:
   
@@ -64,14 +54,11 @@ To discover a Kubernetes service on your managed clusters, complete the followin
   ```
   mcm.ibm.com/service-discovery: '{"target-clusters": ["cluster1", "cluster2"]}'
   ```
-  {: codeblock}
 
 3. Access the discovered service by using the following format:
   
   ```
   <service-name>.<service-namespace>.<service-registry-dns-suffix>
   ```
-  {: codeblock}
-  
   
   An example of the format is: `dbservice.database.mcm.svc`.

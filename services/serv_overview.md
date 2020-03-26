@@ -2,17 +2,9 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-19"
+lastupdated: "2020-03-26"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Red Hat Advanced Cluster Management for Kubernetes services overview
 
@@ -44,7 +36,6 @@ A _service_ resource is a Kubernetes service resource. Edit the `metadata` secti
     selector:
       app: dbservice
   ```
-  {: pre}
 
 ## Ingress service
 
@@ -68,7 +59,6 @@ An _Ingress_ service is a Kubernetes ingress that defines the criteria where the
            serviceName: dbservice
            servicePort: 8000
   ```
-  {: pre}
 
 ## Istio service
 
@@ -91,6 +81,5 @@ An Istio _service_ is a Kubernetes service resource. Edit the `metadata` section
     selector:
       app: dbservice
   ```
-  {: pre}
 
 See [Working with Red Hat Advanced Cluster Management for Kubernetes service discovery](working_serv_intro.md) for more information about the services. 
