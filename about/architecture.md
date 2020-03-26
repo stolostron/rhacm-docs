@@ -10,7 +10,7 @@ lastupdated: "2020-03-19"
 
 Red Hat Advanced Cluster Management for Kubernetes consists of several multicluster components, which are used to access and manage your clusters. Learn more about the following components for Red Hat Advanced Cluster Management for Kubernetes:
 
-<img src="../../images/hub_managed.svg" width="50%" alt="Major common components of the hub cluster and managed cluster">
+<img src="../images/hub_managed.svg" width="50%" alt="Major common components of the hub cluster and managed cluster">
 
   - [Hub cluster](#hub)
   - [Managed cluster](#managed)
@@ -42,6 +42,6 @@ See [Managing applications](../applications/overview.md) for more application to
 ## Governance and risk
 {: #policy}
 
-After you configure an Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can define Red Hat Advanced Cluster Management for Kubernetes security risk and create policies with templates from the _Governance and risk_ page. For more information see, [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
+After you configure an Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can define Red Hat Advanced Cluster Management for Kubernetes security risk and create policies with templates from the _Governance and risk_ page. For more information see, [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
 
 See [Red Hat Advanced Cluster Management for Kubernetes installation](../install/overview.md) to prepare your cluster and get configuration information.

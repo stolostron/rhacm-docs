@@ -1,48 +1,40 @@
 ---
 
 copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-16"
+  years: 2020
+lastupdated: "2020-03-26"
+
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
+# Supported managed cloud providers
 
-# Supported Cluster API and managed cloud providers
+Learn about the cloud providers that are available with Red Hat Advanced Cluster Management for Kubernetes. Also, find the documented managed providers that are available.
 
-Learn about the Cluster API cloud providers that are available with Red Hat Advanced Cluster Management for Kubernetes. Also, find the documented managed providers that are available.
-{:shortdesc}
-
-  - [Supported Cluster API cloud providers](#providers)
+  - [Supported cluster creation](#providers)
   - [Supported managed cluster cloud providers](#providers-managed)
-  - [Configuring kubectl](#kubectl)
 
 Red Hat OpenShift 4.2 is supported for the hub cluster and managed clusters.
 
 **Best practice:** For managed cluster cloud providers, use the latest version of Kubernetes.
 
-## Supported Cluster API cloud providers
+## Supported cluster creation
 {: #providers} 
 
-- See [OpenShift Container Platform on AWS](https://www.openshift.com/learn/partners/amazon-web-services){: new_window}.
+You can create and manage Red Hat OpenShift Container Platform 4.x clusters on various cloud service providers.  Red Hat Advanced Cluster Management for Kubernetes leverages Red Hat OpenShift Hive to create and manage these clusters in the following cloud services environments:
+
+- Red Hat OpenShift Container Platform 4.x cluster on Amazon Web Services (AWS)
+- Red Hat OpenShift Container Platform 4.x cluster on Google Cloud Platform
+- Red Hat OpenShift Container Platform 4.x cluster on Microsoft Azure
 
 ## Supported managed cluster cloud providers
 {: #providers-managed}
 
-- See [OpenShift Container Platform on AWS](https://www.openshift.com/learn/partners/amazon-web-services){: new_window}. 
+You can also import and manage clusters that are already provisioned on various cloud service providers. Clusters on the following cloud providers can be imported and managed by Red Hat Advanced Cluster Management for Kubernetes: 
 
-## Configuring kubectl
-{: #kubectl} 
+- [IBM Kubernetes Service](https://www.ibm.com/cloud/container-service/)
+- [Red Hat OpenShift Container Platform cluster on IBM Cloud](https://cloud.ibm.com/kubernetes/catalog/about?platformType=openshift)
+- [Elastic Kubernetes Service on AWS](https://aws.amazon.com/eks/)
+- [OpenShift Container Platform on AWS](https://www.openshift.com/learn/partners/amazon-web-services).
+- [Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/).
+- [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/).
 
-- See _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/).
-- See [Red Hat OpenShift on AWS](https://www.openshift.com/learn/partners/amazon-web-services).
-
-## Configuring oc
-{: #oc} 
-
-The commands that are used with Red Hat Advanced Cluster Management for Kubernetes cluster creation and management are based on `kubectl` commands. Red Hat OpenShift provides commands that are equivalent to the `kubectl` commands by replacing `kubectl` with `oc` in the command syntax. For OpenShift on AWS, you can visit [Usage of `oc` and `kubectl` commands](https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/usage-oc-kubectl.html) for more information.

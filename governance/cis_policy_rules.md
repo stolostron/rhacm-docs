@@ -1,18 +1,10 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-10-03"
+  years: 2019, 2020
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # CIS rules specifications
 
@@ -119,7 +111,6 @@ Refer to the Center for Internet Security (CIS) rules when you create CIS polici
 1.7.6 Do not admit root containers
 1.7.7 Do not admit containers with dangerous capabilities
 ```
-{: codeblock}
 
 ### Worker node rules for non-OpenShift Container Platform
 ```
@@ -148,7 +139,6 @@ Refer to the Center for Internet Security (CIS) rules when you create CIS polici
 2.2.9 Ensure that the kubelet configuration file ownership is set to root:root
 2.2.10 Ensure that the kubelet configuration file has permissions set to 644 or more restrictive
 ```
-{: codeblock}
 
 ## CIS rules for OpenShift Container Platform
 {: #cis-rule2}
@@ -237,7 +227,6 @@ Refer to the Center for Internet Security (CIS) rules when you create CIS polici
 6.8 Configure Network policies as appropriate
 6.9 Use Security Context Constraints as compensating controls for privileged containers
 ```
-{: codeblock}
 
 ### Worker node rules for OpenShift Container Platform
 ```
@@ -265,4 +254,3 @@ Refer to the Center for Internet Security (CIS) rules when you create CIS polici
 8.7 Verify the OpenShift default permissions for the certificate authorities file.
 8.8 Verify the client certificate authorities file ownership of root:root
 ```
-{: codeblock}

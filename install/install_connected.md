@@ -1,151 +1,214 @@
 # Installing Red Hat Advanced Cluster Management for Kubernetes when connected
 
-Red Hat Advanced Cluster Management for Kubernetes is installed using a main operator that deploys all of the required sub-operators such as etcd, multicloud subscription, Apache Hive, and so on.  
+Red Hat Advanced Cluster Management for Kubernetes is installed using a main operator that deploys all of the required sub-operators such as etcd, multicloud subscription, Apache Hive, and so on. 
+
+There are two methods that you can use to install, both require the same prerequisites and preparations. 
+
+  - Method 1 is an easier method, which leverages a `start.sh` installer script to automate the installation to get running quickly. 
+
+  - Method 2 is more customizable if you want to use `oc` commands to complete each required step, but is not as easy as Method 1.   
+
+- [Prerequisites](#prereq)
+- [Preparing to install](#prep)
+- [Method 1: Installing by using the `start.sh` script](#script)
+- [Method 2: Installing by using the `oc` commands](#commands)
 
 ## Prerequisites
+{: prereq}
 
-The following prerequisites must be met before installing Red Hat Advanced Cluster Management for Kubernetes: 
+See the following prerequisites before installing Red Hat Advanced Cluster Management for Kubernetes: 
 
 * Red Hat OpenShift Container Platform version 4.3 must be deployed in your environment. See the [OpenShift version 4.3 documentation](https://docs.openshift.com/container-platform/4.3/welcome/index.html) for the required steps for installing OpenShift Container Platform. 
 
-* Your CLI must be configured to run `oc` commands.
+* Your Red Hat OpenShift Container Platform CLI must be configured to run `oc` commands and `kubectl` version 1.6, or later, commands.
 
-* Your OpenShift Container Platform must have access to the Red Hat Advanced Cluster Management operator in the OperatorHub catalog. 
+* Your Red Hat OpenShift Container Platform permissions must allow you to create a namespace. 
+
+* Must have access to the Red Hat Advanced Cluster Management for Kubernetes operator in the OperatorHub catalog. 
 
 * You must have an Internet connection to access the dependencies for the operator.
 
-## Installing Red Hat Advanced Cluster Management for Kubernetes
+* If you are using macOS, you must install `gsed`. If you do not already have `gsed` installed, you can install it by entering `brew install gnu-sed` in a terminal window.
 
-1. Create a namespace:
+* Optional: If you are using macOS, it is helpful to install `wait`. You can install it by entering `brew install wait` in a terminal window. 
 
-  ```
-  oc create namespace $NAMESPACE
-  ```
+## Preparing to install
+{: prep}
 
-2. Switch to the new namespace: 
+Complete the following preparations before you complete either of the installation procedures. **Note:** Only run the steps in this section once.
 
-  ```
-  oc project $NAMESPACE
-  ```  
-
-3. Create an Apache Hive namespace: 
+1. Download the required files by cloning the `open-cluster-management/deploy` Git repository with the following command:
 
   ```
-  oc create namespace hive  
+  git clone https://github.com/open-cluster-management/deploy.git
   ```
+
+  Cloning the repository provides the required files for installing Red Hat Advanced Cluster Management for Kubernetes. The repository contains three directories:
+
+  * `prereqs`: Contains `.yaml` definitions that define the required objects, such as namespaces and pull-secrets. 
   
-4. Generate a pull secret called `quay-secret` to access the entitled content on Quay.io:
+  * `multiclusterhub-operator`: Contains `.yaml` definitions for setting up a `CatalogSource` for the operator.
   
-  1. Create a pull secret by running the following command: 
+  * `multiclusterhub`: Contains `yaml` definitions for creating an instance of `MultiClusterHub`.
   
-    ```
-    oc create secret docker-registry quay-secret --docker-server=$(SECRET_REGISTRY) --docker-username=$(DOCKER_USERNAME) --docker-password=$(DOCKER_PASSWORD)
-    ```
+  Each directory contains a `kustomization.yaml` file with settings that you can update to create your environment. If you update the files, you can apply the changes by entering the `kubectl apply -k` command.
   
-    SECRET_REGISTRY should be the path to your Quay.io server. For example,  `quay.io/`.
+2. Generate a pull-secret.
+
+  1. Ensure you have access to the Red Hat Quay.io organization by signing in to [open-cluster-management](https://quay.io/repository/open-cluster-management/multiclusterhub-operator-index?tab=tags).
+  
+   If you do not have access to the `open-cluster-management` organization in Quay.io, you can request access on the internal `#forum-acm` Slack channel.
     
-  2. Visit [https://quay.io/user/*your_quay_id*?tab=settings](https://quay.io/user/quay_id?tab=settings).
-  
-    **Note:** Replace *quay_id* with the ID that you use to access Quay.io.
+  2. Visit the following link, but replace `<your_username>` with your Quay.io username: https://quay.io/user/your_username?tab=settings.
   
   3. Select **Generate Encrypted Password**.
   
   4. Enter your Quay.io password.
   
-  5. Select **Kubernetes Secret** from navigation menu.
+  5. Select **Kubernetes Secret** from the navigation menu.
+    
+  6. Select **Download your_username-secret.yaml** with your Quay username in place of `<your_username>`.
   
-  6. Select **Download username-secret.yaml**
+  7. Save your secret file in the `prereqs` directory of the cloned Git repository with the name of `pull-secret.yaml`.
   
-    **Note:** The *username* part of the filename is replaced with your Quay.io username.
+  8. Edit the contents of the `pull-secret.yaml` file and replace the name of the `Secret metadata: name` entry with `multiclusterhub-operator-pull-secret`, as shown in the following example:
   
-  7. Save your downloaded secret file in the `local` directory as `quay-secret.yaml`. 
-  
-  8. Change the `name` value in the `local/quay-secret.yaml` file to `quay-secret`, as shown in the following example:
- 
-    ```bash
-    ...
-    kind: Secret
-    metadata:
-      name: quay-secret
-    ...
-    ```
-
-5. Associate your secret to your installation process:
-
   ```
-  oc apply -f local/quay-secret.yaml
-  ```
-  
-13. Create an operator group. 
- 
-  1. Create a file in the `local` directory called `operator-group.yaml` with the following content:
-  
-  ```bash
-  apiVersion: operators.coreos.com/v1
-  kind: OperatorGroup
+  apiVersion: v1
+  kind: Secret
   metadata:
-    name: default
-  spec:
-    targetNamespaces:
-    - your_namespace
+    name: multiclusterhub-operator-pull-secret
+  ...
   ```
 
-  Replace *your_namespace* with the namespace that you created in step 1.  
-  
-  2. Apply the operator group:
-  
-  ```
-  oc apply -f local/operator-group.yaml
-  ```
-  
-14. Prepare the resources that are required for multicloudhub.
-   
-  1. Copy the `subscription.yaml` file to the `local` directory. 
-  
-  ```
-  cp build/_output/olm/subscription.yaml local/subscription.yaml
-  ```
-  
-  2. Replace the values of `namespace` and `sourceNamespace` in the `local/subscription.yaml` file with the namespace that you created in step 1:
+## Method 1: Installing by using the `start.sh` script
+{: script}
 
+You can install Red Hat Advanced Cluster Management for Kubernetes by making some updates to a script file and deploying the cluster. This is the easiest way to get started, but the other method is provided if you prefer to use `oc` commands to install. 
+
+1. Run the `start.sh` script that is in the cloned `open-cluster-management/deploy` repository. The following options are available to use when you run the script, but you cannot use multiple options with a single command:
+
+  * `-t`: Modifies the `.yaml`, but exits before applying the resources. You can verify or update the settings in the `.yaml` file before you apply them.  
+
+  * `--silent`: Skips all prompting and uses the settings from the previous configuration.
+
+  * `--watch`: Monitors the main Red Hat Advanced Cluster Management for Kubernetes pod deployments for up to 10 minutes to ensure that they start correctly. 
+  
+  The command format should be similar to the following example: 
+  
+  ```
+  ./start.sh --watch
+  ```
+ 
+2. Provide the SNAPSHOT tag. You can either press `Enter` to use the tag that was used on the previous installation, or provide a new tag. You can find a list of available tags in the [Quay.io multiclusterhub-operator-index](https://quay.io/open-cluster-management/multiclusterhub-operator-index). The following text shows the format of the snapshot:
+
+  ```
+  1.0.0-SNAPSHOT-2020-03-13-23-07-54
+  ```
+
+3. Enter the `watch oc -n open-cluster-management get pods` command to view the progress of the deployment of the `OCM`. Depending on the option that you used when you ran the script, `OCM` is either deployed or deploying. 
+
+4. When the deployment is complete, visit the `Open Cluster Management` URL that is provided in the `start.sh` script file.
+
+  **Note:** You can run this script multiple times, and it attempts to continue where it left off. If you have a failure and have installed multiple times, run the `uninstall.sh` script to clean up the directories before you run the installation again.
+
+## Method 2: Installing by using the `oc` commands
+{: commands}
+
+1. Create the required objects by applying the `.yaml` definitions that are contained in the `prereqs` directory by entering the following command:
+
+  ```
+  kubectl apply --openapi-patch=true -k prereqs/
+  ```
+
+2. Update the `kustomization.yaml` file that is in the `multiclusterhub-operator` directory so the `newTag` setting contains the tag for your snapshot. You can find a snapshot tag by viewing the list of tags available in the [Quay.io index](https://quay.io/open-cluster-management/multiclusterhub-operator-index). You must use a tag that has the word SNAPSHOT in it, as shown in the following example:
+
+  ```
+  namespace: open-cluster-management
+
+  images: # updates operator.yaml with the dev image
+    - name: multiclusterhub-operator-index
+      newName: quay.io/open-cluster-management/multiclusterhub-operator-index
+      newTag: "1.0.0-SNAPSHOT-2020-03-13-23-07-54"
+  ```
+
+3. Create the multiclusterhub-operator objects by applying the `.yaml` definitions in the `multiclusterhub-operator` directory. Enter the following command:
+
+  ```
+  kubectl apply -k multiclusterhub-operator/
+  ```
+
+4. Run the following command to determine whether the subscription is healthy:
+
+  ```
+  oc get subscription multiclusterhub-operator-bundle --namespace open-cluster-management -o yaml
+  ```
+
+  A healthy subscription returns a `true` status value for the `healthy` entry, as shown in the following example: 
+  
   ```
   ...
+  status:
+    catalogHealth:
+    - catalogSourceRef:
+        apiVersion: operators.coreos.com/v1alpha1
+        kind: CatalogSource
+        name: open-cluster-management
+        namespace: open-cluster-management
+        resourceVersion: "1123089"
+        uid: f6da232b-e7c1-4fc6-958a-6fb1777e728c
+      healthy: true
+      ...
+  ```
+
+  Continue with the next step when your subscription is healthy.
+  
+5. Edit the `example-multiclusterhub-cr.yaml` file in the `mulitclusterhub` directory. Set the `imageTagSuffix` to the snapshot value that you used in the `kustomization.yaml` file in the `multiclusterhub-operator` directory in step 2. Remove the `VERSION 1.0.0-,` from the `newTag` value taken from the `kustomization.yaml` file.
+
+  The output should look similar to the following example:
+
+  ```
+  apiVersion: operators.open-cluster-management.io/v1alpha1
+  kind: MultiClusterHub
   metadata:
-    name: multicloudhub-operator
-    namespace: your_namespace
+    name: example-multiclusterhub
+    namespace: open-cluster-management
   spec:
-    channel: alpha
-    installPlanApproval: Automatic
-    name: multicloudhub-operator
-    source: multicloudhub-operator-registry
-    sourceNamespace: your_namespace
-  ...  
-  ```
-	
-  3. Apply the subscription:
-	
-  ```
-  oc apply -f local/subscription.yaml
+    version: latest
+    imageRepository: "quay.io/open-cluster-management"
+    imageTagSuffix: "SNAPSHOT-2020-03-17-21-24-18"
+    imagePullPolicy: Always
+    imagePullSecret: multiclusterhub-operator-pull-secret
+    foundation:
+      apiserver:
+        configuration:
+          http2-max-streams-per-connection: "1000"
+        replicas: 1
+        apiserverSecret: "mcm-apiserver-self-signed-secrets"
+        klusterletSecret: "mcm-klusterlet-self-signed-secrets"
+      controller:
+        configuration:
+          enable-rbac: "true"
+          enable-service-registry: "true"
+        replicas: 1
+    mongo:
+      endpoints: mongo-0.mongo.open-cluster-management
+      replicaSet: rs0
+    hive:
+      additionalCertificateAuthorities:
+        - name: letsencrypt-ca
+      managedDomains:
+        - s1.openshiftapps.com
+      globalPullSecret:
+        name: private-secret
+      failedProvisionConfig:
+        skipGatherLogs: true
   ```
 
-  4. Copy the `operators.multicloud.ibm.com_v1alpha1_multicloudhub_cr.yaml` file to the `local` directory. 
-  
-  ```
-  cp build/_output/olm/operators.multicloud.ibm.com_v1alpha1_multicloudhub_cr.yaml local/operators.multicloud.ibm.com_v1alpha1_multicloudhub_cr.yaml
-  ```
-	
-  5. Replace the values of `default` in the `local/operators.multicloud.ibm.com_v1alpha1_multicloudhub_cr.yaml` file with the namespace that you created in step 1.
-  
-15. Create the operator instance by entering the following command: 
+6. Create the `example-multiclusterhub` objects by applying the `.yaml` definitions that are contained in the `multiclusterhub` directory:
 
   ```
-  oc apply -f local/operators.multicloud.ibm.com_v1alpha1_multicloudhub_cr.yaml
+  kubectl apply -k multiclusterhub/
   ```
-  
-  **Note:** If step 18 fails with the following error, the resources are still being created and applied:
-  
-  ```
-  error: unable to recognize "operators.multicloud.ibm.com_v1alpha1_multicloudhub_cr.yaml": no matches for kind "MultiCloudHub" in version "operators.multicloud.ibm.com/v1alpha1"
-  ```
-  
-  Run the command again in a few minutes when the resources are created.
+
+7. You can access your instance from following URL: https://multicloud-console.apps.${HOST_URL} <!--???? -->

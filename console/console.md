@@ -100,7 +100,7 @@ Learn more about the tabs that are available from the Topology page:
 ## Governance and risk
 {: #grc}
 
-Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
+Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
 
 ## Search 
 {: #search}

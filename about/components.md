@@ -8,7 +8,9 @@ lastupdated: "2020-03-13"
 
 # Services and components
 
-See the following tables for information about components that are installed and enabled on the hub cluster by default.
+See the following tables for information about components that are installed and enabled on the hub cluster by default and the managed cluster.
+
+## Red Hat Advanced Cluster Management for Kubernetes default enabled services
 
 |Service|Description|Required|
 |--------|-----------|-------------------|
@@ -19,6 +21,8 @@ See the following tables for information about components that are installed and
 |mongo-db|All platform services that require a persistent data store use the MongoDB service. Highly available topologies for MongoDB are supported out of the box. This is a service that should not be accessed directly.|Yes|
 |etcd||Yes|
 {: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes default enabled services" caption-side="top"}
+
+## Red Hat Advanced Cluster Management for Kubernetes default enabled components on the hub cluster
 
 |Service|Description|Required|
 |--------|-----------|---------------------|
@@ -47,9 +51,19 @@ See the following tables for information about components that are installed and
 |webhook||Yes|
 {: caption="Table 2. Red Hat Advanced Cluster Management for Kubernetes default enabled components on the hub cluster" caption-side="top"}
 
+## Red Hat Advanced Cluster Management for Kubernetes enabled components on the managed cluster
+
 There are some services that are installed on the managed clusters, but not enabled by default. You can enable them by activating them in the `config.yaml` file. The following table shows the services that are installed, but not enabled by default:
 
 |Service|Description|Required need dev input|
 |--------|-----------|-------------------|
-|Empty|Empty|Empty|
+|applicationManager||Yes|
+|certPolicyController||Yes|
+|cisController||Yes|
+|iamPolicyController||Yes|
+|imageRegistry|quay.io/open-cluster-management|Yes|
+|policyController||Yes|
+|prometheusIntegration||Yes|
+|searchCollector||Yes|
+|topologyCollector||Yes|
 {: caption="Table 3. Red Hat Advanced Cluster Management for Kubernetes enabled components on the managed cluster" caption-side="top"}
