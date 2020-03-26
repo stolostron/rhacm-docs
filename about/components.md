@@ -39,8 +39,8 @@ See the following tables for information about components that are installed and
 |mcm-controller|Service that processes events and requests to Red Hat Advanced Cluster Management for Kubernetes resources|Yes|
 |mcm-webhook|This service extends the Kubernetes API server so the mcm-apiserver resources can be dynamically validated.|Yes|
 |multicluster-operators|Manages and reconciles subscriptions|Yes|
-|multiclusterhub-operator|Manages and reconciles channel resources|Yes|
-|multiclusterhub-repo|Provides management of the single cluster or many clusters. This includes tracking multicluster inventory of cluster resources and configuration, as well as enforcing the multicluster Kubernetes security and compliance policy management.|Yes|
+|multiclusterhub-operator| Operator for installing Red Hat Advanced Cluster Management for Kubernetes on a hub cluster  |Yes|
+|multiclusterhub-repo| Service for hosting internal-facing Helm repository, pre-populated with required component Helm charts |Yes|
 |rcm-api|Handles API requests related to cluster life cycle management|Yes|
 |rcm-controller|Controller that handles cluster life cycle management|Yes|
 |redisgraph-tls|Cache for search data|Yes|
