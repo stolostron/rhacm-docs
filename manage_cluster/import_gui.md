@@ -8,7 +8,7 @@ lastupdated: "2019-03-11"
 
 # Importing an existing cluster with the console
 
-You can use the Red Hat Advanced Cluster Management for Kubernetes console to import an existing cluster. You will need your terminal for authentication.
+You can use the Red Hat Advanced Cluster Management for Kubernetes console to import an existing cluster. You need your terminal for authentication.
 
 - [Prerequisites](#prereq)
 - [Importing a cluster](#import)
