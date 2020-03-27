@@ -21,7 +21,7 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 
 * You need an Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. 
 * You need a cluster that you want to manage. 
-* Install `kubectl` (get site here)
+* Install `kubectl`. To install `kubectl`, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/).
 * You need the `base64` command line tool.
 
 **Required user type or access level**: Cluster administrator
