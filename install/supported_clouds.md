@@ -14,7 +14,7 @@ Learn about the cloud providers that are available with Red Hat Advanced Cluster
   - [Supported managed cluster cloud providers](#providers-managed)
   - [Configuring kubectl](#kubectl)
 
-**Best practice:** For managed cluster cloud providers, use latest version of Kubernetes.
+**Best practice:** For managed cluster cloud providers, use the latest version of Kubernetes.
 
 ## Supported hub cluster cloud provider
 {: #providers} 
