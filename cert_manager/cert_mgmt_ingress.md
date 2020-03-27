@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-23"
+lastupdated: "2020-03-26"
 
 ---
 
@@ -14,7 +14,7 @@ You can replace management ingress certificates.
 
 Prepare and have your `management-ingress` certificates and private keys ready. If needed, you can generate a TLS certificate by using OpenSSL. Set the common name parameter,`CN`, on the certificate to `manangement-ingress`. If you are generating the certificate, include the following settings:
 
-* Include the following IP addresses and domain names to your cert Subject Alternative Name (SAN) list:
+* Include the following IP addresses and domain names in your certificate Subject Alternative Name (SAN) list:
   * The service name for the management ingress: `management-ingress`.
   * Include the route name for Red Hat Advanced Cluster Management for Kubernetes. Recieve the route name by running the following command:
 
@@ -110,12 +110,6 @@ The following OpenSSL commands are used with the preceding configuration file to
      openssl x509  -noout -text -in ./ingress.crt
      ```
 
-  7. Create a secret containing the CA certificate by running the following command:
-
-     ```
-     kubectl -n open-cluster-management create secret tls multicloud-ca-cert --cert ./ca.crt --key ./ca.key
-     ```
-
 ## Backup the existing certificate for the ingress
 
 Create a file with a copy of your existing certificates by completing the following steps:
@@ -155,7 +149,13 @@ Complete the following steps to replace a management ingress certificate:
    kubectl get secret -n [open-cluster-management] | grep management-ingress | grep tls
    ```
 
-4. Edit the management ingress deployment. Get the name of the deployment by running the following command:
+4. Create a secret containing the CA certificate by running the following command:
+
+     ```
+     kubectl -n open-cluster-management create secret tls ingress-ca-cert --cert ./ca.crt --key ./ca.key
+     ```
+
+5. Edit the management ingress deployment. Get the name of the deployment by running the following command:
 
    ```
    oc get deployment -n open-cluster-management
