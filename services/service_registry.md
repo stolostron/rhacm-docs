@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-17"
+lastupdated: "2020-03-26"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Configuring Red Hat Advanced Cluster Management for Kubernetes service discovery and registry
 
 You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Kubernetes, ingress, and Istio services that are in different Red Hat Advanced Cluster Management for Kubernetes managed clusters.
-{: shortdesc}
 
 When you have multiple instances of a Kubernetes, ingress, or Istio service that are managed by Red Hat Advanced Cluster Management for Kubernetes, it is challenging to maintain them. The Red Hat Advanced Cluster Management for Kubernetes service discovery and registry function discovers Kubernetes, ingress, and Istio services that are configured to be discovered.
 
@@ -34,14 +25,12 @@ Configure the DNS for each managed cluster by completing these steps for each ma
   ```
   kubectl get -n <rcm-klusterlet-namespace> service mcm-svc-registry-dns -o jsonpath='{.spec.clusterIP}'
   ```
-  {: codeblock}
 
 2. Configure your cluster DNS configuration by entering the following command:
 
   ```
   kubectl edit -n kube-system configmap kube-dns
   ```
-  {: codeblock}
 
 3. Enable the forwarding plugin in the `kube-dns` configuration, similar to the following example, where *<mcm-svc-registry-dns-service-cluster-ip>* is the IP address that you identified in step 1:
 
@@ -54,13 +43,12 @@ Configure the DNS for each managed cluster by completing these steps for each ma
         forward mcm.svc. <mcm-svc-registry-dns-service-cluster-ip>
     }
   ```
-  {: codeblock}
 
   The value `mcm.svc` is the default DNS domain suffix for the service registry. If you want to set it to another value, complete the following steps:
 
     1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
-	2. Navigate to **Workloads** -> **Helm Releases**.
+	2. Navigate to **Workloads** > **Helm Releases**.
 
 	3. Select your `rcm-klusterlet` release.
 
@@ -74,7 +62,7 @@ The `kube-service` plugin is enabled by default in the service registry componen
 
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
-2. Navigate to **Workloads** -> **Helm Releases**.
+2. Navigate to **Workloads** > **Helm Releases**.
 
 3. Select your `rcm-klusterlet` release.
 
@@ -86,7 +74,7 @@ The `kube-service` plugin is enabled by default in the service registry componen
 	  kube-service,kube-ingress,istio
 	  ```
 
-    **Note:** If you enable the Istio plugin, you need to install the [istio-coredns-plugin](https://github.com/istio-ecosystem/istio-coredns-plugin){: new_window} onto your Istio system and make sure your Istio system has an external load balancer.
+    **Note:** If you enable the Istio plugin, you need to install the [istio-coredns-plugin](https://github.com/istio-ecosystem/istio-coredns-plugin) onto your Istio system and make sure your Istio system has an external load balancer.
 
 ## Discover the Kubernetes service
 
@@ -99,7 +87,6 @@ To discover a Kubernetes service on your managed clusters, complete the followin
   ```
   mcm.rcm.com/service-discovery
   ```
-  {: codeblock}
 
   The following example shows the format for the `dbservice`:
 
@@ -173,7 +160,6 @@ To discover a Kubernetes service on your managed clusters, complete the followin
   ```
   <service-name>.<service-namespace>.<service-registry-dns-suffix>
   ```
-  {: codeblock}
 
 
   An example of the format is: `dbservice.database.mcm.svc`.
@@ -189,7 +175,6 @@ To discover a Kubernetes ingress within your managed clusters, complete the foll
   ```
   mcm.rcm.com/service-discovery
   ```
-  {: codeblock}
 
   The following example shows how to add this to the ingress:
 
@@ -266,7 +251,7 @@ To discover an Istio service within the managed clusters, complete the following
 
 1. Expose an Istio service outside of the service mesh by using an Istio gateway.
 
-  See [Control Ingress Traffic](https://istio.io/docs/tasks/traffic-management/ingress/){: new_window} for information about how to use the Istio Gateway to expose your Istio Service.
+  See [Control Ingress Traffic](https://istio.io/docs/tasks/traffic-management/ingress/) for information about how to use the Istio Gateway to expose your Istio Service.
 
 2. The Istio gateway that you added should look similar to the following example:
 
@@ -297,7 +282,6 @@ To discover an Istio service within the managed clusters, complete the following
   ```
   mcm.rcm.com/service-discovery
   ```
-  {: codeblock}
 
   The following example shows how to add this to the ingress:
 
