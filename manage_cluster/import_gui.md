@@ -31,7 +31,7 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
  **Note:** A hub cluster cannot manage another hub cluster.
 
-<!-- Ensure Supported cloud provider topic has: IKS EKS GKE AKS ROKS and any OpenShift 4X or 311 cluster -->
+<!-- Note: Ensure Supported cloud provider topic has: IKS EKS GKE AKS ROKS and any OpenShift 4X or 311 cluster -->
 
 1. From the navigation menu, hover over Automate infrastructure and click **Clusters**.
 
@@ -53,7 +53,7 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
 9. From your terminal, authenticate to your managed cluster. Configure your `kubectl` for your targeted managed cluster.
 
-  See [Supported cloud providers](../install/cloud_providers.md) to learn how to configure your `kubectl`.
+  See [Supported cloud providers](../install/supported_clouds.md) to learn how to configure your `kubectl`.
 
 9. Run the command that you generated and copied from _step 8_ to deploy the `multicluster-endpoint`.
 
