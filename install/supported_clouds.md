@@ -1,7 +1,7 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-25"
 
 ---
@@ -10,22 +10,24 @@ lastupdated: "2020-03-25"
 
 Learn about the cloud providers that are available with Red Hat Advanced Cluster Management for Kubernetes. Also, find the documented managed providers that are available.
 
-  - [Supported cloud providers](#providers)
+  - [Supported hub cluster cloud providers](#providers)
   - [Supported managed cluster cloud providers](#providers-managed)
   - [Configuring kubectl](#kubectl)
 
-Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the hub cluster and managed clusters.
-
 **Best practice:** For managed cluster cloud providers, use latest version of Kubernetes.
 
-## Supported cloud providers
+## Supported hub cluster cloud providers
 {: #providers} 
+
+Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the hub cluster. <!-- do we need to also mention 3.1.1 here?-->
 
 - See [OpenShift on Amazon Web Services]](https://www.openshift.com/learn/partners/amazon-web-services).
 
 
 ## Supported managed cluster cloud providers
 {: #providers-managed} 
+
+Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the managed clusters. You can use Red Hat OpenShift Container Platform 3.1.1, as well. See the available managed cluster options. <!-- Not a complete list here and please verrify what is listed, we still need to add IKS and RHOKS... -->
 
 - See [OpenShift on Amazon Web Services](https://www.openshift.com/learn/partners/amazon-web-services).
 
