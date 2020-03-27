@@ -12,12 +12,12 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 
 - [Prerequisites](#prereq)
 - [Importing a cluster](#import)
-- [Deleting a cluster](#delete)
+- [Removing a cluster](#delete)
  
 ## Prerequisites
 {: #prereq}
 
-* You need an Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. 
+* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. 
 * You need a cluster that you want to manage. 
 * Install `kubectl`. To install `kubectl`, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/).
 * You need the `base64` command line tool.
@@ -29,33 +29,31 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 
 You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
 
- **Note:** A hub cluster cannot manage another hub cluster.
+ **Note:** A hub cluster cannot manage any other hub cluster; you must import an existing cluster.
 
-<!-- Note: Ensure Supported cloud provider topic has: IKS EKS GKE AKS ROKS and any OpenShift 4X or 311 cluster -->
-
-1. From the navigation menu, hover over Automate infrastructure and click **Clusters**.
+1. From the navigation menu, hover over **Automate infrastructure** and click **Clusters**.
 
 2. Click **Add cluster**.
 
 3. Click **Import an existing cluster**.
 
-4. Provide a cluster name. By default, the namespace is set to the same value as your cluster name. Optional: You can edit the namespace.
+4. Provide a cluster name. By default, the namespace is set to the same value as your cluster name. Optionally, you can edit the namespace.
 
-5. Optional: Click to expand **Edit cluster import YAML file** and modify the endpoint configuration. 
+5. **Optional:** Click to expand **Edit cluster import YAML file** and modify the endpoint configuration. 
 
-   See [Table 1. YAML file parameters and description_](#table_1) for details about each parameter.
+   See [Table 1. YAML file parameters and descriptions](#table_1) for details about each parameter.
 
-6. **Optional**: You can add labels by clicking **Configure advanced parameters** and use these labels to search.
+6. **Optional**: After you import, you can add labels by clicking **Configure advanced parameters** and use these labels to search.
    
 7. Click **Generate Command** to retrieve the command to deploy the `multicluster-endpoint`.
 
-8. From the _Import an existing cluster_ window, hover and click the **Copy command** icon to copy the import command and the token that you are provided. You must click the copy icon to receive the accurate copy.
+8. From the _Import an existing cluster_ window, hover and click the **Copy command** icon to copy the import command and the token that you are provided. You must click the **Copy** icon to receive the accurate copy.
 
 9. From your terminal, authenticate to your managed cluster. Configure your `kubectl` for your targeted managed cluster.
 
   See [Supported cloud providers](../install/supported_clouds.md) to learn how to configure your `kubectl`.
 
-9. Run the command that you generated and copied from _step 8_ to deploy the `multicluster-endpoint`.
+10. To deploy the `multicluster-endpoint` to the managed cluster, run the command that you generated and copied from _step 8_.
 
   If you receive the following error, run the command again:
 
@@ -63,7 +61,7 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
   error: unable to recognize "STDIN": no matches for kind "Endpoint" in version "multicloud.ibm.com/v1beta1"
   ```
 
-10. Click **View cluster** to view the _Overview_ page and a summary of your cluster. 
+11. Click **View cluster** to view the _Overview_ page and a summary of your cluster. 
 
 **Note** You can continue to import more clusters. Click **Import another** to repeat the process.
 
@@ -79,7 +77,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 | clusterLabels.vendor| The Kubernetes vendor label for your cluster| auto-detect|
 | clusterLabels.environment| The environment label for your cluster| none|
 | clusterLabels.region| The region where your cluster is set up|none|
-| ApplicationManager.enabled| Enables multicluster manager application deployment, deploys subscription controller and deployable controller | true | 
+| applicationManager.enabled| Enables multicluster manager application deployment, deploys subscription controller and deployable controller | true | 
 | searchCollector.enabled| Enables search collection and indexing | true|
 | policyController.enabled| Enable the Governance and risk dashboard policy feature|true, updateInterval: 15|  
 | certPolicyController.enabled|Monitors certificate expiration based on distributed policies|true|
@@ -91,7 +89,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 | version| Version of `multicluster-endpoint` |1.0.0|
 {: caption="Table 1. Table of YAML file parameters and descriptions for imported clusters" caption-side="}
 
-## Deleting an imported cluster
+## Removing an imported cluster
 {: #delete}
 
 Complete the following procedure to remove an imported cluster and the `multicluster-endpoint` that was created on the managed cluster.
