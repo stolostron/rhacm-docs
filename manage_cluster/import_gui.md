@@ -13,9 +13,7 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 - [Prerequisites](#prereq)
 - [Importing a cluster](#import)
 - [Deleting a cluster](#delete)
-
-  **Note:** A hub cluster cannot manage another hub cluster.
-  
+ 
 ## Prerequisites
 {: #prereq}
 
@@ -29,9 +27,11 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 ## Importing a cluster
 {: #import}
 
-You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers. 
+You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
 
-<!-- Ensure cloud provider topic has: IKS EKS GKE AKS ROKS and any OpenShift 4X or 311 cluster -->
+ **Note:** A hub cluster cannot manage another hub cluster.
+
+<!-- Ensure Supported cloud provider topic has: IKS EKS GKE AKS ROKS and any OpenShift 4X or 311 cluster -->
 
 1. From the navigation menu, hover over Automate infrastructure and click **Clusters**.
 
@@ -43,13 +43,13 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
 5. Optional: Click to expand **Edit cluster import YAML file** and modify the endpoint configuration. 
 
-   See [_Table 1. YAML file parameters and description_](#table_1) for details about each parameter.
+   See [Table 1. YAML file parameters and description_](#table_1) for details about each parameter.
 
 6. **Optional**: You can add labels by clicking **Configure advanced parameters** and use these labels to search.
    
 7. Click **Generate Command** to retrieve the command to deploy the `multicluster-endpoint`.
 
-8. From the _Import an existing cluster_ window, hover and click the **Copy command** icon to copy the import command and the token that you are provided. Note: You must click this icon to receive the accurate copy.
+8. From the _Import an existing cluster_ window, hover and click the **Copy command** icon to copy the import command and the token that you are provided. You must click the copy icon to receive the accurate copy.
 
 9. From your terminal, authenticate to your managed cluster. Configure your `kubectl` for your targeted managed cluster.
 
@@ -89,7 +89,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 | serviceRegistry.dnsSuffix| The suffix of the registry DNS name, which is added to the end of the target clusters dns domain name.|mcm.svc| 
 | serviceRegistry.plugins| Comma-separated list of enabled plugins. Supported plugins: `kube-service`, `kube-ingress`, and `istio`. |kube-service|
 | version| Version of `multicluster-endpoint` |1.0.0|
-{: caption="Table 1. Table of YAML file parameters and descriptions for import" caption-side="}
+{: caption="Table 1. Table of YAML file parameters and descriptions for imported clusters" caption-side="}
 
 ## Deleting an imported cluster
 {: #delete}
@@ -98,4 +98,4 @@ Complete the following procedure to remove an imported cluster and the `multiclu
 
 1. From the _Clusters_ page, find your imported cluster in the table.
    
-2. Click **Options** > **Detach cluster**.
+2. Click **Options** > **Detach cluster** to remove your cluster from management.
