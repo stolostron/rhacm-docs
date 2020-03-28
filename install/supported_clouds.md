@@ -1,7 +1,7 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-25"
 
 ---
@@ -10,24 +10,29 @@ lastupdated: "2020-03-25"
 
 Learn about the cloud providers that are available with Red Hat Advanced Cluster Management for Kubernetes. Also, find the documented managed providers that are available.
 
-  - [Supported cloud providers](#providers)
+  - [Supported hub cluster cloud provider](#providers)
   - [Supported managed cluster cloud providers](#providers-managed)
   - [Configuring kubectl](#kubectl)
 
-Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the hub cluster and managed clusters.
+**Best practice:** For managed cluster cloud providers, use the latest version of Kubernetes.
 
-**Best practice:** For managed cluster cloud providers, use latest version of Kubernetes.
-
-## Supported cloud providers
+## Supported hub cluster cloud provider
 {: #providers} 
 
-- See [OpenShift on Amazon Web Services]](https://www.openshift.com/learn/partners/amazon-web-services).
+Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the hub cluster.
 
+- See [OpenShift on Amazon Web Services](https://www.openshift.com/learn/partners/amazon-web-services).
 
 ## Supported managed cluster cloud providers
 {: #providers-managed} 
 
+Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the managed clusters. You can use Red Hat OpenShift Container Platform 3.11, as well. See the available managed cluster options and documentation:
+
 - See [OpenShift on Amazon Web Services](https://www.openshift.com/learn/partners/amazon-web-services).
+
+- See [Red Hat OpenShift on IBM Cloud](https://cloud.ibm.com/docs/openshift?topic=openshift-clusters).
+
+- See [Getting started with IBM Cloud Kubernetes Service](https://cloud.ibm.com/docs/containers?topic=containers-getting-started).
 
 - See [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/).
 
@@ -38,6 +43,4 @@ Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the hub clust
 ## Configuring kubectl
 {: #kubectl} 
 
-From each cloud provider documentation, you might need to learn how configure your `kubectl`. You must have `kubectl` installed.
-
-Each cloud provider process to configure `kubectl` is different, so view the product documentation for details.
+From vendor documentation previously listed, you might need to learn how configure your `kubectl`. You must have `kubectl` installed. When you [Import an existing cluster](../manage_cluster/import.md), view the cloud provider product documentation for details.
