@@ -53,23 +53,23 @@ Complete the following preparations before you complete either of the installati
   
 2. Generate a pull-secret.
 
-  1. Ensure you have access to the Red Hat Quay.io organization by signing in to [open-cluster-management](https://quay.io/repository/open-cluster-management/multiclusterhub-operator-index?tab=tags).
+    1. Ensure you have access to the Red Hat Quay.io organization by signing in to [open-cluster-management](https://quay.io/repository/open-cluster-management/multiclusterhub-operator-index?tab=tags).
   
-    If you do not have access to the `open-cluster-management` organization in Quay.io, you can request access on the internal `#forum-acm` Slack channel.
+      If you do not have access to the `open-cluster-management` organization in Quay.io, you can request access on the internal `#forum-acm` Slack channel.
+
+    2. Visit the following link, but replace `<your_username>` with your Quay.io username: https://quay.io/user/your_username?tab=settings.
+  
+    3. Select **Generate Encrypted Password**.
+  
+    4. Enter your Quay.io password.
+  
+    5. Select **Kubernetes Secret** from the navigation menu.
     
-  2. Visit the following link, but replace `<your_username>` with your Quay.io username: https://quay.io/user/your_username?tab=settings.
+    6. Select **Download your_username-secret.yaml** with your Quay username in place of `<your_username>`.
   
-  3. Select **Generate Encrypted Password**.
+    7. Save your secret file in the `prereqs` directory of the cloned Git repository with the name of `pull-secret.yaml`.
   
-  4. Enter your Quay.io password.
-  
-  5. Select **Kubernetes Secret** from the navigation menu.
-    
-  6. Select **Download your_username-secret.yaml** with your Quay username in place of `<your_username>`.
-  
-  7. Save your secret file in the `prereqs` directory of the cloned Git repository with the name of `pull-secret.yaml`.
-  
-  8. Edit the contents of the `pull-secret.yaml` file and replace the name of the `Secret metadata: name` entry with `multiclusterhub-operator-pull-secret`, as shown in the following example:
+    8. Edit the contents of the `pull-secret.yaml` file and replace the name of the `Secret metadata: name` entry with `multiclusterhub-operator-pull-secret`, as shown in the following example:
   
     ```
     apiVersion: v1
