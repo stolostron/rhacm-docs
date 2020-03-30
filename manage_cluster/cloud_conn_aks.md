@@ -40,7 +40,7 @@ To create a cloud connection from the Red Hat Advanced Cluster Management for Ku
   
 3. Select **Add a connection**. 
    
-4. Select **OCP on Azure** as your cloud provider. 
+4. Select **Microsoft Azure** as your cloud provider. 
 
 5. Add a name for your cloud connection.
 
