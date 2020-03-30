@@ -67,7 +67,7 @@
    * [Governance and risk](governance/compliance_intro.md)
      * [Policy overview](governance/policy_overview.md)
      * [Policy controllers](governance/policy_controllers.md)
-       * [Configuration policy controller](governance/config_policy_ctrl.md)
+       * [Kubernetes configuration policy controller](governance/config_policy_ctrl.md)
        * [Certificate policy controller](governance/cert_policy_ctrl.md)
        * [IAM policy controller](governance/iam_policy_ctrl.md) 
        * [CIS policy controller](governance/cis_policy_ctrl.md)
