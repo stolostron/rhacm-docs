@@ -38,9 +38,9 @@ You must have the following prerequisites before creating a cluster on GCP:
 
 To create clusters from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
-1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
-2. On the Clusters page, Click **Add Cluster**.
+2. On the _Clusters_ page, Click **Add Cluster**.
 
 3. Select **Create a cluster**. 
    
@@ -86,7 +86,7 @@ Detaching a cluster removes it from management, but does not completely delete i
 
 Destroying a cluster removes it from management and deletes the components of the cluster. This is permanent, and it cannot be brought back under management after deletion.   
 
-1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
 2. Select the option menu beside the cluster that you want to delete.
 
