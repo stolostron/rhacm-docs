@@ -6,14 +6,6 @@ lastupdated: "2020-03-26"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Creating a cloud connection for Amazon Web Services
 
 You need a cloud connection to use Red Hat Advanced Cluster Management for Kubernetes console to deploy and manage an OpenShift cluster on Amazon Web Services (AWS). 
@@ -39,9 +31,9 @@ You must have the following prerequisites before creating a cloud connection:
 
 To create a cloud connection from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
-1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
-2. On the Clusters page, select the *Cloud connections* tab.
+2. On the _Clusters_ page, select the *Cloud connections* tab.
   
   Existing cloud connections are displayed. 
   
@@ -53,7 +45,7 @@ To create a cloud connection from the Red Hat Advanced Cluster Management for Ku
 
 6. Select a namespace for your cloud connection from the list. 
 
-  **Tip:** It might be beneficial to create a namespace specifically to host your cloud connections, both for convenience and added security.
+  **Tip:** Create a namespace specifically to host your cloud connections, both for convenience and added security.
 
 7. Add your *AWS Access Key ID* for your Amazon Web Services account. Log in to [AWS](https://console.aws.amazon.com/iam/home#/security_credentials) to find the ID.
 
@@ -72,7 +64,7 @@ You can create a cluster that uses this cloud connection by completing the steps
 
 When you are no longer managing a cluster that is using a cloud connection, delete the cloud connection to protect the information in the cloud connection. 
 
-1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
 2. Select **Cloud connections**.
 
