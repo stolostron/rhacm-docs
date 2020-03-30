@@ -39,7 +39,7 @@ To create a cloud connection from the Red Hat Advanced Cluster Management for Ku
   
 3. Select **Add a connection**. 
    
-4. Select **OCP on Google** as your Cloud provider. 
+4. Select **Google Cloud Platform** as your Cloud provider. 
 
 5. Add a name for your cloud connection.
 
@@ -64,7 +64,7 @@ You can use this connection when you create a cluster by completing the steps in
 
 When you are no longer managing a cluster that is using a cloud connection, delete the cloud connection to protect the information in the cloud connection. 
 
-1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
 2. Select **Cloud connections**.
 
