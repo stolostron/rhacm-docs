@@ -86,7 +86,7 @@ Detaching a cluster removes it from management, but does not completely delete i
 
 Destroying a cluster removes it from management and deletes the components of the cluster. This is permanent, and it cannot be brought back under management after deletion.   
 
-1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
 2. Select the option menu beside the cluster that you want to delete.
 
