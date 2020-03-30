@@ -66,9 +66,9 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
   * Worker pools: You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.  
 
-9. Optional: Configure the cluster networking options.
+9. **Optional:** Configure the cluster networking options.
 
-10. Optional: Configure a label for the cluster.
+10. **Optional:** Configure a label for the cluster.
 
 11. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
