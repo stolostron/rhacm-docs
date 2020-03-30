@@ -6,14 +6,6 @@ lastupdated: "2020-03-26"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Creating a cloud connection for Google Cloud Platform
 
 You need a cloud connection to use Red Hat Advanced Cluster Management for Kubernetes console to create and manage a Red Hat OpenShift Container Platform cluster on Google Cloud Platform (GCP). 
@@ -39,7 +31,7 @@ You must have the following prerequisites before creating a cloud connection:
 
 To create a cloud connection from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
-1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
 2. On the Clusters page, select the *Cloud connections* tab.
   
@@ -53,7 +45,7 @@ To create a cloud connection from the Red Hat Advanced Cluster Management for Ku
 
 6. Select a namespace for your cloud connection from the list. 
 
-  **Tip:** It might be beneficial to create a namespace specifically to host your cloud connections, for both convenience and security.
+  **Tip:** Create a namespace specifically to host your cloud connections, for both convenience and security.
 
 7. Add your *Google Cloud Platform Project ID* for your GCP account. Log in to [GCP](https://console.cloud.google.com/apis/credentials/serviceaccountkey) to retrieve your settings.
 
