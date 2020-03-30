@@ -19,13 +19,13 @@ lastupdated: "2019-12-13"
 You can create deployables to represent Helm releases or to use as a template to wrap Kubernetes resources for deployment to target clusters for constructing or updating applications.
 {:shortdesc}
 
-Deployables (`Deployable.app.ibm.com`) are Kubernetes resources that wrap or represent other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. By wrapping the resources, deployables can be directly deployed to one or more target clusters from the storage locations that include the deployables. When the deployables are on the target cluster or clusters, the resources are unwrapped so that required actions can then run against the resources.  
+Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that wrap or represent other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. By wrapping the resources, deployables can be directly deployed to one or more target clusters from the storage locations that include the deployables. When the deployables are on the target cluster or clusters, the resources are unwrapped so that required actions can then run against the resources.  
 
 The deployable controller acts as the default propagation engine and synchronizes local instances of the deployable. The controller follows the cluster and cluster-namespace model.
 
 You do not need to wrap or represent all resources as deployables before you deploy the resources. Depending on the resource type and the type of channel where you promote the resource, you might not need to create a deployable for the resource. For instance, you do not need to directly create deployables for resources that are included in Helm repository and GitHub repository channels. For more information, see [Creating and managing channels](managing_channels.md).
 
-**Note:** The `Deployable.app.ibm.com` Kind is a replacement for the `Deployable.mcm.ibm.com` kind that is used in previous versions of Red Hat Advanced Cluster Management for Kubernetes.
+**Note:** The `deployable.apps.open-cluster-management.io` Kind is a replacement for the `Deployable.mcm.ibm.com` kind that is used in previous versions of Red Hat Advanced Cluster Management for Kubernetes.
 
   * [Create a deployable](#deployable_create)
   * [Update a deployable](#deployable_update)

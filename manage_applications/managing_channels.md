@@ -1,25 +1,17 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-09"
 
 ---
-
-{:new_window: target="blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Creating and managing channels
 
 Create and use channels when you need to improve the continuous integration and delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access.
 {:shortdesc}
 
-Channels (`Channel.app.ibm.com`) define a namespace within the hub cluster and point to a physical place where resources are stored for deployment. There are four types of channels. Each channel differs based on the type of source location where resources are stored:  
+Channels (`channel.apps.open-cluster-management.io`) define a namespace within the hub cluster and point to a physical place where resources are stored for deployment. There are four types of channels. Each channel differs based on the type of source location where resources are stored:  
 
 * Kubernetes namespace (`Namespace`)  
   Uses deployables to store Kubernetes resource templates. Subscription for this type of channel retrieves and deploys the template. The namespaces that the channel monitors for new or updated deployables must be on the hub cluster.
