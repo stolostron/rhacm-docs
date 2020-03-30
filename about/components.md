@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-13"
+lastupdated: "2020-03-30"
 
 ---
 
@@ -60,7 +60,6 @@ The following table shows the services that are installed on the managed cluster
 |--------|-----------|-------------------|
 |applicationManager|Processes events and other requests to managed resources.|Yes|
 |certPolicyController|Monitors certificate expiration based on distributed policies.|Yes|
-|cisController|Monitors CIS security controls based on distributed policies|Yes|
 |component-operator|Handles the deployment of internal components on the endpoint|Yes|
 |connmgr|Manages connection from the managed cluster to the hub|Yes|
 |iamPolicyController|Monitors identity controls based on distributed policies|Yes|
