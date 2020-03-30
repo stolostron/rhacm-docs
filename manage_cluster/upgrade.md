@@ -6,14 +6,6 @@ lastupdated: "2020-03-30"
 
 ---
 
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Upgrading your cluster
 
 After you create clusters that you want to manage with Red Hat Advanced Cluster Management for Kubernetes, you can upgrade those clusters to the latest version by using the console.
@@ -23,7 +15,7 @@ This method of upgrading only works for clusters that were created with Red Hat 
 
 To upgrade your cluster, complete the following steps:
 
-1. From the navigation menu, navigate to **Automate infrastructure** -> **Clusters**. If an upgrade is available, it is shown in the *Installed version* column.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**. If an upgrade is available, it is shown in the *Installed version* column.
 
 2. Select the clusters that you want to upgrade. **Remember:** A cluster must be in *Ready* state, and must have been created by Red Hat Advanced Cluster Management for Kubernetes to be upgraded with the console.
 
