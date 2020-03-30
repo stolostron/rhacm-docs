@@ -6,7 +6,7 @@ lastupdated: "2020-03-18"
 
 ---
 
-# Configuration policy controller
+# Kubernetes configuration policy controller
 
 Configuration policy controller can be used to configure any Kubernetes resource and apply security policies across your clusters.
 
