@@ -6,11 +6,14 @@ lastupdated: "2020-03-23"
 
 ---
 
-# Troubleshooting certificate management service
+# Troubleshooting 
 
-Troubleshoot common certificate management service issues.
+**Important**: Install the Kubernetes CLI to run the troubleshooting commands. For more information, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/).
 
-Install the Kubernetes CLI to run the troubleshooting commands. For more information, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/).
+View the list of troubleshoot topics for Red Hat Advanced Cluster Management for Kubernetes: 
+
+* [Troubleshooting cert-manager-webhook](#webhook)
+
 
 ## Troubleshooting cert-manager-webhook
 {: #webhook}
