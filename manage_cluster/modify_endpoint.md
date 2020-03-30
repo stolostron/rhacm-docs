@@ -1,7 +1,7 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-26"
 
 ---
@@ -17,14 +17,11 @@ The following settings can be updated in the `endpoint.multicloud.ibm.com` Kuber
 |Setting name|Value|
 |-----------------------|------------|
 |applicationmanager |`true` or `false`|
-|metering |`true` or `false`|
 |policyController |`true` or `false`|
-|prometheusIntegration |`true` or `false`|
 |searchCollector |`true` or `false`|
 |serviceRegistry: dnsSuffix: |`mcm.svc`|
 |serviceRegistry |`true` or `false`|
 |serviceRegistry: plugins: |`kube-service`|
-|tillerIntegration |`true` or `false`|
 |topologyCollector |`true` or `false`|
 {: caption="Table 1. Settings for endpoint.multicloud.ibm.com" caption-side="top"}
 
