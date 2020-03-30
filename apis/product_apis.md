@@ -17,7 +17,7 @@ For more information, review the API documentation for each of the following res
 * {: child} [ApplicationRelationship](applicationRel.json)
 * {: child} [Channels.app.ibm.com](channels.json)
 * {: child} [Subscriptions.app.ibm.com](subscriptions.json)
-* {: child} [Deployable.app.ibm.com](deployables_app.json)
+* {: child} [deployable.apps.open-cluster-management.io](deployables_app.json)
 * {: child} [Deployable resource](deployables.json)
 * {: child} [PlacementBinding.mcm.ibm.com](placementBindings.json)
 * {: child} [PlacementRule.app.ibm.com](placementRules.json)

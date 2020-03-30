@@ -1,18 +1,10 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-10"
+  years: 2020
+lastupdated: "2020-03-10"
 
 ---
-
-{:new_window: target="blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Managing applications with the console
 
@@ -112,7 +104,7 @@ From the search results, you can view identifying details for each resource, inc
 
 By clicking the resource name in the search results, a YAML editor opens and displays the YAML definition for the resource. You can choose to edit the definition within the editor. Any changes that you save are applied to the resource immediately.  
 
-For more information about using search, see [console components](../getting_started/console.md#search).
+For more information about using search, see [console components](../console/console.md)).
 
 ## Topology
 {: #topology}
@@ -121,9 +113,9 @@ The Topology page provides you with a visualization of your applications, cluste
 
 You can select any component from the topology view to view more details. You can also hover your cursor over a resource to view the component kind, name, and namespace and links to view the search results for the resource or namespace. When you are viewing the details for a pod, you can select to view the logs for that pod.
 
-The _Topology_ page is available from the _Observe environments_ sub-menu within the console main menu. For more information about using the topology page, see [console components](../getting_started/console.md#mcm_topology).
+The _Topology_ page is available from the _Observe environments_ sub-menu within the console main menu. For more information about using the topology page, see [console components](../console/console.md).
 
 ## Monitoring
 {: #monitoring}
 
-You can open the Grafana dashboard for your applications to monitor by selecting **Grafana** from the _Monitor health_ sub-menu of the console main menu. From this page, you can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.
+If you installed Grafana, uou can open the Grafana dashboard for your applications to monitor by selecting **Grafana**. You can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.

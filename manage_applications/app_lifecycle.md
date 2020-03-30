@@ -26,7 +26,7 @@ The application model and deployment options work for, and scale, any clustered 
 
 Within this application model, applications are composed of multiple resources. The main foundation resources for Red Hat Advanced Cluster Management for Kubernetes applications are the `application` resource and the `deployable` resource. The overrides and dependencies for deployables are defined within the definition for the deployables. The placement rules for deployables can be defined as a stand-alone resource and referenced by the deployable.
 
-* Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for grouping application components.
+* Applications (``) in Red Hat Advanced Cluster Management for Kubernetes are used for grouping application components.
 
 * Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or to represent Helm releases for deployment to clusters.
 
