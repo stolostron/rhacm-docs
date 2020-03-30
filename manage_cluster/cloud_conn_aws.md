@@ -39,7 +39,7 @@ To create a cloud connection from the Red Hat Advanced Cluster Management for Ku
   
 3. Select **Add a connection**. 
    
-4. Select **OCP on Amazon** as your Cloud provider. 
+4. Select **Amazon Web Services** as your Cloud provider. 
 
 5. Add a name for your cloud connection.
 
