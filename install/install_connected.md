@@ -24,8 +24,6 @@ See the following prerequisites before installing Red Hat Advanced Cluster Manag
 
 * Your Red Hat OpenShift Container Platform permissions must allow you to create a namespace. 
 
-* Must have access to the Red Hat Advanced Cluster Management for Kubernetes operator in the OperatorHub catalog. 
-
 * You must have an Internet connection to access the dependencies for the operator.
 
 * If you are using macOS, you must install `gsed`. If you do not already have `gsed` installed, you can install it by entering `brew install gnu-sed` in a terminal window.
@@ -57,7 +55,7 @@ Complete the following preparations before you complete either of the installati
 
   1. Ensure you have access to the Red Hat Quay.io organization by signing in to [open-cluster-management](https://quay.io/repository/open-cluster-management/multiclusterhub-operator-index?tab=tags).
   
-   If you do not have access to the `open-cluster-management` organization in Quay.io, you can request access on the internal `#forum-acm` Slack channel.
+    If you do not have access to the `open-cluster-management` organization in Quay.io, you can request access on the internal `#forum-acm` Slack channel.
     
   2. Visit the following link, but replace `<your_username>` with your Quay.io username: https://quay.io/user/your_username?tab=settings.
   
@@ -73,13 +71,13 @@ Complete the following preparations before you complete either of the installati
   
   8. Edit the contents of the `pull-secret.yaml` file and replace the name of the `Secret metadata: name` entry with `multiclusterhub-operator-pull-secret`, as shown in the following example:
   
-  ```
-  apiVersion: v1
-  kind: Secret
-  metadata:
-    name: multiclusterhub-operator-pull-secret
-  ...
-  ```
+    ```
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: multiclusterhub-operator-pull-secret
+    ...
+    ```
 
 ## Method 1: Installing by using the `start.sh` script
 {: script}
