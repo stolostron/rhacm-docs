@@ -6,7 +6,6 @@ lastupdated: "2020-03-13"
 
 ---
 
-
 # Application management lifecycle
 
 Red Hat Advanced Cluster Management for Kubernetes provides enhanced application management capabilities through a Kubernetes resource based application model and channel and subscription based deployment options. The application model and deployment capabilities are designed to unify and simplify the deployment experience for creating and managing your application across both single cluster and multi-cluster scenarios.
@@ -29,15 +28,15 @@ Within this application model, applications are composed of multiple resources. 
 
 * Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for grouping application components.
 
-* Deployables (`Deployable.apps.open-cluster-management.io`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or to represent Helm releases for deployment to clusters.
+* Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or to represent Helm releases for deployment to clusters.
 
-* Placement rules (`PlacementRule.apps.open-cluster-management.io`) define the target clusters where deployables can be deployed. You can use placement rules to help you facilitate the multi-cluster deployment of your deployables. Placement rules can be referenced by deployables and subscriptions. Placement rules that are defined as stand-alone resources can be shared across deployables.
+* Placement rules (`placementrule.apps.open-cluster-management.io`) define the target clusters where deployables can be deployed. You can use placement rules to help you facilitate the multi-cluster deployment of your deployables. Placement rules can be referenced by deployables and subscriptions. Placement rules that are defined as stand-alone resources can be shared across deployables.
 
 To better integrate with continuous delivery systems, you can use channel and subscription resources. Channels and subscriptions provide you with improved continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications.
 
-* Channels (`Channel.apps.open-cluster-management.io`) define a namespace within the hub cluster and point to a physical place where resources are stored for deployment; such as an object store, Kubernetes namespace, Helm repository, or GitHub repository. Channels are custom resource definitions that can help you streamline deployments and separate cluster access. Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables within a channel can be accessed by only the clusters that subscribe to that channel.
+* Channels (`channel.apps.open-cluster-management.io`) define a namespace within the hub cluster and point to a physical place where resources are stored for deployment; such as an object store, Kubernetes namespace, Helm repository, or GitHub repository. Channels are custom resource definitions that can help you streamline deployments and separate cluster access. Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables within a channel can be accessed by only the clusters that subscribe to that channel.
 
-* Subscriptions (`Subscription.apps.open-cluster-management.io`) are sets of definitions that identify deployables within channels by using annotations, labels, and versions. The subscription operator can monitor the channel for new or updated deployables, such as an updated Helm release or new Kubernetes deployable object. Then, the operator can download the Kubernetes deployable object or Helm release directly from the source location (Helm repository, GitHub repository, object store, or namespace) to the target managed clusters.
+* Subscriptions (`subscription.apps.open-cluster-management.io`) are sets of definitions that identify deployables within channels by using annotations, labels, and versions. The subscription operator can monitor the channel for new or updated deployables, such as an updated Helm release or new Kubernetes deployable object. Then, the operator can download the Kubernetes deployable object or Helm release directly from the source location (Helm repository, GitHub repository, object store, or namespace) to the target managed clusters.
 
 Although single and multi-cluster applications both use the same Kubernetes specifications, multi-cluster applications involve more automation of the deployment and application management lifecycle. The application definition is based on the Custom Resource Definition (CRD) of the [Kubernetes SIG Application CRD definition](https://github.com/kubernetes-sigs/application). This definition is used for applications in both single and multi-cluster environments for grouping application resources. The other resource kinds for the application model (deployables, channels, subscriptions, and placement rules) are based on specifications that are created by IBM. These specifications use common Kubernetes resource fields for defining annotations, labels, metadata, and more, and support custom fields and values.
 
@@ -98,8 +97,6 @@ The dashboard includes enhanced capabilities, which your developers and operatio
 * View events in the context of an application, including deployments, updates, and monitoring data.
 * Access an improved topology view that encompasses the new application resource definitions, including channels, subscriptions, and placement rules.
 * View a the logs tab for applications to view logs for each application resource.
-* When IBM Cloud Event Management is enabled, you can use that service to view incident reports.
-* When IBM Cloud App Management is installed, you can open that service from the console to access visualized golden signals and other monitoring data to view more information about the status and performance of your subscriptions and applications. 
 * When Grafana is installed, you can open the Grafana dashboard for your applications from the applications dashboard to monitor your applications.
 * Add and edit channels, subscriptions, placement rules, and applications from different views and pages.
 
