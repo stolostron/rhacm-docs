@@ -6,7 +6,7 @@ lastupdated: "2020-03-18"
 
 ---
 
-# Configuration policy controller
+# Kubernetes configuration policy controller
 
 Configuration policy controller can be used to configure any Kubernetes resource and apply security policies across your clusters.
 
@@ -35,7 +35,7 @@ Each _policy_ within the policy document contains the following elements.
     
     - A `policy-template` is used to create one or more policies for third party or external security controls. For example, you can create a certificate expiration policy with the certificate policy controller. For more information about other policy and their  controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
 
-## Creating a configuration policy
+## Creating a Kubernetes configuration policy
 
 You can create a YAML file for your configuration policy or create a configuration policy from the console. View the following sections to create a configuration policy:
 
