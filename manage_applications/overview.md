@@ -7,7 +7,7 @@ lastupdated: "2019-12-12"
 ---
 
 
-# Managing applications
+# Managing applications (Technology preview)
 
 Review the following topics to learn more about creating, deploying, and managing your applications. 
 

@@ -1,26 +1,16 @@
 ---
 
 copyright:
-  years: 2016, 2020
-lastupdated: "2020-03-13"
+  years: 2020
+lastupdated: "2020-03-25"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Sizing your Red Hat Advanced Cluster Management for Kubernetes cluster
 
 Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.
 
-**Note:** The requirements that are listed aren’t minimum requirements.
-
-{:shortdesc}
+**Note:** The requirements that are listed are not minimum requirements.
 
 * [Considerations before you size your cluster](#considerations)
 * [Sample deployments](#samples)
@@ -146,4 +136,4 @@ To increase your cluster's resilience level, add two extra master nodes.
 
 To increase your cluster resilience level, you must deploy and manage workloads across multiple clusters.
 
- * A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu){: new_window}.
+ * A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu).

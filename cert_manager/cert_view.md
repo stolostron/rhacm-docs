@@ -2,18 +2,9 @@
 
 copyright:
   years: 2018, 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 
 # Viewing Red Hat Advanced Cluster Management for Kubernetes cert-manager resources
 
@@ -38,7 +29,6 @@ To view all the certificates that are created and managed by Red Hat Advanced Cl
   ```
   kubectl get certificate --all-namespaces
   ```
-  {: codeblock}
 
 The command output provides the following information:
 
@@ -51,13 +41,12 @@ The command output provides the following information:
 | Age | When the certificate resource was first created in Kubernetes. |
 | Expiration | When the certificate expires. |
 
-For more information about certificates, see [kubectl flags](https://kubernetes.io/docs/reference/kubectl/kubectl/){: new_window}.
+For more information about certificates, see [kubectl flags](https://kubernetes.io/docs/reference/kubectl/kubectl/).
 
 For example, a `kubectl describe` gives you more information about the certificate:
   ```
   kubectl describe certificate <certificate name> -n <certificate namespace>
   ```
-  {: codeblock}
 
 ## View the Issuers and ClusterIssuers in your cluster
 {: #issuers}
@@ -70,7 +59,6 @@ To view the Issuers or ClusterIssuers available in your cluster, run the followi
   # To view ClusterIssuers
   kubectl get clusterissuer
   ```
-  {: codeblock}
 
 ## View the Orders and Challenges in your cluster
 {: #orders}
@@ -83,4 +71,3 @@ Orders and Challenges resources are created to issue ACME HTTP certificates, and
   # To view all Challenges
   kubectl get challenges --all-namespaces
   ```
-  {: codeblock}

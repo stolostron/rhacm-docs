@@ -2,22 +2,13 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-10"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # List endpoints
 
 List available endpoints.
-{:shortdesc}
 
 Base path: `https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1`
 
@@ -52,7 +43,6 @@ The sample curl command resembles the following code:
 ```
 curl -k -H GET --header "Authorization: Bearer $ID_TOKEN" https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1
 ```
-{: codeblock}
 
 The response resembles the following code:
 
@@ -69,7 +59,6 @@ GET /image-manager/api/v1/repositories/{repo:.*}
 PUT /image-manager/api/v1/repositories/{repo:.*}
 DELETE /image-manager/api/v1/repositories/{repo:.*}
 ```
-{: pre}
 
 ## Responses
 

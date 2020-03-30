@@ -2,22 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-19"
+lastupdated: "2020-03-26"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Enabling a Kubernetes ingress for discovery
 
 You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Kubernetes ingresses that are on different Red Hat Advanced Cluster Management for Kubernetes managed clusters.
-{: shortdesc}
 
 When you have multiple Kubernetes ingresses that are managed by Red Hat Advanced Cluster Management for Kubernetes, it is challenging to maintain them. The Red Hat Advanced Cluster Management for Kubernetes service discovery function discovers Kubernetes ingresses that are configured to be discovered.
 
@@ -36,7 +27,6 @@ To discover a Kubernetes ingress within your managed clusters, complete the foll
   ```
   mcm.ibm.com/service-discovery
   ```
-  {: codeblock}
 
   The following example shows how to add this to the ingress:
 

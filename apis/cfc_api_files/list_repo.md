@@ -2,22 +2,13 @@
 
 copyright:
   years: 2016, 2020
-lastupdated: "2020-03-10"
+lastupdated: "2020-03-24"
 
 ---
-
-{:new_window: target="_blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # List repositories
 
 List all repositories in the private image registry.
-{:shortdesc}
 
 The private image registry creates individual repositories for images that are assigned the same name.
 
@@ -53,7 +44,6 @@ The sample curl command resembles the following code:
 ```
 curl -k -H GET --header "Authorization: Bearer $ID_TOKEN" https://<Cluster Master Host>:<Cluster Master API Port>/image-manager/api/v1/repositories --insecure
 ```
-{: codeblock}
 
 The sample response resembles the following code:
 
@@ -82,7 +72,6 @@ vnd.docker.image.rootfs.diff.tar.gzip","size":2109387,\
 "digest":"sha256:22a16c518b849c1025d3475ee9310b25eaf5ec70f10d657ac7a322323f14873a"},{"mediaType":"application/vnd.docker.image.rootfs.diff.tar.gzip","size":176,\
 "digest":"sha256:0e5978b6b34b3e943e0fd25dfb50991c0bad82a986cfdaa91c4de756431ba679"}]}}]}]}root@master:~#
 ```
-{: pre}
 
 
 ## Responses

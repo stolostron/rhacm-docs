@@ -18,4 +18,10 @@ With Red Hat Advanced Cluster Management for Kubernetes:
   - Easily create Kubernetes clusters and offer cluster lifecycle management in a single console.
   - Enforce policies at the target clusters using Kubernetes-supported custom resource definitions.
   - Deploy and maintain day-two operations of business applications distributed across your cluster landscape.
+
+See the following documentation for information about the product:
+
+- {: child} [Red Hat Advanced Cluster Management for Kubernetes Architecture](architecture.md)
+- {: child} [Components](components.md)
+- {: child} [Installing Red Hat Advanced Cluster Management for Kubernetes](install/installation.md)
   

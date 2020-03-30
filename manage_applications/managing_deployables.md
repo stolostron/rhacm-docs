@@ -157,7 +157,7 @@ The following YAML structure shows the required fields for a deployable and some
 The following YAML structure shows the required fields for an application and some of the common optional fields. You can compose the YAML content with any tool.
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
   name:
@@ -184,7 +184,7 @@ spec:
 
 |Field|Description|
 |-- | -- |
-| apiVersion | Required. Set the value to `app.ibm.com/v1alpha1`. |
+| apiVersion | Required. Set the value to `apps.open-cluster-management.io/v1`. |
 | kind | Required. Set the value to `Deployable` to indicate that the resource is a deployable. |
 | metadata.name | Optional. The name of the deployable. If you do not set a name when you are creating a deployable, a `generateName` is created by Kubernetes to identify the deployable. |
 | metadata.namespace | Optional. The namespace for the deployable.  |
@@ -200,7 +200,7 @@ spec:
 {: #deployable_example}
 
 ```YAML
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
   annotations:

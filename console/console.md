@@ -11,26 +11,46 @@ lastupdated: "2020-03-11"
 
 Learn more about console components that you can use to view, manage, or customize your console. 
 
-Access your console with the following URL: **(need to add this--how does user access the console after install -- from OCP? -bcs)**
-
 ## Red Hat Advanced Cluster Management for Kubernetes console components
 
 Red Hat Advanced Cluster Management for Kubernetes console components:
 
-* [Welcome page](#welcome)
-* [Overview](#overview) **(I CANNOT DOC TEST THIS -- NOT UP)**
-* [Observe enviroments > Topology](#topology)
-* [Automate Infrastructure](#cluster)
-* [Manage application](#application)
-* [Governance and risk dashboard](#grc)
-* [Search](#search) **(THIS IS THE ONLY PLACE IN THE DOCS WE TALK ABOUT SEARCH SO WE NEED TO LEAVE IT)**
+- [Access your console](#access)
+- [Welcome page](#welcome)
+- [Overview](#overview) 
+- [Observe enviroments > Topology](#topology)
+- [Automate Infrastructure](#cluster)
+- [Manage application](#application)
+- [Governance and risk dashboard](#grc)
+- [Search](#search) 
+
+## Access your console
+{: #access}
+
+- Access from the Red Hat OpenShift console:
+
+  1. From the left-hand navigation, click **Networking** > **Routes**
+
+  2. From the _Project_ menu, select the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.
+
+  3. Find `multicloud-console` and click the URL from the `Location` column.
+
+- Access the console from the Red Hat OpenShift CLI:
+
+  1. While logged in to OpenShift, run the following command to find the route, where `<namespace-from-install>` is the namespace where you installed Red Hat Advanced Cluster Management for Kubernetes:
+
+  ```
+  oc get routes -n <namespace-from-install>
+  ```
+  2. Find the `multicloud-console` name and the `Host/Port` columns to get your URL.
 
 ## Welcome page
 {: #welcome}
 
 From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you get more information about the product and you can access header features, such as _Search_ and _Create resource_. Also from the _Header_, you can click the **Help** (?) icon to view the _About_ page and the documentation. From the _User_ menu, you can access the _Configure Client_ page. Additionally, you can use the [Visual Web Terminal](vwt_search.md). 
 
-## Overview
+## Observe enviroments > Topology
+{: #overview}
 
 Reorganize your dashboard. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
 
@@ -40,6 +60,8 @@ Reorganize your dashboard. You can personalize your view of the Overview dashboa
 * Pod status
 * Cluster resources (VCPU/Memory usage)
 * Storage usage
+
+Additionally, the Heatmap displays color-coordinated boxes that represent the VCPU usage threshold of your nodes. 
 
 ### Filtering your results
 
@@ -55,14 +77,13 @@ Create clusters or bare metal assets, or import existing clusters. Scale up or d
 
 Click **New application** to edit a `.yaml` file and create your application. Click Resources to view the information of each application. For more information about application resources, see [Application management (Technology preview)](../manage_applications/overview.md).
 
-### Viewing your pod health (IS THIS PART OF TOPOLOGY AND SHOULD IT MOVE? I cannot test as topology page not up in my cluster -- bcs)
+### Viewing your pod health 
 
-View the pod health for all of your clusters by expanding the Heatmap. The Heatmap displays color-coordinated boxes that represent the VCPU usage threshold of your nodes. 
+View the pod health for all of your clusters by expanding the Heatmap.
 
 Click **Show details** to view the map. The size of the color-coordinated boxes represents the number of nodes on your cluster. Hover your cursor over the box to view the response time of your cluster. 
 
-## Topology page (Need dev help on this)
-{: #topology}
+## Topology page 
 
 The Topology page uses information from Weave Scope probe to display Kubernetes objects within a cluster. You can view hub cluster resources. As you configure managed clusters, you see more clusters in the Topology view. 
 
@@ -79,7 +100,7 @@ Learn more about the tabs that are available from the Topology page:
 ## Governance and risk
 {: #grc}
 
-Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../compliance/compliance_intro.md).
+Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
 
 ## Search 
 {: #search}
@@ -104,7 +125,7 @@ For more specific search results, include the property in your search. For examp
     - Search for a single field, such as `kind:pod` to find all pod resources.
     - Search for multiple fields, such as `kind:pod namespace:default` to find the pods in the default namespace. 
   
-  **Note:** Any user can search for resources, but results are based on your role-based access control assignment. Additionally, if you save and share a Search query with another user, returned results depend on access level for that user. For more information on role access, see _Using RBAC Authorization_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/){:new_window}.
+  **Note:** Any user can search for resources, but results are based on your role-based access control assignment. Additionally, if you save and share a Search query with another user, returned results depend on access level for that user. For more information on role access, see _Using RBAC Authorization_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 
   - You can also search with conditions by using characters, such as `>, >=, <, <=, !=`.
 
