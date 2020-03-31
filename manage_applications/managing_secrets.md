@@ -131,7 +131,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   annotations:
-      app.ibm.com/deployables: "true"
+      apps.open-cluster-management.io/deployables: "true"
   name:
   namespace:
 data:
@@ -155,7 +155,7 @@ data:
 | data.SecretAccessKey | Optional, but required to store an access key and secret access key combination. The encoded private access key. The key must be encoded as a base64 string. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-## Example secret YAML <!--app.ibm.com needs to change -->
+## Example secret YAML 
 {: #secret_example}
 
 ```yaml
@@ -163,7 +163,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   annotations:
-      app.ibm.com/deployables: "true"
+      apps.open-cluster-management.io/deployables: "true"
   name: secret-namespace
   namespace: channel-namespace
 data:
