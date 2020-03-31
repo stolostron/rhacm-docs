@@ -28,7 +28,7 @@ Within this application model, applications are composed of multiple resources. 
 
 * Applications (`application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for grouping application components.
 
-* Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or to represent Helm releases for deployment to clusters.
+* Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or to represent Helm releases for deployment to clusters. Deployables are custom resource definitions that help you deploy to clusters.
 
 * Placement rules (`placementrule.apps.open-cluster-management.io`) define the target clusters where deployables can be deployed. You can use placement rules to help you facilitate the multi-cluster deployment of your deployables. Placement rules can be referenced by deployables and subscriptions. Placement rules that are defined as stand-alone resources can be shared across deployables.
 
