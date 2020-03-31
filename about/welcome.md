@@ -23,5 +23,5 @@ See the following documentation for information about the product:
 
 - {: child} [Red Hat Advanced Cluster Management for Kubernetes Architecture](architecture.md)
 - {: child} [Components](components.md)
-- {: child} [Installation](install/overview.md)
+- {: child} [Installation](../install/overview.md)
   
