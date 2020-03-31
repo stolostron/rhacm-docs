@@ -67,7 +67,7 @@ After the cluster is created, you can resize your cluster to increase or decreas
   compute.platform.aws.type: m5.xlarge
   ```
 
-See the documentation at [Red Hat OpenShift on IBM Cloud]((https://cloud.ibm.com/docs/openshift?topic=openshift-clusters) for more details.
+See the documentation at [Red Hat OpenShift on IBM Cloud](https://cloud.ibm.com/docs/openshift?topic=openshift-clusters) for more details.
 
 - Resizing:
 
@@ -152,7 +152,7 @@ After the cluster is created, you can resize your cluster to increase or decreas
   nodeVMSize: "Standard_D8s_v3"
   ```
 
-For more information, see [General purpose virtual machine sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general)
+For more information, see [General purpose virtual machine sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general).
 
 - Resizing:
   
@@ -176,7 +176,7 @@ After the cluster is created, you can resize your cluster to increase or decreas
   ```
 
 
-For more information, see [Amazon EC2 Instance Types](https://aws.amazon.com/ec2/instance-types
+For more information, see [Amazon EC2 Instance Types](https://aws.amazon.com/ec2/instance-types).
 
 
 - The total number of worker nodes.
