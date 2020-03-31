@@ -1,7 +1,7 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-24"
 
 ---
@@ -329,7 +329,7 @@ Package overrides for a subscription override values for the Helm chart or Kuber
 
 To configure a package override, specify the field within the Kubernetes resource spec to override as the value for the `path` field. Specify the replacement value as the value for the `value` field.
 
-For example, if you need to override the values field within the spec for a Helm release (`HelmRelease.app.ibm.com`) for a subscribed Helm chart, you need to set the value for the `path` field in your subscription definition to `spec`.
+For example, if you need to override the values field within the spec for a Helm release (`HelmRelease.app.ibm.com`) for a subscribed Helm chart, you need to set the value for the `path` field in your subscription definition to `spec`. 
 
 ```
 packageOverrides:

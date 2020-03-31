@@ -1,18 +1,10 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-09" 
 
 ---
-
-{:new_window: target="blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Managing secrets
 
@@ -163,7 +155,7 @@ data:
 | data.SecretAccessKey | Optional, but required to store an access key and secret access key combination. The encoded private access key. The key must be encoded as a base64 string. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-## Example secret YAML
+## Example secret YAML <!--app.ibm.com needs to change -->
 {: #secret_example}
 
 ```yaml

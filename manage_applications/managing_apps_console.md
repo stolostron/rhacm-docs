@@ -79,6 +79,7 @@ From the _Incidents_ tab, you can complete the following tasks:
 * View events and related information.
   
 From the _Logs_ tab, you can complete the following tasks:
+<!-- Do we remove this or do we move info to topology?-->
 
 * View the log information for each application pod. You can select the pod and a container that is associated with the pod to view the associated log.
 * Select to view the log information in Kibana.
@@ -118,4 +119,4 @@ The _Topology_ page is available from the _Observe environments_ sub-menu within
 ## Monitoring
 {: #monitoring}
 
-If you installed Grafana, uou can open the Grafana dashboard for your applications to monitor by selecting **Grafana**. You can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.
+If you installed Grafana, you can open the Grafana dashboard for your applications to monitor by selecting **Grafana**. You can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.
