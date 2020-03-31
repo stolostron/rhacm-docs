@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020 
-lastupdated: "2020-03-23"
+lastupdated: "2020-03-31"
 
 ---
 
@@ -13,6 +13,7 @@ lastupdated: "2020-03-23"
 View the list of troubleshoot topics for Red Hat Advanced Cluster Management for Kubernetes: 
 
 * [Troubleshooting cert-manager-webhook](#webhook)
+* [Troubleshooting clusters](#clusters)
 
 
 ## Troubleshooting cert-manager-webhook
@@ -120,3 +121,19 @@ failed calling webhook "certificates.admission.certmanager.io": the server is cu
    ```
 
    **NOTE**: If you uninstall the webhook, you lose the functions that the webhook provides, which is validating the cert-manager resources and preventing non-cluster administrators from using `ClusterIssuers` to issue their certificates.
+   
+## Troubleshooting clusters
+{: #clusters}
+
+Use this section to troubleshoot issues when working with clusters.
+
+### Symptom
+
+After importing a cluster by using the Red Hat Advanced Cluster Management console, the cluster appears in the console with a status of *Pending import*.
+
+### Resolving the problem
+
+Ensure that the managed cluster can communicate with the network that hosts the hub cluster. If the communication cannot be established by the managed cluster, the cluster import is not complete. The cluster status for the managed cluster is *Pending import".  
+
+Ensure that the ports on the network of the hub cluster are open to receiving communication (often port 6443).
+
