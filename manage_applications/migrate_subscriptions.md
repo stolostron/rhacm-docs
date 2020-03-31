@@ -6,32 +6,6 @@ lastupdated: "2020-03-26"
 
 ---
 
-# Migrating subscriptions from previous versions <!-- Also please look at this section?-->
+# Migrating subscriptions from previous versions 
 
-Upgrade your subscriptions to indicate whether each subscription must be deployed locally or not.
-
-With the current version, a `spec.placement.local` field is added for the subscription resource spec. This field is used to indicate whether a subscription resource must be deployed locally (`spec.placement.local: true`) or not (`spec.placement.local: false`).
-
-The subscription operator determined whether to deploy a subscription locally or not based on whether the subscription includes a `spec.placement` section. If a `spec.placement` section was included, the subscription was deployed locally.
-
-With the `spec.placement.local` field added, all subscriptions that you migrate to 4.4.0 are not considered local resources by default. This behavior causes the subscription operator to not deploy your resources.
-
-To update any subscription that you are migrating so that the subscription is considered local and can be deployed, override the `spec.placement` setting for the subscription. This override needs to remove the placement settings from the previous version.
-
-## Procedure <!-- seems we do not have upgrade right now, please confirm-->
-
-1. Before you upgrade your hub cluster, update each of the subscription resources for your managed clusters to override the placement settings. Use the following YAML content to override the placement setting:
-
-   ```yaml
-   spec:
-   ...
-     overrides:
-     - clusterName: <target cluster 1>
-       clusterOverrides:
-       - path: "spec.placement"
-         value:
-     - clusterName: <target cluster 2>
-       clusterOverrides:
-       - path: "spec.placement"
-         value:
-   ```
+<to be updated when we have a migration/upgrade user scenario>
