@@ -296,7 +296,7 @@ metadata:
 apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
-  name: ibm-production-charts
+  name: 
   namespace: hub-repo
 spec:
     pathname: https://9.21.107.150:8443/helm-repo/charts
@@ -329,10 +329,10 @@ spec:
   pathname: https://kubernetes-charts.storage.googleapis.com/
 ```
 
-### GitHub (`GitHub`) repository <!--stolen from gitops repo, please check-->
+### GitHub (`GitHub`) repository 
 {: #channeldef_gitrepo}
 
-The following example channel definition shows an example of a channel for the IBM Cloud Charts Helm GitHub Repository:
+The following example channel definition shows an example of a channel for the GitHub Repository. In the following example, `secretRef` refers to the user identity used to access the GitHub repo that is specified in the `pathname`. If you have a public repo, you do not need the `secretRef`:
 
 ```yaml
 apiVersion: app.ibm.com/v1alpha1
@@ -345,30 +345,15 @@ spec:
   pathname: https://github.com/open-cluster-management/gitops-clusters.git
   secretRef:
     name: github-gitops-clusters
-```
-{: codeblock}
-
-The following channel definition shows another example of a GitHub repository channel. This example shows the configuration for identifying a Kubernetes Secret for basic authentication to access the IBM Cloud Charts Helm GitHub Repository: <!--here, what do we use?-->
-
-```yaml
+---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: my-github-secret
-  namespace: ibmcharts
+  name: github-gitops-clusters
+  namespace: gitops-cluster-lifecycle
 data:
-  user: dXNlcgo=
-  accessToken: cGFzc3dvcmQK
----
-apiVersion: apps.open-cluster-management.io/v1
-kind: Channel
-metadata:
-  name: ibm-charts-github
-  namespace: ibmcharts
-spec:
-    type: GitHub
-    pathname: https://github.com/IBM/charts.git
-    secretRef:
-      name: my-github-secret
+  user: dXNlcgo=            # Value of user and accessToken is Base 64 coded.
+  accessToken: cGFzc3dvcmQ
 ```
 {: codeblock}
+
