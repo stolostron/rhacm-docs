@@ -73,16 +73,6 @@ From the _Resources_ tab for a single application, you can complete the followin
 * View the resource list for the application. This list includes all resources that are associated with the application, including pods, secrets, services, and more. This list indicates the name, namespace, kind, API groups, and status of each resource. The list also indicates the cluster where the resource is deployed, the creation date of the resource, and the last date that the resource was updated.
 * View the resource pipeline for the application, which includes the summary of the application resources, options to create resources, and a table that provides more details about the resources. The resource pipeline for a single application includes similar information to the pipeline for all applications. The difference between the two pipelines is that this pipeline is scoped to just the selected application.
 
-From the _Incidents_ tab, you can complete the following tasks:
-
-* View the list all incidents, including the ID, description, priority, escalated, owner, state, creation date, and date of the last updated.
-* View events and related information.
-  
-From the _Logs_ tab, you can complete the following tasks:
-
-* View the log information for each application pod. You can select the pod and a container that is associated with the pod to view the associated log.
-* Select to view the log information in Kibana.
-
 ## Search
 {: #search}
 
@@ -118,4 +108,4 @@ The _Topology_ page is available from the _Observe environments_ sub-menu within
 ## Monitoring
 {: #monitoring}
 
-If you installed Grafana, uou can open the Grafana dashboard for your applications to monitor by selecting **Grafana**. You can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.
+If you installed Grafana, you can open the Grafana dashboard for your applications to monitor by selecting **Grafana**. You can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.

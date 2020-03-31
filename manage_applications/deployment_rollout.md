@@ -1,14 +1,14 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-25"
 
 ---
 
 # Deploying application resources with a rolling update
 
-If you want to roll out an update for a subscription<!-- or deployable--> to your managed clusters, you can configure the deployment to occur on only a percentage of your managed clusters at a time. When the deployment on those clusters is successful, the deployment is rolled out incrementally to the remaining clusters.
+If you want to roll out an update for a subscription <!-- or deployable--> to your managed clusters, you can configure the deployment to occur on only a percentage of your managed clusters at a time. When the deployment on those clusters is successful, the deployment is rolled out incrementally to the remaining clusters.
 
 When you run a percentage rollout, the rolling update happens on only the specified percentage of clusters. As the deployment completes on one cluster, the deployment begins on another cluster while maintaining the percentage of clusters that are made unavailable. If an error occurs during the deployment to one cluster, the deployment to that cluster is stopped. The cluster remains unavailable until the error is resolved and the deployment can complete on that cluster. Meanwhile, the overall deployment continues on the remaining clusters. The cluster or clusters where an error occurred are still counted towards the percentage of clusters where the rolling update occurs. If the number of clusters where occurred matches the specified percentage for the rolling update, the overall rollout for the deployment is stopped until the errors are resolved.
 
@@ -67,7 +67,7 @@ At this stage no rolling update is configured and any change to the initial vers
 
 1. Create the target subscription resource YAML definition to point to the newer version of the resource or chart to deploy. This definition must use the same definition structure as any subscription application resource kind. However, this target subscription must not include the annotations for defining a rolling update and must not define any placement rule.
 
-2. Update the initial subscription YAML definition to Include the following annotations to indicate that a rolling update is used for updating the subscription:
+2. Update the initial subscription YAML definition to Include the following annotations to indicate that a rolling update is used for updating the subscription: <!--rolling update annotations-->
 
    ```yaml
    annotations:

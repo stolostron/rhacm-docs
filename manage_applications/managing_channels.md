@@ -68,12 +68,11 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    * To use the console,
 
-     1. Open the console.
-     2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
-     3. Click the **Resources** tab.
-     4. Scroll to the _Resource pipeline_ section. From the list of buttons to the right of the resource summary cards, click **Channel**. The _Create a Channel_ editor is displayed.
-     5. Enter the YAML content to define your channel or directly update the default YAML template to meet your requirements.
-     6. When you are finished, click **Save** to create the channel. Your new channel displays within the __Resource pipeline__ for the corresponding applications.
+     1. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
+     2. Click the **Resources** tab.
+     3. Scroll to the _Resource pipeline_ section. From the list of buttons, find and click **Channel**. The _Create a Channel_ editor is displayed.
+     4. Enter the YAML content to define your channel or directly update the default YAML template to meet your requirements.
+     5. When you are finished, click **Save** to create the channel. Your new channel displays within the __Resource pipeline__ for the corresponding applications.
 
      Alternatively, you can select to create a channel when you are working with a specific application.
 
@@ -139,7 +138,7 @@ To delete a channel, you can use the console, the Kubernetes command line interf
 * To use the console, use the console search to find and delete a channel:
 
   1. Open the console.
-  2. Click the _Search_ icon in the Header to open the _Search_ page.
+  2. Click the _Search_ icon in the _Header_ to open the _Search_ page.
   3. Within the search box, filter by `kind:channel` to view all channels.
   4. Within the list of all channels, select the _Options_ menu for the channel that you want to delete. Click **Delete channel**.
   5. When the list of all channels is refreshed, the channel is no longer displayed.
@@ -297,7 +296,7 @@ metadata:
 apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
-  name: ibm-production-charts
+  name: 
   namespace: hub-repo
 spec:
     pathname: https://9.21.107.150:8443/helm-repo/charts
@@ -330,44 +329,31 @@ spec:
   pathname: https://kubernetes-charts.storage.googleapis.com/
 ```
 
-### GitHub (`GitHub`) repository
+### GitHub (`GitHub`) repository 
 {: #channeldef_gitrepo}
 
-The following example channel definition shows an example of a channel for the IBM Cloud Charts Helm GitHub Repository:
+The following example channel definition shows an example of a channel for the GitHub Repository. In the following example, `secretRef` refers to the user identity used to access the GitHub repo that is specified in the `pathname`. If you have a public repo, you do not need the `secretRef`:
 
 ```yaml
-apiVersion: apps.open-cluster-management.io/v1
+apiVersion: app.ibm.com/v1alpha1
 kind: Channel
 metadata:
-  name: ibm-charts-github
-  namespace: ibmcharts
+  name: hive-cluster-gitrepo
+  namespace: gitops-cluster-lifecycle
 spec:
-    type: GitHub
-    pathname: https://github.com/IBM/charts.git
-```
-{: codeblock}
-
-The following channel definition shows another example of a GitHub repository channel. This example shows the configuration for identifying a Kubernetes Secret for basic authentication to access the IBM Cloud Charts Helm GitHub Repository:
-
-```yaml
+  type: GitHub
+  pathname: https://github.com/open-cluster-management/gitops-clusters.git
+  secretRef:
+    name: github-gitops-clusters
+---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: my-github-secret
-  namespace: ibmcharts
+  name: github-gitops-clusters
+  namespace: gitops-cluster-lifecycle
 data:
-  user: dXNlcgo=
-  accessToken: cGFzc3dvcmQK
----
-apiVersion: apps.open-cluster-management.io/v1
-kind: Channel
-metadata:
-  name: ibm-charts-github
-  namespace: ibmcharts
-spec:
-    type: GitHub
-    pathname: https://github.com/IBM/charts.git
-    secretRef:
-      name: my-github-secret
+  user: dXNlcgo=            # Value of user and accessToken is Base 64 coded.
+  accessToken: cGFzc3dvcmQ
 ```
 {: codeblock}
+

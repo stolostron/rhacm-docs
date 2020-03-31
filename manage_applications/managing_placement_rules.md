@@ -1,18 +1,10 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-03-09"
 
 ---
-
-{:new_window: target="blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
 
 # Creating and managing placement rules
 
@@ -50,7 +42,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
      1. Open the console.
      2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
      3. Click the **Resources** tab.
-     4. Scroll to the _Resource pipeline_ section. From the list of buttons to the right of the resource summary cards, click **Placement Rule**. The _Create a placement rule_ editor is displayed.
+     4. Scroll to the _Resource pipeline_ section. From the list of buttons, find and click **Placement Rule**. The _Create a placement rule_ editor is displayed.
      5. Enter the YAML content to define your placement rule or directly update the default YAML template to meet your requirements.
      6. When you are finished adding or editing the YAML, click **Save** to create the placement rule.
      7. From the list of resource summary cards, click the _PLACEMENT RULES_ card. The _Search_ dashboard is displayed and lists all placement rules that are used by the applications that are selected on the _Applications_ dashboard. Your new placement rule does not display in this list until the rule is referenced by a subscription that is used by an application. To verify that your new placement rule is created, enter `kind:placementrule` in the search box and run your search. Ensure that your new rule is displayed in the search results list.
@@ -156,7 +148,7 @@ To update a placement rule that is a separate resource, you can use the console,
 
 * To use the Kubernetes CLI tool, the steps are the same as for creating a placement rule.
 
-* To use REST API, you need to use the [placement rule PATCH API](../apis/mcm/placementRules.json).
+* To use REST API, you need to use the [placement rule PATCH API](../apis/placementRules.json).
 
 To update a placement rule that is defined within the definition for a deployable or subscription, the steps are the same as for updating that resource. For more information, see:
 
@@ -193,7 +185,7 @@ To delete a placement rule that is a separate resource, you can use the console,
      {: codeblock}
 
 * To use REST API, you need to use the placement rule DELETE API:
-  * [Placement rule APIs](../apis/mcm/placementRules.json).
+  * [Placement rule APIs](../apis/placementRules.json).
 
 To delete a placement rule that is defined within the definition for a deployable or subscription, edit the definition for that resource to remove the placement rule definition. The steps are the same as for updating that resource. For more information, see:
 
