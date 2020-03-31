@@ -6,7 +6,7 @@ lastupdated: "2020-03-26"
 
 ---
 
-# Scaling your cluster
+# Scaling your cluster (View recommendations and comment)
 
 You can customize your cluster specifications, such as virtual machine sizes and number of nodes. See the following list of recommended settings for each available cloud provider, but also see the documentation for more specific information:
 
