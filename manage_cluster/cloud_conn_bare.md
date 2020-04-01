@@ -16,15 +16,15 @@ You need a cloud connection to use Red Hat Advanced Cluster Management for Kuber
 ## Prerequisites
 {: #prereq}
 
-You must have the following prerequisites before creating a cloud connection:
+You need the following prerequisites before creating a cloud connection:
 
 * A deployed Red Hat Advanced Cluster Management for Kubernetes hub cluster
 
-* Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster on your bare metal server.
+* Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster on your bare metal server
 
-* Your bare metal server login credentials, which include the libvirt URI, SSH Private Key, and a list of SSH known hosts. See [Generating an SSH private key and adding it to the agent](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.3/html/installing_on_bare_metal/installing-on-bare-metal#ssh-agent-using_installing-bare-metal).
+* Your bare metal server login credentials, which include the libvirt URI, SSH Private Key, and a list of SSH known hosts. See [Generating an SSH private key and adding it to the agent](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.3/html/installing_on_bare_metal/installing-on-bare-metal#ssh-agent-using_installing-bare-metal)
 
-* Account permissions that allow installing clusters on the bare metal infrastructure. 
+* Account permissions that allow installing clusters on the bare metal infrastructure
 
 ## Creating a cloud connection by using the console
 {: #create_gui}
