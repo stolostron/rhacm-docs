@@ -75,7 +75,7 @@
      * [Policy example](governance/policy_example.md)
      * [Policy samples](governance/policy_samples.md)
      * [Creating a policy](governance/create_policy.md)
-     * [Managing a security policy](manage_cluster/manage_grc_policy.md)
+     * [Managing a security policy](governance/manage_grc_policy.md)
    * [Service discovery](services/working_serv_intro.md)
      * [Service discovery overview](services/serv_overview.md)
      * [Discover services](services/serv_prep.md)
