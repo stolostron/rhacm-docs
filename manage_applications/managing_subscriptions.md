@@ -366,6 +366,7 @@ The following YAML content defines example subscriptions:
   * [Scheduled channel subscription example](#timewindow_example)
   * [Channel subscription example with overrides](#channel_example_overrides)
   * [Helm repository subscription example](#helm_example)
+  * [GitHub repository subscription example](#github_example)
 
 ### Channel subscription example
 {: #channel_example}
@@ -505,17 +506,17 @@ spec:
 
   In this example subscription, the annotation `apps.open-cluster-management.io/github-path` indicates that the subscription subscribes to all Helm charts and Kubernetes resources within the `sample_app_1/dir1` directory of the GitHub repository that is specified in the channel. The subscription subscribes to `master` branch by default. In this example subscription, the annotation `apps.open-cluster-management.io/github-branch: branch1` is specified to subscribe to `branch1` branch of the repository.
 
-#### .kubernetesignore file
+#### Adding a `.kubernetesignore` file
 
 You can include a `.kubernetesignore` file within your GitHub repository root directory, or within the `apps.open-cluster-management.io/github-path` directory that is specified in subscription's annotations.
 
-You can use this `.kubernetesignore` file to specify patterns of files or subdirectories, or both, to ignore when the subscription deploys Kubernetes resources or helm charts from the repository.
+You can use this `.kubernetesignore` file to specify patterns of files or subdirectories, or both, to ignore when the subscription deploys Kubernetes resources or Helm charts from the repository.
 
 You can also use the `.kubernetesignore` file for fine-grain filtering to selectively apply Kubernetes resources. The pattern format of the `.kubernetesignore` file is the same as a `.gitignore` file.
 
 If the `apps.open-cluster-management.io/github-path` annotation is not defined, the subscription looks for a `.kubernetesignore` file in the repository root directory. If the `apps.open-cluster-management.io/github-path` field is defined, the subscription looks for the `.kubernetesignore` file in the `apps.open-cluster-management.io/github-path` directory. Subscriptions do not search in any other directory for a `.kubernetesignore` file.
 
-#### Kustomize
+#### Applying Kustomize
 
 If there is `kustomization.yaml` or `kustomization.yml` file in a subscribed GitHub folder, kustomize is applied.
 
@@ -538,7 +539,7 @@ patchesStrategicMerge:
 namePrefix: demo-
 ```
 
-In order to override kustomization.yaml, `packageName: kustomization` is required in packageOverrides. The override either adds new entries or updates existing entries. It does not remove existing entries.
+In order to override `kustomization.yaml` file, `packageName: kustomization` is required in `packageOverrides`. The override either adds new entries or updates existing entries. It does not remove existing entries.
 
 #### Enabling GitHub WebHook
 
@@ -558,7 +559,7 @@ Then, use `oc get route multicluster-operators-subscription -n open-cluster-mana
 
 ##### WebHook secret
 
-WebHook secret is optional. Create a Kubernetes secret in the channel namespace. The secret must contain `data.secret`. For example,
+WebHook secret is optional. Create a Kubernetes secret in the channel namespace. The secret must contain `data.secret`. See the following example:
 
 ```yaml
 apiVersion: v1
@@ -571,7 +572,7 @@ data:
 
 The value of `data.secret` is the base-64 encoded WebHook secret you are going to use.
 
-* Using a unique secret per GitHub repository is recommended.
+**Best practice:** Use a unique secret for each GitHub repository.
 
 ##### Configuring WebHook in GitHub repository
 
@@ -579,7 +580,7 @@ Use the payload URL and webhook secret to configure WebHook in your GitHub repos
 
 ##### Enable WebHook event notification in channel
 
-Annotate the subscription's channel.
+Annotate the subscription channel. See the following example:
 
 ```shell
 oc annotate channel.apps.open-cluster-management.io <channel name> apps.open-cluster-management.io/webhook-enabled="true"
