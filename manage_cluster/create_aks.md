@@ -34,7 +34,7 @@ You must have the following prerequisites before creating a cluster on Azure:
 
 * Azure service principals, which include `clientId`, `clientSecret`, and `tenantId`. See [azure.microsoft.com](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli?view=azure-cli-latest#password-based-authentication){:new_window}.
 
-* An Red Hat OpenShift Container Platform image pull secret. See [Image Pull Secrets](https://docs.openshift.com/enterprise/3.0/dev_guide/image_pull_secrets.html).
+* A Red Hat OpenShift image pull secret. See [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html).
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_gui}
@@ -78,7 +78,15 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 ## Accessing your cluster 
 {: #access}
 
-????? Information coming ??????
+To access a cluster that is managed by Red Hat Advanced Cluster Management for Kubernetes, complete the following steps:
+
+1. From the Red Hat Advanced Cluster Management for Kubernetes navigation menu, navigate to **Automate infrastructure** > **Clusters**.
+
+2. Select the *Options* menu for the cluster that you want to access.
+
+3. Select **Launch to cluster**. 
+
+  **Tip:** You can also access the cluster by selecting the name of the cluster on the *Clusters* page to access its details. The cluster URL is provided in the details. 
 
 ## Removing a cluster from management
 {: #delete}

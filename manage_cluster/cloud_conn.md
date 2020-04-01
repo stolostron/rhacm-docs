@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-26"
+lastupdated: "2020-04-01"
 
 ---
 
@@ -18,3 +18,4 @@ The following files detail the information that is required for creating a conne
 - [Creating a cloud connection for Amazon Web Services](cloud_conn_aws.md)
 - [Creating a cloud connection for Microsoft Azure](cloud_conn_aks.md)
 - [Creating a cloud connection for Google Cloud Platform](cloud_conn_gke.md)
+- [Creating a cloud connection for bare metal](cloud_conn_bare.md)

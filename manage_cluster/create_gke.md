@@ -25,13 +25,13 @@ You must have the following prerequisites before creating a cluster on GCP:
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster on GCP
 
-* GCP cloud connection. See [Setting up a cloud connection for Google Cloud Platform](cloud_conn_gcp.md) for more information.
+* GCP cloud connection. See [Setting up a cloud connection for Google Cloud Platform](cloud_conn_gke.md) for more information.
 
 * A configured domain in GCP. See [Setting up a custom domain](https://cloud.google.com/endpoints/docs/openapi/dev-portal-setup-custom-domain) for instructions on how to configure a domain. 
 
 * GCP login credentials, which include user name and password.
 
-* An Red Hat OpenShift Container Platform image pull secret. See [Image Pull Secrets](https://docs.openshift.com/enterprise/3.0/dev_guide/image_pull_secrets.html).
+* A Red Hat OpenShift image pull secret. See [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html).
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_gui}
@@ -75,7 +75,15 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 ## Accessing your cluster 
 {: #access}
 
-????? Information coming ??????
+To access a cluster that is managed by Red Hat Advanced Cluster Management for Kubernetes, complete the following steps:
+
+1. From the Red Hat Advanced Cluster Management for Kubernetes navigation menu, navigate to **Automate infrastructure** > **Clusters**.
+
+2. Select the *Options* menu for the cluster that you want to access.
+
+3. Select **Launch to cluster**. 
+
+  **Tip:** You can also access the cluster by selecting the name of the cluster on the *Clusters* page to access its details. The cluster URL is provided in the details. 
 
 ## Removing a cluster from management
 {: #delete}
