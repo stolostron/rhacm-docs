@@ -11,7 +11,7 @@ lastupdated: "2020-03-24"
 You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management. See the examples that are also provided at the end of the topic.
 {:shortdesc}
 
-Subscriptions (`subscription.apps.open-cluster-management.io`) are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources and Helm charts within channels by using annotations, labels, and versions.
+Subscriptions (`subscription.apps.open-cluster-management.io`) are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources (in GitHub, Objectstores, or hub deployables) and Helm charts within channels by using annotations, labels, and versions.
 
 Subscription resources can point to a channel for identifying new and updated Helm charts or Kubernetes resources for deployment. The subscription operator then watches the channel for new and updated charts and deployables. When a new or updated Helm chart or Kubernetes resource is detected, the subscription operator downloads the Helm release version for the specified Helm chart version or the specified Kubernetes resource. The subscription operator can download these objects directly, or as deployables, from the storage location to target managed clusters without checking the Hub cluster first.
 
@@ -567,7 +567,7 @@ kind: Secret
 metadata:
   name: my-github-webhook-secret
 data:
-  secret: cm9rZWpAY2EuaWJtLmNvbQo=
+  secret: BASE64_ENCODED_SECRET
 ```
 
 The value of `data.secret` is the base-64 encoded WebHook secret you are going to use.
