@@ -6,7 +6,7 @@ lastupdated: "2020-03-09"
 
 ---
 
-# Red Hat Advanced Cluster Management for Kubernetes 
+# Red Hat Advanced Cluster Management for Kubernetes (Technology preview)
 
 Kubernetes provides a platform for deploying and managing containers in a standard, consistent control plane. However, as application workloads move from development to production, they often require multiple fit-for-purpose Kubernetes clusters to support DevOps pipelines. Users, such as administrators and site reliability engineers, face challenges as they work across a range of environments, including multiple data centers, private clouds, and public clouds that run Kubernetes clusters. Red Hat Advanced Cluster Management for Kubernetes provides the tools and capabilities to address these common challenges.
 
@@ -24,4 +24,3 @@ See the following documentation for information about the product:
 - {: child} [Red Hat Advanced Cluster Management for Kubernetes Architecture](architecture.md)
 - {: child} [Components](components.md)
 - {: child} [Installation](../install/overview.md)
-  

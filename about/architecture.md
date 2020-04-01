@@ -6,11 +6,11 @@ lastupdated: "2020-03-19"
 
 ---
 
-# Multicluster architecture
+# Multicluster architecture (in review)
 
 Red Hat Advanced Cluster Management for Kubernetes consists of several multicluster components, which are used to access and manage your clusters. Learn more about the following components for Red Hat Advanced Cluster Management for Kubernetes:
 
-<img src="../images/hub_managed.svg" width="50%" alt="Major common components of the hub cluster and managed cluster">
+<image coming soon>
 
   - [Hub cluster](#hub)
   - [Managed cluster](#managed)
@@ -37,7 +37,7 @@ See [Managing your clusters with Red Hat Advanced Cluster Management for Kuberne
 
 After you configure a Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can view and deploy applications with application resources. Your _Application_ is used to only _view_ your resource, while other application resource examples are for deployment. A multi-cluster application uses a Kubernetes specification, but with additional automation of the deployment and lifecycle management of resources to individual clusters.
 
-See [Managing applications](../applications/overview.md) for more application topics.
+See [Managing applications](../manage_applications/overview.md) for more application topics.
 
 ## Governance and risk
 {: #policy}
