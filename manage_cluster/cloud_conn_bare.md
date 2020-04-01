@@ -8,7 +8,7 @@ lastupdated: "2020-04-01"
 
 # Creating a cloud connection for a bare metal environment
 
-You need a cloud connection to use Red Hat Advanced Cluster Management for Kubernetes console to deploy and manage an OpenShift cluster in a bare metal environment. 
+You need a cloud connection to use Red Hat Advanced Cluster Management for Kubernetes console to deploy and manage a Red Hat OpenShift Container Platform cluster in a bare metal environment. 
 {:shortdesc}
 
 **Note:** This procedure must be done before you can create a cluster with Red Hat Advanced Cluster Manager for Kubernetes. 
