@@ -1,7 +1,7 @@
 ---
 
 copyright:
-  years: 2019, 2020
+  years: 2020
 lastupdated: "2020-04-01"
 
 ---
@@ -19,17 +19,17 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to cr
 ## Prerequisites
 {: #prereq}
 
-You must have the following prerequisites before creating a cluster in a bare metal environment:
+You need the following prerequisites before creating a cluster in a bare metal environment:
 
 * A deployed Red Hat Advanced Cluster Management for Kubernetes hub cluster
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster in the bare metal environment
 
-* Bare metal cloud connection. See [Creating a cloud connection for a bare metal environment](cloud_conn_bare.md) for more information.
+* Bare metal cloud connection; see [Creating a cloud connection for a bare metal environment](cloud_conn_bare.md) for more information
 
-* Login credentials for your bare metal environment, which include user name, password, and Baseboard Management Controller Address.
+* Login credentials for your bare metal environment, which include user name, password, and Baseboard Management Controller Address
 
-* A Red Hat OpenShift image pull secret. See [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html).
+* A Red Hat OpenShift image pull secret; see [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html)
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
 {: #create_gui}
