@@ -28,7 +28,7 @@ When you run the `uninstall.sh` script file that is in the root directory of the
 kubectl delete -k multiclusterhub/
 ```
 
-This removes the *example-multiclusterhub* objects. 
+This removes the MultiClusterHub instance. 
 
 2. Run the `unistall.sh` script in the `multiclusterhub` directory to ensure that all of the objects are removed:
 
@@ -50,7 +50,7 @@ kubectl apply -k multiclusterhub/
 kubectl delete -k multiclusterhub-operator/
 ```
 
-This removes the *multiclusterhub-operator* objects. 
+This removes the MultiClusterHub instance. 
 
 2. Run the `unistall.sh` script in the `multiclusterhub` directory to ensure that all of the objects are removed:
 
