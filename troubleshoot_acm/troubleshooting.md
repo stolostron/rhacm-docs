@@ -133,7 +133,7 @@ After importing a cluster by using the Red Hat Advanced Cluster Management conso
 
 ### Identifying the problem
 
-1. Run the following command on the managed cluster to view the kubernetes pod name that is having the issue:
+1. Run the following command on the managed cluster to view the Kubernetes pod name that is having the issue:
 
   ```
   kubectl get pod -n multicluster-endpoint | grep connmgr
