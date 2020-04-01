@@ -2,13 +2,13 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-25"
+lastupdated: "2020-04-01"
 
 ---
 
 # Certificate policy controller
 
-Certificate policy controller can be used to receive notifications about non-compliant certificate policies.
+Certificate policy controller can be used to receive notifications about certificate policies that meet the minumun duration for an expiration time. When the expiration time is met, the policy is non-compliant.
 
 The certificate policy controller communicates with the local Kubernetes API server to get the list of secrets that contain certificates and determine all non-compliant certificates.
 
