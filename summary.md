@@ -11,7 +11,7 @@
    * [Requirements and recommendations](install/requirements.md)
      * [Supported cloud providers](install/supported_clouds.md)
      * [System requirements and recommendations](install/system_reqs.md)
-     * [Scaling your clusters](manage_cluster/scale_mcm.md)
+     * [Resizing your clusters](manage_cluster/scale.md)
      * [Supported operating systems and platforms](install/supported_os.md)
      * [Supported browsers](install/supported_browsers.md) 
    * [Preparing for installation](install/prep.md)
