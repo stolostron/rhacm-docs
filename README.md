@@ -4,9 +4,9 @@ The documentation for Red Hat Advanced Cluster Management for Kubernetes is prov
 
 **Note:** This documentation is still a work in progress. Frequent changes and improvements are expected. 
 
-## How to use the Red Hat Advanced Cluster Management for Kubernetes documentation
+## How to use the Red Hat Advanced Cluster Management for Kubernetes documentation for test-a-thon
 
-Use the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file as the table of contents. The `summary.md` file provides direct linking within the repository to the corresponding files.
+**External users,** please use the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_prod/summary.md) file as the table of contents. The production `summary.md` file provides direct linking within the repository to the corresponding files.
 
 ### Open an issue
 
@@ -17,6 +17,8 @@ As mentioned earlier, this documentation is still a work in progress. If you hav
 ______________________________________________________________________________________________________________________________
 
 ## For Red Hat Advanced Cluster Management for Kubernetes documentation and developers only
+
+INTERNAL USERS
 
 **IMPORTANT:** DOC SHUT DOWN three days before GA; please give us time to finalize our documentation and deliver on time.
 
