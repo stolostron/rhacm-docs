@@ -8,10 +8,10 @@ lastupdated: "2020-03-24"
 
 # Creating and managing subscriptions
 
-You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management.
+You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management. See the examples that are also provided at the end of the topic.
 {:shortdesc}
 
-Subscriptions (subscription.apps.open-cluster-management.io) are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources and Helm charts within channels by using annotations, labels, and versions.
+Subscriptions (`subscription.apps.open-cluster-management.io`) are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources (in GitHub, Objectstores, or hub deployables) and Helm charts within channels by using annotations, labels, and versions.
 
 Subscription resources can point to a channel for identifying new and updated Helm charts or Kubernetes resources for deployment. The subscription operator then watches the channel for new and updated charts and deployables. When a new or updated Helm chart or Kubernetes resource is detected, the subscription operator downloads the Helm release version for the specified Helm chart version or the specified Kubernetes resource. The subscription operator can download these objects directly, or as deployables, from the storage location to target managed clusters without checking the Hub cluster first.
 
@@ -366,6 +366,7 @@ The following YAML content defines example subscriptions:
   * [Scheduled channel subscription example](#timewindow_example)
   * [Channel subscription example with overrides](#channel_example_overrides)
   * [Helm repository subscription example](#helm_example)
+  * [GitHub repository subscription example](#github_example)
 
 ### Channel subscription example
 {: #channel_example}
@@ -481,3 +482,118 @@ spec:
             pullSecret: hub-repo-docker-secret
 ```
 {: codeblock}
+
+### GitHub repository subscription example
+
+#### Subscribing specific branch and directory of GitHub repository
+
+   ```yaml
+    apiVersion: apps.open-cluster-management.io/v1
+    kind: Subscription
+    metadata:
+      name: sample-subscription
+      namespace: default
+      annotations:
+        apps.open-cluster-management.io/github-path: sample_app_1/dir1
+        apps.open-cluster-management.io/github-branch: branch1
+    spec:
+      channel: default/sample-channel
+      placement:
+        placementRef:
+          kind: PlacementRule
+          name: dev-clusters
+   ```
+
+  In this example subscription, the annotation `apps.open-cluster-management.io/github-path` indicates that the subscription subscribes to all Helm charts and Kubernetes resources within the `sample_app_1/dir1` directory of the GitHub repository that is specified in the channel. The subscription subscribes to `master` branch by default. In this example subscription, the annotation `apps.open-cluster-management.io/github-branch: branch1` is specified to subscribe to `branch1` branch of the repository.
+
+#### Adding a `.kubernetesignore` file
+
+You can include a `.kubernetesignore` file within your GitHub repository root directory, or within the `apps.open-cluster-management.io/github-path` directory that is specified in subscription's annotations.
+
+You can use this `.kubernetesignore` file to specify patterns of files or subdirectories, or both, to ignore when the subscription deploys Kubernetes resources or Helm charts from the repository.
+
+You can also use the `.kubernetesignore` file for fine-grain filtering to selectively apply Kubernetes resources. The pattern format of the `.kubernetesignore` file is the same as a `.gitignore` file.
+
+If the `apps.open-cluster-management.io/github-path` annotation is not defined, the subscription looks for a `.kubernetesignore` file in the repository root directory. If the `apps.open-cluster-management.io/github-path` field is defined, the subscription looks for the `.kubernetesignore` file in the `apps.open-cluster-management.io/github-path` directory. Subscriptions do not search in any other directory for a `.kubernetesignore` file.
+
+#### Applying Kustomize
+
+If there is `kustomization.yaml` or `kustomization.yml` file in a subscribed GitHub folder, kustomize is applied.
+
+You can use `spec.packageOverrides` to override `kustomization` at the subscription deployment time. 
+
+```yaml
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: example-subscription
+  namespace: default
+spec:
+  channel: some/channel
+  packageOverrides:
+    packageName: kustomization
+    packageOverrides:
+      value: | 
+patchesStrategicMerge:
+  - patch.yaml
+namePrefix: demo-
+```
+
+In order to override `kustomization.yaml` file, `packageName: kustomization` is required in `packageOverrides`. The override either adds new entries or updates existing entries. It does not remove existing entries.
+
+#### Enabling GitHub WebHook
+
+By default, a GitHub channel subscription clones the GitHub repository specified in the channel every minute and applies changes when the commit ID has changed. Alternatively, you can configure your subscription to apply changes only when the GitHub repository sends repo PUSH and PULL webhook event notifications.
+
+In order to configure webhook in a GitHub repository, you need a target webhook payload URL and optionally a secret.
+
+##### Payload URL
+
+Create a route (ingress) in the hub cluster to expose the subscription operator's webhook event listener service.
+
+  ```shell
+  oc create route passthrough --service=multicluster-operators-subscription -n open-cluster-management
+  ```
+
+Then, use `oc get route multicluster-operators-subscription -n open-cluster-management` command to find the externally-reachable hostname. The webhook payload URL is `https://<externally-reachable hostname>/webhook`.
+
+##### WebHook secret
+
+WebHook secret is optional. Create a Kubernetes secret in the channel namespace. The secret must contain `data.secret`. See the following example:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-github-webhook-secret
+data:
+  secret: BASE64_ENCODED_SECRET
+```
+
+The value of `data.secret` is the base-64 encoded WebHook secret you are going to use.
+
+**Best practice:** Use a unique secret for each GitHub repository.
+
+##### Configuring WebHook in GitHub repository
+
+Use the payload URL and webhook secret to configure WebHook in your GitHub repository.
+
+##### Enable WebHook event notification in channel
+
+Annotate the subscription channel. See the following example:
+
+```shell
+oc annotate channel.apps.open-cluster-management.io <channel name> apps.open-cluster-management.io/webhook-enabled="true"
+```
+
+If you used a secret to configure WebHook, annotate the channel with this as well where `<the_secret_name>` is the kubernetes secret name containing webhook secret.
+
+```shell
+oc annotate channel.apps.open-cluster-management.io <channel name> apps.open-cluster-management.io/webhook-secret="<the_secret_name>"
+```
+
+##### Subscriptions of webhook-enabled channel
+
+No webhook specific configuration is needed in subscriptions.
+
+
