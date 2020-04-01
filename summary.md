@@ -1,6 +1,6 @@
 # Summary
 
- * [About Red Hat Advanced Cluster Management for Kubernetes](about/welcome.md)
+ * [About Red Hat Advanced Cluster Management for Kubernetes (Technology preview)](about/welcome.md)
    * [Architecture](about/architecture.md)
    * [Components](about/components.md)  
  * [Release Notes](about/release_notes.md)
@@ -39,7 +39,7 @@
      * [Importing a cluster with the CLI](manage_cluster/import_cli.md)
      * [Modifying multicluster endpoint](manage_cluster/modify_endpoint.md)
    * [Upgrading a cluster](manage_cluster/upgrade.md)
- * [Application management (Technology preview)](manage_applications/overview.md)
+ * [Application management](manage_applications/overview.md)
    * [Application lifecycle](manage_applications/app_lifecycle.md)
    * [Application resources](manage_applications/app_resources.md)
      * [Managing application resources](manage_applications/managing_apps.md)
