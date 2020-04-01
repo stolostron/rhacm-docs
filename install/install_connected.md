@@ -20,7 +20,7 @@ See the following prerequisites before installing Red Hat Advanced Cluster Manag
 
 * Red Hat OpenShift Container Platform version 4.3 must be deployed in your environment. See the [OpenShift version 4.3 documentation](https://docs.openshift.com/container-platform/4.3/welcome/index.html).
 
-* A pre-configured StorageClass in Red Hat OpenShift Container Platform that can be used for creating storage for Red Hat Advanced Cluster Management for Kubernetes.
+* A pre-configured StorageClass in Red Hat OpenShift Container Platform that can be used to create storage for Red Hat Advanced Cluster Management for Kubernetes.
 
 * Your Red Hat OpenShift Container Platform CLI must be configured to run `oc` commands and `kubectl` version 1.6, or later, commands.
 
