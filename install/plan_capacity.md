@@ -6,7 +6,7 @@ lastupdated: "2020-03-31"
 
 ---
 
-# Sizing your Red Hat Advanced Cluster Management for Kubernetes cluster
+# Sizing your cluster
 
 Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.
 
