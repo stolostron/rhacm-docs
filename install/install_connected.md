@@ -22,7 +22,7 @@ See the following prerequisites before installing Red Hat Advanced Cluster Manag
 
 * A pre-configured StorageClass in Red Hat OpenShift Container Platform that can be used to create storage for Red Hat Advanced Cluster Management for Kubernetes.
 
-* Your Red Hat OpenShift Container Platform CLI must be configured to run `oc` commands and `kubectl` version 1.6, or later, commands.
+* Your Red Hat OpenShift Container Platform CLI must be configured to run `oc` commands and `kubectl` version 1.6, or later, commands. <!-- I need to go hunt this down, typically we give the user the links here -->
 
 * Your Red Hat OpenShift Container Platform permissions must allow you to create a namespace. 
 
