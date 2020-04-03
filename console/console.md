@@ -105,7 +105,7 @@ Use the Governance and risk dashboard to create and manage policies and policy c
 ## Search 
 {: #search}
 
-For Red Hat Advanced Cluster Management for Kubernetes, Search provides visibility into your resources across all your clusters. You need to install the `search-prod` chart to use Search.
+For Red Hat Advanced Cluster Management for Kubernetes, Search provides visibility into your resources across all your clusters.
 
 **Note:** You can type any text value in the _Search box_ and results include anything with that value from any property, such as a name or namespace. For example, if you search for `RedHat`, you can receive results such as `RedHat123`. 
 

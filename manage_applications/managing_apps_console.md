@@ -105,7 +105,3 @@ You can select any component from the topology view to view more details. You ca
 
 The _Topology_ page is available from the _Observe environments_ sub-menu within the console main menu. For more information about using the topology page, see [console components](../console/console.md).
 
-## Monitoring
-{: #monitoring}
-
-If you installed Grafana, you can open the Grafana dashboard for your applications to monitor by selecting **Grafana**. You can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.
