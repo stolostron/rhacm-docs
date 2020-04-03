@@ -116,7 +116,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
 ## Method 2: Installing by using the `oc` commands
 {: commands}
 
-1. Create the required objects by applying the `.yaml` definitions that are contained in the `prereqs` directory by entering the following command:
+1. Create the required objects by applying the `.yaml` definitions that are contained in the `prereqs` directory by entering the following command: <!--should say from the deploy directory -->
 
   ```
   kubectl apply --openapi-patch=true -k prereqs/
