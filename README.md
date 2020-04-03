@@ -8,9 +8,7 @@ The documentation for Red Hat Advanced Cluster Management for Kubernetes is prov
 
 **External users only!** Use the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_prod/summary.md) file as the table of contents. The production `summary.md` file provides direct linking within the repository to the corresponding files.
 
-### Open an issue
-
-To submit feedback and change requests, see the [documentation issue template](https://github.com/open-cluster-management/rhacm-docs/issues/new/choose).
+Open an issue to submit feedback and change requests, see the [documentation issue template](https://github.com/open-cluster-management/rhacm-docs/issues/new/choose).
 
 As mentioned earlier, this documentation is still a work in progress. If you have suggestions for improvements, feel free to open a documentation issue in the GitHub repository. 
 
@@ -18,7 +16,7 @@ ________________________________________________________________________________
 
 **Internal users only**
 
-Open an issue with this [documentation issue template](https://github.com/open-cluster-management/backlog/issues/new/choose).
+Open an issue with this BACKLOG [documentation issue template](https://github.com/open-cluster-management/backlog/issues/new/choose).
 
 To see the content, (until a link is available), please rely on the table of contents/navigation draft found in the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file.
 
