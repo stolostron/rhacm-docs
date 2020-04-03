@@ -77,7 +77,7 @@ Complete the following steps to create a policy:
 
       With `remediationAction` set to _enforce_, the Red Hat Advanced Cluster Management for Kubernetes policy manager automatically creates the missing policy on the target managed clusters.
 
-3. Define a `PlacementRule`. Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. Your `PlacementRule` might resemble the following content:
+3. Define a `PlacementRule`. Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. View the [PlacementRule definition YAML structure](../manage_applications/managing_placement_rules.md#placement-rule-definition-yaml-structure). Your `PlacementRule` might resemble the following content:
 
    ```yaml
    apiVersion: apps.open-cluster-management.io/v1
