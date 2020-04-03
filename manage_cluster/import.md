@@ -14,7 +14,7 @@ Choose from the following instructions to set up your managed cluster:
 
 **Required user type or access level**: Cluster administrator
 
-- [Importing a cluster with the Red Hat Advanced Cluster Management for Kubernetes console](import_gui.md)
+- [Importing a cluster with the console](import_gui.md)
 - [Importing a cluster with the CLI](import_cli.md)
 - [Modifying multicluster endpoint](modify_endpoint.md)
 
