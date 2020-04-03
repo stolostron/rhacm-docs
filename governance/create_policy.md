@@ -19,7 +19,7 @@ As you create your new policy from the console, a YAML file is also created.
 
 The following objects are required for your Red Hat Advanced Cluster Management for Kubernetes policy:
 
-  *  _PlacementPolicy_: Defines a _cluster selector_ where the policy must be deployed.
+  *  _PlacementRule_: Defines a _cluster selector_ where the policy must be deployed.
   * _PlacementBinding_: Binds the placement to a PlacementPolicy.
 
 View more descriptions of the policy YAML files in the [Red Hat Advanced Cluster Management for Kubernetes policy example](policy_example.md).
@@ -35,7 +35,7 @@ Complete the following steps to create a policy:
 1. Create a policy by running the following command:
 
    ```
-   kubectl create -f -policy
+   kubectl create -f -policy -n <namespace>
    ```
 
 2. Define the template that the policy uses. Edit your `.yaml` file by adding a `templates` field to define a template. Your policy might resemble the following YAML file:
@@ -45,7 +45,6 @@ Complete the following steps to create a policy:
    kind: Policy
    metadata:
      name: policy1
-     namespace: mcm
    spec:
      remediationAction: "enforce" # or inform
      disabled: "false" # or true
@@ -78,15 +77,16 @@ Complete the following steps to create a policy:
 
       With `remediationAction` set to _enforce_, the Red Hat Advanced Cluster Management for Kubernetes policy manager automatically creates the missing policy on the target managed clusters.
 
-3. Define a `PlacementPolicy`. Be sure to change the `PlacementPolicy` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. Your `PlacementPolicy` might resemble the following content:
+3. Define a `PlacementRule`. Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. Your `PlacementRule` might resemble the following content:
 
    ```yaml
-   apiVersion: mcm.ibm.com/v1alpha1
-   kind: PlacementPolicy
+   apiVersion: apps.open-cluster-management.io/v1
+   kind: PlacementRule
    metadata:
      name: placement1
-     namespace: kube-system
    spec:
+     clusterConditions:
+     - type: OK
      clusterNames:
       - "cluster1"
       - "cluster2"
@@ -95,18 +95,17 @@ Complete the following steps to create a policy:
          cloud: IBM
    ```
 
-4. Define a `PlacementBinding` to bind your policy and your `PlacementPolicy`. Your `PlacementBinding` might resemble the following YAML sample:
+4. Define a `PlacementBinding` to bind your policy and your `PlacementRule`. Your `PlacementBinding` might resemble the following YAML sample:
 
    ```yaml
    apiVersion: mcm.ibm.com/v1alpha1
    kind: PlacementBinding
    metadata:
      name: binding1
-     namespace: kube-system
    placementRef:
      name: placement1
-     apiGroup: mcm.ibm.com
-     kind: PlacementPolicy
+     apiGroup: apps.open-cluster-management.io
+     kind: PlacementRule
    subjects:
    - name: policy1
      apiGroup: policy.mcm.ibm.com
@@ -141,7 +140,6 @@ Complete the following steps to create a policy:
     kind: Policy
     metadata:
       name: policy-pod
-      namespace: mcm
       annotations:
         policy.mcm.ibm.com/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
         policy.mcm.ibm.com/controls: 'control example'
@@ -172,22 +170,20 @@ Complete the following steps to create a policy:
     kind: PlacementBinding
     metadata:
       name: binding-pod
-      namespace: mcm
     placementRef:
       name: placement-pod
-      kind: PlacementPolicy
-      apiGroup: mcm.ibm.com
+      kind: PlacementRule
+      apiGroup: apps.open-cluster-management.io
     subjects:
     - name: policy-pod
       kind: Policy
       apiGroup: policy.mcm.ibm.com
 
     ---
-    apiVersion: mcm.ibm.com/v1alpha1
-    kind: PlacementPolicy
+    apiVersion: apps.open-cluster-management.io/v1
+    kind: PlacementRule
     metadata:
       name: placement-pod
-      namespace: mcm
     spec:
       clusterLabels:
         matchLabels:
