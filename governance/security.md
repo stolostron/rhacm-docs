@@ -28,11 +28,6 @@ Red Hat Advanced Cluster Management for Kubernetes supports several roles. Your 
 |endpointconfig.mcm.ibm.com 	|create, read, update, delete 	|create, read, update, delete 	|create, read, update 	| read, update	| read |
 | policies.policy.mcm.ibm.com| create, read, update, delete     |create, read, update, delete     | -     | -     | -     |
 |app.k8s.io, apps.open-cluster-management.io| create, read, update, delete 	|create, read, update, delete| 	read 	| read	| read |
-|resourceview.mcm.ibm.com | create, read, update, delete    |create, read, update, delete     |create, read, update    |  read, update   | read     |
-|works.mcm.ibm.com | create, read, update, delete    |create, read, update, delete     |create, read, update    |  read, update   | read     |
-|worksets.mcm.ibm.com | create, read, update, delete    |create, read, update, delete     |create, read, update    |  read, update   | read     |
-|clusterstatus.mcm.ibm.com | create, read, update, delete    | read   | read    |  read  | read     |
-|cluster.clusterregistry.k8s.io | create, read, update, delete    | read   | read    |  read   | read    |
 {: caption="Table 1. Role-based access control for components in Red Hat Advanced Cluster Management" caption-side="top"}
 
 View the RBAC table for the Red Hat Advanced Cluster Management console:
