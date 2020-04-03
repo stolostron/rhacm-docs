@@ -88,8 +88,8 @@ Complete the following steps to create a policy:
      clusterConditions:
      - type: OK
      clusterNames:
-      - "cluster1"
-      - "cluster2"
+     - "cluster1"
+     - "cluster2"
      clusterLabels:
        matchLabels:
          cloud: IBM
