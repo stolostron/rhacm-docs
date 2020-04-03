@@ -212,4 +212,20 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
   kubectl apply -k multiclusterhub/
   ```
 
-7. You can access your instance from following URL: https://multicloud-console.apps.${HOST_URL} 
+7. Verify that your installation is successful and access your URL by running the following command, where `namespace-from-install` is the namespace where you installed the product:	
+  
+  ```	
+  oc get routes -n <namespace-from-install>	
+  ```
+  
+  See the following example command:	
+
+  ```	
+  oc get routes -n <open-cluster-management>	
+  ```
+  
+8. Find the `multicloud-console` name and the `Host/Port` columns to get your URL. See the following example:	
+
+  ```	
+  https://multicloud-console.apps.<HOST/PORT>	
+  ``` 
