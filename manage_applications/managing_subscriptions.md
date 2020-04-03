@@ -263,8 +263,8 @@ spec:
     clusterOverrides:
       path:
       value:
-  timeWindow:
-    type:
+  timewindow:
+    windowtype:
     location:
     daysofweek:
     hours:
@@ -406,8 +406,8 @@ spec:
     placementRef:
       kind: PlacementRule
       name: my-placement-rule
-  timeWindow:
-    type: "block"/"active"
+  timewindow:
+    windowtype: "block"/"active"
     location: "America/Los_Angeles"
     daysofweek: ["Monday", "Wednesday", "Friday"]
     hours:

@@ -14,7 +14,7 @@ There are two methods that you can use to install, both require the same prerequ
 - [Method 2: Installing by using the `oc` commands](#commands)
 
 ## Prerequisites
-{: prereq}
+{: #prereq}
 
 See the following prerequisites before installing Red Hat Advanced Cluster Management for Kubernetes: 
 
@@ -31,7 +31,7 @@ See the following prerequisites before installing Red Hat Advanced Cluster Manag
 * If you are using macOS, you must install `gsed`. If you do not already have `gsed` installed, you can install it by entering `brew install gnu-sed` in a terminal window.
 
 ## Preparing to install
-{: prep}
+{: #prep}
 
 Complete the following preparations before you complete either of the installation procedures. **Note:** Only run the steps in this section once.
 
@@ -83,7 +83,7 @@ Complete the following preparations before you complete either of the installati
     (!-- question here -->
 
 ## Method 1: Installing by using the `start.sh` script
-{: script}
+{: #script}
 
 You can install Red Hat Advanced Cluster Management for Kubernetes by making some updates to a script file and deploying the cluster. This is the easiest way to get started, but the other method is provided if you prefer to use `oc` commands to install. 
 
