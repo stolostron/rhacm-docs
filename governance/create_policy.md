@@ -185,6 +185,8 @@ Complete the following steps to create a policy:
     metadata:
       name: placement-pod
     spec:
+      clusterConditions:
+      - type: OK
       clusterLabels:
         matchLabels:
           cloud: "IBM"
