@@ -14,7 +14,7 @@ There are two methods that you can use to install, both require the same prerequ
 - [Method 2: Installing by using the `oc` commands](#commands)
 
 ## Prerequisites
-{: prereq}
+{: #prereq}
 
 See the following prerequisites before installing Red Hat Advanced Cluster Management for Kubernetes: 
 
@@ -33,7 +33,7 @@ See the following prerequisites before installing Red Hat Advanced Cluster Manag
 * Optional: If you are using macOS, it is helpful to install `wait`. You can install it by entering `brew install wait` in a terminal window. 
 
 ## Preparing to install
-{: prep}
+{: #prep}
 
 Complete the following preparations before you complete either of the installation procedures. **Note:** Only run the steps in this section once.
 
@@ -82,7 +82,7 @@ Complete the following preparations before you complete either of the installati
     ```
 
 ## Method 1: Installing by using the `start.sh` script
-{: script}
+{: #script}
 
 You can install Red Hat Advanced Cluster Management for Kubernetes by making some updates to a script file and deploying the cluster. This is the easiest way to get started, but the other method is provided if you prefer to use `oc` commands to install. 
 
@@ -113,7 +113,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
   **Note:** You can run this script multiple times, and it attempts to continue where it left off. If you have a failure and have installed multiple times, run the `uninstall.sh` script to clean up the directories before you run the installation again.
 
 ## Method 2: Installing by using the `oc` commands
-{: commands}
+{: #commands}
 
 1. Create the required objects by applying the `.yaml` definitions that are contained in the `prereqs` directory by entering the following command:
 
