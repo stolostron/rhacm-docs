@@ -35,7 +35,7 @@ Complete the following steps to create a policy:
 1. Create a policy by running the following command:
 
    ```
-   kubectl create -f -policy -n <namespace>
+   kubectl create -f policy.yaml -n <namespace>
    ```
 
 2. Define the template that the policy uses. Edit your `.yaml` file by adding a `templates` field to define a template. Your policy might resemble the following YAML file:
