@@ -116,7 +116,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
 ## Method 2: Installing by using the `oc` commands
 {: commands}
 
-1. Create the required objects by applying the `.yaml` definitions that are contained in the `prereqs` directory by entering the following command: <!--should say from the deploy directory -->
+1. Create the required objects by applying the `.yaml` definitions that are contained in the `prereqs` directory by entering the following command: <!--should say from the deploy directory, not only have a CLI, but log in to oc cluster should be prereq, -->
 
   ```
   kubectl apply --openapi-patch=true -k prereqs/
@@ -133,7 +133,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
       newTag: "1.0.0-SNAPSHOT-2020-03-13-23-07-54"
   ```
 
-3. Create the multiclusterhub-operator objects by applying the `.yaml` definitions in the `multiclusterhub-operator` directory. Enter the following command:
+3. Create the multiclusterhub-operator objects by applying the `.yaml` definitions in the `multiclusterhub-operator` directory. Enter the following command: <!-- From the deploy directory -->
 
   ```
   kubectl apply -k multiclusterhub-operator/
@@ -206,7 +206,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
         skipGatherLogs: true
   ```
 
-6. Create the `example-multiclusterhub` objects by applying the `.yaml` definitions that are contained in the `multiclusterhub` directory:
+6. Create the `example-multiclusterhub` objects by applying the `.yaml` definitions that are contained in the `multiclusterhub` directory: <!-- from the deploy directory -->
 
   ```
   kubectl apply -k multiclusterhub/
