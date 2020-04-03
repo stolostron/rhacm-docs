@@ -112,6 +112,8 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
 4. When the deployment is complete, visit the `Open Cluster Management` URL that is provided in the `start.sh` script file.
 
   **Note:** You can run this script multiple times, and it attempts to continue where it left off. If you have a failure and have installed multiple times, run the `uninstall.sh` script to clean up the directories before you run the installation again.
+  
+  <!-- How does user access the product console or know what to do next? -->
 
 ## Method 2: Installing by using the `oc` commands
 {: commands}
@@ -212,4 +214,4 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
   kubectl apply -k multiclusterhub/
   ```
 
-7. You can access your instance from following URL: https://multicloud-console.apps.${HOST_URL} <!--???? -->
+7. You can access your instance from following URL: https://multicloud-console.apps.${HOST_URL} <!--???? brandi: wondering what the questions marks mean here?-->
