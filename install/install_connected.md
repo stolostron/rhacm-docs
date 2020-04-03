@@ -80,6 +80,7 @@ Complete the following preparations before you complete either of the installati
       name: multiclusterhub-operator-pull-secret
     ...
     ```
+    (!-- question here -->
 
 ## Method 1: Installing by using the `start.sh` script
 {: script}
