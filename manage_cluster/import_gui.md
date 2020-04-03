@@ -37,7 +37,7 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
 3. Click **Import an existing cluster**.
 
-4. Provide a cluster name. By default, the namespace is set to the same value as your cluster name. Optionally, you can edit the namespace but this is discouraged.
+4. Provide a cluster name. By default, the namespace is set to the same value as your cluster name. **Best practice:** Leave the namespace value and do not edit.
 
 5. **Optional:** Click to expand **Edit cluster import YAML file** and modify the endpoint configuration. 
 
