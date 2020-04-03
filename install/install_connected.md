@@ -18,19 +18,17 @@ There are two methods that you can use to install, both require the same prerequ
 
 See the following prerequisites before installing Red Hat Advanced Cluster Management for Kubernetes: 
 
-* Red Hat OpenShift Container Platform version 4.3 must be deployed in your environment. See the [OpenShift version 4.3 documentation](https://docs.openshift.com/container-platform/4.3/welcome/index.html).
+* Red Hat OpenShift Container Platform version 4.3 must be deployed in your environment, and you must be logged into it with the CLI. See the [OpenShift version 4.3 documentation](https://docs.openshift.com/container-platform/4.3/welcome/index.html).
 
 * A pre-configured StorageClass in Red Hat OpenShift Container Platform that can be used to create storage for Red Hat Advanced Cluster Management for Kubernetes.
 
-* Your Red Hat OpenShift Container Platform CLI must be configured to run `oc` commands and `kubectl` version 1.6, or later, commands.
+* Your Red Hat OpenShift Container Platform CLI must be configured to run `oc` commands and `kubectl` version 1.6, or later, commands. See [Getting started with the CLI](https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html) for information about configuring the Red Hat OpenShift CLI, and [Overview of kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) for information about `kubectl`.
 
 * Your Red Hat OpenShift Container Platform permissions must allow you to create a namespace. 
 
 * You must have an Internet connection to access the dependencies for the operator.
 
 * If you are using macOS, you must install `gsed`. If you do not already have `gsed` installed, you can install it by entering `brew install gnu-sed` in a terminal window.
-
-* Optional: If you are using macOS, it is helpful to install `wait`. You can install it by entering `brew install wait` in a terminal window. 
 
 ## Preparing to install
 {: #prep}
@@ -53,13 +51,15 @@ Complete the following preparations before you complete either of the installati
   
   Each directory contains a `kustomization.yaml` file with settings that you can update to create your environment. If you update the files, you can apply the changes by entering the `kubectl apply -k` command.
   
-2. Generate a pull-secret.
+2. Change to the `deploy` directory that you just cloned.
+  
+3. Generate a pull-secret.
 
     1. Ensure you have access to the Red Hat Quay.io organization by signing in to [open-cluster-management](https://quay.io/repository/open-cluster-management/multiclusterhub-operator-index?tab=tags).
   
       If you do not have access to the `open-cluster-management` organization in Quay.io, you can request access on the internal `#forum-acm` Slack channel.
 
-    2. Visit the following link, but replace `<your_username>` with your Quay.io username: https://quay.io/user/your_username?tab=settings.
+    2. Visit the following link, but replace `<your_username>` with your Quay.io username: https://quay.io/user/<your_username>?tab=settings.
   
     3. Select **Generate Encrypted Password**.
   
@@ -67,9 +67,9 @@ Complete the following preparations before you complete either of the installati
   
     5. Select **Kubernetes Secret** from the navigation menu.
     
-    6. Select **Download your_username-secret.yaml** with your Quay username in place of `<your_username>`.
+    6. Select **Download <your_username>-secret.yml** with your Quay username in place of `<your_username>`.
   
-    7. Save your secret file in the `prereqs` directory of the cloned Git repository with the name of `pull-secret.yaml`.
+    7. Save your secret file in the `prereqs` directory of the cloned Git repository with the name of `pull-secret.yaml`. **Notice:** If the pull secret file has a *.yml* extension when you download it, update it to *.yaml* when you rename it.
   
     8. Edit the contents of the `pull-secret.yaml` file and replace the name of the `Secret metadata: name` entry with `multiclusterhub-operator-pull-secret`, as shown in the following example:
   
@@ -80,6 +80,7 @@ Complete the following preparations before you complete either of the installati
       name: multiclusterhub-operator-pull-secret
     ...
     ```
+    (!-- question here -->
 
 ## Method 1: Installing by using the `start.sh` script
 {: #script}
@@ -112,10 +113,10 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
 
   **Note:** You can run this script multiple times, and it attempts to continue where it left off. If you have a failure and have installed multiple times, run the `uninstall.sh` script to clean up the directories before you run the installation again.
 
-## Method 2: Installing by using the `oc` commands
-{: #commands}
+## Method 2: Installing by using commands
+{: commands}
 
-1. Create the required objects by applying the `.yaml` definitions that are contained in the `prereqs` directory by entering the following command:
+1. Create the required objects by applying the `.yaml` definitions that are contained in the `deploy/prereqs` directory: 
 
   ```
   kubectl apply --openapi-patch=true -k prereqs/
@@ -132,7 +133,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
       newTag: "1.0.0-SNAPSHOT-2020-03-13-23-07-54"
   ```
 
-3. Create the multiclusterhub-operator objects by applying the `.yaml` definitions in the `multiclusterhub-operator` directory. Enter the following command:
+3. Create the multiclusterhub-operator objects by applying the `.yaml` definitions in the `deploy/multiclusterhub-operator` directory. Enter the following command:
 
   ```
   kubectl apply -k multiclusterhub-operator/
@@ -205,10 +206,26 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
         skipGatherLogs: true
   ```
 
-6. Create the `example-multiclusterhub` objects by applying the `.yaml` definitions that are contained in the `multiclusterhub` directory:
+6. Create the `example-multiclusterhub` objects by applying the `.yaml` definitions that are contained in the `deploy/multiclusterhub` directory:
 
   ```
   kubectl apply -k multiclusterhub/
   ```
 
-7. You can access your instance from following URL: https://multicloud-console.apps.${HOST_URL} <!--???? -->
+7. Verify that your installation is successful and access your URL by running the following command, where `namespace-from-install` is the namespace where you installed the product:	
+  
+  ```	
+  oc get routes -n <namespace-from-install>	
+  ```
+  
+  See the following example command:	
+
+  ```	
+  oc get routes -n <open-cluster-management>	
+  ```
+  
+8. Find the `multicloud-console` name and the `Host/Port` columns to get your URL. See the following example:	
+
+  ```	
+  https://multicloud-console.apps.<HOST/PORT>	
+  ``` 
