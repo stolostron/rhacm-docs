@@ -10,7 +10,7 @@ There are two methods that you can use to install, both require the same prerequ
 
 - [Prerequisites](#prerequisites)
 - [Preparing to install](#preparing-to-install)
-- [Method 1: Installing by using the `start.sh` script](#method-1-installing-by-using-the-startsh- script)
+- [Method 1: Installing by using the `start.sh` script](#method-1-installing-by-using-the-startsh-script)
 - [Method 2: Installing by using commands](#method-2-installing-by-using-commands)
 
 ## Prerequisites
