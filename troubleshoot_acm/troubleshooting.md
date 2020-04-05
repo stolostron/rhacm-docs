@@ -12,13 +12,12 @@ lastupdated: "2020-04-05
 
 View the list of troubleshoot topics for Red Hat Advanced Cluster Management for Kubernetes: 
 
-* [Troubleshooting cert-manager-webhook](#webhook)
-* [Troubleshooting clusters](#clusters)
-* [Troubleshooting installation](#install)
+* [Troubleshooting cert-manager-webhook](#troubleshooting-cert-manager-webhook)
+* [Troubleshooting clusters](#troubleshooting-clusters)
+* [Troubleshooting installation](#troubleshooting-installation)
 
 
 ## Troubleshooting cert-manager-webhook
-{: #webhook}
 
 Cert-manager is deployed with a webhook to support RBAC and provide extra validation when `cert-manager` resources are created.
 
@@ -124,7 +123,6 @@ failed calling webhook "certificates.admission.certmanager.io": the server is cu
    **NOTE**: If you uninstall the webhook, you lose the functions that the webhook provides, which is validating the cert-manager resources and preventing non-cluster administrators from using `ClusterIssuers` to issue their certificates.
    
 ## Troubleshooting clusters
-{: #clusters}
 
 Use this section to troubleshoot issues when working with clusters.
 
@@ -162,7 +160,6 @@ After importing a cluster by using the Red Hat Advanced Cluster Management conso
   If the communication cannot be established by the managed cluster, the cluster import is not complete. The cluster status for the managed cluster is *Pending import".
 
 ## Troubleshooting installation
-{: #install}
 
 Use this section to troubleshoot issues when installing Red Hat Advanced Cluster Management for Kubernetes.
 
