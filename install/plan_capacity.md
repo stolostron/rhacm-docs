@@ -12,11 +12,6 @@ Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own char
 
 **Note:** The requirements that are listed are not minimum requirements.
 
-* [Considerations before you size your cluster](#considerations)
-
-## Considerations before you size your cluster
-{: #considerations}
-
 ### Worker nodes (workloads)
 {: #workload}
 
@@ -29,37 +24,39 @@ As you determine the number of worker nodes and the resource configurations, con
 - The maximum pod per node is 500 and the maximum pod per CPU core is 10.
 - The cluster size depends on the worker node number. The pod number depends on the application type and the worker node's configuration.
 
+A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu).
+
 ### Red Hat Advanced Cluster Management for Kubernetes environment 
 
-Creating an OpenShift cluster on Amazon Web Services. See [product documentation](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-customizations.html#installing-aws-customizations).
+- Creating an OpenShift cluster on Amazon Web Services. 
 
-Node type | Number of nodes | vCPU | Memory (GB) | Disk (GB) |
-| :---: | :---: | :---: | :---: | :---: |
-|	Master m5.xlarge	| 3	| ? | ?|100 |
-|	Worker m5.xlarge | 3 | ?| ?| 100|
+  See the [Amazon Web Services product documentation](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-customizations.html#installing-aws-customizations) for more information. Also learn more about [machine types](https://aws.amazon.com/ec2/instance-types/m5/).
 
-Creating an OpenShift cluster on Google Cloud Platform
+  Instance size: m5.xlarge
+  vCPU: 4
+  Memory: 16 GB
 
-Node type | Number of nodes | vCPU | Memory (GB) | Disk (GB) |
-| :---: | :---: | :---: | :---: | :---: |
-| Boot	| ?	| ?|?| 120|
-|	Master	| 3	| ? | ?|120 |
-|	Worker  | 3 | ?| ?| 120|
+- Creating an OpenShift cluster on Google Cloud Platform. 
 
-Creating an OpenShift cluster on Microsoft Azure
+  See the [Google Cloud Platform product documenation](https://cloud.google.com/docs/quota) for more information about quotas. Also learn more about [machine types](https://cloud.google.com/compute/docs/machine-types).
 
-Node type | Number of nodes | vCPU | Memory (GB) | Disk (GB) |
-| :---: | :---: | :---: | :---: | :---: |
-| Boot	| ?	| ?|?| 100|
-|	Master	| 3	| ? | ?|100 |
-|	Worker  | 3 | ?| ?| 100|
+  Instance size: N1-standard-4 (0.95–6.5 GB)
+  vCPU: 4
+  Memory: 16 GB
+  
+  
+- Creating an OpenShift cluster on Microsoft Azure. See the following [product documentation](https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-account.html) for more details.
 
-Creating an OpenShift cluster on bare metal
+  Instance size: 
+  vCPU: 
+  Memory:
 
-Node type | Number of nodes | vCPU | Memory (GB) | Disk (GB) |
-| :---: | :---: | :---: | :---: | :---: |
-| Boot	| ?	| ?|?| 100|
-|	Master	| 3	| ? | ?|100 |
-|	Worker  | 3 | ?| ?| 100|
+- Creating an OpenShift cluster on bare metal. See the following [product documentation](https://docs.openshift.com/container-platform/4.3/installing/installing_bare_metal/installing-bare-metal.html) for more details.
 
- * A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu).
+
+  Instance size: 
+  vCPU: 4
+  Memory: 16 GB
+
+
+ 
