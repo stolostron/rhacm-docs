@@ -26,7 +26,7 @@ When you attempt to delete a namespace, the status remains in `terminating` stat
 
 1. For OpenShift, get the cluster metadata information from the secret. You need the secret to complete step 5. 
 
-For the other available cloud providers, proceed to step 2.
+For the other available providers, proceed to step 2.
 
 Run the following command to get the secret name for (OpenShift):
 

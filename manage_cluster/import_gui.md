@@ -76,7 +76,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 | Parameter | Description | Default value|
 |---|---|---|
 | clusterLabels| Provide cluster labels; you can add labels to your file | none |
-| clusterLabels.cloud| The cloud provider label for your cluster| auto-detect|
+| clusterLabels.cloud| The provider label for your cluster| auto-detect|
 | clusterLabels.vendor| The Kubernetes vendor label for your cluster| auto-detect|
 | clusterLabels.environment| The environment label for your cluster| none|
 | clusterLabels.region| The region where your cluster is set up|none|
