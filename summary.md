@@ -12,7 +12,7 @@
      * [Supported operating systems and platforms](install/supported_os.md)
      * [Supported browsers](install/supported_browsers.md) 
    * [Preparing for installation](install/prep.md)
-     * [Sizing your hub cluster](install/plan_capacity.md)
+   * [Sizing your hub cluster](install/plan_capacity.md)
    * [Installing](install/install_connected.md)
  * [Console](console/console_intro.md)
    * [Observability from the console](console/console.md)
