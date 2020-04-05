@@ -10,14 +10,9 @@ lastupdated: "2020-03-26"
 
 You can customize your cluster specifications, such as virtual machine sizes and number of nodes. See the following list of recommended settings for each available cloud provider, but also see the documentation for more specific information:
 
-* [Red Hat OpenShift Container Platform cluster in Amazon Web Services (AWS)](#ocp_aws) <!--check these, of only create is represented now, I can removed managed-->
-* [Red Hat OpenShift on IBM Cloud](#rhoks)
-* [IBM Kubernetes Service cluster](#iks)
+* [Red Hat OpenShift Container Platform cluster in Amazon Web Services (AWS)](#ocp_aws) 
 * [Google Kubernetes Engine (GKE)](#gke)
 * [Azure Kubernetes Service (AKS) cluster](#aks)
-* [Amazon Elastic Kubernetes Service (EKS)](#eks)
-
-<!-- if this is all we are recommending, I think add to system req -->
 
 ## Red Hat OpenShift Container Platform cluster in Amazon Web Services (AWS)
 {: #ocp_aws}
