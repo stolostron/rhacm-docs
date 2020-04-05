@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-04-01"
+lastupdated: "2020-04-05"
 
 ---
 
@@ -11,10 +11,10 @@ lastupdated: "2020-04-01"
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to create a Red Hat OpenShift Container Platform cluster in a bare metal environment. 
 {:shortdesc}
 
-  - [Prerequisites](#prereq)
-  - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#create_gui)
-  - [Accessing your cluster](#access)
-  - [Deleting your cluster](#delete)
+  - [Prerequisites](#prerequisites)
+  - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console)
+  - [Accessing your cluster](#accessing-your-cluster)
+  - [Removing a cluster from management](#removing-a-cluster-from-management)
  
 ## Prerequisites
 {: #prereq}

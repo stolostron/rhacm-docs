@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-26"
+lastupdated: "2020-04-05"
 
 ---
 
@@ -52,9 +52,9 @@ To create a cloud connection from the Red Hat Advanced Cluster Management for Ku
 
 8. Add your *Azure Service Principal JSON*.
 
-9. Enter your *Red Hat OpenShift Pull Secret*. 
+9. Enter your *Red Hat OpenShift Pull Secret*. You can download your pull secret from [Pull secret](https://cloud.redhat.com/openshift/install/pull-secret). 
 
-10. Add your *SSH Private Key* and *SSH Public Key*. See [Generating an SSH private key and adding it to the agent](https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-default.html) for more information about how to generate a key.
+10. Add your *SSH Private Key* and *SSH Public Key* to use to connect to the cluster. See [Generating an SSH private key and adding it to the agent](https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-default.html) for more information about how to generate a key.
 
 11. Click **Create**. When you create the cloud connection, it is added to the list of cloud connections.
 
