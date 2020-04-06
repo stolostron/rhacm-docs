@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-04-01"
+lastupdated: "2020-04-06"
 
 ---
 
@@ -100,11 +100,10 @@ Certificate policy controller can only inform the user about a policy violation.
 
 You can create a YAML file for your certificate policy or create a certificate policy from the console. View the following sections to create a certificate policy:
 
-* [Creating a YAML file for a certificate policy](#yaml)
-* [Creating a certificate policy from the console](#policy_gui)
+* [Creating a YAML file for a certificate policy](#creating-a-yaml-file-for-a-certificate-policy)
+* [Creating a certificate policy from the console](#creating-a-certificate-policy-from-the-console)
 
 ### Creating a YAML file for a certificate policy
-{: #yaml}
 
 Complete the following steps to create a certificate policy from the command line interface (CLI):
 
@@ -162,7 +161,6 @@ Complete the following steps to view your certificate policy from the CLI:
    ```
 
 ### Create a certificate policy from the console
-{: #policy_gui}
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**
