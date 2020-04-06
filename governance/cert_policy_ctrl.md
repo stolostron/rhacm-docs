@@ -160,7 +160,7 @@ Complete the following steps to view your certificate policy from the CLI:
    kubectl describe certificatepolicy <name> -n <namespace>
    ```
 
-### Create a certificate policy from the console
+### Creating a certificate policy from the console
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**
