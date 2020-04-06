@@ -283,7 +283,7 @@ metadata:
   labels:
     app: gbapp
     chart: gbapp-0.1.0
-    heritage: Tiller
+    heritage: Tiller <!--????--->
     release: gbapp
   selfLink: /apis/apps.open-cluster-management.io/v1/namespaces/development/placementrules/gbapp-gbapp
   uid: d5b3cafa-c361-11e9-9fc2-0016ac101aef
@@ -314,8 +314,11 @@ spec:
   clusterReplicas: 1
   clusterConditions:
     - type: OK
-  clusterLabels:
-    matchLabels:
-      environment: dev
+  clusterSelector:
+    matchExpressions:
+    - key: environment
+      operator: In
+      values:
+      - dev
 ```
 {: codeblock}
