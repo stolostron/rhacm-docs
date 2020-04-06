@@ -20,7 +20,7 @@ View the following application resource sections:
 
 - [Application](#application)
 - [Deployables](#deployables)
-- [Secrets](secrets)
+- [Secrets](#secrets)
 - [Channels](#channels)
 - [Subscriptions](#subscriptions)
 - [Placement rules](#placement-rules)
