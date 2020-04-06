@@ -32,31 +32,32 @@ A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kub
 
   See the [Amazon Web Services product documentation](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-customizations.html#installing-aws-customizations) for more information. Also learn more about [machine types](https://aws.amazon.com/ec2/instance-types/m5/).
 
-  Instance size: m5.xlarge
-  vCPU: 4
-  Memory: 16 GB
+  - Instance size: m5.xlarge
+  - vCPU: 4
+  - Memory: 16 GB
+  - Storage size: 120 GB
 
 - Creating an OpenShift cluster on Google Cloud Platform. 
 
   See the [Google Cloud Platform product documenation](https://cloud.google.com/docs/quota) for more information about quotas. Also learn more about [machine types](https://cloud.google.com/compute/docs/machine-types).
 
-  Instance size: N1-standard-4 (0.95–6.5 GB)
-  vCPU: 4
-  Memory: 16 GB
-  
+  - Instance size: N1-standard-4 (0.95–6.5 GB)
+  - vCPU: 4
+  - Memory: 16 GB
+  - Storage size: 120 GB  
   
 - Creating an OpenShift cluster on Microsoft Azure. See the following [product documentation](https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-account.html) for more details.
 
-  Instance size: 
-  vCPU: 
-  Memory:
+  - Instance size: Standard_D2s_v3
+  - vCPU: 4
+  - Memory: 16 GB
+  - Storage size: 120 GB
 
 - Creating an OpenShift cluster on bare metal. See the following [product documentation](https://docs.openshift.com/container-platform/4.3/installing/installing_bare_metal/installing-bare-metal.html) for more details.
 
-
-  Instance size: 
-  vCPU: 4
-  Memory: 16 GB
+  - CPU: 4 (minimum)
+  - Memory: 16 GB (minimum)
+  - Storage size: 120 GB (minimum)
 
 
  
