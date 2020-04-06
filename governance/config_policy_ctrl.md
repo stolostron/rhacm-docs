@@ -99,7 +99,7 @@ Complete the following steps to view your configuration policy from the CLI:
    kubectl describe policy <name> -n <namespace>
    ```
 
-### Create a configuration policy from the console
+### Creating a configuration policy from the console
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**
