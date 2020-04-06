@@ -142,7 +142,7 @@ To promote a deployable to a channel, you can use any of the following methods:
   
   Channel gate requirements are defined within the `spec.gate` section of a channel definition. If the deployable has the fields to match the channel `spec.gate` values, the deployable is promoted to the channel. In this case, the deployable does not need to point to a specific channel with the  `spec.channels` field.
 
-### Deploy with a percentage rollout  
+### Deploy with a percentage roll out  
 
 If you want to roll out a deployment to your target managed clusters instead of deploying to all target cluster, you can configure the deployment of a deployable or chart to only a percentage of your managed clusters at a time. For instance, you might want to roll out a deployment when you need to deploy an update but you do not want to affect all clusters at once. When the deployment is successful on a cluster, the deployment is rolled out to another cluster.
 
