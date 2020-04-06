@@ -13,7 +13,7 @@ You can use the console to create, manage, view details, and troubleshoot applic
 
 The console includes different tools that each provide different application management capabilities. These capabilities allow you to easily create, find, update, deploy, and monitor applications resources.
 
-  * [Application dashboards](#application-dashboards)
+  * [Applications dashboards](#applications-dashboards)
   * [Search](#search)
   * [Topology](#topology)
   * [Monitoring](#monitoring)
