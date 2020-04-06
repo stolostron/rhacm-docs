@@ -16,12 +16,12 @@ Learn more about console components that you can use to view, manage, or customi
 Red Hat Advanced Cluster Management for Kubernetes console components:
 
 - [Access your console](#access-your-console)
-- [Welcome page](#welcome-page)
-- [Overview](#overview) 
-- [Observe enviroments > Topology](#observe-environments-topology)
+- [Welcome page](#welcome-page) 
+- [Observe enviroment details](#observe-environment-details)
 - [Automate Infrastructure](#automate-infrastructure)
-- [Manage application](#manage-application)
+- [Manage applications (Technology preview](#manage-applications-technology-preview)
 - [Governance and risk dashboard](#governance-and-risk-dashboard)
+- [Topology page](#topology-page)
 - [Search](#search) 
 
 ## Access your console
@@ -47,7 +47,7 @@ Red Hat Advanced Cluster Management for Kubernetes console components:
 
 From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you get more information about the product and you can access header features, such as _Search_ and _Create resource_. Also from the _Header_, you can click the **Help** (?) icon to view the _About_ page and the documentation. From the _User_ menu, you can access the _Configure Client_ page. Additionally, you can use the [Visual Web Terminal](vwt_search.md). 
 
-## Observe enviroments > Topology
+## Observe enviroment details
 
 Reorganize your dashboard. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
 
@@ -92,7 +92,7 @@ Learn more about the tabs that are available from the Topology page:
 
   - Policies: View the policy, policy placement, and clusters that are being validated. Check for violations for the selected policy.
 
-## Governance and risk
+## Governance and risk dashboard
 
 Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
 
