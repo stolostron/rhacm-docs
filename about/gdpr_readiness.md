@@ -28,7 +28,6 @@ This document is intended to help you in your preparations for General Data Prot
 * [Data Access](#data-access)
 * [Data Processing](#data-processing)
 * [Data Deletion](#data-deletion)
-* [Data Monitoring](#data-monitoring)
 * [Capability for Restricting Use of Personal Data](#capability-for-restricting-use-of-personal-data)
 * [Appendix](#appendix)
 
@@ -49,7 +48,7 @@ GDPR establishes a stronger data protection regulatory framework for processing 
 * [EU GDPR Information Portal](https://www.eugdpr.org/)
 * [Red Hat GDPR website](https://www.redhat.com/en/gdpr)
 
-## Product Configuration – considerations for GDPR Readiness
+## Product Configuration for GDPR
 
 The following sections describe aspects of data management within the Red Hat Advanced Cluster Management for Kubernetes platform and provide information on capabilities to help clients with GDPR requirements.
 
@@ -177,27 +176,9 @@ Under GDPR, users have rights to access, modify, and restrict processing. Refer 
 * Right to restrict processing
   * Red Hat Advanced Cluster Management for Kubernetes platform administrators can use Red Hat Advanced Cluster Management for Kubernetes platform features to stop processing an individual's data.
 
-## Appendix - Data logged by Red Hat Advanced Cluster Management for Kubernetes platform
+## Appendix
 
 As a platform, Red Hat Advanced Cluster Management for Kubernetes deals with several categories of technical data that could be considered as personal data, such as an administrator user ID and password, service user IDs and passwords, IP addresses, and Kubernetes node names. Red Hat Advanced Cluster Management for Kubernetes platform also deals with information about users who manage the platform. Applications that run on the platform might introduce other categories of personal data that are unknown to the platform.
 
 This appendix includes details on data that is logged by the platform services.
-
-### Red Hat Advanced Cluster Management for Kubernetes Kubernetes
-
-* What data is logged
-  * Cluster deploy topology (node information for master and worker)
-  * Service configuration (k8s configuration map) and secrets (k8s secrets)
-* When data is logged
-  * When you deploy a cluster
-* Where data is logged
-  * Cluster deploy topology in `etcd`
-  * Configuration and secret for deployed clusters in `etcd`
-* How to delete data
-  * Use the Red Hat Advanced Cluster Management for Kubernetes console
-  * Search for and delete data by using the k8s console (`kubectl`) or `etcd` REST API
-
-  Use caution when modifying Kubernetes cluster configuration or deleting cluster data.
-
-  For more information, see [Kubernetes kubectl](https://kubernetes.io/docs/reference/kubectl/overview/).
 
