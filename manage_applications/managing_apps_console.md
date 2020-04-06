@@ -16,7 +16,6 @@ The console includes different tools that each provide different application man
   * [Applications dashboards](#applications-dashboards)
   * [Search](#search)
   * [Topology](#topology)
-  * [Monitoring](#monitoring)
 
 ## Applications dashboards
 
