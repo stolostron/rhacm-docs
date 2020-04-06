@@ -2,7 +2,7 @@
 
 copyright:
   years: 2019, 2020
-lastupdated: "2020-03-18"
+lastupdated: "2020-04-06"
 
 ---
 
@@ -39,11 +39,10 @@ Each _policy_ within the policy document contains the following elements.
 
 You can create a YAML file for your configuration policy or create a configuration policy from the console. View the following sections to create a configuration policy:
 
-* [Creating a YAML file for a configuration policy](#yaml)
-* [Creating a configuration policy from the console](#policy_gui)
+* [Creating a YAML file for a configuration policy](#creating-a-yaml-file-for-a-configuration-policy)
+* [Creating a configuration policy from the console](#creating-a-configuration-policy-from-the-console)
 
 ### Creating a YAML file for a configuration policy
-{: #yaml}
 
 Complete the following steps to create a configuration policy from the command line interface (CLI):
 
@@ -100,8 +99,7 @@ Complete the following steps to view your configuration policy from the CLI:
    kubectl describe policy <name> -n <namespace>
    ```
 
-### Create a configuration policy from the console
-{: #policy_gui}
+### Creating a configuration policy from the console
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**
