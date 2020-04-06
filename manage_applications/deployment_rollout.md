@@ -156,7 +156,7 @@ For more information about how to define a deployable, see [Creating and managin
 For more information about how to define a placement rule, see [creating and managing placement rules](managing_placement_rules.md).
 -->
 
-## Example
+## Examples
 
 The following example YAML definitions show the required fields for deploying an update for a deployable by using a rolling update.
 
