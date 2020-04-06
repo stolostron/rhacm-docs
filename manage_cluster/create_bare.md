@@ -71,11 +71,19 @@ To access a cluster that is managed by Red Hat Advanced Cluster Management for K
 
 1. From the Red Hat Advanced Cluster Management for Kubernetes navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
-2. Select the *Options* menu for the cluster that you want to access.
+2. Select the name of the cluster that you created or want to access. The cluster details are displayed.
 
-3. Select **Launch to cluster**. 
+3. Select **Reveal credentials** to view the user name and password for the cluster. Note these values to use when you log in to the cluster. 
 
-  **Tip:** You can also access the cluster by selecting the name of the cluster on the *Clusters* page to access its details. The cluster URL is provided in the details. 
+4. Select **Console URL** to link to the cluster.
+
+5. Log in to the cluster by using the user ID and password that you found in step 3. 
+
+6. Select the *Options* menu for the cluster that you want to access.
+
+7. Select **Launch to cluster**. 
+
+  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Options* menu for the cluster, and selecting **Launch to cluster**.
 
 ## Removing a cluster from management
 {: #delete}
