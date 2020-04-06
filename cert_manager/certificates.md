@@ -12,9 +12,8 @@ Various certificates are created and used throughout Red Hat Advanced Cluster Ma
 
 More information about managing certificates created by the installer can be found in the following documents:
 
-* [Refreshing certificates](refresh_certs.md)
-* [Replacing certificates](byok_certs.md)
-* [Restoring certificates](restore_certs.md)
+* [Replacing the root CA](cert_root_ca.md)
+* [Replacing the management ingress certificates](cert_mgmt_ingress.md)
 
 ## Creating a certificate
 
@@ -53,4 +52,3 @@ View the following table of the internal services that use `cert-manager` to cre
 | `topology-276c4-ca-cert` | `multicluster-hub-mcm-server-ca-issuer` | `topology-b24e0-topology-secrets` | Topology |
 {: caption="Table 1. Certificates Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
-All certificates managed by `cert-manager` for example, MongoDB, are managed (created, refreshed, and watched) by `cert-manager`. For more information about `cert-manager`, see [Using Red Hat Advanced Cluster Management for Kubernetes Certificate manager](cert_manager.md).

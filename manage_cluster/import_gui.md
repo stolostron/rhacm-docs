@@ -21,7 +21,7 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 * You need a cluster that you want to manage. 
 * Install `kubectl`. To install `kubectl`, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/). 
 
-<!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters.-->
+<!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters. (wait for testing, elder sending RFE)-->
 
 * You need the `base64` command line tool.
 
@@ -32,7 +32,7 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 
 You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
 
- **Note:** A hub cluster cannot manage any other hub cluster; you must import an existing cluster.
+ **Note:** A hub cluster cannot manage _any_ other hub cluster; you must import an existing cluster.
 
 1. From the navigation menu, hover over **Automate infrastructure** and click **Clusters**.
 
@@ -57,12 +57,6 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
   See [Supported cloud providers](../install/supported_clouds.md) to learn how to configure your `kubectl`.
 
 10. To deploy the `multicluster-endpoint` to the managed cluster, run the command that you generated and copied from _step 8_.
-
-  If you receive the following error, run the command again:
-
-  ```
-  error: unable to recognize "STDIN": no matches for kind "Endpoint" in version "multicloud.ibm.com/v1beta1"
-  ```
 
 11. Click **View cluster** to view the _Overview_ page and a summary of your cluster. 
 

@@ -1,6 +1,6 @@
 # Summary
 
- * [About Red Hat Advanced Cluster Management for Kubernetes (Technology preview)](about/welcome.md)
+ * [About Red Hat Advanced Cluster Management for Kubernetes (Technology preview 1.0)](about/welcome.md)
    * [Architecture](about/architecture.md)
    * [Components](about/components.md)  
  * [Release Notes](about/release_notes.md)
@@ -53,15 +53,6 @@
    * [Certificates in Red Hat Advanced Cluster Management for Kubernetes](cert_manager/certificates.md)
        * [Replacing the root CA certificate](cert_manager/cert_root_ca.md)
        * [Replacing management ingress certificates](cert_manager/cert_mgmt_ingress.md)
-     * [Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)](cert_manager/cert_manager.md)
-       * [Creating your own self-signed and CA Issuers](cert_manager/create_issuer.md)
-       * [Creating Certificate manager (cert-manager) certificates](cert_manager/create_cert.md)
-         * [Customizing cert-manager certificates](cert_manager/create_cert_advance.md)
-       * [Viewing (product name) cert-manager resources](cert_manager/cert_view.md)
-       * [Using Vault to issue certificates](cert_manager/cert_vault.md)
-       * [Using ACME to issue certificates](cert_manager/cert_acme.md)
-       * [Adding certificates by using the ECDSA algorithm for encryption](cert_manager/cert_ecdsa.md)
-       * [Certificate Manager role-based access control (RBAC) support](cert_manager/cert_manager_rbac.md)
    * [Governance and risk](governance/compliance_intro.md)
      * [Policy overview](governance/policy_overview.md)
      * [Policy controllers](governance/policy_controllers.md)
