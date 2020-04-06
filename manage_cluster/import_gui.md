@@ -58,12 +58,6 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
 10. To deploy the `multicluster-endpoint` to the managed cluster, run the command that you generated and copied from _step 8_.
 
-  If you receive the following error, run the command again:
-
-  ```
-  error: unable to recognize "STDIN": no matches for kind "Endpoint" in version "multicloud.ibm.com/v1beta1"
-  ```
-
 11. Click **View cluster** to view the _Overview_ page and a summary of your cluster. 
 
 **Note** You can continue to import more clusters. Click **Import another** to repeat the process.
