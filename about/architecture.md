@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-19"
+lastupdated: "2020-04-06"
 
 ---
 
@@ -12,14 +12,13 @@ Red Hat Advanced Cluster Management for Kubernetes consists of several multiclus
 
 ![Architecture diagram](RHACM-arch.png)
 
-  - [Hub cluster](#hub)
-  - [Managed cluster](#managed)
-  - [Cluster lifecycle](#cluster)
-  - [Application lifecycle](#app)
-  - [Governance risk and compliance](#policy)
+  - [Hub cluster](#hub-cluster)
+  - [Managed cluster](#managed-cluster)
+  - [Cluster lifecycle](#cluster-lifecycle)
+  - [Application lifecycle](#application-lifecycle)
+  - [Governance and risk](#governance-and-risk)
 
 ## Hub cluster
-{: #hub}
 
 The hub cluster is the common term that is used to define the central controller that runs in a Red Hat Advanced Cluster Management for Kubernetes cluster.
 
@@ -28,7 +27,6 @@ The hub cluster aggregates information from multiple clusters by using an asynch
 <!-- add info from diagram here-->
 
 ## Managed cluster
-{: #managed}
 
 The managed cluster is used to define the Red Hat Advanced Cluster Management for Kubernetes multicluster-endpoint, which is the agent that is responsible for a single Kubernetes cluster. The managed cluster initiates a connection to the hub cluster, receives work requests, applies work requests, then returns the results. The managed cluster connects to various services within the cluster for operations, including the Kubernetes API service, and Weave for topology.
 
@@ -37,17 +35,14 @@ See [Managing your clusters with Red Hat Advanced Cluster Management for Kuberne
 <add the stuff from diagram that is added to your enpoint>
 
 ## Cluster lifecycle
-{: #cluster}
   
 ## Application lifecycle
-{: #app}
 
 After you configure a Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can view and deploy applications with application resources. Your _Application_ is used to only _view_ your resource, while other application resource examples are for deployment. A multi-cluster application uses a Kubernetes specification, but with additional automation of the deployment and lifecycle management of resources to individual clusters.
 
 See [Managing applications](../manage_applications/overview.md) for more application topics.
 
-## Governance and risk
-{: #policy}
+## Governance and risk 
 
 After you configure a Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can define Red Hat Advanced Cluster Management for Kubernetes security risk and create policies with templates from the _Governance and risk_ page. For more information see, [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
 
