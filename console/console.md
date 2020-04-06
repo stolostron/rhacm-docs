@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-11"
+lastupdated: "2020-04-06"
 
 ---
 
@@ -15,17 +15,16 @@ Learn more about console components that you can use to view, manage, or customi
 
 Red Hat Advanced Cluster Management for Kubernetes console components:
 
-- [Access your console](#access)
-- [Welcome page](#welcome)
-- [Overview](#overview) 
-- [Observe enviroments > Topology](#topology)
-- [Automate Infrastructure](#cluster)
-- [Manage application](#application)
-- [Governance and risk dashboard](#grc)
+- [Access your console](#access-your-console)
+- [Welcome page](#welcome-page) 
+- [Observe environment details](#observe-environment-details)
+- [Automate Infrastructure](#automate-infrastructure)
+- [Manage applications (Technology preview)](#manage-applications-technology-preview)
+- [Governance and risk dashboard](#governance-and-risk-dashboard)
+- [Topology page](#topology-page)
 - [Search](#search) 
 
 ## Access your console
-{: #access}
 
 - Access from the Red Hat OpenShift console:
 
@@ -45,12 +44,10 @@ Red Hat Advanced Cluster Management for Kubernetes console components:
   2. Find the `multicloud-console` name and the `Host/Port` columns to get your URL.
 
 ## Welcome page
-{: #welcome}
 
 From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you get more information about the product and you can access header features, such as _Search_ and _Create resource_. Also from the _Header_, you can click the **Help** (?) icon to view the _About_ page and the documentation. From the _User_ menu, you can access the _Configure Client_ page. Additionally, you can use the [Visual Web Terminal](vwt_search.md). 
 
-## Observe enviroments > Topology
-{: #overview}
+## Observe environment details
 
 Reorganize your dashboard. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
 
@@ -68,12 +65,10 @@ Additionally, the Heatmap displays color-coordinated boxes that represent the VC
 You can personalize the Overview page more with the filtering feature. Click **Filter results** to specify what information is displayed on your page.
 
 ## Automate infrastructure
-{: #cluster}
 
 Create clusters or bare metal assets, or import existing clusters. Scale up or down and delete clusters as needed. For more information, see [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](manage_cluster/intro.md)
 
 ## Manage applications (Technology preview)
-{: #manage}
 
 Click **New application** to edit a `.yaml` file and create your application. Click Resources to view the information of each application. For more information about application resources, see [Application management (Technology preview)](../manage_applications/overview.md).
 
@@ -97,13 +92,11 @@ Learn more about the tabs that are available from the Topology page:
 
   - Policies: View the policy, policy placement, and clusters that are being validated. Check for violations for the selected policy.
 
-## Governance and risk
-{: #grc}
+## Governance and risk dashboard
 
 Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
 
 ## Search 
-{: #search}
 
 For Red Hat Advanced Cluster Management for Kubernetes, Search provides visibility into your resources across all your clusters.
 
