@@ -106,7 +106,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
 2. Provide the SNAPSHOT tag. You can either press `Enter` to use the tag that was used on the previous installation, or provide a new tag. You can find a list of available tags in the [Quay.io multiclusterhub-operator-index](https://quay.io/open-cluster-management/multiclusterhub-operator-index). The following text shows the format of the snapshot:
 
   ```
-  1.0.0-SNAPSHOT-2020-03-13-23-07-54
+  SNAPSHOT-2020-03-31-02-16-43
   ```
 
 3. Enter the `watch oc -n open-cluster-management get pods` command to view the progress of the deployment of the `OCM`. Depending on the option that you used when you ran the script, `OCM` is either deployed or deploying. 
@@ -132,7 +132,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
   images: # updates operator.yaml with the dev image
     - name: multiclusterhub-operator-index
       newName: quay.io/open-cluster-management/multiclusterhub-operator-index
-      newTag: "1.0.0-SNAPSHOT-2020-03-13-23-07-54"
+      newTag: "SNAPSHOT-2020-03-31-02-16-43"
   ```
 
 3. Create the multiclusterhub-operator objects by applying the `.yaml` definitions in the `deploy/multiclusterhub-operator` directory. Enter the following command:
@@ -179,7 +179,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
   spec:
     version: latest
     imageRepository: "quay.io/open-cluster-management"
-    imageTagSuffix: "SNAPSHOT-2020-03-17-21-24-18"
+    imageTagSuffix: "SNAPSHOT-2020-03-31-02-16-43"
     imagePullPolicy: Always
     imagePullSecret: multiclusterhub-operator-pull-secret
     foundation:
