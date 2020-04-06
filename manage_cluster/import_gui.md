@@ -21,7 +21,7 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 * You need a cluster that you want to manage. 
 * Install `kubectl`. To install `kubectl`, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/). 
 
-<!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters.-->
+<!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters. (wait for testing, elder sending RFE)-->
 
 * You need the `base64` command line tool.
 
@@ -32,7 +32,7 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 
 You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
 
- **Note:** A hub cluster cannot manage any other hub cluster; you must import an existing cluster.
+ **Note:** A hub cluster cannot manage _any_ other hub cluster; you must import an existing cluster.
 
 1. From the navigation menu, hover over **Automate infrastructure** and click **Clusters**.
 
