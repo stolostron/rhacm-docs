@@ -6,15 +6,14 @@ There are two methods that you can use to install, both require the same prerequ
 
   - Method 1 is an easier method, which leverages a `start.sh` installer script to automate the installation to get running quickly. 
 
-  - Method 2 is more customizable if you want to use `oc` commands to complete each required step, but is not as easy as Method 1.   
+  - Method 2 is more customizable if you want to use commands to complete each required step, but is not as easy as Method 1.   
 
-- [Prerequisites](#prereq)
-- [Preparing to install](#prep)
-- [Method 1: Installing by using the `start.sh` script](#script)
-- [Method 2: Installing by using the `oc` commands](#commands)
+- [Prerequisites](#prerequisites)
+- [Preparing to install](#preparing-to-install)
+- [Method 1: Installing by using the `start.sh` script](#method-1-installing-by-using-the-startsh-script)
+- [Method 2: Installing by using commands](#method-2-installing-by-using-commands)
 
 ## Prerequisites
-{: #prereq}
 
 See the following prerequisites before installing Red Hat Advanced Cluster Management for Kubernetes: 
 
@@ -22,9 +21,9 @@ See the following prerequisites before installing Red Hat Advanced Cluster Manag
 
 * A pre-configured StorageClass in Red Hat OpenShift Container Platform that can be used to create storage for Red Hat Advanced Cluster Management for Kubernetes.
 
-* Your Red Hat OpenShift Container Platform CLI must be configured to run `oc` commands. See [Getting started with the CLI](https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html) for information about installing and configuring the Red Hat OpenShift CLI.
+* Your Red Hat OpenShift Container Platform CLI must be version 4.3, or later, and configured to run `oc` commands. See [Getting started with the CLI](https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html) for information about installing and configuring the Red Hat OpenShift CLI.
 
-* You also need the Kubernetes CLI, `kubectl` version 1.6, or later. See the [Overview of kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) for information about `kubectl`.
+* You also need the Kubernetes CLI, `kubectl` version 1.6, or later. See [Overview of kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) for information about `kubectl`.
 
 * Your Red Hat OpenShift Container Platform permissions must allow you to create a namespace. 
 
@@ -33,7 +32,6 @@ See the following prerequisites before installing Red Hat Advanced Cluster Manag
 * If you are using macOS, you must install `gsed`. If you do not already have `gsed` installed, you can install it by entering `brew install gnu-sed` in a terminal window.
 
 ## Preparing to install
-{: #prep}
 
 Complete the following preparations before you complete either of the installation procedures. **Note:** Only run the steps in this section once.
 
@@ -82,10 +80,10 @@ Complete the following preparations before you complete either of the installati
       name: multiclusterhub-operator-pull-secret
     ...
     ```
-    (!-- question here -->
+    
+4. Select either [Method 1](#method-1-installing-by-using-the-startsh-script) or [Method 2](#method-2-installing-by-using-commands) to continue installing Red Hat Advanced Cluster Management for Kubernetes.
 
-## Method 1: Installing by using the `start.sh` script
-{: #script}
+## Method 1: Installing by using the start.sh script
 
 You can install Red Hat Advanced Cluster Management for Kubernetes by making some updates to a script file and deploying the cluster. This is the easiest way to get started, but the other method is provided if you prefer to use `oc` commands to install. 
 
@@ -103,20 +101,25 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
   ./start.sh --watch
   ```
  
-2. Provide the SNAPSHOT tag. You can either press `Enter` to use the tag that was used on the previous installation, or provide a new tag. You can find a list of available tags in the [Quay.io multiclusterhub-operator-index](https://quay.io/open-cluster-management/multiclusterhub-operator-index). The following text shows the format of the snapshot:
+2. Provide the SNAPSHOT tag. You can either press `Enter` to use the tag that was used on the previous installation, or provide a new tag. You can find a list of available tags in the [Quay.io multiclusterhub-operator-index](https://quay.io/open-cluster-management/multiclusterhub-operator-index). 
+  **Tip:** You can change the default SNAPSHOT value in the `start.sh` script by editing the value for `snapshot.ver` to the new version. Updating the default SNAPSHOT value in the script is useful when using the `--silent` option.
+  
+  The following text shows the format of the snapshot:
 
   ```
   SNAPSHOT-2020-03-31-02-16-43
   ```
+  **Remember:** If you enter a snapshot value, the value that you enter overwrites the existing default value and is stored as the default value for future installation attempts. The last snapshot value that was entered is the default value.
 
 3. Enter the `watch oc -n open-cluster-management get pods` command to view the progress of the deployment of the `OCM`. Depending on the option that you used when you ran the script, `OCM` is either deployed or deploying. 
 
 4. When the deployment is complete, visit the `Open Cluster Management` URL that is provided in the `start.sh` script file.
 
   **Note:** You can run this script multiple times, and it attempts to continue where it left off. If you have a failure and have installed multiple times, run the `uninstall.sh` script to clean up the directories before you run the installation again.
+  
+5. Follow the link that is included at the end of the installation output to your installed cluster. 
 
 ## Method 2: Installing by using commands
-{: commands}
 
 1. Create the required objects by applying the `.yaml` definitions that are contained in the `deploy/prereqs` directory: 
 
