@@ -16,8 +16,16 @@ Both single and multi-cluster applications use the same Kubernetes specification
 
 All of the application component resources for Red Hat Advanced Cluster Management for Kubernetes applications are defined in YAML file spec sections. When you need to create or update an application component resource, you need to create or edit the appropriate spec section to include the labels for defining your resource.
 
+View the following application resource sections:
+
+- [Application](#application)
+- [Deployables](#deployables)
+- [Secrets](secrets)
+- [Channels](#channels)
+- [Subscriptions](#subscriptions)
+- [Placement rules](#placement-rules)
+
 ## Application
-{: #application}
 
 Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for viewing the application components.
 
@@ -44,7 +52,7 @@ spec:
 For more information about creating and managing applications, see [Creating and managing applications](managing_apps.md).
 
 ## Deployables
-{: #deployables}
+
 
 Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or represent Helm releases for deployment to clusters to create or manage applications.
 
@@ -92,7 +100,6 @@ spec:
 For more information about creating and managing deployables, see [Managing deployables](managing_deployables.md).
 
 ## Secrets
-{: #secrets}
 
 Secrets (`Secret`) are Kubernetes resources that you can use to store authorization and other sensitive information, such as passwords, OAuth tokens, and SSH keys. By storing this information as secrets, you can separate the information from the application components that require the information to improve your data security.
 
@@ -118,7 +125,6 @@ data:
 For more information about creating and managing secrets, see [Managing secrets](managing_secrets.md).
 
 ## Channels
-{: #channel}
 
 Channels (`channel.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access.
 
@@ -146,7 +152,6 @@ spec:
 For more information about creating and managing channels, see [Managing channels](managing_channels.md).
 
 ## Subscriptions
-{: #subscription}
 
 As with channels, subscriptions (`subscription.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for application management.
 
@@ -177,7 +182,6 @@ The definition structure for a subscription can resemble the following YAML cont
 For more information about creating and managing subscriptions, see [Managing subscriptions](managing_subscriptions.md).
 
 ## Placement rules
-{: #placement}
 
 Placement rules (`placementrule.apps.open-cluster-management.io`) define the target clusters where deployables can be deployed. Use placement rules to help you facilitate the multi-cluster deployment of your deployables.
 

@@ -10,21 +10,19 @@ lastupdated: "2020-03-25"
 
 Learn about the cloud providers that are available with Red Hat Advanced Cluster Management for Kubernetes. Also, find the documented managed providers that are available.
 
-  - [Supported hub cluster cloud provider](#providers)
-  - [Supported managed cluster cloud providers](#providers-managed)
-  - [Configuring kubectl](#kubectl)
+  - [Supported hub cluster provider](#supported-hub-cluster-provider)
+  - [Supported managed cluster providers](#supported-managed-cluster-providers)
+  - [Configuring kubectl](#configuring-kubectl)
 
 **Best practice:** For managed cluster cloud providers, use the latest version of Kubernetes.
 
 ## Supported hub cluster cloud provider
-{: #providers} 
 
 Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the hub cluster.
 
 - See [OpenShift on Amazon Web Services](https://www.openshift.com/learn/partners/amazon-web-services).
 
 ## Supported managed cluster cloud providers
-{: #providers-managed} 
 
 Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the managed clusters. You can use Red Hat OpenShift Container Platform 3.11, as well. See the available managed cluster options and documentation:
 
@@ -41,6 +39,5 @@ Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the managed c
 - See [Amazon Elastic Container Service for Kubernetes](https://aws.amazon.com/eks/).  
 
 ## Configuring kubectl
-{: #kubectl} 
 
 From vendor documentation previously listed, you might need to learn how configure your `kubectl`. You must have `kubectl` installed. When you [Import an existing cluster](../manage_cluster/import.md), view the cloud provider product documentation for details.

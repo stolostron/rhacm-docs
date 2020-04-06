@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-31"
+lastupdated: "2020-04-06"
 
 ---
 
@@ -13,7 +13,6 @@ Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own char
 **Note:** The requirements that are listed are not minimum requirements.
 
 ### Worker nodes (workloads)
-{: #workload}
 
 As you determine the number of worker nodes and the resource configurations, consider the workload that is running.
 
