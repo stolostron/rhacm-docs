@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-24"
+lastupdated: "2020-04-07"
 
 ---
 
@@ -37,8 +37,8 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
 1. Log in to your _hub cluster_. Run the following command:
    
-  ```command here
-
+  ```
+  oc login
   ```
 
 2. Run the following command on the hub cluster to create the `oc create ns <cluster_namespace>` namespace:
