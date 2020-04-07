@@ -38,12 +38,12 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
   * [Delete a channel](#delete-a-channel)
   * [Managing deployments with channels](#managing-deployments-with-channels)
   * [Channel status and synchronization](#channel-status-and-synchronization)
-  * [View the channel definition YAML](#view-the-channel-definition-yaml)
-  * [View an example channel](#view-an-example-channel)
+  * [Channel definition YAML structure](#channel-definition-yaml-structure)
+  * [Example channel YAML](#example-channel-yaml)
 
 ## Create a channel
 
-1. Compose your channel definition YAML content. To create or update a channel resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Channel definition](#channel_compose).
+1. Compose your channel definition YAML content. To create or update a channel resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Channel definition YAML structure](#channel-definition-yaml-structure).
 
 2. Optional. If you are creating an `Namespace` type channel, create the namespace on your hub cluster. You can define the namespace as part of your YAML definition or use the Kubernetes command line interface (`kubectl`) tool to create the namespace.
   
@@ -96,11 +96,11 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
         Ensure that your new channel is listed in the resulting output.
 
-   * To use REST API, you need to use the [channel POST API](../apis/mcm/channels.json).
+   * To use REST API, you need to use the [channel POST API](../apis/channels.json).
 
-## Updating a channel
+## Update a channel
 
-1. Compose the definition updates for your channel. For more information about the YAML structure, including the required fields, see [Channel definition](#channel-definition).
+1. Compose the definition updates for your channel. For more information about the YAML structure, including the required fields, see [Channel definition YAML structure](#channel-definition-yaml-structure).
 
 2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
@@ -122,9 +122,9 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a channel.
 
-   * To use REST API, use the [channel PATCH API](../apis/mcm/channels.json).
+   * To use REST API, use the [channel PATCH API](../apis/channels.json).
 
-## Deleting a channel
+## Delete a channel
 
 To delete a channel, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
 
@@ -150,7 +150,7 @@ To delete a channel, you can use the console, the Kubernetes command line interf
      kubectl get Channel <name>
      ```
 
-* To use REST API, use the [channel DELETE API](../apis/mcm/channels.json).
+* To use REST API, use the [channel DELETE API](../apis/channels.json).
 
 ## Managing deployments with channels
 
