@@ -54,7 +54,7 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 6. Select **Google Cloud** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available cloud providers.
 
-7. Select your cloud connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a cloud connection on Google Cloud Platform](conn_cloud_gke.md).
+7. Select your cloud connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a cloud connection on Google Cloud Platform](cloud_conn_gke.md).
    
 8. Configure the *Node pools* for your cluster. 
 
