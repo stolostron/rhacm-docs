@@ -71,4 +71,3 @@
      * [Enabling a Kubernetes ingress for discovery](services/serv_ingress.md)
      * [Enabling an Istio service for discovery](services/serv_istio.md)
    * [Troubleshooting](troubleshoot_acm/troubleshooting.md)
- 
