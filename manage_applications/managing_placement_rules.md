@@ -14,18 +14,18 @@ You can create and manage placement rules to define where and how Helm charts an
 
   * [Create a placement rule](#create-a-placement-rule)
   * [Assign a placement rule](#assign-a-placement-rule)
-  * [View placement rule status](#view-placement-rule-status)
+  * [Placement rule status](#placement-rule-status)
   * [Update a placement rule](#update-a-placement-rule)
   * [Delete a placement rule](#delete-a-placement-rule)
-  * [View the placement rule definition](#view-the-placement-rule-definition)
-  * [View the placement rule status definition](#view-the-placement-rule-status-definition)
-  * [View an example placement rule](#view-an-example-placement-rule)
+  * [Placement rule definition](#placement-rule-definition)
+  * [Placement rule status definition](#placement-rule-status-definition)
+  * [Examples of placement rule](#examples-of-placement-rule)
 
 ## Create a placement rule
 
 Placement rules can be defined for subscriptions and for deployables. Define the placement rule at the subscription level for multi-cluster deployments. Define the placement rule for a specific deployable for single-cluster deployments or to override placement settings.
 
-1. Compose the definition YAML content for your placement rule. For more information about the YAML structure, including the required fields, see [Placement rule definition](#placement_compose).
+1. Compose the definition YAML content for your placement rule. For more information about the YAML structure, including the required fields, see [Placement rule definition](#placement-rule-definition).
 
 2. Create the placement rule within Red Hat Advanced Cluster Management for Kubernetes. You can define a placement rule as a separate resource or define the rule within the definition for a deployable or subscription. As a best practice, define placement rules as a separate resource when the rule might need to be referenced by multiple resources.
 
@@ -59,7 +59,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
         Ensure that your new placement rule is listed in the resulting output.
 
-   * To use REST API, you need to use the [placement rule POST API](../apis/mcm/placementRules.json).
+   * To use REST API, you need to use the [placement rule POST API](../apis/placementRules.json).
 
 ## Assign a placement rule
 
@@ -90,9 +90,9 @@ When a placement rule is assigned to a subscription, you can view the assignment
 4. Scroll to the **Resource pipeline** section. Within the table that lists your applications, expand the row for the application that includes the subscription that is assigned the placement rule.
 5. From the expanded view for the application, you can see the available subscriptions for each channel. The details for each subscription include any assigned placement rule. If needed, you can select to view or edit the YAML for the placement rule, subscription, and channel from this resource pipeline table.
 
-## View placement rule status
+## Placement rule status
 
-When a placement rule is created and in use, you can view the status details for the rule. This status is appended to the YAML definition for a placement rule and indicates the target clusters where the rule is used for placing deployables. For more information about the available status fields, see [Placement rule status definition](#placement_statusdef).
+When a placement rule is created and in use, you can view the status details for the rule. This status is appended to the YAML definition for a placement rule and indicates the target clusters where the rule is used for placing deployables. For more information about the available status fields, see [Placement rule status definition](#placement-rule-status-definition).
 
 To view the status fields for a placement rule, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.
 
@@ -114,7 +114,7 @@ To view the status fields for a placement rule, you can use the console, the Kub
 
   2. Review the fields and values within the `status` section of the YAML content.
 
-* To use REST API, you need to use the [placement rule GET API](../apis/mcm/placementRules.json).
+* To use REST API, you need to use the [placement rule GET API](../apis/placementRules.json).
 
 ## Update a placement rule
 
@@ -180,7 +180,7 @@ To delete a placement rule that is defined within the definition for a deployabl
 * [Creating and managing deployables](managing_deployables.md)
 * [Creating and managing subscriptions](managing_subscriptions.md)
 
-## View the placement rule definition
+## Placement rule definition
 
 The following YAML structure shows the required fields for a placement rule and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
@@ -231,7 +231,7 @@ spec:
 | spec.Policies | Optional. The policy filters for the placement rule. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-### View the placement rule status definition
+### Placement rule status definition
 
 Existing placement rules can include the following fields that indicate the status for the placement rule. This status section is appended after the `spec` section in the YAML structure for a rule.
 
@@ -250,7 +250,7 @@ status:
 | status.decisions.clusterNamespace | The namespace for a target cluster. |
 {: caption="Table 2. Status definition fields" caption-side="top"}
 
-## View an example placement rule
+## Examples of placement rule
 
 The following YAML content defines example placement rules:
 
