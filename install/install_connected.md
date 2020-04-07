@@ -112,7 +112,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
   The following text shows the format of the snapshot:
 
   ```
-  SNAPSHOT-2020-03-31-02-16-43
+  1.0.0-SNAPSHOT-2020-03-31-02-16-43
   ```
   **Remember:** If you enter a snapshot value, the value that you enter overwrites the existing default value and is stored as the default value for future installation attempts. The last snapshot value that was entered is the default value.
 
