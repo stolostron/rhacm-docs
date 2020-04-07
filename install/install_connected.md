@@ -31,6 +31,8 @@ See the following prerequisites before installing Red Hat Advanced Cluster Manag
 
 * If you are using macOS, you must install `gsed`. If you do not already have `gsed` installed, you can install it by entering `brew install gnu-sed` in a terminal window.
 
+* Optional: If you are using macOS and want to view the progress of your pods starting, you must install `watch`. If you do not already have `watch` installed, you can install it by entering `brew install watch` in a teminal window. You must have `watch` if you use the `--watch` option with your installation command.
+
 ## Preparing to install
 
 Complete the following preparations before you complete either of the installation procedures. **Note:** Only run the steps in this section once.
