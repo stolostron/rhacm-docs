@@ -40,7 +40,7 @@ Create and manage applications across environments through channel and subscript
 
   - Channels are custom resource definitions that can help you streamline deployments and separate cluster access. Channels define a namespace within the hub cluster and point to a physical place where resources are stored for deployment.
   
-  - Subscriptions (subscription.apps.open-cluster-management.io) are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources (in GitHub, Objectstores, or hub deployables) and Helm charts within channels by using annotations, labels, and versions.
+  - Subscriptions are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources (in GitHub, Objectstores, or hub deployables) and Helm charts within channels by using annotations, labels, and versions.
 
 ## Security and compliance
 
