@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-04-07"
 
 ---
 
@@ -11,15 +11,14 @@ lastupdated: "2020-03-09"
 Create application resources to group and view the application components that make up your overall Red Hat Advanced Cluster Management for Kubernetes multi-cluster applications.
 {:shortdesc}
 
-  * [Create an application](#app_create)
-  * [Matching an application to a subscription](#subscription_app)
-  * [Update an application](#app_update)
-  * [Delete an application](#app_delete)
-  * [View the application YAML definition](#app_compose)
-  * [View an example application](#app_example)
+  * [Create an application](#create-an-application)
+  * [Matching an application to a subscription](#matching-an-application-to-a-subscription)
+  * [Update an application](#update-an-application)
+  * [Delete an application](#delete-an-application)
+  * [View the application YAML definition](#view-the-application-yaml-definition)
+  * [View an example application](#view-an-example-application)
 
 ## Create an application 
-{: #app_create}
 
 1. Compose your application definition YAML content. To create or update an application resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
 
@@ -39,21 +38,18 @@ Create application resources to group and view the application components that m
         ```shell
         kubectl apply -f filename.yaml
         ```
-        {: codeblock}
 
      3. Verify that your application resource is created by running the following command:
 
         ```shell
         kubectl get Application
         ```
-        {: codeblock}
 
         Ensure that your new application is listed in the resulting output. 
 
    * To use REST API, use the [application POST API](../apis/mcm/applications.json).
 
 ## Matching a subscription to an application
-{: #subscription_app}
 
 To associate a subscription with an application, both the subscription and application must be in the same namespace so that the subscription can retrieve Helm charts, deployables, or other resources from a channel to deploy for an application.
 
@@ -66,7 +62,6 @@ When the subscription is associated with an application, the subscription uses t
 For more information about the resource definition for an application, see [Creating and managing applications](managing_apps.md).
 
 ## Update an application
-{: #app_update}
 
 1. Compose your application definition updates. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
 
@@ -92,7 +87,6 @@ For more information about the resource definition for an application, see [Crea
    * To use REST API, use the [application PATCH API](../apis/mcm/applications.json).
 
 ## Delete an application
-{: #app_delete}
 
 To delete an application, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
@@ -115,17 +109,15 @@ To delete an application, you can use the console, the Kubernetes command line i
      ```
      kubectl delete Application <name> -n <namespace>     
      ```
-     {: codeblock}
+  
   2. Verify that your application resource is deleted by running the following command: 
      ```
      kubectl get Application <name>
      ```
-     {: codeblock}
 
 * To use REST API, use the [application DELETE API](../apis/mcm/applications.json).
 
 ## Application definition YAML structure
-{: #app_compose}
 
 To compose the application definition YAML content for creating or updating an application resource, your YAML structure needs to include some required fields and values. Depending on your application requirements or application management requirements, you might need to include other optional fields and values. 
 
@@ -156,7 +148,6 @@ spec:
       operator:
       values:
 ```
-{: codeblock}
 
 |Field|Description|
 |-- | -- |
@@ -176,7 +167,6 @@ spec:
 The spec for defining these applications is based on the Application metadata descriptor custom resource definition that is provided by the Kubernetes Special Interest Group (SIG). You can use this definition to help you compose your own application YAML content. For more information about this definition, see [Kubernetes SIG Application CRD community specification](https://github.com/kubernetes-sigs/application).
 
 ## Example application
-{: #app_example}
 
 ```YAML
 apiVersion: app.k8s.io/v1beta1
@@ -195,4 +185,3 @@ spec:
       app: nginx-app-details
 status: {}
 ```
-{: codeblock}
