@@ -12,7 +12,7 @@ Create application resources to group and view the application components that m
 {:shortdesc}
 
   * [Create an application](#create-an-application)
-  * [Matching a application to a subscription](#matching-a-application-to-a-subscription)
+  * [Matching an application to a subscription](#matching-a-application-to-a-subscription)
   * [Update an application](#update-an-application)
   * [Delete an application](#delete-an-application)
   * [Application definition YAML structure](#application-definition-yaml-structure)
@@ -49,7 +49,7 @@ Create application resources to group and view the application components that m
 
    * To use REST API, use the [application POST API](../apis/mcm/applications.json).
 
-## Matching a subscription to an application
+## Matching an application to a subscription
 
 To associate a subscription with an application, both the subscription and application must be in the same namespace so that the subscription can retrieve Helm charts, deployables, or other resources from a channel to deploy for an application.
 
