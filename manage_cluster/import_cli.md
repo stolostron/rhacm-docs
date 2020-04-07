@@ -34,7 +34,6 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 * macOS
 
 ## Prepare for import
-{: #prep}
 
 1. Log in to your _hub cluster_. Run the following command:
    

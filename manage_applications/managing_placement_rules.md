@@ -59,7 +59,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
         Ensure that your new placement rule is listed in the resulting output.
 
-   * To use REST API, you need to use the [placement rule POST API](../apis/mcm/placementRules.json).
+   * To use REST API, you need to use the [placement rule POST API](../apis/placementRules.json).
 
 ## Assign a placement rule
 
@@ -114,7 +114,7 @@ To view the status fields for a placement rule, you can use the console, the Kub
 
   2. Review the fields and values within the `status` section of the YAML content.
 
-* To use REST API, you need to use the [placement rule GET API](../apis/mcm/placementRules.json).
+* To use REST API, you need to use the [placement rule GET API](../apis/placementRules.json).
 
 ## Update a placement rule
 
