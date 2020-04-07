@@ -12,11 +12,11 @@ Create application resources to group and view the application components that m
 {:shortdesc}
 
   * [Create an application](#create-an-application)
-  * [Matching an application to a subscription](#matching-an-application-to-a-subscription)
+  * [Matching a application to a subscription](#matching-a-application-to-a-subscription)
   * [Update an application](#update-an-application)
   * [Delete an application](#delete-an-application)
-  * [View the application YAML definition](#view-the-application-yaml-definition)
-  * [View an example application](#view-an-example-application)
+  * [Application definition YAML structure](#application-definition-yaml-structure)
+  * [Example application](#example-application)
 
 ## Create an application 
 
