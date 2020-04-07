@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-16"
+lastupdated: "2020-04-07"
 
 ---
 
@@ -18,4 +18,4 @@ You can access the Red Hat Advanced Cluster Management for Kubernetes console fr
 |macOS|<ul><li>Mozilla Firefox - 74.0 and later</li><li>Google Chrome - Version 80.0 and later</li><li>Safari - 13.0.5 and later</li></ul>|
 {: caption="Table 1. Supported browsers" caption-side="top"}
 
-**Note:** You cannot install Red Hat Advanced Cluster Management for Kubernetes on a system that uses a Windows or Mac operating system. However, you can access the Red Hat Advanced Cluster Management for Kubernetes console from a Windows or Mac host by using a browser. <!--??? -->
+**Note:** You cannot install Red Hat Advanced Cluster Management for Kubernetes on a Windows or Mac operating system. However, you can access the Red Hat Advanced Cluster Management for Kubernetes console from a Windows or Mac host with a browser.
