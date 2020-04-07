@@ -2,29 +2,17 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-31"
+lastupdated: "2020-04-06"
 
 ---
 
-# Sizing your cluster
+# Sizing your hub cluster
 
 Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.
 
 **Note:** The requirements that are listed are not minimum requirements.
 
-* [Considerations before you size your cluster](#considerations)
-* [Sample deployments](#samples)
-
-## Considerations before you size your cluster
-{: #considerations}
-
-View the following considerations before you size your cluster.
-
-- [Worker nodes (workloads)](#workload)
-- [Large cluster considerations](#large_consider)
-
 ### Worker nodes (workloads)
-{: #workload}
 
 As you determine the number of worker nodes and the resource configurations, consider the workload that is running.
 
@@ -35,71 +23,40 @@ As you determine the number of worker nodes and the resource configurations, con
 - The maximum pod per node is 500 and the maximum pod per CPU core is 10.
 - The cluster size depends on the worker node number. The pod number depends on the application type and the worker node's configuration.
 
-### Large cluster considerations
-{: #large_consider}
+A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu).
 
-Consider the capabilities of Red Hat Advanced Cluster Management for Kubernetes when you plan for a large cluster. Red Hat Advanced Cluster Management for Kubernetes has extra enterprise capability workloads in addition to Vanilla Kubernetes, adding more services, such as Calico (node to node MeSH). Also, consider monitoring and logging assessment.
+### Red Hat Advanced Cluster Management for Kubernetes environment 
 
-The following are more considerations that apply to large clusters:
+- Creating an OpenShift cluster on Amazon Web Services. 
 
-- The node-to-node mesh starts to fail with 700 nodes in the cluster.  You must create a router reflector for BGP Daemons.
-- Consider to use `etcd` outside of your master nodes if you plan on having a cluster with several hundred worker nodes. A separated `etcd` cluster is ideal to reduce the impact on the master node.
-- Be sure to implement load balancing on your master node.
-- The number of services in your cluster affects the load on each node.  In large clusters with more than 5000 services, you must run your nodes in IP Virtual Server (IPVS) mode.
+  See the [Amazon Web Services product documentation](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-customizations.html#installing-aws-customizations) for more information. Also learn more about [machine types](https://aws.amazon.com/ec2/instance-types/m5/).
 
-**Note:** IPVS takes extra considerations for deployment.
+  - Instance size: m5.xlarge
+  - vCPU: 4
+  - Memory: 16 GB
+  - Storage size: 120 GB
 
-## Sample deployments
-{: #samples}
+- Creating an OpenShift cluster on Google Cloud Platform. 
 
-View the following sample deployments of different sized environments.
+  See the [Google Cloud Platform product documenation](https://cloud.google.com/docs/quota) for more information about quotas. Also learn more about [machine types](https://cloud.google.com/compute/docs/machine-types).
 
-- [Small Red Hat Advanced Cluster Management for Kubernetes environment (resilience medium)](#small)
-- [Medium Red Hat Advanced Cluster Management for Kubernetes environment (resilience medium)](#medium)
-- [Large Red Hat Advanced Cluster Management for Kubernetes environment (resilience high)](#large)
+  - Instance size: N1-standard-4 (0.95–6.5 GB)
+  - vCPU: 4
+  - Memory: 16 GB
+  - Storage size: 120 GB  
+  
+- Creating an OpenShift cluster on Microsoft Azure. See the following [product documentation](https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-account.html) for more details.
 
-### Small Red Hat Advanced Cluster Management for Kubernetes environment (resilience medium)
-{: #small}
+  - Instance size: Standard_D2s_v3
+  - vCPU: 4
+  - Memory: 16 GB
+  - Storage size: 120 GB
 
-| Node type | Number of nodes | vCPU | Memory (GB) | Disk (GB) |
-| :---: | :---: | :---: | :---: | :---: |
-| Boot	| 1	| 2	| 8	| 250 |
-|	Master	| 3	| 16	| 32	| 500 |
-|	Worker - Java Workloads | 3+ (Max:20)	| 8	| 32	| 400 |
+- Creating an OpenShift cluster on bare metal. See the following [product documentation](https://docs.openshift.com/container-platform/4.3/installing/installing_bare_metal/installing-bare-metal.html) for more details.
 
-To create a testing environment with this particular cluster, you can deploy a single master node and decrease the proxy nodes (resilience low). To provide the most flexibility for your environment, you must not combine node types. The workers included are shaped for Java workloads. See the [Worker nodes](#workload) section.
+  - CPU: 4 (minimum)
+  - Memory: 16 GB (minimum)
+  - Storage size: 120 GB (minimum)
 
-### Medium Red Hat Advanced Cluster Management for Kubernetes environment (resilience medium)
-{: #medium}
 
-| Node type | Number of nodes | vCPU | Memory (GB) | Disk (GB) |
-| :---: | :---: | :---: | :---: | :---: |
-| Boot	| 1	| 2	| 8	| 250 |
-|	Master	| 3	| 16	| 32	| 500 |
-|	Worker - Java Workloads | 3+ (Max:20)	| 8	| 32	| 400 |
-|	Worker | 5+ (Max:70)| 8 | 32	| 400 |
-
-To increase your cluster's resilience level, add two extra master nodes.
-
-### Large Red Hat Advanced Cluster Management for Kubernetes environment (resilience high)
-{: #large}
-
-**Sizing cluster for 500 worker nodes**:
-
-| Node type| Number | vCPU |Memory (GB)|Disk (GB)|
-| :---: | :---: | :---: | :---: | :---: |
-|Boot node| 1 | 4 | 8 |  250 |
-|Master node|3|16|128 | 500|
-|Worker node|500|8 |32| 400|
-
-**Sizing cluster for 1000 worker nodes**:
-
-| Node type | Number of nodes | vCPU | Memory (GB) | Disk (GB) |
-| :---: | :---: | :---: | :---: | :---: |
-|	Boot	| 1	| 4	| 8	| 250 |
-|	Master | 3 | 16 | 128	| 500 |
-|	Worker | 1000| 8	| 32	|400 |
-
-To increase your cluster resilience level, you must deploy and manage workloads across multiple clusters.
-
- * A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu).
+ 

@@ -49,15 +49,15 @@ To create a cloud connection from the Red Hat Advanced Cluster Management for Ku
 
 7. Add your *libvirt URI*. See [Connection URIs](https://libvirt.org/uri.html) for more information.
 
-8. Enter your *Red Hat OpenShift Pull Secret*. 
+8. Enter your *Red Hat OpenShift Pull Secret*. You can download your pull secret from [Pull secret](https://cloud.redhat.com/openshift/install/pull-secret). 
 
-9. Add your *SSH Private Key*. See [Generating an SSH private key and adding it to the agent](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.3/html/installing_on_bare_metal/installing-on-bare-metal#ssh-agent-using_installing-bare-metal) for more information about how to generate a key.
+9. Add your *SSH Private Key* so you can access the cluster. See [Generating an SSH private key and adding it to the agent](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.3/html/installing_on_bare_metal/installing-on-bare-metal#ssh-agent-using_installing-bare-metal) for more information about how to generate a key.
 
 10. Add a list of your SSH known hosts.
 
 11. Click **Create**. When you create the cloud connection, it is added to the list of cloud connections.
 
-You can create a cluster that uses this cloud connection by completing the steps in [Creating an OpenShift cluster on bare metal] (create_ocp_bare.md).
+You can create a cluster that uses this cloud connection by completing the steps in [Creating an OpenShift cluster on bare metal](create_bare.md).
 
 ## Deleting your cloud connection
 {: #delete}

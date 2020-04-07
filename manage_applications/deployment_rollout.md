@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-25"
+lastupdated: "2020-04-06"
 
 ---
 
@@ -20,8 +20,8 @@ The rolling update for a deployment runs on the Hub cluster. The deployment roll
 
 You can configure a percentage rollout for a subscription or directly for a deployable resource.
 
-  - [Configuring a rolling update for a subscription](#subsription_rollout)
-  - [Examples](#example_rollout)
+  - [Configuring a rolling update for a subscription](#configuring-a-rolling-update-for-a-subscription)
+  - [Examples](#examples)
 <!--  - [Configuring a rolling update for a deployable](#deployable_rollout) -->
 
 A rolling update for a subscription <!-- or deployable-->uses the rolling update feature that is included in the Kubernetes resource definition. To configure this feature for a deploying a subscription or deployable, you need to create or update the following Kubernetes resources:
@@ -45,7 +45,6 @@ A rolling update for a subscription <!-- or deployable-->uses the rolling update
 - Target subscriptions and target deployables cannot define any placement rule. The initial subscription or initial deployable must define the placement rule for the rolling update.
 
 ## Configuring a rolling update for a subscription
-{: #subsription_rollout}
 
 If you have existing subscriptions that you want to configure to use a rolling update, you need to create your target subscription and update your initial existing subscription to include the required annotations. 
 
@@ -157,8 +156,7 @@ For more information about how to define a deployable, see [Creating and managin
 For more information about how to define a placement rule, see [creating and managing placement rules](managing_placement_rules.md).
 -->
 
-## Example
-{: #example_rollout}
+## Examples
 
 The following example YAML definitions show the required fields for deploying an update for a deployable by using a rolling update.
 

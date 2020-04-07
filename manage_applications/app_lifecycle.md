@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-13"
+lastupdated: "2020-04-06"
 
 ---
 
@@ -14,13 +14,12 @@ With these application management capabilities, you can use channels and subscri
 
 Your developers and DevOps personnel can use these resources to deploy, update, manage, and monitor versions of your applications across multiple environments through complete automation.
 
-  * [Application model](#app_model)
-  * [Application resource interactions and lifecycle](#app_interact)
-  * [Deploying application resources](#app_deploy)
-  * [Managing applications with the console](#app_gui)
+  * [Application model](#application-model)
+  * [Application resource interactions and lifecycle](#application-resource-interactions-and-lifecycle)
+  * [Deploying application resources](#deploying-application-resources)
+  * [Managing applications with the console](#managing-applications-with-the-console)
 
 ## Application model
-{: #app_model}
 
 The application model and deployment options work for, and scale, any clustered environment and application management requirements. This scalability supports both a single application developer that builds and deploys an application from their device to a multicloud environment, or a cloud operations personnel that needs to deploy and update hundreds of applications across hundreds of clusters. With this application model and deployment option, you can separate your organizations roles for developing applications and DevOps. Your application developers can focus on developing and defining the application resources. Meanwhile, your DevOps personnel can focus on creating and managing the channels and subscriptions to ensure that resources are deployed correctly. You can use the application model and deployment options to update and deploy one or more applications to hundreds of managed clusters, each in a different physical location.
 
@@ -53,7 +52,6 @@ All of the application component resources for Red Hat Advanced Cluster Manageme
 The Kubernetes apiserver is the main service for providing application management functions. All application resource specs are accessible by using the Kubernetes CLI tool. In addition, a hcmctl is provided to wrap kubectl commands for better and smoother CLI experiences.
 
 ## Application resource interactions and lifecycle
-{: #app_interact}
 
 With the new application model and deployment options, the high-level flow for creating and managing applications can resemble the following steps:
 
@@ -82,12 +80,10 @@ Once the deployables and other resources are created, the subscription operator 
 To create or edit the resource definitions developers and other users can use the console, the Kubernetes CLI tool, or REST API.
 
 ## Deploying application resources
-{: #app_deploy}
 
 Red Hat Advanced Cluster Management for Kubernetes supports multiple options for the deployment of deployable objects and Helm charts. The deployment option that you use can depend upon whether you need to deploy to a single cluster or multiple clusters and the frequency that you need to deploy updates. For more information, see [Deploying an application resource](deployment_app.md).
   
 ## Managing applications with the console
-{: #app_gui}
 
 The console includes an applications dashboard for managing the application lifecycle. You can use the console dashboard to create and manage application, subscriptions, channels, and placement rules. You can also use the console to view the status of your applications, channels, subscriptions, and related deployments.
 
