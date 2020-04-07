@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-04-05"
+lastupdated: "2020-04-07"
 
 ---
 
@@ -15,7 +15,6 @@ You need a cloud connection to use Red Hat Advanced Cluster Management for Kuber
 **Note:** This procedure is a prerequisite for creating a cluster with Red Hat Advanced Cluster Manager for Kubernetes. 
 
 ## Prerequisites
-{: #prereq}
 
 You must have the following prerequisites before creating a cloud connection:
 
@@ -28,7 +27,6 @@ You must have the following prerequisites before creating a cloud connection:
 * Azure login credentials, which include your Base Domain Resource Group and Azure Service Principal JSON. See [azure.microsoft.com](https://azure.microsoft.com/en-ca/features/azure-portal).
 
 ## Creating a cloud connection by using the console
-{: #create_gui}
 
 To create a cloud connection from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
@@ -61,7 +59,6 @@ To create a cloud connection from the Red Hat Advanced Cluster Management for Ku
 You can create a cluster that uses this cloud connection by completing the steps in [Creating an OpenShift cluster on Microsoft Azure] (create_aks.md).
 
 ## Deleting your cloud connection
-{: #delete}
 
 When you are no longer managing a cluster that is using a cloud connection, delete the cloud connection to protect the information in the cloud connection. 
 
