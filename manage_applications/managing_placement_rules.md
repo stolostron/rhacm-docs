@@ -14,12 +14,12 @@ You can create and manage placement rules to define where and how Helm charts an
 
   * [Create a placement rule](#create-a-placement-rule)
   * [Assign a placement rule](#assign-a-placement-rule)
-  * [Placement rule status](#view-placement-rule-status)
+  * [Placement rule status](#placement-rule-status)
   * [Update a placement rule](#update-a-placement-rule)
   * [Delete a placement rule](#delete-a-placement-rule)
   * [Placement rule definition](#placement-rule-definition)
   * [Placement rule status definition](#placement-rule-status-definition)
-  * [Example placement rule](#example-placement-rule)
+  * [Examples of placement rule](#examples-of-placement-rule)
 
 ## Create a placement rule
 
@@ -250,7 +250,7 @@ status:
 | status.decisions.clusterNamespace | The namespace for a target cluster. |
 {: caption="Table 2. Status definition fields" caption-side="top"}
 
-## View an example placement rule
+## Examples of placement rule
 
 The following YAML content defines example placement rules:
 
