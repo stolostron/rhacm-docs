@@ -57,7 +57,7 @@ To create a cloud connection from the Red Hat Advanced Cluster Management for Ku
 
 11. Click **Create**. When you create the cloud connection, it is added to the list of cloud connections.
 
-You can create a cluster that uses this cloud connection by completing the steps in [Creating an OpenShift cluster on bare metal] (create_bare.md).
+You can create a cluster that uses this cloud connection by completing the steps in [Creating an OpenShift cluster on bare metal](create_bare.md).
 
 ## Deleting your cloud connection
 {: #delete}
