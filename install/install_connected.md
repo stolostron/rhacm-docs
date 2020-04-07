@@ -29,6 +29,8 @@ See the following prerequisites before installing Red Hat Advanced Cluster Manag
 
 * You must have an Internet connection to access the dependencies for the operator.
 
+* You must have `jq` installed. If you do not have `jq` installed, and you are using macOS, enter `breq install jq` in a terminal window. 
+
 * If you are using macOS, you must install `gsed`. If you do not already have `gsed` installed, you can install it by entering `brew install gnu-sed` in a terminal window.
 
 * Optional: If you are using macOS and want to view the progress of your pods starting, you must install `watch`. If you do not already have `watch` installed, you can install it by entering `brew install watch` in a teminal window. You must have `watch` if you use the `--watch` option with your installation command.
