@@ -10,12 +10,11 @@ lastupdated: "2020-03-11"
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to import an existing cluster. You need your terminal for authentication.
 
-- [Prerequisites](#prereq)
-- [Importing a cluster](#import)
-- [Removing a cluster](#delete)
+- [Prerequisites](#prerequisites)
+- [Importing a cluster](#importing-a-cluster)
+- [Removing a cluster](#removing-an-imported-cluster)
  
 ## Prerequisites
-{: #prereq}
 
 * You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. 
 * You need a cluster that you want to manage. 
@@ -28,7 +27,6 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 **Required user type or access level**: Cluster administrator
 
 ## Importing a cluster
-{: #import}
 
 You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
 
@@ -44,7 +42,7 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
 5. **Optional:** Click to expand **Edit cluster import YAML file** and modify the endpoint configuration. 
 
-   See [Table 1. YAML file parameters and descriptions](#table_1) for details about each parameter.
+   See [Table 1. YAML file parameters and descriptions](#yaml-parameters-and-descriptions) for details about each parameter.
 
 6. **Optional**: After you import, you can add labels by clicking **Configure advanced parameters** and use these labels to search.
    
@@ -63,7 +61,6 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 **Note** You can continue to import more clusters. Click **Import another** to repeat the process.
 
 ### YAML Parameters and descriptions
-{: #table_1}
 
 Table 1: The following table lists the parameters and descriptions that are available in the YAML file:
 
@@ -87,7 +84,6 @@ Table 1: The following table lists the parameters and descriptions that are avai
 {: caption="Table 1. Table of YAML file parameters and descriptions for imported clusters" caption-side="}
 
 ## Removing an imported cluster
-{: #delete}
 
 Complete the following procedure to remove an imported cluster and the `multicluster-endpoint` that was created on the managed cluster.
 
