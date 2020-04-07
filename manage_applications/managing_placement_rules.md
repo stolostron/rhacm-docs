@@ -14,12 +14,12 @@ You can create and manage placement rules to define where and how Helm charts an
 
   * [Create a placement rule](#create-a-placement-rule)
   * [Assign a placement rule](#assign-a-placement-rule)
-  * [View placement rule status](#view-placement-rule-status)
+  * [Placement rule status](#view-placement-rule-status)
   * [Update a placement rule](#update-a-placement-rule)
   * [Delete a placement rule](#delete-a-placement-rule)
-  * [View the placement rule definition](#view-the-placement-rule-definition)
-  * [View the placement rule status definition](#view-the-placement-rule-status-definition)
-  * [View an example placement rule](#view-an-example-placement-rule)
+  * [Placement rule definition](#placement-rule-definition)
+  * [Placement rule status definition](#placement-rule-status-definition)
+  * [Example placement rule](#example-placement-rule)
 
 ## Create a placement rule
 
@@ -90,7 +90,7 @@ When a placement rule is assigned to a subscription, you can view the assignment
 4. Scroll to the **Resource pipeline** section. Within the table that lists your applications, expand the row for the application that includes the subscription that is assigned the placement rule.
 5. From the expanded view for the application, you can see the available subscriptions for each channel. The details for each subscription include any assigned placement rule. If needed, you can select to view or edit the YAML for the placement rule, subscription, and channel from this resource pipeline table.
 
-## View placement rule status
+## Placement rule status
 
 When a placement rule is created and in use, you can view the status details for the rule. This status is appended to the YAML definition for a placement rule and indicates the target clusters where the rule is used for placing deployables. For more information about the available status fields, see [Placement rule status definition](#placement_statusdef).
 
@@ -180,7 +180,7 @@ To delete a placement rule that is defined within the definition for a deployabl
 * [Creating and managing deployables](managing_deployables.md)
 * [Creating and managing subscriptions](managing_subscriptions.md)
 
-## View the placement rule definition
+## Placement rule definition
 
 The following YAML structure shows the required fields for a placement rule and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
@@ -231,7 +231,7 @@ spec:
 | spec.Policies | Optional. The policy filters for the placement rule. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-### View the placement rule status definition
+### Placement rule status definition
 
 Existing placement rules can include the following fields that indicate the status for the placement rule. This status section is appended after the `spec` section in the YAML structure for a rule.
 
