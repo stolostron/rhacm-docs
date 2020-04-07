@@ -25,7 +25,7 @@ You can create and manage placement rules to define where and how Helm charts an
 
 Placement rules can be defined for subscriptions and for deployables. Define the placement rule at the subscription level for multi-cluster deployments. Define the placement rule for a specific deployable for single-cluster deployments or to override placement settings.
 
-1. Compose the definition YAML content for your placement rule. For more information about the YAML structure, including the required fields, see [Placement rule definition](#placement_compose).
+1. Compose the definition YAML content for your placement rule. For more information about the YAML structure, including the required fields, see [Placement rule definition](#placement-rule-definition).
 
 2. Create the placement rule within Red Hat Advanced Cluster Management for Kubernetes. You can define a placement rule as a separate resource or define the rule within the definition for a deployable or subscription. As a best practice, define placement rules as a separate resource when the rule might need to be referenced by multiple resources.
 
@@ -92,7 +92,7 @@ When a placement rule is assigned to a subscription, you can view the assignment
 
 ## Placement rule status
 
-When a placement rule is created and in use, you can view the status details for the rule. This status is appended to the YAML definition for a placement rule and indicates the target clusters where the rule is used for placing deployables. For more information about the available status fields, see [Placement rule status definition](#placement_statusdef).
+When a placement rule is created and in use, you can view the status details for the rule. This status is appended to the YAML definition for a placement rule and indicates the target clusters where the rule is used for placing deployables. For more information about the available status fields, see [Placement rule status definition](#placement-rule-status-definition).
 
 To view the status fields for a placement rule, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.
 
