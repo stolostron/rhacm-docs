@@ -23,8 +23,8 @@ You do not need to wrap or represent all resources as deployables before you dep
   * [Update a deployable](#update-a-deployable)
   * [Delete a deployable](#delete-a-deployable)
   * [Promote a deployable to a channel](#promote-a-deployable-to-a-channel)
-  * [View the deployable YAML definition](#view-the-deployable-yaml-definition)
-  * [View an example deployable](#view-an-example-deployable)
+  * [Deployable definition YAML structure](#deployable-definition-yaml-structure)
+  * [Example deployable YAML](#example-deployable-yaml)
 
 ## Create a deployable
 
