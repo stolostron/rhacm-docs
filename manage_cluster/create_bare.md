@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-04-05"
+lastupdated: "2020-04-07"
 
 ---
 
@@ -17,7 +17,6 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to cr
   - [Removing a cluster from management](#removing-a-cluster-from-management)
  
 ## Prerequisites
-{: #prereq}
 
 You need the following prerequisites before creating a cluster in a bare metal environment:
 
@@ -32,7 +31,6 @@ You need the following prerequisites before creating a cluster in a bare metal e
 * A Red Hat OpenShift image pull secret; see [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html)
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
-{: #create_gui}
 
 To create clusters from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
@@ -65,7 +63,6 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 11. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
 ## Accessing your cluster 
-{: #access}
 
 To access a cluster that is managed by Red Hat Advanced Cluster Management for Kubernetes, complete the following steps:
 
@@ -86,7 +83,6 @@ To access a cluster that is managed by Red Hat Advanced Cluster Management for K
   **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Options* menu for the cluster, and selecting **Launch to cluster**.
 
 ## Removing a cluster from management
-{: #delete}
 
 When you remove a Red Hat OpenShift Cloud Platform cluster from management that was created with Red Hat Advanced Cluster Management for Kubernetes, you can either *detach* it or *destroy* it.  
 
