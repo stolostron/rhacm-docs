@@ -16,7 +16,7 @@ To learn about the Red Hat Advanced Cluster Management for Kubernetes console ca
 
 ## Installation
 
-With operator-based installation, you can install a working Red Hat OpenShift cluster on a configured cloud provide, such as Amazon Web Services, in less than 10 minutes. See [Installing Red Hat Advanced Cluster Management for Kubernetes when connected](../install/install_connected.md) for more information.  
+With operator-based installation, you can install a working Red Hat OpenShift cluster on a configured cloud provider, such as Amazon Web Services, in less than 10 minutes. See [Installing Red Hat Advanced Cluster Management for Kubernetes when connected](../install/install_connected.md) for more information.  
   
 ## Cluster management
 
