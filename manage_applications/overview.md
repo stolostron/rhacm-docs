@@ -1,12 +1,12 @@
 ---
 
 copyright:
-  years: 2019
-lastupdated: "2019-12-12"
+  years: 2020
+lastupdated: "2020-04-12"
 
 ---
 
-# Managing applications (Technology preview)
+# Managing applications 
 
 Review the following topics to learn more about creating, deploying, and managing your applications. 
 
