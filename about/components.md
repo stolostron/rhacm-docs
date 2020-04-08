@@ -12,13 +12,13 @@ See the following tables for information about components that are installed and
 
 ## Red Hat Advanced Cluster Management for Kubernetes default enabled services
 
-|Service|Description (needed)|Required|
+|Service|Description|Required|
 |--------|-----------|-------------------|
 |management-ingress|Unifies all management services behind a network ingress controller with predictable annotations and TLS protection. This service should not be accessed directly.|Yes|
 |cert-manager|This service manages the lifecycle of certificates.|Yes|
 |cert-manager-webhook|This service extends the Kubernetes API server so the certificate manager resources can be dynamically validated.|Yes|
 |configmap-watcher|This service can be used to restart pods when a dependent config map is updated.|Yes|
-|mongo-db|All platform services that require a persistent data store use the MongoDB service. Highly available topologies for MongoDB are supported out of the box. This is a service that should not be accessed directly.|Yes|
+|mongo-db|All platform services that require a persistent data store use the MongoDB service. Highly available topologies for MongoDB are supported out of the box. This is a service that should not be accessed directly.|Yes, 5G|
 |etcd|A distributed key-value store|Yes|
 {: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes default enabled services" caption-side="top"}
 
