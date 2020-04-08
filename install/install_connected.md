@@ -88,7 +88,6 @@ Complete the following preparations before you complete either of the installati
 4. Select either [Method 1](#method-1-installing-by-using-the-startsh-script) or [Method 2](#method-2-installing-by-using-commands) to continue installing Red Hat Advanced Cluster Management for Kubernetes.
 
 ## Method 1: Installing by using the `start.sh` script
-{: #script}
 
 You can install Red Hat Advanced Cluster Management for Kubernetes by making some updates to a script file and deploying the cluster. This is the easiest way to get started, but the other method is provided if you prefer to use `oc` commands to install. 
 
@@ -152,7 +151,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
 4. Run the following command to determine whether the subscription is healthy:
 
   ```
-  oc get subscription multiclusterhub-operator-bundle --namespace open-cluster-management -o yaml
+  oc get subscription.operators.coreos.com multiclusterhub-operator-bundle --namespace open-cluster-management -o yaml
   ```
 
   A healthy subscription returns a `true` status value for the `healthy` entry, as shown in the following example: 
