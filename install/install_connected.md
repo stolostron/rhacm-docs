@@ -152,7 +152,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
 4. Run the following command to determine whether the subscription is healthy:
 
   ```
-  oc get subscription multiclusterhub-operator-bundle --namespace open-cluster-management -o yaml
+  oc get subscription.operators.coreos.com multiclusterhub-operator-bundle --namespace open-cluster-management -o yaml
   ```
 
   A healthy subscription returns a `true` status value for the `healthy` entry, as shown in the following example: 
