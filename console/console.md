@@ -50,7 +50,7 @@ From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you ge
 ## Observe environment details
 <!--Will users be able to see any of this information even though it will not be on the Overview page?-->
 
-Reorganize your dashboard. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
+Reorganize and personalize your view of the page. You can view the following information about your clusters: 
 
 * Name of the cloud service with the number of clusters
 * Cluster compliance
