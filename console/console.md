@@ -17,7 +17,7 @@ Red Hat Advanced Cluster Management for Kubernetes console components:
 
 - [Access your console](#access-your-console)
 - [Welcome page](#welcome-page) 
-- [Observe environment details](#observe-environment-details)<!--if users are unable to view the listed details in this section; this link needs to be removed-->
+- [Observe environment details](#observe-environment-details)
 - [Automate Infrastructure](#automate-infrastructure)
 - [Manage applications (Technology preview)](#manage-applications-technology-preview)
 - [Governance and risk dashboard](#governance-and-risk-dashboard)
@@ -49,7 +49,6 @@ From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you ge
 
 ## Observe environment details
 
-<!--Will users be able to see any of this information even though it will not be on the Overview page?-->
 Reorganize your dashboard. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
 
 * Name of the cloud service with the number of clusters
