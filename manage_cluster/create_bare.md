@@ -76,11 +76,11 @@ To access a cluster that is managed by Red Hat Advanced Cluster Management for K
 
 5. Log in to the cluster by using the user ID and password that you found in step 3. 
 
-6. Select the *Options* menu for the cluster that you want to access.
+6. Select the *Actions* menu for the cluster that you want to access.
 
 7. Select **Launch to cluster**. 
 
-  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Options* menu for the cluster, and selecting **Launch to cluster**.
+  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
 
 ## Removing a cluster from management
 
