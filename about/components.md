@@ -10,6 +10,7 @@ lastupdated: "2020-03-30"
 
 See the following tables for information about components that are installed and enabled on the hub cluster by default and the managed cluster. See what components are required and if it applies, the default value that is required.
 
+
 - [Default enabled services](Default-enabled-services)
 - [Default enabled components on the hub cluster](Default-enabled-components-on-the-hub-cluster)
 - [Default enabled components on the managed cluster](Default-enabled-components-on-the-managed-cluster)
