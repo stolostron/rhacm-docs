@@ -8,9 +8,13 @@ lastupdated: "2020-03-30"
 
 # Components
 
-See the following tables for information about components that are installed and enabled on the hub cluster by default and the managed cluster.
+See the following tables for information about components that are installed and enabled on the hub cluster by default and the managed cluster. See what compnents are required and if it applies, the default value that is required.
 
-## Red Hat Advanced Cluster Management for Kubernetes default enabled services
+- [Default enabled services](Default-enabled-services)
+- [Default enabled components on the hub cluster](Default-enabled-components-on-the-hub-cluster)
+- [Default enabled components on the managed cluster](Default-enabled-components-on-the-managed-cluster)
+
+## Default enabled services
 
 |Service|Description|Required|
 |--------|-----------|-------------------|
@@ -22,7 +26,7 @@ See the following tables for information about components that are installed and
 |etcd|A distributed key-value store|Yes|
 {: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes default enabled services" caption-side="top"}
 
-## Red Hat Advanced Cluster Management for Kubernetes default enabled components on the hub cluster
+## Default enabled components on the hub cluster
 
 |Service|Description (needed)|Required|
 |--------|-----------|---------------------|
@@ -52,7 +56,7 @@ See the following tables for information about components that are installed and
 |topology-api|Provides the backend services for the topology-ui service|Yes|
 {: caption="Table 2. Red Hat Advanced Cluster Management for Kubernetes default enabled components on the hub cluster" caption-side="top"}
 
-## Red Hat Advanced Cluster Management for Kubernetes enabled components on the managed cluster
+## Default enabled components on the managed cluster
 
 The following table shows the services that are installed on the managed cluster:
 
