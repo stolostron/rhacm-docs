@@ -40,7 +40,7 @@ After you configure a Red Hat Advanced Cluster Management for Kubernetes hub clu
 
 See [Managing applications](../manage_applications/overview.md) for more application topics.
 
-## Governance and risk
+## Governance risk and compliance
 
 After you configure a Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can define Red Hat Advanced Cluster Management for Kubernetes security risk and create policies with templates from the _Governance and risk_ page. For more information see, [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
 
