@@ -8,7 +8,7 @@ lastupdated: "2020-04-06"
 
 # Red Hat Advanced Cluster Management for Kubernetes Governance and risk
 
-Use the Governance and risk dashboard to view and manage the number of policy violations in your clusters and applications. 
+Use the Governance and risk page to view and manage the number of policy violations in your clusters and applications. 
 
 From the _Policies_ tab, you can view a summary of cluster and policy violations. You can customize your _Summary_ view by filtering the violations by categories or standards. Collapse the summary to see less information. 
 
