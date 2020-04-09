@@ -76,5 +76,5 @@
      * [Subscriptions](apis/subscriptions.json)
      * [Deployables](apis/deployables.json)
      * [Helm](apis/helms.json)
-     * [PlacementRule.app.ibm.com](apis/placementRules.json)
+     * [PlacementRule](apis/placementRules.json)
    * [Troubleshooting](troubleshoot_acm/troubleshooting.md)
