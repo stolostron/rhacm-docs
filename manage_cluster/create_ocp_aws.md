@@ -23,7 +23,7 @@ You must have the following prerequisites before creating a cluster on AWS:
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster on Amazon Web Services
 
-* AWS cloud connection. See [Setting up a cloud connection for AWS](cloud_conn_aws.md) for more information.
+* AWS provider connection. See [Setting up a provider connection for AWS](cloud_conn_aws.md) for more information.
 
 * A configured domain in AWS. See [Configuring an AWS account](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html) for instructions on how to configure a domain. 
 
@@ -51,7 +51,7 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 6. Select **Amazon Web Services** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available cloud providers.
 
-7. Select your cloud connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a cloud connection on AWS](cloud_conn_aws.md).
+7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on AWS](cloud_conn_aws.md).
    
 8. Configure the *Node pools* for your cluster. 
 
