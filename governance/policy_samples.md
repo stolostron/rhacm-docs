@@ -10,19 +10,18 @@ lastupdated: "2020-03-24"
 
 View a description of the the policy samples that are included in your Red Hat Advanced Cluster Management for Kubernetes installation.
 
-* [Memory usage policy](#limit_mem) 
-* [Namespace policy](#namespace)
-* [Network policy](#network)
-* [Pod nginx policy](#pod_nginx)
-* [Pod security policy](#psp)
-* [Role policy](#role)
-* [Rolebinding policy](#rbind_policy)
+* [Memory usage policy](#memory-usage-policy) 
+* [Namespace policy](#namespace-policy)
+* [Network policy](#network-policy)
+* [Pod nginx policy](#pod-nginx-policy)
+* [Pod security policy](#pod-security-policy)
+* [Role policy](#role-policy)
+* [Rolebinding policy](#rolebinding-policy)
 
 
 **Note**: You must create a placement policy and placement binding policy to apply your policies on to your cluster. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy example](../governance/policy_example.md).
 
 ## Memory usage policy
-{: #limit_mem}
 
 Apply the limit range policy to limit your memory usage. Your memory usage policy might resemble the following YAML file:
 
@@ -65,7 +64,6 @@ Complete the following steps to apply the memory usage policy from the console:
 4. Select **Limitrange** from the _Specifications_ field.
 
 ## Namespace policy
-{: #namespace}
 
 Apply the namespace policy to define specific rules for your namespace. Your namespace policy might resemble the following YAML file:
   
@@ -101,8 +99,7 @@ Complete the following steps to apply the memory usage policy from the console:
 4. Select **Namespace** from the _Specifications_ field.
 
         
-## Network
-{: #network}
+## Network policy
 
 Apply the network policy to define which network request to deny. For more information about network policies, see _Network Policy_ from the [Kubernetes documentation]( https://kubernetes.io/docs/concepts/services-networking/network-policies/).
 
@@ -146,7 +143,6 @@ Complete the following steps to apply the network policy from the console:
 4. Select **Networkpolicy** from the _Specifications_ field.
 
 ## Pod nginx policy
-{: #pod_nginx}
 
 Apply the pod policy to define the container rules for your pods. A nginx pod must exist in your cluster. Your pod policy nginx policy might resemble the following YAML file:
 
@@ -188,7 +184,6 @@ Complete the following steps to apply the pod policy from the console:
 4. Select **Pod** from the _Specifications_ field.
 
 ## Pod security policy
-{: #psp}
 
 Apply a pod security policy to secure pods and containers. For more information, see _Pod Security Policies_ in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/policy/pod-security-policy/).
 
@@ -249,7 +244,6 @@ Complete the following steps to apply the pod security policy from the console:
 4. Select **Podsecuritypolicy** from the _Specifications_ field.
 
 ## Role policy
-{: #role}
 
 Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](../governance/security.md). Your role policy might resemble the following YAML file:
 
@@ -297,8 +291,7 @@ Complete the following steps to apply the role policy from the console:
 3. Click **Create policy**. 
 4. Select **Role** from the _Specifications_ field.
 
-## Role binding policy
-{: #rbind_policy}
+## Rolebinding policy
 
 Apply a role binding policy to bind a policy to a namespace in your cluster. Your role binding policy might resemble the following YAML file:
 

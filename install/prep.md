@@ -15,7 +15,6 @@ Before you install Red Hat Advanced Cluster Management for Kubernetes, review th
 * You must have a supported Red Hat OpenShift Container Platform version, including the registry and storage services, installed and working in your cluster. For more information about installing the Red Hat OpenShift Container Platform, see the Red Hat OpenShift documentation. 
 
   * For Red Hat OpenShift Container Platform version 4.3, see [Red Hat OpenShift Container Platform 4.3 Documentation](https://docs.openshift.com/container-platform/4.3/welcome/index.html).
-  * For Red Hat OpenShift Container Platform version 4.2, see [Red Hat OpenShift Container Platform 4.2 Documentation](https://docs.openshift.com/container-platform/4.2/welcome/index.html).
   
 * To ensure that the Red Hat OpenShift Container Platform cluster is set up correctly, access the Red Hat OpenShift Container Platform web console.
 

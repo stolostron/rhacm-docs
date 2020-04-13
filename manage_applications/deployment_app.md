@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-25"
+lastupdated: "2020-04-06"
 
 ---
 
@@ -34,13 +34,12 @@ If you need to deploy a Kubernetes resource or Helm chart to only a single clust
 
 Based on your deployment requirements, review the details and process for the following deployment options:
 
-  * [Deploy by using channels, subscriptions, and placement rules](#deploy_subscriptions)
-    * [Promote a deployable to a channel](#promote_channel)
-    * [Deploy with a percentage roll out](#deploy_rollout)
-  * [Deploy by using only placement rules](#deploy_placerules)
+  * [Deploy by using channels, subscriptions, and placement rules](#deploy-by-using-channels-subscriptions-and-placement-rules)
+    * [Promote a deployable to a channel](#promote-a-deployable-to-a-channel)
+    * [Deploy with a percentage roll out](#deploy-with-a-percentage-roll-out)
+  * [Deploy by using only placement rules](#deploy-by-using-only-placement-rules)
 
 ## Deploy by using channels, subscriptions, and placement rules
-{: #deploy_subscriptions}
 
 To set up and use channels, subscriptions, and placement rules for deployments, complete the following procedure:
 
@@ -67,7 +66,6 @@ If you need to deploy new or changed Helm charts or other resources during only 
 For more information, see [Scheduling resource deployments for a subscription](managing_subscriptions.md#subscription_timewindow).
 
 ## Promote a deployable to a channel
-{: #promote_channel}
 
 To promote a deployable to a channel, you can use any of the following methods:
 
@@ -144,15 +142,13 @@ To promote a deployable to a channel, you can use any of the following methods:
   
   Channel gate requirements are defined within the `spec.gate` section of a channel definition. If the deployable has the fields to match the channel `spec.gate` values, the deployable is promoted to the channel. In this case, the deployable does not need to point to a specific channel with the  `spec.channels` field.
 
-### Deploy with a rolling update  
-{: #deploy_rollout}
+### Deploy with a percentage roll out  
 
 If you want to roll out a deployment to your target managed clusters instead of deploying to all target cluster, you can configure the deployment of a deployable or chart to only a percentage of your managed clusters at a time. For instance, you might want to roll out a deployment when you need to deploy an update but you do not want to affect all clusters at once. When the deployment is successful on a cluster, the deployment is rolled out to another cluster.
 
 For more information, see [Deploying application resources with rolling update](deployment_rollout.md).
 
 ## Deploy by using only placement rules
-{: #deploy_placerules}
 
 If you do not want or need to use channels and subscriptions, you can still use placement rules. When you are deploying a deployable by using only a placement rule, the deployable definition can include a reference to a stand-alone placement rule resource.
 

@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-26"
+lastupdated: "2020-04-07"
 
 ---
 
@@ -11,13 +11,12 @@ lastupdated: "2020-03-26"
 Follow the procedure to create a Red Hat OpenShift Container Platform cluster on Google Cloud Platform (GCP). For more information about Google Cloud Platform, see [Google Cloud Platform](https://cloud.google.com/docs/overview).
 {:shortdesc}
 
-  - [Prerequisites](#prereq)
-  - [Creating your cluster with the console](#create_gui)
-  - [Accessing your cluster](#access)
-  - [Deleting your cluster](#delete)
+  - [Prerequisites](#prerequisites)
+  - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console)
+  - [Accessing your cluster](#accessing-your-cluster)
+  - [Removing a cluster from management](#removing-a-cluster-from-management)
 
 ## Prerequisites
-{: #prereq}
 
 You must have the following prerequisites before creating a cluster on GCP:
 
@@ -34,7 +33,6 @@ You must have the following prerequisites before creating a cluster on GCP:
 * A Red Hat OpenShift image pull secret. See [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html).
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
-{: #create_gui}
 
 To create clusters from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
@@ -73,20 +71,26 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 11. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
 ## Accessing your cluster 
-{: #access}
 
 To access a cluster that is managed by Red Hat Advanced Cluster Management for Kubernetes, complete the following steps:
 
 1. From the Red Hat Advanced Cluster Management for Kubernetes navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
-2. Select the *Options* menu for the cluster that you want to access.
+2. Select the name of the cluster that you created or want to access. The cluster details are displayed.
 
-3. Select **Launch to cluster**. 
+3. Select **Reveal credentials** to view the user name and password for the cluster. Note these values to use when you log in to the cluster. 
 
-  **Tip:** You can also access the cluster by selecting the name of the cluster on the *Clusters* page to access its details. The cluster URL is provided in the details. 
+4. Select **Console URL** to link to the cluster.
+
+5. Log in to the cluster by using the user ID and password that you found in step 3. 
+
+6. Select the *Actions* menu for the cluster that you want to access.
+
+7. Select **Launch to cluster**. 
+
+  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
 
 ## Removing a cluster from management
-{: #delete}
 
 When you remove a Red Hat OpenShift Cloud Platform cluster from management that was created with Red Hat Advanced Cluster Management for Kubernetes, you can either *detach* it or *destroy* it.  
 

@@ -2,19 +2,17 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-04-05"
+lastupdated: "2020-04-07"
 
 ---
 
 # Creating a provider connection for Amazon Web Services
 
 You need a provider connection to use Red Hat Advanced Cluster Management for Kubernetes console to deploy and manage an OpenShift cluster on Amazon Web Services (AWS). 
-{:shortdesc}
 
 **Note:** This procedure must be done before you can create a cluster with Red Hat Advanced Cluster Manager for Kubernetes. 
 
 ## Prerequisites
-{: #prereq}
 
 You must have the following prerequisites before creating a provider connection:
 
@@ -27,7 +25,6 @@ You must have the following prerequisites before creating a provider connection:
 * Account permissions that allow installing clusters on AWS. See [Configuring an AWS account](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html#installation-aws-permissions_installing-aws-account) for instructions on how to configure. 
 
 ## Creating a provider connection by using the console
-{: #create_gui}
 
 To create a provider connection from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
@@ -51,16 +48,15 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 8. Add your *AWS Secret Access Key ID*.
 
-9. Enter your *Red Hat OpenShift Pull Secret*. 
+9. Enter your *Red Hat OpenShift Pull Secret*. You can download your pull secret from [Pull secret](https://cloud.redhat.com/openshift/install/pull-secret).
 
-10. Add your *SSH Private Key* and *SSH Public Key*. See [Generating an SSH private key and adding it to the agent](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-default.html#ssh-agent-using_installing-aws-default) for more information about how to generate a key.
+10. Add your *SSH Private Key* and *SSH Public Key*, which allows you to connect to the cluster. See [Generating an SSH private key and adding it to the agent](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-default.html#ssh-agent-using_installing-aws-default) for more information about how to generate a key.
 
 11. Click **Create**. When you create the provider connection, it is added to the list of provider connections.
 
 You can create a cluster that uses this provider connection by completing the steps in [Creating an OpenShift cluster on Amazon Web Services] (create_ocp_aws.md).
 
 ## Deleting your provider connection
-{: #delete}
 
 When you are no longer managing a cluster that is using a provider connection, delete the provider connection to protect the information in the provider connection. 
 

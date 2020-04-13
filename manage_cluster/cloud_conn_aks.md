@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-04-05"
+lastupdated: "2020-04-07"
 
 ---
 
@@ -15,7 +15,6 @@ You need a provider connection to use Red Hat Advanced Cluster Management for Ku
 **Note:** This procedure is a prerequisite for creating a cluster with Red Hat Advanced Cluster Manager for Kubernetes. 
 
 ## Prerequisites
-{: #prereq}
 
 You must have the following prerequisites before creating a provider connection:
 
@@ -28,7 +27,6 @@ You must have the following prerequisites before creating a provider connection:
 * Azure login credentials, which include your Base Domain Resource Group and Azure Service Principal JSON. See [azure.microsoft.com](https://azure.microsoft.com/en-ca/features/azure-portal).
 
 ## Creating a provider connection by using the console
-{: #create_gui}
 
 To create a provider connection from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
@@ -52,16 +50,15 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 8. Add your *Azure Service Principal JSON*.
 
-9. Enter your *Red Hat OpenShift Pull Secret*. 
+9. Enter your *Red Hat OpenShift Pull Secret*. You can download your pull secret from [Pull secret](https://cloud.redhat.com/openshift/install/pull-secret). 
 
-10. Add your *SSH Private Key* and *SSH Public Key*. See [Generating an SSH private key and adding it to the agent](https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-default.html) for more information about how to generate a key.
+10. Add your *SSH Private Key* and *SSH Public Key* to use to connect to the cluster. See [Generating an SSH private key and adding it to the agent](https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-default.html) for more information about how to generate a key.
 
 11. Click **Create**. When you create the provider connection, it is added to the list of provider connections.
 
 You can create a cluster that uses this provider connection by completing the steps in [Creating an OpenShift cluster on Microsoft Azure] (create_aks.md).
 
 ## Deleting your provider connection
-{: #delete}
 
 When you are no longer managing a cluster that is using a provider connection, delete the provider connection to protect the information in the provider connection. 
 

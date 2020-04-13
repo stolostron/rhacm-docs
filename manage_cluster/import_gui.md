@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2019-03-11"
+lastupdated: "2020-03-11"
 
 ---
 
@@ -10,29 +10,27 @@ lastupdated: "2019-03-11"
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to import an existing cluster. You need your terminal for authentication.
 
-- [Prerequisites](#prereq)
-- [Importing a cluster](#import)
-- [Removing a cluster](#delete)
+- [Prerequisites](#prerequisites)
+- [Importing a cluster](#importing-a-cluster)
+- [Removing a cluster](#removing-an-imported-cluster)
  
 ## Prerequisites
-{: #prereq}
 
 * You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. 
 * You need a cluster that you want to manage. 
 * Install `kubectl`. To install `kubectl`, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/). 
 
-<!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters.-->
+<!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters. (wait for testing, elder sending RFE)-->
 
 * You need the `base64` command line tool.
 
 **Required user type or access level**: Cluster administrator
 
 ## Importing a cluster
-{: #import}
 
 You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
 
- **Note:** A hub cluster cannot manage any other hub cluster; you must import an existing cluster.
+ **Note:** A hub cluster cannot manage _any_ other hub cluster; you must import an existing cluster.
 
 1. From the navigation menu, hover over **Automate infrastructure** and click **Clusters**.
 
@@ -44,7 +42,7 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
 5. **Optional:** Click to expand **Edit cluster import YAML file** and modify the endpoint configuration. 
 
-   See [Table 1. YAML file parameters and descriptions](#table_1) for details about each parameter.
+   See [Table 1. YAML file parameters and descriptions](#yaml-parameters-and-descriptions) for details about each parameter.
 
 6. **Optional**: After you import, you can add labels by clicking **Configure advanced parameters** and use these labels to search.
    
@@ -58,18 +56,11 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
 10. To deploy the `multicluster-endpoint` to the managed cluster, run the command that you generated and copied from _step 8_.
 
-  If you receive the following error, run the command again:
-
-  ```
-  error: unable to recognize "STDIN": no matches for kind "Endpoint" in version "multicloud.ibm.com/v1beta1"
-  ```
-
 11. Click **View cluster** to view the _Overview_ page and a summary of your cluster. 
 
 **Note** You can continue to import more clusters. Click **Import another** to repeat the process.
 
 ### YAML Parameters and descriptions
-{: #table_1}
 
 Table 1: The following table lists the parameters and descriptions that are available in the YAML file:
 
@@ -93,7 +84,6 @@ Table 1: The following table lists the parameters and descriptions that are avai
 {: caption="Table 1. Table of YAML file parameters and descriptions for imported clusters" caption-side="}
 
 ## Removing an imported cluster
-{: #delete}
 
 Complete the following procedure to remove an imported cluster and the `multicluster-endpoint` that was created on the managed cluster.
 

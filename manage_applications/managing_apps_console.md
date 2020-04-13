@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-10"
+lastupdated: "2020-04-06"
 
 ---
 
@@ -13,13 +13,11 @@ You can use the console to create, manage, view details, and troubleshoot applic
 
 The console includes different tools that each provide different application management capabilities. These capabilities allow you to easily create, find, update, deploy, and monitor applications resources.
 
-  * [Application dashboards](#applications)
+  * [Applications dashboards](#applications-dashboards)
   * [Search](#search)
   * [Topology](#topology)
-  * [Monitoring](#monitoring)
 
 ## Applications dashboards
-{: #applications}
 
 From the main _Applications_ dashboard, you can view information about all applications and select a specific application to view the dashboard for more information about that specific application.
 
@@ -74,7 +72,6 @@ From the _Resources_ tab for a single application, you can complete the followin
 * View the resource pipeline for the application, which includes the summary of the application resources, options to create resources, and a table that provides more details about the resources. The resource pipeline for a single application includes similar information to the pipeline for all applications. The difference between the two pipelines is that this pipeline is scoped to just the selected application.
 
 ## Search
-{: #search}
 
 The console search page supports searching for application resources by the component kind for each resource. To search for resources, use the following values:
 
@@ -94,10 +91,9 @@ From the search results, you can view identifying details for each resource, inc
 
 By clicking the resource name in the search results, a YAML editor opens and displays the YAML definition for the resource. You can choose to edit the definition within the editor. Any changes that you save are applied to the resource immediately.  
 
-For more information about using search, see [console components](../console/console.md)).
+For more information about using search, see [console components](../console/console.md).
 
 ## Topology
-{: #topology}
 
 The Topology page provides you with a visualization of your applications, clusters, relationships, and policies. The application topology includes a visualization of the components that comprise each application. The topology view for each application includes any deployables, services, deployments, charts, and pods for that application.
 

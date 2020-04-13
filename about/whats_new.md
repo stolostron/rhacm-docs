@@ -10,13 +10,13 @@ lastupdated: "2020-03-02"
 
 Red Hat Advanced Cluster Management for Kubernetes provides visibility of your entire Kubernetes domain with built-in governance and application life-cycle management.
 
-Get an overivew of Red Hat Advanced Cluster Management for Kubernetes from the [Product Welcome page](../about/welcome.md). See the [architecture page](../about/architecture.md) to learn more about major components of the product.
+Get an overview of Red Hat Advanced Cluster Management for Kubernetes from the [Product Welcome page](../about/welcome.md). See the [architecture page](../about/architecture.md) to learn more about major components of the product.
 
 To learn about the Red Hat Advanced Cluster Management for Kubernetes console capabilities, see [Observability in the console](../console/console_intro.md).
 
 ## Installation
 
-With operator-based installation, you can install a working Red Hat OpenShift cluster on a configured cloud provide, such as Amazon Web Services, in less than 10 minutes. See [Installing Red Hat Advanced Cluster Management for Kubernetes when connected](../install/install_connected.md) for more information.  
+With operator-based installation, you can install a working Red Hat OpenShift cluster on a configured cloud provider, such as Amazon Web Services, in less than 10 minutes. See [Installing Red Hat Advanced Cluster Management for Kubernetes when connected](../install/install_connected.md) for more information.  
   
 ## Cluster management
 
@@ -40,7 +40,7 @@ Create and manage applications across environments through channel and subscript
 
   - Channels are custom resource definitions that can help you streamline deployments and separate cluster access. Channels define a namespace within the hub cluster and point to a physical place where resources are stored for deployment.
   
-  - Subscriptions (subscription.apps.open-cluster-management.io) are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources (in GitHub, Objectstores, or hub deployables) and Helm charts within channels by using annotations, labels, and versions.
+  - Subscriptions are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources (in GitHub, Objectstores, or hub deployables) and Helm charts within channels by using annotations, labels, and versions.
 
 ## Security and compliance
 

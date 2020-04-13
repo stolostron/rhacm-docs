@@ -2,15 +2,13 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-09"
+lastupdated: "2020-04-09"
 
 ---
 
 # Multicluster commands (mc)
-{: #cli_mc_commands}
 
 Learn about the `oc mc` commands that you can run to access your Red Hat Advanced Cluster Management for Kubernetes cluster.
-{:shortdesc}
 
 Many of the `oc mc` commands correspond to `kubectl` commands that are similar. In most cases, the `oc mc` command provides the same functionality as its `kubectl` counterpart, but the `oc mc` commands apply to a multi-cluster environment. 
 
@@ -19,25 +17,23 @@ For example, the `oc mc get pods` command lists the pods on one or more managed 
 The options that are available for the `oc mc` commands are generally a subset of the options that are available with the `kubectl` commands, but the content and format of the results that are returned from the `oc mc` commands should be similar to the results from the `kubectl` commands.
 
 ## oc mc
-{: #mc}
 
- * [oc mc apply](#apply)
- * [oc mc cluster import](#cluster_import)
- * [oc mc cluster list](#cluster_list)
- * [oc mc cluster remove](#cluster_remove)
- * [oc mc cluster template](#cluster_template)
- * [oc mc create](#create)
- * [oc mc create helmrepo](#create_helmrepo)
- * [oc mc delete](#delete)
- * [oc mc deploy application](#deploy_application)
- * [oc mc describe](#describe)
- * [oc mc edit](#edit)
- * [oc mc get](#get)
- * [oc mc label](#label)
- * [oc mc logs](#logs)
+ * [oc mc apply](#oc-mc-apply)
+ * [oc mc cluster import](#oc-mc-cluster-import)
+ * [oc mc cluster list](#oc-mc-cluster-list)
+ * [oc mc cluster remove](#oc-mc-cluster-remove)
+ * [oc mc cluster template](#oc-mc-cluster-template)
+ * [oc mc create](#oc-mc-create)
+ * [oc mc create helmrepo](#oc-mc-create-helmrepo)
+ * [oc mc delete](#oc-mc-delete)
+ * [oc mc deploy application](#oc-mc-deploy-application)
+ * [oc mc describe](#oc-mc-describe)
+ * [oc mc edit](#oc-mc-edit)
+ * [oc mc get](#oc-mc-get)
+ * [oc mc label](#oc-mc-label)
+ * [oc mc logs](#oc-mc-logs)
 
 ## oc mc apply
-{: #apply}
 
 Apply a configuration to a resource by `filename` or `stdin`.
 
@@ -62,10 +58,8 @@ OPTIONS:
    -v, -v               Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule            Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc cluster import
-{: #cluster_import}
 
 Import a cluster
 
@@ -92,10 +86,8 @@ OPTIONS:
    -v, -v                     Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule                  Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc cluster list
-{: #cluster_list}
 
 List the clusters imported
 
@@ -114,10 +106,8 @@ OPTIONS:
    -v, -v              Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule           Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc cluster remove
-{: #cluster_remove}
 
 Remove an imported cluster
 
@@ -141,10 +131,8 @@ OPTIONS:
    -v, -v                    Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule                 Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc cluster template
-{: #cluster_template}
 
 Output a template config.yaml file used for cluster import
 
@@ -164,10 +152,8 @@ OPTIONS:
    -v, -v              Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule           Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc create
-{: #create}
 
 Create a resource from a file or from stdin
 
@@ -192,10 +178,8 @@ OPTIONS:
    -v, -v               Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule            Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc create helmrepo
-{: #create_helmrepo}
 
 Create a Helm repository
 
@@ -220,10 +204,8 @@ OPTIONS:
    -v, -v               Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule            Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc delete
-{: #delete}
 
 Delete resources by file names, stdin, resources and names, or by resources and label selector
 
@@ -252,10 +234,8 @@ OPTIONS:
    -v, -v               Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule            Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc deploy application
-{: #deploy_application}
 
 Deploy an application
 
@@ -280,10 +260,8 @@ OPTIONS:
    -v, -v               Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule            Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc describe
-{: #describe}
 
 Show details of a specific resource or group of resources
 
@@ -312,10 +290,8 @@ OPTIONS:
    -v, -v               Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule                Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc edit
-{: #edit}
 
 Edit a resource from the default editor
 
@@ -341,10 +317,8 @@ OPTIONS:
    --vmodule               Comma-separated list of pattern=N settings for file-filtered logging
    --windows-line-endings  Defaults to the line ending native to your platform.
 ```
-{: codeblock}
 
 ## oc mc get
-{: #get}
 
 Display one or many resources
 
@@ -379,10 +353,8 @@ OPTIONS:
    --vmodule                      Comma-separated list of pattern=N settings for file-filtered logging
    --watch, -w                    After listing/getting the requested object, watch for changes; uninitialized objects are excluded if no object name is provided
 ```
-{: codeblock}
 
 ## oc mc label
-{: #label}
 
 Update the labels on a resource
 
@@ -408,10 +380,8 @@ OPTIONS:
    -v, -v               Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule            Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}
 
 ## oc mc logs
-{: #logs}
 
 Print the logs for a container in a pod
 
@@ -440,4 +410,3 @@ OPTIONS:
    -v, -v               Sets the verbosity level of the information returned in the logs with an integer between 0 and 9, where 9 is the most verbose (default v=0) 
    --vmodule            Comma-separated list of pattern=N settings for file-filtered logging
 ```
-{: codeblock}

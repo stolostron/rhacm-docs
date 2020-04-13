@@ -33,18 +33,17 @@ For more information about deployables and other application resources, see [App
 
 The channel type can be specified with the `spec.sourceNamespaces` and `spec.type` fields of a channel spec. When a channel is created and pointing to a source, the channel controller maintains the promotion of the deployables at the source. The controller also synchronizes the source and channel namespaces.
 
-  * [Create a channel](#channel_create)
-  * [Update a channel](#channel_update)
-  * [Delete a channel](#channel_delete)
-  * [Managing deployments with channels](#channel_deployable)
-  * [Channel status and synchronization](#channel_status)
-  * [View the channel definition YAML](#channel_compose)
-  * [View an example channel](#channel_example)
+  * [Create a channel](#create-a-channel)
+  * [Update a channel](#update-a-channel)
+  * [Delete a channel](#delete-a-channel)
+  * [Managing deployments with channels](#managing-deployments-with-channels)
+  * [Channel status and synchronization](#channel-status-and-synchronization)
+  * [Channel definition YAML structure](#channel-definition-yaml-structure)
+  * [Example channel YAML](#example-channel-yaml)
 
 ## Create a channel
-{: #channel_create}
 
-1. Compose your channel definition YAML content. To create or update a channel resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Channel definition](#channel_compose).
+1. Compose your channel definition YAML content. To create or update a channel resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Channel definition YAML structure](#channel-definition-yaml-structure).
 
 2. Optional. If you are creating an `Namespace` type channel, create the namespace on your hub cluster. You can define the namespace as part of your YAML definition or use the Kubernetes command line interface (`kubectl`) tool to create the namespace.
   
@@ -53,14 +52,12 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
    ```
    kubectl create namespace <namespace name>
    ```
-   {: codeblock}
 
 3. Optional. If you need or want to use a Kubernetes Secret for authenticating the access to a repository or chart by the channel, create the Kubernetes Secret resource. You can use the Kubernetes command line interface (`kubectl`) tool to create the Kubernetes Secret by running the following command:
 
     ```
     kubectl create secret <secret name> generic --from-literal=user --from-literal=password=
     ```
-    {: codeblock}
 
    You can use a secret for authentication with only `HelmRepo`, `ObjectBucket`, and `GitHub` type channels. To associate a secret with a channel, include the `spec.secretRef.name` setting in your channel YAML definition.
 
@@ -90,23 +87,20 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
         ```
         kubectl apply -f filename.yaml
         ```
-        {: codeblock}
 
      3. Verify that your channel resource is created, by running the following command:
 
         ```
         kubectl get Channel
         ```
-        {: codeblock}
 
         Ensure that your new channel is listed in the resulting output.
 
-   * To use REST API, you need to use the [channel POST API](../apis/mcm/channels.json).
+   * To use REST API, you need to use the [channel POST API](../apis/channels.json).
 
-## Updating a channel
-{: #channel_update}
+## Update a channel
 
-1. Compose the definition updates for your channel. For more information about the YAML structure, including the required fields, see [Channel definition](#channel_compose).
+1. Compose the definition updates for your channel. For more information about the YAML structure, including the required fields, see [Channel definition YAML structure](#channel-definition-yaml-structure).
 
 2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
@@ -128,10 +122,9 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a channel.
 
-   * To use REST API, use the [channel PATCH API](../apis/mcm/channels.json).
+   * To use REST API, use the [channel PATCH API](../apis/channels.json).
 
-## Deleting a channel
-{: #channel_delete}
+## Delete a channel
 
 To delete a channel, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
 
@@ -150,18 +143,16 @@ To delete a channel, you can use the console, the Kubernetes command line interf
      ```
      kubectl delete Channel <name> -n <namespace>
      ```
-     {: codeblock}
+
   2. Verify that your channel is deleted by running the following command:
 
      ```
      kubectl get Channel <name>
      ```
-     {: codeblock}
 
-* To use REST API, use the [channel DELETE API](../apis/mcm/channels.json).
+* To use REST API, use the [channel DELETE API](../apis/channels.json).
 
 ## Managing deployments with channels
-{: #channel_deployable}
 
 You can use channels and subscriptions to manage the continuous delivery of deployables, such as Helm charts and Kubernetes deployable objects, to your managed clusters or other namespaces.
 
@@ -178,7 +169,6 @@ For channels that do not include gate requirements, the channel controller promo
 Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables that are promoted to a channel can be accessed by only the subscriptions for that channel. When channels and subscriptions exist, the channels and subscriptions work together to retrieve deployables from the channel source and place the deployables at the destination. The destination is typically a managed cluster, which is abstracted as a namespace. A managed cluster or namespace can subscribe to multiple channels for identifying the deployables to deploy to the cluster. Channels ensure that the correct deployable is available for retrieval. Subscriptions ensure that the deployable is retrieved and placed on the destination namespaces or clusters. For retrieving a deployable, the subscription operator checks the annotation limits and determines whether to retrieve and apply the deployable to the managed cluster.
 
 ## Channel status and synchronization
-{: #channel_status}
 
 Channels do not have a status, while a subscription that subscribes to a channel does have a status. The status for a subscription reports whether the subscription is successfully propagated on the hub cluster, and whether the subscription successfully created or applied a deployable template or created the helmRelease CR. The status for the deployables that are deployed through the use of channels and subscriptions are reported separately from the subscription.
 
@@ -191,7 +181,6 @@ For a subscription to a namespace type channel, resources are synchronized for a
 For subscriptions to Helm repository and object store type channels, the subscription watches the channel source repositories for new or updated Helm charts or deployables. The subscriptions do not need to communicate with the hub cluster unless the source repository is on the hub cluster. If subscriptions are set up to pull the latest version for a Helm release or deployable object, and new versions are included in the repository types, the subscriptions can retrieve the versions.  
 
 ## Channel definition YAML structure
-{: #channel_compose}
 
 The following YAML structures show the required fields for a channel and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
@@ -211,7 +200,6 @@ spec:
     annotations:
   labels:
 ```
-{: codeblock}
 
 |Field|Description|
 |-- | -- |
@@ -221,7 +209,7 @@ spec:
 | metadata.namespace | Required. The namespace for the channel. |
 | spec.sourceNamespaces | Optional. Identifies the namespace that the channel controller monitors for new or updated deployables to retrieve and promote to the channel. For a `Namespace` channel, the namespace must be on the hub cluster. |  
 | spec.type | Required. The channel type. The supported types are: `Namespace`, `HelmRepo`, `GitHub`, and `ObjectBucket` |
-| spec.pathname | Required for `HelmRepo`, `GitHub`, and `ObjectBucket` channels. <ul><li>For a `HelmRepo` channel, set the value to be the URL for the Helm repository.</li><li>For an `ObjectBucket` channel, set the value to be the URL for the Object store.</li><li>For a `GitHub` channel, set the value to be the HTTPS URL for the GitHub repository.</li><li>For a `Namespace` channel, set the value to be the namespace where the channel is included.</li></ul> |
+| spec.pathname | Required for `HelmRepo`, `GitHub`, `ObjectBucket`, `Namespace` channels. <ul><li>For a `HelmRepo` channel, set the value to be the URL for the Helm repository.</li><li>For an `ObjectBucket` channel, set the value to be the URL for the Object store.</li><li>For a `GitHub` channel, set the value to be the HTTPS URL for the GitHub repository.</li><li>For a `Namespace` channel, set the value to be the namespace where the channel is included.</li></ul> |
 | spec.secretRef.name | Optional. Identifies a Kubernetes Secret resource to use for authentication, such as for accessing a repository or chart. You can use a secret for authentication with only `HelmRepo`, `ObjectBucket`, and `GitHub` type channels. |
 | spec.gates | Optional. Defines requirements for promoting a deployable within the channel. If no requirements are set, any deployable that is added to the channel namespace or source is promoted to the channel. `gates` do not apply for `HelmRepo` and `GitHub` channel types, only for `Namespace` and `ObjectBucket` channel types. |
 | spec.gates.annotations | Optional. The annotations for the channel. Deployables must have matching annotations to be included in the channel. |
@@ -229,17 +217,15 @@ spec:
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 ## Example channel YAML
-{: #channel_example}
 
 The following YAML content defines an example for each channel type:
 
-* [Namespace](#channeldef_namespace)
-* [Object store](#channeldef_objectbucket)
-* [Helm repository](#channeldef_helmrepo)
-* [GitHub repository](#channeldef_gitrepo)
+* [Kubernetes namespace (`Namespace`) channel](#kubernetes-namespace-namespace-channel)
+* [Object store bucket (`ObjectBucket`) channel](#object-store-bucket-objectbucket-channel)
+* [Helm repository (`HelmRepo`) channel](#helm-repository-helmrepo-channel)
+* [GitHub (`GitHub`) repository](#github-github-repository)
 
-### Kubernetes namespace (`Namespace`) channel example
-{: #channeldef_namespace}
+### Kubernetes namespace (`Namespace`) channel
 
 The following example channel definition abstracts a namespace as a channel that holds deployable resources. When this YAML is applied, a namespace `ch-qa` is created for the channel that is named `qa`. When created, this channel points to the source default namespace for identifying deployables. The channel controller maintains the resources at the actual namespace location and ensures that the resources are kept up-to-date.
 
@@ -258,10 +244,8 @@ The following example channel definition abstracts a namespace as a channel that
       annotations:
         dev-ready: approved
   ```
-  {: codeblock}
 
-### Object store bucket (`ObjectBucket`) channel example
-{: #channeldef_objectbucket}
+### Object store bucket (`ObjectBucket`) channel 
 
 The following example channel definition abstracts an object store bucket as a channel:
 
@@ -280,10 +264,8 @@ spec:
    annotations:
      dev-ready: true
 ```
-{: codeblock}
 
 ### Helm repository (`HelmRepo`) channel
-{: #channeldef_helmrepo}
 
 The following example channel definition abstracts a Helm repository as a channel:
 
@@ -312,7 +294,6 @@ metadata:
   name: insecure-skip-verify
   namespace: hub-repo
 ```
-{: codeblock}
 
 The following channel definition shows another example of a Helm repository channel:
 
@@ -330,7 +311,6 @@ spec:
 ```
 
 ### GitHub (`GitHub`) repository 
-{: #channeldef_gitrepo}
 
 The following example channel definition shows an example of a channel for the GitHub Repository. In the following example, `secretRef` refers to the user identity used to access the GitHub repo that is specified in the `pathname`. If you have a public repo, you do not need the `secretRef`:
 
@@ -355,5 +335,4 @@ data:
   user: dXNlcgo=            # Value of user and accessToken is Base 64 coded.
   accessToken: cGFzc3dvcmQ
 ```
-{: codeblock}
 

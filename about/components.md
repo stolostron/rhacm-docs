@@ -6,23 +6,28 @@ lastupdated: "2020-03-30"
 
 ---
 
-# Services and components 
+# Components
 
-See the following tables for information about components that are installed and enabled on the hub cluster by default and the managed cluster.
+See the following tables for information about components that are installed and enabled on the hub cluster by default and the managed cluster. See what components are required and if it applies, the default value that is required.
 
-## Red Hat Advanced Cluster Management for Kubernetes default enabled services
 
-|Service|Description (needed)|Required|
+- [Default enabled services](#default-enabled-services)
+- [Default enabled hub cluster components](#default-enabled-hub-cluster-components)
+- [Default enabled components managed cluster](#default-enabled-managed-cluster-components)
+
+## Default enabled services
+
+|Service|Description|Required|
 |--------|-----------|-------------------|
 |management-ingress|Unifies all management services behind a network ingress controller with predictable annotations and TLS protection. This service should not be accessed directly.|Yes|
 |cert-manager|This service manages the lifecycle of certificates.|Yes|
 |cert-manager-webhook|This service extends the Kubernetes API server so the certificate manager resources can be dynamically validated.|Yes|
 |configmap-watcher|This service can be used to restart pods when a dependent config map is updated.|Yes|
-|mongo-db|All platform services that require a persistent data store use the MongoDB service. Highly available topologies for MongoDB are supported out of the box. This is a service that should not be accessed directly.|Yes|
+|mongo-db|All platform services that require a persistent data store use the MongoDB service. Highly available topologies for MongoDB are supported out of the box. This is a service that should not be accessed directly.|Yes, 5G|
 |etcd|A distributed key-value store|Yes|
 {: caption="Table 1. Red Hat Advanced Cluster Management for Kubernetes default enabled services" caption-side="top"}
 
-## Red Hat Advanced Cluster Management for Kubernetes default enabled components on the hub cluster
+## Default enabled hub cluster components
 
 |Service|Description (needed)|Required|
 |--------|-----------|---------------------|
@@ -39,7 +44,7 @@ See the following tables for information about components that are installed and
 |mcm-controller|Service that processes events and requests to Red Hat Advanced Cluster Management for Kubernetes resources|Yes|
 |mcm-webhook|This service extends the Kubernetes API server so the `mcm-apiserver` resources can be dynamically validated.|Yes|
 |multicluster-operators|Manages and reconciles subscriptions|Yes|
-|multiclusterhub-operator| Operator for installing Red Hat Advanced Cluster Management for Kubernetes on a hub cluste|Yes|
+|multiclusterhub-operator| Operator for installing Red Hat Advanced Cluster Management for Kubernetes on a hub cluster|Yes|
 |multiclusterhub-repo| Service for hosting internal-facing Helm repository, pre-populated with required component Helm charts |Yes|
 |rcm-api|Handles API requests related to cluster lifecycle management|Yes|
 |rcm-controller|Controller that handles cluster lifecycle management|Yes|
@@ -52,7 +57,7 @@ See the following tables for information about components that are installed and
 |topology-api|Provides the backend services for the topology-ui service|Yes|
 {: caption="Table 2. Red Hat Advanced Cluster Management for Kubernetes default enabled components on the hub cluster" caption-side="top"}
 
-## Red Hat Advanced Cluster Management for Kubernetes enabled components on the managed cluster
+## Default enabled managed cluster components
 
 The following table shows the services that are installed on the managed cluster:
 

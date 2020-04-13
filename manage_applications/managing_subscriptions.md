@@ -21,18 +21,17 @@ Subscriptions are defined with a `subscription.apps.open-cluster-management.io` 
 
 For more information about deployables and other application resources, see [Application resources](app_resources.md).
 
-  * [Create a subscription](#subscription_create)
-  * [Matching a subscription to an application](#subscription_app)
-  * [Update a subscription](#subscription_update)
-  * [Delete a subscription](#subscription_delete)
-  * [Schedule a subscription](#subscription_timewindow)
-  * [View the subscription YAML definition](#subscription_compose)
-  * [View an example subscription](#subscription_example)
+  * [Create a subscription](#create-a-subscription)
+  * [Matching a subscription to an application](#matching-a-subscription-to-an-application)
+  * [Update a subscription](#update-a-subscription)
+  * [Delete a subscription](#delete-a-subscription)
+  * [Schedule a subscription](#schedule-a-subscription)
+  * [View the subscription YAML definition](#view-the-subscription-yaml-definition)
+  * [View an example subscription](#view-an-example-subscription)
 
 ## Creating a subscription
-{: #subscription_create}
 
-1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription_compose).
+1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription-definition).
 
 2. Create the subscription within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
 
@@ -53,7 +52,7 @@ For more information about deployables and other application resources, see [App
      4. Enter the YAML content to define your subscription or directly update the default YAML template to meet your requirements.
      5. When you are finished, click **Save** to create the subscription. Your new subscription displays within the __Resource pipeline__ for the corresponding applications and channels.
 
-     **Note:** The subscription might not initially display in your resource pipeline for any application. For the subscription to be associated with an application, you need to include the appropriate values in your subscription definition to match the required values that are defined by the application definition. For more information, see [Matching a subscription to an application](#subscription_app).
+     **Note:** The subscription might not initially display in your resource pipeline for any application. For the subscription to be associated with an application, you need to include the appropriate values in your subscription definition to match the required values that are defined by the application definition. For more information, see [Matching a subscription to an application](#matching-a-subscription-to-an-application).
 
    * To use the Kubernetes CLI tool:
 
@@ -62,14 +61,12 @@ For more information about deployables and other application resources, see [App
         ```
         kubectl apply -f filename.yaml
         ```
-        {: codeblock}
 
      2. Verify that your subscription resource is created, by running the following command:
 
         ```
         kubectl get Subscription
         ```
-        {: codeblock}
 
         Ensure that your new subscription is listed in the resulting output.
 
@@ -111,7 +108,6 @@ If you created your subscription on a stand-alone cluster or a cluster that you 
   The subscription does not subscribe to any resources from the specified channel.
 
 ## Matching a subscription to an application
-{: #subscription_app}
 
 To associate a subscription with an application, both the subscription and application must be in the same namespace so that the subscription can retrieve Helm charts, deployables, or other resources from a channel.
 
@@ -124,9 +120,8 @@ When the subscription is associated with an application, the subscription uses t
 For more information about the resource definition for an application, see [Creating and managing applications](managing_apps.md).
 
 ## Updating a subscription
-{: #subscription_update}
 
-1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription_compose.md).
+1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription-definition).
 
 2. Create the subscription within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
 
@@ -161,7 +156,6 @@ For more information about the resource definition for an application, see [Crea
    * To use REST API, use the [subscription PATCH API](../apis/mcm/subscriptions.json).
 
 ## Scheduling resource deployments for a subscription
-{: #subscription_timewindow}
 
 If you need to deploy new or changed Helm charts, deployables, or other Kubernetes resources during only specific times, you can define subscriptions for those resources to begin deployments during only those specific times. For instance, you can define time windows between 10:00 PM and 11:00 PM each Friday to serve as scheduled maintenance windows for applying patches or other application updates to your clusters.
 
@@ -191,7 +185,6 @@ To define a time window for a subscription, you need to add the required fields 
 * You can define multiple time windows for a subscription, such as to define a time window every Monday and Wednesday.  
 
 ## Deleting subscriptions
-{: #subscription_delete}
 
 To delete a subscription, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
 
@@ -210,19 +203,16 @@ To delete a subscription, you can use the console, the Kubernetes command line i
      ```
      kubectl delete Subscription <name> -n <namespace>
      ```
-     {: codeblock}
 
   2. Verify that your subscription is deleted by running the following command:
 
      ```
      kubectl get Subscription <name>
      ```
-     {: codeblock}
 
 * To use REST API, use the [subscription DELETE API](../apis/mcm/subscriptions.json).
 
 ## Subscription definition YAML structure
-{: #subscription_compose}
 
 The following YAML structure shows the required fields for a subscription and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
@@ -271,7 +261,6 @@ spec:
       - start:
         end:
 ```
-{: codeblock}
 
 |Field|Description|
 |-- | -- |
@@ -290,7 +279,7 @@ spec:
 | spec.packageOverrides | Optional. Section for defining overrides for the Kubernetes resource that is subscribed to by the subscription, such as a Helm chart, deployable, or other Kubernetes resource within a channel. |
 | spec.packageOverrides.packageName  | Optional, but required for setting an override. Identifies the Kubernetes resource that is being overwritten. |
 | spec.packageOverrides.packageAlias | Optional. Gives an alias to the Kubernetes resource that is being overwritten. |
-| spec.packageOverrides.packageOverrides | Optional. The configuration of parameters and replacement values to use to override the Kubernetes resource. For more information, see [Package overrides](#package_overrides). |
+| spec.packageOverrides.packageOverrides | Optional. The configuration of parameters and replacement values to use to override the Kubernetes resource. For more information, see [Package overrides](#package-overrides). |
 | spec.placement | Required. Identifies the subscribing clusters where deployables need to be placed, or the placement rule that defines the clusters. Use the placement configuration to define values for multi-cluster deployments. |
 | spec.local | Optional, but required for a stand-alone cluster or cluster that you want to manage directly. Defines whether the subscription must be deployed locally. Set the value to `true` to have the subscription synchronize with the specified channel. Set the value to `false` to prevent the subscription from subscribing to any resources from the specified channel. Use this field when your cluster is a stand-alone cluster or you are managing this cluster directly. If your cluster is part of a multi-cluster and you do not want to manage the cluster directly, use only one of `clusters`, `clusterSelector`, or `placementRef` to define where your subscription is to be placed. If your cluster is the Hub of a multi-cluster and you want to manage the cluster directly, you must register the Hub as a managed cluster before the subscription operator can subscribe to resources locally. |
 | spec.placement.clusters | Optional. Defines the clusters where the subscription is to be placed. Use only one of `clusters`, `clusterSelector`, or `placementRef` to define where your subscription is to be placed for a multi-cluster. If your cluster is a stand-alone cluster that is not your Hub cluster, you can also use `local`. |
@@ -323,7 +312,6 @@ spec:
   3. `clusterSelector`
 
 ### Package overrides
-{: #package_overrides}
 
 Package overrides for a subscription override values for the Helm chart or Kubernetes resource that is subscribed to by the subscription.
 
@@ -338,7 +326,6 @@ packageOverrides:
   - path: spec
     value: my-override-values
 ```
-{: codeblock}
 
 The contents for the `value` field are used to override the values within the `spec` field of the `HelmRelease` spec.
 
@@ -355,21 +342,18 @@ The contents for the `value` field are used to override the values within the `s
   - packageName: nginx-ingress
     packageAlias: my-helm-release-name
   ```
-  {: codeblock}
 
 ## Example subscription YAML 
-{: #subscription_example}
 
 The following YAML content defines example subscriptions:
 
-  * [Channel subscription example](#channel_example)
-  * [Scheduled channel subscription example](#timewindow_example)
-  * [Channel subscription example with overrides](#channel_example_overrides)
-  * [Helm repository subscription example](#helm_example)
-  * [GitHub repository subscription example](#github_example)
+  * [Channel subscription example](#channel-subscription-example)
+  * [Scheduled channel subscription example](#scheduled-channel-subscription-example)
+  * [Channel subscription example with overrides](#channel-subscription-example-with-overrides)
+  * [Helm repository subscription example](#helm-repository-subscription-example)
+  * [GitHub repository subscription example](#github-repository-subscription-example)
 
 ### Channel subscription example
-{: #channel_example}
 
 ```YAML
 apiVersion: apps.open-cluster-management.io/v1
@@ -382,10 +366,8 @@ spec:
     clusters:
     - name: my-development-cluster-1
 ```
-{: codeblock}
 
 ### Scheduled channel subscription example
-{: #timewindow_example}
 
 The following example subscription includes multiple configured time windows. A time window occurs between 10:20 AM and 10:30 AM occurs every Monday, Wednesday, and Friday. A time window also occurs between 12:40 PM and 1:40 PM every Monday, Wednesday, and Friday. The subscription is active only during these six weekly time windows for deployments to begin.  
 
@@ -416,10 +398,8 @@ spec:
       - start: "12:40PM"
         end: "1:40PM"
 ```
-{: codeblock}
 
 ### Channel subscription example with overrides
-{: #channel_example_overrides}
 
 The following example includes package overrides to define a different release name of the Helm release for Helm chart. A package override setting is used to set the name `my-nginx-ingress-releaseName` as the different release name for the  `nginx-ingress` Helm release.
 
@@ -443,10 +423,8 @@ spec:
   placement:
     local: false
 ```
-{: codeblock}
 
 ### Helm repository subscription example
-{: #helm_example}
 
 The following subscription automatically pulls the latest `nginx` Helm release for the version `1.x`. The Helm release deployable is placed on the `mydevcluster1` cluster when a new version is available in the source Helm repository.
 
@@ -481,7 +459,6 @@ spec:
           registrationImage:
             pullSecret: hub-repo-docker-secret
 ```
-{: codeblock}
 
 ### GitHub repository subscription example
 

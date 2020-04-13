@@ -77,7 +77,6 @@ Complete the following steps to create a root CA certificate with OpenSSL:
 4. Validate the custom CA is in use by logging in to the console and view the details of the certificate being used. <!-- we should state the steps to do this; it migth be only 3 steps?-->
 
 ## Refreshing _cert-manager_ certificates
-{: #refresh}
 
 After the root CA is replaced, all certificates that are signed by the root CA must be refreshed and the services that use those certificates must be restarted. Cert-manager creates the default Issuer from the root CA so all of the certificates issued by `cert-manager`, and signed by the default ClusterIssuer must also be refreshed.
 
