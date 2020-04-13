@@ -49,7 +49,7 @@ From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you ge
 
 ## Observe environment details
 
-Reorganize your dashboard. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters: 
+Reorganize your dashboard. You can personalize your view of the Overview dashboard by reorganizing the resource overview cards. You can view the following information about your clusters:  
 
 * Name of the cloud service with the number of clusters
 * Cluster compliance
@@ -62,7 +62,7 @@ Additionally, the Heatmap displays color-coordinated boxes that represent the VC
 
 ### Filtering your results
 
-You can personalize the Overview page more with the filtering feature. Click **Filter results** to specify what information is displayed on your page.
+You can personalize your view of the page by using the filtering feature. Click **Filter results** to specify what information is displayed on your page.
 
 ## Automate infrastructure
 

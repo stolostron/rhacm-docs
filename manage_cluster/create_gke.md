@@ -24,7 +24,7 @@ You must have the following prerequisites before creating a cluster on GCP:
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster on GCP
 
-* GCP cloud connection. See [Setting up a cloud connection for Google Cloud Platform](cloud_conn_gke.md) for more information.
+* GCP provider connection. See [Setting up a provider connection for Google Cloud Platform](cloud_conn_gke.md) for more information.
 
 * A configured domain in GCP. See [Setting up a custom domain](https://cloud.google.com/endpoints/docs/openapi/dev-portal-setup-custom-domain) for instructions on how to configure a domain. 
 
@@ -50,9 +50,9 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 5. Enter the base domain information that you configured for your Azure account. See [Setting up a custom domain](https://cloud.google.com/endpoints/docs/openapi/dev-portal-setup-custom-domain) for more information. This name is used in the hostname of the cluster.
 
-6. Select **Google Cloud** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available cloud providers.
+6. Select **Google Cloud** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available providers.
 
-7. Select your cloud connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a cloud connection on Google Cloud Platform](cloud_conn_gke.md).
+7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on Google Cloud Platform](conn_cloud_gke.md).
    
 8. Configure the *Node pools* for your cluster. 
 
@@ -84,11 +84,11 @@ To access a cluster that is managed by Red Hat Advanced Cluster Management for K
 
 5. Log in to the cluster by using the user ID and password that you found in step 3. 
 
-6. Select the *Options* menu for the cluster that you want to access.
+6. Select the *Actions* menu for the cluster that you want to access.
 
 7. Select **Launch to cluster**. 
 
-  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Options* menu for the cluster, and selecting **Launch to cluster**.
+  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
 
 ## Removing a cluster from management
 

@@ -24,7 +24,7 @@ You need the following prerequisites before creating a cluster in a bare metal e
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster in the bare metal environment
 
-* Bare metal cloud connection; see [Creating a cloud connection for a bare metal environment](cloud_conn_bare.md) for more information
+* Bare metal provider connection; see [Creating a provider connection for a bare metal environment](cloud_conn_bare.md) for more information
 
 * Login credentials for your bare metal environment, which include user name, password, and Baseboard Management Controller Address
 
@@ -50,9 +50,9 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 6. Select **Bare Metal** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available cloud providers.
 
-7. Select your cloud connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a cloud connection for a bare metal environment](cloud_conn_bare.md).
+7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection for a bare metal environment](cloud_conn_bare.md).
    
-8. Select your hosts from the list of hosts that are associated with your Cloud connection. Select a minimum of three assets that are on the same bridge networks as the hypervisor. 
+8. Select your hosts from the list of hosts that are associated with your provider connection. Select a minimum of three assets that are on the same bridge networks as the hypervisor. 
 
 9. **Optional:** Configure the cluster networking options.
 
@@ -76,11 +76,11 @@ To access a cluster that is managed by Red Hat Advanced Cluster Management for K
 
 5. Log in to the cluster by using the user ID and password that you found in step 3. 
 
-6. Select the *Options* menu for the cluster that you want to access.
+6. Select the *Actions* menu for the cluster that you want to access.
 
 7. Select **Launch to cluster**. 
 
-  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Options* menu for the cluster, and selecting **Launch to cluster**.
+  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
 
 ## Removing a cluster from management
 

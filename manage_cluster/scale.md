@@ -2,13 +2,13 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-03-26"
+lastupdated: "2020-04-05"
 
 ---
 
 # Resizing a cluster before creating
 
-You can customize your cluster specifications, such as virtual machine sizes and number of nodes. See the following list of recommended settings for each available cloud provider, but also see the documentation for more specific information:
+You can customize your cluster specifications, such as virtual machine sizes and number of nodes. See the following list of recommended settings for each available provider, but also see the documentation for more specific information:
 
 * [Red Hat OpenShift Container Platform cluster in Amazon Web Services (AWS)](#red-hat-openshift-container-platform-cluster-in-amazon-web-services-aws) 
 * [Google Kubernetes Engine (GKE)](#google-kubernetes-engine)

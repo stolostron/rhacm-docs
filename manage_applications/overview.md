@@ -23,5 +23,3 @@ The application management functions provide you with unified and simplified opt
 - [Deploying an application resource](deployment_app.md)
 - [Deploying application resources with a rolling update](deployment_rollout.md)
 - [Managing applications with the console](managing_apps_console.md)
-- [Migrating subscriptions](migrate_subscriptions.md)
-
