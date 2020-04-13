@@ -48,4 +48,4 @@ The product supports Mozilla Firefox 74.0 or the latest version that is availabl
 
 ## Host adoption failed
 
-Bare metal hosts is not supported. An error message appears when you try to validate the host adoption. 
+Bare metal hosts are not supported. An error message appears when you try to validate the host adoption. 
