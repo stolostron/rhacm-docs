@@ -14,7 +14,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [LDAP user names are case-sensitive](#ldap-user-names-are-case-sensitive)
   - [CIS policy controller is not installed](#cis-policy-controller-is-not-installed)
   - [Console features might not display in Firefox earlier versions](#console-features-might-not-display-in-firefox-earlier-versions)
-  - [Host adoption failed](host-adoption-failed)
+  - [Host adoption failed](#host-adoption-failed)
 
 ## Certificate manager must not exist during an installation
 
