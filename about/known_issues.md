@@ -2,7 +2,7 @@
 
 copyright:
   years: 2020
-lastupdated: "2020-04-06"
+lastupdated: "2020-04-13"
 
 ---
 
@@ -14,6 +14,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [LDAP user names are case-sensitive](#ldap-user-names-are-case-sensitive)
   - [CIS policy controller is not installed](#cis-policy-controller-is-not-installed)
   - [Console features might not display in Firefox earlier versions](#console-features-might-not-display-in-firefox-earlier-versions)
+  - [Host adoption failed](host-adoption-failed)
 
 ## Certificate manager must not exist during an installation
 
@@ -44,3 +45,7 @@ You must enable the CIS policy controller. For more information, see _Enable the
 ## Console features might not display in Firefox earlier versions
 
 The product supports Mozilla Firefox 74.0 or the latest version that is available for Linux, macOS, and Windows. Upgrade to the latest version for the best console compatibility. 
+
+## Host adoption failed
+
+Bare metal hosts is not supported. An error message appears when you try to validate the host adoption. 
