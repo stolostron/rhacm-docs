@@ -30,7 +30,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
-2. On the _Clusters_ page, select the *Cloud connections* tab.
+2. On the _Clusters_ page, select the *Provider connections* tab.
   
   Existing provider connections are displayed. 
   
@@ -62,7 +62,7 @@ When you are no longer managing a cluster that is using a provider connection, d
 
 1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
-2. Select **Cloud connections**.
+2. Select **Provider connections**.
 
 3. Select the options menu beside the provider connection that you want to delete.
 
