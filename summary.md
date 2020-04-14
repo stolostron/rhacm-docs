@@ -46,7 +46,6 @@
        * [Deploying an application resource](manage_applications/deployment_app.md)
        * [Deploying an application resource with a rolling update](manage_applications/deployment_rollout.md)
        * [Managing applications with the console](manage_applications/managing_apps_console.md)
-       * [Migrating subscriptions](manage_applications/migrate_subscriptions.md)
  * [Security](governance/security.md)
    * [Certificates in Red Hat Advanced Cluster Management for Kubernetes](cert_manager/certificates.md)
        * [Replacing the root CA certificate](cert_manager/cert_root_ca.md)
