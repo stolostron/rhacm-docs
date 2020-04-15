@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-07"
-
----
-
 # Importing a managed cluster with the CLI
 
 Under construction.
@@ -24,7 +16,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
 * You must have an Red Hat Advanced Cluster Management for Kubernetes hub that is deployed and cluster that you want to manage.
 
-* You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/).
+* You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see _Install and Set Up kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos).
 
   **Note:** Download the installation file for CLI tools from the console.
 
