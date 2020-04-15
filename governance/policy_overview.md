@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-05"
-
----
-
 # Red Hat Advanced Cluster Management for Kubernetes policy overview
 
 An Red Hat Advanced Cluster Management for Kubernetes template is defined within a policy document. Each policy document can have at least one or multiple templates.
@@ -26,7 +18,9 @@ Each _policy_ within the policy document contains the following elements:
         * Parameter values for `standard, categories, and controls` are not required. The parameter value is empty when the values are not defined.
         * Use your internal security standards or industry standards for the `annotations` field. You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, from the console.
 
-  - A `namespace` selector that specifies which namespaces within the hub cluster that the policy is applied to.
+  - A `namespace` selector that specifies which namespaces within the hub cluster that the policy is applied to. 
+  
+    **Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.
 
   - A list of `templates`, such as `role-templates`, `object-templates`, and `policy-templates` within the policy that describes how a resource in Kubernetes might be defined, and whether it is allowed to exist.
 
