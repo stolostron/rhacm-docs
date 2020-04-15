@@ -10,23 +10,22 @@ Manage your cluster policy to remediate and edit your security policy.
 
 ## Updating your security policy from the console
 
-1. From the navigation menu, click **Govern risk**.
-2. Click the _Policies_ tab.
-3. Select a policy and click the **Options** icon. 
-4. Click **Edit**. The YAML file appears in the _Edit policy_ modal.
-5. Click **Submit**.
+1. From the navigation menu, click **Govern risk** to view a table list of your policies.
+2. Select a policy and click the **Options** icon. 
+3. Click **Edit**. The YAML file appears in the _Edit policy_ modal.
+4. Click **Submit**.
 
 Your policy is updated. 
 
 ## Viewing cluster policy violations from the console
 
-1. From the navigation menu, click **Govern risk**.
-2. From the _Policies_ tab, select a policy to view more details.
+1. From the navigation menu, click **Govern risk** to view a table list of your policies.
+2. Select a policy to view more details.
 3. Click the _Violations_ tab to view the table list of violations.
 
 ## Viewing image vulnerability violations from the console
 
-1. From the navigation menu, click **Govern risk**. 
+1. From the navigation menu, click **Govern risk** to view a table list of your policies. 
 2. Select the **`policy-imagemanifestvulnpolicy`** policy > **_Violations_ tab** to view the cluster location of the violation.
 
    Your image vulnerability violation might resemble the following:
@@ -49,13 +48,11 @@ After you create a security policy, it is enabled by default. Complete the follo
 
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
-2. From the navigation menu, click **Govern risk**.
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
 
-3. View a table list of your policies.
+3. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
 
-4. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
-
-5. Click **Disable policy**. 
+4. Click **Disable policy**. 
 
 Your policy is disbaled. 
 
@@ -85,11 +82,10 @@ Complete the following steps to delete your policy:
 
 Complete the following steps to delete your policy:
 
-1. From the navigation menu, click **Govern risk**.
-2. Click the _Policies_ tab. 
-3. Click the **Options** icon for the policy you want to delete in the policy violation table.
-4. Click **Remove**.
-5. From the _Remove policy_ dialog box, click **Remove policy**. 
+1. From the navigation menu, click **Govern risk** to view a table list of your policies.
+2. Click the **Options** icon for the policy you want to delete in the policy violation table.
+3. Click **Remove**.
+4. From the _Remove policy_ dialog box, click **Remove policy**. 
 
 Your policy is deleted.
 
