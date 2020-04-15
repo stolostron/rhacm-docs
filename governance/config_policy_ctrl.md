@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-04-06"
-
----
-
 # Kubernetes configuration policy controller
 
 Configuration policy controller can be used to configure any Kubernetes resource and apply security policies across your clusters.
@@ -143,10 +135,9 @@ A configuration policy is created and the `Policy` definition might resemble the
 You can view any configuration policy and its status from the console.
 
 1. Log in to your cluster from the console.
-2. From the navigation menu, click **Govern risk**. 
-3. Click the _Policies_ tab to view a summary of your policies and a table list of your policies.
-   **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab. 
-4. Select one of your policies.
+2. From the navigation menu, click **Govern risk** to view a table list of your policies. 
 
+   **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab. 
+3. Select one of your policies.
 
 For more information, see [Policy samples](../governance/policy_samples.md) to view policy samples that can be applied with the configuration policy controller.

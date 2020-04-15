@@ -1,14 +1,6 @@
----
-
-copyright:
-  years: 2020 
-lastupdated: "2020-04-05
-
----
-
 # Troubleshooting 
 
-**Important**: Install the Kubernetes CLI to run the troubleshooting commands. For more information, see _Overview of kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/overview/).
+**Important**: Install the Kubernetes CLI to run the troubleshooting commands. For more information, see _Install and Set Up kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos).
 
 View the list of troubleshoot topics for Red Hat Advanced Cluster Management for Kubernetes: 
 

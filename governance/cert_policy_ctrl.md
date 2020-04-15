@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-06"
-
----
-
 # Certificate policy controller
 
 Certificate policy controller can be used to detect certificates that are close to expiring. Configure and customize the certificate policy controller by updating the minimum duration parameter in your controller policy. To learn more, view the Certificate policy elements section in this document. When a certificate expires in less than the minimum duration amount of time, the policy becomes noncompliant.
@@ -204,8 +196,8 @@ A certificate policy is created and the `CertificatePolicy` definition within it
 You can view any certificate policy and its status from the console.
 
 1. Log in to your cluster from the console.
-2. From the navigation menu, click **Governance and risk**. 
-3. Click the _Policies_ tab to view a summary of your policies and a table list of your policies.
+2. From the navigation menu, click **Governance and risk** to view a table list of your policies.
+
    **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab. 
 4. Select one of your policies.
 

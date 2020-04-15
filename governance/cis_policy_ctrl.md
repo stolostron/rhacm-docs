@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-04-06"
-
----
-
 # CIS policy controller
 
 You can use the Center for Internet Security (CIS) policy controller to receive notifications about non-compliant clusters.
@@ -616,11 +608,11 @@ spec:
 
 View any CIS Policy and its status from the console.
 1. Log in to the Red Hat Advanced Cluster Management for Kubernetes console.
-2. From the navigation menu, click **Govern risk**.
-3. Click the _Policies_ tab to view a summary of your policies and a table list of your policies.
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
 
-**Note:** You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
-Select one of your policies.
+  **Note:** You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
+
+3. Select one of your policies.
 
 ## CIS risk score
 
