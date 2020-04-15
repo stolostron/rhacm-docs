@@ -33,6 +33,7 @@ View the RBAC table for the Red Hat Advanced Cluster Management console:
 |Bare metal assets | 	create, read, update, delete 	 | read 	 | read | read |
 |Manage applications 	 |create, read, update, delete 	 |create, read, update, delete 	 | read   | read |
 |Govern risk 	 |create, read, update, delete 	 |create, read, update, delete 	 |- 	 |- |
+| Provider conections | create, read, update, delete | create, read, update, delete | create, read, update, delete | -|
 {: caption="Table 2. Role-based access control for components in Red Hat Advanced Cluster Management" caption-side="top"}
 
 View the following sections for information about managing your cluster security:
