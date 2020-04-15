@@ -24,15 +24,15 @@ Red Hat Advanced Cluster Management for Kubernetes supports several roles. Your 
 
 View the RBAC table for the Red Hat Advanced Cluster Management console:
 
-| Console page | Cluster Administrator | Administrator | Operator | Editor | Viewer |
-|--------|--------------|-------|----------|--------|--------|
-|Welcome    | read     | read    | read   | read   | read     |
-|Overview 	 | read 	 | read  	 | read	 | read	 | read |
-|Topology 	 | read 	 | read 	 | read	 | read 	 | read |
-|Clusters 	 |create, read, update, delete 	 | read 	 | read | 	read 	 | read |
-|Bare metal assets | 	create, read, update, delete 	 | read 	 | read 	 | read | read |
-|Manage applications 	 |create, read, update, delete 	 |create, read, update, delete 	 | read   | read | 	read |
-|Govern risk 	 |create, read, update, delete 	 |create, read, update, delete 	 |- 	 |- 	 |- |
+| Console page | Cluster Administrator | Administrator | Editor | Viewer |
+|--------|--------------|-------|--------|--------|
+|Welcome    | read     | read    | read   | read     |
+|Overview 	 | read 	 | read  	 | read	 | read |
+|Topology 	 | read 	 | read 	 | read 	 | read |
+|Clusters 	 |create, read, update, delete 	 | read 	 | 	read 	 | read |
+|Bare metal assets | 	create, read, update, delete 	 | read 	 | read | read |
+|Manage applications 	 |create, read, update, delete 	 |create, read, update, delete 	 | read   | read |
+|Govern risk 	 |create, read, update, delete 	 |create, read, update, delete 	 |- 	 |- |
 {: caption="Table 2. Role-based access control for components in Red Hat Advanced Cluster Management" caption-side="top"}
 
 View the following sections for information about managing your cluster security:
