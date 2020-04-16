@@ -21,7 +21,8 @@ The ID team adds the `in-review` label when it is time to start reviewing the ch
 ## Documentation Report
 
 ## Product release(s)
-- [ ] [ACM 4.4] 
+- [ ] [ACM 1.0 tech preview]
+- [ ] [ACM 2.0 GA]
 
 **Note:** ID will update the current version and the two previous versions (n-2). For earlier versions, we will address only P1 & P2 Doc APARS for releases in support.
 
