@@ -30,7 +30,7 @@ When you install the Klusterlet, the CIS policy controller is disabled by defaul
      location: <base64-encoded label for controller location>
    ```
    
-   For more information about the `cis-controller-minio`, see the [CIS policy controller components](#contr_comp).
+   For more information about the `cis-controller-minio`, see the [CIS policy controller components](#cis-policy-controller-components).
    
 Enable the controller after your cluster is imported by running the following command: 
 
