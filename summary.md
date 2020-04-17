@@ -14,7 +14,7 @@
    * [Preparing for installation](install/prep.md)
    * [Sizing your hub cluster](install/plan_capacity.md)
    * [Installing](install/install_connected.md)
- * [Web Console](console/console_intro.md)
+ * [Web console](console/console_intro.md)
    * [Accessing the console](console/console_access.md)
    * [Observability from the console](console/console.md)
    * [Managing your cluster with the Visual Web Terminal](console/vwt_search.md)
