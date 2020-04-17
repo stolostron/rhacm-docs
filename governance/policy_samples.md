@@ -93,7 +93,7 @@ Complete the following steps to apply the memory usage policy from the console:
         
 ## Image vulnerability policy
 
-Apply the image vulnerability policy to define which network request to deny. For more information about network policies, see _Network Policy_ from the [Kubernetes documentation]( https://kubernetes.io/docs/concepts/services-networking/network-policies/).
+Apply the image vulnerability policy to define which container images have vulnerabilities. For more information about container images, see _Images_ from the [Kubernetes documentation](https://kubernetes.io/docs/concepts/containers/images/).
 
 Your network policy might resemble the following YAML file:
 
@@ -101,7 +101,7 @@ Your network policy might resemble the following YAML file:
    apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
-     name: policy-networkpolicy
+     name: policy-imagemanifestvulnpolicy
      namespace: mcm 
   spec:
   complianceType: musthave
@@ -112,7 +112,7 @@ Your network policy might resemble the following YAML file:
   object-templates:
     - complianceType: musthave
       objectDefinition:
-        kind: NetworkPolicy # deny network request
+        kind: ImageVulnPolicy # deny network request
         apiVersion: networking.k8s.io/v1
         metadata:
           name: deny-from-other-namespaces
