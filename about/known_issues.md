@@ -7,7 +7,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [CIS policy controller is not installed](#cis-policy-controller-is-not-installed)
   - [Console features might not display in Firefox earlier versions](#console-features-might-not-display-in-firefox-earlier-versions)
   - [Host adoption failed](#host-adoption-failed)
-  - [Application not deployed after an updated placement rule](#application not deployed after an updated placement rule)
+  - [Application not deployed after an updated placement rule](#application-not-deployed-after-an-updated-placement-rule)
   - [Unable to search using values with empty spaces](#unable-to-search-using-values-with-empty-spaces)
 
 ## Certificate manager must not exist during an installation
