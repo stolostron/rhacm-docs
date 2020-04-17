@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-07"
-
----
-
 # Creating a provider connection for Amazon Web Services
 
 You need a provider connection to use Red Hat Advanced Cluster Management for Kubernetes console to deploy and manage an OpenShift cluster on Amazon Web Services (AWS). 

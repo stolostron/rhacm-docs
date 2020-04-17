@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-06"
-
----
-
 # Sizing your hub cluster
 
 Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.

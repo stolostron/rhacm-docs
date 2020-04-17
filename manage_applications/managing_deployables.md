@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-07" 
-
----
-
 # Creating and managing deployables
 
 You can create deployables to represent Helm releases or to use as a template to wrap Kubernetes resources for deployment to target clusters for constructing or updating applications.

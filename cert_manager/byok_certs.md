@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-24"
-
----
-
 # Replacing certificates
 
 You can replace certain certificates that are created by the installer in your Red Hat Advanced Cluster Management for Kubernetes environment.

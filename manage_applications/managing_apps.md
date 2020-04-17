@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-07"
-
----
-
 # Creating and managing application resources
 
 Create application resources to group and view the application components that make up your overall Red Hat Advanced Cluster Management for Kubernetes multi-cluster applications.

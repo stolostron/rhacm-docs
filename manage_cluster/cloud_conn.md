@@ -1,15 +1,6 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-05"
-
----
-
 # Creating a provider connection
 
 A *provider connection* is required to create a Red Hat OpenShift Container Platform cluster on a cloud service provider with Red Hat Advanced Cluster Management for Kubernetes.
-{:shortdesc}
 
 The provider connection stores the access credentials and configuration information for a provider. Each provider account requires its own provider connection, as does each domain on a single provider. 
 

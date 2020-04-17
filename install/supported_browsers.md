@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-07"
-
----
-
 # Supported browsers
 
 You can access the Red Hat Advanced Cluster Management for Kubernetes console from Mozilla Firefox, Google Chrome, Microsoft™ Edge, and Safari. See the following versions that are tested and supported:

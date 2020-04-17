@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-03-30"
-
----
-
 # Components
 
 See the following tables for information about components that are installed and enabled on the hub cluster by default and the managed cluster. See what components are required and if it applies, the default value that is required.

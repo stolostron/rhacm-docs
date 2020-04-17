@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-12"
-
----
-
 # Managing applications 
 
 Review the following topics to learn more about creating, deploying, and managing your applications. 

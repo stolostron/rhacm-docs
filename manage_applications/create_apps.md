@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2016, 2020
-lastupdated: "2020-03-25"
-
----
-
 # Creating deployments
 
 Learn how to create and configure deployments in your cluster.

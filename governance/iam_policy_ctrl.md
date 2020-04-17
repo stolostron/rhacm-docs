@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-04-06"
-
----
-
 # IAM policy controller
 
 Identity and Access Management (IAM) policy controller can be used to receive notifications about IAM policy non-compliance.
