@@ -30,7 +30,7 @@ A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kub
 
 - Creating an OpenShift cluster on Google Cloud Platform. 
 
-  See the [Google Cloud Platform product documenation](https://cloud.google.com/docs/quota) for more information about quotas. Also learn more about [machine types](https://cloud.google.com/compute/docs/machine-types).
+  See the [Google Cloud Platform product documentation](https://cloud.google.com/docs/quota) for more information about quotas. Also learn more about [machine types](https://cloud.google.com/compute/docs/machine-types).
 
   - Instance size: N1-standard-4 (0.95–6.5 GB)
   - vCPU: 4
