@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2016, 2020
-lastupdated: "2020-03-24"
-
----
-
 # Managing policies
 
 Create and maintain deployment policies. Deployment policies automatically scale the number of deployment replicas.

@@ -1,12 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-03-11"
-
----
-
-
 # Visual Web Terminal
 
 You can use the Visual Web Terminal to run many commands across your environment. When categorized data is returned, such as when you enter a `search` command, it is returned in an interactive tabular format.

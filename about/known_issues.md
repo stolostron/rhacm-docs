@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-13"
-
----
-
 # Known issues
 
 Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
