@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-09"
-
----
-
 # Supported operating systems and platforms
 
 You can install Red Hat Advanced Cluster Management for Kubernetes on Linux x86_64 with Red Hat OpenShift Container Platform version 4.3.
