@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-24"
-
----
-
 # Red Hat Advanced Cluster Management for Kubernetes policy samples
 
 View a description of the the policy samples that are included in your Red Hat Advanced Cluster Management for Kubernetes installation.
