@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-06"
-
----
-
 # Deploying application resources with a rolling update
 
 If you want to roll out an update for a subscription <!-- or deployable--> to your managed clusters, you can configure the deployment to occur on only a percentage of your managed clusters at a time. When the deployment on those clusters is successful, the deployment is rolled out incrementally to the remaining clusters.

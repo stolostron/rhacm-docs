@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2018, 2020
-lastupdated: "2020-03-24"
-
----
-
 # Red Hat Advanced Cluster Management for Kubernetes policy example
 
 Each Red Hat Advanced Cluster Management for Kubernetes policy can have at least one or multiple templates. For more details about the policy elements, see [Red Hat Advanced Cluster Management for Kubernetes policy overview](../governance/policy_overview.md).

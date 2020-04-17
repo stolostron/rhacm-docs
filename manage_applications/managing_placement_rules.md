@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-07"
-
----
-
 # Creating and managing placement rules
 
 You can create and manage placement rules to define where and how Helm charts and deployables are deployed. Use placement rules to help you facilitate multi-cluster deployments of your deployables.
@@ -24,6 +16,8 @@ You can create and manage placement rules to define where and how Helm charts an
 ## Create a placement rule
 
 Placement rules can be defined for subscriptions and for deployables. Define the placement rule at the subscription level for multi-cluster deployments. Define the placement rule for a specific deployable for single-cluster deployments or to override placement settings.
+
+**Prerequisite:** Be sure the `endpoint-appmgr` is running. You can run `oc get pods -n multicluster-endpoint` to check for pods.
 
 1. Compose the definition YAML content for your placement rule. For more information about the YAML structure, including the required fields, see [Placement rule definition](#placement-rule-definition).
 

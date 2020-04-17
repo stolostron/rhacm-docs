@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-09"
-
----
-
 # Multicluster commands (mc)
 
 Learn about the `oc mc` commands that you can run to access your Red Hat Advanced Cluster Management for Kubernetes cluster.

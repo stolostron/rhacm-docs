@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-06"
-
----
-
 # Deploying application resources
 
 You can deploy application resources, such as Kubernetes deployable objects or Helm charts to a cluster to update existing applications or to add applications. Red Hat Advanced Cluster Management for Kubernetes supports multiple options for the deployment of deployable objects.

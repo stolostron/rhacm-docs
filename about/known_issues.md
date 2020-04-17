@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-13"
-
----
-
 # Known issues
 
 Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
@@ -15,6 +7,8 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [CIS policy controller is not installed](#cis-policy-controller-is-not-installed)
   - [Console features might not display in Firefox earlier versions](#console-features-might-not-display-in-firefox-earlier-versions)
   - [Host adoption failed](#host-adoption-failed)
+  - [Application not deployed after an updated placement rule](#application-not-deployed-after-an-updated-placement-rule)
+  - [Unable to search using values with empty spaces](#unable-to-search-using-values-with-empty-spaces)
 
 ## Certificate manager must not exist during an installation
 
@@ -49,3 +43,17 @@ The product supports Mozilla Firefox 74.0 or the latest version that is availabl
 ## Host adoption failed
 
 Bare metal hosts are not supported. An error message appears when you try to validate the host adoption. 
+
+## Application not deployed after an updated placement rule
+
+If applications are not deploying after an update to a placement rule, verify that the `endpoint-appmgr` pod is running. The `endpoint-appmgr` is the subscription container that needs to run on endpoint clusters.
+
+You can run `oc get pods -n multicluster-endpoint` to verify.
+
+You can also search for `kind:pod cluster:yourcluster` in the console and see if the `endpoint-appmgr` is running.
+
+If you cannot verify, attempt to import the cluster again and verify again.
+
+## Unable to search using values with empty spaces
+
+From the console and Visual Web Terminal, users are unable to search for values that contain an empty space. 

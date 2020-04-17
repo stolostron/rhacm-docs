@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-26"
-
----
-
 # Working with Red Hat Advanced Cluster Management for Kubernetes service discovery
 
 Configure Red Hat Advanced Cluster Management for Kubernetes so that your Red Hat Advanced Cluster Management for Kubernetes managed cluster can discover Kubernetes services, Ingress services, and Istio services. 
