@@ -8,13 +8,13 @@ lastupdated: "2020-04-16"
 
 # Accessing your console
 
-From the Red Hat OpenShift web console, you can access the Red Hat Advanced Cluster Management for Kubernetes console. You can also access the console from your terminal after installation. See all the options for accessing your console.
+From the Red Hat OpenShift Container Platform web console, you can access the Red Hat Advanced Cluster Management for Kubernetes console. You can also access the console from your terminal after installation. See all the options for accessing your console.
 
-## From theUsing your cluster console OpenShift web console
+## From the OpenShift Container Platform web console 
 
   - You can click the **Application launcher** in the header and choose the _Red Hat Advanced Cluster Management for Kubernetes_ option.
 
-  - You can also access the console from he left-hand navigatio.
+  - You can also access the console from the left-hand navigation.
   
     - Click **Networking** > **Routes**
     - From the _Project_ menu, select the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.
