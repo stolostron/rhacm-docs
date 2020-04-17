@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-06"
-
----
-
 # APIs
 
 You can access APIs for to create and manage application resources, channels, subscriptions, deployables, Helm, and query information.

@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-06"
-
----
-
 # Using the multicluster plug-in (mc)
 
 After you install the OpenShift Container Platform command-line interface (CLI), you can use the multicluster plug-in (mc) to view information about your clusters, manage your clusters, deploy applications, and more.

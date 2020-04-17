@@ -1,12 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-06"
-
----
-
-
 # Observability in the console 
 
 Learn more about console components that you can use to view, manage, or customize your console. 

@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-03-02"
-
----
-
 # What's new in Red Hat Advanced Cluster Management for Kubernetes
 
 Red Hat Advanced Cluster Management for Kubernetes provides visibility of your entire Kubernetes domain with built-in governance and application life-cycle management.

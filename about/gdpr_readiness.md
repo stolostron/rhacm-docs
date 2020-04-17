@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2016, 2020
-lastupdated: "2020-03-23"
-
----
-
 # Red Hat Advanced Cluster Management for Kubernetes platform considerations for GDPR readiness
 
 ## Notice
