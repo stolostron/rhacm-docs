@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-07" 
-
----
-
 # Managing secrets
 
 You can create Kubernetes secret resources to store authorization credentials and other sensitive information for your subscriptions and application components. By storing this information as secrets, you can separate the information from the application components that require the information to improve your data security.

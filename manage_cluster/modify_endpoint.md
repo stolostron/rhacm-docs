@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-03-26"
-
----
-
 # Modifying the multicluster endpoint settings of your cluster
 
 You can modify the settings of `multicluster endpoint` to change your configuration either by using the hub cluster or the managed cluster.

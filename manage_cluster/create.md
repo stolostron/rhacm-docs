@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-01"
-
----
-
 # Creating a cluster with Red Hat Advanced Cluster Management for Kubernetes
 
 Learn how to create Red Hat OpenShift Container Platform clusters across cloud providers with Red Hat Advanced Cluster Management for Kubernetes.
