@@ -7,6 +7,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [CIS policy controller is not installed](#cis-policy-controller-is-not-installed)
   - [Console features might not display in Firefox earlier versions](#console-features-might-not-display-in-firefox-earlier-versions)
   - [Host adoption failed](#host-adoption-failed)
+  - [Unable to parse an empty space in a query](#unable-to-parse-an-empty-space-in-a-query)
 
 ## Certificate manager must not exist during an installation
 
@@ -41,3 +42,7 @@ The product supports Mozilla Firefox 74.0 or the latest version that is availabl
 ## Host adoption failed
 
 Bare metal hosts are not supported. An error message appears when you try to validate the host adoption. 
+
+## Unable to parse an empty space in a query
+
+From the console and Visual Web Terminal, users are unable to search for values that contain an empty space. 
