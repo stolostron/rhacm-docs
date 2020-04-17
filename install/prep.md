@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-03-31"
-
----
-
 # Preparing to install Red Hat Advanced Cluster Management for Kubernetes
 
 Before you install Red Hat Advanced Cluster Management for Kubernetes, review the following installation requirements.

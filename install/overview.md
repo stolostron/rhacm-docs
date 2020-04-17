@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-03-25"
-
----
-
 # Installation
 
 This section provides all the details required to install and uninstall your installation of Red Hat Advanced Cluster Management for Kubernetes.

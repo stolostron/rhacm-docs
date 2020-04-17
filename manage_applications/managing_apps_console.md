@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-06"
-
----
-
 # Managing applications with the console
 
 You can use the console to create, manage, view details, and troubleshoot application resources, including applications, deployables, channels, subscriptions, and placement rules.
