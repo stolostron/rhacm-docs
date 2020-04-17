@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-06"
-
----
-
 # Upgrading your cluster
 
 After you create clusters that you want to manage with Red Hat Advanced Cluster Management for Kubernetes, you can upgrade those clusters to the latest version by using the console.

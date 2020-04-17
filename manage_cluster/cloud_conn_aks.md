@@ -1,16 +1,6 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-07"
-
----
-
-
 # Creating a provider connection for Microsoft Azure
 
 You need a provider connection to use Red Hat Advanced Cluster Management for Kubernetes console to create and manage a Red Hat OpenShift Container Platform cluster on Microsoft Azure. 
-{:shortdesc}
 
 **Note:** This procedure is a prerequisite for creating a cluster with Red Hat Advanced Cluster Manager for Kubernetes. 
 

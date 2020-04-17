@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-05"
-
----
-
 # Adding a provider connection
 
 Add description here and all content needed.

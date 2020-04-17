@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-04-07"
-
----
-
 # Creating and managing placement rules
 
 You can create and manage placement rules to define where and how Helm charts and deployables are deployed. Use placement rules to help you facilitate multi-cluster deployments of your deployables.

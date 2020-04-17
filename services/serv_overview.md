@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-26"
-
----
-
 # Red Hat Advanced Cluster Management for Kubernetes services overview
 
 A Red Hat Advanced Cluster Management for Kubernetes service can be one of the following types: Kubernetes service, Kubernetes ingress, or Istio service. A Red Hat Advanced Cluster Management for Kubernetes service runs on a single managed cluster or on multiple managed clusters. They support Kubernetes services, Kubernetes ingress services, and Istio services.

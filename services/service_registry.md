@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-26"
-
----
-
 # Configuring Red Hat Advanced Cluster Management for Kubernetes service discovery and registry
 
 You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Kubernetes, ingress, and Istio services that are in different Red Hat Advanced Cluster Management for Kubernetes managed clusters.
