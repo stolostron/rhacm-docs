@@ -4,7 +4,7 @@ View a description of the the policy samples that are included in your Red Hat A
 
 * [Memory usage policy](#memory-usage-policy) 
 * [Namespace policy](#namespace-policy)
-* [Network policy](#network-policy)
+* [Image vulnerability policy](#image-vulnerability-policy)
 * [Pod nginx policy](#pod-nginx-policy)
 * [Pod security policy](#pod-security-policy)
 * [Role policy](#role-policy)
@@ -91,9 +91,9 @@ Complete the following steps to apply the memory usage policy from the console:
 4. Select **Namespace** from the _Specifications_ field.
 
         
-## Network policy
+## Image vulnerability policy
 
-Apply the network policy to define which network request to deny. For more information about network policies, see _Network Policy_ from the [Kubernetes documentation]( https://kubernetes.io/docs/concepts/services-networking/network-policies/).
+Apply the image vulnerability policy to define which network request to deny. For more information about network policies, see _Network Policy_ from the [Kubernetes documentation]( https://kubernetes.io/docs/concepts/services-networking/network-policies/).
 
 Your network policy might resemble the following YAML file:
 
