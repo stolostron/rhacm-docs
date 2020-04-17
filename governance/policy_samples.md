@@ -93,12 +93,9 @@ Complete the following steps to apply the memory usage policy from the console:
         
 ## Image vulnerability policy
 
-detects if containers images have vulnerabilities by leveraging Container Security Operator. For more information about Container Security Operator, see https://github.com/quay/container-security-operator. The policy installs Container Security Operator on your managed cluster if not installed and then detecting if there is any ImageManifestVuln object being created.
-
-
 Apply the image vulnerability policy to detect if container images have vulnerabilities by leveraging the Container Security Operator. For more information about the Security Operator, see the _Container Security Operator_ from the [Quay repository](https://github.com/quay/container-security-operator). The policy installs the Container Security Operator on your managed cluster if it is not installed. 
 
-Your network policy might resemble the following YAML file:
+Your image vulnerability policy might resemble the following YAML file:
 
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
