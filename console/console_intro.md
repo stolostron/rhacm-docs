@@ -1,6 +1,6 @@
 
 
-# Using your cluster console
+# Accessing and using your cluster console
 
 Learn how to access your cluster and use some of the console components.
 
