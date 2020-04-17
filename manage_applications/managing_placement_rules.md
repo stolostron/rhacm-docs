@@ -17,6 +17,8 @@ You can create and manage placement rules to define where and how Helm charts an
 
 Placement rules can be defined for subscriptions and for deployables. Define the placement rule at the subscription level for multi-cluster deployments. Define the placement rule for a specific deployable for single-cluster deployments or to override placement settings.
 
+**Prerequisite:** Be sure the `endpoint-appmgr` is running. You can run `oc get pods -n multicluster-endpoint` to check for pods.
+
 1. Compose the definition YAML content for your placement rule. For more information about the YAML structure, including the required fields, see [Placement rule definition](#placement-rule-definition).
 
 2. Create the placement rule within Red Hat Advanced Cluster Management for Kubernetes. You can define a placement rule as a separate resource or define the rule within the definition for a deployable or subscription. As a best practice, define placement rules as a separate resource when the rule might need to be referenced by multiple resources.
