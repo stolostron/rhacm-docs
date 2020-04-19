@@ -1,0 +1,156 @@
+[#kubernetes-configuration-policy-controller]
+= Kubernetes configuration policy controller
+
+Configuration policy controller can be used to configure any Kubernetes resource and apply security policies across your clusters.
+
+[#configuration-policy-elements]
+== Configuration policy elements
+
+The configuration policy controller communicates with the local Kubernetes API server to get the list of your configurations that are in your cluster.
+
+[#configuration-policy]
+== Configuration policy
+
+A `Policy` is a CustomResourceDefinition (CRD) instance that contains the specifications of the configuration policy elements section.
+For more information about CRDs, see https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/[Extend the Kubernetes API with CustomResourceDefinitions].
+
+[#policy-elements]
+=== Policy elements
+
+Each _policy_ within the policy document contains the following elements.
+
+* A `namespace` selector that specifies which namespaces within the cluster that the policy is applied to.
+* A `remediationAction` specifies the remediation of your policy.
+The configuration policy controller can inform users, or automically enforce remediation.
+The parameter values are `inform` and `enforce`.
+* A list of `templates`, such as `role-templates`, `object-templates`, and `policy-templates` within the policy that describes how a resource in Kubernetes might be defined, and whether it is allowed to exist.
+ ** A `role-template` is used to list RBAC roles that must be evaluated or applied to the managed clusters.
+Role templates are treated as a special category of templates, as they have rules inside that can be analyzed and compared to evaluate the compliance of a cluster.
+ ** An `object-template` is used to list any other Kubernetes object that must be evaluated or applied to the managed clusters.
+An example of object can be a pod security policy, an image policy, or a limit range.
+ ** A `policy-template` is used to create one or more policies for third party or external security controls.
+For example, you can create a certificate expiration policy with the certificate policy controller.
+For more information about other policy and their  controllers, see xref:../governance/policy_controllers.adoc[Red Hat Advanced Cluster Management for Kubernetes policy controllers].
+
+[#creating-a-kubernetes-configuration-policy]
+== Creating a Kubernetes configuration policy
+
+You can create a YAML file for your configuration policy or create a configuration policy from the console.
+View the following sections to create a configuration policy:
+
+* <<creating-a-yaml-file-for-a-configuration-policy,Creating a YAML file for a configuration policy>>
+* <<creating-a-configuration-policy-from-the-console,Creating a configuration policy from the console>>
+
+[#creating-a-yaml-file-for-a-configuration-policy]
+=== Creating a YAML file for a configuration policy
+
+Complete the following steps to create a configuration policy from the command line interface (CLI):
+
+. Create a YAML file for your configuration policy.
+See link:../governance/create_policy.md#yaml[Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy] for more information on policy requirements.
++
+Your configuration policy might resemble the following policy:
++
+[source,yaml]
+----
+ apiVersion: policy.mcm.ibm.com/v1alpha1
+ kind: Policy
+ metadata:
+   name: policy-1
+   namespace: kube-system
+ spec:
+ # "include" are parameter values of the namespaces you want to apply the configuration policy , while exclude specifies the namespaces you explicitly do not want to apply
+   namespaces:
+     include: ["default", "kube-*"]
+     exclude: ["kube-system"]
+   # This parameter value can be "enforce" or "inform", however "enforce" does not do anything with regards to this controller.
+   remediationAction: inform
+   disabled: false
+   complianceType: musthave
+   object-templates:
+    ...
+----
+
+. Apply the policy by running the following command:
++
+----
+kubectl apply -f <policy-file-name>  --namespace=<namespace>
+----
+
+. Verify and list the policies by running the following command:
++
+----
+kubectl get policy --namespace=<namespace>
+----
+
+Your configuration policy is created.
+
+[#viewing-your-configuration-policy]
+==== Viewing your configuration policy
+
+Complete the following steps to view your configuration policy from the CLI:
+
+. View details for a specific configuration policy by running the following command:
++
+----
+kubectl get policy <policy-name> -n <namespace> -o yaml
+----
+
+. View a description of your configuration policy by running the following command:
++
+----
+kubectl describe policy <name> -n <namespace>
+----
+
+[#creating-a-configuration-policy-from-the-console]
+=== Creating a configuration policy from the console
+
+. Log in to your cluster from the console.
+. From the navigation menu, click *Governance and risk*
+. Click *Create policy*.
+. Enter or select the appropriate values for the following fields:
+ ** Name
+ ** Specifications
+ ** Cluster selector
+ ** Remediation action
+ ** Standards
+ ** Categories
+ ** Controls
+ ** Disabled
+. Click *Create*.
+
+A configuration policy is created and the `Policy` definition might resemble the following YAML:
+
+[source,yaml]
+----
+   apiVersion: policy.mcm.ibm.com/v1alpha1
+   kind: Policy
+   metadata:
+     name: policy-1
+     namespace: kube-system
+   spec:
+   # "include" are parameter values of the namespaces you want to apply the configuration policy , while exclude specifies the namespaces you explicitly do not want to apply
+     namespaces:
+       include: ["default", "kube-*"]
+       exclude: ["kube-system"]
+     # This parameter value can be "enforce" or "inform", however "enforce" does not do anything with regards to this controller.
+     remediationAction: inform
+     disabled: false
+     complianceType: musthave
+     object-templates:
+      ...
+----
+
+[#view-your-configuration-policy]
+==== View your configuration policy
+
+You can view any configuration policy and its status from the console.
+
+. Log in to your cluster from the console.
+. From the navigation menu, click *Govern risk* to view a table list of your policies.
++
+NOTE: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
+
+. Select one of your policies.
+
+For more information, see xref:../governance/policy_samples.adoc[Policy samples] to view policy samples that can be applied with the configuration policy controller.
