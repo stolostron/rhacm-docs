@@ -1,24 +1,14 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-03-11"
-
----
-
-
 # Visual Web Terminal
 
 You can use the Visual Web Terminal to run many commands across your environment. When categorized data is returned, such as when you enter a `search` command, it is returned in an interactive tabular format.
 
 The Visual Web Terminal is particularly useful when troubleshooting issues that require running multiple commands, and navigating the results of the commands in an easy way. The information that is provided in the Visual Web Terminal is limited by the permissions of the user. When you run a command, only the items that you have permission to view are displayed. If there are over ten sessions that are running at the same time, there might be a slower response time when running commands.
 
-  - [Starting a session](#start)
-  - [Supported command list](#commands)
-  - [Searching with Visual Web Terminal](#search)
+  - [Starting a session](#starting-a-session)
+  - [Supported command list](#supported-command-list)
+  - [Searching with Visual Web Terminal](#searching-with-visual-web-terminal)
 
 ## Starting a session
-{: #start}
 
 You can access the Visual Web Terminal by completing the following steps:
 
@@ -27,7 +17,6 @@ To get started, log in to your console and select the **Visual Web Terminal** ic
 **Note:** The Visual Web Terminal connects to the cloud that you are already logged into with the hub cluster console.
 
 ## Supported command list
-{: #commands}
 
 The following table provides information and examples for the command types that are supported by the Visual Web Terminal:
 
@@ -51,7 +40,6 @@ The following table provides information and examples for the command types that
 | `themes` |  Displays the contrast theme options of the interface, which you can set to either `light` or `dark` | `themes` |
 
 ## Searching with Visual Web Terminal
-{: #search}
 
 The Visual Web Terminal search function provides visibility into your resources across all your clusters.
 

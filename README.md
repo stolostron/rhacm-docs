@@ -4,23 +4,31 @@ The documentation for Red Hat Advanced Cluster Management for Kubernetes is prov
 
 **Note:** This documentation is still a work in progress. Frequent changes and improvements are expected. 
 
-## How to use the Red Hat Advanced Cluster Management for Kubernetes documentation
+## How to use the Red Hat Advanced Cluster Management for Kubernetes documentation for test-a-thon
 
-Use the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file as the table of contents. The `summary.md` file provides direct linking within the repository to the corresponding files.
+**External users only!** Use the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_prod/summary.md) file as the table of contents. The production `summary.md` file provides direct linking within the repository to the corresponding files.
 
-To submit feedback and change requests, see the [documentation issue template](https://github.com/open-cluster-management/rhacm-docs/issues/new/choose).
+Open an issue to submit feedback and change requests, see the [documentation issue template](https://github.com/open-cluster-management/rhacm-docs/issues/new/choose).
 
 As mentioned earlier, this documentation is still a work in progress. If you have suggestions for improvements, feel free to open a documentation issue in the GitHub repository. 
 
 ______________________________________________________________________________________________________________________________
 
+**Internal users only**
+
+Open an issue with this BACKLOG [documentation issue template](https://github.com/open-cluster-management/backlog/issues/new/choose).
+
+To see the content, (until a link is available), please rely on the table of contents/navigation draft found in the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file.
+
 ## For Red Hat Advanced Cluster Management for Kubernetes documentation and developers only
+
+INTERNAL USERS
 
 **IMPORTANT:** DOC SHUT DOWN three days before GA; please give us time to finalize our documentation and deliver on time.
 
 To ensure product documentation is accessible, accurate, tested, complete, and follows corporate style manual, we need to shut down incoming work three days before GA. Please open issues early and doc test early.
 
-To see the content, (until a link is available), please rely on the table of contents/navigation draft found in the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file.
+
 
 **RHACM developers:** Please open an issue as normal with the file/content that needs to be added. Label your issue `squad:doc` and give a detailed description of your change. The clearer you are in the description, the quicker we can make the updates. **Please open an issue, not a PR** so that we can make updates as we transition into ASCII doc.
 

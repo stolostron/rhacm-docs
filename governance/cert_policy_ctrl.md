@@ -1,14 +1,6 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-25"
-
----
-
 # Certificate policy controller
 
-Certificate policy controller can be used to receive notifications about non-compliant certificate policies.
+Certificate policy controller can be used to detect certificates that are close to expiring. Configure and customize the certificate policy controller by updating the minimum duration parameter in your controller policy. To learn more, view the Certificate policy elements section in this document. When a certificate expires in less than the minimum duration amount of time, the policy becomes noncompliant.
 
 The certificate policy controller communicates with the local Kubernetes API server to get the list of secrets that contain certificates and determine all non-compliant certificates.
 
@@ -100,11 +92,10 @@ Certificate policy controller can only inform the user about a policy violation.
 
 You can create a YAML file for your certificate policy or create a certificate policy from the console. View the following sections to create a certificate policy:
 
-* [Creating a YAML file for a certificate policy](#yaml)
-* [Creating a certificate policy from the console](#policy_gui)
+* [Creating a YAML file for a certificate policy](#creating-a-yaml-file-for-a-certificate-policy)
+* [Creating a certificate policy from the console](#creating-a-certificate-policy-from-the-console)
 
 ### Creating a YAML file for a certificate policy
-{: #yaml}
 
 Complete the following steps to create a certificate policy from the command line interface (CLI):
 
@@ -161,8 +152,7 @@ Complete the following steps to view your certificate policy from the CLI:
    kubectl describe certificatepolicy <name> -n <namespace>
    ```
 
-### Create a certificate policy from the console
-{: #policy_gui}
+### Creating a certificate policy from the console
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**
@@ -206,8 +196,8 @@ A certificate policy is created and the `CertificatePolicy` definition within it
 You can view any certificate policy and its status from the console.
 
 1. Log in to your cluster from the console.
-2. From the navigation menu, click **Governance and risk**. 
-3. Click the _Policies_ tab to view a summary of your policies and a table list of your policies.
+2. From the navigation menu, click **Governance and risk** to view a table list of your policies.
+
    **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab. 
 4. Select one of your policies.
 

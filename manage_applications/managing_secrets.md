@@ -1,19 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-09" 
-
----
-
-{:new_window: target="blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Managing secrets
 
 You can create Kubernetes secret resources to store authorization credentials and other sensitive information for your subscriptions and application components. By storing this information as secrets, you can separate the information from the application components that require the information to improve your data security.
@@ -33,16 +17,15 @@ When you create and include a secret within a channel for deployment to managed 
 
 When you use Kubernetes secrets with your subscriptions to access channel sources or deploy secrets through subscriptions, the secret and all related data in rest and data in transit remain encrypted. The Kubernetes secrets are created with the specified data values encrypted. Transport Layer Security (TLS) is used to encrypt the data in transit.
 
- - [Create a Secret](#secret_create)
- - [Update a Secret](#secret_update)
- - [Delete a Secret](#secret_delete)
- - [View the Secret YAML definition](#secret_compose)
- - [View an example Secret](#secret_example)
+ - [Create a Secret](#create-a-secret)
+ - [Update a Secret](#update-a-secret)
+ - [Delete a Secret](#delete-a-secret)
+ - [View the Secret YAML definition](#view-the-secret-yaml-definition)
+ - [View an example Secret](#view-an-example-secret)
 
 ## Create a secret
-{: #secret_create}
 
-1. Compose the definition YAML content for your secret resource. For more information about the YAML structure, including the required fields, see [Secret definition](#secret_compose).
+1. Compose the definition YAML content for your secret resource. For more information about the YAML structure, including the required fields, see [Secret definition](#secret-definition).
 
 2. Create the secret within Red Hat Advanced Cluster Management for Kubernetes. You can use Kubernetes command line interface (`kubectl`) tool or REST API:
 
@@ -52,7 +35,6 @@ When you use Kubernetes secrets with your subscriptions to access channel source
         ```
         kubectl apply -f filename.yaml
         ```
-        {: codeblock}
 
         Alternatively, you can use a `create secret` command to create a secret. For instance, you can use the command when you want a name generated and do not want to specifically name the secret.
 
@@ -60,7 +42,6 @@ When you use Kubernetes secrets with your subscriptions to access channel source
         ```
         kubectl get secrets
         ```
-        {: codeblock}
 
         Ensure that your new secret is listed in the resulting output.
 
@@ -74,9 +55,8 @@ When you use Kubernetes secrets with your subscriptions to access channel source
 - A subscription cannot detect changes to a secret and pull the updated secret from a channel and deploy the updated secret to managed clusters. Updates to secrets are only retrieved by a subscription when the subscription needs to directly reference the secret, such as when the subscription detects a new or changed version of the subscribed Kubernetes resource or Helm chart.
 
 ## Update a secret
-{: #secret_update}
 
-1. Compose the definition updates for your secret. For more information about the YAML structure, including the required fields, see [Secret definition](#secret_compose).
+1. Compose the definition updates for your secret. For more information about the YAML structure, including the required fields, see [Secret definition](#secret-definition).
 
 2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
@@ -93,7 +73,7 @@ When you use Kubernetes secrets with your subscriptions to access channel source
          ```
          kubectl edit secrets <name>
          ```
-         {: codeblock}
+         
        2. Update any fields or annotations that you need to change.
 
    - To use REST API, you need to use the Kubernetes API. For more information, see [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/).
@@ -101,7 +81,6 @@ When you use Kubernetes secrets with your subscriptions to access channel source
 When your changes are saved, the changes are not automatically detected. The updated version is not deployed to any destination clusters where the version was previously deployed until the secret is required.
 
 ## Delete a secret
-{: #secret_delete}
 
 You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API to delete a secret:
 
@@ -117,16 +96,13 @@ You can use the console, the Kubernetes command line interface (`kubectl`) tool,
      ```
      kubectl delete secret <name> -n <namespace>
      ```
-     {: codeblock}
      
      2. Verify that your deployable is deleted by running the following command:
      ```
      kubectl get secrets <name>
      ```
-     {: codeblock}
 
 ## Secret definition YAML structure
-{: #secret_compose}
 
 The following YAML structure shows the required fields for a secret and some of the common optional fields. Your YAML structure needs to include some required fields and values. 
 
@@ -139,7 +115,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   annotations:
-      app.ibm.com/deployables: "true"
+      apps.open-cluster-management.io/deployables: "true"
   name:
   namespace:
 data:
@@ -148,7 +124,6 @@ data:
   AccessKeyID:
   SecretAccessKey:
 ```
-{: codeblock}
 
 |Field|Description|
 |-- | -- |
@@ -163,22 +138,20 @@ data:
 | data.SecretAccessKey | Optional, but required to store an access key and secret access key combination. The encoded private access key. The key must be encoded as a base64 string. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-## Example secret YAML
-{: #secret_example}
+## Example secret YAML 
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
   annotations:
-      app.ibm.com/deployables: "true"
+      apps.open-cluster-management.io/deployables: "true"
   name: secret-namespace
   namespace: channel-namespace
 data:
   AccessKeyID: ABCdeF1=
   SecretAccessKey: gHIjk2lmnoPQRST3uvw==
 ```
-{: codeblock}
 
 ## Example YAML for creating and referencing a secret with a subscription
 
@@ -220,4 +193,3 @@ spec:
     local: true
   sourceNamespace: ch-ns
 ```
-{: codeblock}

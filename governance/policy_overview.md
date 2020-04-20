@@ -1,16 +1,8 @@
----
-
-copyright:
-  years: 2018, 2020
-lastupdated: "2020-03-25"
-
----
-
 # Red Hat Advanced Cluster Management for Kubernetes policy overview
 
 An Red Hat Advanced Cluster Management for Kubernetes template is defined within a policy document. Each policy document can have at least one or multiple templates.
 
-**Important**: Each client and cloud provider is responsible for ensuring that their managed cloud environment meets internal enterprise security standards for software engineering, secure engineering, resiliency, security, and regulatory compliance for workloads hosted on Kubernetes clusters. Use the governance and security capability to gain visibility and remediate configurations to meet standards.
+**Important**: Each client and provider is responsible for ensuring that their managed cloud environment meets internal enterprise security standards for software engineering, secure engineering, resiliency, security, and regulatory compliance for workloads hosted on Kubernetes clusters. Use the governance and security capability to gain visibility and remediate configurations to meet standards.
 
 ## Policy elements
 
@@ -21,9 +13,14 @@ Each _policy_ within the policy document contains the following elements:
       * `policy.mcm.ibm.com/categories` - The security control category the policy applies to. For example, Access Control, System and Information Integrity.
       * `policy.mcm.ibm.com/controls` - The name of the security control that is being checked. For example, Center of Internet Security (CIS) and certificate policy controller.
       
-        **Note**: Use your internal security standards or industry standards for the `annotations` field. You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, from the console.
+        **Notes**: 
+        
+        * Parameter values for `standard, categories, and controls` are not required. The parameter value is empty when the values are not defined.
+        * Use your internal security standards or industry standards for the `annotations` field. You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, from the console.
 
-  - A `namespace` selector that specifies which namespaces within the cluster that the policy is applied to.
+  - A `namespace` selector that specifies which namespaces within the hub cluster that the policy is applied to. 
+  
+    **Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.
 
   - A list of `templates`, such as `role-templates`, `object-templates`, and `policy-templates` within the policy that describes how a resource in Kubernetes might be defined, and whether it is allowed to exist.
 

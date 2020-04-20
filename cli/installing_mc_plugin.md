@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2020
-lastupdated: "2020-03-09"
-
----
-
 # Installing the multicluster plug-in (mc)
 
 The `mc` plug-in is required after CLI installation. Complete the following procedure to download and install the plug-in to work with multiple clusters.

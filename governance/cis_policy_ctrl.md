@@ -1,25 +1,16 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-23"
-
----
-
 # CIS policy controller
 
 You can use the Center for Internet Security (CIS) policy controller to receive notifications about non-compliant clusters.
 
-* [Enable the CIS policy controller](#cisc)
-* [CIS policy](#cis_policy)
-* [CIS policy elements](#cis_elements)
-* [CIS policy controller components](#contr_comp)
-* [Creating a CIS policy](#create_policy)
-* [Viewing a CIS policy](#view_policy)
-* [CIS risk score](#risk_score)
+* [Enable the CIS policy controller](#enable-the-cis-policy-controller)
+* [CIS policy](#cis-policy)
+* [CIS policy elements](#cis-policy-elements)
+* [CIS policy controller components](#cis-policy-controller-components)
+* [Creating a CIS policy](#creating-a-cis-policy)
+* [Viewing a CIS policy](#viewing-a-cis-policy)
+* [CIS risk score](#cis-risk-score)
 
 ## Enable the CIS policy controller
-{: #cisc}
 
 The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list. 
 
@@ -39,7 +30,7 @@ When you install the Klusterlet, the CIS policy controller is disabled by defaul
      location: <base64-encoded label for controller location>
    ```
    
-   For more information about the `cis-controller-minio`, see the [CIS policy controller components](#contr_comp).
+   For more information about the `cis-controller-minio`, see the [CIS policy controller components](#cis-policy-controller-components).
    
 Enable the controller after your cluster is imported by running the following command: 
 
@@ -48,7 +39,6 @@ Enable the controller after your cluster is imported by running the following co
    ```
 
 ## CIS policy
-{: #cis_policy}
 
 The CIS policy controller watches policies of `kind:` `CISPolicy` and updates the status of the policy by checking whether the managed cluster is compliant or not. The policy itself includes a list of CIS controls that need to be excluded from checking. All the CIS controls that are not listed in the policy are checked for compliance. The controller uses `aqua-security` `kube-bench` tool for checking the master and worker nodes in the managed cluster for compliance.
 
@@ -218,7 +208,6 @@ spec:
 ```
 
 ## CIS policy elements
-{: #cis_elements}
 
 ### Policy enforcement 
 
@@ -235,7 +224,6 @@ For more information see, [CIS rules specifications](../governance/cis_policy_ru
 
 
 ## CIS policy controller components
-{: #contr_comp}
 
 The CIS policy controller consists of the following four components.
 
@@ -301,7 +289,6 @@ The `cis-controller` depends on the results that are posted by `drishti-cis`, wh
 
 
 ## Creating a CIS policy
-{: #create_policy}
 
 A CIS policy can be created either from the command line by using kubectl or from the console.
 
@@ -309,7 +296,6 @@ A CIS policy can be created either from the command line by using kubectl or fro
 * [Create a CIS policy from Red Hat Advanced Cluster Management for Kubernetes console](#create_policy_gui)
 
 ### Creating a CIS policy from the command line
-{: #create_policy_cli}
 
 Complete the following steps to create a certificate policy from the command line interface (CLI):
 
@@ -366,7 +352,6 @@ Complete the following steps to view the CIS policy from the CLI:
    ```
 
 ### Creating a CIS policy from Red Hat Advanced Cluster Management for Kubernetes console
-{: #create_policy_gui}
 
 1. Log in to Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Govern risk**.
@@ -620,18 +605,16 @@ spec:
 ```
 
 ## Viewing a CIS policy
-{: #view_policy}
 
 View any CIS Policy and its status from the console.
 1. Log in to the Red Hat Advanced Cluster Management for Kubernetes console.
-2. From the navigation menu, click **Govern risk**.
-3. Click the _Policies_ tab to view a summary of your policies and a table list of your policies.
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
 
-**Note:** You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
-Select one of your policies.
+  **Note:** You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
+
+3. Select one of your policies.
 
 ## CIS risk score
-{: #risk_score}
 
 When a managed cluster is non-compliant, the CIS controller assigns a risk score. Each CIS rule that fails the check is assigned a score. The risk score that is assigned to the non-compliant cluster is the maximum of all the scores that are assigned to failed checks.
 
@@ -656,4 +639,4 @@ You can assign a custom risk score to each CIS rule:
     kubectl -n <namespace> delete pod pod_name
     ```
 
-For more information about other policy controllers, see [{Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md). For more information about policies, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
+For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md). For more information about policies, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).

@@ -1,19 +1,3 @@
----
-
-copyright:
-  years: 2019
-lastupdated: "2019-12-10"
-
----
-
-{:new_window: target="blank"}
-{:shortdesc: .shortdesc}
-{:screen: .screen}
-{:codeblock: .codeblock}
-{:pre: .pre}
-{:child: .link .ulchildlink}
-{:childlinks: .ullinks}
-
 # Managing applications with the console
 
 You can use the console to create, manage, view details, and troubleshoot application resources, including applications, deployables, channels, subscriptions, and placement rules.
@@ -21,13 +5,11 @@ You can use the console to create, manage, view details, and troubleshoot applic
 
 The console includes different tools that each provide different application management capabilities. These capabilities allow you to easily create, find, update, deploy, and monitor applications resources.
 
-  * [Application dashboards](#applications)
+  * [Applications dashboards](#applications-dashboards)
   * [Search](#search)
   * [Topology](#topology)
-  * [Monitoring](#monitoring)
 
 ## Applications dashboards
-{: #applications}
 
 From the main _Applications_ dashboard, you can view information about all applications and select a specific application to view the dashboard for more information about that specific application.
 
@@ -81,18 +63,7 @@ From the _Resources_ tab for a single application, you can complete the followin
 * View the resource list for the application. This list includes all resources that are associated with the application, including pods, secrets, services, and more. This list indicates the name, namespace, kind, API groups, and status of each resource. The list also indicates the cluster where the resource is deployed, the creation date of the resource, and the last date that the resource was updated.
 * View the resource pipeline for the application, which includes the summary of the application resources, options to create resources, and a table that provides more details about the resources. The resource pipeline for a single application includes similar information to the pipeline for all applications. The difference between the two pipelines is that this pipeline is scoped to just the selected application.
 
-From the _Incidents_ tab, you can complete the following tasks:
-
-* View the list all incidents, including the ID, description, priority, escalated, owner, state, creation date, and date of the last updated.
-* View events and related information.
-  
-From the _Logs_ tab, you can complete the following tasks:
-
-* View the log information for each application pod. You can select the pod and a container that is associated with the pod to view the associated log.
-* Select to view the log information in Kibana.
-
 ## Search
-{: #search}
 
 The console search page supports searching for application resources by the component kind for each resource. To search for resources, use the following values:
 
@@ -112,18 +83,13 @@ From the search results, you can view identifying details for each resource, inc
 
 By clicking the resource name in the search results, a YAML editor opens and displays the YAML definition for the resource. You can choose to edit the definition within the editor. Any changes that you save are applied to the resource immediately.  
 
-For more information about using search, see [console components](../getting_started/console.md#search).
+For more information about using search, see [console components](../console/console.md).
 
 ## Topology
-{: #topology}
 
 The Topology page provides you with a visualization of your applications, clusters, relationships, and policies. The application topology includes a visualization of the components that comprise each application. The topology view for each application includes any deployables, services, deployments, charts, and pods for that application.
 
 You can select any component from the topology view to view more details. You can also hover your cursor over a resource to view the component kind, name, and namespace and links to view the search results for the resource or namespace. When you are viewing the details for a pod, you can select to view the logs for that pod.
 
-The _Topology_ page is available from the _Observe environments_ sub-menu within the console main menu. For more information about using the topology page, see [console components](../getting_started/console.md#mcm_topology).
+The _Topology_ page is available from the _Observe environments_ sub-menu within the console main menu. For more information about using the topology page, see [console components](../console/console.md).
 
-## Monitoring
-{: #monitoring}
-
-You can open the Grafana dashboard for your applications to monitor by selecting **Grafana** from the _Monitor health_ sub-menu of the console main menu. From this page, you can use monitoring metrics and logs to quickly determine the root cause for application problems to reduce or eliminate downtime.

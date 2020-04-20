@@ -1,12 +1,4 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-18"
-
----
-
-# Configuration policy controller
+# Kubernetes configuration policy controller
 
 Configuration policy controller can be used to configure any Kubernetes resource and apply security policies across your clusters.
 
@@ -25,7 +17,7 @@ Each _policy_ within the policy document contains the following elements.
 
   - A `namespace` selector that specifies which namespaces within the cluster that the policy is applied to.
   
-  - A `remediationAction` specifies the remediation of your policy. The parameter values are `enforce` and `inform`. 
+  - A `remediationAction` specifies the remediation of your policy. The configuration policy controller can inform users, or automically enforce remediation. The parameter values are `inform` and `enforce`.  
 
   - A list of `templates`, such as `role-templates`, `object-templates`, and `policy-templates` within the policy that describes how a resource in Kubernetes might be defined, and whether it is allowed to exist.
 
@@ -35,15 +27,14 @@ Each _policy_ within the policy document contains the following elements.
     
     - A `policy-template` is used to create one or more policies for third party or external security controls. For example, you can create a certificate expiration policy with the certificate policy controller. For more information about other policy and their  controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
 
-## Creating a configuration policy
+## Creating a Kubernetes configuration policy
 
 You can create a YAML file for your configuration policy or create a configuration policy from the console. View the following sections to create a configuration policy:
 
-* [Creating a YAML file for a configuration policy](#yaml)
-* [Creating a configuration policy from the console](#policy_gui)
+* [Creating a YAML file for a configuration policy](#creating-a-yaml-file-for-a-configuration-policy)
+* [Creating a configuration policy from the console](#creating-a-configuration-policy-from-the-console)
 
 ### Creating a YAML file for a configuration policy
-{: #yaml}
 
 Complete the following steps to create a configuration policy from the command line interface (CLI):
 
@@ -100,8 +91,7 @@ Complete the following steps to view your configuration policy from the CLI:
    kubectl describe policy <name> -n <namespace>
    ```
 
-### Create a configuration policy from the console
-{: #policy_gui}
+### Creating a configuration policy from the console
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**
@@ -145,10 +135,9 @@ A configuration policy is created and the `Policy` definition might resemble the
 You can view any configuration policy and its status from the console.
 
 1. Log in to your cluster from the console.
-2. From the navigation menu, click **Govern risk**. 
-3. Click the _Policies_ tab to view a summary of your policies and a table list of your policies.
-   **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab. 
-4. Select one of your policies.
+2. From the navigation menu, click **Govern risk** to view a table list of your policies. 
 
+   **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab. 
+3. Select one of your policies.
 
 For more information, see [Policy samples](../governance/policy_samples.md) to view policy samples that can be applied with the configuration policy controller.

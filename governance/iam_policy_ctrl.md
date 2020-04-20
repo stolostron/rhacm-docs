@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-25"
-
----
-
 # IAM policy controller
 
 Identity and Access Management (IAM) policy controller can be used to receive notifications about IAM policy non-compliance.
@@ -23,7 +15,6 @@ The IAM policy controller checks for compliance of the number of cluster adminis
 IAM policy controller can only inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. View an example of an IAM policy in the following section.
 
 ## IAM policy
-{: #iam-policy}
 
 The IAM policy controller watches the namespaces that are included in the `namespaceSelector.include` section and reports whether the role binding in the namespaces and the policy itself are compliant or not.
 
@@ -56,11 +47,10 @@ spec:
 
 You can create a YAML file for your IAM policy or create an IAM policy from the console.
 
-* [Creating a YAML file for an IAM policy](#yaml)
-* [Creating an IAM policy from the console](#policy_gui)
+* [Creating a YAML file for an IAM policy](#creating-a-yaml-file-for-an-iam-policy)
+* [Creating an IAM policy from the console](#creating-an-iam-policy-from-the-console)
 
 ### Creating a YAML file for an IAM policy
-{: #yaml}
 
 Complete the following steps to create an IAM policy from the command-line interface (CLI):
 
@@ -71,7 +61,6 @@ Complete the following steps to create an IAM policy from the command-line inter
    ```
    kubectl apply -f <iam-policy-file-name>  --namespace=<mcm_namespace>
    ```
-   {: codeblock}
 
 3. Verify and list the policy by running the following command:
 
@@ -80,7 +69,6 @@ Complete the following steps to create an IAM policy from the command-line inter
    ```
 
 ### Create an IAM policy from the console
-{: #policy_gui}
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Govern risk**.

@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2016, 2020
-lastupdated: "2020-03-23"
-
----
-
 # Red Hat Advanced Cluster Management for Kubernetes platform considerations for GDPR readiness
 
 ## Notice
@@ -20,20 +12,18 @@ This document is intended to help you in your preparations for General Data Prot
 
 ## Table of Contents
 
-* [GDPR](#overview)
-* [Product Configuration for GDPR](#productconfig)
-* [Data Life Cycle](#datalifecycle)
-* [Data Collection](#datacollection)
-* [Data Storage](#datastorage)
-* [Data Access](#dataaccess)
-* [Data Processing](#dataprocessing)
-* [Data Deletion](#datadeletion)
-* [Data Monitoring](#datamonitoring)
-* [Capability for Restricting Use of Personal Data](#datasubjectrights)
+* [GDPR](#gdpr)
+* [Product Configuration for GDPR](#product-configuration-for-gdpr)
+* [Data Life Cycle](#data-life-cycle)
+* [Data Collection](#data-collection)
+* [Data Storage](#data-storage)
+* [Data Access](#data-access)
+* [Data Processing](#data-processing)
+* [Data Deletion](#data-deletion)
+* [Capability for Restricting Use of Personal Data](#capability-for-restricting-use-of-personal-data)
 * [Appendix](#appendix)
 
 ## GDPR
-{: #overview}
 
 General Data Protection Regulation (GDPR) has been adopted by the European Union ("EU") and applies from May 25, 2018.
 
@@ -50,13 +40,11 @@ GDPR establishes a stronger data protection regulatory framework for processing 
 * [EU GDPR Information Portal](https://www.eugdpr.org/)
 * [Red Hat GDPR website](https://www.redhat.com/en/gdpr)
 
-## Product Configuration – considerations for GDPR Readiness
-{: #productconfig}
+## Product Configuration for GDPR
 
 The following sections describe aspects of data management within the Red Hat Advanced Cluster Management for Kubernetes platform and provide information on capabilities to help clients with GDPR requirements.
 
 ## Data Life Cycle
-{: #datalifecycle}
 
 Red Hat Advanced Cluster Management for Kubernetes is an application platform for developing and managing on-premises, containerized applications. It is an integrated environment for managing containers that includes the container orchestrator Kubernetes, cluster lifecycle, application lifecycle, and security frameworks (governance, risk, and compliance).
 
@@ -83,7 +71,6 @@ Customers can submit online comments/feedback/requests for information about in 
 Typically, only the client name and email address are used, to enable personal replies for the subject of the contact, and the use of personal data conforms to the [Red Hat Online Privacy Statement](https://www.redhat.com/en/about/privacy-policy).
 
 ## Data Collection
-{: #datacollection}
 
 The Red Hat Advanced Cluster Management for Kubernetes platform does not collect sensitive personal data. It does create and manage technical data, such as an administrator user ID and password, service user IDs and passwords, IP addresses, and Kubernetes node names, which might be considered personal data. The Red Hat Advanced Cluster Management for Kubernetes platform also deals with information about users who manage the platform. All such information is only accessible by the system administrator through a management console with role-based access control or by the system administrator though login to a Red Hat Advanced Cluster Management for Kubernetes platform node.
 
@@ -100,7 +87,6 @@ This is not a definitive list of the types of data that are collected by the Red
 
 
 ## Data storage
-{: #datastorage}
 
 The Red Hat Advanced Cluster Management for Kubernetes platform persists technical data that is related to configuration and management of the platform in stateful stores on local or remote file systems as configuration files or in databases. Consideration must be given to securing all data at rest. The Red Hat Advanced Cluster Management for Kubernetes platform supports encryption of data at rest in stateful stores that use `dm-crypt`.
 
@@ -112,7 +98,6 @@ The following items highlight the areas where data is stored, which you might wa
 * **Service authentication data, including user IDs and passwords:** Credentials that are used by Red Hat Advanced Cluster Management for Kubernetes platform components for inter-component access are defined as Kubernetes Secrets. All Kubernetes resource definitions are persisted in the `etcd` key-value data store. Initial credentials values are defined in the platform configuration data as Kubernetes Secret configuration YAML files. For more information, see [Managing Secrets](../applications/managing_secrets.md).
 
 ## Data access
-{: #dataaccess}
 
 Red Hat Advanced Cluster Management for Kubernetes platform data can be accessed through the following defined set of product interfaces.
 * Web user interface (the console)
@@ -145,7 +130,6 @@ Red Hat Advanced Cluster Management for Kubernetes platform roles control access
 Pod security policies are used to set up cluster-level control over what a pod can do or what it can access. 
 
 ## Data Processing
-{: #dataprocessing}
 
 Users of Red Hat Advanced Cluster Management for Kubernetes can control the way that technical data that is related to configuration and management is processed and secured through system configuration.
 
@@ -158,7 +142,6 @@ Users of Red Hat Advanced Cluster Management for Kubernetes can control the way 
 These same platform mechanisms that are used to manage and secure Red Hat Advanced Cluster Management for Kubernetes platform technical data can be used to manage and secure personal data for user-developed or user-provided applications. Clients can develop their own capabilities to implement further controls.
 
 ## Data Deletion
-{: #datadeletion}
 
 Red Hat Advanced Cluster Management for Kubernetes platform provides commands, application programming interfaces (APIs), and user interface actions to delete data that is created or collected by the product. These functions enable users to delete technical data, such as service user IDs and passwords, IP addresses, Kubernetes node names, or any other platform configuration data, as well as information about users who manage the platform.
 
@@ -172,7 +155,6 @@ Areas of Red Hat Advanced Cluster Management for Kubernetes platform to consider
 Function to remove user ID and password data that is managed through an enterprise LDAP directory would be provided by the LDAP product used with Red Hat Advanced Cluster Management for Kubernetes platform.
 
 ## Capability for Restricting Use of Personal Data
-{: #datasubjectrights}
 
 Using the facilities summarized in this document, Red Hat Advanced Cluster Management for Kubernetes platform enables an end user to restrict usage of any technical data within the platform that is considered personal data.
 
@@ -186,28 +168,9 @@ Under GDPR, users have rights to access, modify, and restrict processing. Refer 
 * Right to restrict processing
   * Red Hat Advanced Cluster Management for Kubernetes platform administrators can use Red Hat Advanced Cluster Management for Kubernetes platform features to stop processing an individual's data.
 
-## Appendix - Data logged by Red Hat Advanced Cluster Management for Kubernetes platform
-{: #appendix}
+## Appendix
 
 As a platform, Red Hat Advanced Cluster Management for Kubernetes deals with several categories of technical data that could be considered as personal data, such as an administrator user ID and password, service user IDs and passwords, IP addresses, and Kubernetes node names. Red Hat Advanced Cluster Management for Kubernetes platform also deals with information about users who manage the platform. Applications that run on the platform might introduce other categories of personal data that are unknown to the platform.
 
 This appendix includes details on data that is logged by the platform services.
-
-### Red Hat Advanced Cluster Management for Kubernetes Kubernetes
-
-* What data is logged
-  * Cluster deploy topology (node information for master and worker)
-  * Service configuration (k8s configuration map) and secrets (k8s secrets)
-* When data is logged
-  * When you deploy a cluster
-* Where data is logged
-  * Cluster deploy topology in `etcd`
-  * Configuration and secret for deployed clusters in `etcd`
-* How to delete data
-  * Use the Red Hat Advanced Cluster Management for Kubernetes console
-  * Search for and delete data by using the k8s console (`kubectl`) or `etcd` REST API
-
-  Use caution when modifying Kubernetes cluster configuration or deleting cluster data.
-
-  For more information, see [Kubernetes kubectl](https://kubernetes.io/docs/reference/kubectl/overview/).
 

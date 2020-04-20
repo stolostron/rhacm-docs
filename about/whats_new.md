@@ -1,20 +1,14 @@
----
+# What's new in Red Hat Advanced Cluster Management for Kubernetes
 
-copyright:
-  years: 2020
-lastupdated: "2020-03-02"
+Red Hat Advanced Cluster Management for Kubernetes provides visibility of your entire Kubernetes domain with built-in governance and application life-cycle management.
 
----
-
-# What's new in Red Hat Advanced Cluster Management for Kubernetes 
-
-Get an overivew of Red Hat Advanced Cluster Management for Kubernetes from the [Product Welcome page](../about/welcome.md). See the [architecture page](../about/architecture.md) to learn more about major components of the product. 
+Get an overview of Red Hat Advanced Cluster Management for Kubernetes from the [Product Welcome page](../about/welcome.md). See the [architecture page](../about/architecture.md) to learn more about major components of the product.
 
 To learn about the Red Hat Advanced Cluster Management for Kubernetes console capabilities, see [Observability in the console](../console/console_intro.md).
 
 ## Installation
 
-With operator-based installation, you can install a working Red Hat OpenShift cluster on a configured cloud provide, such as Amazon Web Services, in less than 10 minutes. See [Installing Red Hat Advanced Cluster Management for Kubernetes when connected](../install/install_connected.md) for more information.  
+With operator-based installation, you can install a working Red Hat OpenShift cluster on a configured cloud provider, such as Amazon Web Services, in less than 10 minutes. See [Installing Red Hat Advanced Cluster Management for Kubernetes when connected](../install/install_connected.md) for more information.  
   
 ## Cluster management
 
@@ -26,25 +20,19 @@ With operator-based installation, you can install a working Red Hat OpenShift cl
 
 ## Application management
 
-Create and manage applications across environments through channel and subscription-based automation. You can also view your applications and resources from the topology page in the console. Application lifecycle management offers the following capabilities:
+Deploy and maintain day two operations of business applications distributed across your cluster landscape.
+Create and manage applications across environments through channel and subscription-based automation. You can also view your applications and resources from the topology page in the console. For more information, see [Managing applications](../manage_applications/overview.md).
 
-* Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes, which are used for grouping applition components. You can scale applications with the application model.
 
-* Deployables (`Deployable.apps.open-cluster-management.io`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or to represent Helm releases for deployment to clusters.
+  - Application resources are used to group and view the components across your applications.
 
-* Placement rules (`PlacementRule.apps.open-cluster-management.io`) define the target clusters where deployables can be deployed. Create and edit application placement rules from the console.
+  - Deployables are Kubernetes resources that wrap or represent other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters.
 
-* Channels (`Channel.apps.open-cluster-management.io`) define a namespace within the hub cluster and a place where resources are stored for deployment.
- 
-* Subscriptions (`Subscription.apps.open-cluster-management.io`) are sets of definitions that identify deployables within channels by using annotations, labels, and versions. 
+  - Placement rules define where and how Helm charts and deployables are deployed. Use placement rules to help you facilitate multicluster deployments of your deployables.
 
-  - Use subscription annotations, labels, and versions, which are Kubernetes resources that serve as sets of definitions for identifying resources and Helm charts within channels.
+  - Channels are custom resource definitions that can help you streamline deployments and separate cluster access. Channels define a namespace within the hub cluster and point to a physical place where resources are stored for deployment.
   
-  - Schedule subscription activity for specific time windows to control deployments and upgrades to your managed clusters.
-  
-  - Store and deploy Kubernetes secrets through subscriptions.
-
-For more information, see [Managing applications](../manage_applications/overview.md).
+  - Subscriptions are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources (in GitHub, Objectstores, or hub deployables) and Helm charts within channels by using annotations, labels, and versions.
 
 ## Security and compliance
 

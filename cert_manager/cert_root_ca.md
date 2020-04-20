@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-23"
-
----
-
 # Replacing the root CA certificate
 
 You can replace the root CA certificate.
@@ -33,10 +25,10 @@ Complete the following steps to create a root CA certificate with OpenSSL:
 2. Generate a self-signed CA certificate by using your CA key. Run the following command:
 
    ```
-   openssl req -x509 -new -nodes -key ca.key -subj "/C=US/ST=North Carolina/L=Raleigh/O=Red Hat" -days 400 -out ca.crt -config csr.cnf
+   openssl req -x509 -new -nodes -key ca.key -days 400 -out ca.crt -config req.cnf
    ```
 
-   Your `csr.cnf` file might resemble the following file:
+   Your `req.cnf` file might resemble the following file:
 
       ```
       [ req ]               # Main settings
@@ -77,19 +69,18 @@ Complete the following steps to create a root CA certificate with OpenSSL:
 4. Validate the custom CA is in use by logging in to the console and view the details of the certificate being used. <!-- we should state the steps to do this; it migth be only 3 steps?-->
 
 ## Refreshing _cert-manager_ certificates
-{: #refresh}
 
 After the root CA is replaced, all certificates that are signed by the root CA must be refreshed and the services that use those certificates must be restarted. Cert-manager creates the default Issuer from the root CA so all of the certificates issued by `cert-manager`, and signed by the default ClusterIssuer must also be refreshed.
 
 Delete the Kubernetes secrets associated with each `cert-manager` certificate to refresh the certificate and restart the services that use the certificate. Run the following command: 
 
    ```
-   oc delete secret -n open-cluster-management $(oc get cert -n open-cluster-management -o wide | grep multicloud-ca-issuer | awk '{print $3}’)
+   oc delete secret -n open-cluster-management $(oc get cert -n open-cluster-management -o wide | grep multicloud-ca-issuer | awk '{print $3}')
    ```
 
 ## Restoring root CA certificates
 
-Before you restore the root CA certificate, create a backup file of the root CA certificate. Run the following command: 
+To restore the root CA certificate, obtain the previously created backup file of the root CA certificate. Run the following command: 
 
    ```
    oc create -f multicloud-ca-cert-backup.yaml

@@ -1,11 +1,3 @@
----	
-
-copyright:	
-  years: 2019, 2020	
-lastupdated: "2020-03-26"	
-
----	
-
 # Enabling an Istio service for discovery
 
 You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Istio services that are in different Red Hat Advanced Cluster Management for Kubernetes managed clusters.	

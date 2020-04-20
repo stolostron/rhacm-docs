@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2018, 2020
-lastupdated: "2020-03-24"
-
----
-
 # Creating an Red Hat Advanced Cluster Management for Kubernetes security policy
 
 Create a security policy to report and validate your cluster compliance based on your specified security standards, categories, and controls. To create a policy for Red Hat Advanced Cluster Management for Kubernetes, you must create a YAML file to create a policy for managed clusters.
@@ -14,12 +6,12 @@ Create a security policy to report and validate your cluster compliance based on
 
 As you create your new policy from the console, a YAML file is also created.
 
-  - [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](#yaml)
-  - [Creating a cluster security policy from the Red Hat Advanced Cluster Management for Kubernetes console](#policy_gui)
+  - [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](#creating-a-yaml-file-for-an-red-hat-advanced-cluster-Management-for-kubernetes-policy)
+  - [Creating a cluster security policy from the Red Hat Advanced Cluster Management for Kubernetes console](#creating-a-cluster-security-policy-from-the-red-hat-advanced-cluster-management-for-kubernetes-console)
 
 The following objects are required for your Red Hat Advanced Cluster Management for Kubernetes policy:
 
-  *  _PlacementPolicy_: Defines a _cluster selector_ where the policy must be deployed.
+  *  _PlacementRule_: Defines a _cluster selector_ where the policy must be deployed.
   * _PlacementBinding_: Binds the placement to a PlacementPolicy.
 
 View more descriptions of the policy YAML files in the [Red Hat Advanced Cluster Management for Kubernetes policy example](policy_example.md).
@@ -28,14 +20,13 @@ View the following sections to create any policy:
 
 
 ## Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy
-{: #yaml}
 
 Complete the following steps to create a policy:
 
 1. Create a policy by running the following command:
 
    ```
-   kubectl create -f -policy
+   kubectl create -f policy.yaml -n <namespace>
    ```
 
 2. Define the template that the policy uses. Edit your `.yaml` file by adding a `templates` field to define a template. Your policy might resemble the following YAML file:
@@ -45,7 +36,6 @@ Complete the following steps to create a policy:
    kind: Policy
    metadata:
      name: policy1
-     namespace: mcm
    spec:
      remediationAction: "enforce" # or inform
      disabled: "false" # or true
@@ -78,35 +68,35 @@ Complete the following steps to create a policy:
 
       With `remediationAction` set to _enforce_, the Red Hat Advanced Cluster Management for Kubernetes policy manager automatically creates the missing policy on the target managed clusters.
 
-3. Define a `PlacementPolicy`. Be sure to change the `PlacementPolicy` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. Your `PlacementPolicy` might resemble the following content:
+3. Define a `PlacementRule`. Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. View the [PlacementRule definition YAML structure](../manage_applications/managing_placement_rules.md#placement-rule-definition-yaml-structure). Your `PlacementRule` might resemble the following content:
 
    ```yaml
-   apiVersion: mcm.ibm.com/v1alpha1
-   kind: PlacementPolicy
+   apiVersion: apps.open-cluster-management.io/v1
+   kind: PlacementRule
    metadata:
      name: placement1
-     namespace: kube-system
    spec:
+     clusterConditions:
+     - type: OK
      clusterNames:
-      - "cluster1"
-      - "cluster2"
+     - "cluster1"
+     - "cluster2"
      clusterLabels:
        matchLabels:
          cloud: IBM
    ```
 
-4. Define a `PlacementBinding` to bind your policy and your `PlacementPolicy`. Your `PlacementBinding` might resemble the following YAML sample:
+4. Define a `PlacementBinding` to bind your policy and your `PlacementRule`. Your `PlacementBinding` might resemble the following YAML sample:
 
    ```yaml
    apiVersion: mcm.ibm.com/v1alpha1
    kind: PlacementBinding
    metadata:
      name: binding1
-     namespace: kube-system
    placementRef:
      name: placement1
-     apiGroup: mcm.ibm.com
-     kind: PlacementPolicy
+     apiGroup: apps.open-cluster-management.io
+     kind: PlacementRule
    subjects:
    - name: policy1
      apiGroup: policy.mcm.ibm.com
@@ -114,7 +104,6 @@ Complete the following steps to create a policy:
    ```
 
 ## Creating a cluster security policy from the Red Hat Advanced Cluster Management for Kubernetes console
-{: #policy_gui}
 
 1. From the navigation menu, click **Govern risk**.
 2. To create a policy, click **Create policy**.
@@ -141,7 +130,6 @@ Complete the following steps to create a policy:
     kind: Policy
     metadata:
       name: policy-pod
-      namespace: mcm
       annotations:
         policy.mcm.ibm.com/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
         policy.mcm.ibm.com/controls: 'control example'
@@ -172,23 +160,23 @@ Complete the following steps to create a policy:
     kind: PlacementBinding
     metadata:
       name: binding-pod
-      namespace: mcm
     placementRef:
       name: placement-pod
-      kind: PlacementPolicy
-      apiGroup: mcm.ibm.com
+      kind: PlacementRule
+      apiGroup: apps.open-cluster-management.io
     subjects:
     - name: policy-pod
       kind: Policy
       apiGroup: policy.mcm.ibm.com
 
     ---
-    apiVersion: mcm.ibm.com/v1alpha1
-    kind: PlacementPolicy
+    apiVersion: apps.open-cluster-management.io/v1
+    kind: PlacementRule
     metadata:
       name: placement-pod
-      namespace: mcm
     spec:
+      clusterConditions:
+      - type: OK
       clusterLabels:
         matchLabels:
           cloud: "IBM"
@@ -202,6 +190,6 @@ Complete the following steps to create a policy:
 
 A cluster policy is created.
 
-To manage your policies, see [Managing a security policy](../manage_cluster/manage_grc_policy.md) for more information. You can also create custom policy controllers to enforce specific policies. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
+To manage your policies, see [Managing a security policy](../governance/manage_grc_policy.md) for more information. You can also create custom policy controllers to enforce specific policies. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
 
 See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more information about policies.

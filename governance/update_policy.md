@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2016, 2020
-lastupdated: "2020-03-24"
-
----
-
 # Updating a deployment policy
 
 Update a deployment policy.

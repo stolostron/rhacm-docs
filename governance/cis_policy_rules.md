@@ -1,21 +1,12 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-24"
-
----
-
 # CIS rules specifications
 
 Refer to the Center for Internet Security (CIS) rules when you create CIS policies for non-OpenShift Container Platform environments. When creating rules for OpenShift Container Platform environments, refer to the Red Hat OpenShift Hardening rules.
 {:shortdesc}
 
-* [CIS rules for non-OpenShift Container Platform](#cis-rule1)
-* [CIS rules for OpenShift Container Platform](#cis-rule2)
+* [CIS rules for non-OpenShift Container Platform](#cis-rules-for-non-openshift-container-platform)
+* [CIS rules for OpenShift Container Platform](#cis-rules-for-openshift-container-platform)
 
 ## CIS rules for non-OpenShift Container Platform
-{: #cis-rule1}
 
 ### Master node rules for non-OpenShift Container Platform
 ```
@@ -141,7 +132,6 @@ Refer to the Center for Internet Security (CIS) rules when you create CIS polici
 ```
 
 ## CIS rules for OpenShift Container Platform
-{: #cis-rule2}
 
 ### Master node rules for OpenShift Container Platform
 ```

@@ -1,123 +1,84 @@
----
+# Importing an existing cluster with the console
 
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-26"
+You can use the Red Hat Advanced Cluster Management for Kubernetes console to import an existing cluster. You need your terminal for authentication.
 
----
-
-# Importing a cluster with the Red Hat Advanced Cluster Management for Kubernetes console
-
-You can use the Red Hat Advanced Cluster Management for Kubernetes console to import a cluster. You will need your terminal for authentication.
-
-- [Prerequisites](#prereq)
-- [Preparing for import](#prep)
-- [Importing a cluster](#import)
-- [Deleting a cluster](#delete)
-
-  **Note:** A hub cluster cannot manage another hub cluster.
-  
+- [Prerequisites](#prerequisites)
+- [Importing a cluster](#importing-a-cluster)
+- [Removing a cluster](#removing-an-imported-cluster)
+ 
 ## Prerequisites
-{: #prereq}
 
-* You need an Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. See [Red Hat Advanced Cluster Management for Kubernetes](../../cloudctl/install_cli.md) for installation information.
-  
-* You need a cluster that you want to manage.
-  
-## Supported architecture
+* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. 
+* You need a cluster that you want to manage. 
+* Install `kubectl`. To install `kubectl`, see _Install and Set Up kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos). 
 
-* Linux
-* Linux on Power (ppc64le)
-* Linux on LinuxONE
+<!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters. (wait for testing, elder sending RFE)-->
 
-## Prepare for import 
-{: #prep}
-
-From your terminal, authenticate to your managed cluster based on your cloud provider instructions.
+* You need the `base64` command line tool.
 
 **Required user type or access level**: Cluster administrator
 
 ## Importing a cluster
-{: #import}
 
 You can import existing clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
 
-**Note:** By default, the `multicluster-endpoint` deployment pulls all of the required images from Docker Hub. You only need to install images from DockerHub if you are working in an air gapped environment.
+ **Note:** A hub cluster cannot manage _any_ other hub cluster; you must import an existing cluster.
 
-1. From the navigation menu, click **Clusters**.
+1. From the navigation menu, hover over **Automate infrastructure** and click **Clusters**.
 
 2. Click **Add cluster**.
 
-3. Click **Import an existing cluster...** > **Select**.
+3. Click **Import an existing cluster**.
 
-4. Provide a unique cluster name and a unique cluster namespace on the _Configure cluster_ page.
+4. Provide a cluster name. By default, the namespace is set to the same value as your cluster name. **Best practice:** Leave the namespace value and do not edit.
 
-5. Click to expand **Edit cluster import YAML file** and edit the file. 
+5. **Optional:** Click to expand **Edit cluster import YAML file** and modify the endpoint configuration. 
 
-   See [_Table 1. YAML file parameters and description_](#table_1) for details about each parameter.
+   See [Table 1. YAML file parameters and descriptions](#yaml-parameters-and-descriptions) for details about each parameter.
 
-   **Note:** Do not remove parameters, as the console might not properly render.
+6. **Optional**: After you import, you can add labels by clicking **Configure advanced parameters** and use these labels to search.
    
-6. Click **Generate Command** to retrieve the command to deploy the `multicluster-endpoint`.
+7. Click **Generate Command** to retrieve the command to deploy the `multicluster-endpoint`.
 
-   **Optional**: You can add labels by clicking **Configure advanced parameters** and use these labels to search.
+8. From the _Import an existing cluster_ window, hover and click the **Copy command** icon to copy the import command and the token that you are provided. You must click the **Copy** icon to receive the accurate copy.
 
-7. From the _Import an existing cluster_ window, hover and click the **Copy command** icon to copy the import command and the token that you are provided. Note: You must click this icon to receive the accurate copy.
+9. From your terminal, authenticate to your managed cluster. Configure your `kubectl` for your targeted managed cluster.
 
-8. Go to your terminal and configure your `kubectl` for your targeted managed cluster.
+  See [Supported cloud providers](../install/supported_clouds.md) to learn how to configure your `kubectl`.
 
-  See [Supported cloud providers](cloud_providers.md) to learn how to configure your `kubectl`.
+10. To deploy the `multicluster-endpoint` to the managed cluster, run the command that you generated and copied from _step 8_.
 
-9. Run the command that you generated and copied from _step 7_ to deploy the `multicluster-endpoint`.
-
-  If you receive the following error, run the command again:
-
-  ```
-  error: unable to recognize "STDIN": no matches for kind "Endpoint" in version "multicloud.ibm.com/v1beta1"
-  ```
-
-10. Click **View cluster** to view the _Overview_ page and a summary of your cluster. 
+11. Click **View cluster** to view the _Overview_ page and a summary of your cluster. 
 
 **Note** You can continue to import more clusters. Click **Import another** to repeat the process.
 
 ### YAML Parameters and descriptions
-{: #table_1}
 
 Table 1: The following table lists the parameters and descriptions that are available in the YAML file:
 
 | Parameter | Description | Default value|
 |---|---|---|
 | clusterLabels| Provide cluster labels; you can add labels to your file | none |
-| cloud| The cloud provider label for your cluster| auto-detect|
-| vendor| The Kubernetes vendor label for your cluster| auto-detect|
-| environment| The environment label for your cluster| Dev|
-| region| The region where your cluster is set up| US|
-| version| Version of multicluster-endpoint | 3.2.1|
-| ApplicationManager| Enables multicluster manager application deployment, deploys subscription controller and deployable controller | true | 
-| tillerIntegration|Enables IBM tiller to deploy Helm release| true|
-| prometheusIntegration| Enables integration to IBM or OpenShift monitoring for metric collection| true|
-| topologyCollector| Enables cluster topology data collection for the Topology page| true|
-| searchCollector| Enables search collection and indexing | true|
-| policyController| Enable the Governance and risk dashboard policy feature|true, updateInterval: 15| 
-| metering| Enable the Governance and risk dashboard policy feature|false| 
-| serviceRegistry| Service registry that is used to discover services that are deployed by Application Deployable among managed clusters.| false | 
-| dnsSuffix| The suffix of the registry DNS name, which is added to the end of the target clusters dns domain name.|mcm.svc| 
-| plugins| Comma-separated list of enabled plugins. Supported plugins: `kube-service`, `kube-ingress`, and `istio`. |kube-service|
-| private_registry_enabled| Enable if using a private Docker registry | false|
-| docker_username| User name for the private Docker registry | none|
-| docker_password| Password for the private Docker registry | none|
-| imageRegistry | The image registry from which to pull the multicluster-endpoint|ibmcom|
-| imageNamePostfix| Postfix for the image name | none |
-| migrateFrom320|Migration from 3.2.0 multicluster-endpoint|false|
-{: caption="Table 1. Table of YAML file parameters and descriptions for import" caption-side="}
+| clusterLabels.cloud| The provider label for your cluster| auto-detect|
+| clusterLabels.vendor| The Kubernetes vendor label for your cluster| auto-detect|
+| clusterLabels.environment| The environment label for your cluster| none|
+| clusterLabels.region| The region where your cluster is set up|none|
+| applicationManager.enabled| Enables multicluster manager application deployment, deploys subscription controller and deployable controller | true | 
+| searchCollector.enabled| Enables search collection and indexing | true|
+| policyController.enabled| Enable the Governance and risk dashboard policy feature|true, updateInterval: 15|  
+| certPolicyController.enabled|Monitors certificate expiration based on distributed policies|true|
+| cisController.enabled|Monitors CIS security controls based on distributed policies|true|
+| iamPolicyController|Monitors identity controls based on distributed policies|true|
+| serviceRegistry.enabled| Service registry that is used to discover services that are deployed by Application Deployable among managed clusters.| false | 
+| serviceRegistry.dnsSuffix| The suffix of the registry DNS name, which is added to the end of the target clusters dns domain name.|mcm.svc| 
+| serviceRegistry.plugins| Comma-separated list of enabled plugins. Supported plugins: `kube-service`, `kube-ingress`, and `istio`. |kube-service|
+| version| Version of `multicluster-endpoint` |1.0.0|
+{: caption="Table 1. Table of YAML file parameters and descriptions for imported clusters" caption-side="}
 
-## Deleting an imported cluster
-{: #delete}
+## Removing an imported cluster
 
 Complete the following procedure to remove an imported cluster and the `multicluster-endpoint` that was created on the managed cluster.
 
 1. From the _Clusters_ page, find your imported cluster in the table.
    
-2. Click your cluster name.
-   
-3. From the _Overview_, click **Delete cluster**.
+2. Click **Options** > **Detach cluster** to remove your cluster from management.

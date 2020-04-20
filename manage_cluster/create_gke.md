@@ -1,328 +1,99 @@
----
+# Creating an OpenShift cluster on Google Cloud Platform
 
-copyright:
-  years: 2020
-lastupdated: "2020-03-23"
-
----
-
-# Creating a Google Kubernetes Engine cluster
-
-Follow the procedure to create a Google Kubernetes Engine (Kubernetes Engine) cluster. For more information about Kubernetes Engine, see [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/){:new_window}.
+Follow the procedure to create a Red Hat OpenShift Container Platform cluster on Google Cloud Platform (GCP). For more information about Google Cloud Platform, see [Google Cloud Platform](https://cloud.google.com/docs/overview).
 {:shortdesc}
 
-## Supported architectures
-
-The following hardware architectures are supported:
-
-* Linux x86
-
-**Required user type or access level**: Cluster administrator
-
-  - [Prerequisites](#prereq)
-  - [Creating your cluster with the console](#create_gui)
-  - [Creating your cluster with kubectl](#create_cli)
-  - [Accessing your cluster](#access)
-  - [Deleting your cluster](#delete)
-  - [Updating your `kubeconfig` file](#update)
+  - [Prerequisites](#prerequisites)
+  - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console)
+  - [Accessing your cluster](#accessing-your-cluster)
+  - [Removing a cluster from management](#removing-a-cluster-from-management)
 
 ## Prerequisites
-{: #prereq}
 
-* You must have an Red Hat Advanced Cluster Mangement for Kubernetes hub deployed.
+You must have the following prerequisites before creating a cluster on GCP:
 
-* You need to install the Kubernetes CLI, `kubectl`.
+* A deployed Red Hat Advanced Cluster Management for Kubernetes hub cluster
 
-* You need Internet access so your Red Hat Advanced Cluster Mangement for Kubernetes cluster can create a remote Kubernetes cluster by using Google Kubernetes Engine.
+* Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster on GCP
 
-* You need Google Cloud Platform login credentials and access to create a Google Kubernetes Engine cluster.
+* GCP provider connection. See [Setting up a provider connection for Google Cloud Platform](cloud_conn_gke.md) for more information.
 
-* To create clusters across cloud providers with Red Hat OpenShift Container Platform, run the following command to enable the namespace to pull the image from the private registry:
+* A configured domain in GCP. See [Setting up a custom domain](https://cloud.google.com/endpoints/docs/openapi/dev-portal-setup-custom-domain) for instructions on how to configure a domain. 
 
-  ```
-  oc policy add-role-to-user system:image-puller system:serviceaccount:<namespace>:default --namespace=ibmcom
-  ```
-  {:codeblock}
+* GCP login credentials, which include user name and password.
+
+* A Red Hat OpenShift image pull secret. See [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html).
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
-{: #create_gui}
 
-You can create clusters from the Red Hat Advanced Cluster Management for Kubernetes console for each of the available cloud providers.
+To create clusters from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
-1. From the navigation menu, click **Clusters**.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
-2. Click **Add Cluster**.
+2. On the _Clusters_ page, Click **Add Cluster**.
 
-3. Select whether to create a new cluster or import an existing cluster.
+3. Select **Create a cluster**. 
    
-  You can create a cluster as a managed service from a cloud provider or import an existing cluster into a managed cluster. 
-
-4. If you selected the option to import an existing cluster, find and select the cluster that you want to add. 
-
-5. If you selected the option to create a managed cluster, enter a name for your cluster. 
+  **Note:** This procedure is for creating a cluster. If you have an existing cluster that you want to import, see [Importing a target managed cluster to the hub cluster](import.md) for those steps.
   
-  **Tip:** You can view the `YAML` content that is updated as you complete the fields by turning on the **YAML** slider. 
-  
-6. Add the _Base DNS domain_ for your cluster.
+4. Enter a name for your cluster. This name is used in the hostname of the cluster.
 
-7. Specify a _Template_ for your cluster. 
+  **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**. 
 
-8. Select Red Hat OpenShift as your Kubernetes distribution.
+5. Enter the base domain information that you configured for your Azure account. See [Setting up a custom domain](https://cloud.google.com/endpoints/docs/openapi/dev-portal-setup-custom-domain) for more information. This name is used in the hostname of the cluster.
 
-9. Select Google Kubernetes Engine as your cloud provider. 
+6. Select **Google Cloud** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available providers.
 
-10. Select a namespace in the _Cloud connection_ field. The namespaces that are listed are already connected to a cloud provider. 
+7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on Google Cloud Platform](conn_cloud_gke.md).
    
-  **Note** If you do not have a namespace that is connected to a cloud provider, you can click **Add connection** to create one.
-
-11. Expand **Node Pools** to define the nodes for your cluster. A cluster must have at least one node pool.
-
-12. Select **Add Node pool** to create a node pool. 
-
-13. Select the required settings for the node pools.
-
-14. Define the networking settings by expanding the **Networking** section. 
-
-15. **Optional**: Configure advanced parameters. You can assign labels to later identify 
-clusters. 
-
-  You must add a label even if the label belongs to another cluster. Labels are not assigned automatically across clusters.
-
-16. Click **Create**. When you create a cluster, you also import a cluster. You can view your cluster details after the create and import process is complete. 
-
-## Create your cluster with kubectl
-{: #create_cli}
-
-Complete the following procedure to create a cluster with kubectl:
-
-1. Create and save the following `.yaml` files that you need to complete the procedure:
-
-  * Create and name your `apikey.yaml` file.
-  * Create and name your `cluster.yaml` file.
-
-2. Create a service account to obtain Google identity credentials. See [Creating a service account](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount) in the Google Developers Console.
-
-3. Download the corresponding JSON key file. Encode key with base64 and add it to the `apikey.yaml` privateKey field. Run the following command:
-
-  ```
-  cat key.json | base64 | tr -d '\n'
-  ```
-  {:codeblock}
-
-  <!-- 3 needs to be fixed and formatted like the others -->
-
-4. In the `apikey.yaml` file, enter the GKE API key information to ensure that you have permission to create a cluster with the API key. In the following example, `name` is your GKE ID and `privateKey` is your GKE key:
-
-  ```
-  apiVersion: v1
-  kind: Secret
-  metadata:
-    name: <cloud-access-secret-name>
-    labels:
-      cloud-provider: gke
-      purpose: cloud-connection
-  type: Opaque
-  data:
-    privateKey: <base64-encoded-private-key> # cat key.json | base64 | tr -d '\n'
-   ```
-   {:codeblock}
-
-5. Run the following command to apply the configuration:
-
-  ```
-  kubectl apply -f <directory>/apikey.yaml -n <namespace>
-  ```
-  {:codeblock}
-
-6. Edit the cluster object that is defined in the `cluster.yaml` with your cluster configuration. Ensure that the object name is the same as the secret name. See [_Table 1. YAML file parameters and description_](#table_1) for details about each parameter. See the following sample file:
-  
-  ```
-  apiVersion: "cluster.k8s.io/v1alpha1"
-  kind: Cluster
-  metadata:
-    name: <cluster-name>
-    labels:
-      cloud-provider: gke
-  spec:
-    clusterNetwork:
-      services:
-        cidrBlocks: ["172.32.0.0/16"]
-      pods:
-        cidrBlocks: ["192.168.0.0/16"]
-      serviceDomain: "cluster.local"
-    providerSpec:
-      value:
-        apiVersion: "gke/v1alpha1"
-        kind: "GKEClusterProviderSpec"
-        spec:
-          secretName: <cloud-access-secret-name>
-          projectID: <your-project-ID>
-          zone: "us-central1-a"
-          clusterVersion: "1.12.8-gke.10"
-          numNodes: 3
-          machineType: "n1-standard-1"
-          diskSize: "100G"
-          diskType: "pd-standard"
-  ```
-  {: codeblock}
-
-7. Run the following command to apply the cluster object:
-
-  ```
-  kubectl apply -f <directory>/cluster.yaml -n <namespace>
-  ```
-  {: codeblock}
-
-8. Depending on your specifications, it can take up to 30 minutes to create a cluster. Run the following command to see the status:
+8. Configure the *Node pools* for your cluster. 
 
-  ```
-  kubectl describe cluster.cluster.k8s.io/<cluster-name> -n <namespace>
-  ```
-  {: codeblock}
+  The node pools define the location and size of the nodes that are used for your cluster. 
 
-  You see `CreateClusterSuccessful` in the `Event` list when the cluster is created.
+  The *Region* specifies where the nodes are located geographically. A closer region might provide faster performance, but a more distant region might be more distributed. 
 
-### YAML Parameters and descriptions
-{: #table_1}
+  * Master pool: There are three Master nodes that are created for your cluster in the master pool. The master nodes share the management of the cluster activity. You can select multiple zones within the region for a more distributed group of master nodes. You can change the type and size of your instance after it is created, but you can also specify it in this section. The default values are *n1-standard-1  - n1-standard-1 1 vCPU - General Purpose* with 500 GiB of root storage. 
 
-Table 1: The following table lists the parameters and descriptions that are available in the YAML file:
+  * Worker pools: You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.  
 
-|Parameter|Description|Default value|
-|---|---|---|
-|apiVersion|Red Hat Advanced Cluster Management for Kubernetes api; do not edit|cluster.k8s.io/v1alpha1|
-|kind|Resource type; do not edit|Cluster|
-|name|Required; your cluster name|gke-cluster|
-|labels:cloud-provider|Required; name of your cloud provider; do not edit|gke|
-|spec:clusterNetwork|Cluster network information||
-|services:cidrBlocks|Required; just a placeholder; do not edit|["172.32.0.0/16"]|
-|pods:cidrBlocks|Required; just a placeholder; do not edit|["192.168.0.0/16"]|
-|servicesDomian|Required; just a placeholder; do not edit|cluster.local|
-|providerSpec:value|Cloud provider specific information||
-|value:apiVersion|Version of cloud provider api|gke/v1alpha1|
-|value:kind|Cloud provider specific resource type|GKEClusterProviderSpec|
-|spec:zone|Required; Compute zone (example: `us-central1-a`) for the cluster; Use `gcloud compute zones list` to list all Google Compute Engine zones in a project|none|
-|spec:clusterVersion|The Kubernetes version to use for the master and nodes; `gcloud container get-server-config` displays all Kubernetes versions|The default Kubernetes version is available using the command: `gcloud container get-server-config`|
-|numNodes|Optional; number of nodes to be created in each of the cluster zones|3|
-|spec:machineType|The type of machine to use for nodes. Defaults to n1-standard-1. Use `gcloud compute machine-types list` displays all machine types|n1-standard-1|
-|spec:diskSize|Optional; size for node VM boot disks|100GB|
-|spec:diskType|Optional; type of the node VM boot disk; diskType must be pd-standard or pd-ssd|pd-standard|
-|spec:projectID|Required to interact with GCP resources, you must provide project ID for every request|none|
-|spec:secretName|Required; the same as the name value in apikey.yaml|none|
-{: caption="Table 1. YAML file parameters and descriptions" caption-side="top"}
+9. **Optional:** Configure the cluster networking options.
 
-## Accessing your cluster
-{: #access}
+10. **Optional:** Configure a label for the cluster.
 
-After you installed your cluster, you can access your cluster by using the `kubeconfig` file or cluster portal.
+11. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
-1. Run the following command to get the secret:
+## Accessing your cluster 
 
-  ```
-  kubectl get secret -n <namespace>
-  ```
-  {: codeblock}
+To access a cluster that is managed by Red Hat Advanced Cluster Management for Kubernetes, complete the following steps:
 
-  See the following example output:
+1. From the Red Hat Advanced Cluster Management for Kubernetes navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
-  ```
-  NAME                      TYPE                                  DATA   AGE
-  <cluster-name>-<cluster-id>  Opaque                                3      4m41s
-  ```
-  {: pre}
+2. Select the name of the cluster that you created or want to access. The cluster details are displayed.
 
-2. Generate the kubeconfig to access the cluster that you created. Run the following command:
+3. Select **Reveal credentials** to view the user name and password for the cluster. Note these values to use when you log in to the cluster. 
 
-  ```
-  kubectl get secrets/<cluster-name>-<cluster-id> -o 'go-template={{index .data "kubeconfig"}}' | base64 --decode > <directory>/kubeconfig
-  ```
-  {: codeblock}
+4. Select **Console URL** to link to the cluster.
 
-3. Run the following command to access your cluster by endpoint:
+5. Log in to the cluster by using the user ID and password that you found in step 3. 
 
-  ```
-  kubectl describe cluster.cluster.k8s.io/<cluster-name> -n <namespace>
-  ```
-  {: codeblock}
+6. Select the *Actions* menu for the cluster that you want to access.
 
-  URL example: `https://<Cluster Master Host>:<Cluster Master API Port>`
+7. Select **Launch to cluster**. 
 
-4. Set the `KUBECONFIG` environment variable with the following command:
+  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
 
-  ```
-  export KUBECONFIG=<directory>/kubeconfig
-  ```
-  {: codeblock}
+## Removing a cluster from management
 
-## Deleting your cluster
-{: #delete}
+When you remove a Red Hat OpenShift Cloud Platform cluster from management that was created with Red Hat Advanced Cluster Management for Kubernetes, you can either *detach* it or *destroy* it.  
 
-1. Run the following command to get your cluster:
+Detaching a cluster removes it from management, but does not completely delete it. You can import it again, if you decide that you want to bring it back under management. This is only an option when the cluster is in a *Ready* state, and when the cluster was created by the Red Hat Advanced Cluster Management for Kubernetes. You cannot detach a cluster that was imported.
 
-  ```
-  kubectl get cluster.cluster.k8s.io/<cluster-name>
-  ```
-  {: codeblock}
+Destroying a cluster removes it from management and deletes the components of the cluster. This is permanent, and it cannot be brought back under management after deletion.   
 
-2. Run the following command to delete the cluster:
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**.
 
-  ```
-  kubectl delete cluster.cluster.k8s.io/<cluster-name>
-  ```
-  {: codeblock}
+2. Select the option menu beside the cluster that you want to delete.
 
-  For more information about the delete command options, run `kubectl delete --help`.
+3. Select **Destroy cluster** or **Detach cluster**. 
 
-View your cluster in the Red Hat Advanced Cluster Management for Kubernetes console.
-
-## Updating your `kubeconfig` file
-{: #update}
-
-When the `access-token` in `kubeconfig` expires, you need to manually update the `kubeconfig` file so that you can access the cluster.
-
-1. [Install Google Cloud SDK](https://cloud.google.com/sdk/install){: new_window}.
-
-2. Authorize Google Cloud SDK tools. Choose one of the following authorization types:
-
-  * User account type
-
-    ```
-    gcloud auth login
-    ```
-    {: codeblock}
-
-  * [Service account](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount){: new_window}.
-
-    ```
-    gcloud auth activate-service-account --key-file [KEY_FILE]
-    ```
-    {: codeblock}
-
-3. Configure Google Cloud SDK tools with the following command:
-
-  ```
-  gcloud config set project [PROJECT_ID]
-  gcloud config set compute/zone [COMPUTE_ZONE]
-  ```
-  {: codeblock}
-
-4. Generate a `kubeconfig` file by running the following command:
-
-  ```
-  gcloud container clusters get-credentials [CLUSTER_NAME]
-  ```
-  {: codeblock}
-
-5. Access your cluster to fetch `access-token` with the following command:
-
-  ```
-  kubectl --kubeconfig ~/.kube/config cluster-info
-  ```
-  {: codeblock}
-
-6. Access your `kubeconfig` with the following command:
-
-  ```
-  cp ~/.kube/config ./kubeconfig
-  kubectl --kubeconfig ./kubeconfig cluster-info
-  ```
-  {: codeblock}
+  **Tip:** You can detach or destroy multiple clusters by selecting the check boxes of the clusters that you want to detach or destroy. Then select **Detach** or **Destroy**.

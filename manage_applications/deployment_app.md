@@ -1,16 +1,8 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-25"
-
----
-
 # Deploying application resources
 
 You can deploy application resources, such as Kubernetes deployable objects or Helm charts to a cluster to update existing applications or to add applications. Red Hat Advanced Cluster Management for Kubernetes supports multiple options for the deployment of deployable objects.
 
-Within the Red Hat Advanced Cluster Management for Kubernetes application model, you use deployables (`Deployable.app.ibm.com`), which are Kubernetes resources that contain templates to wrap other Kubernetes resources or represent Helm releases for deployment. Deployables are used to wrap other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. For more information about deployables, see [Application resources](app_resources.md).
+Within the Red Hat Advanced Cluster Management for Kubernetes application model, you use deployables (`deployable.apps.open-cluster-management.io`), which are Kubernetes resources that contain templates to wrap other Kubernetes resources or represent Helm releases for deployment. Deployables are used to wrap other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. For more information about deployables, see [Application resources](app_resources.md).
 
 When you are preparing to deploy, the deployment option that you can use can depend on the following requirement:
 * You are deploying to a single cluster or multiple clusters.
@@ -20,9 +12,9 @@ When you are preparing to deploy, the deployment option that you can use can dep
 
 In general, if you plan to use a continuous delivery model for developing your applications, use a combination of channels, subscriptions, and placement rules.
 
-* Channels (`Channel.app.ibm.com`) define a namespace within the Hub cluster and point to a physical place where resources are stored for deployment, such as an object store, Kubernetes namespace, Helm repository, or GitHub repository. Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables within a channel can be accessed by only the clusters that subscribe to that channel.
+* Channels (`channel.apps.open-cluster-management.io`) define a namespace within the Hub cluster and point to a physical place where resources are stored for deployment, such as an object store, Kubernetes namespace, Helm repository, or GitHub repository. Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables within a channel can be accessed by only the clusters that subscribe to that channel.
 
-* Subscriptions (`Subscription.app.ibm.com`) are sets of definitions that identify deployables within channels by using annotations, labels, and versions. The subscription operator can monitor the channel for new or updated Helm charts, deployables, or secret. Then, the operator can download the Helm chart, deployable, or secret directly from the source location (Helm repository, GitHub repository, object store, or namespace) to the target managed clusters.
+* Subscriptions (`subscription.apps.open-cluster-management.io`) are sets of definitions that identify deployables within channels by using annotations, labels, and versions. The subscription operator can monitor the channel for new or updated Helm charts, deployables, or secret. Then, the operator can download the Helm chart, deployable, or secret directly from the source location (Helm repository, GitHub repository, object store, or namespace) to the target managed clusters.
 
 * Placement rules (`PlacementRule.app.ibm.com`) define the target clusters where deployables can be deployed. Use placement rules to help you facilitate the multi-cluster deployment of your deployables.
 
@@ -34,13 +26,12 @@ If you need to deploy a Kubernetes resource or Helm chart to only a single clust
 
 Based on your deployment requirements, review the details and process for the following deployment options:
 
-  * [Deploy by using channels, subscriptions, and placement rules](#deploy_subscriptions)
-    * [Promote a deployable to a channel](#promote_channel)
-    * [Deploy with a percentage roll out](#deploy_rollout)
-  * [Deploy by using only placement rules](#deploy_placerules)
+  * [Deploy by using channels, subscriptions, and placement rules](#deploy-by-using-channels-subscriptions-and-placement-rules)
+    * [Promote a deployable to a channel](#promote-a-deployable-to-a-channel)
+    * [Deploy with a percentage roll out](#deploy-with-a-percentage-roll-out)
+  * [Deploy by using only placement rules](#deploy-by-using-only-placement-rules)
 
 ## Deploy by using channels, subscriptions, and placement rules
-{: #deploy_subscriptions}
 
 To set up and use channels, subscriptions, and placement rules for deployments, complete the following procedure:
 
@@ -67,13 +58,12 @@ If you need to deploy new or changed Helm charts or other resources during only 
 For more information, see [Scheduling resource deployments for a subscription](managing_subscriptions.md#subscription_timewindow).
 
 ## Promote a deployable to a channel
-{: #promote_channel}
 
 To promote a deployable to a channel, you can use any of the following methods:
 
 * Point the deployable to a specific channel by configuring the `spec.channels` field within the deployable definition with the correct annotations to identify the channel.
 
-    The `spec.channels` parameter is available for deployable (`Deployable.app.ibm.com`) resources to identify the channels where the deployable is to be promoted. The following example shows a deployable that defines the channels where the deployable is to be included.
+    The `spec.channels` parameter is available for deployable (`deployable.apps.open-cluster-management.io`) resources to identify the channels where the deployable is to be promoted. The following example shows a deployable that defines the channels where the deployable is to be included.
 
     ```yaml
     apiVersion: apps.open-cluster-management.io/v1
@@ -144,15 +134,13 @@ To promote a deployable to a channel, you can use any of the following methods:
   
   Channel gate requirements are defined within the `spec.gate` section of a channel definition. If the deployable has the fields to match the channel `spec.gate` values, the deployable is promoted to the channel. In this case, the deployable does not need to point to a specific channel with the  `spec.channels` field.
 
-### Deploy with a rolling update  
-{: #deploy_rollout}
+### Deploy with a percentage roll out  
 
 If you want to roll out a deployment to your target managed clusters instead of deploying to all target cluster, you can configure the deployment of a deployable or chart to only a percentage of your managed clusters at a time. For instance, you might want to roll out a deployment when you need to deploy an update but you do not want to affect all clusters at once. When the deployment is successful on a cluster, the deployment is rolled out to another cluster.
 
 For more information, see [Deploying application resources with rolling update](deployment_rollout.md).
 
 ## Deploy by using only placement rules
-{: #deploy_placerules}
 
 If you do not want or need to use channels and subscriptions, you can still use placement rules. When you are deploying a deployable by using only a placement rule, the deployable definition can include a reference to a stand-alone placement rule resource.
 

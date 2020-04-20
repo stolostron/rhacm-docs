@@ -1,11 +1,3 @@
----
-
-copyright:
-  years: 2019, 2020
-lastupdated: "2020-03-26"
-
----
-
 # Enabling a Kubernetes ingress for discovery
 
 You can configure the Red Hat Advanced Cluster Management for Kubernetes service registry to discover Kubernetes ingresses that are on different Red Hat Advanced Cluster Management for Kubernetes managed clusters.
@@ -14,23 +6,7 @@ When you have multiple Kubernetes ingresses that are managed by Red Hat Advanced
 
 **Required user type or access level:** Cluster administrator.
 
-## Enable the kube-ingress discovery plugin
-
-The plugin for the Kubernetes ingress discovery must be enabled if you want to discover a Kubernetes ingress in your managed clusters. Complete the following steps to enable the ingress plugin:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
-
-2. Navigate to **Workloads** -> **Helm Releases**.
-
-3. Select your `rm-klusterlet` release.
-
-4. Expand **All parameters**.
-
-5. In the *Multicloud Manager service registry configuration* section, you can enable the plugin that you want to use by entering it in the **Enabled Plugins** field. Your entry should be comma-separated, like the following example:
-
-  ```
-  kube-service,kube-ingress
-  ```
+The plugin for the Kubernetes ingress discovery must be enabled when you import your target managed cluster if you want to discover a Kubernetes ingress in your managed clusters.
 
 ## Discover the Kubernetes ingress
 
@@ -65,50 +41,13 @@ To discover a Kubernetes ingress within your managed clusters, complete the foll
            servicePort: 8000
   ```
 
-  **Tip:** You can append the service registry DNS suffix (mcm.svc) to your ingress host name, thus you can access the ingress host directly using the host name.
+  **Tip:** You can append the service registry DNS suffix (mcm.svc) to your ingress host name, then you can access the ingress host directly using the host name.
 
-2. If the ingress that you added the discovery annotation to has other applications that depend on it, add the ingress to the application's entry as a deployable dependency.
-
-  The following example shows how to add this dependency:
+2. By default, the annotated ingress can be discovered on all managed clusters. If you want to discover the service on specific managed clusters, add the `target-clusters` in the annotation, as shown in the following example:
 
   ```
-  apiVersion: apps.ibm.com/v1alpha1
-  kind: Deployable
-  metadata:
-    name: name1
-    namespace: workspace
-  spec:
-    template:
-      apiVersion: extensions/v1beta1
-      kind: Deployment
-      metadata:
-        name: ibm-websphere
-        labels:
-          app: ibm-websphere
-      spec:
-        replicas: 1
-        selector:
-          matchLabels:
-            app: ibm-websphere
-        template:
-          metadata:
-            labels:
-              app: ibm-websphere
-          spec:
-            containers:
-            - name: ibm-websphere
-              image: "registry.ng.bluemix.net/seed/ibm-websphere-sample"
-              imagePullPolicy: Always
-    dependencies:
-    - name: dbing
-      namespace: database
-      kind: Ingress
-      apiGroup: extensions/v1beta1
-    placement:
-      clusterNames:
-      - managed cluster1
+  mcm.ibm.com/service-discovery: '{"target-clusters": ["cluster1", "cluster2"]}'
   ```
-
-  After applying this deployable, its dependent ingress is automatically discovered in the cluster (`managed cluster1`) in which the application is deployed.
+  {: codeblock}
 
 3. Access the discovered ingress by using the ingress host name. In this example, the host name is `mydb.database.mcm.svc`.
