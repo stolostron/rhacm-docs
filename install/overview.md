@@ -13,7 +13,7 @@ After you install and deploy the Red Hat Advanced Cluster Management for Kuberne
 
 Installing Red Hat Advanced Cluster Management for Kubernetes sets up a multi-node cluster production environment. You can install Red Hat Advanced Cluster Management for Kubernetes in either standard or high availability configurations.
 
-The installation procedure consists of the following overall steps:
+The intallation process includes the following topics:
 
 - [Requirements and recommendations](install/requirements.md)
 - [Preparing your hub cluster for installation](install/prep.md)
