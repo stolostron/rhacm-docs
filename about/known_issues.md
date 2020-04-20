@@ -57,7 +57,7 @@ If you cannot verify, attempt to import the cluster again and verify again.
 
 ## Subscription operator does not create an SCC
 
-Learn about Red Hat Openshift Container Platform SCC at [Managing Security Context Constraints (SCC)](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth), which is an additional configuration required on the hub cluster. 
+Learn about Red Hat Openshift Container Platform SCC at [Managing Security Context Constraints (SCC)](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth), which is an additional configuration required on the managed cluster. 
 
 Different deployments have different security context and different service accounts. The subscription operator cannot create an SCC automatically.Administrators control permissions for pods. A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace:
 
@@ -70,7 +70,28 @@ nginx-ingress-52edb
 nginx-ingress-52edb-backend
 ```
 
-2. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. 
+2. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example where `kind: SecurityContextConstraints` is added:
+
+```
+apiVersion: security.openshift.io/v1
+defaultAddCapabilities:
+kind: SecurityContextConstraints
+metadata:
+  name: ingress-nginx
+  namespace: ns-sub-1
+priority: null
+readOnlyRootFilesystem: false
+requiredDropCapabilities: 
+fsGroup:
+  type: RunAsAny
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+users:
+- system:serviceaccount:my-operator:nginx-ingress-52edb
+- system:serviceaccount:my-operator:nginx-ingress-52edb-backend
+```
 
 ## Unable to search using values with empty spaces
 
