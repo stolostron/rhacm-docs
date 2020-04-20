@@ -1,4 +1,4 @@
-# Installing Red Hat Advanced Cluster Management for Kubernetes when connected
+# Installing while connected online 
 
 Red Hat Advanced Cluster Management for Kubernetes is installed using a main operator that deploys all of the required sub-operators such as etcd, multicloud subscription, Apache Hive, and so on. 
 
