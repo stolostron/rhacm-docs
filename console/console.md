@@ -111,7 +111,7 @@ For more specific search results, include the property in your search. For examp
   
     **Notes:** 
   
-    - Users are unable to searchfor values that contain an empty space. 
+    - Users are unable to search for values that contain an empty space. 
 
     - Any user can search for resources, but results are based on your role-based access control assignment. Additionally, if you save and share a Search query with another user, returned results depend on access level for that user. For more information on role access, see _Using RBAC Authorization_ in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 
