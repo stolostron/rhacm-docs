@@ -36,7 +36,7 @@ Your policy is updated.
 
 3. Navigate to your OpenShift Container Platform console by selecting the _Cluster_ link.
 
-4. From the navigation menu on the OpenShift Container Platform console, click **Administratio** > **Custom Resource Definitions**.
+4. From the navigation menu on the OpenShift Container Platform console, click **Administration** > **Custom Resource Definitions**.
 
 5. Select **`imagemanifestvulns`** > **_Instances_ tab** to view all of the `imagemanifestvulns` instances. 
 
