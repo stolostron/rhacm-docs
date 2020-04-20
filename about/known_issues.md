@@ -8,7 +8,6 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [Console features might not display in Firefox earlier versions](#console-features-might-not-display-in-firefox-earlier-versions)
   - [Host adoption failed](#host-adoption-failed)
   - [Application not deployed after an updated placement rule](#application-not-deployed-after-an-updated-placement-rule)
-  - [Subscription operator does not create a Security Context Constraint (SCC)](#subscription-operator-does-not-create-an-scc)
   - [Unable to search using values with empty spaces](#unable-to-search-using-values-with-empty-spaces)
 
 ## Certificate manager must not exist during an installation
@@ -54,44 +53,6 @@ You can run `oc get pods -n multicluster-endpoint` to verify.
 You can also search for `kind:pod cluster:yourcluster` in the console and see if the `endpoint-appmgr` is running.
 
 If you cannot verify, attempt to import the cluster again and verify again.
-
-## Subscription operator does not create an SCC
-
-Learn about Red Hat Openshift Container Platform SCC at [Managing Security Context Constraints (SCC)](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth), which is an additional configuration required on the managed cluster. 
-
-Different deployments have different security context and different service accounts. The subscription operator cannot create an SCC automatically. Administrators control permissions for pods. A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace:
-
-To manually create an SCC CR in your namespace, complete the following:
-
-1. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
-
-```
-nginx-ingress-52edb
-nginx-ingress-52edb-backend
-```
-
-2. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example where `kind: SecurityContextConstraints` is added:
-
-```
-apiVersion: security.openshift.io/v1
-defaultAddCapabilities:
-kind: SecurityContextConstraints
-metadata:
-  name: ingress-nginx
-  namespace: ns-sub-1
-priority: null
-readOnlyRootFilesystem: false
-requiredDropCapabilities: 
-fsGroup:
-  type: RunAsAny
-runAsUser:
-  type: RunAsAny
-seLinuxContext:
-  type: RunAsAny
-users:
-- system:serviceaccount:my-operator:nginx-ingress-52edb
-- system:serviceaccount:my-operator:nginx-ingress-52edb-backend
-```
 
 ## Unable to search using values with empty spaces
 
