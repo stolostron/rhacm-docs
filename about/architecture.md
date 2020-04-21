@@ -8,7 +8,7 @@ Red Hat Advanced Cluster Management for Kubernetes consists of several multiclus
   - [Managed cluster](#managed-cluster)
   - [Cluster lifecycle](#cluster-lifecycle)
   - [Application lifecycle](#application-lifecycle)
-  - [Governance risk and compliance](#Governance-risk-and-compliance)
+  - [Governance and risk](#governance-and-risk)
 
 ## Hub cluster
 
