@@ -19,7 +19,7 @@ Each _policy_ within the policy document contains the following elements:
         * Use your internal security standards or industry standards for the `annotations` field. You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, from the console.
         * You must add your `label` directly into the YAML file to create a label.
 
-  - A `namespace` selector that specifies which namespaces within the hub cluster that the policy is applied to. 
+  - A `namespace` selector specifies which namespaces within the hub cluster that the policy is applied to. 
   
     **Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.
 
