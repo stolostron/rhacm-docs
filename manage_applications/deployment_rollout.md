@@ -152,7 +152,7 @@ For more information about how to define a placement rule, see [creating and man
 
 The following example YAML definitions show the required fields for deploying an update for a deployable by using a rolling update.
 
-- The following definitions create a `development-ns/development-ns` namespace and `development-ch` channel to use for the deployables and subscriptions:
+- The following definitions create a `development-ns/development-ns` namespace and `development-ch` channel to use for the deployables and subscriptions: <!--do we have rolling updates?-->
 
 ```yaml
 ---
@@ -179,24 +179,23 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
   annotations:
-    app.ibm.com/is-local-deployable: "false"
-    app.ibm.com/deployable-version: 1.2.3
-  name: configmap-initial
-  namespace: development-ns
+    apps.open-cluster-management.io/is-local-deployable: "false"
+  labels:
+    app: nginx-app-details
+  name: example-configmap
+  namespace: ns-sub-1
 spec:
   template:
     apiVersion: v1
     kind: ConfigMap
     metadata:
-      labels:
-        app: my-application
-      name: development-ns
+      name: config1
       namespace: default
     data:
-      purpose: For testing purposes
+      purpose: for test
 ---
 apiVersion: apps.open-cluster-management.io/v1
-kind: Deployable
+kind: Deployable 
 metadata:
   annotations:
     app.ibm.com/is-local-deployable: "false"
@@ -213,7 +212,7 @@ spec:
       name: development-ns
       namespace: default
     data:
-      purpose: For testing a rolling update
+      purpose: For testing a rolling update 
 ```
 
 - The following YAML content includes the definition for the initial subscription to the channel and initial deployable. This YAML content also includes the definition for the target subscription to the channel for rolling out the updated deployable. The definition for the initial subscription also includes the `placement` definition to list the target clusters where the deployables must be placed instead of referencing an associated placement rule.

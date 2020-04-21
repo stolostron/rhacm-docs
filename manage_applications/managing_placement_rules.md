@@ -275,7 +275,6 @@ kind: PlacementRule
 metadata:
   name: towhichcluster
   namespace: ns-sub-1
-  generation: 2
   labels:
     app: nginx-app-details
 spec:

@@ -27,18 +27,18 @@ The definition structure for an application can resemble the following example Y
 apiVersion: app.k8s.io/v1beta1
 kind: Application
 metadata:
-  name: mq-advanced-server-prod
-  namespace: cloudpak4integration
+  labels:
+    app: nginx-app-details
+  name: nginx-app-3
+  namespace: ns-sub-1
 spec:
-  selector:
-    matchExpressions:
-    - key: purpose
-      operator: In
-      values:
-      - mq-advanced-server-prod
   componentKinds:
-  - group: apps.open-cluster-management.io/v1
+  - group: apps.open-cluster-management.io
     kind: Subscription
+  selector:
+    matchLabels:
+      app: nginx-app-details
+status: {}
 ```
 
 For more information about creating and managing applications, see [Creating and managing applications](managing_apps.md).
@@ -58,35 +58,21 @@ The definition structure for a deployable can resemble the following YAML conten
 apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
-  name: {{ template "guestbookchannel.fullname" . }}-service
   annotations:
-    app.ibm.com/is-local-deployable: "false"
+    apps.open-cluster-management.io/is-local-deployable: "false"
   labels:
-    app: {{ template "guestbookchannel.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    component: main
-    package: guestbook
+    app: nginx-app-details
+  name: example-configmap
+  namespace: ns-sub-1
 spec:
   template:
-    kind: Service
     apiVersion: v1
+    kind: ConfigMap
     metadata:
-      name: {{ template "guestbookchannel.fullname" . }}
-      labels:
-        app: {{ template "guestbookchannel.name" . }}
-        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-        release: {{ .Release.Name }}
-        heritage: {{ .Release.Service }}
-    spec:
-      type: {{ .Values.frontend.service.type }}
-      ports:
-        - port: 80
-      selector:
-        app: {{ template "guestbookchannel.name" . }}
-        release: {{ .Release.Name }}
-        tier: frontend
+      name: config1
+      namespace: default
+    data:
+      purpose: for test
 ```
 
 For more information about creating and managing deployables, see [Managing deployables](managing_deployables.md).
@@ -106,12 +92,12 @@ apiVersion: v1
 kind: Secret
 metadata:
   annotations:
-      app.ibm.com/deployables: "true"
-  name: secret-namespace
-  namespace: channel-namespace
+      apps.open-cluster-management.io/deployables: "true"
+  name: [secret-name]
+  namespace: [channel-namespace]
 data:
-  AccessKeyID: ABCdeF1=
-  SecretAccessKey: gHIjk2lmnoPQRST3uvw==
+  AccessKeyID: [ABCdeF1=] #Base64 encoded
+  SecretAccessKey: [gHIjk2lmnoPQRST3uvw==] #Base64 encoded
 ```
 
 For more information about creating and managing secrets, see [Managing secrets](managing_secrets.md).
@@ -130,15 +116,13 @@ The definition structure for a channel can resemble the following YAML content, 
 apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
-  name: {{ .Release.Name }}
+  name: predev-ch
+  namespace: ns-ch
   labels:
-    app: {{ template "guestbookchannel.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app: nginx-app-details
 spec:
-  type: Namespace
-  pathname: {{ .Release.Namespace }}
+  type: HelmRepo
+  pathname: https://kubernetes-charts.storage.googleapis.com/
 ```
 
 For more information about creating and managing channels, see [Managing channels](managing_channels.md).
@@ -152,23 +136,27 @@ Subscriptions are sets of definitions that identify Helm charts, deployables, an
 The definition structure for a subscription can resemble the following YAML content:
 
 ```yaml
-  apiVersion: apps.open-cluster-management.io/v1
-  kind: Subscription
-  metadata:
-      name: nginx-public
-  spec:
-    source: https://kubernetes-charts.storage.googleapis.com/
-    name: nginx-ingress
-    packageFilter:
-      annotations:
-        tillerVersion: 2.4.0
-      version: '>=0.3.1'
-    packageOverrides:
-    - packageName: nginx-ingress
-      packageAlias:
-      - path: spec
-        value:
-          replicaCount: 2
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: nginx
+  namespace: ns-sub-1
+  labels:
+    app: nginx-app-details
+spec:
+  channel: ns-ch/predev-ch
+  name: nginx-ingress
+  packageFilter:
+    version: "1.36.x"
+  placement: # See the following section for information
+    placementRef:
+      kind: PlacementRule
+      name: towhichcluster
+  overrides: # See Deployable documentation
+  - clusterName: "/"
+    clusterOverrides:
+    - path: "metadata.namespace"
+      value: default
 ```
 
 For more information about creating and managing subscriptions, see [Managing subscriptions](managing_subscriptions.md).
@@ -187,15 +175,10 @@ The definition structure for a placement rule can resemble the following YAML co
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
-  name: {{ template "guestbookapplication.fullname" . }}-redismaster
-  labels:
-    app: {{ template "guestbookapplication.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+  name: towhichcluster
+  namespace: ns-sub-1
 spec:
-  clusterReplicas: {{ .Values.clusterReplicas }}
-  clusterLabels:
+  clusterSelector: {}
 ```
 
 For more information about creating and managing placement rules, see [Managing placement rules](managing_placement_rules.md).
