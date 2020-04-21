@@ -98,21 +98,24 @@ To promote a deployable to a channel, you can use any of the following methods:
     apiVersion: apps.open-cluster-management.io/v1
     kind: Subscription
     metadata:
-        name: mydevsub
-        namespace: myspace
+      name: nginx
+      namespace: ns-sub-1
+      labels:
+        app: nginx-app-details
     spec:
-      channel: ch-dev/dev
-      package: nginx
+      channel: ns-ch/predev-ch
+      name: nginx-ingress
       packageFilter:
-        version: 1.x
+        version: "1.36.x"
       placement:
-        clusters:
-        - name: mydevcluster1
+        placementRef:
+          kind: PlacementRule
+          name: towhichcluster
     ```
 
 * Update the subscription definition to identify the deployables. The configuration for promoting a deployable to a channel can also be specified within the subscription definition.
 
-  The following example subscription indicates that the most recent `nginx` version `1.x` chart is to be promoted through the channel for deployment with the subscription.
+  The following example subscription indicates that the most recent `nginx` version `1.x` chart is to be promoted through the channel for deployment with the subscription. <!-- check this one and the version -->
 
     ```yaml
     apiVersion: apps.open-cluster-management.io/v1

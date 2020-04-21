@@ -351,14 +351,15 @@ The following YAML content defines example subscriptions:
 
 ```YAML
 apiVersion: apps.open-cluster-management.io/v1
-kind: Subscription
+kind: Channel
 metadata:
-  name: my-channel-subscription
+  name: predev-ch
+  namespace: ns-ch
+  labels:
+    app: nginx-app-details
 spec:
-  channel: my-channel-namespace/my-qa-channel
-  placement:
-    clusters:
-    - name: my-development-cluster-1
+  type: HelmRepo
+  pathname: https://kubernetes-charts.storage.googleapis.com/
 ```
 
 ### Scheduled channel subscription example
@@ -370,18 +371,18 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: nginx
-  namespace: my-channel-subscription-nginx
+  namespace: ns-sub-1
   labels:
     app: nginx-app-details
 spec:
-  channel: my-channel-namespace/my-development-channel
+  channel: ns-ch/predev-ch
   name: nginx-ingress
   packageFilter:
-    version: "1.20.x"
+    version: "1.36.x"
   placement:
     placementRef:
       kind: PlacementRule
-      name: my-placement-rule
+      name: towhichcluster
   timewindow:
     windowtype: "block"/"active"
     location: "America/Los_Angeles"

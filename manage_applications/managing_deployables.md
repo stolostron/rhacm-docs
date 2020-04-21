@@ -176,31 +176,18 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
   annotations:
-    app.ibm.com/is-local-deployable: "false"
-  name: sample-deploy
-  namespace: dev
+    apps.open-cluster-management.io/is-local-deployable: "false"
+  labels:
+    app: nginx-app-details
+  name: example-configmap
+  namespace: ns-sub-1
 spec:
   template:
-    apiVersion: apps/v1
-    kind: Deployment
+    apiVersion: v1
+    kind: ConfigMap
     metadata:
-      labels:
-        app: nginx
-      name: sample-deployment
+      name: config1
       namespace: default
-    spec:
-      replicas: 1
-      selector:
-        matchLabels:
-          app: nginx
-      template:
-        metadata:
-          labels:
-            app: nginx
-        spec:
-          containers:
-          - image: nginx:1.7.9
-            name: nginx
-            ports:
-            - containerPort: 80
+    data:
+      purpose: for test
 ```
