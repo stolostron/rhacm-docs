@@ -2,7 +2,8 @@
 
  * [About Red Hat Advanced Cluster Management for Kubernetes (Technology preview 1.0)](about/welcome.md)
    * [Architecture](about/architecture.md)
-   * [Components](about/components.md)  
+   * [Components](about/components.md)
+   * [Quick Start Guide](about/quick_start.md)  
  * [Release Notes](about/release_notes.md)
    * [What's new](about/whats_new.md)
    * [Known issues and limitations](about/known_issues.md)
