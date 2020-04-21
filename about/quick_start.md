@@ -1,5 +1,7 @@
 # Getting started 
 
+Note: Work in progress
+
 ## Introduction
 
 Review the [Architecture](architecture.md) topic and the [Components](components.md) topics to learn more about what is installed with Red Hat Advanced Cluster Management for Kubernetes.
