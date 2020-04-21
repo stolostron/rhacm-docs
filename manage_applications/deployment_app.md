@@ -89,11 +89,13 @@ To promote a deployable to a channel, you can use any of the following methods:
     apiVersion: apps.open-cluster-management.io/v1
     kind: Channel
     metadata:
-        name: dev
-        namespace: dev
+      name: predev-ch
+      namespace: ns-ch
+      labels:
+        app: nginx-app-details
     spec:
-        type: HelmRepo
-        pathname: https://kubernetes-charts.storage.googleapis.com/
+      type: HelmRepo
+      pathname: https://kubernetes-charts.storage.googleapis.com/
     ---
     apiVersion: apps.open-cluster-management.io/v1
     kind: Subscription
@@ -115,23 +117,7 @@ To promote a deployable to a channel, you can use any of the following methods:
 
 * Update the subscription definition to identify the deployables. The configuration for promoting a deployable to a channel can also be specified within the subscription definition.
 
-  The following example subscription indicates that the most recent `nginx` version `1.x` chart is to be promoted through the channel for deployment with the subscription. <!-- check this one and the version -->
-
-    ```yaml
-    apiVersion: apps.open-cluster-management.io/v1
-    kind: Subscription
-    metadata:
-        name: mydevsub
-        namespace: myspace
-    spec:
-      source: https://kubernetes-charts.storage.googleapis.com/
-      package: nginx
-      packageFilter:
-        version: 1.x
-      placement:
-        clusters:
-        - name: mydevcluster1
-    ```
+  In the previous example, `packageFilter.version: "1.36.x"` indicates the specific `nginx` version `1.36.x` chart is  promoted through the channel for deployment with the subscription. 
 
 * Update the channel definition to specify channel gate requirements and update the definitions for your deployables to include the fields and values to match the gate requirements.
   
