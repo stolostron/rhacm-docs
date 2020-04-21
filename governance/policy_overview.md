@@ -10,13 +10,14 @@ Each _policy_ within the policy document contains the following elements:
 
   - An `annotations` parameter is used to specify a set of security details that describes the set of standards the policy is trying to validate. View the following descriptions of the security policy annotations:
       * `policy.mcm.ibm.com/standards` - The name or names of security standards the policy is related to. For example, National Institute of Standards and Technology (NIST) and Payment Card Industry (PCI).
-      * `policy.mcm.ibm.com/categories` - The security control category the policy applies to. For example, Access Control, System and Information Integrity.
-      * `policy.mcm.ibm.com/controls` - The name of the security control that is being checked. For example, Center of Internet Security (CIS) and certificate policy controller.
+      * `policy.mcm.ibm.com/categories` - A security control category represents the presence of specific requirements for one or more standards. For example, a System and Information Integrity category might indicate that your policy contains a data transfer protocol to protect personal information, as required by the HIPAA and PCI standards.
+      * `policy.mcm.ibm.com/controls` -  The name of the security control that is being checked. For example, Center of Internet Security (CIS) and certificate policy controller.
       
         **Notes**: 
         
         * Parameter values for `standard, categories, and controls` are not required. The parameter value is empty when the values are not defined.
         * Use your internal security standards or industry standards for the `annotations` field. You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, from the console.
+        * You must add your `label` directly into the YAML file to create a label.
 
   - A `namespace` selector that specifies which namespaces within the hub cluster that the policy is applied to. 
   
@@ -32,4 +33,4 @@ Each _policy_ within the policy document contains the following elements:
     
     Create custom policy controllers to validate the compliance of your policies. For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
 
-See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](compliance_intro.md) for more policy topics.
+For more information on how the policy elements are utilized, see [Red Hat Advanced Cluster Management for Kubernetes policy example](policy_example.md). See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](compliance_intro.md) for more policy topics.
