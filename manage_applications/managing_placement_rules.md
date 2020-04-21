@@ -2,8 +2,6 @@
 
 You can create and manage placement rules to define where and how Helm charts and deployables are deployed. Use placement rules to help you facilitate multi-cluster deployments of your deployables.
 
-**Note:** The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used in previous versions of Red Hat Advanced Cluster Management for Kubernetes for deployables. Placement policies are still used for governance and risk policies.
-
   * [Create a placement rule](#create-a-placement-rule)
   * [Assign a placement rule](#assign-a-placement-rule)
   * [Placement rule status](#placement-rule-status)
