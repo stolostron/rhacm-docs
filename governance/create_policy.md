@@ -16,9 +16,6 @@ The following objects are required for your Red Hat Advanced Cluster Management 
 
 View more descriptions of the policy YAML files in the [Red Hat Advanced Cluster Management for Kubernetes policy example](policy_example.md).
 
-View the following sections to create any policy:
-
-
 ## Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy
 
 Complete the following steps to create a policy:
