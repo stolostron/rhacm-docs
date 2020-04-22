@@ -52,7 +52,7 @@ metadata:
   namespace: mcm
 spec:
   remediationAction: "enforce" # enforce or inform
-  disabled: "false" # or true 
+  disabled: false # or true 
   complianceType: "musthave" # used as default, when missing in a particular sub-template
   namespaces:
     include: ["default"]
