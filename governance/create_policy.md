@@ -35,7 +35,7 @@ Complete the following steps to create a policy:
      name: policy1
    spec:
      remediationAction: "enforce" # or inform
-     disabled: "false" # or true
+     disabled: false # or true
      namespaces:
        include: ["default"]
        exclude: ["kube*"]
