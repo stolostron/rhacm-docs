@@ -59,7 +59,7 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: Deployable
 metadata:
   annotations:
-    apps.open-cluster-management.io/is-local-deployable: false
+    apps.open-cluster-management.io/is-local-deployable: "false"
   labels:
     app: nginx-app-details
   name: example-configmap
