@@ -1,7 +1,6 @@
 # Creating an OpenShift cluster on bare metal
-
+<!--I believe this file should be removed too-->
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to create a Red Hat OpenShift Container Platform cluster in a bare metal environment. 
-{:shortdesc}
 
   - [Prerequisites](#prerequisites)
   - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console)

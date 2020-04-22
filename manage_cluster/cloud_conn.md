@@ -9,4 +9,4 @@ The following files detail the information that is required for creating a conne
 - [Creating a provider connection for Amazon Web Services](cloud_conn_aws.md)
 - [Creating a provider connection for Microsoft Azure](cloud_conn_aks.md)
 - [Creating a provider connection for Google Cloud Platform](cloud_conn_gke.md)
-- [Creating a provider connection for bare metal](cloud_conn_bare.md)
+- [Creating a provider connection for bare metal](cloud_conn_bare.md) <!--if it is agreed to remove this file, this link must be removed-->

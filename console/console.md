@@ -57,7 +57,7 @@ You can personalize your view of the page by using the filtering feature. Click 
 
 ## Automate infrastructure
 
-Create clusters or bare metal assets, or import existing clusters. Scale up or down and delete clusters as needed. For more information, see [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](manage_cluster/intro.md)
+Create clusters or import existing clusters. Scale up or down and delete clusters as needed. For more information, see [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](manage_cluster/intro.md)
 
 ## Manage applications (Technology preview)
 
