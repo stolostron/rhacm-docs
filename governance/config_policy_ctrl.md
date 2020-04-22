@@ -29,7 +29,7 @@ Each _policy_ within the policy document contains the following elements.
 
 ### Inform and enforce summary
 
-When you create a configuration policy, set the `remediationAction` to define how policy violations are reported. View the following summary table to know which polcies support the `enforce` feature: 
+When you create a configuration policy, set the `remediationAction` to define how policy violations are reported. View the following summary table to know which policies support the `enforce` feature: 
 
 | Sample policy| Enforce support | Enforce Action |
 | -------| --------------- | -------------- |
