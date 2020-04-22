@@ -339,7 +339,7 @@ The contents for the `value` field are used to override the values within the `s
 
 ## Example subscription YAML 
 
-The following YAML content defines example subscriptions:
+The following YAML content defines example subscriptions: <!--note Ian/Brandi to create a full topic with just examples and pull from the main doc -->
 
   * [Channel subscription example](#channel-subscription-example)
   * [Scheduled channel subscription example](#scheduled-channel-subscription-example)
@@ -347,21 +347,22 @@ The following YAML content defines example subscriptions:
   * [Helm repository subscription example](#helm-repository-subscription-example)
   * [GitHub repository subscription example](#github-repository-subscription-example)
 
-### Channel subscription example
+### Subscription example
 
 ```YAML
 apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
-  name: my-channel-subscription
+  name: nginx
+  namespace: ns-sub-1
+  labels:
+    app: nginx-app-details
 spec:
-  channel: my-channel-namespace/my-qa-channel
-  placement:
-    clusters:
-    - name: my-development-cluster-1
+  channel: ns-ch/predev-ch
+  name: nginx-ingress
 ```
 
-### Scheduled channel subscription example
+### Subscription time window example
 
 The following example subscription includes multiple configured time windows. A time window occurs between 10:20 AM and 10:30 AM occurs every Monday, Wednesday, and Friday. A time window also occurs between 12:40 PM and 1:40 PM every Monday, Wednesday, and Friday. The subscription is active only during these six weekly time windows for deployments to begin.  
 
@@ -370,18 +371,18 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   name: nginx
-  namespace: my-channel-subscription-nginx
+  namespace: ns-sub-1
   labels:
     app: nginx-app-details
 spec:
-  channel: my-channel-namespace/my-development-channel
+  channel: ns-ch/predev-ch
   name: nginx-ingress
   packageFilter:
-    version: "1.20.x"
+    version: "1.36.x"
   placement:
     placementRef:
       kind: PlacementRule
-      name: my-placement-rule
+      name: towhichcluster
   timewindow:
     windowtype: "block"/"active"
     location: "America/Los_Angeles"
@@ -393,7 +394,7 @@ spec:
         end: "1:40PM"
 ```
 
-### Channel subscription example with overrides
+### Subscription with overrides example
 
 The following example includes package overrides to define a different release name of the Helm release for Helm chart. A package override setting is used to set the name `my-nginx-ingress-releaseName` as the different release name for the  `nginx-ingress` Helm release.
 
@@ -404,7 +405,7 @@ metadata:
   name: simple
   namespace: default
 spec:
-  channel: dev/dev-helmrepo
+  channel: ns-ch/predev-ch
   name: nginx-ingress
   packageOverrides:
   - packageName: nginx-ingress
@@ -420,7 +421,7 @@ spec:
 
 ### Helm repository subscription example
 
-The following subscription automatically pulls the latest `nginx` Helm release for the version `1.x`. The Helm release deployable is placed on the `mydevcluster1` cluster when a new version is available in the source Helm repository.
+The following subscription automatically pulls the latest `nginx` Helm release for the version `1.36.x`. The Helm release deployable is placed on the `my-development-cluster-1` cluster when a new version is available in the source Helm repository.
 
 The `spec.packageOverrides` section shows optional parameters for overriding values for the Helm release. The override values are merged into the Helm release `values.yaml` file, which is used to retrieve the configurable variables for the Helm release.
 
@@ -428,13 +429,15 @@ The `spec.packageOverrides` section shows optional parameters for overriding val
 apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
-  name: my-helm-subscription
-  namespace: my-namespace
-spec:
-  source: https://kubernetes-charts.storage.googleapis.com/
   name: nginx
+  namespace: ns-sub-1
+  labels:
+    app: nginx-app-details
+spec:
+  channel: ns-ch/predev-ch
+  name: nginx-ingress
   packageFilter:
-    version: 1.x
+    version: "1.36.x"
   placement:
     clusters:
     - name: my-development-cluster-1

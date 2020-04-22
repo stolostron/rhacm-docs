@@ -1,7 +1,7 @@
 # Red Hat Advanced Cluster Management for Kubernetes policy example
 
 Each Red Hat Advanced Cluster Management for Kubernetes policy can have at least one or multiple templates. For more details about the policy elements, see [Red Hat Advanced Cluster Management for Kubernetes policy overview](../governance/policy_overview.md).
-  
+ 
 The policy requires a _PlacementPolicy_ that defines the clusters that the policy document is applied to, and a _PlacementBinding_ that binds the Red Hat Advanced Cluster Management for Kubernetes policy to the `PlacementPolicy`. View the example placement policy and placement binding: 
 
    * Example placement policy that selects clusters based on a label:
@@ -52,7 +52,7 @@ metadata:
   namespace: mcm
 spec:
   remediationAction: "enforce" # enforce or inform
-  disabled: "false" # or true 
+  disabled: false # or true 
   complianceType: "musthave" # used as default, when missing in a particular sub-template
   namespaces:
     include: ["default"]
