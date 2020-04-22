@@ -30,8 +30,7 @@ The following table provides information and examples for the command types that
 | `helm` | Run supported `helm` commands. **Tip:** See the [helm commands](https://v2.helm.sh/docs/helm/#helm) topic in the Helm documentation for more information about the Helm commands. | `helm list --chart-name` |
 | `help` | Display additional information about a command that is supported in the Visual Web Terminal | `help` |
 | `history` | Displays the previous 25 commands that were run during the current session. **Tip:** You can limit the search criteria by adding it to the end of the command. For example, `history help` displays the last 25 commands that contained the string *help*. | `history` |
-| `istioctl` | Run supported `istioctl` commands. **Tip:** See the [Istioctl](https://istio.io/docs/reference/commands/istioctl/) topic in the Istio documentation for more information about the `istioctl` commands. | `istioctl get policy` |
-| `kubectl` | Run supported `kubectl` commands. **Tip:** See the [Kubectl reference](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands) for more information about the `kubectl` commands. | `kubectl get pods`  |
+| `kubectl` | Run supported `kubectl` commands. **Tip:** See the [Kubernetes CLI reference](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands) for more information about the `kubectl` commands. | `kubectl get pods`  |
 | `oc` | Runs Red Hat OpenShift `oc` commands. **Tip:** See [Red Hat OpenShift CLI Operations](https://docs.openshift.com/enterprise/3.0/cli_reference/basic_cli_operations.html) for more information about the `oc` commands. | `oc get svc` |
 | `run` | Runs an external script | `run script_name` |
 | `search` | Searches your Kubernetes resources for those that match the specified search filters and parameters| `search pod` |
