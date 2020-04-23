@@ -391,7 +391,7 @@ spec:
       - start: "10:20AM"
         end: "10:30AM"
       - start: "12:40PM"
-        end: "1:40PM". <!--Ian please see this format--user test threw an error -->
+        end: "1:40PM" <!--Ian please see this format--user test threw an error -->
 ```
 
 ### Subscription with overrides example
