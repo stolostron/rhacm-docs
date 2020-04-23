@@ -64,14 +64,6 @@ An operator-assigned, functionally independent segment of network infrastructure
 <details><summary>Click to expand.</summary>
 <p>
 
-### boot node
-
-A node that is used for running installation, configuration, node scaling, and cluster updates.
-
-### buildpack
-
-A collection of scripts that provide framework and runtime support for apps.
-
 </p>
 </details>
 
@@ -136,10 +128,6 @@ An open platform that developers and system administrators can use to build, shi
 <details><summary>Click to expand.</summary>
 <p>
 
-### ELK stack
-
-The three products, Elasticsearch, Logstash, and Kibana, that comprise a stack of tools that stream, store, search, and monitor data, including logs.
-
 ### endpoint
 
 A network destination address that is exposed by Kubernetes resources, such as services and ingresses.
@@ -166,9 +154,7 @@ The ability of a system to continue to operate effectively after the failure of 
 <details><summary>Click to expand.</summary>
 <p>
 
-### Grafana
 
-An open source analytics and visualization platform to monitor, search, analyze, and visualize metrics.
 </p>
 </details>
 
@@ -280,10 +266,6 @@ A configuration that is used to instantiate a virtual machine.
 ### management logging service
 
 An ELK stack that is used to collect and store all Docker-captured logs.
-
-### management node
-
-An optional node that only hosts management services such as monitoring, metering, and logging and can be used to prevent the master node from becoming overloaded.
 
 ### marketplace
 
