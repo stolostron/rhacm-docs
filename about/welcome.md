@@ -15,4 +15,4 @@ See the following documentation for information about the product:
 
 - [Architecture](architecture.md)
 - [Components](components.md)
-- [Installation](../install/overview.md)
+- [Installation](../install/install_overview.md)
