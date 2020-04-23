@@ -391,7 +391,7 @@ spec:
       - start: "10:20AM"
         end: "10:30AM"
       - start: "12:40PM"
-        end: "1:40PM"
+        end: "1:40PM". <!--Ian please see this format--user test threw an error -->
 ```
 
 ### Subscription with overrides example
@@ -500,7 +500,7 @@ You can use `spec.packageOverrides` to override `kustomization` at the subscript
 apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
-  name: example-subscription
+  name: example-subscription <!-- Ian need to talk to you about this -->
   namespace: default
 spec:
   channel: some/channel
