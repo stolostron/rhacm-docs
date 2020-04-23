@@ -62,7 +62,7 @@ It is very important to get the doc team to help with UI content.
  
 ### Known issues or limitations
 
-Please `squad:doc` issues where we have a known issue or limitation in the product that you want us to document in the [Known issues](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/about/known_issues.md) section.
+Please `squad:doc` issues where we have a known issue or limitation in the product that you want us to document in the [Known issues](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/release_notes/known_issues.md) section.
 
 ### Branch strategy
 
