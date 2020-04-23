@@ -21,7 +21,7 @@ With operator-based installation, you can install a working Red Hat OpenShift cl
 ## Application management
 
 Deploy and maintain day two operations of business applications distributed across your cluster landscape.
-Create and manage applications across environments through channel and subscription-based automation. You can also view your applications and resources from the topology page in the console. For more information, see [Managing applications](../manage_applications/overview.md).
+Create and manage applications across environments through channel and subscription-based automation. You can also view your applications and resources from the topology page in the console. For more information, see [Managing applications](../manage_applications/app_management_overview.md).
 
 
   - Application resources are used to group and view the components across your applications.
