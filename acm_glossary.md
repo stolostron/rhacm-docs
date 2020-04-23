@@ -14,30 +14,32 @@ The following cross-references are used in this glossary:
 <!--If you do not want letter links at the top of your 
 glossary, delete the
 text between these comment tags.-->
+Click the arrow for each letter-specific glossary to expand the list of words:
 
-[A](#glossa)
-[B](#glossb)
-[C](#glossc)
-[D](#glossd)
-[E](#glosse)
-[F](#glossf)
-[G](#glossg)
-[H](#glossh)
-[I](#glossi)
-[K](#glossk)
-[L](#glossl)
-[M](#glossm)
-[N](#glossn)
-[P](#glossp)
-[R](#glossr)
-[S](#glosss)
-[T](#glosst)
-[W](#glossw)
+[A](#a)
+[B](#b)
+[C](#c)
+[D](#d)
+[E](#e)
+[F](#f)
+[G](#g)
+[H](#h)
+[I](#i)
+[K](#k)
+[L](#l)
+[M](#m)
+[N](#n)
+[P](#p)
+[R](#r)
+[S](#s)
+[T](#t)
+[W](#w)
 
 <!--end letter link tags-->
 
 ## A
-{: #glossa}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### air gap
 {: #x9794218}
@@ -74,9 +76,12 @@ A log file containing a record of system events and responses.
 
 An operator-assigned, functionally independent segment of network infrastructure.
 
+</p>
+</details>
 
 ## B
-{: #glossb}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### boot node
 {: #x9520233}
@@ -88,9 +93,12 @@ A node that is used for running installation, configuration, node scaling, and c
 
 A collection of scripts that provide framework and runtime support for apps.
 
+</p>
+</details>
 
 ## C
-{: #glossc}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### catalog
 {: #x2000504}
@@ -122,9 +130,12 @@ In Docker, standalone, executable software, including code and system tools, tha
 
 The process of managing the lifecycle of containers, including provisioning, deployment, and availability.
 
+</p>
+</details>
 
 ## D
-{: #glossd}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### deployable
 {: #x4063633}
@@ -145,10 +156,12 @@ A software methodology that integrates application development and IT operations
 {: #x7764788}
 
 An open platform that developers and system administrators can use to build, ship, and run distributed applications.
-
+</p>
+</details>
 
 ## E
-{: #glosse}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### ELK stack
 {: #x9756373}
@@ -165,27 +178,35 @@ A network destination address that is exposed by Kubernetes resources, such as s
 
 A package that contains a deployment process and its required scripts and files.
 
+</p>
+</details>
 
 ## F
-{: #glossf}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### fault tolerance
 {: #x2847028}
 
 The ability of a system to continue to operate effectively after the failure of a component part. See also [high availability](#x2284708).
 
+</p>
+</details>
 
 ## G
-{: #glossg}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### Grafana
 {: #x9773864}
 
 An open source analytics and visualization platform to monitor, search, analyze, and visualize metrics.
-
+</p>
+</details>
 
 ## H
-{: #glossh}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### HA
 {: #x2404289}
@@ -217,9 +238,12 @@ The ability of IT services to withstand all outages and continue providing proce
 
 A cloud computing environment that consists of multiple public and private resources.
 
+</p>
+</details>
 
 ## I
-{: #glossi}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### IBM Certified Container
 {: #x9796955}
@@ -267,9 +291,12 @@ A division that can be used to separate applications as if they were in differen
 
 Open technology that provides a way for developers to seamlessly connect, manage and secure networks of different microservices, regardless of platform, source, or vendor.
 
+</p>
+</details>
 
 ## K
-{: #glossk}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### Klusterlet
 {: #x9773879}
@@ -281,9 +308,12 @@ In IBM Multicloud Manager, the agent that is responsible for a single Kubernetes
 
 An open-source orchestration tool for containers.
 
+</p>
+</details>
 
 ## L
-{: #glossl}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### layer
 {: #x2028320}
@@ -295,9 +325,12 @@ A changed version of a parent image. Images consist of layers, where the changed
 
 Software or hardware that distributes workload across a set of servers to ensure that servers are not overloaded. The load balancer also directs users to another server if the initial server fails.
 
+</p>
+</details>
 
 ## M
-{: #glossm}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### machine type (MT)
 {: #x3883065}
@@ -359,9 +392,12 @@ See [machine type](#x3883065).
 
 A cloud computing model in which an enterprise uses a combination of on-premises, private cloud, and public cloud architecture.
 
+</p>
+</details>
 
 ## N
-{: #glossn}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### namespace
 {: #x2031005}
@@ -378,8 +414,12 @@ A protocol that allows a computer to access files over a network as if they were
 
 See [Network File System](#x2031282).
 
+</p>
+</details>
+
 ## P
-{: #glossp}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### persistent volume
 {: #x9532496}
@@ -431,9 +471,12 @@ A node that transmits external requests to the services that are created inside 
 
 A cloud computing environment in which access to standardized resources, such as infrastructure, multi-tenant hardware, and services, is available to subscribers on a pay-per-use basis. See also [private cloud](#x4585362).
 
+</p>
+</details>
 
 ## R
-{: #glossr}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### RBAC
 {: #x5488132}
@@ -464,10 +507,12 @@ A physical or logical component that can be provisioned or reserved for an appli
 {: #x2403611}
 
 The process of restricting integral components of a system based on user authentication, roles, and permissions.
-
+</p>
+</details>
 
 ## S
-{: #glosss}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### service broker
 {: #x7636561}
@@ -489,8 +534,12 @@ See [IBM Cloud Pak](#x9773840).
 
 A set of definitions that identify deployables within channels by using annotations, labels and versions. Then, the subscription places the deployables (template or referenced Helm chart) on the subscribed target clusters.
 
+</p>
+</details>
+
 ## T
-{: #glosst}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### TA
 {: #x9773902}
@@ -507,8 +556,12 @@ An entity that groups users and resources.
 
 A developer tool that is used to evaluate on-premises Java EE apps for deployment to the cloud.
 
+</p>
+</details>
+
 ## W
-{: #glossw}
+<details><summary>Click to expand.</summary>
+<p>
 
 ### worker node
 {: #x5503637}
@@ -519,5 +572,6 @@ In a cluster, a physical or virtual machine that carries the deployments and ser
 {: #x2012537}
 
 A collection of virtual servers that perform a customer-defined collective purpose. A workload generally can be viewed as a multitiered application. Each workload is associated with a set of policies that define performance and energy consumption goals.
-
+</p>
+</details>
 
