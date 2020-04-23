@@ -245,11 +245,11 @@ The following example channel definition abstracts an object store bucket as a c
 apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
- name: devChannel
- namespace: devChannelNs
+ name: dev
+ namespace: ch-obj
 spec:
  type: ObjectBucket
- pathname: http://9.28.236.243:31311/devChannelNs
+ pathname: [http://9.28.236.243:31311/dev] # URL is appended with the valid bucket name, which matches the channel name.
  secretRef:
    name: miniosecret
  gates:
@@ -270,10 +270,10 @@ metadata:
 apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
-  name: 
+  name: helm
   namespace: hub-repo
 spec:
-    pathname: https://9.21.107.150:8443/helm-repo/charts
+    pathname: [https://9.21.107.150:8443/helm-repo/charts] # URL points to a valid chart URL.
     configRef:
       name: insecure-skip-verify
     type: HelmRepo
@@ -307,7 +307,7 @@ spec:
 The following example channel definition shows an example of a channel for the GitHub Repository. In the following example, `secretRef` refers to the user identity used to access the GitHub repo that is specified in the `pathname`. If you have a public repo, you do not need the `secretRef`:
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name: hive-cluster-gitrepo
