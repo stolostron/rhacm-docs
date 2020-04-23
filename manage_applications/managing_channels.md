@@ -245,11 +245,11 @@ The following example channel definition abstracts an object store bucket as a c
 apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
- name: devChannel
- namespace: devChannelNs
+ name: dev
+  namespace: ch-obj
 spec:
  type: ObjectBucket
- pathname: http://9.28.236.243:31311/devChannelNs
+ pathname: [http://9.28.236.243:31311/dev] <!-- Ian please confirm this change -->
  secretRef:
    name: miniosecret
  gates:
