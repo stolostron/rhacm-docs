@@ -1,4 +1,4 @@
-# Supported managed providers
+# Supported clouds
 
 Learn about the cloud providers that are available with Red Hat Advanced Cluster Management for Kubernetes. Also, find the documented managed providers that are available.
 
