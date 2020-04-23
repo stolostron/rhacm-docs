@@ -273,7 +273,7 @@ metadata:
   name: helm
   namespace: hub-repo
 spec:
-    pathname: https://9.21.107.150:8443/helm-repo/charts
+    pathname: [https://9.21.107.150:8443/helm-repo/charts] # URL points to a valid chart URL.
     configRef:
       name: insecure-skip-verify
     type: HelmRepo
