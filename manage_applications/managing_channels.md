@@ -246,10 +246,10 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
  name: dev
-  namespace: ch-obj
+ namespace: ch-obj
 spec:
  type: ObjectBucket
- pathname: [http://9.28.236.243:31311/dev] <!-- Ian please confirm this change -->
+ pathname: [http://9.28.236.243:31311/dev] # URL is appended with the valid bucket name, which matches the channel name.
  secretRef:
    name: miniosecret
  gates:
