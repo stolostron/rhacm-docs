@@ -270,7 +270,7 @@ metadata:
 apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
-  name: 
+  name: helm
   namespace: hub-repo
 spec:
     pathname: https://9.21.107.150:8443/helm-repo/charts
@@ -307,7 +307,7 @@ spec:
 The following example channel definition shows an example of a channel for the GitHub Repository. In the following example, `secretRef` refers to the user identity used to access the GitHub repo that is specified in the `pathname`. If you have a public repo, you do not need the `secretRef`:
 
 ```yaml
-apiVersion: app.ibm.com/v1alpha1
+apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name: hive-cluster-gitrepo
