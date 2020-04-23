@@ -10,7 +10,7 @@ Each _policy_ within the policy document contains the following elements:
 
   - An `annotations` parameter is used to specify a set of security details that describes the set of standards the policy is trying to validate. View the following descriptions of the security policy annotations:
       * `policy.mcm.ibm.com/standards` - The name or names of security standards the policy is related to. For example, National Institute of Standards and Technology (NIST) and Payment Card Industry (PCI).
-      * `policy.mcm.ibm.com/categories` - A security control category represents the presence of specific requirements for one or more standards. For example, a System and Information Integrity category might indicate that your policy contains a data transfer protocol to protect personal information, as required by the HIPAA and PCI standards.
+      * `policy.mcm.ibm.com/categories` - A security control category represent specific requirements for one or more standards. For example, a System and Information Integrity category might indicate that your policy contains a data transfer protocol to protect personal information, as required by the HIPAA and PCI standards.
       * `policy.mcm.ibm.com/controls` -  The name of the security control that is being checked. For example, Center of Internet Security (CIS) and certificate policy controller.
       
         **Notes**: 
