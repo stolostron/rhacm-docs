@@ -9,7 +9,7 @@ View a description of the the policy samples that are included in your Red Hat A
 * [Pod security policy](#pod-security-policy)
 * [Role policy](#role-policy)
 * [Rolebinding policy](#rolebinding-policy)
-* [Security context constraints (SCC) policy](#security-context-constraints-scc-policy)
+* [Security context constraints (SCC) policy](#security-context-constraints-scc-policy) 
 
 
 **Note**: You must create a placement policy and placement binding policy to apply your policies on to your cluster. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy example](../governance/policy_example.md).
@@ -581,7 +581,7 @@ Complete the following steps to apply the SCC policy from the console:
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Govern risk**. 
 3. Click **Create policy**. 
-4. Select **SecurityContextConstraintPolicy** from the _Specifications_ field.
+4. Select **SecurityContextConstraintPolicy** from the _Specifications_ field. 
 
 
 See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more information about policies.
