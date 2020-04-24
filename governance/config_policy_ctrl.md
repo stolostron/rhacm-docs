@@ -17,7 +17,7 @@ Each _policy_ within the policy document contains the following elements.
 
   - A `namespace` selector that specifies which namespaces within the cluster that the policy is applied to.
   
-  - A `remediationAction` specifies the remediation of your policy. The configuration policy controller can inform users of violations when you set the parameter to `inform`. When you set the parameter value to `enforce`, the controller creates the object on the managed cluster with the `objectTemplate` value. View the [Inform and enforce summary](#inform-and-enforce-summary).
+  - A `remediationAction` specifies the remediation of your policy. The configuration policy controller can inform users of violations when you set the parameter to `inform`. When you set the parameter value to `enforce`, the controller creates the object on the managed cluster with the `objectTemplate` value.
 
   - A list of `templates`, such as `role-templates`, `object-templates`, and `policy-templates` within the policy that describes how a resource in Kubernetes might be defined, and whether it is allowed to exist.
 
@@ -26,20 +26,6 @@ Each _policy_ within the policy document contains the following elements.
     - An `object-template` is used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. An example of object can be a pod security policy, an image policy, or a limit range.
     
     - A `policy-template` is used to create one or more policies for third party or external security controls. For example, you can create a certificate expiration policy with the certificate policy controller. For more information about other policy and their  controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
-
-### Inform and enforce summary
-
-When you create a configuration policy, set the `remediationAction` to define how policy violations are reported. View the following summary table to know which policies support the `enforce` feature: 
-
-| Sample policy| Enforce support | Enforce Action |
-| -------| --------------- | -------------- |
-| Memory | No? | N/A |
-| Namespace | yes | Creates the namespace |
-| Image vulnerability | No? | N/A |
-| Pod nginx | No? | N/A |
-| Pod security | No? | N/A |
-| Role  | Yes | Creates the role |
-| RoleBinding | Yes | Creates the role bind |
 
 ## Creating a Kubernetes configuration policy
 
