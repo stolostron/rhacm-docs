@@ -4,7 +4,9 @@
 
 Review the [Architecture](architecture.md) topic and the [Components](components.md) topics to learn more about what is installed with Red Hat Advanced Cluster Management for Kubernetes.
 
-After you learn about the hub cluster and managed cluster architecture, learn more about the [Supported clouds](install/supported_clouds.md), which lists the cloud provider cluster options. The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run on any [supported RHOCP infrastructure](https://docs.openshift.com/container-platform/4.3/architecture/architecture-installation.html).
+After you learn about the hub cluster and managed cluster architecture, learn more about the [Supported clouds](install/supported_clouds.md), which lists the cloud provider cluster options. 
+
+The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run on any [supported RHOCP infrastructure](https://docs.openshift.com/container-platform/4.3/architecture/architecture-installation.html).
 
 ## Install
 
@@ -20,7 +22,7 @@ After installation, review the [Web console](console/console_intro) guide to lea
 
 You are ready to create and import clusters. From your hub cluster, you can create clusters to manage and view cluster information. 
 
-1. See [Creating a cluster](managed_cluster/create.md) to learn about the types of managed clusters you can create. When you create a managed cluster, the new managed cluster will import automatically. 
+1. See [Creating a cluster](managed_cluster/create.md) to learn about the types of managed clusters you can create. When you create a managed cluster, the new managed cluster imports automatically. 
 
 2. If you have a cluster that you want to import manually, you can view [Importing a cluster](managed_cluster/import.md) to learn how to import a managed cluster.
 
@@ -28,7 +30,7 @@ You are ready to create and import clusters. From your hub cluster, you can crea
 
 ## Manage applications
 
-You can start managing applications on any newly created and imported managed clusters. The types of resources that you can create are called applications, channels, subscriptions, and placement rules. 
+You can start managing applications on any created and imported managed clusters. The types of resources that you can create are applications, channels, subscriptions, and placement rules. 
 
 1. Learn more about the resources and how to create and manage them at [Managing applications](/app_management_overview.md). Add or edit your `.yaml` to create your resources.
 
@@ -36,7 +38,7 @@ You can start managing applications on any newly created and imported managed cl
 
 ## Manage security
 
-You can also manage security and compliance across your newly created and imported managed clusters.
+You can also manage security and compliance across your created and imported managed clusters.
 
 1. Create a policy using the _policy_ templates. See the [policy overview](policy_overview.md) for details about how to create a policy with a `.yaml` template.
 
