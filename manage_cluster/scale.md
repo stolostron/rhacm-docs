@@ -2,21 +2,21 @@
 
 You can customize your cluster specifications, such as virtual machine sizes and number of nodes. See the following list of recommended settings for each available provider, but also see the documentation for more specific information:
 
-* [Red Hat OpenShift Container Platform cluster in Amazon Web Services (AWS)](#red-hat-openshift-container-platform-cluster-in-amazon-web-services-aws) 
-* [Google Kubernetes Engine (GKE)](#google-kubernetes-engine)
-* [Azure Kubernetes Service (AKS) cluster](#azure-kubernetes-service-aks-cluster)
+* [Red Hat OpenShift Container Platform cluster in Amazon Web Services](#red-hat-openshift-container-platform-cluster-in-amazon-web-services-aws) 
+* [Google Cloud](#google-cloud)
+* [Azure Kubernetes Service](#azure-kubernetes-service)
 
-## Red Hat OpenShift Container Platform cluster in Amazon Web Services (AWS)
+## Red Hat OpenShift Container Platform cluster in Amazon Web Services
 
 See the Amazon documentation at [Amazon EC2 Instance Types](https://aws.amazon.com/ec2/instance-types/) for more details.
 
 After the cluster is created, you can resize your cluster to increase or decrease the number of nodes in that cluster. To learn how to resize your cluster, refer to [Creating a MachineSet to scale your cluster](https://docs.openshift.com/container-platform/4.1/machine_management/creating-machineset.html).
 
-## Google Kubernetes Engine
+## Google Cloud
 
-After the cluster is created, you can resize your cluster to increase or decrease the number of nodes in that cluster.  To learn how to resize your cluster, refer to [Resizing a cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/resizing-a-cluster).
+After the cluster is created, you can resize your cluster to increase or decrease the number of nodes in that cluster. To learn how to resize your cluster, refer to [Resizing a cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/resizing-a-cluster).
 
-## Azure Kubernetes Service (AKS) cluster
+## Azure Kubernetes Service
 
 For more information, see [General purpose virtual machine sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general).
 
