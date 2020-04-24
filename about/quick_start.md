@@ -26,8 +26,7 @@ You are now ready to create and import clusters. From your hub cluster, you can 
 
 2. If you have a cluster that you want to import manually, you can view [Importing a cluster](../manage_cluster/import.md) to learn how to import a managed cluster.
 
-3. When you no longer need to manage a cluster, you can detach that cluster from the _Cluster page_ or through the [Multicluster CLI](../cli/multicluster_cli.md).
-
+3. When you no longer need to manage a cluster, you can detach that cluster from the _Cluster page_.
 ## Manage applications
 
 You can start managing applications on any created and imported managed clusters. The types of resources that you can create are applications, channels, subscriptions, and placement rules. 
