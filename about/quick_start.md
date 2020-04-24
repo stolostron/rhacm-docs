@@ -4,7 +4,7 @@
 
 Review the [Architecture](architecture.md) topic and the [Components](components.md) topics to learn more about what is installed with Red Hat Advanced Cluster Management for Kubernetes.
 
-After you learn about the hub cluster and managed cluster architecture, learn more about the [Supported clouds](install/supported_clouds.md), which lists the cloud provider cluster options. 
+After you learn about the hub cluster and managed cluster architecture, learn more about the [Supported clouds](../install/supported_clouds.md), which lists the cloud provider cluster options. 
 
 The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run on any [supported RHOCP infrastructure](https://docs.openshift.com/container-platform/4.3/architecture/architecture-installation.html).
 
@@ -32,7 +32,7 @@ You are ready to create and import clusters. From your hub cluster, you can crea
 
 You can start managing applications on any created and imported managed clusters. The types of resources that you can create are applications, channels, subscriptions, and placement rules. 
 
-1. Learn more about the resources and how to create and manage them at [Managing applications](../applications/app_management_overview.md). Add or edit your `.yaml` to create your resources.
+1. Learn more about the resources and how to create and manage them at [Managing applications](../manage_applications/app_management_overview.md). Add or edit your `.yaml` to create your resources.
 
 2. View and edit your resources from the table.
 
