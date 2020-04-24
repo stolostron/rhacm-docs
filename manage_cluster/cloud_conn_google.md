@@ -46,7 +46,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 11. Click **Create**. When you create the provider connection, it is added to the list of provider connections.
 
-You can use this connection when you create a cluster by completing the steps in [Creating an OpenShift cluster on Google Cloud Platform] (create_google.md).
+You can use this connection when you create a cluster by completing the steps in [Creating an OpenShift cluster on Google Cloud Platform](create_google.md).
 
 ## Deleting your provider connection
 
