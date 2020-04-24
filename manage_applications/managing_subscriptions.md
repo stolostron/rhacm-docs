@@ -505,12 +505,11 @@ metadata:
 spec:
   channel: some/channel
   packageOverrides:
-    packageName: kustomization
+  - packageName: kustomization
     packageOverrides:
-      value: | 
+    - value: | 
 patchesStrategicMerge:
-  - patch.yaml
-namePrefix: demo-
+- patch.yaml
 ```
 
 In order to override `kustomization.yaml` file, `packageName: kustomization` is required in `packageOverrides`. The override either adds new entries or updates existing entries. It does not remove existing entries.

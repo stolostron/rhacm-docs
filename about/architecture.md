@@ -30,10 +30,10 @@ Create, import, and manage clusters across public and private clouds. From the c
 
 After you configure a Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can view and deploy applications with application resources. Your _Application_ is used to only _view_ your resource, while other application resource examples are for deployment. A multi-cluster application uses a Kubernetes specification, but with additional automation of the deployment and lifecycle management of resources to individual clusters.
 
-See [Managing applications](../manage_applications/overview.md) for more application topics.
+See [Managing applications](../manage_applications/app_management_overview.md) for more application topics.
 
-## Governance and risk 
+## Governance and risk
 
 After you configure a Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can view and create policies for Red Hat Advanced Cluster Management for Kubernete with templates from the _Governance and risk_ page. For more information see, [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
 
-See [Red Hat Advanced Cluster Management for Kubernetes installation](../install/overview.md) to prepare your cluster and get configuration information. See the [components](components.md) topic to learn more about what is installed with the product.
+See [Red Hat Advanced Cluster Management for Kubernetes installation](../install/install_overview.md) to prepare your cluster and get configuration information. See the [components](components.md) topic to learn more about what is installed with the product.

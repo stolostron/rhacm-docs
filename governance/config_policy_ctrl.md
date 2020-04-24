@@ -17,7 +17,7 @@ Each _policy_ within the policy document contains the following elements.
 
   - A `namespace` selector that specifies which namespaces within the cluster that the policy is applied to.
   
-  - A `remediationAction` specifies the remediation of your policy. The configuration policy controller can inform users, or automically enforce remediation. The parameter values are `inform` and `enforce`.  
+  - A `remediationAction` specifies the remediation of your policy. The configuration policy controller can inform users of violations when you set the parameter to `inform`. When you set the parameter value to `enforce`, the controller creates the object on the managed cluster with the `objectTemplate` value.
 
   - A list of `templates`, such as `role-templates`, `object-templates`, and `policy-templates` within the policy that describes how a resource in Kubernetes might be defined, and whether it is allowed to exist.
 
@@ -53,7 +53,6 @@ Complete the following steps to create a configuration policy from the command l
       namespaces:
         include: ["default", "kube-*"]
         exclude: ["kube-system"]
-      # This parameter value can be "enforce" or "inform", however "enforce" does not do anything with regards to this controller.
       remediationAction: inform
       disabled: false 
       complianceType: musthave
@@ -98,6 +97,7 @@ Complete the following steps to view your configuration policy from the CLI:
 3. Click **Create policy**.
 4. Enter or select the appropriate values for the following fields:
    * Name
+   * Namespace
    * Specifications
    * Cluster selector
    * Remediation action
@@ -121,7 +121,6 @@ A configuration policy is created and the `Policy` definition might resemble the
      namespaces:
        include: ["default", "kube-*"]
        exclude: ["kube-system"]
-     # This parameter value can be "enforce" or "inform", however "enforce" does not do anything with regards to this controller.
      remediationAction: inform
      disabled: false
      complianceType: musthave
