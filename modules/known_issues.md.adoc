@@ -9,6 +9,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
 * <<console-features-might-not-display-in-firefox-earlier-versions,Console features might not display in Firefox earlier versions>>
 * <<host-adoption-failed,Host adoption failed>>
 * <<application-not-deployed-after-an-updated-placement-rule,Application not deployed after an updated placement rule>>
+* <<subscription-operator-does-not-create-an-scc,Subscription operator does not create a Security Context Constraint (SCC)>>
 * <<unable-to-search-using-values-with-empty-spaces,Unable to search using values with empty spaces>>
 
 [#certificate-manager-must-not-exist-during-an-installation]
@@ -65,6 +66,50 @@ You can run `oc get pods -n multicluster-endpoint` to verify.
 You can also search for `kind:pod cluster:yourcluster` in the console and see if the `endpoint-appmgr` is running.
 
 If you cannot verify, attempt to import the cluster again and verify again.
+
+[#subscription-operator-does-not-create-an-scc]
+== Subscription operator does not create an SCC
+
+Learn about Red Hat Openshift Container Platform SCC at https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth[Managing Security Context Constraints (SCC)], which is an additional configuration required on the managed cluster.
+
+Different deployments have different security context and different service accounts.
+The subscription operator cannot create an SCC automatically.
+Administrators control permissions for pods.
+A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace:
+
+To manually create an SCC CR in your namespace, complete the following:
+
+. Find the service account that is defined in the deployments.
+For example, see the following `nginx` deployments:
+
+----
+nginx-ingress-52edb
+nginx-ingress-52edb-backend
+----
+
+. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts.
+See the following example where `kind: SecurityContextConstraints` is added:
+
+----
+apiVersion: security.openshift.io/v1
+defaultAddCapabilities:
+kind: SecurityContextConstraints
+metadata:
+  name: ingress-nginx
+  namespace: ns-sub-1
+priority: null
+readOnlyRootFilesystem: false
+requiredDropCapabilities:
+fsGroup:
+  type: RunAsAny
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+users:
+- system:serviceaccount:my-operator:nginx-ingress-52edb
+- system:serviceaccount:my-operator:nginx-ingress-52edb-backend
+----
 
 [#unable-to-search-using-values-with-empty-spaces]
 == Unable to search using values with empty spaces
