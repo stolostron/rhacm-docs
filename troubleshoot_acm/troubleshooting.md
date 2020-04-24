@@ -118,11 +118,13 @@ failed calling webhook "certificates.admission.certmanager.io": the server is cu
 
 Use this section to troubleshoot issues when working with clusters.
 
-### Symptom
+### Cluster appears in console with *Pending import* status
+
+#### Symptom
 
 After importing a cluster by using the Red Hat Advanced Cluster Management console, the cluster appears in the console with a status of *Pending import*.
 
-### Identifying the problem
+#### Identifying the problem
 
 1. Run the following command on the managed cluster to view the Kubernetes pod name that is having the issue:
 
@@ -139,7 +141,7 @@ After importing a cluster by using the Red Hat Advanced Cluster Management conso
 
 3. Search the returned results for text that indicates there was a networking connectivity problem. Examples include: `no route to host` or `unable to resolve`.
 
-### Resolving the problem
+#### Resolving the problem
 
 1. Retrieve the port number that is having the problem by entering the following command on the hub cluster:
 
@@ -149,7 +151,63 @@ After importing a cluster by using the Red Hat Advanced Cluster Management conso
 
 2. Ensure that the hostname from the managed cluster can be resolved, and that outbound connectivity to the host and port is occurring.
 
-  If the communication cannot be established by the managed cluster, the cluster import is not complete. The cluster status for the managed cluster is *Pending import".
+  If the communication cannot be established by the managed cluster, the cluster import is not complete. The cluster status for the managed cluster is *Pending import*.
+  
+### Cluster appears in console with *Unknown* status
+
+#### Symptom
+
+After creating a new cluster by using the Red Hat Advanced Cluster Management for Kubernetes console, the cluster shows a status of _Unknown_ in the console.
+
+#### Identifying the problem
+
+* Procedure 1
+
+  1. Run the following command on the hub cluster to view the names of the Kubernetes pods that have the status of _Unknown_:
+
+    ```
+    oc get pod -n <new_cluster_name>
+    ```
+	
+	Replace *new_cluster_name* with the name of the cluster that you created.
+  
+  2. If no pod that contains the string `provision` in its name is listed, continue with Procedure 2. If there is a pod with `provision` in its title, run the following command on the hub cluster to view the logs of that pod:
+
+    ```
+    oc logs <new_cluster_name*provision*pod_name> -n <new_cluster_name> -c hive
+    ```
+	
+	Replace *new_cluster_name*provision*pod_name* with the name of the cluster that you created, followed by the pod name that contains `provision`.
+
+  3. Search for errors in the logs that might explain the cause of the problem. 
+
+* Procedure 2 
+
+  If there is not a pod with `provision` in its name, the problem occurred earlier in the process. 
+
+  1. Run the following command on the hub cluster:
+  
+    ```
+    oc describe clusterdeployments -n <new_cluster_name>
+    ```
+  
+    Replace *new_cluster_name* with the name of the cluster that you created.
+	
+  2. See if there is additional information about the problem in the _Status.Conditions.Message_ and _Status.Conditions.Reason_ entries of the logs.
+
+#### Resolving the problem
+
+After you identify the errors in the logs, complete the steps in the procedure that best match your errors:
+
+##### Log error
+
+  ```
+  No subnets provided for zones
+  ```
+  
+##### Resolution
+
+  Select different zones within the region. One or more of the zones that you selected is not supported. Omit the zone which does not provide the support, or select a different region.
 
 ## Troubleshooting installation
 
