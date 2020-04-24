@@ -500,16 +500,16 @@ You can use `spec.packageOverrides` to override `kustomization` at the subscript
 apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
-  name: example-subscription <!-- Ian need to talk to you about this -->
+  name: example-subscription
   namespace: default
 spec:
   channel: some/channel
   packageOverrides:
-    packageName: kustomization
+  - packageName: kustomization
     packageOverrides:
-      value: | 
+    - value: | 
 patchesStrategicMerge:
-  - patch.yaml
+- patch.yaml
 namePrefix: demo-
 ```
 
