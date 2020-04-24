@@ -16,15 +16,15 @@ The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run 
 
 3. With a supported version of OpenShift Container Platform installed and running for your hub cluster, you can proceed with [Installing while connected online](../install/install_connected.md).
 
-After installation, review the [Web console](../console/console_intro) guide to learn how to access your console and what features are available in the console.
+After installation, review the [Web console](../console/console_intro.md) guide to learn how to access your console and what features are available in the console.
 
 ## Manage clusters
 
 You are ready to create and import clusters. From your hub cluster, you can create clusters to manage and view cluster information. 
 
-1. See [Creating a cluster](../managed_cluster/create.md) to learn about the types of managed clusters you can create. When you create a managed cluster, the new managed cluster imports automatically. 
+1. See [Creating a cluster](../manage_cluster/create.md) to learn about the types of managed clusters you can create. When you create a managed cluster, the new managed cluster imports automatically. 
 
-2. If you have a cluster that you want to import manually, you can view [Importing a cluster](../managed_cluster/import.md) to learn how to import a managed cluster.
+2. If you have a cluster that you want to import manually, you can view [Importing a cluster](../manage_cluster/import.md) to learn how to import a managed cluster.
 
 3. When you no longer need to manage a cluster, you can detach that cluster from the _Cluster page_.
 
@@ -40,7 +40,7 @@ You can start managing applications on any created and imported managed clusters
 
 You can also manage security and compliance across your created and imported managed clusters.
 
-1. Create a policy using the _policy_ templates. See the [policy overview](../security/policy_overview.md) for details about how to create a policy with a `.yaml` template.
+1. Create a policy using the _policy_ templates. See the [policy overview](../governance/policy_overview.md) for details about how to create a policy with a `.yaml` template.
 
 2. From the _Policies_ page, you can view a summary of cluster and policy violations. 
 
