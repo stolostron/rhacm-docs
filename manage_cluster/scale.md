@@ -2,11 +2,11 @@
 
 You can customize your cluster specifications, such as virtual machine sizes and number of nodes. See the following list of recommended settings for each available provider, but also see the documentation for more specific information:
 
-* [Red Hat OpenShift Container Platform cluster in Amazon Web Services](#red-hat-openshift-container-platform-cluster-in-amazon-web-services-aws) 
+* [Amazon Web Services](#red-hat-openshift-container-platform-cluster-in-amazon-web-services-aws) 
 * [Google Cloud](#google-cloud)
 * [Azure Kubernetes Service](#azure-kubernetes-service)
 
-## Red Hat OpenShift Container Platform cluster in Amazon Web Services
+## Amazon Web Services
 
 See the Amazon documentation at [Amazon EC2 Instance Types](https://aws.amazon.com/ec2/instance-types/) for more details.
 
