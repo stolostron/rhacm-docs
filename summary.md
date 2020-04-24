@@ -28,7 +28,7 @@
      * [Creating a provider connection for Microsoft Azure](manage_cluster/cloud_conn_aks.md)
      * [Creating a provider connection for Google Cloud Platform](manage_cluster/cloud_conn_google.md)
    * [Creating a cluster](manage_cluster/create.md)
-     * [Creating an Amazon Web Services cluster](manage_cluster/create_ocp_aws.md)
+     * [Creating an Amazon Web Services cluster](manage_cluster/create_aws.md)
      * [Creating a Microsoft Azure cluster](manage_cluster/create_aks.md)
      * [Creating a Google Cloud Platform cluster](manage_cluster/create_google.md)
    * [Importing a target managed cluster](manage_cluster/import.md)
