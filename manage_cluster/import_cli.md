@@ -13,7 +13,9 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
     
 ## Prerequisites
 
-* You must have an Red Hat Advanced Cluster Management for Kubernetes hub that is deployed and cluster that you want to manage.
+* You must have an Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed and separate cluster that you want to manage.
+
+* Your Red Hat OpenShift Container Platform CLI must be version 4.3, or later, and configured to run `oc` commands. See [Getting started with the CLI](https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html) for information about installing and configuring the Red Hat OpenShift CLI, `oc`.
 
 * You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see _Install and Set Up kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos).
 
@@ -38,16 +40,62 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   oc create -n ${CLUSTER_NAMESPACE} secret docker-registry quay-secret --docker-server=quay.io --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS}
   ```
   
-3. Edit the example ClusterRegistry cluster in the `/test/resources/test_cluster.yaml` file of the `open-cluster-management` [repository](https://github.com/open-cluster-management/rcm-controller/blob/master/test/resources/test_cluster.yaml)
+3. Edit the example ClusterRegistry cluster with the following sample of YAML:
 
-4. Add the following `imagePullSecret`: `quay-secret in test_endpoint_config.yaml`
+  ```
+  apiVersion: clusterregistry.k8s.io/v1alpha1
+  kind: Cluster
+  metadata:
+    labels:
+      cloud: auto-detect
+      name: <cluster_namespace>
+      vendor: auto-detect
+    name: <cluster_namespace>
+    namespace: <cluster_namespace>
+  spec: {}
+  ```
 
-   - Create a ClusterRegistry cluster: `oc apply -f test_cluster.yaml`
-   - Refer to the [cluster-registry](https://github.com/kubernetes/cluster-registry/blob/master/pkg/apis/clusterregistry/v1alpha1/types.go) for API definition
-  
-5. Create the endpoint configuration. Edit the [example EndpointConfig resource[/test/resources/test_endpoint_config.yaml](https://github.com/open-cluster-management/rcm-controller/blob/master/test/resources/test_endpoint_config.yaml). 
-  
-  
+
+4. Apply the ClusterRegistry cluster with the following command: <!-- I added this step to apply, please confirm (we didn't have one in the draft)-->
+
+  ```
+  oc apply -f <file-name.yaml>
+  ```
+   
+5. Create the endpoint configuration. Enter the following example YAML:
+
+  ```
+  apiVersion: multicloud.ibm.com/v1alpha1
+  kind: EndpointConfig
+  metadata:
+    name: <cluster_namespace>
+    namespace: <cluster_namespace>
+  spec:
+    applicationManager:
+      enabled: true
+    clusterLabels:
+      cloud: auto-detect
+      vendor: auto-detect
+    clusterName: <cluster_namespace>
+    clusterNamespace: <cluster_namespace>
+    connectionManager:
+      enabledGlobalView: false
+    imageRegistry: quay.io/open-cluster-management
+    imagePullSecret: quay-secret
+    policyController:
+      enabled: true
+    searchCollector:
+      enabled: true
+    serviceRegistry:
+      enabled: true
+    certPolicyController:
+      enabled: true
+    cisController:
+      enabled: true
+    iamPolicyController:
+      enabled: true
+    version: 1.0.0
+  ```
 6. Create a Multicloud EndpointConfig. Run the following command: 
 
   ```
@@ -80,13 +128,13 @@ The ClusterController takes the following actions:
 
 3. Log in to your target managed cluster.
   
-3. Apply the `import.yaml` generated in previous step. Run the following commands:
+4. Apply the `import.yaml` generated in previous step. Run the following commands:
   
   ```
   kubectl apply -f endpoint-crd.yaml
   ```
 
-4. Validate the pod status on the target managed cluster. Run the following command:
+5. Validate the pod status on the target managed cluster. Run the following command:
    
   ```
   kubectl get pod -n multicluster-endpoint
@@ -96,7 +144,7 @@ The ClusterController takes the following actions:
   kubectl apply -f import.yaml
   ```
 
-5. Check the cluster on the hub cluster. Run the following command:
+6. Check the cluster on the hub cluster. Run the following command:
    
    ```
    kubectl get cluster --all-namespaces
