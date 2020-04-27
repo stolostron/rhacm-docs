@@ -3,7 +3,7 @@
 You can customize your cluster specifications, such as virtual machine sizes and number of nodes. See the following list of recommended settings for each available provider, but also see the documentation for more specific information:
 
 * [Amazon Web Services](#red-hat-openshift-container-platform-cluster-in-amazon-web-services-aws) 
-* [Google Cloud](#google-cloud)
+* [Google Cloud Platform](#google-cloud)
 * [Azure Kubernetes Service](#azure-kubernetes-service)
 
 ## Amazon Web Services
@@ -14,7 +14,7 @@ After the cluster is created, you can resize your cluster to increase or decreas
 
 ## Google Cloud Platform
 
-After the cluster is created, you can resize your cluster to increase or decrease the number of nodes in that cluster. To learn how to resize your cluster, refer to [Resizing a cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/resizing-a-cluster).
+After the cluster is created, you can resize your cluster to increase or decrease the number of nodes in that cluster. To learn how to resize your cluster, refer to Google Kubernetes Engine [Resizing a cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/resizing-a-cluster) documentation.
 
 ## Azure Kubernetes Service
 
