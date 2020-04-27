@@ -20,7 +20,7 @@ After installation, review the [Web console](../console/console_intro.md) guide 
 
 ## Manage clusters
 
-You are now ready to create and import clusters. From your hub cluster, you can create clustersn from other Kubernetes services to manage, and you can view cluster information. 
+You are now ready to create and import clusters. From your hub cluster, you can create clusters from other Kubernetes services to manage, and you can view cluster information. 
 
 1. See [Creating a cluster](../manage_cluster/create.md) to learn about the types of managed clusters you can create. When you create a managed cluster, the new managed cluster imports automatically. 
 
@@ -43,4 +43,4 @@ You can also manage security and compliance across your created and imported man
 
 2. From the _Policies_ page, you can view a summary of cluster and policy violations. 
 
-3. View your policies from the _Governance and risk_ page in the console. You can also click on the cluster to view that cluster _Overview_ and learn more about any policy violations.
+3. View your policies from the _Governance and risk_ page in the console. You can also view policy details from the cluster _Overview_.
