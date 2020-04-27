@@ -1,6 +1,6 @@
 # CIS policy controller
 
-You can use the Center for Internet Security (CIS) policy controller to receive notifications about non-compliant clusters. **NOTE**: The CIS policy controller is only supported on OpenShift Container Platform 3.11.
+You can use the Center for Internet Security (CIS) policy controller to receive notifications about non-compliant clusters. **Note**: The CIS policy controller is only supported on OpenShift Container Platform 3.11.
 
 * [Enable the CIS policy controller](#enable-the-cis-policy-controller)
 * [CIS policy](#cis-policy)
