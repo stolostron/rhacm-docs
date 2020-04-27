@@ -17,12 +17,11 @@ You need the following prerequisites before creating a bare metal asset:
 * Access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster to connect to the bare metal asset.
 
 * A configured bare metal asset, and log in credentials with the required permissions to log in and manage it.
-
-* Login credentials for your bare metal asset, which include the following items for the asset that are provided by your administrator:
-  * User name
-  * Password
-  * Baseboard Management Controller Address
-  * Boot NIC MAC address
+  **Note:** Login credentials for your bare metal asset include the following items for the asset that are provided by your administrator:
+    * user name
+    * password
+    * Baseboard Management Controller Address
+    * boot NIC MAC address
 
 ## Creating your bare metal asset with the Red Hat Advanced Cluster Management for Kubernetes console
 
@@ -30,9 +29,9 @@ To create a bare metal asset using the Red Hat Advanced Cluster Management for K
 
 1. From the navigation menu, navigate to **Automate infrastructure** > **Bare metal assets**.
 
-2. On the Bare metal assets page, Click **Create bare metal asset**.
+2. On the *Bare metal assets* page, Click **Create bare metal asset**.
 
-3. Enter a name for your asset. This name is used to identify this asset when creating a cluster. 
+3. Enter a name for your asset that identifies it when you create a cluster. 
 
   **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**. 
 
