@@ -46,7 +46,7 @@ Click the arrow for each letter-specific glossary to expand the list of words:
 A unique code that is passed to an API to identify the calling application or user. An API key is used to track and control how the API is being used, for example, to prevent malicious use or abuse of the API.
 
 ### application
-
+<!--replace this with product definition-->
 One or more computer programs or software components that provide a function in direct support of a specific business process or processes.
 
 ### audit log
@@ -76,7 +76,7 @@ An operator-assigned, functionally independent segment of network infrastructure
 A centralized location that can be used to browse for and install packages in a cluster.
 
 ### channel
-
+<!--Brandi will update this-->
 A custom resource definition that points to repositories where Kubernetes resources are stored, such as a namespace, object store, or Helm repository. Channels use deployable resources to represent stored Kubernetes resources and Helm charts.
 
 ### cluster
@@ -183,8 +183,9 @@ A collection of charts.
 The ability of IT services to withstand all outages and continue providing processing capability according to some predefined service level. Covered outages include both planned events, such as maintenance and backups, and unplanned events, such as software failures, hardware failures, power failures, and disasters. See also [fault tolerance](#fault-tolerance).
 
 ### hybrid cloud
-
+<!--use RH definition-->
 A cloud computing environment that consists of multiple public and private resources.
+<!--we should either add the term, open hybrid cloud or remove hybrid cloud and open hybrid cloud is the replacemement-->
 
 </p>
 </details>
