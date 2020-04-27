@@ -20,7 +20,7 @@ After installation, review the [Web console](../console/console_intro.md) guide 
 
 ## Manage clusters
 
-You are now ready to create and import clusters. From your hub cluster, you can create clusters to manage and view cluster information. 
+You are now ready to create and import clusters. From your hub cluster, you can create clustersn from other Kubernetes services to manage, and you can view cluster information. 
 
 1. See [Creating a cluster](../manage_cluster/create.md) to learn about the types of managed clusters you can create. When you create a managed cluster, the new managed cluster imports automatically. 
 
