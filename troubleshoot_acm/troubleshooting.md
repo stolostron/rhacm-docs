@@ -163,7 +163,7 @@ After creating a new cluster by using the Red Hat Advanced Cluster Management fo
 
 * Procedure 1
 
-  1. Run the following command on the hub cluster to view the names of the Kubernetes pods that have the status of _Unknown_:
+  1. Run the following command on the hub cluster to view the names of the Kubernetes pods that were created in the new cluster's namespace:
 
     ```
     oc get pod -n <new_cluster_name>
@@ -193,7 +193,7 @@ After creating a new cluster by using the Red Hat Advanced Cluster Management fo
   
     Replace *new_cluster_name* with the name of the cluster that you created.
 	
-  2. See if there is additional information about the problem in the _Status.Conditions.Message_ and _Status.Conditions.Reason_ entries of the logs.
+  2. See if there is additional information about the problem in the _Status.Conditions.Message_ and _Status.Conditions.Reason_ entries of the resource.
 
 #### Resolving the problem
 
