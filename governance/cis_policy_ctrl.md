@@ -14,29 +14,11 @@ You can use the Center for Internet Security (CIS) policy controller to receive 
 
 The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list. 
 
-When you install the Klusterlet, the CIS policy controller is disabled by default. 
+When you install the Klusterlet, the CIS policy controller is disabled by default. Enable the controller after your cluster is imported by running the following command: 
 
-**Important:** You must create a secret that contains configuration credentials for the MinIO instance before you enable the CIS controller. Your secret might resemble the following YAML file: 
-
-   ```yaml
-   apiVersion: v1
-   kind: Secret
-   metadata:
-     name: cis-controller-secret
-   type: Opaque
-   data:
-     secret_key: <base64-encoded username for MinIO>
-     access_key: <base64-encoded username for MinIO>
-     location: <base64-encoded label for controller location>
-   ```
-   
-   For more information about the `cis-controller-minio`, see the [CIS policy controller components](#cis-policy-controller-components).
-   
-Enable the controller after your cluster is imported by running the following command: 
-
-   ```
-   kubectl patch endpointconfig $CLUSTER_NAME -n $CLUSTER_NAMESPACE --type='json' -p='[{"op": "replace", "path": "/spec/cisController/enabled", "value":true}]'
-   ```
+  ```
+  kubectl patch endpointconfig $CLUSTER_NAME -n $CLUSTER_NAMESPACE --type='json' -p='[{"op": "replace", "path": "/spec/cisController/enabled", "value":true}]'
+  ```
 
 ## CIS policy
 
