@@ -1,6 +1,6 @@
 # CIS policy controller
 
-You can use the Center for Internet Security (CIS) policy controller to receive notifications about non-compliant clusters.
+You can use the Center for Internet Security (CIS) policy controller to receive notifications about non-compliant clusters. **NOTE**: The CIS policy controller is only supported on OpenShift Container Platform 3.11.
 
 * [Enable the CIS policy controller](#enable-the-cis-policy-controller)
 * [CIS policy](#cis-policy)
@@ -45,98 +45,6 @@ The CIS policy controller watches policies of `kind:` `CISPolicy` and updates th
 The CIS policy can be created at the Red Hat Advanced Cluster Management for Kubernetes hub or on the managed cluster itself. When created at the Red Hat Advanced Cluster Management for Kubernetes hub, it is embedded into a parent policy. The policy can then be propagated to managed clusters in the Red Hat Advanced Cluster Management for Kubernetes hub based on the placement policy.
 
 The set of rules that constitute CIS controls is different on an OpenShift Container Platform cluster. On OpenShift, the kube-bench tools use rules based on the Red Hat OpenShift Hardening Guide.
-
-### Sample CIS policy (non-OpnShift Container Platform)
-
-```yaml
-apiVersion: policies.ibm.com/v1alpha1
-kind: CisPolicy
-metadata:
-  labels:
-    controller-tools.k8s.io: "1.0"
-    pci-category: "system-integrity"
-  name: cispolicy-pci-sample
-spec:
-  cisSpecVersion: 1.4
-  severity: medium
-  kubernetesCisPolicy:
-    masterNodeExcludeRules:
-    - 1.1.11 Ensure that the admission control plugin AlwaysPullImages is set
-    - 1.1.12 Ensure that the admission control plugin DenyEscalatingExec is set
-    - 1.1.13 Ensure that the admission control plugin SecurityContextDeny is set
-    - 1.1.15 Ensure that the --audit-log-path argument is set as appropriate
-    - 1.1.16 Ensure that the --audit-log-maxage argument is set to 30 or as appropriate
-    - 1.1.17 Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate
-    - 1.1.18 Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate
-    - 1.1.34 Ensure that the --experimental-encryption-provider-config argument is set as appropriate
-    - 1.1.35 Ensure that the encryption provider is set to aescbc
-    - 1.3.6 Ensure that the RotateKubeletServerCertificate argument is set to true
-    - 1.4.1 Ensure that the API server pod specification file permissions are set to 644 or more restrictive
-    - 1.4.2 Ensure that the API server pod specification file ownership is set to root:root
-    - 1.4.3 Ensure that the controller manager pod specification file permissions are set to 644 or more restrictive
-    - 1.4.4 Ensure that the controller manager pod specification file ownership is set to root:root
-    - 1.4.5 Ensure that the scheduler pod specification file permissions are set to 644 or more restrictive
-    - 1.4.6 Ensure that the scheduler pod specification file ownership is set to root:root
-    - 1.4.7 Ensure that the etcd pod specification file permissions are set to 644 or more restrictive
-    - 1.4.8 Ensure that the etcd pod specification file ownership is set to root:root
-    - 1.4.9 Ensure that the Container Network Interface file permissions are set to 644 or more restrictive
-    - 1.4.10 Ensure that the Container Network Interface file ownership is set to root:root
-    - 1.4.11 Ensure that the etcd data directory permissions are set to 700 or more restrictive
-    - 1.4.12 Ensure that the etcd data directory ownership is set to etcd:etcd
-    - 1.4.13 Ensure that the admin.conf file permissions are set to 644 or more restrictive
-    - 1.4.14 Ensure that the admin.conf file ownership is set to root:root
-    - 1.4.15 Ensure that the scheduler.conf file permissions are set to 644 or more restrictive
-    - 1.4.16 Ensure that the scheduler.conf file ownership is set to root:root
-    - 1.4.17 Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive
-    - 1.4.18 Ensure that the controller-manager.conf file ownership is set to root:root
-    - 1.4.19 Ensure that the Kubernetes PKI directory and file ownership is set to root:root
-    - 1.4.20 Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive
-    - 1.4.21 Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive
-    - 1.5.2 Ensure that the --client-cert-auth argument is set to true
-    - 1.5.4 Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate
-    - 1.5.5 Ensure that the --peer-client-cert-auth argument is set to true
-    - 1.5.6 Ensure that the --peer-auto-tls argument is not set to true
-    - 1.5.7 Ensure that a unique Certificate Authority is used for etcd
-    - 1.6.1 Ensure that the cluster-admin role is only used where required
-    - 1.6.2 Create administrative boundaries between resources using namespaces
-    - 1.6.3 Create network segmentation using Network Policies
-    - 1.6.4 Ensure that the seccomp profile is set to docker/default in your pod definitions
-    - 1.6.5 Apply Security Context to Your Pods and Containers
-    - 1.6.6 Configure Image Provenance using ImagePolicyWebhook admission controller
-    - 1.6.7 Configure Network policies as appropriate
-    - 1.6.8 Place compensating controls in the form of PSP and RBAC for privileged containers usage
-    - 1.7.1 Do not admit privileged containers
-    - 1.7.2 Do not admit containers wishing to share the host process ID namespace
-    - 1.7.3 Do not admit containers wishing to share the host IPC namespace
-    - 1.7.4 Do not admit containers wishing to share the host network namespace
-    - 1.7.5 Do not admit containers with allowPrivilegeEscalation
-    - 1.7.6 Do not admit root containers
-    - 1.7.7 Do not admit containers with dangerous capabilities
-
- workerNodeExcludeRules:
-    - 2.1.1 Ensure that the --anonymous-auth argument is set to false
-    - 2.1.2 Ensure that the --authorization-mode argument is not set to AlwaysAllow
-    - 2.1.3 Ensure that the --client-ca-file argument is set as appropriate
-    - 2.1.4 Ensure that the --read-only-port argument is set to 0
-    - 2.1.5 Ensure that the --streaming-connection-idle-timeout argument is not set to 0
-    - 2.1.6 Ensure that the --protect-kernel-defaults argument is set to true
-    - 2.1.8 Ensure that the --hostname-override argument is not set
-    - 2.1.9 Ensure that the --event-qps argument is set to 0
-    - 2.1.10 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate
-    - 2.1.12 Ensure that the --rotate-certificates argument is not set to false
-    - 2.1.13 Ensure that the RotateKubeletServerCertificate argument is set to true
-    - 2.1.14 Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers
-    - 2.2.1 Ensure that the kubelet.conf file permissions are set to 644 or more restrictive
-    - 2.2.2 Ensure that the kubelet.conf file ownership is set to root:root
-    - 2.2.3 Ensure that the kubelet service file permissions are set to 644 or more restrictive
-    - 2.2.4 Ensure that the kubelet service file ownership is set to root:root
-    - 2.2.5 Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive
-    - 2.2.6 Ensure that the proxy kubeconfig file ownership is set to root:root
-    - 2.2.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive
-    - 2.2.8 Ensure that the client certificate authorities file ownership is set to root:root
-    - 2.2.9 Ensure that the kubelet configuration file ownership is set to root:root
-    - 2.2.10 Ensure that the kubelet configuration file has permissions set to 644 or more restrictive
-```
 
 ### Sample CIS policy 
 
