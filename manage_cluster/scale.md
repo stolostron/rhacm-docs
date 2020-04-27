@@ -12,7 +12,7 @@ See the Amazon documentation at [Amazon EC2 Instance Types](https://aws.amazon.c
 
 After the cluster is created, you can resize your cluster to increase or decrease the number of nodes in that cluster. To learn how to resize your cluster, refer to [Creating a MachineSet to scale your cluster](https://docs.openshift.com/container-platform/4.1/machine_management/creating-machineset.html).
 
-## Google Cloud
+## Google Cloud Platform
 
 After the cluster is created, you can resize your cluster to increase or decrease the number of nodes in that cluster. To learn how to resize your cluster, refer to [Resizing a cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/resizing-a-cluster).
 
