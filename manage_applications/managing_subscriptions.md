@@ -384,7 +384,7 @@ spec:
       kind: PlacementRule
       name: towhichcluster
   timewindow:
-    windowtype: "active" #enter Active or Block depending on the purpose of the type.
+    windowtype: "active" #enter active or block depending on the purpose of the type.
     location: "America/Los_Angeles"
     daysofweek: ["Monday", "Wednesday", "Friday"]
     hours:
