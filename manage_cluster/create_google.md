@@ -1,4 +1,4 @@
-# Creating an OpenShift cluster on Google Cloud Platform
+# Creating a cluster on Google Cloud Platform
 
 Follow the procedure to create a Red Hat OpenShift Container Platform cluster on Google Cloud Platform (GCP). For more information about Google Cloud Platform, see [Google Cloud Platform](https://cloud.google.com/docs/overview).
 {:shortdesc}
@@ -16,7 +16,7 @@ You must have the following prerequisites before creating a cluster on GCP:
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster on GCP
 
-* GCP provider connection. See [Setting up a provider connection for Google Cloud Platform](cloud_conn_gke.md) for more information.
+* GCP provider connection. See [Setting up a provider connection for Google Cloud Platform](cloud_conn_google.md) for more information.
 
 * A configured domain in GCP. See [Setting up a custom domain](https://cloud.google.com/endpoints/docs/openapi/dev-portal-setup-custom-domain) for instructions on how to configure a domain. 
 
@@ -44,7 +44,7 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 6. Select **Google Cloud** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available providers.
 
-7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on Google Cloud Platform](conn_cloud_gke.md).
+7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on Google Cloud Platform](conn_cloud_google.md).
    
 8. Configure the *Node pools* for your cluster. 
 

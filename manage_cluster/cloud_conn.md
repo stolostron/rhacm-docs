@@ -8,4 +8,4 @@ The following files detail the information that is required for creating a conne
 
 - [Creating a provider connection for Amazon Web Services](cloud_conn_aws.md)
 - [Creating a provider connection for Microsoft Azure](cloud_conn_aks.md)
-- [Creating a provider connection for Google Cloud Platform](cloud_conn_gke.md)
+- [Creating a provider connection for Google Cloud Platform](cloud_conn_google.md)
