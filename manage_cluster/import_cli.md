@@ -157,8 +157,8 @@ The ClusterController takes the following actions:
   kubectl get pod -n multicluster-endpoint
   ```
   
-7. Check the cluster on the hub cluster. Run the following command:
+7. Validate `Ready` status for your imported cluster. Run the following command:
    
   ```
-  kubectl get cluster --all-namespaces
+  kubectl get cluster -n `<cluster_name>`
   ```
