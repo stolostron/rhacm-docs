@@ -1,4 +1,4 @@
-# Secret sample
+# Secret samples
 
 Secrets (`Secret`) are Kubernetes resources that you can use to store authorization and other sensitive information, such as passwords, OAuth tokens, and SSH keys. By storing this information as secrets, you can separate the information from the application components that require the information to improve your data security.
 

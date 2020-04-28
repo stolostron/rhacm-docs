@@ -1,4 +1,4 @@
-# Deployables sample
+# Deployables samples
 
 Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or represent Helm releases for deployment to clusters to create or manage applications.
 

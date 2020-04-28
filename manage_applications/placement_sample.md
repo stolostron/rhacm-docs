@@ -1,5 +1,5 @@
 
-# Placement rules
+# Placement rules samples
 
 Placement rules (`placementrule.apps.open-cluster-management.io`) define the target clusters where deployables can be deployed. Use placement rules to help you facilitate the multi-cluster deployment of your deployables.
 

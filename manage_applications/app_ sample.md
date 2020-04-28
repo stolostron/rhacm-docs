@@ -1,4 +1,4 @@
-# Application sample
+# Application samples
 
 Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for viewing the application components.
 
