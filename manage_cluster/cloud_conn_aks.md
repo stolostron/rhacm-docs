@@ -2,7 +2,7 @@
 
 You need a provider connection to use Red Hat Advanced Cluster Management for Kubernetes console to create and manage a Red Hat OpenShift Container Platform cluster on Microsoft Azure. 
 
-**Note:** This procedure is a prerequisite for creating a cluster with Red Hat Advanced Cluster Manager for Kubernetes. 
+**Note:** This procedure is a prerequisite for creating a cluster with Red Hat Advanced Cluster Management for Kubernetes. 
 
 ## Prerequisites
 
