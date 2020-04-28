@@ -1,4 +1,4 @@
-# Creating an OpenShift cluster on Amazon Web Services
+# Creating a cluster on Amazon Web Services
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to create a Red Hat OpenShift Container Platform cluster on Amazon Web Services (AWS).
 
