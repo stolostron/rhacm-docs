@@ -1,6 +1,6 @@
 # Creating an OpenShift cluster on Microsoft Azure
 
-You can use the Red Hat Advanced Cluster Management for Kubernetes console to deploy an OpenShift cluster on Microsoft Azure.
+You can use the Red Hat Advanced Cluster Management for Kubernetes console to deploy a Red Hat OpenShift Container Platform cluster on Microsoft Azure.
 
   - [Prerequisites](#prerequisites)
   - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console)
