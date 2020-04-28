@@ -36,7 +36,13 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   oc login
   ```
 
-2. Run the following command on the hub cluster to create the `oc create ns <cluster_namespace>` namespace:
+2. Run the following command on the hub cluster to create the namespace:
+
+  ```
+  oc new-project <cluster_namespace>
+  ```
+
+3. Run the following command to create a secret:
 
   ```
   oc create -n ${CLUSTER_NAMESPACE} secret docker-registry quay-secret --docker-server=quay.io --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS}
@@ -57,7 +63,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   spec: {}
   ```
 
-4. Apply the ClusterRegistry cluster with the following command: <!-- I added this step to apply, please confirm (we didn't have one in the draft)-->
+4. Apply the ClusterRegistry cluster with the following command: 
 
   ```
   oc apply -f <file-name.yaml>
