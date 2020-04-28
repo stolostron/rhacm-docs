@@ -48,7 +48,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   oc create -n ${CLUSTER_NAMESPACE} secret docker-registry quay-secret --docker-server=quay.io --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS}
   ```
   
-3. Edit the example ClusterRegistry cluster with the following sample of YAML:
+4. Edit the example ClusterRegistry cluster with the following sample of YAML:
 
   ```
   apiVersion: clusterregistry.k8s.io/v1alpha1
@@ -63,13 +63,13 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   spec: {}
   ```
 
-4. Apply the ClusterRegistry cluster with the following command: 
+5. Apply the with YAML file the following command: 
 
   ```
   oc apply -f <file-name.yaml>
   ```
    
-5. Create the endpoint configuration. Enter the following example YAML:
+6. Create the endpoint configuration. Enter the following example YAML:
 
   ```
   apiVersion: multicloud.ibm.com/v1alpha1
@@ -103,7 +103,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
       enabled: true
     version: 1.0.0
   ```
-6. Create a multicloud `EndpointConfig`. Run the following command: 
+7. Create a multicloud `EndpointConfig`. Run the following command: 
 
   ```
   oc apply -f test_endpoint_config.yaml
@@ -135,24 +135,26 @@ The ClusterController takes the following actions:
 
 3. Log in to your target managed cluster.
   
-4. Apply the `import.yaml` that was generated in previous step. Run the following commands:
+4. Apply the `endpoint-crd.yaml` that was generated in previous step. Run the following commands:
   
   ```
   kubectl apply -f endpoint-crd.yaml
   ```
 
-5. Validate the pod status on the target managed cluster. Run the following command:
-   
-  ```
-  kubectl get pod -n multicluster-endpoint
-  ```
+5. Apply the `import.yaml` file.
 
   ```
   kubectl apply -f import.yaml
   ```
 
-6. Check the cluster on the hub cluster. Run the following command:
+6. Validate the pod status on the target managed cluster. Run the following command:
    
-   ```
-   kubectl get cluster --all-namespaces
-   ```
+  ```
+  kubectl get pod -n multicluster-endpoint
+  ```
+  
+7. Check the cluster on the hub cluster. Run the following command:
+   
+  ```
+  kubectl get cluster --all-namespaces
+  ```
