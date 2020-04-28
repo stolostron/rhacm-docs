@@ -36,10 +36,10 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   oc login
   ```
 
-2. Run the following command on the hub cluster to create the namespace:
+2. Run the following command on the hub cluster to create the namespace. **Note:** The cluster name that is defined in `<cluster_name>` is also used as the cluster namespace in the `.yaml` file:
 
   ```
-  oc new-project <cluster_namespace>
+  oc new-project <cluster_name>
   ```
 
 3. Run the following command to create a secret:
@@ -56,35 +56,37 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   metadata:
     labels:
       cloud: auto-detect
-      name: <cluster_namespace>
+      name: <cluster_name>
       vendor: auto-detect
-    name: <cluster_namespace>
-    namespace: <cluster_namespace>
+    name: <cluster_name>
+    namespace: <cluster_name>
   spec: {}
   ```
 
-5. Apply the with YAML file the following command: 
+5. Save the file as `cluster-registry.yaml`.
+
+6. Apply the with YAML file the following command: 
 
   ```
-  oc apply -f <file-name.yaml>
+  oc apply -f `cluster-registry.yaml`
   ```
    
-6. Create the endpoint configuration. Enter the following example YAML:
+7. Create the endpoint configuration file. Enter the following example YAML:
 
   ```
   apiVersion: multicloud.ibm.com/v1alpha1
   kind: EndpointConfig
   metadata:
-    name: <cluster_namespace>
-    namespace: <cluster_namespace>
+    name: <cluster_name>
+    namespace: <cluster_name>
   spec:
     applicationManager:
       enabled: true
     clusterLabels:
       cloud: auto-detect
       vendor: auto-detect
-    clusterName: <cluster_namespace>
-    clusterNamespace: <cluster_namespace>
+    clusterName: <cluster_name>
+    clusterNamespace: <cluster_name>
     connectionManager:
       enabledGlobalView: false
     imageRegistry: quay.io/open-cluster-management
@@ -103,10 +105,12 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
       enabled: true
     version: 1.0.0
   ```
-7. Create a multicloud `EndpointConfig`. Run the following command: 
+8. Save the file as `endpoint-config.yaml`.
+
+9. Apply the YAML. Run the following command: 
 
   ```
-  oc apply -f test_endpoint_config.yaml
+  oc apply -f endpoint-config.yaml
   ```
 
 The ClusterController takes the following actions:
@@ -133,15 +137,15 @@ The ClusterController takes the following actions:
   kubectl get secret ${cluster_name}-import -n ${cluster_namespace} -o jsonpath={.data.import\\.yaml} | base64 --decode > import.yaml
   ```
 
-3. Log in to your target managed cluster.
+3. Log in to your target _managed_ cluster.
   
-4. Apply the `endpoint-crd.yaml` that was generated in previous step. Run the following commands:
+4. Apply the `endpoint-crd.yaml` that was generated in step 1. Run the following command:
   
   ```
   kubectl apply -f endpoint-crd.yaml
   ```
 
-5. Apply the `import.yaml` file.
+5. Apply the `import.yaml` file that was generated in step 2. Run the following command:
 
   ```
   kubectl apply -f import.yaml
