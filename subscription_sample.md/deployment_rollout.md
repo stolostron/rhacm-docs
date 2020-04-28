@@ -8,12 +8,12 @@ With a percentage rollout, you can phase in a deployment to your clusters to fin
 
 The rolling update for a deployment runs on the hub cluster. The deployment rollout occurs for the managed cluster namespaces that exist on the hub cluster. When the rolling update is completed, the updates can be propagated to the actual managed clusters, such as by using an existing subscription for each managed cluster. The managed cluster namespaces that are updated are defined by the placement rule for the subscription or deployable.
 
-## About this task
+### About this task
 
 You can configure a percentage rollout for a subscription or directly for a deployable resource.
 
   - [Configuring a rolling update for a subscription](#configuring-a-rolling-update-for-a-subscription)
-  - [Rolling update sample](#examples)
+  - [Examples](#examples)
 
 A rolling update for a subscription uses the rolling update feature that is included in the Kubernetes resource definition. To configure this feature for a deploying a subscription, you need to create or update the following Kubernetes resources:
 
@@ -88,6 +88,120 @@ At this stage no rolling update is configured and any change to the initial vers
    kubectl annotate --overwrite subscriptions.apps.open-cluster-management.io sub-orig -n ns-sub-1 apps.open-cluster-management.io/rollingupdate-target=sub-target apps.open-cluster-management.io/rollingupdate-maxunavaialble=30
    ```
 
-For example definitions of resources that use a rolling update, see [Rolling update sample](#roll_update_sample.md).
+For example definitions of resources that use a rolling update, see [Examples](#example_rollout).
 
 With the subscription resources created or updated, the rolling update begins and the new target subscription and updated initial subscription are deployed to the managed clusters. Then, the target subscription that is on the managed clusters is used to detect the new version of the resource or chart for deployment.
+
+## Examples
+
+The following example YAML definitions show the required fields for deploying an update for a subscription by using a rolling update.
+
+- The following definitions create a `predev-ch` channel in the `ns-ch` namespace, and a `towhichcluster` placementrule in the `ns-sub-1` to use for the subscriptions:
+
+```yaml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-ch
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: predev-ch
+  namespace: ns-ch
+  labels:
+    app: nginx-app-details
+spec:
+  type: HelmRepo
+  pathname: https://kubernetes-charts.storage.googleapis.com/
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-sub-1
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: towhichcluster
+  namespace: ns-sub-1
+spec:
+  clusterSelector: {}
+```
+
+- The following definitions create the initial and target subscriptions. As shown below, the original subscription resource is nginx-ingress helm chart v1.35 and the target subscription is nginx-ingress helm chart v1.36.
+
+```yaml
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-orig
+  namespace: ns-sub-1
+  labels:
+    app: nginx-app-details
+spec:
+  channel: ns-ch/predev-ch
+  name: nginx-ingress
+  packageFilter:
+    version: "1.35.x"
+  placement:
+    placementRef:
+      kind: PlacementRule
+      name: towhichcluster
+  overrides:
+  - clusterName: "/"
+    clusterOverrides:
+    - path: "metadata.namespace"
+      value: default
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-target
+  namespace: ns-sub-1
+  labels:
+    app: nginx-app-details
+spec:
+  channel: ns-ch/predev-ch
+  name: nginx-ingress
+  packageFilter:
+    version: "1.36.x"
+  overrides:
+  - clusterName: "/"
+    clusterOverrides:
+    - path: "metadata.namespace"
+      value: default
+```
+
+The definition for the initial subscription does not include the required fields for using a rolling update:
+
+```yaml
+apps.open-cluster-management.io/rollingupdate-maxunavaialble: 20
+apps.open-cluster-management.io/rollingupdate-target: subscription-target
+```
+
+These annotations can be added to the initial subscription with the following command:
+
+```yaml
+kubectl annotate --overwrite subscriptions.apps.open-cluster-management.io sub-orig -n ns-sub-1 apps.open-cluster-management.io/rollingupdate-target=sub-target apps.open-cluster-management.io/rollingupdate-maxunavaialble=20
+```
+
+With the annotations added, the definition for the initial subscription resembles the following YAML content:
+
+```yaml
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  annotations:
+    apps.open-cluster-management.io/rollingupdate-maxunavaialble: "20"
+    apps.open-cluster-management.io/rollingupdate-target: sub-target
+  name: subscription-orig
+  namespace: ns-sub-1
+spec:
+  channel: ns-ch/predev-ch
+  name: nginx-ingress
+  packageFilter:
+    version: "1.35.x"
+```
