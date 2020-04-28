@@ -4,5 +4,5 @@ Learn how to create Red Hat OpenShift Container Platform clusters across cloud p
 
 - [Creating an Amazon Web Services cluster](create_ocp_aws.md)  
 - [Creating a Google Cloud Platform cluster](create_gke.md)  
-- [Creating a Microsoft Azure cluster cluster](create_aks.md)
+- [Creating a Microsoft Azure cluster](create_aks.md)
 - [Creating an OpenShift cluster on bare metal](create_bare.md)
