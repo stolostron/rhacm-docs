@@ -1,4 +1,4 @@
-# Creating an OpenShift cluster on Google Cloud Platform
+# Creating a cluster on Google Cloud Platform
 
 Follow the procedure to create a Red Hat OpenShift Container Platform cluster on Google Cloud Platform (GCP). For more information about Google Cloud Platform, see [Google Cloud Platform](https://cloud.google.com/docs/overview).
 {:shortdesc}
