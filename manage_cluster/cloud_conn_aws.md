@@ -2,7 +2,7 @@
 
 You need a provider connection to use Red Hat Advanced Cluster Management for Kubernetes console to deploy and manage an OpenShift cluster on Amazon Web Services (AWS). 
 
-**Note:** This procedure must be done before you can create a cluster with Red Hat Advanced Cluster Manager for Kubernetes. 
+**Note:** This procedure must be done before you can create a cluster with Red Hat Advanced Cluster Management for Kubernetes. 
 
 ## Prerequisites
 
