@@ -105,7 +105,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
 The ClusterController takes the following actions:
 
-- The `EndpointConfig` creation stars `Reconcile()` in [/pkg/controllers/endpointconfig/endpointconfig_controller.go](https://github.com/open-cluster-management/rcm-controller/blob/master/pkg/controller/endpointconfig/endpointconfig_controller.go).
+- The `EndpointConfig` creation starts `Reconcile()` in [/pkg/controllers/endpointconfig/endpointconfig_controller.go](https://github.com/open-cluster-management/rcm-controller/blob/master/pkg/controller/endpointconfig/endpointconfig_controller.go).
   
 - The controller uses information in `EndpointConfig` to generate a secret named `{cluster-name}-import`.
   
