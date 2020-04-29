@@ -15,7 +15,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
 * You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed.
 
-* You need a separate cluster that you want to manage.
+* You need a separate cluster that you want to manage and Internet connectivity.
 
 * You need the Red Hat OpenShift Container Platform CLI version 4.3, or later, to run `oc` commands. See [Getting started with the CLI](https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html) for information about installing and configuring the Red Hat OpenShift CLI, `oc`.
 
