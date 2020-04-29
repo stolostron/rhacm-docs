@@ -100,4 +100,4 @@ From the console and Visual Web Terminal, users are unable to search for values 
 
 ## At logout user kubeadmin gets extra browser tab with blank page 
 
-When you log in as `kubeadmin` with **Log out** option in the drop-down menu, the console returns to the login screen, but a browser tab opens with a `/logout` URL. The page is blank and you can close the tab without impact to your console.
+When you are logged in as `kubeadmin` and you click the **Log out** option in the drop-down menu, the console returns to the login screen, but a browser tab opens with a `/logout` URL. The page is blank and you can close the tab without impact to your console.
