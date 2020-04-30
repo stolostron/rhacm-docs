@@ -361,49 +361,35 @@ You can view a CIS policy from the command line by using kubectl or from the con
 
 ### Viewing a CIS policy from command line interface (CLI)
 
-Complete the following steps to view the CIS policy from the CLI:
+Complete the following steps to view the CIS policy from the managed cluster CLI. View non-compliant policies by completing the following steps:
 
-1. View details for a specific CIS policy by running the following command:
-
-   ```
-   kubectl get cispolicy <policy-name> -n <namespace> -o yaml
-   ```
-
-2. View a description of your CIS policy by running the following command:
+1. Get a list of the CIS policies that are on your hub cluster by running the following command:
 
    ```
-   kubectl describe cispolicy <name> -n <namespace>
+   oc get cispolicy --all-namespaces
    ```
-
-3. You can also view non-compliant policies by completing the following steps:
-
-   1. Get a list of the CIS policies that are on your hub cluster by running the following command:
-
-      ```
-      oc get cispolicy --all-namespaces
-      ```
   
-   2. Run the following command to view which policies are listed `NonCompliant`:
+2. Run the following command to view which policies are listed `NonCompliant`:
+
+   ```
+   oc describe cispolicy -n <namespace> <policyname>
+   ```
+
+   Your output might resemble the following response: <!--update example-->
 
      ```
-     oc describe cispolicy -n <namespace> <policyname>
+     need sample here
      ```
-
-    Your output might resemble the following response:
-
-      ```
-      need sample here
-      ```
   
-   3. Verify which nodes are non-compliant by running the following commands:
+3. Verify which nodes are non-compliant by running the following commands:
 
-     ```
-     oc get nodes -o wide
+   ```
+   oc get nodes -o wide
 
-     oc describe node <node-name>
-     ```
+   oc describe node <node-name>
+   ```
 
-   **Note**: The node name that might appear is the node label, for instance `ibm-cloud.kubernetes.io/external-ip=150.238.253.106`.
+   **Note**: The node name that appear might be a label for the node, for instance `ibm-cloud.kubernetes.io/external-ip=150.238.253.106`.
 
 ### Viewing a CIS policy from the console 
 
