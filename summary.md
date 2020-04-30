@@ -15,6 +15,7 @@
    * [Preparing your hub cluster for installation](install/prep.md)
    * [Sizing your hub cluster](install/plan_capacity.md)
    * [Installing while connected online](install/install_connected.md)
+   * [Uninstalling](install/uninstall.md)
  * [Web console](console/console_intro.md)
    * [Accessing the console](console/console_access.md)
    * [Observability from the console](console/console.md)
