@@ -43,9 +43,11 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 6. Select **Amazon Web Services** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available cloud providers.
 
-7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on AWS](cloud_conn_aws.md).
+7. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the path to the image that you want to use.
+
+8. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on AWS](cloud_conn_aws.md).
    
-8. Configure the *Node pools* for your cluster. 
+9. Configure the *Node pools* for your cluster. 
 
   The node pools define the location and size of the nodes that are used for your cluster. 
 
@@ -55,11 +57,11 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
   * Worker pools: You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.  
 
-9. **Optional:** Configure the cluster networking options.
+10. **Optional:** Configure the cluster networking options.
 
-10. **Optional:** Configure a label for the cluster.
+11. **Optional:** Configure a label for the cluster.
 
-11. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
+12. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
 ## Accessing your cluster 
 

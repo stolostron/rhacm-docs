@@ -41,17 +41,19 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 6. Select **Bare Metal** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available cloud providers.
 
-7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection for a bare metal environment](cloud_conn_bare.md).
+7. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the path to the image that you want to use.
+
+8. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection for a bare metal environment](cloud_conn_bare.md).
    
-8. Select your hosts from the list of hosts that are associated with your provider connection. Select a minimum of three assets that are on the same bridge networks as the hypervisor. 
+9. Select your hosts from the list of hosts that are associated with your provider connection. Select a minimum of three assets that are on the same bridge networks as the hypervisor. 
 
-9. **Optional:** Configure the cluster networking options.
+10. **Optional:** Configure the cluster networking options.
 
-10. **Optional:** Configure a label for the cluster.
+11. **Optional:** Configure a label for the cluster.
 
-11. **Optional:** Update the advanced settings, if you want to change the setting for including a configmap. 
+12. **Optional:** Update the advanced settings, if you want to change the setting for including a configmap. 
 
-11. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
+13. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
 ## Accessing your cluster 
 
