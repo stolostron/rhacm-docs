@@ -61,7 +61,7 @@
        * [IAM policy controller](governance/iam_policy_ctrl.md)
        * [CIS policy controller](governance/cis_policy_ctrl.md)
      * [Policy example](governance/policy_example.md)
-     * [Policy samples](governance/policy_samples.md)
+     * [Configuration policy samples](governance/policy_samples.md)
      * [Creating a policy](governance/create_policy.md)
      * [Managing a security policy](governance/manage_grc_policy.md)
 * [Service discovery](services/working_serv_intro.md)
