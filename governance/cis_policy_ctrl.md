@@ -8,7 +8,7 @@ You can use the Center for Internet Security (CIS) policy controller to receive 
 * [CIS policy controller components](#cis-policy-controller-components)
 * [Creating a CIS policy](#creating-a-cis-policy)
 * [Viewing a CIS policy](#viewing-a-cis-policy)
-* [Verifying node rules](#verifying-node-rules)
+* [Remediating CIS policy violation](#remediating-cis-policy-violation)
 * [CIS risk score](#cis-risk-score)
 
 ## Enable the CIS policy controller
@@ -379,15 +379,15 @@ Complete the following steps to view the CIS policy from the CLI:
 
    1. Get a list of the CIS policies that are on your hub cluster by running the following command:
 
-    ```
-    oc get cispolicy --all-namespaces
-    ```
+      ```
+      oc get cispolicy --all-namespaces
+      ```
   
   2. Run the following command to view which policies are listed `NonCompliant`:
 
-    ```
-    oc describe cispolicy -n <namespace> <policyname>
-    ```
+     ```
+     oc describe cispolicy -n <namespace> <policyname>
+     ```
 
     Your output might resemble the following response:
 
@@ -397,13 +397,13 @@ Complete the following steps to view the CIS policy from the CLI:
   
   3. Verify which nodes are non-compliant by running the following commands:
 
-    ```
-    oc get nodes -o wide
+     ```
+     oc get nodes -o wide
 
-    oc describe node <node-name>
-    ```
+     oc describe node <node-name>
+     ```
 
-    **Note**: The node name that might appear is the node label, for instance `ibm-cloud.kubernetes.io/external-ip=150.238.253.106`.
+   **Note**: The node name that might appear is the node label, for instance `ibm-cloud.kubernetes.io/external-ip=150.238.253.106`.
 
 ### Viewing a CIS policy from the console 
 
@@ -415,13 +415,43 @@ View any CIS Policy and its status from the console.
 
 3. Select one of your policies.
 
-4. You can also view non-compliant policies from the console:
 
-   1. 
+## Remediating CIS policy violation
 
-## Verifying node rules
+Verify node rules status
 
-<!--come back and add details-->
+1. Log in to your OpenShift Container Platform from the CLI. Run the following command to port-forward the CIS endpoint:
+
+   ```
+   oc port-forward endpoint-cisctrl-minio-0 9123:9000
+   ```
+
+2. Log in to your MinIO account with your access key and secret key, which is contained on the endpoint in a secret.
+
+3. Obtain the endpoint secret by running the following command:
+
+  ```
+  oc get secret -n multicluster-endpoint endpoint-cisctrl-secret -o yaml
+  ```
+ 
+4. Decode the encoded values by completing the following steps:
+
+  1. Decode the access key and secret key by running the following commands:
+  
+     ```
+     echo <encoded_access_key_value> | base64 --decode
+     
+     echo <encoded_secret_key_value> | base64 --decode
+     ```
+     
+  2. Copy and paste the decoded values into the appropriate fields from the MinIO console.
+  
+5. Verify what nodes are labeled `NonCompliant` by selecting **cis-k8s** > **icp-local** > **Recent** > **Worker** or **Master**.
+
+6. Click the non-compliant node and click **Download**. The nodes rules have that have failed are shown with the following label: [FAIL]. 
+
+7. Remediate the non-compliant node manually by updating your CIS policy. If a rule does not apply to your environment, add the rule to the `NodeExcludeRules` parameter.
+     
 
 ## CIS risk score
 
