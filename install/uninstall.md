@@ -1,4 +1,4 @@
-# Uninstalling Red Hat Advanced Cluster Management for Kubernetes
+# Uninstalling
 
 When you uninstall Red Hat Advanced Cluster Management for Kubernetes, you must delete both the MultiClusterHub Instance and the multiclusterhub-operator.
 
