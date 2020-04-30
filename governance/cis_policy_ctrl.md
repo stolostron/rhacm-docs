@@ -199,7 +199,7 @@ spec:
 2. From the navigation menu, click **Govern risk**.
 3. Click **Create Policy**.
 4. Enter the name for the CIS policy in the **Name** field.
-5. For **Specifications**, select either `Cispolicy-cis compliance for OCP` from the drop-down list.
+5. For **Specifications**, select `Cispolicy-cis compliance for OCP` from the drop-down list. <!--this option is not available if the feature flag is enabled-->
 6. Use the drop-down list and make selections for the following parameters:
     - Cluster selector
     - Standards
@@ -418,23 +418,21 @@ View any CIS Policy and its status from the console.
 
 ## Remediating CIS policy violation
 
-Verify node rules status
+Resolve rule failures to remediate your CIS policy violations. Complete the following steps:
 
-1. Log in to your OpenShift Container Platform from the CLI. Run the following command to port-forward the CIS endpoint:
+1. Log in to your OpenShift Container Platform from the CLI. Run the following command to port-forward the CIS controller MinIO endpoint:
 
    ```
    oc port-forward endpoint-cisctrl-minio-0 9123:9000
    ```
 
-2. Log in to your MinIO account with your access key and secret key, which is contained on the endpoint in a secret.
-
-3. Obtain the endpoint secret by running the following command:
+2. Log in to your MinIO account with your access key and secret key, which is contained on the endpoint in a secret. Obtain the endpoint secret by running the following command:
 
   ```
   oc get secret -n multicluster-endpoint endpoint-cisctrl-secret -o yaml
   ```
  
-4. Decode the encoded values by completing the following steps:
+3. Decode the encoded values by completing the following steps:
 
   1. Decode the access key and secret key by running the following commands:
   
@@ -446,13 +444,29 @@ Verify node rules status
      
   2. Copy and paste the decoded values into the appropriate fields from the MinIO console.
   
-5. Verify what nodes are labeled `NonCompliant` by selecting **cis-k8s** > **icp-local** > **Recent** > **Worker** or **Master**.
+4. Verify what nodes are labeled `NonCompliant` by selecting **cis-k8s** > **icp-local** > **Recent** > **Worker** or **Master**. <!--verify w/screenshot from Gus-->
 
-6. Click the non-compliant node and click **Download**. The nodes rules have that have failed are shown with the following label: [FAIL]. 
+5. Click the non-compliant node and select the attached file to download. Click **Download** and then open the file. The nodes rules that have failed are shown with the following label: `[FAIL]`. 
 
-7. Remediate the non-compliant node manually by updating your CIS policy. If a rule does not apply to your environment, add the rule to the `NodeExcludeRules` parameter.
-     
+6. Remediate the non-compliant node manually by referencing the `Remediation` section of the attached file. If a rule does not apply to your environment, add the rule to the `masterNodeExcludeRules` or `workerNodeExcludeRules` in your CIS policy. Your `Remediation` section might resemble the following content:
 
+   ```
+   == Remediations ==
+   7.9 Reset to the OpenShift defaults
+
+   7.12 Reset to the OpenShift default values.
+
+   7.14 Edit the Openshift node config file /etc/origin/node/node-config.yaml and set RotateKubeletClientCertificate to true.
+
+   7.15 Edit the Openshift node config file /etc/origin/node/node-config.yaml and set RotateKubeletServerCertificate to true.
+
+   8.2
+   8.3 Run the below command on each worker node.
+   chmod 644 $nodesvc
+
+   8.4 audit test did not run: failed to run: stat -c %U:%G $nodesvc, command: [stat -c %U:%G $nodesvc], error: exit status 1
+   ```
+   
 ## CIS risk score
 
 When a managed cluster is non-compliant, the CIS controller assigns a risk score. Each CIS rule that fails the check is assigned a score. The risk score that is assigned to the non-compliant cluster is the maximum of all the scores that are assigned to failed checks.
@@ -463,23 +477,9 @@ The risk score is on a scale of 1 to 10.
 *  If the score is greater than 7, then the risk category is `high`.
 
 You can view the risk scores for the CIS rules by running the following command:
-`kubectl -n <namespace> describe configmap endpoint-cisctrl-controller-config`
 
-Edit the CIS configuration map by completing the following steps:
-
-
-1. Edit configmap, `endpoint-cisctrl-controller-config`.
-   
-   ```
-   kubectl -n <namespace> edit configmap endpoint-cisctrl-controller-config
-   ```
-
-2. In the `cis_risk_score.yaml` section, locate the rule for which you want to assign a custom risk score.
-3. Replace the existing score with the custom score and save the changes.
-4. Restart the `cis-controller pod` by deleting it.
-    
-    ```
-    kubectl -n <namespace> delete pod pod_name
-    ```
+  ```
+  kubectl -n <namespace> describe configmap endpoint-cisctrl-controller-config
+  ```
 
 For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md). For more information about policies, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
