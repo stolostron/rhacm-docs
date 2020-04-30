@@ -22,3 +22,17 @@ spec:
 ```
 
 For more information about creating and managing channels, see [Managing channels](managing_channels.md).
+The definition structure for a channel can resemble the following YAML content, which defines a namespace type channel:
+
+```yaml
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: predev-ch
+  namespace: ns-ch
+  labels:
+    app: nginx-app-details
+spec:
+  type: HelmRepo
+  pathname: https://kubernetes-charts.storage.googleapis.com/
+```

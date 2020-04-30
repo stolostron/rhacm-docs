@@ -266,3 +266,30 @@ oc annotate channel.apps.open-cluster-management.io <channel name> apps.open-clu
 No webhook specific configuration is needed in subscriptions.
 
 
+__ 
+
+The definition structure for a subscription can resemble the following YAML content:
+
+```yaml
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: nginx
+  namespace: ns-sub-1
+  labels:
+    app: nginx-app-details
+spec:
+  channel: ns-ch/predev-ch
+  name: nginx-ingress
+  packageFilter:
+    version: "1.36.x"
+  placement: # See the following section for information
+    placementRef:
+      kind: PlacementRule
+      name: towhichcluster
+  overrides: # See Deployable documentation
+  - clusterName: "/"
+    clusterOverrides:
+    - path: "metadata.namespace"
+      value: default
+```

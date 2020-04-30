@@ -22,3 +22,22 @@ data:
 ```
 
 For more information about creating and managing secrets, see [Managing secrets](managing_secrets.md).
+
+## Secrets
+
+
+
+The definition structure for a secret can resemble the following YAML content:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+      apps.open-cluster-management.io/deployables: "true"
+  name: [secret-name]
+  namespace: [channel-namespace]
+data:
+  AccessKeyID: [ABCdeF1=] #Base64 encoded
+  SecretAccessKey: [gHIjk2lmnoPQRST3uvw==] #Base64 encoded
+```
