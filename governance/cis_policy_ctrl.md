@@ -383,7 +383,7 @@ Complete the following steps to view the CIS policy from the CLI:
       oc get cispolicy --all-namespaces
       ```
   
-  2. Run the following command to view which policies are listed `NonCompliant`:
+   2. Run the following command to view which policies are listed `NonCompliant`:
 
      ```
      oc describe cispolicy -n <namespace> <policyname>
@@ -395,7 +395,7 @@ Complete the following steps to view the CIS policy from the CLI:
       need sample here
       ```
   
-  3. Verify which nodes are non-compliant by running the following commands:
+   3. Verify which nodes are non-compliant by running the following commands:
 
      ```
      oc get nodes -o wide
