@@ -67,7 +67,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 | searchCollector.enabled| Enables search collection and indexing | true|
 | policyController.enabled| Enable the Governance and risk dashboard policy feature|true, updateInterval: 15|  
 | certPolicyController.enabled|Monitors certificate expiration based on distributed policies|true|
-| cisController.enabled|Monitors CIS security controls based on distributed policies|true|
+| cisController.enabled|Monitors CIS security controls based on distributed policies|false|
 | iamPolicyController|Monitors identity controls based on distributed policies|true|
 | serviceRegistry.enabled| Service registry that is used to discover services that are deployed by Application Deployable among managed clusters.| false | 
 | serviceRegistry.dnsSuffix| The suffix of the registry DNS name, which is added to the end of the target clusters dns domain name.|mcm.svc| 
