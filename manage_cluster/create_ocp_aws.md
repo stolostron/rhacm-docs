@@ -15,7 +15,7 @@ You must have the following prerequisites before creating a cluster on AWS:
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster on Amazon Web Services
 
-* AWS provider connection. See [Setting up a provider connection for AWS](cloud_conn_aws.md) for more information.
+* AWS provider connection. See [Setting up a provider connection for AWS](prov_conn_aws.md) for more information.
 
 * A configured domain in AWS. See [Configuring an AWS account](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html) for instructions on how to configure a domain. 
 
@@ -41,11 +41,13 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 5. Enter the base domain information that you configured for your AWS account. See [Configuring an AWS account](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html) for more information. This name is used in the hostname of the cluster.
 
-6. Select **Amazon Web Services** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available cloud providers.
+6. Select **Amazon Web Services** for the infrastructure platform. 
 
-7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on AWS](cloud_conn_aws.md).
+7. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the path to the image that you want to use.
+
+8. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on AWS](prov_conn_aws.md).
    
-8. Configure the *Node pools* for your cluster. 
+9. Configure the *Node pools* for your cluster. 
 
   The node pools define the location and size of the nodes that are used for your cluster. 
 
@@ -55,11 +57,11 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
   * Worker pools: You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.  
 
-9. **Optional:** Configure the cluster networking options.
+10. **Optional:** Configure the cluster networking options.
 
-10. **Optional:** Configure a label for the cluster.
+11. **Optional:** Configure a label for the cluster.
 
-11. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
+12. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
 ## Accessing your cluster 
 
@@ -83,7 +85,7 @@ To access a cluster that is managed by Red Hat Advanced Cluster Management for K
 
 ## Removing a cluster from management
 
-When you remove a Red Hat OpenShift Cloud Platform cluster from management that was created with Red Hat Advanced Cluster Management for Kubernetes, you can either *detach* it or *destroy* it.  
+When you remove a Red Hat OpenShift Container Platform cluster from management that was created with Red Hat Advanced Cluster Management for Kubernetes, you can either *detach* it or *destroy* it.  
 
 Detaching a cluster removes it from management, but does not completely delete it. You can import it again, if you decide that you want to bring it back under management. This is only an option when the cluster is in a *Ready* state, and when the cluster was created by the Red Hat Advanced Cluster Management for Kubernetes. You cannot detach a cluster that was imported.
 

@@ -15,7 +15,7 @@ You must have the following prerequisites before creating a cluster on Azure:
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster on Azure
 
-* Azure provider connection. See [Setting up a provider connection for Microsoft Azure](cloud_conn_aks.md) for more information.
+* Azure provider connection. See [Setting up a provider connection for Microsoft Azure](prov_conn_azure.md) for more information.
 
 * A configured domain in Azure. See [Configuring a custom domain name for an Azure cloud service](https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-custom-domain-name-portal) for instructions on how to configure a domain. 
 
@@ -43,11 +43,13 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 5. Enter the base domain information that you configured for your Azure account. See [Configuring a custom domain name for an Azure cloud service](https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-custom-domain-name-portal) for more information. This name is used in the hostname of the cluster.
 
-6. Select **Microsoft Azure** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available cloud providers.
+6. Select **Microsoft Azure** for the infrastructure platform.
 
-7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on Azure](conn_cloud_aks.md).
+7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on Azure](prov_conn_azure.md).
+
+8. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the path to the image that you want to use.
    
-8. Configure the *Node pools* for your cluster. 
+9. Configure the *Node pools* for your cluster. 
 
   The node pools define the location and size of the nodes that are used for your cluster. 
 
@@ -57,11 +59,11 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
   * Worker pools: You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.  
 
-9. **Optional:** Configure the cluster networking options.
+10. **Optional:** Configure the cluster networking options.
 
-10. **Optional:** Configure a label for the cluster.
+11. **Optional:** Configure a label for the cluster.
 
-11. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
+12. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
 ## Accessing your cluster
 

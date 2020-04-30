@@ -6,6 +6,6 @@ The provider connection stores the access credentials and configuration informat
 
 The following files detail the information that is required for creating a connection document for each supported provider:
 
-- [Creating a provider connection for Amazon Web Services](cloud_conn_aws.md)
-- [Creating a provider connection for Microsoft Azure](cloud_conn_aks.md)
-- [Creating a provider connection for Google Cloud Platform](cloud_conn_google.md)
+- [Creating a provider connection for Amazon Web Services](prov_conn_aws.md)
+- [Creating a provider connection for Microsoft Azure](prov_conn_aks.md)
+- [Creating a provider connection for Google Cloud Platform](prov_conn_google.md)
