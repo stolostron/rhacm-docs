@@ -100,7 +100,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
     certPolicyController:
       enabled: true
     cisController:
-      enabled: true
+      enabled: false
     iamPolicyController:
       enabled: true
     version: 1.0.0
