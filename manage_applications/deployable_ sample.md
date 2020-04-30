@@ -28,5 +28,30 @@ spec:
     data:
       purpose: for test
 ```
+## Deployables
+
+The definition structure for a deployable can resemble the following YAML content:
+
+```yaml
+apiVersion: apps.open-cluster-management.io/v1
+kind: Deployable
+metadata:
+  annotations:
+    apps.open-cluster-management.io/is-local-deployable: "false"
+  labels:
+    app: nginx-app-details
+  name: example-configmap
+  namespace: ns-sub-1
+spec:
+  template:
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: config1
+      namespace: default
+    data:
+      purpose: for test
+```
 
 For more information about creating and managing deployables, see [Managing deployables](managing_deployables.md).
+

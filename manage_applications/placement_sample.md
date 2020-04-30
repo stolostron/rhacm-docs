@@ -20,3 +20,15 @@ spec:
 ```
 
 For more information about creating and managing placement rules, see [Managing placement rules](managing_placement_rules.md).
+
+The definition structure for a placement rule can resemble the following YAML content:
+
+```yaml
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: towhichcluster
+  namespace: ns-sub-1
+spec:
+  clusterSelector: {}
+```
