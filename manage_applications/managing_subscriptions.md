@@ -334,4 +334,3 @@ The contents for the `value` field are used to override the values within the `s
   - packageName: nginx-ingress
     packageAlias: my-helm-release-name
   ```
-  
