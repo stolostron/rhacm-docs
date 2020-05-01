@@ -1,16 +1,18 @@
 # Creating and managing application resources
 
-Create application resources to group and view the application components that make up your overall Red Hat Advanced Cluster Management for Kubernetes multi-cluster applications. Samples for all resources are located in the [Application resource samples](app_resource_samples.md) documentation.
+Create application resources to group and view the application components that make up your overall Red Hat Advanced Cluster Management for Kubernetes multi-cluster applications.
 {:shortdesc}
 
   * [Create an application](#create-an-application)
   * [Matching an application to a subscription](#matching-an-application-to-a-subscription)
   * [Update an application](#update-an-application)
   * [Delete an application](#delete-an-application)
+  * [Application definition YAML structure](#application-definition-yaml-structure)
+  * [Example application](#example-application)
 
 ## Create an application 
 
-1. Compose your application definition YAML content. To create or update an application resource, you must first compose the YAML file that defines the resource. 
+1. Compose your application definition YAML content. To create or update an application resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
 
 2. Create the application within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
 
@@ -95,9 +97,7 @@ To delete an application, you can use the console, the Kubernetes command line i
   6. When the list of all applications is refreshed, the application is no longer displayed.
 
 * To use the Kubernetes CLI tool, complete the following steps:  
-
   1. Run the following command to delete the application from a target namespace. Replace `name` and `namespace` with the name of your application and your target namespace:
-
      ```
      kubectl delete Application <name> -n <namespace>     
      ```
@@ -108,3 +108,72 @@ To delete an application, you can use the console, the Kubernetes command line i
      ```
 
 * To use REST API, use the [application DELETE API](../apis/mcm/applications.json).
+
+## Application definition YAML structure
+
+To compose the application definition YAML content for creating or updating an application resource, your YAML structure needs to include some required fields and values. Depending on your application requirements or application management requirements, you might need to include other optional fields and values. 
+
+The following YAML structure shows the required fields for an application and some of the common optional fields.
+
+```yaml
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name:
+  namespace:
+  resourceVersion:
+  annotations:
+  labels:
+    app:
+    chart:
+    heritage:
+    name:
+    release:
+spec:
+  componentKinds:
+  - group:
+    kind:
+  descriptor:
+  selector:
+    matchExpressions:
+    - key:
+      operator:
+      values:
+```
+
+|Field|Description|
+|-- | -- |
+| apiVersion | Required. Set the value to `app.k8s.io/v1beta1`. |
+| kind | Required. Set the value to `Application` to indicate the resource is an application resource. |
+| metadata.name | Required. The name for identifying the application resource. |
+| metadata.namespace | The namespace resource to use for the application. |
+| metadata.resourceVersion | The version of the application resource. |
+| metadata.annotations | Optional. The annotations for the application. |
+| metadata.labels | Optional. The labels for the deployable. |
+| spec.componentKinds | Optional. The list of the kinds of resources to be associated with the application. |
+| spec.selector.matchExpressions | Optional. Label selectors for associating other Kubernetes resources with the application. |
+| spec.selector.matchExpressions.key | Required when defining label selectors. The Kubernetes label key that a resource needs to match. |
+| spec.selector.matchExpressions.values | Required when defining label selectors. The Kubernetes label values that a resource needs to match. |
+{: caption="Table 1. Required and optional definition fields" caption-side="top"}
+
+The spec for defining these applications is based on the Application metadata descriptor custom resource definition that is provided by the Kubernetes Special Interest Group (SIG). You can use this definition to help you compose your own application YAML content. For more information about this definition, see [Kubernetes SIG Application CRD community specification](https://github.com/kubernetes-sigs/application).
+
+## Example application
+
+```YAML
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  labels:
+    app: nginx-app-details
+  name: nginx-app-3
+  namespace: ns-sub-1
+spec:
+  componentKinds:
+  - group: app.ibm.com
+    kind: Subscription
+  selector:
+    matchLabels:
+      app: nginx-app-details
+status: {}
+```

@@ -1,6 +1,7 @@
 # Managing applications with the console
 
-You can use the console to create, manage, view details, and troubleshoot application resources, including applications, deployables, channels, subscriptions, and placement rules. Samples for all resources are located in the [Application resource samples](app_resource_samples.md) documentation.
+You can use the console to create, manage, view details, and troubleshoot application resources, including applications, deployables, channels, subscriptions, and placement rules.
+{:shortdesc}
 
 The console includes different tools that each provide different application management capabilities. These capabilities allow you to easily create, find, update, deploy, and monitor applications resources.
 

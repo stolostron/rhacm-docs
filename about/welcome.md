@@ -11,6 +11,8 @@ With Red Hat Advanced Cluster Management for Kubernetes:
   - Enforce policies at the target clusters using Kubernetes-supported custom resource definitions.
   - Deploy and maintain day-two operations of business applications distributed across your cluster landscape.
 
+This guide assumes that users are familiar with Kubernetes concepts and terminology. For more information about Kubernetes concepts, see [Kubernetes Documentation](https://kubernetes.io/docs/home/).
+
 See the following documentation for information about the product:
 
 - [Architecture](architecture.md)

@@ -1,6 +1,6 @@
-# Red Hat Advanced Cluster Management for Kubernetes policy samples
+# Red Hat Advanced Cluster Management for Kubernetes configuration policy samples
 
-View a description of the the policy samples that are included in your Red Hat Advanced Cluster Management for Kubernetes installation.
+View a description of the configuration policy samples that are included in your Red Hat Advanced Cluster Management for Kubernetes installation.
 
 * [Memory usage policy](#memory-usage-policy) 
 * [Namespace policy](#namespace-policy)

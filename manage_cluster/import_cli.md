@@ -1,6 +1,5 @@
 # Importing a managed cluster with the CLI
 
-Under construction.
 
 After you install Red Hat Advanced Cluster Management for Kubernetes, you are ready to import a cluster to manage.
 
@@ -14,7 +13,11 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
     
 ## Prerequisites
 
-* You must have an Red Hat Advanced Cluster Management for Kubernetes hub that is deployed and cluster that you want to manage.
+* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed.
+
+* You need a separate cluster that you want to manage and Internet connectivity.
+
+* You need the Red Hat OpenShift Container Platform CLI version 4.3, or later, to run `oc` commands. See [Getting started with the CLI](https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html) for information about installing and configuring the Red Hat OpenShift CLI, `oc`.
 
 * You need to install the Kubernetes CLI, `kubectl`. To install `kubectl`, see _Install and Set Up kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos).
 
@@ -33,69 +36,129 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   oc login
   ```
 
-2. Run the following command on the hub cluster to create the `oc create ns <cluster_namespace>` namespace:
+2. Run the following command on the hub cluster to create the namespace. **Note:** The cluster name that is defined in `<cluster_name>` is also used as the cluster namespace in the `.yaml` file:
+
+  ```
+  oc new-project <cluster_name>
+  ```
+
+3. Run the following command to create a secret:
 
   ```
   oc create -n ${CLUSTER_NAMESPACE} secret docker-registry quay-secret --docker-server=quay.io --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS}
   ```
   
-3. Edit the example ClusterRegistry cluster in the `/test/resources/test_cluster.yaml` file of the `open-cluster-management` [repository](https://github.com/open-cluster-management/rcm-controller/blob/master/test/resources/test_cluster.yaml)
-
-4. Add the following `imagePullSecret`: `quay-secret in test_endpoint_config.yaml`
-
-   - Create a ClusterRegistry cluster: `oc apply -f test_cluster.yaml`
-   - Refer to the [cluster-registry](https://github.com/kubernetes/cluster-registry/blob/master/pkg/apis/clusterregistry/v1alpha1/types.go) for API definition
-  
-5. Create the endpoint configuration. Edit the [example EndpointConfig resource[/test/resources/test_endpoint_config.yaml](https://github.com/open-cluster-management/rcm-controller/blob/master/test/resources/test_endpoint_config.yaml). 
-  
-6. Refer to [/pkg/apis/multicloud/v1alpha1/endpointconfig_types.go](https://github.com/open-cluster-management/rcm-controller/blob/master/pkg/apis/multicloud/v1alpha1/endpointconfig_types.go) and [endpoint-operator - /pkg/apis/multicloud/v1beta1/endpoint_types.go](https://github.com/open-cluster-management/endpoint-operator/blob/master/pkg/apis/multicloud/v1beta1/endpoint_types.go) for API definition.
-  
-7. Create a Multicloud EndpointConfig. Run the following command: 
+4. Edit the example ClusterRegistry cluster with the following sample of YAML:
 
   ```
-  oc apply -f test_endpoint_config.yaml
+  apiVersion: clusterregistry.k8s.io/v1alpha1
+  kind: Cluster
+  metadata:
+    labels:
+      cloud: auto-detect
+      name: <cluster_name>
+      vendor: auto-detect
+    name: <cluster_name>
+    namespace: <cluster_name>
+  spec: {}
+  ```
+
+5. Save the file as `cluster-registry.yaml`.
+
+6. Apply the with YAML file the following command: 
+
+  ```
+  oc apply -f `cluster-registry.yaml`
+  ```
+   
+7. Create the endpoint configuration file. Enter the following example YAML:
+
+  ```
+  apiVersion: multicloud.ibm.com/v1alpha1
+  kind: EndpointConfig
+  metadata:
+    name: <cluster_name>
+    namespace: <cluster_name>
+  spec:
+    applicationManager:
+      enabled: true
+    clusterLabels:
+      cloud: auto-detect
+      vendor: auto-detect
+    clusterName: <cluster_name>
+    clusterNamespace: <cluster_name>
+    connectionManager:
+      enabledGlobalView: false
+    imageRegistry: quay.io/open-cluster-management
+    imagePullSecret: quay-secret
+    policyController:
+      enabled: true
+    searchCollector:
+      enabled: true
+    serviceRegistry:
+      enabled: true
+    certPolicyController:
+      enabled: true
+    cisController:
+      enabled: false
+    iamPolicyController:
+      enabled: true
+    version: 1.0.0
+  ```
+8. Save the file as `endpoint-config.yaml`.
+
+9. Apply the YAML. Run the following command: 
+
+  ```
+  oc apply -f endpoint-config.yaml
   ```
 
 The ClusterController takes the following actions:
 
-- EndpointConfig creation triggers `Reconcile()` in [/pkg/controllers/endpointconfig/endpointconfig_controller.go](https://github.com/open-cluster-management/rcm-controller/blob/master/pkg/controller/endpointconfig/endpointconfig_controller.go).
+- The `EndpointConfig` creation starts `Reconcile()` in [/pkg/controllers/endpointconfig/endpointconfig_controller.go](https://github.com/open-cluster-management/rcm-controller/blob/master/pkg/controller/endpointconfig/endpointconfig_controller.go).
   
-- Controller uses information in EndpointConfig to generate a secret named `{cluster-name}-import`.
+- The controller uses information in `EndpointConfig` to generate a secret named `{cluster-name}-import`.
   
 - The `{cluster-name}-import` secret contains the `import.yaml` that the user applies to a managed cluster to install `multicluster-endpoint`.
 
 ## Importing the multicluster-endpoint
 
-1. Obtain the `import.yaml` that was generated by the cluster controller.
+1. Obtain the `endpoint-crd.yaml` that was generated by the cluster controller.
 
-- For macOS, run the following command:
-
-  ```bash
-  kubectl get secret ${cluster_name}-import -n ${cluster_namespace} -o jsonpath={.data.import\\.yaml} | base64 -D > import.yaml
-  ```
-
-- For Linux, run the following command:
+  For macOS, run the following command:
 
   ```bash
-  kubectl get secret ${cluster_name}-import -n ${cluster_namespace} -o jsonpath={.data.import\\.yaml} | base64 -d > import.yaml
+  kubectl get secret ${cluster_name}-import -n ${cluster_namespace} -o jsonpath={.data.endpoint-crd\\.yaml} | base64 --decode > endpoint-crd.yaml
   ```
 
-2. Login to your target managed cluster.
-  
-3. Apply the `import.yaml` generated in previous step. Run the following command:
-  
-  ```
-  kubectl apply -f import.yaml --validate=false
+2. Obtain the `import.yaml` that was generated by the cluster controller. Run the following command:
+
+  ```bash
+  kubectl get secret ${cluster_name}-import -n ${cluster_namespace} -o jsonpath={.data.import\\.yaml} | base64 --decode > import.yaml
   ```
 
-4. Validate the pod status on the target managed cluster. Run the following command:
+3. Log in to your target _managed_ cluster.
+  
+4. Apply the `endpoint-crd.yaml` that was generated in step 1. Run the following command:
+  
+  ```
+  kubectl apply -f endpoint-crd.yaml
+  ```
+
+5. Apply the `import.yaml` file that was generated in step 2. Run the following command:
+
+  ```
+  kubectl apply -f import.yaml
+  ```
+
+6. Validate the pod status on the target managed cluster. Run the following command:
    
   ```
   kubectl get pod -n multicluster-endpoint
   ```
-
-5. Check the cluster on the hub cluster. Run the following command:
+  
+7. Validate `Ready` status for your imported cluster. Run the following command:
    
-   ```
-   kubectl get cluster --all-namespaces
-   ```
+  ```
+  kubectl get cluster -n `<cluster_name>`
+  ```

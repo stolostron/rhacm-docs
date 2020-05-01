@@ -9,7 +9,7 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 ## Prerequisites
 
 * You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed. 
-* You need a cluster that you want to manage. 
+* You need a cluster that you want to manage and Internet connectivity.
 * Install `kubectl`. To install `kubectl`, see _Install and Set Up kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos). 
 
 <!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters. (wait for testing, elder sending RFE)-->
@@ -67,7 +67,7 @@ Table 1: The following table lists the parameters and descriptions that are avai
 | searchCollector.enabled| Enables search collection and indexing | true|
 | policyController.enabled| Enable the Governance and risk dashboard policy feature|true, updateInterval: 15|  
 | certPolicyController.enabled|Monitors certificate expiration based on distributed policies|true|
-| cisController.enabled|Monitors CIS security controls based on distributed policies|true|
+| cisController.enabled|Technology preview only; Monitors CIS security controls based on distributed policies|false|
 | iamPolicyController|Monitors identity controls based on distributed policies|true|
 | serviceRegistry.enabled| Service registry that is used to discover services that are deployed by Application Deployable among managed clusters.| false | 
 | serviceRegistry.dnsSuffix| The suffix of the registry DNS name, which is added to the end of the target clusters dns domain name.|mcm.svc| 

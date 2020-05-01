@@ -17,7 +17,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
 **Prerequisite:** Be sure the `endpoint-appmgr` is running. You can run `oc get pods -n multicluster-endpoint` to check for pods.
 
-1. Compose the definition YAML content for your placement rule. Samples for all resources, including placement rules, are located in the [Application resource samples](app_resource_samples.md) documentation.
+1. Compose the definition YAML content for your placement rule. For more information about the YAML structure, including the required fields, see [Placement rule definition](#placement-rule-definition).
 
 2. Create the placement rule within Red Hat Advanced Cluster Management for Kubernetes. You can define a placement rule as a separate resource or define the rule within the definition for a deployable or subscription. As a best practice, define placement rules as a separate resource when the rule might need to be referenced by multiple resources.
 
