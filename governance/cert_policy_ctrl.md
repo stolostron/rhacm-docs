@@ -254,3 +254,5 @@ Update the `metadata` parameter in your TLS Secret by adding the `certificate_ke
      cert: <Certificate Data>
      key: <Private Key Data>
    ```
+   
+See [Configuration policy samples](../governance/policy_samples.md) to view policy samples that can be applied to your certificate policies.

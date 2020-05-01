@@ -484,4 +484,6 @@ You can view the risk scores for the CIS rules by running the following command:
   kubectl -n <namespace> describe configmap endpoint-cisctrl-controller-config
   ```
 
-For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md). For more information about policies, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
+See [Configuration policy samples](../governance/policy_samples.md) to view policy samples that can be applied to your CIS policies.
+
+For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md). 
