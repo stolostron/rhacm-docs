@@ -40,7 +40,7 @@ spec:
   disabled: false
   maxClusterRoleBindingUsers: 5
   # Maximum number of IAM role binding violations that are still valid before a namespace is considered as non-compliant.
-   maxRoleBindingViolationsPerNamespace: 2
+  maxRoleBindingViolationsPerNamespace: 2
 ```
 
 ## Creating an IAM policy
