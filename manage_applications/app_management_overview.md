@@ -1,6 +1,6 @@
 # Managing applications 
 
-Review the following topics to learn more about creating, deploying, and managing your applications. This guide assumes that users are familiar with Kubernetes concepts and terminology. Key Kubernetes terms and components are not defined. For more information about Kubernetes concepts, see [https://kubernetes.io/docs/home/](https://kubernetes.io/docs/home/)
+Review the following topics to learn more about creating, deploying, and managing your applications. This guide assumes that users are familiar with Kubernetes concepts and terminology. Key Kubernetes terms and components are not defined. For more information about Kubernetes concepts, see [Kubernetes Documentation](https://kubernetes.io/docs/home/)
 
 The application management functions provide you with unified and simplified options for constructing and deploying applications and application updates. With these functions, your developers and DevOps personnel can create and manage applications across environments through channel and subscription-based automation.
 
