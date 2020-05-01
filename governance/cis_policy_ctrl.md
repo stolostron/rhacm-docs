@@ -375,10 +375,26 @@ Complete the following steps to view the CIS policy from the managed cluster CLI
    oc describe cispolicy -n <namespace> <policyname>
    ```
 
-   Your output might resemble the following response: <!--update example-->
+   Your output might resemble the following response: 
 
      ```
-     need sample here
+     Status:
+       Cis Policy Status:
+         Endpoint 4:
+           Cluster Name:  endpoint4
+           Compliancy:    NonCompliant
+           Node Status:
+             150 . 238 . 253 . 105:  NonCompliant
+             150 . 238 . 253 . 106:  NonCompliant
+             150 . 238 . 253 . 121:  NonCompliant
+           Risk Score:
+             Highest Risk Score:  5
+             Risk Category:       medium
+        Observed Generation:       2
+     Events:
+       Type     Reason       Age                From            Message
+       ----     ------       ----               ----            -------
+       Warning  Medium Risk  12s (x2 over 26s)  cis-controller  Medium Risk detected!
      ```
   
 3. Verify which nodes are non-compliant by running the following commands:
@@ -430,9 +446,9 @@ Resolve rule failures to remediate your CIS policy violations. Complete the foll
      
   2. Copy and paste the decoded values into the appropriate fields from the MinIO console.
   
-4. Verify what nodes are labeled `NonCompliant` by selecting **cis-k8s** > **icp-local** > **Recent** > **Worker** or **Master**. <!--verify w/screenshot from Gus-->
+4. Verify what nodes are labeled `NonCompliant`. From the MinIO menu browser, select **cis-k8s** > **icp-local** > **recent** > **IP address for worker or master node**. 
 
-5. Click the non-compliant node and select the attached file to download. Click **Download** and then open the file. The nodes rules that have failed are shown with the following label: `[FAIL]`. 
+5. Click the non-compliant node and select the attached file to download. Click **Download object** and then open the file. The nodes rules that have failed are shown with the following label: `[FAIL]`. 
 
 6. Remediate the non-compliant node manually by referencing the `Remediation` section of the attached file. If a rule does not apply to your environment, add the rule to the `masterNodeExcludeRules` or `workerNodeExcludeRules` in your CIS policy. Your `Remediation` section might resemble the following content:
 
