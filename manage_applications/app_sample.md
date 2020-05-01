@@ -2,7 +2,7 @@
 
 ## Application definition YAML structure
 
-To compose the application definition YAML content for creating or updating an application resource, your YAML structure needs to include some required fields and values. Depending on your application requirements or application management requirements, you might need to include other optional fields and values. 
+To compose the application definition YAML content for creating or updating an application resource, your YAML structure needs to include some required fields and values. Depending on your application requirements or application management requirements, you might need to include other optional fields and values. For more information about creating and managing applications, see [Creating and managing applications](managing_apps.md).
 
 The following YAML structure shows the required fields for an application and some of the common optional fields.
 
@@ -93,23 +93,3 @@ spec:
       app: nginx-app-details
 status: {}
 ```
-
-```YAML
-apiVersion: app.k8s.io/v1beta1
-kind: Application
-metadata:
-  labels:
-    app: nginx-app-details
-  name: nginx-app-3
-  namespace: ns-sub-1
-spec:
-  componentKinds:
-  - group: app.ibm.com
-    kind: Subscription
-  selector:
-    matchLabels:
-      app: nginx-app-details
-status: {}
-```
-
-For more information about creating and managing applications, see [Creating and managing applications](managing_apps.md).
