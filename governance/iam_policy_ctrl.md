@@ -35,12 +35,12 @@ spec:
   #labelSelector:
     #env: "production"
   # Options are `enforce` or `inform`. However, only the `inform` option is available in this release.
-     remediationAction: inform # enforce or inform
+  remediationAction: inform # enforce or inform
   # Maximum number of cluster role bindings that are still valid before a namespace is considered as non-compliant.
-     disabled: false
-     maxClusterRoleBindingUsers: 5
+  disabled: false
+  maxClusterRoleBindingUsers: 5
   # Maximum number of IAM role binding violations that are still valid before a namespace is considered as non-compliant.
-     maxRoleBindingViolationsPerNamespace: 2
+   maxRoleBindingViolationsPerNamespace: 2
 ```
 
 ## Creating an IAM policy
