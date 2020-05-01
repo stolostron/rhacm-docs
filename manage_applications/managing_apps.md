@@ -1,6 +1,6 @@
 # Creating and managing application resources
 
-Create application resources to group and view the application components that make up your overall Red Hat Advanced Cluster Management for Kubernetes multi-cluster applications.
+Create application resources to group and view the application components that make up your overall Red Hat Advanced Cluster Management for Kubernetes multi-cluster applications. Samples for all resources are located in the [Application resource samples](app_resource_samples.md) documentation.
 {:shortdesc}
 
   * [Create an application](#create-an-application)
@@ -10,7 +10,7 @@ Create application resources to group and view the application components that m
 
 ## Create an application 
 
-1. Compose your application definition YAML content. To create or update an application resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
+1. Compose your application definition YAML content. To create or update an application resource, you must first compose the YAML file that defines the resource. 
 
 2. Create the application within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
 
