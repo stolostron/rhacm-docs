@@ -1,4 +1,4 @@
-# Application resources 
+# Managing application resources 
 
 Within Red Hat Advanced Cluster Management for Kubernetes, applications are composed of multiple application resources. The foundational resources for Red Hat Advanced Cluster Management for Kubernetes applications are the `application` resource and the `deployable` resource.
 
