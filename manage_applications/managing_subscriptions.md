@@ -1,6 +1,6 @@
 # Creating and managing subscriptions
 
-You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management. See the examples that are also provided at the end of the topic.
+You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management. Samples for all resources, including subscriptions, are located in the [Application resource samples](app_resource_samples.md) documentation.
 {:shortdesc}
 
 Subscriptions (`subscription.apps.open-cluster-management.io`) are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources (in GitHub, Objectstores, or hub cluster deployables), and Helm charts within channels by using annotations, labels, and versions.
@@ -20,9 +20,7 @@ For more information about deployables and other application resources, see [App
   * [Update a subscription](#update-a-subscription)
   * [Delete a subscription](#delete-a-subscription)
   * [Schedule a subscription](#schedule-a-subscription)
-  * [View the subscription YAML definition](#view-the-subscription-yaml-definition)
-  * [View an example subscription](#view-an-example-subscription)
-
+  
 ## Creating a subscription
 
 1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription-definition).
@@ -336,4 +334,4 @@ The contents for the `value` field are used to override the values within the `s
   - packageName: nginx-ingress
     packageAlias: my-helm-release-name
   ```
-  For samples YAML files, see [Subscription samples](subscription_sample.md) for more samples.
+  

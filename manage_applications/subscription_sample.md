@@ -5,6 +5,8 @@ As with channels, subscriptions (`subscription.apps.open-cluster-management.io`)
 
 Subscriptions are sets of definitions that identify Helm charts, deployables, and other Kubernetes resources within channels by using annotations, labels, and versions. Subscriptions can point to a channel or storage location for identifying new or updated deployables. The subscription operator can then download the subscribed Helm chart, deployable, or secret directly from the storage location to target managed clusters without checking the Hub cluster first. With a subscription, the subscription operator can monitor the channel for new or updated resources instead of the Hub cluster.
 
+## Example subscription YAML 
+
 The definition structure for a subscription can resemble the following YAML content:
 
 ```yaml
@@ -20,7 +22,7 @@ spec:
   name: nginx-ingress
   packageFilter:
     version: "1.36.x"
-  placement: # See the following section for information
+  placement: # See the subscription documentation for information
     placementRef:
       kind: PlacementRule
       name: towhichcluster
@@ -31,17 +33,13 @@ spec:
       value: default
 ```
 
-For more information about creating and managing subscriptions, see [Managing subscriptions](managing_subscriptions.md).
+For more information about creating and managing subscriptions, see [Managing subscriptions](managing_subscriptions.md). See the following list of samples:
 
-## Example subscription YAML 
-
-The following YAML content defines example subscriptions: <!--note Ian/Brandi to create a full topic with just examples and pull from the main doc -->
-
-  * [Channel subscription example](#channel-subscription-example)
-  * [Scheduled channel subscription example](#scheduled-channel-subscription-example)
-  * [Channel subscription example with overrides](#channel-subscription-example-with-overrides)
-  * [Helm repository subscription example](#helm-repository-subscription-example)
-  * [GitHub repository subscription example](#github-repository-subscription-example)
+  * Subscription example
+  * Subscription time window example
+  * Subscription with overrides example
+  * Helm repository subscription example
+  * GitHub repository subscription example
 
 ### Subscription example
 
@@ -264,32 +262,3 @@ oc annotate channel.apps.open-cluster-management.io <channel name> apps.open-clu
 ##### Subscriptions of webhook-enabled channel
 
 No webhook specific configuration is needed in subscriptions.
-
-
-__ 
-
-The definition structure for a subscription can resemble the following YAML content:
-
-```yaml
-apiVersion: apps.open-cluster-management.io/v1
-kind: Subscription
-metadata:
-  name: nginx
-  namespace: ns-sub-1
-  labels:
-    app: nginx-app-details
-spec:
-  channel: ns-ch/predev-ch
-  name: nginx-ingress
-  packageFilter:
-    version: "1.36.x"
-  placement: # See the following section for information
-    placementRef:
-      kind: PlacementRule
-      name: towhichcluster
-  overrides: # See Deployable documentation
-  - clusterName: "/"
-    clusterOverrides:
-    - path: "metadata.namespace"
-      value: default
-```

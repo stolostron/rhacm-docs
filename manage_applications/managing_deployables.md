@@ -7,9 +7,9 @@ Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resour
 
 The deployable controller acts as the default propagation engine and synchronizes local instances of the deployable. The controller follows the cluster and cluster-namespace model.
 
-You do not need to wrap or represent all resources as deployables before you deploy the resources. Depending on the resource type and the type of channel where you promote the resource, you might not need to create a deployable for the resource. For instance, you do not need to directly create deployables for resources that are included in Helm repository and GitHub repository channels. For more information, see [Creating and managing channels](managing_channels.md).
+You do not need to wrap or represent all resources as deployables before you deploy the resources. Depending on the resource type and the type of channel where you promote the resource, you might not need to create a deployable for the resource. For instance, you do not need to directly create deployables for resources that are included in Helm repository and GitHub repository channels. For more information, see [Creating and managing channels](managing_channels.md). Samples for all resources, including deployables, are located in the [Application resource samples](app_resource_samples.md) documentation.
 
-**Note:** The `deployable.apps.open-cluster-management.io` Kind is a replacement for the `Deployable.mcm.ibm.com` kind that is used in previous versions of Red Hat Advanced Cluster Management for Kubernetes.
+**Note:** The `deployable.apps.open-cluster-management.io` Kind is a replacement for the `Deployable.mcm.ibm.com` kind that is used in previous versions of the product.
 
   * [Create a deployable](#create-a-deployable)
   * [Update a deployable](#update-a-deployable)
@@ -18,7 +18,7 @@ You do not need to wrap or represent all resources as deployables before you dep
   
 ## Create a deployable
 
-1. Compose the definition YAML content for your deployable. For more information about the YAML structure, including the required fields, see [Deployable definition](#deployable_compose).
+1. Compose the definition YAML content for your deployable. 
 
 2. Create the deployable within Red Hat Advanced Cluster Management for Kubernetes. You can use Kubernetes command line interface (`kubectl`) tool or REST API:
 
@@ -106,9 +106,8 @@ You can use the console, the Kubernetes command line interface (`kubectl`) tool,
 
 * To use REST API, use the [deployable DELETE API](../apis/mcm/deployables_app.json).
 
-#### Notes:
-
 * If you want to only remove a deployable from a specific application, you can update the application to remove the content that defines the deployable. For more information about updating an application, see [Creating and managing applications](managing_apps.md).
+
 * If you only need to remove the deployable for a specific channel, edit the subscription to no longer include the deployable. You can also change the defined annotations for the deployable to remove the deployable. If you change the annotations of the source Kubernetes resource or Helm release so that the deployable no longer meets the required annotations for the channel, the deployable is removed from the channel. A deployable that is included in a channel must continue to meet the requirements for a channel to remain in that channel. For instance, the annotations for the deployable must match the defined annotations for the channel (`spec.gate.annotations`).
 
 ## Promote a deployable to a channel
