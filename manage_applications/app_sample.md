@@ -1,6 +1,6 @@
 # Application samples 
 
-Learn the YAML file structure, use the table to build your YAML  file, and see example values that you can use in your file.
+Learn the YAML file structure, use the table to build your YAML file, and see example values that you can use in your file.
 
 ## Application definition YAML structure
 
