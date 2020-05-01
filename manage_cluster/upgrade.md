@@ -7,9 +7,9 @@ This method of upgrading only works for Red Hat OpenShift Container Platform clu
 
 To upgrade your cluster, complete the following steps:
 
-1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**. If an upgrade is available, it is shown in the *Installed version* column.
+1. From the navigation menu, navigate to **Automate infrastructure** > **Clusters**. If an upgrade is available, it is shown in the *Distribution version* column.
 
-2. Select the clusters that you want to upgrade. **Remember:** A cluster must be in *Ready* state, and must be a Red Hat OpenShift Container Platform clsuter to be upgraded with the console.
+2. Select the clusters that you want to upgrade. **Remember:** A cluster must be in *Ready* state, and must be a Red Hat OpenShift Container Platform cluster to be upgraded with the console.
 
 3. Select **Upgrade**.
 
