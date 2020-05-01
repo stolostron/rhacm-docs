@@ -1,5 +1,7 @@
 # Application samples 
 
+Learn the YAML file structure, use the table to build your YAML file, and see example values that you can use in your file.
+
 ## Application definition YAML structure
 
 To compose the application definition YAML content for creating or updating an application resource, your YAML structure needs to include some required fields and values. Depending on your application requirements or application management requirements, you might need to include other optional fields and values. For more information about creating and managing applications, see [Creating and managing applications](managing_apps.md).
@@ -30,25 +32,6 @@ spec:
     - key:
       operator:
       values:
-```
-The definition structure for an application can resemble the following example YAML content:
-
-```yaml
-apiVersion: app.k8s.io/v1beta1
-kind: Application
-metadata:
-  labels:
-    app: nginx-app-details
-  name: nginx-app-3
-  namespace: ns-sub-1
-spec:
-  componentKinds:
-  - group: apps.open-cluster-management.io
-    kind: Subscription
-  selector:
-    matchLabels:
-      app: nginx-app-details
-status: {}
 ```
 
 ## Application table
