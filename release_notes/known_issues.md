@@ -105,4 +105,4 @@ When you are logged in as `kubeadmin` and you click the **Log out** option in t
 
 ## _etcd-operator_ does not reconcile the cluster
 
-When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, your managed clusters are removed. You lose most data. 
+When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, the `etcd-operator` does not reconcile you managed clusters. As a result, your managed clusters are removed and you lose most data. 
