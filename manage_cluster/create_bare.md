@@ -15,7 +15,7 @@ You need the following prerequisites before creating a cluster in a bare metal e
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster in the bare metal environment
 
-* Bare metal provider connection; see [Creating a provider connection for a bare metal environment](cloud_conn_bare.md) for more information
+* Bare metal provider connection; see [Creating a provider connection for a bare metal environment](prov_conn_bare.md) for more information
 
 * Login credentials for your bare metal environment, which include user name, password, and Baseboard Management Controller Address
 
@@ -39,19 +39,21 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 5. Enter the base domain information that you configured in your bare metal environment. This name is used in the hostname of the cluster.
 
-6. Select **Bare Metal** for the infrastructure platform. See [Supported managed cloud providers](cloud_providers.md) to learn more about other available cloud providers.
+6. Select **Bare Metal** for the infrastructure platform.
 
-7. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection for a bare metal environment](cloud_conn_bare.md).
+7. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the path to the image that you want to use.
+
+8. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection for a bare metal environment](prov_conn_bare.md).
    
-8. Select your hosts from the list of hosts that are associated with your provider connection. Select a minimum of three assets that are on the same bridge networks as the hypervisor. 
+9. Select your hosts from the list of hosts that are associated with your provider connection. Select a minimum of three assets that are on the same bridge networks as the hypervisor. 
 
-9. **Optional:** Configure the cluster networking options.
+10. **Optional:** Configure the cluster networking options.
 
-10. **Optional:** Configure a label for the cluster.
+11. **Optional:** Configure a label for the cluster.
 
-11. **Optional:** Update the advanced settings, if you want to change the setting for including a configmap. 
+12. **Optional:** Update the advanced settings, if you want to change the setting for including a configmap. 
 
-11. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
+13. Click **Create**. When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes. You can view your cluster details after the create and import process is complete.
 
 ## Accessing your cluster 
 
@@ -75,7 +77,7 @@ To access a cluster that is managed by Red Hat Advanced Cluster Management for K
 
 ## Removing a cluster from management
 
-When you remove a Red Hat OpenShift Cloud Platform cluster from management that was created with Red Hat Advanced Cluster Management for Kubernetes, you can either *detach* it or *destroy* it.  
+When you remove a Red Hat OpenShift Container Platform cluster from management that was created with Red Hat Advanced Cluster Management for Kubernetes, you can either *detach* it or *destroy* it.  
 
 Detaching a cluster removes it from management, but does not completely delete it. You can import it again, if you decide that you want to bring it back under management. This is only an option when the cluster is in a *Ready* state, and when the cluster was created by the Red Hat Advanced Cluster Management for Kubernetes. You cannot detach a cluster that was imported.
 
