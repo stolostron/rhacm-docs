@@ -1,34 +1,120 @@
 
 # Placement rules samples
 
-Placement rules (`placementrule.apps.open-cluster-management.io`) define the target clusters where deployables can be deployed. Use placement rules to help you facilitate the multi-cluster deployment of your deployables.
+Placement rules (`placementrule.apps.open-cluster-management.io`) define the target clusters where deployables can be deployed. Use placement rules to help you facilitate the multi-cluster deployment of your deployables.  
 
-The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used for applications in previous versions of Red Hat Advanced Cluster Management for Kubernetes. Placement policies are still used for governance and risk policies.
+## Example placement rule definition YAML structure
 
-Placement rules can be defined for subscriptions and for deployables. Define the placement rule at the subscription level for multi-cluster deployments. Define the placement rule for a specific deployable for single-cluster deployments or to override placement settings.  
-
-The definition structure for a placement rule can resemble the following YAML content:
+The following YAML structure shows the required fields for a placement rule and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
 ```yaml
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
-metadata:
-  name: towhichcluster
-  namespace: ns-sub-1
+  name:
+  namespace:
+  resourceVersion:
+  labels:
+    app: 
+    chart:
+    release:
+    heritage:
+  selfLink:
+  uid:
 spec:
-  clusterSelector: {}
+  clusterLabels:
+    matchLabels:
+      datacenter:
+      environment:
+  clusterReplicas:
+  clusterConditions:
+  ResourceHint:
+    type:
+    order:
+  Policies:
+```
+## YAML values table
+
+|Field|Description|
+|-- | -- |
+| apiVersion | Required. Set the value to `apps.open-cluster-management.io/v1`. |
+| kind | Required. Set the value to `PlacementRule` to indicate that the resource is a placement rule. |
+| metadata.name | Required. The name for identifying the placement rule. |
+| metadata.namespace | Required. The namespace resource to use for the placement rule. |
+| metadata.resourceVersion | Optional. The version of the placement rule resource. |
+| metadata.labels | Optional. The labels for the placement rule. |
+| spec.clusterLabels | Optional. The labels for identifying the target clusters |
+| spec.clusterLabels.matchLabels | Optional. The labels that must exist for the target clusters. |
+| status.decisions | Optional. Defines the target clusters where deployables are placed. |
+| status.decisions.clusterName | Optional. The name of a target cluster |
+| status.decisions.clusterNamespace | Optional. The namespace for a target cluster. |
+| spec.clusterReplicas | Optional. The number of replicas to create. |
+| spec.clusterConditions | Optional. Define any conditions for the cluster. |
+| spec.ResourceHint | Optional. If more than one cluster matches the labels and values that you provided in the previous fields, you can specify a resource specific criteria to select the clusters. For example, you can select the cluster with the most available CPU cores. |
+| spec.ResourceHint.type | Optional. Set the value to either `cpu` to select clusters based on available CPU cores or `memory` to select clusters based on available memory resources. |
+| spec.ResourceHint.order | Optional. Set the value to either `asc` for ascending order, or `desc` for descending order. |
+| spec.Policies | Optional. The policy filters for the placement rule. |
+{: caption="Table 1. Required and optional definition fields" caption-side="top"}
+
+## Placement rule status definition
+
+Existing placement rules can include the following fields that indicate the status for the placement rule. This status section is appended after the `spec` section in the YAML structure for a rule.
+
+```  
+status:
+  decisions:
+    clusterName:
+    clusterNamespace:
 ```
 
-For more information about creating and managing placement rules, see [Managing placement rules](managing_placement_rules.md).
+|Field|Description|
+|-- | -- |
+| status | The status information for the placement rule. |
+| status.decisions | Defines the target clusters where deployables are placed. |
+| status.decisions.clusterName | The name of a target cluster |
+| status.decisions.clusterNamespace | The namespace for a target cluster. |
+{: caption="Table 2. Status definition fields" caption-side="top"}
 
-The definition structure for a placement rule can resemble the following YAML content:
+## Examples of placement rule
+
+- Example 1
 
 ```yaml
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
+  name: gbapp-gbapp
+  namespace: development
+  labels:
+    app: gbapp
+spec:
+  clusterLabels:
+    matchLabels:
+      environment: Dev
+  clusterReplicas: 1
+status:
+  decisions:
+    - clusterName: local-cluster
+      clusterNamespace: local-cluster
+```
+
+- Example 2
+
+```YAML
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
   name: towhichcluster
   namespace: ns-sub-1
+  labels:
+    app: nginx-app-details
 spec:
-  clusterSelector: {}
+  clusterReplicas: 1
+  clusterConditions:
+    - type: OK
+  clusterSelector:
+    matchExpressions:
+    - key: environment
+      operator: In
+      values:
+      - dev
 ```
