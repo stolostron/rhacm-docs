@@ -11,6 +11,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [Subscription operator does not create a Security Context Constraint (SCC)](#subscription-operator-does-not-create-an-scc)
   - [Unable to search using values with empty spaces](#unable-to-search-using-values-with-empty-spaces)
   - [At logout, user `kubeadmin` gets extra browser tab with blank page](#at-logout-user-kubeadmin-gets-extra-browser-tab-with-blank-page)
+  - [_etcd-operator_ does not reconcile the cluster](#etcd-operator-does-not-reconcile-the-cluster)
 
 ## Certificate manager must not exist during an installation
 
@@ -101,3 +102,7 @@ From the console and Visual Web Terminal, users are unable to search for values 
 ## At logout user kubeadmin gets extra browser tab with blank page 
 
 When you are logged in as `kubeadmin` and you click the **Log out** option in the drop-down menu, the console returns to the login screen, but a browser tab opens with a `/logout` URL. The page is blank and you can close the tab without impact to your console.
+
+## _etcd-operator_ does not reconcile the cluster
+
+When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, your managed clusters are removed. You lose most data. 
