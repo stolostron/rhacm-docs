@@ -102,52 +102,29 @@ The following OpenSSL commands are used with the preceding configuration file to
      openssl x509  -noout -text -in ./ingress.crt
      ```
 
-## Backup the existing certificate for the ingress
-
-Create a file with a copy of your existing certificates by completing the following steps:
-
-1. Get the certificate and secret names for the ingress by running the following command:
-
-   ```
-   oc get cert -n open-cluster-management | grep ingress
-   ```
-
-2. Backup the `management-ingress` certifcate by running the following command:
-
-   ```
-   oc get cert -n open-cluster-management management-ingress-c38ac-cert -o yaml > ingress-cert-backup.yaml
-   ```
-
 ## Replace the management ingress certificate
 
 Complete the following steps to replace a management ingress certificate:
 
-1. Delete the management-ingress certificate and secret by running the following command:
+1. Create the `byo-ingress-tls` secret by using your certificate and private key. Run the following command:
 
    ```
-   kubectl delete cert -n [open-cluster-management] management-ingress-c38ac-cert
-   ```
-   {: codeblock}
-
-2. Create the management-ingress secret by using your certificate and private key.
-
-   ```
-   kubectl -n [open-cluster-management] create secret tls management-ingress-c38ac-tls-secret --cert ./ingress.crt --key ./ingress.key
+   kubectl -n open-cluster-management create secret tls byo-ingress-tls-secret --cert ./ingress.crt --key ./ingress.key
    ```
 
-3. Verify that the secret is created in the correct namespace.
+2. Verify that the secret is created in the correct namespace.
 
    ```
-   kubectl get secret -n [open-cluster-management] | grep management-ingress | grep tls
+   kubectl get secret -n open-cluster-management | grep byo-ingress | grep tls
    ```
 
-4. Create a secret containing the CA certificate by running the following command:
+3. Create a secret containing the CA certificate by running the following command:
 
      ```
      kubectl -n open-cluster-management create secret tls ingress-ca-cert --cert ./ca.crt --key ./ca.key
      ```
 
-5. Edit the management ingress deployment. Get the name of the deployment by running the following command:
+4. Edit the management ingress deployment. Get the name of the deployment by running the following command:
 
    ```
    oc get deployment -n open-cluster-management
@@ -164,20 +141,12 @@ Complete the following steps to replace a management ingress certificate:
 
 1. Retrieve the certificate backup file that you created when you replaced the management ingress:
 
-   1. Run the following command to restore the management ingress certificate from the backup:
-
-      ```
-      oc create -f ingress-cert-backup.yaml
-      ```
-
-      The secret is automatically updated.
-
-   2. Edit the management ingress deployment. Get the name of the deployment by running the following command:
+   1. Edit the management ingress deployment. Get the name of the deployment by running the following command:
 
       ```
       oc get deployment -n open-cluster-management
       ```
-
+<!--Still confused here about changing the values-->
     * Open and edit the management ingress deployment. Replace the `ingress-ca-cert` string  with `multicloud-ca-cert` to restart the management ingress. Run the following command:
 
          ```
@@ -185,3 +154,9 @@ Complete the following steps to replace a management ingress certificate:
          ```
 
 2. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
+
+3. Delete the bring your own (byo) ingress secret by running the following command:
+
+   ```
+   oc delete secret -n open-cluster-management byo-ingress-tls-secret
+   ```
