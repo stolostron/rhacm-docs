@@ -1,6 +1,6 @@
 # Importing an existing cluster with the console
 
-You can use the Red Hat Advanced Cluster Management for Kubernetes console to import an existing cluster. You need your terminal for authentication.
+ After you install Red Hat Advanced Cluster Management for Kubernetes, you are ready to import a cluster to manage. You can import from both the console and the CLI. Follow this procedure to import from the console. You need your terminal for authentication during this procedure.
 
 - [Prerequisites](#prerequisites)
 - [Importing a cluster](#importing-a-cluster)
@@ -12,7 +12,7 @@ You can use the Red Hat Advanced Cluster Management for Kubernetes console to im
 * You need a cluster that you want to manage and Internet connectivity.
 * Install `kubectl`. To install `kubectl`, see _Install and Set Up kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos). 
 
-<!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters. (wait for testing, elder sending RFE)-->
+<!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters. (wait for testing, elder sending RFE, see Brandi or elder for history here)-->
 
 * You need the `base64` command line tool.
 
