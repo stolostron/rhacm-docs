@@ -1,21 +1,23 @@
 # Creating and managing deployables
 
-You can create deployables to represent Helm releases or to use as a template to wrap Kubernetes resources for deployment to target clusters for constructing or updating applications.
-{:shortdesc}
+You can create deployables to represent Helm releases or to use as a template to wrap Kubernetes resources for deployment to target clusters for constructing or updating applications. You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management. Samples for all resources, including deployables, are located in the [Application resource samples](app_resource_samples.md) documentation.
+
+Learn more about deployments, then see the following tasks:
+
+  - Create a deployable
+  - Update a deployable
+  - Delete a deployable
+  - Promote a deployable to a channel
+  
 
 Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that wrap or represent other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. By wrapping the resources, deployables can be directly deployed to one or more target clusters from the storage locations that include the deployables. When the deployables are on the target cluster or clusters, the resources are unwrapped so that required actions can then run against the resources.  
+
+**Note:** The `deployable.apps.open-cluster-management.io` Kind is a replacement for the `Deployable.mcm.ibm.com` kind that is used in previous versions of the product.
 
 The deployable controller acts as the default propagation engine and synchronizes local instances of the deployable. The controller follows the cluster and cluster-namespace model.
 
 You do not need to wrap or represent all resources as deployables before you deploy the resources. Depending on the resource type and the type of channel where you promote the resource, you might not need to create a deployable for the resource. For instance, you do not need to directly create deployables for resources that are included in Helm repository and GitHub repository channels. For more information, see [Creating and managing channels](managing_channels.md). Samples for all resources, including deployables, are located in the [Application resource samples](app_resource_samples.md) documentation.
 
-**Note:** The `deployable.apps.open-cluster-management.io` Kind is a replacement for the `Deployable.mcm.ibm.com` kind that is used in previous versions of the product.
-
-  * [Create a deployable](#create-a-deployable)
-  * [Update a deployable](#update-a-deployable)
-  * [Delete a deployable](#delete-a-deployable)
-  * [Promote a deployable to a channel](#promote-a-deployable-to-a-channel)
-  
 ## Create a deployable
 
 1. Compose the definition YAML content for your deployable. 
