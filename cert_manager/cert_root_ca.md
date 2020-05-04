@@ -52,21 +52,21 @@ Complete the following steps to create a root CA certificate with OpenSSL:
 
 ## Replacing root CA certificates
 
-1. Delete the `multicloud-ca-cert` certificate by running the following command:
+1. Create a new secret with the CA certificate by running the following command:
 
    ```
-   oc delete cert multicloud-ca-cert -n open-cluster-management
+   kubectl -n open-cluster-management create secret tls byo-ca-cert --cert ./ca.crt --key ./ca.key
    ```
 
-2. Create a secret with the CA certificate by running the following command:
+2. Edit the CA issuer to point to the BYO certificate. Run the following commnad:
 
    ```
-   kubectl -n open-cluster-management create secret tls multicloud-ca-cert --cert ./ca.crt --key ./ca.key
+   oc edit issuer -n open-cluster-management byo-ca-cert
    ```
 
 3. Refresh all of your `cert-manager` certificates that use the CA. For more information view the upcoming section, [Refreshing _cert-manager_ certificates](#refresh).
 
-4. Validate the custom CA is in use by logging in to the console and view the details of the certificate being used. <!-- we should state the steps to do this; it migth be only 3 steps?-->
+4. Validate the custom CA is in use by logging in to the console and view the details of the certificate being used. <!-- How do users complete this?-->
 
 ## Refreshing _cert-manager_ certificates
 
@@ -80,10 +80,18 @@ Delete the Kubernetes secrets associated with each `cert-manager` certificate to
 
 ## Restoring root CA certificates
 
-To restore the root CA certificate, obtain the previously created backup file of the root CA certificate. Run the following command: 
+To restore the root CA certificate, update the CA issuer by completing the following steps:
+
+1. Edit the CA issuer by running the following command:
 
    ```
-   oc create -f multicloud-ca-cert-backup.yaml
+   oc edit issuer -n open-cluster-management multicloud-ca-issuer
+   ```
+   
+2. Delete the BYO CA certificate. Run the following commnad:
+
+   ```
+   oc delete secret -n open-cluster-management multicloud-ca-cert
    ```
 
 Refresh all `cert-manager` certificates that use the CA. For more information, see the [Refreshing _cert-manager_ certificates](#refresh) section. 

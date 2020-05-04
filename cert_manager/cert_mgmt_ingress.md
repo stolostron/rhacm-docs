@@ -103,7 +103,7 @@ The following OpenSSL commands are used with the preceding configuration file to
      ```
 
 ## Replace the management ingress certificate
-
+<!--Should the title of the section be updated to Replace the Bring Your Own (BYO) ingress certificate?-->
 Complete the following steps to replace a management ingress certificate:
 
 1. Create the `byo-ingress-tls` secret by using your certificate and private key. Run the following command:
@@ -155,7 +155,7 @@ Complete the following steps to replace a management ingress certificate:
 
 2. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
 
-3. Delete the bring your own (byo) ingress secret by running the following command:
+3. Delete the Bring Your Own (BYO) ingress secret by running the following command:
 
    ```
    oc delete secret -n open-cluster-management byo-ingress-tls-secret
