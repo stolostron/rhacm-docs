@@ -118,6 +118,24 @@ failed calling webhook "certificates.admission.certmanager.io": the server is cu
 
 Use this section to troubleshoot issues when working with clusters.
 
+### Default storage class error when creating a cluster on bare metal
+
+#### Symptom
+
+When you create a cluster in a bare metal environment using the default setting for the storage class, the installation fails with the following error:
+
+```
+"error":"failed to find default storageclass",
+```
+
+#### Resolving the problem
+
+Verify that your `StorageClass` setting is set to the following value:
+
+```
+storageclass.kubernetes.io/is-default-class: "true"
+```
+
 ### Cluster appears in console with *Pending import* status
 
 #### Symptom
