@@ -4,7 +4,7 @@ Learn how to create, import, and manage clusters across cloud providers by using
 
 Learn how to manage clusters across cloud providers in the following topics:
 
-- [Supported cloud providers](install/supported_clouds.md)
+- [Supported cloud providers](../install/supported_clouds.md)
 - [Resizing your clusters](manage_cluster/scale.md)
 - [Creating a provider connection](manage_cluster/prov_conn.md)
 - [Creating a cluster](manage_cluster/create.md)
