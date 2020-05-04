@@ -2,7 +2,7 @@
 
 You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management. Samples for all resources, including subscriptions, are located in the [Application resource samples](app_resource_samples.md) documentation.
 
-See the following tasks: 
+Learn more about subscriptions, then see the following tasks: 
 
   - Creating a subscription
   - Matching a subscription to an application
