@@ -1,7 +1,14 @@
 # Creating and managing channels
 
-Create and use channels when you need to improve the continuous integration and delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access.
-{:shortdesc}
+Create and use channels when you need to improve the continuous integration and delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access. Samples for all resources, including channels, are located in the [Application resource samples](app_resource_samples.md) documentation.
+
+Learn more about channels, then see the following tasks:
+
+  - Create a channel
+  - Update a channel
+  - Delete a channel
+  - Managing deployments with channels
+  - Channel status and synchronization
 
 Channels (`channel.apps.open-cluster-management.io`) define a namespace within the hub cluster and point to a physical place where resources are stored for deployment. There are four types of channels. Each channel differs based on the type of source location where resources are stored:  
 
@@ -17,20 +24,14 @@ Channels (`channel.apps.open-cluster-management.io`) define a namespace within t
 * GitHub repository (`GitHub`)  
   Stores Kubernetes resources YAML files and unpackaged Helm charts. These resources do not need to be wrapped or represented as deployables. The channel controllers synchronize resources as deployables automatically.
 
-Channels are created on the hub cluster by pointing to the location where resources are stored, such as a bucket within an object store, a Helm repository, a GitHub repository, or a namespace on the hub cluster. Channels are defined with a `Channel` custom resource definition (CRD)
+Channels are created on the hub cluster by pointing to the location where resources are stored, such as a bucket within an object store, a Helm repository, a GitHub repository, or a namespace on the hub cluster. Channels are defined with a `Channel` custom resource definition (CRD).
 
 Channels reside in their own namespace for role-based access control. The channel namespace is made available to a subscription operator on managed clusters when the cluster subscribes to the channel. The operator can then get the secrets to access the actual channel. The operator needs this access to check whether a deployable meets the channel requirements.
 
-For more information about deployables and other application resources, see [Application resources](app_resources.md). Samples for all resources, including channels, are located in the [Application resource samples](app_resource_samples.md) documentation.
+For more information about deployables and other application resources, see [Application resources](app_resources.md). 
 
 The channel type can be specified with the `spec.sourceNamespaces` and `spec.type` fields of a channel spec. When a channel is created and pointing to a source, the channel controller maintains the promotion of the deployables at the source. The controller also synchronizes the source and channel namespaces.
-
-  * [Create a channel](#create-a-channel)
-  * [Update a channel](#update-a-channel)
-  * [Delete a channel](#delete-a-channel)
-  * [Managing deployments with channels](#managing-deployments-with-channels)
-  * [Channel status and synchronization](#channel-status-and-synchronization)
-  
+   
 ## Create a channel
 
 1. Compose your channel definition YAML content. To create or update a channel resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Channel definition YAML structure](#channel-definition-yaml-structure).
