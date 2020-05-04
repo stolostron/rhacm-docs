@@ -1,8 +1,6 @@
 # Creating and managing placement rules
 
-You can create and manage placement rules to define where and how Helm charts and deployables are deployed. U
-
- of your deployables.
+You can create and manage placement rules to define where and how Helm charts and deployables are deployed. 
 
   * [Create a placement rule](#create-a-placement-rule)
   * [Assign a placement rule](#assign-a-placement-rule)
