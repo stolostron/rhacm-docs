@@ -35,13 +35,13 @@ To create a bare metal asset using the Red Hat Advanced Cluster Management for K
 
   **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**. 
 
-4. Enter the namespace for your bare metal asset. This namespace must be the same as the namespace where you create your cluster that uses this asset.
+4. Enter the namespace where you want to create the bare metal asset. Users with access to this namespace can associate this asset to the cluster when creating a cluster.
 
 5. Enter the Baseboard Management Conroller address. This is the controller that enables communication with the host. The following protocols are supported: 
-  * IPMI
+  * IPMI, for example: `ipmi://192.168.100.12`
   * iDRAC
   * iRMC
-  * Redfish
+  * Redfish, for example: `redfish://192.168.100.14`
 
 6. Enter the user name and password for the bare metal asset.
 
