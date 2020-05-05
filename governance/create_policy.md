@@ -2,11 +2,11 @@
 
 Create a security policy to report and validate your cluster compliance based on your specified security standards, categories, and controls. To create a policy for Red Hat Advanced Cluster Management for Kubernetes, you must create a YAML file to create a policy for managed clusters.
 
-**Required access level**: Cluster administrator 
+**Required access level**: Cluster administrator
 
 As you create your new policy from the console, a YAML file is also created.
 
-  - [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](#creating-a-yaml-file-for-an-red-hat-advanced-cluster-Management-for-kubernetes-policy)
+  - [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](#creating-a-yaml-file-for-an-red-hat-advanced-cluster-management-for-kubernetes-policy)
   - [Creating a cluster security policy from the Red Hat Advanced Cluster Management for Kubernetes console](#creating-a-cluster-security-policy-from-the-red-hat-advanced-cluster-management-for-kubernetes-console)
 
 The following objects are required for your Red Hat Advanced Cluster Management for Kubernetes policy:

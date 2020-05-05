@@ -1,10 +1,10 @@
-# Application samples 
+# Application samples
 
 View samples and YAML definitions that you can use to build your files. Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for viewing the application components. For more information about creating and managing applications, see [Creating and managing applications](managing_apps.md).
 
-## Application definition YAML structure
+## Application definition YAML structure {#app_compose}
 
-To compose the application definition YAML content for creating or updating an application resource, your YAML structure needs to include some required fields and values. Depending on your application requirements or application management requirements, you might need to include other optional fields and values. 
+To compose the application definition YAML content for creating or updating an application resource, your YAML structure needs to include some required fields and values. Depending on your application requirements or application management requirements, you might need to include other optional fields and values.
 
 The following YAML structure shows the required fields for an application and some of the common optional fields.
 

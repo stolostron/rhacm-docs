@@ -10,7 +10,7 @@ The IAM policy controller checks for compliance of the number of cluster adminis
 
 - The IAM policy controller runs on the managed cluster or hub cluster, and checks for compliance against the IAM policy that you define.
 
-**Policy enforcement** 
+**Policy enforcement**
 
 IAM policy controller can only inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. View an example of an IAM policy in the following section.
 
@@ -68,7 +68,7 @@ Complete the following steps to create an IAM policy from the command-line inter
    kubectl get <iam-policy-file-name> --namespace=<mcm_namespace>
    ```
 
-### Create an IAM policy from the console
+### Creating an IAM policy from the console
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Govern risk**.

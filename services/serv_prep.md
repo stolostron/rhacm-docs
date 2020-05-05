@@ -34,7 +34,7 @@ Configure the DNS for each target managed cluster by completing these steps:
 
 **Note:** The DNS configuration is depented on the kind of your managed cluster, you can consult your cluster administrator for more details, the below steps base on OpenShift Container Platform 4.3
 
-1. Find the `mcm-svc-registry-dns` service cluster IP by entering the following command, where *<rcm-klusterlet-namespace>* is the namespace that contains your registry component:
+1. Find the `mcm-svc-registry-dns` service cluster IP by entering the following command, where <rcm-klusterlet-namespace> is the namespace that contains your registry component:
 
   ```
   kubectl get -n <rcm-klusterlet-namespace> service mcm-svc-registry-dns -o jsonpath='{.spec.clusterIP}'
@@ -46,7 +46,7 @@ Configure the DNS for each target managed cluster by completing these steps:
   oc edit dns.operator/default
   ```
 
-3. Enable the forwarding plugin in the `default` configuration, similar to the following example, where *<mcm-svc-registry-dns-service-cluster-ip>* is the IP address that you identified in step 1:
+3. Enable the forwarding plugin in the `default` configuration, similar to the following example, where <mcm-svc-registry-dns-service-cluster-ip> is the IP address that you identified in step 1:
 
   ```
   spec:

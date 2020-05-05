@@ -95,5 +95,5 @@ To restore the root CA certificate, update the CA issuer by completing the follo
    ```
    oc delete secret -n open-cluster-management byo-ca-cert
    ```
-
+   
 Refresh all `cert-manager` certificates that use the CA. For more information, see the [Refreshing _cert-manager_ certificates](#refresh_cert_manager_certs) section. 
