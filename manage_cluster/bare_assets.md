@@ -38,10 +38,10 @@ To create a bare metal asset using the Red Hat Advanced Cluster Management for K
 4. Enter the namespace where you want to create the bare metal asset. Users with access to this namespace can associate this asset to the cluster when creating a cluster.
 
 5. Enter the Baseboard Management Conroller address. This is the controller that enables communication with the host. The following protocols are supported: 
-  * IPMI, for example: `ipmi://192.168.100.12`
-  * iDRAC
-  * iRMC
-  * Redfish, for example: `redfish://192.168.100.14`
+  * IPMI, see [IPMI 2.0 Specification](https://www.intel.com/content/www/us/en/products/docs/servers/ipmi/ipmi-second-gen-interface-spec-v2-rev1-1.html) for more information.
+  * iDRAC, see [Support for Integrated Dell Remote Access Controller 9 (iDRAC9)](https://www.dell.com/support/article/en-us/sln311300/support-for-integrated-dell-remote-access-controller-9-idrac9?lang=en) for more information.
+  * iRMC, see [Data Sheet: FUJITSU Software ServerView Suite integrated Remote Management Controller - iRMC S5](https://sp.ts.fujitsu.com/dmsp/Publications/public/ds-irmc-s5-en.pdf) for more information.
+  * Redfish, see [Redfish specification](https://www.dmtf.org/sites/default/files/standards/documents/DSP0266_1.8.0.pdf) for more information.
 
 6. Enter the user name and password for the bare metal asset.
 
