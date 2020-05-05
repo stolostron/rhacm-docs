@@ -4,7 +4,7 @@ You can import clusters from different Kubernetes cloud providers. After you imp
 
  **Note:** A hub cluster cannot manage _any_ other hub cluster; you must import an existing cluster.
 
-Choose from the following instructions to set up your managed cluster:
+Choose from the following instructions to set up your managed cluster, either from the console or from the CLI:
 
 **Required user type or access level**: Cluster administrator
 
