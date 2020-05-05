@@ -4,14 +4,14 @@
 After you install Red Hat Advanced Cluster Management for Kubernetes, you are ready to import a cluster to manage. You can import from both the console and the CLI. Follow this procedure to import from the CLI.
 
 
-  - [Prerequisites](#prerequisites)
+  - [Prerequisites](#cli_prerequisites)
   - [Supported architecture](#supported-architecture)
   - [Prepare for import](#prepare-for-import)
   - [Importing the multicluster-endpoint](#importing-the-multicluster-endpoint)
-    
+
   **Note:** A hub cluster cannot manage another hub cluster.
-    
-## Prerequisites
+
+## Prerequisites {#cli_prerequisites}
 
 * You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed.
 
@@ -31,7 +31,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 ## Prepare for import
 
 1. Log in to your _hub cluster_. Run the following command:
-   
+
   ```
   oc login
   ```
@@ -47,7 +47,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   ```
   oc create -n ${CLUSTER_NAME} secret docker-registry quay-secret --docker-server=quay.io --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS}
   ```
-  
+
 4. Edit the example ClusterRegistry cluster with the following sample of YAML:
 
   ```
@@ -65,12 +65,12 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
 5. Save the file as `cluster-registry.yaml`.
 
-6. Apply the with YAML file the following command: 
+6. Apply the with YAML file the following command:
 
   ```
   oc apply -f cluster-registry.yaml
   ```
-   
+
 7. Create the endpoint configuration file. Enter the following example YAML:
 
   ```
@@ -107,7 +107,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
   ```
 8. Save the file as `endpoint-config.yaml`.
 
-9. Apply the YAML. Run the following command: 
+9. Apply the YAML. Run the following command:
 
   ```
   oc apply -f endpoint-config.yaml
@@ -116,9 +116,9 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 The ClusterController takes the following actions:
 
 - The `EndpointConfig` creation starts `Reconcile()` in [/pkg/controllers/endpointconfig/endpointconfig_controller.go](https://github.com/open-cluster-management/rcm-controller/blob/master/pkg/controller/endpointconfig/endpointconfig_controller.go).
-  
+
 - The controller uses information in `EndpointConfig` to generate a secret named `${CLUSTER_NAME}-import`.
-  
+
 - The `${CLUSTER_NAME}-import` secret contains the `import.yaml` that the user applies to a managed cluster to install `multicluster-endpoint`.
 
 ## Importing the multicluster-endpoint
@@ -138,9 +138,9 @@ The ClusterController takes the following actions:
   ```
 
 3. Log in to your target _managed_ cluster.
-  
+
 4. Apply the `endpoint-crd.yaml` that was generated in step 1. Run the following command:
-  
+
   ```
   kubectl apply -f endpoint-crd.yaml
   ```
@@ -152,13 +152,13 @@ The ClusterController takes the following actions:
   ```
 
 6. Validate the pod status on the target managed cluster. Run the following command:
-   
+
   ```
   kubectl get pod -n multicluster-endpoint
   ```
-  
+
 7. Validate `Ready` status for your imported cluster. Run the following command from the _hub_ cluster:
-   
+
   ```
   kubectl get cluster -n ${CLUSTER_NAME}
   ```

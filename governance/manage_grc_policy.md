@@ -1,9 +1,9 @@
 # Managing a security policy
 
-Manage your cluster policy to remediate and edit your security policy. 
+Manage your cluster policy to remediate and edit your security policy.
 
-- [Updating your security policy from the cosole](#updating-your-security-policy-from-the-cosole)
-- [Viewing cluster policy violations from the console](#viewing-cluster-violations-from-the-console)
+- [Updating your security policy from the console](#updating-your-security-policy-from-the-console)
+- [Viewing cluster policy violations from the console](#viewing-cluster-policy-violations-from-the-console)
 - [Viewing image vulnerability violations from the console](#viewing-image-vulnerability-violations-from-the-console)
 - [Disabling your security policy from the console](#disabling-your-security-policy-from-the-console)
 - [Deleting an Red Hat Advanced Cluster Management for Kubernetes policy](#deleting-an-red-hat-advanced-cluster-management-for-kubernetes-policy)
@@ -11,11 +11,11 @@ Manage your cluster policy to remediate and edit your security policy.
 ## Updating your security policy from the console
 
 1. From the navigation menu, click **Govern risk** to view a table list of your policies.
-2. Select a policy and click the **Options** icon. 
+2. Select a policy and click the **Options** icon.
 3. Click **Edit**. The YAML file appears in the _Edit policy_ modal.
 4. Click **Submit**.
 
-Your policy is updated. 
+Your policy is updated.
 
 ## Viewing cluster policy violations from the console
 
@@ -25,7 +25,7 @@ Your policy is updated.
 
 ## Viewing image vulnerability violations from the console
 
-1. From the navigation menu, click **Govern risk** to view a table list of your policies. 
+1. From the navigation menu, click **Govern risk** to view a table list of your policies.
 2. Select the **`policy-imagemanifestvulnpolicy`** policy > **_Violations_ tab** to view the cluster location of the violation.
 
    Your image vulnerability violation might resemble the following:
@@ -38,9 +38,9 @@ Your policy is updated.
 
 4. From the navigation menu on the OpenShift Container Platform console, click **Administration** > **Custom Resource Definitions**.
 
-5. Select **`imagemanifestvulns`** > **_Instances_ tab** to view all of the `imagemanifestvulns` instances. 
+5. Select **`imagemanifestvulns`** > **_Instances_ tab** to view all of the `imagemanifestvulns` instances.
 
-6. Select an entry to view more details. 
+6. Select an entry to view more details.
 
 ## Disabling your security policy from the console
 
@@ -52,9 +52,9 @@ After you create a security policy, it is enabled by default. Complete the follo
 
 3. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
 
-4. Click **Disable policy**. 
+4. Click **Disable policy**.
 
-Your policy is disbaled. 
+Your policy is disbaled.
 
 ## Deleting an Red Hat Advanced Cluster Management for Kubernetes policy
 
@@ -85,12 +85,8 @@ Complete the following steps to delete your policy:
 1. From the navigation menu, click **Govern risk** to view a table list of your policies.
 2. Click the **Options** icon for the policy you want to delete in the policy violation table.
 3. Click **Remove**.
-4. From the _Remove policy_ dialog box, click **Remove policy**. 
+4. From the _Remove policy_ dialog box, click **Remove policy**.
 
 Your policy is deleted.
 
 See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more policy topics.
-
-
-
-

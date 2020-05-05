@@ -1,4 +1,4 @@
-# Deploying application resources
+# Deploying an application resource
 
 You can deploy application resources, such as Kubernetes deployable objects or Helm charts to a cluster to update existing applications or to add applications. Red Hat Advanced Cluster Management for Kubernetes supports multiple options for the deployment of deployable objects.
 
@@ -47,7 +47,7 @@ To set up and use channels, subscriptions, and placement rules for deployments, 
 
 5. Optional. If you created the placement rule as a stand-alone resource, edit the definition for your subscription or deployables to reference your placement rule.
 
-6. Edit the definition for your deployables and your channel to ensure that deployables are promoted to the channel. For more information, see [Promote a deployable to a channel](#promote_channel).
+6. Edit the definition for your deployables and your channel to ensure that deployables are promoted to the channel. For more information, see [Promote a deployable to a channel](#promote-a-deployable-to-a-channel).
 
 7. Use the console to monitor the status of the deployment to the target cluster or clusters for the channel.
 
@@ -117,10 +117,10 @@ To promote a deployable to a channel, you can use any of the following methods:
 
 * Update the subscription definition to identify the deployables. The configuration for promoting a deployable to a channel can also be specified within the subscription definition.
 
-  In the previous example, `packageFilter.version: "1.36.x"` indicates the specific `nginx` version `1.36.x` chart is  promoted through the channel for deployment with the subscription. 
+  In the previous example, `packageFilter.version: "1.36.x"` indicates the specific `nginx` version `1.36.x` chart is  promoted through the channel for deployment with the subscription.
 
 * Update the channel definition to specify channel gate requirements and update the definitions for your deployables to include the fields and values to match the gate requirements.
-  
+
   Channel gate requirements are defined within the `spec.gate` section of a channel definition. If the deployable has the fields to match the channel `spec.gate` values, the deployable is promoted to the channel. In this case, the deployable does not need to point to a specific channel with the  `spec.channels` field.
 
 ### Deploy with a percentage roll out  

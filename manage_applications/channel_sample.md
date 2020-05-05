@@ -1,8 +1,8 @@
 # Channels samples
 
-View samples and YAML definitions that you can use to build your files. Channels (`channel.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Learn more at [Creating and managing channels](managing_channels.md). 
+View samples and YAML definitions that you can use to build your files. Channels (`channel.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Learn more at [Creating and managing channels](managing_channels.md).
 
-## Example channel definition YAML structure
+## Example channel definition YAML structure {#channel-definition-yaml-structure}
 
 The definition structure for a channel can resemble the following YAML content:
 
@@ -37,7 +37,7 @@ spec:
     annotations:
   labels:
 ```
-## YAML values table
+## YAML values table {#channel-yaml-values}
 
 |Field|Description|
 |-- | -- |
@@ -54,7 +54,7 @@ spec:
 | spec.labels | Optional. The labels for the channel. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-## Kubernetes namespace (`Namespace`) channel
+## Kubernetes namespace (Namespace) channel
 
 The following example channel definition abstracts a namespace as a channel that holds deployable resources. When this YAML is applied, a namespace `ch-qa` is created for the channel that is named `qa`. When created, this channel points to the source default namespace for identifying deployables. The channel controller maintains the resources at the actual namespace location and ensures that the resources are kept up-to-date.
 
@@ -74,7 +74,7 @@ The following example channel definition abstracts a namespace as a channel that
         dev-ready: approved
   ```
 
-## Object store bucket (`ObjectBucket`) channel 
+## Object store bucket (`ObjectBucket`) channel
 
 The following example channel definition abstracts an object store bucket as a channel:
 
@@ -164,4 +164,3 @@ data:
   user: dXNlcgo=            # Value of user and accessToken is Base 64 coded.
   accessToken: cGFzc3dvcmQ
 ```
-

@@ -14,7 +14,7 @@ kind: PlacementRule
   namespace:
   resourceVersion:
   labels:
-    app: 
+    app:
     chart:
     release:
     heritage:
@@ -32,7 +32,7 @@ spec:
     order:
   Policies:
 ```
-## YAML values table
+## YAML values table {#placement-yaml-values}
 
 |Field|Description|
 |-- | -- |

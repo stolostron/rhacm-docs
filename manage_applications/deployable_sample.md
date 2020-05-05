@@ -32,7 +32,7 @@ spec:
   placement:
     clusterSelector:
 ```
-## YAML values table
+## YAML values table {#deployable-yaml-values}
 
 |Field|Description|
 |-- | -- |
