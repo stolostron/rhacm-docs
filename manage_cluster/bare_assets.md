@@ -35,7 +35,7 @@ To create a bare metal asset using the Red Hat Advanced Cluster Management for K
 
   **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**. 
 
-4. Enter the namespace where you want to create the bare metal asset. Users with access to this namespace can associate this asset to the cluster when creating a cluster.
+4. Enter the namespace where you want to create the bare metal asset. Users who have access to this namespace can associate this asset to the cluster when creating a cluster.
 
 5. Enter the Baseboard Management Conroller address. This is the controller that enables communication with the host. The following protocols are supported: 
   * IPMI, see [IPMI 2.0 Specification](https://www.intel.com/content/www/us/en/products/docs/servers/ipmi/ipmi-second-gen-interface-spec-v2-rev1-1.html) for more information.
@@ -47,7 +47,7 @@ To create a bare metal asset using the Red Hat Advanced Cluster Management for K
 
 7. Add the boot NIC MAC address for the bare metal asset. This is the MAC address of the host's network-connected NIC that is used to provision the host on the bare metal asset. 
 
-You can continue with [Creating a provider connection for a bare metal environment](cloud_conn_bare.md) and then [Creating an OpenShift cluster on bare metal](create_bare.md).
+You can continue with [Creating a provider connection for a bare metal environment](prov_conn_bare.md) and then [Creating an OpenShift cluster on bare metal](create_bare.md).
 
 ## Modifying a bare metal asset
 
