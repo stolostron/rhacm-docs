@@ -19,9 +19,13 @@ Each _policy_ within the policy document contains the following elements:
         * Use your internal security standards or industry standards for the `annotations` field. You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, from the console.
         * You must add your `label` directly into the YAML file to create a label.
 
-  - `remediationAction` parameter specifies the remediation of your policy. The parameter values are _enforce_ and _inform_. The _inform_ value, creates a list of violations for you to manually remediate. The _enforce_ value, automatically creates the missing policy on the target managed clusters.
-  
-  - `disabled` parameter provides the ability to enable and disable your policies.
+   - `disabled` parameter provides the ability to enable and disable your policies.
+   
+  - `remediationAction` parameter specifies the remediation of your policy. The parameter values are _enforce_ and _inform_. The _inform_ value reports whether the cluster is compliant to the specified policies. You must remediate your policy manually. The _enforce_ value automatically remediates your policy on target managed clusters.
+
+      **Note**: For example, with `remediationAction` set to _inform_ and a policy that requires a specific role-based access control (RBAC), the policy status reports that the cluster is non-compliant if the role is not on the cluster. The policy includes the list of violations. No remediation actions are carried out in _inform_ mode.
+
+      With `remediationAction` set to _enforce_, the Red Hat Advanced Cluster Management for Kubernetes policy manager automatically creates the missing policy on the target managed clusters.
   
   - `namespace` selector specifies which namespaces within the hub cluster that the policy is applied to.
 
