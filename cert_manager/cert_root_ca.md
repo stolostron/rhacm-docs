@@ -2,7 +2,7 @@
 
 You can replace the root CA certificate.
 
-## Before you begin
+## Before you begin {#cert_root_before_you_begin}
 
 Verify that your Red Hat Advanced Cluster Management for Kubernetes cluster is running.
 
@@ -61,18 +61,18 @@ Complete the following steps to create a root CA certificate with OpenSSL:
 2. Edit the CA issuer to point to the BYO certificate. Run the following commnad:
 
    ```
-   oc edit issuer -n open-cluster-management byo-ca-cert
+   oc edit issuer -n open-cluster-management multicloud-ca-issuer
    ```
 
-3. Refresh all of your `cert-manager` certificates that use the CA. For more information view the upcoming section, [Refreshing _cert-manager_ certificates](#refresh).
+3. Replace the string `mulicloud-ca-cert` with `byo-ca-cert`. Save your deployment and quit the editor.
 
-4. Validate the custom CA is in use by logging in to the console and view the details of the certificate being used. <!-- How do users complete this?-->
+4. Validate the custom CA is in use by logging in to the console and view the details of the certificate being used.
 
-## Refreshing _cert-manager_ certificates
+## Refreshing _cert-manager_ certificates {#refresh_cert_manager_certs}
 
 After the root CA is replaced, all certificates that are signed by the root CA must be refreshed and the services that use those certificates must be restarted. Cert-manager creates the default Issuer from the root CA so all of the certificates issued by `cert-manager`, and signed by the default ClusterIssuer must also be refreshed.
 
-Delete the Kubernetes secrets associated with each `cert-manager` certificate to refresh the certificate and restart the services that use the certificate. Run the following command: 
+Delete the Kubernetes secrets associated with each `cert-manager` certificate to refresh the certificate and restart the services that use the certificate. Run the following command:
 
    ```
    oc delete secret -n open-cluster-management $(oc get cert -n open-cluster-management -o wide | grep multicloud-ca-issuer | awk '{print $3}')
@@ -82,16 +82,18 @@ Delete the Kubernetes secrets associated with each `cert-manager` certificate to
 
 To restore the root CA certificate, update the CA issuer by completing the following steps:
 
-1. Edit the CA issuer by running the following command:
+1. Edit the CA issuer. Run the following command:
 
    ```
    oc edit issuer -n open-cluster-management multicloud-ca-issuer
    ```
-   
-2. Delete the BYO CA certificate. Run the following commnad:
+
+2. Replace the `byo-ca-cert` string with `multi-cloud-ca-cert` in the editor. Save the issuer and quit the editor.
+
+3. Delete the BYO CA certificate. Run the following commnad:
 
    ```
-   oc delete secret -n open-cluster-management multicloud-ca-cert
+   oc delete secret -n open-cluster-management byo-ca-cert
    ```
 
-Refresh all `cert-manager` certificates that use the CA. For more information, see the [Refreshing _cert-manager_ certificates](#refresh) section. 
+Refresh all `cert-manager` certificates that use the CA. For more information, see the [Refreshing _cert-manager_ certificates](#refresh_cert_manager_certs) section. 
