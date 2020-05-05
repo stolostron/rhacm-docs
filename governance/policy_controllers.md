@@ -8,3 +8,5 @@ Create and customize policies with the out of the box policy templates. View the
 - [Certificate policy controller](../governance/cert_policy_ctrl.md)
 - [IAM policy controller](../governance/iam_policy_ctrl.md)
 - [CIS policy controller](../governance/cis_policy_ctrl.md)
+
+**Important**: Some policy controllers may not support the enforce feature. If the enforce feature is not supported by the controller, you must remediate it manually. See, `remediationAction` in the [Policy elements section](../policy_overview.md#policy_elements_2).

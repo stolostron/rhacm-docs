@@ -57,14 +57,6 @@ Complete the following steps to create a policy:
                verbs: ["get", "list", "watch", "create", "delete","patch"]
    ```
 
-  - The `disabled` parameter provides the ability to enable and disable your policies.
-  - The value _enforce_ provides automatic remediation based on the policies.
-  - The value _inform_ reports whether the cluster is compliant to the specified policies.
-
-      **Note**: For example, with `remediationAction` set to _inform_ and a policy that requires a specific role-based access control (RBAC), the policy status reports that the cluster is non-compliant if the role is not on the cluster. The policy includes the list of violations. No remediation actions are carried out in _inform_ mode.
-
-      With `remediationAction` set to _enforce_, the Red Hat Advanced Cluster Management for Kubernetes policy manager automatically creates the missing policy on the target managed clusters.
-
 3. Define a `PlacementRule`. Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. View the [PlacementRule definition YAML structure](../manage_applications/managing_placement_rules.md#placement-rule-definition-yaml-structure). Your `PlacementRule` might resemble the following content:
 
    ```yaml
