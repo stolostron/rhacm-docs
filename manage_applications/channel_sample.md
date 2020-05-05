@@ -74,7 +74,7 @@ The following example channel definition abstracts a namespace as a channel that
         dev-ready: approved
   ```
 
-## Object store bucket (`ObjectBucket`) channel
+## Object store bucket (ObjectBucket) channel
 
 The following example channel definition abstracts an object store bucket as a channel:
 
