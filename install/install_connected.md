@@ -49,7 +49,7 @@ Complete the following preparations before you complete either of the installati
 
   * `prereqs`: Contains `.yaml` definitions that define the required objects, such as namespaces and pull-secrets.
 
-  * `multiclusterhub-operator`: Contains `.yaml` definitions for setting up a `CatalogSource` for the operator.
+  * `acm-operator`: Contains `.yaml` definitions for setting up a `CatalogSource` for the operator.
 
   * `multiclusterhub`: Contains `yaml` definitions for creating an instance of `MultiClusterHub`.
 
