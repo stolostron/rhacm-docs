@@ -1,4 +1,4 @@
-# Application management lifecycle 
+# Application management lifecycle
 
 Red Hat Advanced Cluster Management for Kubernetes provides enhanced application management capabilities through a Kubernetes resource based application model and channel and subscription based deployment options. The application model and deployment capabilities are designed to unify and simplify the deployment experience for creating and managing your application across both single cluster and multi-cluster scenarios.
 
@@ -74,8 +74,8 @@ To create or edit the resource definitions developers and other users can use th
 ## Deploying application resources
 
 Red Hat Advanced Cluster Management for Kubernetes supports multiple options for the deployment of deployable objects and Helm charts. The deployment option that you use can depend upon whether you need to deploy to a single cluster or multiple clusters and the frequency that you need to deploy updates. For more information, see [Deploying an application resource](deployment_app.md).
-  
-## Managing applications with the console
+
+## Managing applications with the console  {#manage-apps-console}
 
 The console includes an applications dashboard for managing the application lifecycle. You can use the console dashboard to create and manage application, subscriptions, channels, and placement rules. You can also use the console to view the status of your applications, channels, subscriptions, and related deployments.
 

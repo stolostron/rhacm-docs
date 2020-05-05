@@ -1,7 +1,7 @@
 
 # Subscription samples
 
-View samples and YAML definitions that you can use to build your files. As with channels, subscriptions (`subscription.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for application management. Learn more at [Creating and managing subscriptions](managing_subscriptions.md). 
+View samples and YAML definitions that you can use to build your files. As with channels, subscriptions (`subscription.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for application management. Learn more at [Creating and managing subscriptions](managing_subscriptions.md).
 
 ## Example subscription definition YAML structure
 
@@ -52,7 +52,7 @@ spec:
       - start:
         end:
 ```
-## YAML values table
+## YAML values table {#subscription-yaml-values}
 
 |Field|Description|
 |-- | -- |
@@ -194,7 +194,7 @@ spec:
     packageAlias: my-nginx-ingress-releaseName
     packageOverrides:
     - path: spec
-      value: 
+      value:
         defaultBackend:
           replicaCount: 3
   placement:
@@ -276,7 +276,7 @@ If the `apps.open-cluster-management.io/github-path` annotation is not defined, 
 
 If there is `kustomization.yaml` or `kustomization.yml` file in a subscribed GitHub folder, kustomize is applied.
 
-You can use `spec.packageOverrides` to override `kustomization` at the subscription deployment time. 
+You can use `spec.packageOverrides` to override `kustomization` at the subscription deployment time.
 
 ```yaml
 apiVersion: apps.open-cluster-management.io/v1
@@ -289,7 +289,7 @@ spec:
   packageOverrides:
   - packageName: kustomization
     packageOverrides:
-    - value: | 
+    - value: |
 patchesStrategicMerge:
 - patch.yaml
 ```
