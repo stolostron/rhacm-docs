@@ -21,7 +21,7 @@ Each _policy_ within the policy document contains the following elements:
 
    - `disabled` parameter provides the ability to enable and disable your policies.
    
-  - `remediationAction` parameter specifies the remediation of your policy. The parameter values are _enforce_ and _inform_. The _inform_ value reports whether the cluster is compliant to the specified policies. You must remediate your policy manually. The _enforce_ value automatically remediate the violations on the target managed clusters. **Important**: Some policies may not support the enforce feature.
+  - `remediationAction` parameter specifies the remediation of your policy. The parameter values are _enforce_ and _inform_. The _inform_ value reports whether the cluster is compliant to the specified policies. You must remediate your policy manually. The _enforce_ value automatically remediate the violations on the target managed clusters. **Important**: Some policies may not support the enforce feature. To learn more, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
 
       **Note**: For example, with `remediationAction` set to _inform_ and a policy that requires a specific role-based access control (RBAC), the policy status reports that the cluster is non-compliant if the role is not on the cluster. The policy includes the list of violations. No remediation actions are carried out in _inform_ mode.
 
