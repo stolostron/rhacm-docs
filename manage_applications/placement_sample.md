@@ -21,8 +21,8 @@ kind: PlacementRule
   selfLink:
   uid:
 spec:
-  clusterLabels:
-    matchLabels:
+  clusterSelector:
+    matchExpressions:
       datacenter:
       environment:
   clusterReplicas:
@@ -42,8 +42,8 @@ spec:
 | metadata.namespace | Required. The namespace resource to use for the placement rule. |
 | metadata.resourceVersion | Optional. The version of the placement rule resource. |
 | metadata.labels | Optional. The labels for the placement rule. |
-| spec.clusterLabels | Optional. The labels for identifying the target clusters |
-| spec.clusterLabels.matchLabels | Optional. The labels that must exist for the target clusters. |
+| spec.clusterSelector | Optional. The labels for identifying the target clusters |
+| spec.clusterSelector.matchExpressions | Optional. The labels that must exist for the target clusters. |
 | status.decisions | Optional. Defines the target clusters where deployables are placed. |
 | status.decisions.clusterName | Optional. The name of a target cluster |
 | status.decisions.clusterNamespace | Optional. The namespace for a target cluster. |
@@ -87,8 +87,8 @@ metadata:
   labels:
     app: gbapp
 spec:
-  clusterLabels:
-    matchLabels:
+  clusterSelector:
+    matchExpressions:
       environment: Dev
   clusterReplicas: 1
 status:
