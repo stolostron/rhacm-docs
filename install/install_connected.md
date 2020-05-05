@@ -131,7 +131,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
   kubectl apply --openapi-patch=true -k prereqs/
   ```
 
-2. Update the `kustomization.yaml` file that is in the `multiclusterhub-operator` directory so the `newTag` setting contains the tag for your snapshot. You can find a snapshot tag by viewing the list of tags available in the [Quay.io index](https://quay.io/open-cluster-management/multiclusterhub-operator-index). You must use a tag that has the word SNAPSHOT in it, as shown in the following example:
+2. Update the `kustomization.yaml` file that is in the `acm-operator` directory so the `newTag` setting contains the tag for your snapshot. You can find a snapshot tag by viewing the list of tags available in the [Quay.io index](https://quay.io/open-cluster-management/multiclusterhub-operator-index). You must use a tag that has the word SNAPSHOT in it, as shown in the following example:
 
   ```
   namespace: open-cluster-management
@@ -142,16 +142,16 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
       newTag: "SNAPSHOT-2020-03-31-02-16-43"
   ```
 
-3. Create the multiclusterhub-operator objects by applying the `.yaml` definitions in the `deploy/multiclusterhub-operator` directory. Enter the following command:
+3. Create the multiclusterhub-operator objects by applying the `.yaml` definitions in the `deploy/acm-operator` directory. Enter the following command:
 
   ```
-  kubectl apply -k multiclusterhub-operator/
+  kubectl apply -k acm-operator/
   ```
 
 4. Run the following command to determine whether the subscription is healthy:
 
   ```
-  oc get subscription.operators.coreos.com multiclusterhub-operator-bundle --namespace open-cluster-management -o yaml
+  oc get subscription.operators.coreos.com acm-operator-subscription --namespace open-cluster-management -o yaml
   ```
 
   A healthy subscription returns a `true` status value for the `healthy` entry, as shown in the following example:
@@ -173,7 +173,7 @@ You can install Red Hat Advanced Cluster Management for Kubernetes by making som
 
   Continue with the next step when your subscription is healthy.
 
-5. Edit the `example-multiclusterhub-cr.yaml` file in the `mulitclusterhub` directory. Set the `imageTagSuffix` to the snapshot value that you used in the `kustomization.yaml` file in the `multiclusterhub-operator` directory in step 2. Remove the `VERSION 1.0.0-,` from the `newTag` value taken from the `kustomization.yaml` file.
+5. Edit the `example-multiclusterhub-cr.yaml` file in the `mulitclusterhub` directory. Set the `imageTagSuffix` to the snapshot value that you used in the `kustomization.yaml` file in the `acm-operator` directory in step 2. Remove the `VERSION 1.0.0-,` from the `newTag` value taken from the `kustomization.yaml` file.
 
   The output should look similar to the following example:
 
