@@ -1,14 +1,16 @@
 # Multicluster architecture
 
-Red Hat Advanced Cluster Management for Kubernetes consists of several multicluster components, which are used to access and manage your clusters. Learn more about the following components for Red Hat Advanced Cluster Management for Kubernetes:
+Red Hat Advanced Cluster Management for Kubernetes consists of several multicluster components, which are used to access and manage your clusters. 
 
 ![Architecture diagram](RHACM-arch.png)
 
-  - [Hub cluster](#hub-cluster)
-  - [Managed cluster](#managed-cluster)
-  - [Cluster lifecycle](#cluster-lifecycle)
-  - [Application lifecycle](#application-lifecycle)
-  - [Governance and risk](#governance-and-risk)
+Learn more about the following components for Red Hat Advanced Cluster Management for Kubernetes:
+
+  - Hub cluster
+  - Managed cluster
+  - Cluster lifecycle
+  - Application lifecycle
+  - Governance and risk
 
 ## Hub cluster
 
@@ -18,13 +20,15 @@ The hub cluster aggregates information from multiple clusters by using an asynch
 
 ## Managed cluster
 
-The managed cluster is the term used to define the Red Hat Advanced Cluster Management for Kubernetes `multicluster-endpoint`, which is the agent that is responsible for a single Kubernetes cluster. The managed cluster initiates a connection to the hub cluster, receives work requests, applies work requests, then returns the results. The managed cluster connects to various services within the cluster for operations, including the Kubernetes API service, and Weave for topology.
+The managed cluster is the term used to define the Red Hat Advanced Cluster Management for Kubernetes `multicluster-endpoint`, which is the agent that is responsible for a single Kubernetes cluster. The managed cluster initiates a connection to the hub cluster, receives and applies requests, then returns the results. 
 
-See [Managing your clusters](../manage_cluster/intro.md) for to learn how to create and import clusters, which is part of _Cluster lifecycle_.
+See [Managing your clusters](../manage_cluster/intro.md) to learn how to create and import clusters, which is part of _Cluster lifecycle_.
 
 ## Cluster lifecycle
 
-Red Hat Advanced Cluster Management for Kubernetes cluster lifecycle defines creating, importing, and managing clusters across public and private clouds. From the console, you can view cluster health status, for instance, then you can move toward creating applications on those clusters.
+Red Hat Advanced Cluster Management for Kubernetes cluster lifecycle defines the process of creating, importing, and managing clusters across public and private clouds. From the hub cluster console, you can view an aggregation of all cluster health statuses, or view individual health metrics. You can upgrade managed Red Hat Openshift clusters individually or in bulk, as well as destroy any Red Hat Openshift clusters clusters that you created from your hub cluster. 
+
+You are ready to manage application resources with the Application lifecycle stage.
 
 ## Application lifecycle
 
