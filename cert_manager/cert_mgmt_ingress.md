@@ -102,9 +102,9 @@ The following OpenSSL commands are used with the preceding configuration file to
      openssl x509  -noout -text -in ./ingress.crt
      ```
 
-## Replace the management ingress certificate
-<!--Should the title of the section be updated to Replace the Bring Your Own (BYO) ingress certificate?-->
-Complete the following steps to replace a management ingress certificate:
+## Replace the Bring Your Own (BYO) ingress certificate
+
+Complete the following steps to replace your BYO ingress certificate:
 
 1. Create the `byo-ingress-tls` secret by using your certificate and private key. Run the following command:
 
@@ -129,11 +129,14 @@ Complete the following steps to replace a management ingress certificate:
    ```
    oc get deployment -n open-cluster-management
    ```
-  * Open and edit the management ingress deployment. Replace the string `multicloud-ca-cert` with `ingress-ca-cert` to restart the management ingress. Run the following command:
-
+  
+  * Open and edit the management ingress deployment. Replace the string similar to `management-ingress-b6417-tls-secret` with `byo-ingress-tls-secret`. Run the following command: 
+  
      ```
      oc edit deployment management-ingress -n open-cluster-management
      ```
+
+   Save your deployment and close the editor. The management ingress automatically restarts.
 
 5. After the management ingress pod has restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
 
@@ -146,12 +149,14 @@ Complete the following steps to replace a management ingress certificate:
       ```
       oc get deployment -n open-cluster-management
       ```
-<!--Still confused here about changing the values-->
-    * Open and edit the management ingress deployment. Replace the `ingress-ca-cert` string  with `multicloud-ca-cert` to restart the management ingress. Run the following command:
+      
+   2.Open and edit the management ingress deployment. Replace the `byo-ingress-tls-secret` string  with the correct secret name similar to `management-ingress-b6417-tls-secret`. Run the following command:
 
          ```
          oc edit deployment management-ingress -n open-cluster-management
          ```
+         
+   3. Save your deployment and close the editor. The management ingress automatically restarts.
 
 2. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
 
