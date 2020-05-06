@@ -4,7 +4,7 @@ Red Hat Advanced Cluster Management for Kubernetes is installed using an operato
 
 ## Prerequisites
 
-The following prerequisites must be met before installing Red Hat Advanced Cluster Management for Kubernetes: 
+You must meet the following requirements before installing Red Hat Advanced Cluster Management for Kubernetes: 
 
 * Red Hat OpenShift Container Platform version 4.3, or later, must be deployed in your environment, and you must be logged into it with the CLI. See the [OpenShift version 4.3 documentation](https://docs.openshift.com/container-platform/4.3/welcome/index.html) or [OpenShift version 4.4 documentation](https://docs.openshift.com/container-platform/4.4/welcome/index.html).
 
@@ -18,8 +18,6 @@ The following prerequisites must be met before installing Red Hat Advanced Clust
 
 * Your Red Hat OpenShift Container Platform must have access to the Red Hat Advanced Cluster Management operator in the OperatorHub catalog. 
 
-* Optional: If you are using macOS and want to view the progress of your pods starting, you must install `watch`. If you do not already have `watch` installed, you can install it by entering `brew install watch` in a teminal window. You must have `watch` if you use the `--watch` option with your installation command.
-
 ## Installing Red Hat Advanced Cluster Management for Kubernetes by using the CLI
 
 1. Create a namespace where the operator requirements are contained:
@@ -29,7 +27,7 @@ The following prerequisites must be met before installing Red Hat Advanced Clust
   ```
   
   Replace <namespace> with a name for your namespace.
-  **Remember:** The multiclusterhub operator must be installed in its own namespace.
+  **Remember:** The Advanced Cluster Management for Kubernetes operator must be installed in its own namespace.
   
 2. Switch your project namespace to the one that you created:
 
@@ -38,16 +36,7 @@ The following prerequisites must be met before installing Red Hat Advanced Clust
   ```  
   Replace <namespace> with the name of the namespace that you created in step 1.
 
-3. Generate a pull secret to access the entitled content from the Quay.io repository. **Important:** Pull secrets are namespace-specific, so make sure that you are in the namespace that you created in step 1.
-  
-  ```
-  oc create secret docker-registry <secret> --docker-server=quay.io --docker-username=<docker_username> --docker-password=<docker_password>
-  ```
-  Replace <secret> with the name of the secret that you created.
-  Replace <docker_username> with your username for the Docker repository that you identified as the `docker-server`. 
-  Replace <docker_password> with your password or token for the Docker repository that you identified as the `docker-server`.
-  
-4. Create an operator group. Each namespace can have only one operator group.
+3. Create an operator group. Each namespace can have only one operator group.
  
   1. Create a `.yaml` file that defines the operator group. Your file should look similar to the following example:
   
@@ -71,49 +60,59 @@ The following prerequisites must be met before installing Red Hat Advanced Clust
     ```
     Replace <operator-group> with the name of the operator group `.yaml` file that you created.
     
-5. Apply the subscription.
+4. Apply the subscription.
 
   1.  Create a `.yaml` file that defines the subscription. Your file should look similar to the following example:
 
     ```
     apiVersion: operators.coreos.com/v1alpha1
-      kind: Subscription
+    kind: Subscription
     metadata:
-      name: multiclusterhub-operator-bundle
+      name: acm-operator-subscription
     spec:
-      channel: alpha
+      channel: release-1.0
       installPlanApproval: Automatic
-      name: multiclusterhub-operator-bundle
-      source: open-cluster-management
-      sourceNamespace: <namespace>
-      startingCSV: multiclusterhub-operator.v1.0.0	
+      name: advanced-cluster-management
 	```
-	
-    Replace <namespace> with the name of the namespace that you created in step 1.
-			
+  
   2. Apply the subscription:
 
     ```
     oc apply -f local/<subscription>.yaml
     ```
 
-6. Create the Red Hat Advanced Cluster Management for Kubernetes custom resource operator instance:
+5. Generate a pull secret to access the entitled content from the distribution registry. **Important:** Pull secrets are namespace-specific, so make sure that you are in the namespace that you created in step 1.
+  
+  ```
+  oc create secret docker-registry <secret> --docker-server=registry.access.redhat.com/rhacm1-tech-preview --docker-username=<docker_username> --docker-password=<docker_password>
+  ```
+  Replace <secret> with the name of the secret that you created.
+  Replace <docker_username> with your username for the distribution registry that you identified as the `docker-server`. 
+  Replace <docker_password> with your password or token for the distribution registry that you identified as the `docker-server`.
 
-  1. Create a `.yaml` file that defines the custom resource operator. Your file should look similar to the following example:
+6. Create the MultiClusterHub custom resource:
+
+  1. Create a `.yaml` file that defines the custom resource. Your file should look similar to the following example:
   
   ```
-  sample here
+  apiVersion: operators.open-cluster-management.io/v1beta1
+  kind: MultiClusterHub
+  metadata:
+    name: multiclusterhub
+    namespace: <namespace>
+  spec:
+    imagePullSecret: <pull_secret>
   ```
   
-  2. Apply the custom resource operator: 
+  2. Apply the custom resource: 
   
   ```
-  oc apply -f local/operators.multicloud.ibm.com_v1alpha1_multicloudhub_cr.yaml
+  oc apply -f local/mch.yaml
   ```
-  **Note:** If step 6 fails with the following error, the resources are still being created and applied: 
+  **Note:** If this step fails with the following error, the resources are still being created and applied: 
   
   ```
-  error: unable to recognize "operators.multicloud.ibm.com_v1alpha1_multicloudhub_cr.yaml": no matches for kind "MultiCloudHub" in version "operators.multicloud.ibm.com/v1alpha1"
+  error: unable to recognize "./mch.yaml": no matches for kind "MultiClusterHub" in version "operators.open-cluster-management.io/v1beta1"
   ```
   
   Run the command again in a few minutes when the resources are created.
@@ -142,7 +141,7 @@ The following prerequisites must be met before installing Red Hat Advanced Clust
   
   2. In the *Projects* field, select the namespace that you created in step 1 from the dropdown list. 
   
-3. Create a Quay.io pull secret that provides the entitlement to the downloads.
+3. Create a pull secret that provides the entitlement to the downloads.
 
   1. In the Red Hat OpenShift Container Platform console navigation, select **Workloads** > **Secrets**. 
   
@@ -152,17 +151,17 @@ The following prerequisites must be met before installing Red Hat Advanced Clust
   
   4. Select **Image Registry Credentials** as the authentication type.
   
-  5. In the *Registry Server Address* field, enter the address of the Docker server that contains your image. In most cases, it is `quay.io`.
+  5. In the *Registry Server Address* field, enter the address of the distribution registry that contains your image. In most cases, it is `registry.access.redhat.com/rhacm1-tech-preview`.
   
-  6. Enter your username and password or token for the Docker server that contains the image. 
+  6. Enter your username and password or token for the distribution registry that contains the image. 
   
   7. Select **Create** to create the pull secret. 
-  
+
 4. Subscribe to the operator.
 
   1. In the Red Hat OpenShift Container Platform console navigation, select **Operators** > **OperatorHub**.
   
-  2. Select **acm-operator**.
+  2. Select **Advanced Cluster Management for Kubernetes**. **Tip:** You can filter on the *Integration & Delivery* category to narrow the choices.
   
   3. Select **Install**.
   
@@ -170,13 +169,15 @@ The following prerequisites must be met before installing Red Hat Advanced Clust
   
   5. Select **Subscribe**.
   
-5. Create the Red Hat Advanced Cluster Management for Kubernetes hub instance.
+5. Create the *MultiClusterHub* custom resource.
 
-  1. In the Red Hat OpenShift Container Platform console navigation, select **Installed Operators** > **Multicluster Hub Operator**. 
+  1. In the Red Hat OpenShift Container Platform console navigation, select **Installed Operators** > **MultiClusterHub**.
   
-  2. Select **Create MultiClusterHub**. 
+  2. Select the **MultiClusterHub** tab.
   
-  3. Update the default values in the `.yaml` file, according to your needs. The following example shows some sample data:
+  3. Select **Create MultiClusterHub**. 
+  
+  4. Update the default values in the `.yaml` file, according to your needs. The following example shows some sample data:
   
     ```
     apiVersion: operators.open-cluster-management.io/v1beta1
@@ -187,17 +188,18 @@ The following prerequisites must be met before installing Red Hat Advanced Clust
     spec:
       imagePullSecret: <secret>
     ```
-	
+
     Replace <secret> with the name of the pull secret that you created.
     Confirm that the <namespace> is your project namespace.
    
-  4. Select **Create** to initialize the custom resource. It can take up to 10 minutes for the cluster to build and start.
+  5. Select **Create** to initialize the custom resource. It can take up to 10 minutes for the hub to build and start.
    
-     After the hub is created, the status for the operator is *Running* on the *OperatorHub* page.
+     After the hub is created, the status for the operator is *Running* on the *Installed Operators* page.
 	 
 6. Access the console for the hub.
 
-  1. In the Red Hat OpensShift Container Platform console navigation, select **Networking** > **Routes**.
+  1. In the Red Hat OpenShift Container Platform console navigation, select **Networking** > **Routes**.
   
-  2. View the URL for your hub cluster in the list. 
+  2. View the URL for your hub in the list, and navigate to it to access the console for your hub.
+ 
   
