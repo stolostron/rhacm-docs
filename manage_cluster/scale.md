@@ -2,8 +2,13 @@
 
 You can customize your cluster specifications, such as virtual machine sizes and number of nodes. See the following list of recommended settings for each available provider, but also see the documentation for more specific information:
 
+<<<<<<< Updated upstream
 * [Amazon Web Services](#amazon-web-services)
 * [Google Cloud Platform](#google-cloud-platform)
+=======
+* [Amazon Web Services](#red-hat-openshift-container-platform-cluster-in-amazon-web-services-aws) 
+* [Google Cloud](#google-cloud)
+>>>>>>> Stashed changes
 * [Azure Kubernetes Service](#azure-kubernetes-service)
 
 ## Amazon Web Services

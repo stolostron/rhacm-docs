@@ -1,4 +1,4 @@
-# Deploying application resources with a rolling update
+# Managing deployables with a rolling update
 
 If you want to roll out an update for a subscription to your managed clusters, you can configure the deployment to occur on only a percentage of your managed clusters at a time. When the deployment on those clusters is successful, the deployment is rolled out incrementally to the remaining clusters.
 
@@ -11,9 +11,6 @@ The rolling update for a deployment runs on the hub cluster. The deployment roll
 ## About this task
 
 You can configure a percentage rollout for a subscription or directly for a deployable resource.
-
-  - [Configuring a rolling update for a subscription](#configuring-a-rolling-update-for-a-subscription)
-  - [Rolling update sample](#rolling_update_sample)
 
 A rolling update for a subscription uses the rolling update feature that is included in the Kubernetes resource definition. To configure this feature for a deploying a subscription, you need to create or update the following Kubernetes resources:
 

@@ -2,7 +2,7 @@
 
 View samples and YAML definitions that you can use to build your files. Channels (`channel.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Learn more at [Creating and managing channels](managing_channels.md).
 
-## Example channel definition YAML structure {#channel-definition-yaml-structure}
+## Channel YAML structure
 
 The definition structure for a channel can resemble the following YAML content:
 
@@ -37,7 +37,7 @@ spec:
     annotations:
   labels:
 ```
-## YAML values table {#channel-yaml-values}
+## Channel YAML table
 
 |Field|Description|
 |-- | -- |
