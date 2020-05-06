@@ -9,3 +9,4 @@ The following files detail the information that is required for creating a conne
 - [Creating a provider connection for Amazon Web Services](prov_conn_aws.md)
 - [Creating a provider connection for Microsoft Azure](prov_conn_aks.md)
 - [Creating a provider connection for Google Cloud Platform](prov_conn_google.md)
+- [Creating a provider connection for bare metal](prov_conn_bare.md)
