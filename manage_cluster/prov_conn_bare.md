@@ -1,7 +1,7 @@
 # Creating a provider connection for bare metal
 
 You need a provider connection to use Red Hat Advanced Cluster Management for Kubernetes console to deploy and manage a Red Hat OpenShift Container Platform cluster in a bare metal environment.
-**Note:** This procedure must be done before you can create a cluster with Red Hat Advanced Cluster Management for Kubernetes.
+**Note:** You must complete this procedure before you can create a cluster with Red Hat Advanced Cluster Management for Kubernetes.
 
 ## Prerequisites {#bare_prov_conn_prerequisites}
 
