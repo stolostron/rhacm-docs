@@ -29,15 +29,9 @@
      * [Creating a provider connection for Microsoft Azure](manage_cluster/prov_conn_aks.md)
      * [Creating a provider connection for Google Cloud Platform](manage_cluster/prov_conn_google.md)
    * [Creating a cluster](manage_cluster/create.md)
-<<<<<<< Updated upstream
-     * [Creating a cluster on Amazon Web Services](manage_cluster/create_aws.md)
+     * [Creating a cluster on Amazon Web Services](manage_cluster/create_ocp_aws.md)
      * [Creating a cluster on Microsoft Azure](manage_cluster/create_azure.md)
      * [Creating a cluster on Google Cloud Platform](manage_cluster/create_google.md)
-=======
-     * [Creating an Amazon Web Services cluster](manage_cluster/create_aws.md)
-     * [Creating a Microsoft Azure cluster](manage_cluster/create_aks.md)
-     * [Creating a Google Cloud Platform cluster](manage_cluster/create_google.md)
->>>>>>> Stashed changes
    * [Importing a target managed cluster](manage_cluster/import.md)
      * [Importing a cluster with the console](manage_cluster/import_gui.md)
      * [Importing a cluster with the CLI](manage_cluster/import_cli.md)
