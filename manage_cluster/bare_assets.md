@@ -5,7 +5,7 @@ Bare metal assets are virtual or physical servers that are configured to run you
 You must create a bare metal asset in Red Hat Advanced Cluster Management for Kubernetes to create a cluster on it. Use the following procedure to create a bare metal asset that can host a cluster that is managed by Red Hat Advanced Cluster Management for Kubernetes.
 
 - [Prerequisites](#bma-prerequisites)
-- [Creating your bare metal asset with the Red Hat Advanced Cluster Management for Kubernetes console](#creating-a-bare-metal-asset-with-the-red-hat-advanced-cluster-management-for-kubernetes-console)
+- [Creating your bare metal asset with the console](#creating-a-bare-metal-asset-with-the-console)
 - [Modifying a bare metal asset](#modifying-a-bare-metal-asset)
 - [Removing a bare metal asset](#removing-a-bare-metal-asset)
  
@@ -24,7 +24,7 @@ You need the following prerequisites before creating a bare metal asset:
     * Baseboard Management Controller Address
     * boot NIC MAC address
 
-## Creating a bare metal asset with the Red Hat Advanced Cluster Management for Kubernetes console {#creating-a-bare-metal-asset-with-the-red-hat-advanced-cluster-management-for-kubernetes-console}
+## Creating a bare metal asset with the console {#creating-a-bare-metal-asset-with-the-console}
 
 To create a bare metal asset using the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
