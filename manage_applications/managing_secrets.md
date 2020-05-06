@@ -1,7 +1,6 @@
 # Managing secrets
 
-You can create Kubernetes secret resources to store authorization credentials and other sensitive information for your subscriptions and application components. By storing this information as secrets, you can separate the information from the application components that require the information to improve your data security.
-{:shortdesc}
+You can create Kubernetes secret resources to store authorization credentials and other sensitive information for your subscriptions and application components. By storing this information as secrets, you can separate the information from the application components that require the information to improve your data security. Samples for all resources, including secrets, are located in the [Application resource samples](app_resource_samples.md) documentation.
 
 Secrets (`Secret`) are Kubernetes resources that you can use to store authorization and other sensitive information, such as passwords, OAuth tokens, and SSH keys. By storing this information as secrets, you can separate the information from the subscriptions and other application components that require the information to avoid exposing sensitive information to help encrypt your data and better control data security within your application lifecycle.
 
