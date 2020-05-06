@@ -6,7 +6,7 @@ The `mc` plug-in is required after CLI installation. Complete the following proc
 
 * You must install the Red Hat OpenShift CLI tool. (need the prereq here)
 
-## Installing the plug-in (change this for oc/acm instructions)
+## Installing the plug-in 
 
 1. Download the multicluster, or `mc` plug-in for the applicable operating system. See the list of the `mc` plug-in commands for the different operating systems:
 
