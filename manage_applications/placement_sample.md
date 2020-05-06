@@ -3,7 +3,7 @@
 
 Placement rules (`placementrule.apps.open-cluster-management.io`) define the target clusters where deployables can be deployed. Use placement rules to help you facilitate the multi-cluster deployment of your deployables.  
 
-## Example placement rule definition YAML structure
+## Placement rule YAML structure
 
 The following YAML structure shows the required fields for a placement rule and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
@@ -32,7 +32,7 @@ spec:
     order:
   Policies:
 ```
-## YAML values table {#placement-yaml-values}
+## Placement rule YAML values table 
 
 |Field|Description|
 |-- | -- |
@@ -55,7 +55,7 @@ spec:
 | spec.Policies | Optional. The policy filters for the placement rule. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-## Placement rule status definition
+## Placement rule sample files
 
 Existing placement rules can include the following fields that indicate the status for the placement rule. This status section is appended after the `spec` section in the YAML structure for a rule.
 
@@ -73,8 +73,6 @@ status:
 | status.decisions.clusterName | The name of a target cluster |
 | status.decisions.clusterNamespace | The namespace for a target cluster. |
 {: caption="Table 2. Status definition fields" caption-side="top"}
-
-## Examples of placement rule
 
 - Example 1
 

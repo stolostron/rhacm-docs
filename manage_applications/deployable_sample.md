@@ -2,7 +2,7 @@
 
 Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or represent Helm releases for deployment to clusters to create or manage applications. For more information about creating and managing deployables, see [Managing deployables](managing_deployables.md).
 
-## Example deployable definition YAML structure
+## Deployable YAML structure
 
 The following YAML structure shows the required fields for a deployable and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your deployable requirements or application management requirements, you might need to include other optional fields and values. The structure for a deployable is the same whether you are deploying to a single cluster or multiple clusters.
 
@@ -32,7 +32,7 @@ spec:
   placement:
     clusterSelector:
 ```
-## YAML values table {#deployable-yaml-values}
+## Deployable YAML table
 
 |Field|Description|
 |-- | -- |
@@ -48,7 +48,7 @@ spec:
 | spec.placement | Define where the deployable is to be deployed, such as to a single cluster or to multiple clusters. Alternatively, you can specify a placement rule for the deployable, which can then define how to deploy the deployable to the target cluster or clusters. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-## Deployable sample
+## Deployable sample files
 
 ```YAML
 apiVersion: apps.open-cluster-management.io/v1

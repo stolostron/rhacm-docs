@@ -1,8 +1,10 @@
-# Rolling update samples {#rolling_update_sample}
+# Rolling update samples 
 
-The following example YAML definitions show the required fields for deploying an update for a subscription by using a rolling update.
+You can configure the deployment to occur on only a percentage of your managed clusters at a time. When the deployment on those clusters is successful, the deployment is rolled out incrementally to the remaining clusters. For more information about rolling updates, see [Managing deployables with rolling update](deployment_rollout.md).
 
-- The following definitions create a `predev-ch` channel in the `ns-ch` namespace, and a `towhichcluster` placementrule in the `ns-sub-1` to use for the subscriptions:
+## Rolling update YAML structure
+
+See example YAML definitions show the required fields for deploying an update for a subscription by using a rolling update. The following definitions create a `predev-ch` channel in the `ns-ch` namespace, and a `towhichcluster` placementrule in the `ns-sub-1` to use for the subscriptions:
 
 ```yaml
 ---
@@ -36,7 +38,7 @@ spec:
   clusterSelector: {}
 ```
 
-- The following definitions create the initial and target subscriptions. As shown below, the original subscription resource is nginx-ingress helm chart v1.35 and the target subscription is nginx-ingress helm chart v1.36.
+- The following definitions create the initial and target subscriptions. As demonstrated in the following example, the original subscription resource is `nginx-ingress` Helm chart version `1.35.x` and the target subscription is `nginx-ingress` Helm chart version `1.36.x`.
 
 ```yaml
 ---
