@@ -4,11 +4,12 @@ Bare metal assets are virtual or physical servers that are configured to run you
 
 You must create a bare metal asset in Red Hat Advanced Cluster Management for Kubernetes to create a cluster on it. Use the following procedure to create a bare metal asset that can host a cluster that is managed by Red Hat Advanced Cluster Management for Kubernetes.
 
-- [Prerequisites](#prerequisites)
-- [Creating your bare metal asset with the Red Hat Advanced Cluster Management for Kubernetes console](#creating-your-bare-metal-asset-with-the-red-hat-advanced-cluster-management-for-kubernetes-console)
+- [Prerequisites](#bma-prerequisites)
+- [Creating your bare metal asset with the console](#creating-a-bare-metal-asset-with-the-console)
+- [Modifying a bare metal asset](#modifying-a-bare-metal-asset)
 - [Removing a bare metal asset](#removing-a-bare-metal-asset)
  
-## Prerequisites
+## Prerequisites {#bma-prerequisites}
 
 You need the following prerequisites before creating a bare metal asset:
 
@@ -23,7 +24,7 @@ You need the following prerequisites before creating a bare metal asset:
     * Baseboard Management Controller Address
     * boot NIC MAC address
 
-## Creating your bare metal asset with the Red Hat Advanced Cluster Management for Kubernetes console
+## Creating a bare metal asset with the console {#creating-a-bare-metal-asset-with-the-console}
 
 To create a bare metal asset using the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps: 
 
@@ -47,9 +48,9 @@ To create a bare metal asset using the Red Hat Advanced Cluster Management for K
 
 7. Add the boot NIC MAC address for the bare metal asset. This is the MAC address of the host's network-connected NIC that is used to provision the host on the bare metal asset. 
 
-You can continue with [Creating a provider connection for a bare metal environment](prov_conn_bare.md) and then [Creating an OpenShift cluster on bare metal](create_bare.md).
+You can continue with [Creating a provider connection for bare metal](prov_conn_bare.md) and then [Creating a cluster on bare metal](create_bare.md).
 
-## Modifying a bare metal asset
+## Modifying a bare metal asset {#modifying-a-bare-metal-asset}
 
 If you need to modify the settings for a bare metal asset, complete the following steps:
 
@@ -59,7 +60,7 @@ If you need to modify the settings for a bare metal asset, complete the followin
 
 3. Select **Modify**.
 
-## Removing a bare metal asset
+## Removing a bare metal asset {#removing-a-bare-metal-asset}
 
 When a bare metal asset is no longer used for any of the clusters, you can remove it from the list of available bare metal assets. Removing unused assets both simplifies your list of available assets, and prevents the accidental selection of that asset.
 
