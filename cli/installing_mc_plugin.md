@@ -4,7 +4,7 @@ The `mc` plug-in is required after CLI installation. Complete the following proc
 
 ## Prerequisites
 
-* You must install the OpenShift CLI tool. (need the prereq here)
+* You must install the Red Hat OpenShift CLI tool. (need the prereq here)
 
 ## Installing the plug-in (change this for oc/acm instructions)
 
