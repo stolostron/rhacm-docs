@@ -2,7 +2,7 @@
 
 You can use the Center for Internet Security (CIS) policy controller to receive notifications about non-compliant clusters. **Note**: The CIS policy controller is only supported on OpenShift Container Platform 3.11.
 
-* [Enable the CIS policy controller](#enable-the-cis-policy-controller)
+* [Enabling the CIS policy controller](#enabling-the-cis-policy-controller)
 * [CIS policy](#cis-policy)
 * [CIS policy elements](#cis-policy-elements)
 * [CIS policy controller components](#cis-policy-controller-components)
@@ -11,7 +11,7 @@ You can use the Center for Internet Security (CIS) policy controller to receive 
 * [Remediating CIS policy violation](#remediating-cis-policy-violation)
 * [CIS risk score](#cis-risk-score)
 
-## Enable the CIS policy controller
+## Enabling the CIS policy controller
 
 The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list.
 
@@ -20,6 +20,30 @@ When you install the Klusterlet, the CIS policy controller is disabled by defaul
   ```
   kubectl patch endpointconfig $CLUSTER_NAME -n $CLUSTER_NAMESPACE --type='json' -p='[{"op": "replace", "path": "/spec/cisController/enabled", "value":true}]'
   ```
+
+### Enabling the CIS policy controller feature flag
+
+Complete the following steps to enable the CIS policy controller feature flag. The CIS policy specification becomes available:
+
+1. Log in to your hub cluster and open the Visual Web terminal.
+
+2. Edit the deployment to enable the feature flag. Run the following command:
+
+   ```
+   oc edit deployment $(oc get deployment -o custom-columns=:.metadata.name | grep 'grcui$')
+   ```
+
+3. Update the `env.value` parameter to `"yes"`. Your deployment might resemble the following content:
+
+   ```
+   -env
+     - name: featureFlags_cisPolicyTemplate
+       value: "yes"
+   ```
+
+4. Save your deployment and close the Visual Web Terminal. 
+
+5. The associated pod restarts. Attempt to create the policy again. See, [Creating a CIS policy from Red Hat Advanced Cluster Management for Kubernetes console](#creating-a-cis-policy-from-red-hat-advanced-cluster-management-for-kubernetes-console).
 
 ## CIS policy
 
@@ -199,7 +223,10 @@ spec:
 2. From the navigation menu, click **Govern risk**.
 3. Click **Create Policy**.
 4. Enter the name for the CIS policy in the **Name** field.
-5. For **Specifications**, select `Cispolicy-cis compliance for OCP` from the drop-down list. <!--this option is not available if the feature flag is enabled-->
+5. For **Specifications**, select `Cispolicy-cis compliance for OCP` from the drop-down list.
+
+  **Note**: You must enable the feature flag to make the `Cispolicy-cis compliance for OCP` option available.
+
 6. Use the drop-down list and make selections for the following parameters:
     - Cluster selector
     - Standards

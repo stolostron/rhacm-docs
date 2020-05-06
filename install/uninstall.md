@@ -39,19 +39,19 @@ kubectl apply -k multiclusterhub/
 1. Delete the `yaml` definitions that are contained in the `multiclusterhub` directory by entering the following command:
 
 ```
-kubectl delete -k multiclusterhub-operator/
+kubectl delete -k acm-operator/
 ```
 
 This removes the MultiClusterHub instance. 
 
-2. Run the `unistall.sh` script in the `multiclusterhub` directory to ensure that all of the objects are removed:
+2. Run the `uninstall.sh` script in the `multiclusterhub` directory to ensure that all of the objects are removed:
 
 ```
-./multiclusterhub-operator/uninstall.sh
+./acm-operator/uninstall.sh
 ```
 
 **Tip:** You can redeploy the `multiclusterhub-operator` by running the following command:
 
 ```
-kubectl apply -k multiclusterhub-operator/
+kubectl apply -k acm-operator/
 ```
