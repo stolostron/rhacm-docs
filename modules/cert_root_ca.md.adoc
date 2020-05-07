@@ -57,22 +57,22 @@ Your `req.cnf` file might resemble the following file:
 [#replacing-root-ca-certificates]
 == Replacing root CA certificates
 
-. Delete the `multicloud-ca-cert` certificate by running the following command:
+. Create a new secret with the CA certificate by running the following command:
 +
 ----
-oc delete cert multicloud-ca-cert -n open-cluster-management
+kubectl -n open-cluster-management create secret tls byo-ca-cert --cert ./ca.crt --key ./ca.key
 ----
 
-. Create a secret with the CA certificate by running the following command:
+. Edit the CA issuer to point to the BYO certificate.
+Run the following commnad:
 +
 ----
-kubectl -n open-cluster-management create secret tls multicloud-ca-cert --cert ./ca.crt --key ./ca.key
+oc edit issuer -n open-cluster-management multicloud-ca-issuer
 ----
 
-. Refresh all of your `cert-manager` certificates that use the CA.
-For more information view the upcoming section, <<refresh_cert_manager_certs,Refreshing _cert-manager_ certificates>>.
+. Replace the string `mulicloud-ca-cert` with `byo-ca-cert`.
+Save your deployment and quit the editor.
 . Validate the custom CA is in use by logging in to the console and view the details of the certificate being used.
-// we should state the steps to do this; it migth be only 3 steps?
 
 [#refresh_cert_manager_certs]
 == Refreshing _cert-manager_ certificates
@@ -90,11 +90,22 @@ Run the following command:
 [#restoring-root-ca-certificates]
 == Restoring root CA certificates
 
-To restore the root CA certificate, obtain the previously created backup file of the root CA certificate.
-Run the following command:
+To restore the root CA certificate, update the CA issuer by completing the following steps:
 
+. Edit the CA issuer.
+Run the following command:
++
 ----
-   oc create -f multicloud-ca-cert-backup.yaml
+oc edit issuer -n open-cluster-management multicloud-ca-issuer
+----
+
+. Replace the `byo-ca-cert` string with `multi-cloud-ca-cert` in the editor.
+Save the issuer and quit the editor.
+. Delete the BYO CA certificate.
+Run the following commnad:
++
+----
+oc delete secret -n open-cluster-management byo-ca-cert
 ----
 
 Refresh all `cert-manager` certificates that use the CA.
