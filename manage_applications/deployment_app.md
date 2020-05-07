@@ -47,7 +47,7 @@ To set up and use channels, subscriptions, and placement rules for deployments, 
 
 5. Optional. If you created the placement rule as a stand-alone resource, edit the definition for your subscription or deployables to reference your placement rule.
 
-6. Edit the definition for your deployables and your channel to ensure that deployables are promoted to the channel. For more information, see [Promote a deployable to a channel](#promote-a-deployable-to-a-channel).
+6. Edit the definition for your deployables and your channel to ensure that deployables are promoted to the channel. For more information, see [Promoting a deployable to a channel](#promoting-a-deployable-to-a-channel).
 
 7. Use the console to monitor the status of the deployment to the target cluster or clusters for the channel.
 

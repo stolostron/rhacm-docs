@@ -48,7 +48,7 @@ You do not need to wrap or represent all resources as deployables before you dep
 
 To update a deployable with a new version, you can change the deployed resource in managed clusters by changing the deployable resource in the source location on your Hub cluster. The change is started immediately with a rolling update.
 
-1. Compose the definition updates for your deployable. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
+1. Compose the definition updates for your deployable. For more information about the YAML structure, including the required fields, see [Application definition](#application-yaml-structure).
 
 2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
