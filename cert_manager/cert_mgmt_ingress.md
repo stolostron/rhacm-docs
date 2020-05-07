@@ -132,7 +132,7 @@ Complete the following steps to replace your BYO ingress certificate:
    oc edit deployment management-ingress -n open-cluster-management
    ```
   
-   * Replace the string similar to `management-ingress-b6417-tls-secret` with `byo-ingress-tls-secret`.
+   * Replace the string similar to `multicloud-ca-cert` with `ingress-ca-cert`.
 
    * Save your deployment and close the editor. The management ingress automatically restarts.
 
@@ -148,7 +148,7 @@ Complete the following steps to replace your BYO ingress certificate:
       oc edit deployment management-ingress -n open-cluster-management
       ```
       
-   1. Replace the `multicloud-ca-cert` string  with `ingress-ca-cert`.
+   1. Replace the `ingress-ca-cert` string  with `multicloud-ca-cert`.
    
    2. Replace the `byo-ingress-tls-secret` string with the correct secret name similar to `management-ingress-b6417-tls-secret`.
    3. Save your deployment and close the editor. The management ingress automatically restarts.
