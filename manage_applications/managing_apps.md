@@ -6,10 +6,10 @@ Create application resources to group and view the application components that m
   - Matching an application to a subscription
   - Update an application
   - Delete an application
-  
-## Create an application 
 
-1. Compose your application definition YAML content. To create or update an application resource, you must first compose the YAML file that defines the resource. 
+## Create an application
+
+1. Compose your application definition YAML content. To create or update an application resource, you must first compose the YAML file that defines the resource.
 
 2. Create the application within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
 
@@ -34,7 +34,7 @@ Create application resources to group and view the application components that m
         kubectl get Application
         ```
 
-        Ensure that your new application is listed in the resulting output. 
+        Ensure that your new application is listed in the resulting output.
 
    * To use REST API, use the [application POST API](../apis/mcm/applications.json).
 
@@ -52,7 +52,7 @@ For more information about the resource definition for an application, see [Crea
 
 ## Update an application
 
-1. Compose your application definition updates. For more information about the YAML structure, including the required fields, see [Application definition](#app_compose).
+1. Compose your application definition updates. For more information about the YAML structure, including the required fields, see [Application definition](#application-yaml-structure).
 
 2. Update the application definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
@@ -100,8 +100,8 @@ To delete an application, you can use the console, the Kubernetes command line i
      ```
      kubectl delete Application <name> -n <namespace>     
      ```
-  
-  2. Verify that your application resource is deleted by running the following command: 
+
+  2. Verify that your application resource is deleted by running the following command:
      ```
      kubectl get Application <name>
      ```

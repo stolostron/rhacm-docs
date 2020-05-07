@@ -34,7 +34,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
    
 ## Create a channel
 
-1. Compose your channel definition YAML content. To create or update a channel resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Channel definition YAML structure](#channel-definition-yaml-structure).
+1. Compose your channel definition YAML content. To create or update a channel resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Channel definition YAML structure](#channel-yaml-structure).
 
 2. Optional. If you are creating an `Namespace` type channel, create the namespace on your hub cluster. You can define the namespace as part of your YAML definition or use the Kubernetes command line interface (`kubectl`) tool to create the namespace.
   
@@ -91,7 +91,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
 ## Update a channel
 
-1. Compose the definition updates for your channel. For more information about the YAML structure, including the required fields, see [Channel definition YAML structure](#channel-definition-yaml-structure).
+1. Compose the definition updates for your channel. For more information about the YAML structure, including the required fields, see [Channel definition YAML structure](#channel-yaml-structure).
 
 2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
