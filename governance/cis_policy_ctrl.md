@@ -41,9 +41,9 @@ Complete the following steps to enable the CIS policy controller feature flag. T
        value: "yes"
    ```
 
-4. Save your deployment and close the Visual Web Terminal. 
+4. Save your deployment and close the Visual Web Terminal.
 
-5. The associated pod restarts. Attempt to create the policy again. See, [Creating a CIS policy from Red Hat Advanced Cluster Management for Kubernetes console](#creating-a-cis-policy-from-red-hat-advanced-cluster-management-for-kubernetes-console).
+5. The associated pod restarts. Attempt to create the policy again. See, [Creating a CIS policy from Red Hat Advanced Cluster Management for Kubernetes console](#create_policy_console).
 
 ## CIS policy
 
