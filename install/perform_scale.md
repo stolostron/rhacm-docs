@@ -1,0 +1,66 @@
+# Performance and scalability
+
+Red Hat Advanced Cluster Management for Kubernetes is tested to determine some scalability and performance data. The major areas that are tested are cluster scalability and search performance. 
+
+You can use this information to help you plan your environment. 
+
+**Important:** This data is based on the results from a lab environment at the time of testing. Your results might vary, depending on your environment, network throughput, and changes to the product. 
+
+## Maximum number of managed clusters
+
+The Advanced Cluster Management for Kubernetes hub cluster provided good performance when managing up to 250 managed clusters. 
+
+| --- | Infrastructure  | OS  | Instance type |  Zone  |  CPU (#vCPU)  |  Memory (GB)  |  Red Hat OpenShift Container Platform version  |  OpenShift Container Platform specification |
+| ------- | --------| -----|----- |-------- | --- | -------- | --- | --- |
+| Hub      | AWS |   | m5.2xlarge | us-east-1e | 8 | 32 | 4.3.5 | 3 master nodes, 3 worker nodes |
+| Host1     | AWS | Red Hat Enterprise Linux 8  | c4.2xlarge | us-east-1e | 8 | 15 |  |  |
+| Host2     | AWS | Red Hat Enterprise Linux 8  | c4.2xlarge | us-east-1e | 8 | 15 |  |  |
+
+Table: Tested cluster information
+
+## Search scalability
+
+The scalability of the Search component depends on the performance of the data store, RedisGraph. The following variables are important to the search performance:
+
+* Physical memory
+* Write throughput (Cache recovery time)
+* Query execution time
+
+### Physical memory
+
+RedisGraph is an in-memory graph database. The memory required is proportional to the number of resources (ConfigMaps, Deployments, Pods, etc) and their relationships in the cluster.
+
+| Clusters | Kubernetes resources  | Relationships  | Observed size (with simulated data) |
+| ------- | --------| -----|----- |
+| 1 medium   | 5000 | 9500  | 50 MB |
+| 5 medium     | 25,000 | 75,000  | 120 MB | 
+| 15 medium     | 75,000 | 20,0000  | 263 MB |
+| 30 medium     | 150,000 | 450,000  | 492 MB |
+| 50 medium     | 250,000 | 750,000  | 878 MB | 
+
+Table: Physical memory data
+
+### Write throughput (cache recovery time)
+
+Most clusters in steady state generate a small number of resource updates. The highest rate of updates happen when the data in RedisGraph is cleared, which causes the remote collectors to get close their full state around the same time.
+
+| Clusters | Kubernetes resources  | Relationships  | Average recovery time from simulation |
+| ------- | --------| -----|----- |
+| 1 medium   | 5000 | 9500  | less than 2 seconds |
+| 5 medium     | 25,000 | 75,000  | less than 15 seconds | 
+| 15 medium     | 75,000 | 200,000  | 2 minutes and 40 seconds |
+| 30 medium     | 150,000 | 450,000  | 5-8 minutes |
+
+Table: Cache recovery time data
+
+**Remember:** Times might increase for clusters that have a slow network connection to the hub.
+
+### Query execution considerations
+
+There are some things that can affect the time that it takes to run and return results from a query. Consider the following items when planning and configuring your environment:
+
+* Searching for a keyword is not efficient.
+* The first search takes longer than later searches because it takes additional time to build the RBAC filter.
+* The length of time to complete a request is proportional to the number of namespaces on the hub cluster.
+* The worst performance is observed for a request by a non-administrator user with access to all of the namespaces, or all of the managed clusters.
+
