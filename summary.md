@@ -27,7 +27,7 @@
    * [Creating and modifying bare metal assets](manage_cluster/bare_assets.md)
    * [Creating a provider connection](manage_cluster/prov_conn.md)
      * [Creating a provider connection for Amazon Web Services](manage_cluster/prov_conn_aws.md)
-     * [Creating a provider connection for Microsoft Azure](manage_cluster/prov_conn_aks.md)
+     * [Creating a provider connection for Microsoft Azure](manage_cluster/prov_conn_azure.md)
      * [Creating a provider connection for Google Cloud Platform](manage_cluster/prov_conn_google.md)
      * [Creating a provider connection for bare metal](manage_cluster/prov_conn_bare.md)
    * [Creating a cluster](manage_cluster/create.md)
