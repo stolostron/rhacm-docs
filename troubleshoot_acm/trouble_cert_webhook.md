@@ -64,7 +64,6 @@ failed calling webhook "certificates.admission.certmanager.io": the server is cu
        Container  cpu       0    800m  300m             800m           -
        Container  memory    0    1Gi   300Mi            1Gi            -
       ```
-      {: codeblock}
 
     - If the label is not on the namespace, add the label and restart the `cert-manager` webhook pods. Add the label:
 
