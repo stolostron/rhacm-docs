@@ -7,6 +7,7 @@ View the list of troubleshoot topics for Red Hat Advanced Cluster Management for
 * [Troubleshooting cert-manager-webhook](#troubleshooting-cert-manager-webhook)
 * [Troubleshooting clusters](#troubleshooting-clusters)
 * [Troubleshooting installation](#troubleshooting-installation)
+* 
 
 
 ## Troubleshooting cert-manager-webhook
