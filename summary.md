@@ -88,3 +88,5 @@
      * [Helm](apis/helmreleases.json)
      * [PlacementRule](apis/placementrules.json)
 * [Troubleshooting](troubleshoot_acm/troubleshooting.md)
+     * [Troubleshooting cert-manager-webhook](troubleshoot_acm/trouble_cert_webhook.md) 
+
