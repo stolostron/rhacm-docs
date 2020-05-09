@@ -88,7 +88,7 @@ To restore the root CA certificate, update the CA issuer by completing the follo
    oc edit issuer -n open-cluster-management multicloud-ca-issuer
    ```
 
-2. Replace the `byo-ca-cert` string with `multi-cloud-ca-cert` in the editor. Save the issuer and quit the editor.
+2. Replace the `byo-ca-cert` string with `multicloud-ca-cert` in the editor. Save the issuer and quit the editor.
 
 3. Delete the BYO CA certificate. Run the following commnad:
 

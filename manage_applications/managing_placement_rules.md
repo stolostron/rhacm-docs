@@ -8,8 +8,7 @@ You can create and manage placement rules to define where and how Helm charts an
   - Update a placement rule
   - Delete a placement rule
   - Placement rule definition
-  * [Placement rule status definition](#placement-rule-status-definition)
-  * [Examples of placement rule](#examples-of-placement-rule)
+  * [Placement rule status definition](#placement-rule-sample-files)
 
 The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used for applications in previous versions of Red Hat Advanced Cluster Management for Kubernetes. Placement policies are still used for governance and risk policies.
 
@@ -88,7 +87,7 @@ When a placement rule is assigned to a subscription, you can view the assignment
 
 ## Placement rule status
 
-When a placement rule is created and in use, you can view the status details for the rule. This status is appended to the YAML definition for a placement rule and indicates the target clusters where the rule is used for placing deployables. For more information about the available status fields, see [Placement rule status definition](#placement-rule-status-definition).
+When a placement rule is created and in use, you can view the status details for the rule. This status is appended to the YAML definition for a placement rule and indicates the target clusters where the rule is used for placing deployables. For more information about the available status fields, see [Placement rule status definition](#placement-rule-sample-files).
 
 To view the status fields for a placement rule, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.
 
