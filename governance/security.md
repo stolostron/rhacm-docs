@@ -4,7 +4,7 @@ Manage your security and role-based access control (RBAC) of Red Hat Advanced Cl
 
 **Prerequisite**: You must configure authentication service requirements for Red Hat Advanced Cluster Management for Kubernetes to onboard workloads to Identity and Access Management (IAM). For more information see, _Understanding authentication_ in [OpenShift Container Platform documentation](https://docs.openshift.com/container-platform/4.3/authentication/understanding-authentication.html).
 
-## Role-based access control (RBAC)
+## Role-based access control
 
 Red Hat Advanced Cluster Management for Kubernetes supports several roles. Your role determines the actions that you can perform. Kubernetes offers role-based access control (RBAC) authorization mechanisms, so users of the cluster platform can be grouped into teams and have namespaces dedicated to teams. For more information about RBAC, see the _RBAC_ overview in the [OpenShift Container Platform documentation](https://docs.openshift.com/container-platform/4.3/authentication/using-rbac.html). View the following RBAC tables for components in Red Hat Advanced Cluster Management for Kubernetes:
 
