@@ -2,16 +2,18 @@
 
 Various certificates are created and used throughout Red Hat Advanced Cluster Management for Kubernetes.
 
-After you create your certificates, you can replace certain certificates that are created by the Red Hat Advanced Cluster Management for Kubernetes installer. You must be a cluster administrator or team administrator. See the following documents to learn more information about managing certificates created by the installer:
-
-* [Replacing the root CA](cert_root_ca.md)
-* [Replacing the management ingress certificates](cert_mgmt_ingress.md)
+You can bring your own certificates. After you create your certificates, you can replace certain certificates that are created by the Red Hat Advanced Cluster Management for Kubernetes installer. You must be a cluster administrator or team administrator. 
 
   **Note**: Replacing certificates is supported only on native Red Hat Advanced Cluster Management for Kubernetes installations.
 
 All certificates required by services that run on Red Hat Advanced Cluster Management for Kubernetes are created during the installation of Red Hat Advanced Cluster Management for Kubernetes. Certificates are either created and managed by the Red Hat Advanced Cluster Management for Kubernetes installer or by the Red Hat Advanced Cluster Management for Kubernetes Certificate manager (`cert-manager`).
 
-## Red Hat Advanced Cluster Management for Kubernetes Certificates
+See the following topics to replace certificates:
+
+* [Replacing the root CA](cert_root_ca.md)
+* [Replacing the management ingress certificates](cert_mgmt_ingress.md)
+
+## Certificates
 
 The following certificates are automatically created during the installation of Red Hat Advanced Cluster Management for Kubernetes:
 
