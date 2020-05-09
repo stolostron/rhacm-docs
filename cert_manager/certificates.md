@@ -2,32 +2,24 @@
 
 Various certificates are created and used throughout Red Hat Advanced Cluster Management for Kubernetes.
 
-After you create your certificates, you can replace certain certificates that are created by the Red Hat Advanced Cluster Management for Kubernetes installer. You must be a cluster or team administrator. See the following documents to learn more information about managing certificates created by the installer:
+After you create your certificates, you can replace certain certificates that are created by the Red Hat Advanced Cluster Management for Kubernetes installer. You must be a cluster administrator or team administrator. See the following documents to learn more information about managing certificates created by the installer:
 
 * [Replacing the root CA](cert_root_ca.md)
 * [Replacing the management ingress certificates](cert_mgmt_ingress.md)
 
   **Note**: Replacing certificates is supported only on native Red Hat Advanced Cluster Management for Kubernetes installations.
 
-## Creating a certificate
-
 All certificates required by services that run on Red Hat Advanced Cluster Management for Kubernetes are created during the installation of Red Hat Advanced Cluster Management for Kubernetes. Certificates are either created and managed by the Red Hat Advanced Cluster Management for Kubernetes installer or by the Red Hat Advanced Cluster Management for Kubernetes Certificate manager (`cert-manager`).
-
-Use the certificate policy controller to create and manage certificate policies. For more information, see [Certificate policy controller](../governance/cert_policy_ctrl.md).
 
 ## Red Hat Advanced Cluster Management for Kubernetes Certificates
 
-These are the certificates that are automatically created during the installation of Red Hat Advanced Cluster Management for Kubernetes. 
+The following certificates are automatically created during the installation of Red Hat Advanced Cluster Management for Kubernetes:
 
-#### Accessing the Red Hat Advanced Cluster Management for Kubernetes Root CA Certificate
+* Root CA Certificate
+* Certificate manager (_cert-manager_)
+
 
 The Red Hat Advanced Cluster Management for Kubernetes Root CA Certificate is stored within the Kubernetes Secret `multicloud-ca-cert` in the `open-cluster-management` namespace. The certificate can be imported into your client truststores to access Red Hat Advanced Cluster Management for Kubernetes Platform APIs.
-
-To retrieve and decode the certificate, run the following command:
-
-```
-kubectl get secret -n open-cluster-management multicloud-ca-cert -o jsonpath='{.data.ca\.crt}' | base64 --decode
-```
 
 ### Created and managed by Red Hat Advanced Cluster Management for Kubernetes Certificate manager (_cert-manager_)
 
@@ -46,3 +38,4 @@ View the following table of the internal services that use `cert-manager` to cre
 | `topology-276c4-ca-cert` | `multicluster-hub-mcm-server-ca-issuer` | `topology-b24e0-topology-secrets` | Topology |
 {: caption="Table 1. Certificates Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
+Use the certificate policy controller to create and manage certificate policies. See [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md) for more for more information about controllers.

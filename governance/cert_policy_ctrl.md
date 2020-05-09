@@ -1,24 +1,18 @@
 # Certificate policy controller
 
-Certificate policy controller can be used to detect certificates that are close to expiring. Configure and customize the certificate policy controller by updating the minimum duration parameter in your controller policy. To learn more, view the Certificate policy elements section in this document. When a certificate expires in less than the minimum duration amount of time, the policy becomes noncompliant.
+Certificate policy controller can be used to detect certificates that are close to expiring. Configure and customize the certificate policy controller by updating the minimum duration parameter in your controller policy. When a certificate expires in less than the minimum duration amount of time, the policy becomes noncompliant. The certificate policy controller is created on your hub cluster.
 
-The certificate policy controller communicates with the local Kubernetes API server to get the list of secrets that contain certificates and determine all non-compliant certificates.
+The certificate policy controller communicates with the local Kubernetes API server to get the list of secrets that contain certificates and determine all non-compliant certificates. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/). 
 
-## Certificate policy
+Certificate policy controller does not support the `enforce` feature. 
 
-A `CertificatePolicy` is a CustomResourceDefinition (CRD) instance that contains the specifications of which certificates to monitor and refresh. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
+## Certificate policy controller YAML structure
 
-### Parent policy for the certificate policy
-
-A certificate policy can be either created directly on your managed cluster, or on your hub cluster if it manages your managed cluster. Your managed cluster must be a Red Hat Advanced Cluster Management for Kubernetes with the required services. If Red Hat Advanced Cluster Management for Kubernetes is not installed, you can create a certificate policy directly on your managed cluster by running the following command: `kubectl create -f certificatePolicyFile.yaml`.
-
-Create a parent policy that includes the certificate policy to be propagated to the managed cluster.
-
-  View the following example description of a certificate policy and review the element descriptions of the certificate policy:
+View the following example of a certificate policy and review the element in the YAML table:
 
   ```yaml
   Name:         certificate-policy-example
-  Namespace:    default
+  Namespace:
   Labels:       category=system-and-information-integrity
   APIVersion:  policies.ibm.com/v1alpha1
   Kind:         CertificatePolicy
@@ -28,231 +22,81 @@ Create a parent policy that includes the certificate policy to be propagated to 
   Spec:
     Conditions:
       Ownership:
-        ReplicaSet
-        Deployment
-        DeamonSet
-        ReplicationController
     NamespaceSelector:
       Exclude:
-        kube-system
       Include:
-        default
-        kube-*
-    RemediationAction:  enforce
-    Disabled:  false
-    MinimumDuration: 100h
+    RemediationAction:
+    Disabled:
+    MinimumDuration:
  Status:
    CompliancyDetails:
      Certificate-Policy-Example:
        Default:
-         0 secrets with certificates detected in namespace `default`
        Kube - Public:
-         0 secrets with certificates detected in namespace `kube-public`
-   Compliant:  Compliant
+   Compliant:
   Events:
-    Type    Reason         Age                            From                       Message
-    ----    ------         ----                           ----                       -------
-    Normal  Pod-Restarted  37m                            certificatepolicy-controller  Restarted Pod default/nginx-7cdbd8cdc9-j8fh9
-    Normal  Pod-Restarted  37m                            certificatepolicy-controller  Restarted Pod kube-public/nginx-7cdbd8cdc9-5k2j4
   ```
 
-  **Note:** In a certificate policy, the `category=system-and-information-integrity` label categorizes the policy and facilitates querying the certificate policies. If there is a different value for the `category` key in your certificate policy, the value is overridden by the certificate controller.
+  **Note:** 
 
-### Certificate policy elements
+## Certificate policy controller YAML table
 
-The `namespaceSelector` defines which namespaces are subject to the enforcement of the certificate policy. A single certificate policy can be applied to multiple namespaces. For example, if there are two certificate policies with same value for the `namespaceSelector` parameter, only the first policy is applied to the specified namespace.
+|Field|Description|
+|-- | -- |
+| Name | Required. <!--Add explanation--> |
+| Namespace | Required. <!--Add explanation--> |
+| Labels | Optional. In a certificate policy, the `category=system-and-information-integrity` label categorizes the policy and facilitates querying the certificate policies. If there is a different value for the `category` key in your certificate policy, the value is overridden by the certificate controller. |
+| APIVersion | Required. Set the value to `policies.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
+| Kind | Required. Set the value to `CertificatePolicy` to indicate the type of policy. |
+| Metadata | Required. <!--add description--> |
+| Metadata.Finalizers | Required. <!--add description-->  |
+| Spec | Required. Specifications of which certificates to monitor and refresh.|
+| Spec.Conditions |  Required. <!--add description--> |
+| Spec.Ownership | Required. <!--Add description--> |
+| Spec.NamespaceSelector| Required. <!--add description--> parameter values for `Include` and `Exclude`. |
+| Spec.RemediationAction | Required. | <!--add description-->|
+| Spec.Disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
+| Spec.MinimumDuration | Required. parameter specifies the smallest duration before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. <!--is there a default parameter value-->| 
+| Status | Required. Reports the status of the policy. <!--expand explanation if possible--> |
+| Status.CompliancyDetails | Required. <!--details needed--> |
+| Status.Events| Required. <!--add details-->
+{: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-  View the following YAML example of the `namespaceSelector` parameter in a certificate policy that is applied to multiple namespaces:
 
-   ```yaml
-   spec:
-     namespaceSelector:
-          include: ["default", "kube-*"]
-          exclude: ["kube-system"]
-   ```
+## Certificate policy YAML structure
 
-The `minimumDuration` parameter specifies the smallest duration before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. View the following YAML example of the `minimumDuration` parameter in a certificate policy:
+Certificate policy is created on the managed cluster. <!--will add more-->
 
-  ```yaml
-  disabled: false
-  minimumDuration: 200h
-  ```
-
-  The default value for `minimumDuration` is 30 days (672h).
-
-### Policy enforcement {#policy_enforcement_1}
-
-Certificate policy controller can only inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. Your parameter might resemble the following content:
-
-   ```
-   remediationAction: inform
-   ```
-
-## Creating a certificate policy
-
-You can create a YAML file for your certificate policy or create a certificate policy from the console. View the following sections to create a certificate policy:
-
-* [Creating a YAML file for a certificate policy](#creating-a-yaml-file-for-a-certificate-policy)
-* [Creating a certificate policy from the console](#creating-a-certificate-policy-from-the-console)
-
-### Creating a YAML file for a certificate policy
-
-Complete the following steps to create a certificate policy from the command line interface (CLI):
-
-1. Create a YAML file for your certificate policy. See [Creating a YAML file for a Red Hat Advanced Cluster Management for Kubernetes policy](../governance/create_policy.md#yaml) for more information on policy requirements.
-
-    Your certificate policy might resemble the following policy:
-
-    ```yaml
-    apiVersion: policies.ibm.com/v1alpha1
-    kind: CertificatePolicy
-    metadata:
-      name: certificate-policy-1
-      namespace: kube-system
-      label:
-        category: "System-Integrity"
-    spec:
-      # include specifies the namespaces in which you want to watch certificates, while exclude specifies the namespaces you explicitly do not want to watch
-      namespaceSelector:
-        include: ["default", "kube-*"]
-        exclude: ["kube-system"]
-      # This parameter value can be "enforce" or "inform", however "enforce" does not do anything with regards to this controller
-      remediationAction: inform
-      # minimum duration is the least amount of time the certificate is still valid from the time the controller checks the policy compliance
-      minimumDuration: 100h
-    ```
-
-2. Apply the policy by running the following command:
-
-   ```
-   kubectl apply -f <certificate-policy-file-name>  --namespace=<namespace>
-   ```
-
-3. Verify and list the policies by running the following command:
-
-   ```
-   kubectl get certificatepolicy --namespace=<namespace>
-   ```
-
-Your certificate policy is created.
-
-#### Viewing your certificate policy
-
-Complete the following steps to view your certificate policy from the CLI:
-
-1. View details for a specific certificate policy by running the following command:
-
-   ```
-   kubectl get certificatepolicy <policy-name> -n <namespace> -o yaml
-   ```
-
-2. View a description of your certificate policy by running the following command:
-
-   ```
-   kubectl describe certificatepolicy <name> -n <namespace>
-   ```
-
-### Creating a certificate policy from the console
-
-1. Log in to your cluster from the console.
-2. From the navigation menu, click **Governance and risk**
-3. Click **Create policy**.
-4. Enter or select the appropriate values for the following fields:
-   * Name
-   * Specifications
-   * Cluster selector
-   * Remediation action
-   * Standards
-   * Categories
-   * Controls
-   * Disabled
-
-5. Click **Create**.
-
-A certificate policy is created and the `CertificatePolicy` definition within it will look similar to the following YAML.
-
-   ```yaml
+```yaml
    apiVersion: policies.ibm.com/v1alpha1
    kind: CertificatePolicy
    metadata:
      name: certificate-policy-1
-     namespace: kube-system
+     namespace:
      label:
        category: "System-Integrity"
    spec:
-   # include parameter values are the namespaces you want to watch certificates in; exclude parameter values are the namespaces you explicitly do not want to watch
      namespaceSelector:
-       include: ["default", "kube-*"]
-       exclude: ["kube-system"]
-     # This parameter value can be "enforce" or "inform", however "enforce" does not do anything with regards to this controller.
-     remediationAction: inform
-     # minimum duration is the least amount of time the certificate is still valid from the time the controller checks the policy compliance
+       include:
+       exclude:
+     remediationAction:
      disabled: false
-     minimumDuration: 100h
+     minimumDuration:
    ```
 
-#### View your certificate policy
+### Certificate policy YAML table
 
-You can view any certificate policy and its status from the console.
+|Field|Description|
+|-- | -- |
+| apiVersion | Required. Set the value to `policies.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
+| kind | Required. Set the value to `CertificatePolicy` to indicate the type of policy. |
+| metadata.name | Required. The name for identifying the policy resource. |
+| metadata.namespaces | Optional. |
+| metadata.label | Required. <!--need description--> |
+| spec.namespaceSelector | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to.**Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
+| remediationAction | Optional. Specifies the remediation of your policy. Certificate policy controller can only inform the user about a policy violation. Set the `remediationAction` parameter to `inform`.|
+| disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
+| minimumDuration | Required. specifies the smallest duration before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. The default value is `672h` (30 days). |
+{: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-1. Log in to your cluster from the console.
-2. From the navigation menu, click **Governance and risk** to view a table list of your policies.
-
-   **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
-4. Select one of your policies.
-
-
-For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md). See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more information about policies.
-
-## Bringing your own certificates
-
-You can monitor your own certificates with the certificate policy controller. You must complete one of the following requirements to monitor your own certificates:
-
-* Create a Kubernetes TLS Secret for your certificate
-* Add the label `certificate_key_name` into your Kubernetes secret
-
-### Creating a Kubernetes TLS secret
-
-Create a Kubernetes TLS secret to monitor your own certificates by running the following command:
-
-   ```
-   kubectl -n <namespace> create secret tls <secret name> --cert=<path to certificate>/<certificate name> --key=<path to key>/<key name>
-   ```
-
-   View the following descriptions of the parameters you must update for your TLS secret:
-
-   * `<namespace>`: The namespace where you want your certificate secret to be.
-   * `<secret name>`: The name of your Kubernetes Secret.
-   * `<path to certificate>`: The folder that contains the certificate on your local file system.
-   * `<certificate name>`: The name of the certificate file on your file system.
-   * `<path to key>`: The folder that contains the private key of your certificate on your local file system.
-   * `<key name>`: The name of your private key file on your file system.
-
-
-### Adding a label into your Kubernetes secret
-
-You can also monitor your own certificates with the certificate policy controller by adding the `certificate_key_name` label for your certificate key.
-
-Update the `metadata` parameter in your TLS Secret by adding the `certificate_key_name` label. Run the following command to add the `certificate_key_name` label:
-
-   ```
-   kubectl label secret my-certificate -n default certificate_key_name=cert
-   ```
-
-   Your updated TLS Secret might resemble the following content:
-
-   ```yaml
-   apiVersion: v1
-   kind: Secret
-   metadata:
-     name: my-certificate
-     namespace: default
-     labels:
-       certificate_key_name: cert
-   type: Opaque
-   data:
-     cert: <Certificate Data>
-     key: <Private Key Data>
-   ```
-
-See [Configuration policy samples](../governance/policy_samples.md) to view policy samples that can be applied to your certificate policies.
+Learn how to create a certificate policy, see [Manage security policies](manage_policy_overview.md) for more details.
