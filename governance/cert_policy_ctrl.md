@@ -39,7 +39,7 @@ View the following example of a certificate policy and review the element in the
 
   **Note:** 
 
-## Certificate policy controller YAML table
+### Certificate policy controller YAML table
 
 |Field|Description|
 |-- | -- |
@@ -98,5 +98,24 @@ Certificate policy is created on the managed cluster. <!--will add more-->
 | disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
 | minimumDuration | Required. specifies the smallest duration before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. The default value is `672h` (30 days). |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
+
+## Certificate policy sample
+
+```yaml
+apiVersion: policies.ibm.com/v1alpha1
+kind: CertificatePolicy
+metadata:
+  name: certificate-policy-1
+  namespace: kube-system
+  label:
+    category: "System-Integrity"
+spec:
+  namespaceSelector:
+    include: ["default", "kube-*"]
+    exclude: ["kube-system"]
+  remediationAction: inform
+  disabled: false
+  minimumDuration: 100h
+```
 
 Learn how to create a certificate policy, see [Manage security policies](manage_policy_overview.md) for more details.
