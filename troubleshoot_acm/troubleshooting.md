@@ -133,7 +133,9 @@ When you create a cluster in a bare metal environment using the default setting 
 Verify that your `StorageClass` setting is set to the following value:
 
 ```
-storageclass.kubernetes.io/is-default-class: "true"
+  metadata:
+    annotations:
+      storageclass.kubernetes.io/is-default-class: "true"
 ```
 
 ### Cluster appears in console with *Pending import* status
