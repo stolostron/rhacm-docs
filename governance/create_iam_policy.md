@@ -32,4 +32,4 @@ Complete the following steps to create an IAM policy from the command-line inter
 4. Copy and paste the IAM policy definition in the _Create policy_ window.
 5. Click **Create policy**.  
 
-An IAM policy is created. See _IAM policy sample_ on [IAM policy comtroller page](iam_policy_ctrl.md). See, [Manage security policies](manage_policy_overview.md) more topics.
+An IAM policy is created. See _IAM policy sample_ on [IAM policy comtroller page](iam_policy_ctrl.md). See [Manage security policies](manage_policy_overview.md) for more topics.
