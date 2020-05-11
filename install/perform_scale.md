@@ -4,7 +4,7 @@ Red Hat Advanced Cluster Management for Kubernetes is tested to determine some s
 
 You can use this information to help you plan your environment. 
 
-**Important:** This data is based on the results from a lab environment at the time of testing. Your results might vary, depending on your environment, network throughput, and changes to the product. 
+**Important:** This data is based on the results from a lab environment at the time of testing. Your results might vary, depending on your environment, network speed, and changes to the product. 
 
 ## Maximum number of managed clusters
 
