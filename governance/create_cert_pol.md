@@ -4,11 +4,11 @@ Learn to create, apply, view, and update your certificate policies.
 
 ## Creating a certificate policy 
 
-You can create a YAML file for your certificate policy from the CLI or from the console. View the following sections to create a certificate policy:
+You can create a YAML file for your certificate policy from the command line interface (CLI) or from the console. View the following sections to create a certificate policy:
 
 ### Creating a certificate policy from the CLI
 
-Complete the following steps to create a certificate policy from the command line interface (CLI):
+Complete the following steps to create a certificate policy from the CLI:
 
 1. Create a YAML file for your certificate policy. Run the following command:
 
