@@ -40,15 +40,15 @@ You must meet the following requirements before installing Red Hat Advanced Clus
  
   1. Create a `.yaml` file that defines the operator group. Your file should look similar to the following example:
   
-    ```
-    apiVersion: operators.coreos.com/v1
-    kind: OperatorGroup
-    metadata:
-      name: <default>
-    spec:
-      targetNamespaces:
-      - <namespace>
-    ```
+  ```
+  apiVersion: operators.coreos.com/v1
+  kind: OperatorGroup
+  metadata:
+    name: <default>
+  spec:
+    targetNamespaces:
+    - <namespace>
+  ```
   
     Replace <default> with the name of your operator group.
     Replace <namespace> with the name of your project namespace. 
@@ -70,11 +70,13 @@ You must meet the following requirements before installing Red Hat Advanced Clus
     metadata:
       name: acm-operator-subscription
     spec:
+      sourceNamespace: openshift-marketplace
+      source: redhat-operators
       channel: release-1.0
       installPlanApproval: Automatic
       name: advanced-cluster-management
-	```
-  
+      ```
+           
   2. Apply the subscription:
 
     ```
@@ -90,9 +92,7 @@ You must meet the following requirements before installing Red Hat Advanced Clus
   Replace <docker_username> with your username for the distribution registry that you identified as the `docker-server`. 
   Replace <docker_password> with your password or token for the distribution registry that you identified as the `docker-server`.
 
-6. Create the MultiClusterHub custom resource:
-
-  1. Create a `.yaml` file that defines the custom resource. Your file should look similar to the following example:
+6. Create the MultiClusterHub custom resource by creating a `.yaml` file that defines the custom resource. Your file should look similar to the following example:
   
   ```
   apiVersion: operators.open-cluster-management.io/v1beta1
@@ -104,11 +104,6 @@ You must meet the following requirements before installing Red Hat Advanced Clus
     imagePullSecret: <pull_secret>
   ```
   
-  2. Apply the custom resource: 
-  
-  ```
-  oc apply -f local/mch.yaml
-  ```
   **Note:** If this step fails with the following error, the resources are still being created and applied: 
   
   ```
