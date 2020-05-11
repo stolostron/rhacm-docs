@@ -81,7 +81,7 @@ Complete the following steps to view your certificate policy from the CLI:
 
 5. Click **Create**.
 
-A certificate policy is created and the `CertificatePolicy` definition within it will look similar to the following YAML.
+A certificate policy is created and the `CertificatePolicy` definition within it will look similar to the following YAML:
 
    ```yaml
    apiVersion: policies.ibm.com/v1alpha1
