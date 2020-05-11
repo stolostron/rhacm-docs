@@ -86,13 +86,13 @@ spec:
 | annotations.policy.mcm.ibm.com/categories | A security control category represent specific requirements for one or more standards. For example, a System and Information Integrity category might indicate that your policy contains a data transfer protocol to protect personal information, as required by the HIPAA and PCI standards. |
 | annotations.policy.mcm.ibm.com/controls | The name of the security control that is being checked. For example, Center of Internet Security (CIS) and certificate policy controller.|
 | spec | Required. <!--Add a description-->
-| spec.complianceType | Reqired. Set the value to `"musthave"`|
+| spec.complianceType | Required. Set the value to `"musthave"`|
 | spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to.**Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
 | spec.policy-template | Optional. Used to create one or more policies for third party or external security controls. |
 | policy-template.objectDefinition | Optional. <!--Add description-->|
 | obejctDefinition.labels| Optional. <!--add description-->|
 | objectDefinition.cisSpecVersion | Required. <!--Add description-->|
-| objectDefintion.kubernetesCisPolicy| Required. Refer to OpenShift Container platform CIS rules when you create CIS policies. Enter parameter values for the `masterNodeExcludeRules` and `workerNodeExcludeRules`. See [CIS rules specification](cis_policy_rules.md) for a list of the rules. |
+| objectDefintion.kubernetesCisPolicy| Required. Refer to OpenShift Container Platform CIS rules when you create CIS policies. Enter parameter values for the `masterNodeExcludeRules` and `workerNodeExcludeRules`. See [CIS rules specification](cis_policy_rules.md) for a list of the rules. |
 | objectDefinition.severity | Required. <!--Add info-->
 | disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies. CIS policy controller is disabled by default.<!--needs work-->|
 | remediationAction | Required. Specifies the remediation of your policy. Enter `inform`. <!--clean this up-->|
