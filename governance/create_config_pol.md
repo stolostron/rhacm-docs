@@ -138,4 +138,4 @@ Delete a configuration policy from the CLI or the console.
 
 Your policy is deleted.
 
-View security policy samples of policies that are checked by the configuration policy controller, see [Policy samples](policy_sample_intro.md). See [Manage security policies](manage_policy_overview.md) to manage other policies. 
+View configuration policy samples, see [Policy samples](policy_sample_intro.md). See [Manage security policies](manage_policy_overview.md) to manage other policies. 
