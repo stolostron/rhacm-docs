@@ -37,8 +37,6 @@ View the following example of a certificate policy and review the element in the
   Events:
   ```
 
-  **Note:** 
-
 ### Certificate policy controller YAML table
 
 |Field|Description|
