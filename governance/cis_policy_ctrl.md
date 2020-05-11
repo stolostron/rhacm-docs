@@ -92,7 +92,7 @@ spec:
 | policy-template.objectDefinition | Optional. <!--Add description-->|
 | obejctDefinition.labels| Optional. <!--add description-->|
 | objectDefinition.cisSpecVersion | Required. <!--Add description-->|
-| objectDefintion.kubernetesCisPolicy| Required. Enter values for the `masterNodeExcludeRules` and `workerNodeExcludeRules`. <!--will explain more-->|
+| objectDefintion.kubernetesCisPolicy| Required. Refer to OpenShift Container platform CIS rules when you create CIS policies. Enter parameter values for the `masterNodeExcludeRules` and `workerNodeExcludeRules`. See [CIS rules specification](cis_policy_rules.md) for a list of the rules. |
 | objectDefinition.severity | Required. <!--Add info-->
 | disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies. CIS policy controller is disabled by default.<!--needs work-->|
 | remediationAction | Required. Specifies the remediation of your policy. Enter `inform`. <!--clean this up-->|
