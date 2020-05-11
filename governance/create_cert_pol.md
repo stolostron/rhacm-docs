@@ -160,7 +160,7 @@ Delete the certificate policy from the CLI or the console.
 
 * Delete a certificate policy from the CLI:
 
-  1. Delete a policy by running the following command: <!--verify command `namespace`-->
+  1. Delete a certificate policy by running the following command: <!--verify command `namespace`-->
 
       ```
       kubectl delete policy <cert-policy-name> -n <mcm namespace>  
