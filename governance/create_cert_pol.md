@@ -67,7 +67,7 @@ Complete the following steps to view your certificate policy from the CLI:
 ### Creating a certificate policy from the console
 
 1. Log in to your cluster from the console.
-2. From the navigation menu, click **Governance and risk**
+2. From the navigation menu, click **Governance and risk**.
 3. Click **Create policy**.
 4. Enter or select the appropriate values for the following fields:
    * Name
@@ -117,8 +117,8 @@ For more information about other policy controllers, see [Red Hat Advanced Clust
 
 You can monitor your own certificates with the certificate policy controller. You must complete one of the following requirements to monitor your own certificates:
 
-* Create a Kubernetes TLS Secret for your certificate
-* Add the label `certificate_key_name` into your Kubernetes secret
+* Create a Kubernetes TLS Secret for your certificate.
+* Add the label `certificate_key_name` into your Kubernetes secret.
 
 Create a Kubernetes TLS secret to monitor your own certificates by running the following command:
 
