@@ -16,24 +16,6 @@ Complete the following steps to create a certificate policy from the CLI:
   kubectl create -f policy-1.yaml
   ```
 
-  Your certificate policy might resemble the following policy:
-
-    ```yaml
-    apiVersion: policies.ibm.com/v1alpha1
-    kind: CertificatePolicy
-    metadata:
-      name: certificate-policy-1
-      namespace: kube-system
-      label:
-        category: "System-Integrity"
-    spec:
-      namespaceSelector:
-        include: ["default", "kube-*"]
-        exclude: ["kube-system"]
-      remediationAction: inform
-      minimumDuration: 100h
-    ```
-
 2. Apply the policy by running the following command:
 
    ```
