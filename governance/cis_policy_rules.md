@@ -2,9 +2,6 @@
 
 Refer to the Red Hat OpenShift Hardening rules <!--find a link to reference users--> . Refer to the Center for Internet Security (CIS) rules when you create CIS policies for non-OpenShift Container Platform environments. When creating rules for OpenShift Container Platform environments, refer to the Red Hat OpenShift Hardening rules.
 
-* [CIS rules for OpenShift Container Platform](#cis-rules-for-openshift-container-platform)
-* [CIS rules for non-OpenShift Container Platform](#cis-rules-for-non-openshift-container-platform)
-
 ## CIS rules for OpenShift Container Platform
 
 ### Master node rules for OpenShift Container Platform
