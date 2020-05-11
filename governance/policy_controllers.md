@@ -1,4 +1,4 @@
-# Red Hat Advanced Cluster Management for Kubernetes policy controllers
+# Policy controllers
 
 Use the Red Hat Advanced Cluster Management for Kubernetes governance and risk policy framework to create custom policy controllers. The policy controllers are Kubernetes CustomResourceDefinition (CRD) instance. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
 
