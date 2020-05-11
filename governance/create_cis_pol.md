@@ -1,12 +1,12 @@
 # Managing a CIS policy
 
-Learn to create, apply, and view your CIS policies.
+Learn to create, apply, view, and update your CIS policies.
 
 ## Creating a CIS policy 
 
-You can create a YAML file for your CIS policy or create a CIS policy from the console. View the following sections to create a certificate policy:
+You can create a YAML file for your CIS policy from the command line interface (CLI) or from the console. View the following sections to create a certificate policy:
 
-### Creating a CIS policy from the command line
+### Creating a CIS policy from the CLI
 
 Complete the following steps to create a certificate policy from the command line interface (CLI):
 
@@ -15,6 +15,7 @@ Complete the following steps to create a certificate policy from the command lin
   ```
   kubectl create -f CisPolicy.yaml
   ```
+  
   Your YAML might resemble the following file:
 
   ```yaml
@@ -61,6 +62,8 @@ Complete the following steps to create a certificate policy from the command lin
    ```
    kubectl get cispolicy --namespace=<namespace>
    ```
+
+Your CIS policy is created. 
 
 #### Viewing a CIS policy from command line interface (CLI)
 
@@ -116,7 +119,6 @@ Complete the following steps to view the CIS policy from the managed cluster CLI
   kubectl -n <namespace> describe configmap endpoint-cisctrl-controller-config
   ```
 
-
 ### Creating a CIS policy from the console
 
 1. Log in to the Red Hat Advanced Cluster Management for Kubernetes console.
@@ -147,6 +149,41 @@ View any CIS Policy and its status from the console.
 
 3. Select one of your policies.
 
+## Updating CIS policies
+
+### Enabling the CIS policy controller from the CLI
+
+The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list.
+
+When you install the Klusterlet, the CIS policy controller is disabled by default. Enable the controller after your cluster is imported by running the following command:
+
+  ```
+  kubectl patch endpointconfig $CLUSTER_NAME -n $CLUSTER_NAMESPACE --type='json' -p='[{"op": "replace", "path": "/spec/cisController/enabled", "value":true}]'
+  ```
+  
+### Enabling the CIS policy controller from the console
+
+Complete the following steps to enable the CIS policy controller feature flag from the console. The CIS policy specification becomes available:
+
+1. Log in to your hub cluster and open the Visual Web terminal.
+
+2. Edit the deployment to enable the feature flag. Run the following command:
+
+   ```
+   oc edit deployment $(oc get deployment -o custom-columns=:.metadata.name | grep 'grcui$')
+   ```
+
+3. Update the `env.value` parameter to `"yes"`. Your deployment might resemble the following content:
+
+   ```
+   -env
+     - name: featureFlags_cisPolicyTemplate
+       value: "yes"
+   ```
+
+4. Save your deployment and close the Visual Web Terminal.
+
+5. The associated pod restarts. Attempt to create the policy again. See, [Creating a CIS policy from the console](#create_policy_console).
 
 ## Remediating CIS policy violation
 
@@ -199,8 +236,33 @@ Verify rule failures to remediate your CIS policy violations. Complete the follo
    8.4 audit test did not run: failed to run: stat -c %U:%G $nodesvc, command: [stat -c %U:%G $nodesvc], error: exit status 1
    ```
 
-See [Configuration policy samples](../governance/policy_samples.md) to view policy samples that can be applied to your CIS policies.
+### Deleting a CIS poicy
 
-For more information about other policy controllers, see [Policy controllers](../governance/policy_controllers.md).
+Delete a CIS policy from the CLI or the console.
 
-<!--do we want to point users to the sample of CIS rules; cis_policy_rules-->
+* Delete a CIS policy from the CLI:
+  
+  1. Delete a CIS policy by running the following command:
+
+    ```
+    kubectl delete policy <cis-policy-name> -n <mcm namespace>  
+    ```
+
+    After your policy is deleted, it is removed from your target cluster or clusters.
+
+  2. Verify that your policy is removed by running the following command:
+
+    ```
+    kubectl get policy <policy-name> -n <mcm namespace>
+    ```
+    
+* Delete a policy from the console:
+
+  1. From the navigation menu, click **Govern risk** to view a table list of your policies.
+  2. Click the **Options** icon for the policy you want to delete in the policy violation table.
+  3. Click **Remove**.
+  4. From the _Remove policy_ dialog box, click **Remove policy**.
+
+Your policy is deleted.
+
+View a sample of a CIS policy, see _CIS policy sample_ from the [Configuration policy samples page](policy_sample_intro.md). For more information about other policy controllers, see [Policy controllers](../governance/policy_controllers.md).
