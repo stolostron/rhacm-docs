@@ -1,12 +1,12 @@
 # Managing a certificate policy
 
-Learn to create, apply, update, and view your certificeate policies.
+Learn to create, apply, view, and update your certificate policies.
 
 ## Creating a certificate policy 
 
-You can create a YAML file for your certificate policy or create a certificate policy from the console. View the following sections to create a certificate policy:
+You can create a YAML file for your certificate policy from the CLI or from the console. View the following sections to create a certificate policy:
 
-### Creating a YAML file for a certificate policy
+### Creating a certificate policy from the CLI
 
 Complete the following steps to create a certificate policy from the command line interface (CLI):
 
@@ -81,24 +81,7 @@ Complete the following steps to view your certificate policy from the CLI:
 
 5. Click **Create**.
 
-A certificate policy is created and the `CertificatePolicy` definition within it will look similar to the following YAML:
-
-   ```yaml
-   apiVersion: policies.ibm.com/v1alpha1
-   kind: CertificatePolicy
-   metadata:
-     name: certificate-policy-1
-     namespace: kube-system
-     label:
-       category: "System-Integrity"
-   spec:
-     namespaceSelector:
-       include: ["default", "kube-*"]
-       exclude: ["kube-system"]
-     remediationAction: inform
-     disabled: false
-     minimumDuration: 100h
-   ```
+A certificate policy is created. 
 
 #### Viewing your certificate policy
 
@@ -108,17 +91,17 @@ You can view any certificate policy and its status from the console.
 2. From the navigation menu, click **Governance and risk** to view a table list of your policies.
 
    **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
-4. Select one of your policies.
+4. Select one of your policies to view more details.
+5. View the certificate policy violations by selecting the _Violations_ tab. 
 
-
-For more information about other policy controllers, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md). See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more information about policies.
+## Updating certificate policies
 
 ### Bringing your own certificates
 
 You can monitor your own certificates with the certificate policy controller. You must complete one of the following requirements to monitor your own certificates:
 
 * Create a Kubernetes TLS Secret for your certificate.
-* Add the label `certificate_key_name` into your Kubernetes secret.
+* Add the label `certificate_key_name` into your Kubernetes secret to monitor your certificates.
 
 Create a Kubernetes TLS secret to monitor your own certificates by running the following command:
 
@@ -127,8 +110,6 @@ Create a Kubernetes TLS secret to monitor your own certificates by running the f
    ```
 
 ### Adding a label into your Kubernetes secret
-
-You can also monitor your own certificates with the certificate policy controller by adding the `certificate_key_name` label for your certificate key.
 
 Update the `metadata` parameter in your TLS Secret by adding the `certificate_key_name` label. Run the following command to add the `certificate_key_name` label:
 
@@ -151,5 +132,55 @@ Update the `metadata` parameter in your TLS Secret by adding the `certificate_ke
      cert: <Certificate Data>
      key: <Private Key Data>
    ```
+   **Note**: When you add the label from the console, you must manually add the label into the TLS Secret YAML file.
 
-View a sample of a certificate policy, see _Certificate policy sample_ on the [Policy samples page](policy_samples_intro.md).
+### Disabling certificate policies
+
+When you create a certificate policy, it is enabled by default. Complete the following steps to disable a certificate policy from the CLI or the console:
+
+* Disable a certificate policy from the CLI:
+
+<!--add info here-->
+
+* Disable a certificate policy from the console:
+
+  1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
+
+  2. From the navigation menu, click **Govern risk** to view a table list of your policies.
+
+  3. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
+
+  4. Click **Disable policy**.
+
+Your policy is disbaled.
+
+### Deleting a certificate policy
+
+Delete the certificate policy from the CLI or the console. 
+
+* Delete a certificate policy from the CLI:
+
+  1. Delete a policy by running the following command: <!--verify command `namespace`-->
+
+      ```
+      kubectl delete policy <cert-policy-name> -n <mcm namespace>  
+      ```
+
+      After your policy is deleted, it is removed from your target cluster or clusters.
+
+  2. Verify that your policy is removed by running the following command:
+
+      ```
+      kubectl get policy <policy-name> -n <mcm namespace>
+      ```
+      
+* Delete a certificate policy from the console:
+
+  1. From the navigation menu, click **Govern risk** to view a table list of your policies.
+  2. Click the **Options** icon for the policy you want to delete in the policy violation table.
+  3. Click **Remove**.
+  4. From the _Remove policy_ dialog box, click **Remove policy**.
+
+Your certificate policy is deleted.
+   
+View a sample of a certificate policy, see _Certificate policy sample_ on the [Policy samples page](policy_samples_intro.md). For more information about other policy controllers, see [Policy controllers](policy_controllers.md). See [Governance and risk](../governance/compliance_intro.md) for information about other policies.
