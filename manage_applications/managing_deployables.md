@@ -42,7 +42,7 @@ You do not need to wrap or represent all resources as deployables before you dep
 
         Ensure that your new deployable is listed in the resulting output.
 
-   * To use REST API, you need to use the [deployable POST API](../apis/mcm/deployables_app.json).
+   * To use REST API, you need to use the [deployable POST API](../apis/deployables_app.json).
 
 ## Update a deployable
 
@@ -71,7 +71,7 @@ To update a deployable with a new version, you can change the deployed resource 
 
        2. Update any fields or annotations that you need to change.
 
-   * To use REST API, use the [deployable PATCH API](../apis/mcm/deployables_app.json).
+   * To use REST API, use the [deployable PATCH API](../apis/deployables_app.json).
 
 When your changes are saved, the changes can be automatically detected by the channel controller for any channel that subscribes to the deployable. If the updated deployable no longer meets the channel requirements, the deployable is removed from the channel. If the deployable still meets the requirements, the updated version can be deployed to any destination clusters where the version was previously deployed.
 
@@ -106,7 +106,7 @@ You can use the console, the Kubernetes command line interface (`kubectl`) tool,
      kubectl get Deployable <name>
      ```
 
-* To use REST API, use the [deployable DELETE API](../apis/mcm/deployables_app.json).
+* To use REST API, use the [deployable DELETE API](../apis/deployables_app.json).
 
 * If you want to only remove a deployable from a specific application, you can update the application to remove the content that defines the deployable. For more information about updating an application, see [Creating and managing applications](managing_apps.md).
 
