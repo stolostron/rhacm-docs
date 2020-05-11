@@ -64,7 +64,7 @@ Complete the following steps to create a certificate policy from the command lin
 
 #### Viewing a CIS policy from command line interface (CLI)
 
-Complete the following steps to view the CIS policy from the managed cluster CLI. View non-compliant policies by completing the following steps:
+Complete the following steps to view the CIS policy from the managed cluster CLI:
 
 1. Get a list of the CIS policies that are on your hub cluster by running the following command:
 
