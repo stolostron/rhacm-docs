@@ -140,7 +140,7 @@ You must meet the following requirements before installing Red Hat Advanced Clus
 
   1. In the Red Hat OpenShift Container Platform console navigation, select **Workloads** > **Secrets**. 
   
-  2. Select **Create**. 
+  2. Select **Create** > **Image Pull Secret**. 
   
   3. Enter a name for your secret.
   
