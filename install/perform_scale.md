@@ -8,15 +8,11 @@ You can use this information to help you plan your environment.
 
 ## Maximum number of managed clusters
 
-The Advanced Cluster Management for Kubernetes hub cluster provided good performance when managing up to 250 managed clusters. 
+The Advanced Cluster Management for Kubernetes hub cluster provided good performance when managing up to 250 managed clusters. The following table shows the configuration information for the clusters on the Amazon Web Services cloud platfrom that were used to determine the cluster maximums:
 
-| --- | Infrastructure  | OS  | Instance type |  Zone  |  CPU (#vCPU)  |  Memory (GB)  |  Red Hat OpenShift Container Platform version  |  OpenShift Container Platform specification |
-| ------- | --------| -----|----- |-------- | --- | -------- | --- | --- |
-| Hub      | AWS |   | m5.2xlarge | us-east-1e | 8 | 32 | 4.3.5 | 3 master nodes, 3 worker nodes |
-| Host1     | AWS | Red Hat Enterprise Linux 8  | c4.2xlarge | us-east-1e | 8 | 15 |  |  |
-| Host2     | AWS | Red Hat Enterprise Linux 8  | c4.2xlarge | us-east-1e | 8 | 15 |  |  |
-
-Table: Tested cluster information
+| Node | Flavor | vCPU | RAM (GiB) | Disk type | Disk size(GiB)/IOS | Count | Region |
+| Master | m5.2xlarge | 8 | 32 | gp2 | 100 | 3 | us-east-1 |
+| Worker | m5.2xlarge | 8 | 32 | gp2 | 100 | 3/5 | us-east-1 |
 
 ## Search scalability
 
