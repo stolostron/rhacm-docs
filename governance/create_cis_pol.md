@@ -15,41 +15,6 @@ Complete the following steps to create a certificate policy from the command lin
   ```
   kubectl create -f CisPolicy.yaml
   ```
-  
-  Your YAML might resemble the following file:
-
-  ```yaml
-  apiVersion: policies.ibm.com/v1alpha1
-  kind: CisPolicy
-  metadata:
-    labels:
-      controller-tools.k8s.io: "1.0"
-      pci-category: "system-integrity"
-    name: cispolicy-pci-sample
-  spec:
-    cisSpecVersion: 1.4
-    severity: medium
-    kubernetesCisPolicy:
-      masterNodeExcludeRules:
-      1.1 Maintain default behavior for anonymous access
-      1.2 Verify that the basic-auth-file method is not enabled
-      1.3 Insecure Tokens
-      1.4 Secure communications between the API server and master nodes
-      1.5 Prevent insecure bindings
-      1.6 Prevent insecure port access
-      1.7 Use Secure Ports for API Server Traffic
-      1.8 Do not expose API server profiling data
-      1.9 Verify repair-malformed-updates argument for API compatibility
-      1.10 Verify that the AlwaysAdmit admission controller is disabled
-      1.11 Manage the AlwaysPullImages admission controller
-      1.12 Use Security Context Constraints instead of DenyEscalatingExec admission
-      1.13 Use Security Context Constraints instead of the SecurityContextDeny admission controller
-      1.14 Manage the NamespaceLifecycle admission controller
-      1.15 Configure API server auditing - audit log file path
-      1.16 Configure API server auditing - audit log retention
-      1.17 Configure API server auditing - audit log backup retention
-      1.18 Configure audit log file size
-  ```
 
 2. Apply the policy by running the following command:
 
@@ -265,4 +230,4 @@ Delete a CIS policy from the CLI or the console.
 
 Your policy is deleted.
 
-View a sample of a CIS policy, see _CIS policy sample_ from the [Configuration policy samples page](policy_sample_intro.md). For more information about other policy controllers, see [Policy controllers](../governance/policy_controllers.md).
+View a sample of a CIS policy, see _CIS policy sample_ from the [Configuration policy samples page](policy_sample_intro.md). For more information about other policy controllers, see [Policy controllers](policy_controllers.md).
