@@ -2,7 +2,7 @@
 
 Various certificates are created and used throughout Red Hat Advanced Cluster Management for Kubernetes.
 
-You can bring your own certificates. After you create your certificates, you can replace certain certificates that are created by the Red Hat Advanced Cluster Management for Kubernetes installer. You must be a cluster administrator or team administrator. 
+You can bring your own certificates. You must create a Kubernetes TLS Secret for your secret. After you create your certificates, you can replace certain certificates that are created by the Red Hat Advanced Cluster Management for Kubernetes installer. You must be a cluster administrator or team administrator. 
 
   **Note**: Replacing certificates is supported only on native Red Hat Advanced Cluster Management for Kubernetes installations.
 
