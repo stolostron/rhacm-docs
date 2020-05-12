@@ -27,7 +27,8 @@ You must meet the following requirements before installing Red Hat Advanced Clus
   ```
   
   Replace <namespace> with a name for your namespace.
-  **Remember:** The Advanced Cluster Management for Kubernetes operator must be installed in its own namespace.
+  
+  **Important:** The Advanced Cluster Management for Kubernetes operator must be installed in its own namespace. A `ServiceAgent` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Advanced Cluster Management for Kubernetes and to any ID with access to the namespace. For security, do not give anyone access to this namespace who does not already have at least cluster administrator access. 
   
 2. Switch your project namespace to the one that you created:
 
@@ -129,6 +130,8 @@ You must meet the following requirements before installing Red Hat Advanced Clus
   3. Provide a name for your namespace. This is the namespace that you use throughout the installation process.
   
   4. Select **Create**.
+  
+  **Important:** The Advanced Cluster Management for Kubernetes operator must be installed in its own namespace. A `ServiceAgent` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Advanced Cluster Management for Kubernetes and to any ID with access to the namespace. For security, do not give anyone access to this namespace who does not already have at least cluster administrator access. 
   
 2. Switch your project namespace to the one that you created in step 1. This ensures that the steps are completed in the correct namespace. Some resources are namespace-specific.
 
