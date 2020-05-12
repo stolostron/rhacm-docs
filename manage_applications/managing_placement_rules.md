@@ -54,7 +54,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
         Ensure that your new placement rule is listed in the resulting output.
 
-   * To use REST API, you need to use the [placement rule POST API](../apis/placementRules.json).
+   * To use REST API, you need to use the [placement rule POST API](../apis/placementrules.json).
 
 ## Assign a placement rule
 
@@ -108,7 +108,7 @@ To view the status fields for a placement rule, you can use the console, the Kub
 
   2. Review the fields and values within the `status` section of the YAML content.
 
-* To use REST API, you need to use the [placement rule GET API](../apis/placementRules.json).
+* To use REST API, you need to use the [placement rule GET API](../apis/placementrules.json).
 
 ## Update a placement rule
 
@@ -133,7 +133,7 @@ To update a placement rule that is a separate resource, you can use the console,
 
 * To use the Kubernetes CLI tool, the steps are the same as for creating a placement rule.
 
-* To use REST API, you need to use the [placement rule PATCH API](../apis/placementRules.json).
+* To use REST API, you need to use the [placement rule PATCH API](../apis/placementrules.json).
 
 To update a placement rule that is defined within the definition for a deployable or subscription, the steps are the same as for updating that resource. For more information, see:
 
@@ -167,7 +167,7 @@ To delete a placement rule that is a separate resource, you can use the console,
      ```
 
 * To use REST API, you need to use the placement rule DELETE API:
-  * [Placement rule APIs](../apis/placementRules.json).
+  * [Placement rule APIs](../apis/placementrules.json).
 
 To delete a placement rule that is defined within the definition for a deployable or subscription, edit the definition for that resource to remove the placement rule definition. The steps are the same as for updating that resource. For more information, see:
 
