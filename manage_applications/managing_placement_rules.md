@@ -67,7 +67,6 @@ placement:
   placementRef:
     name:
     kind: PlacementRule
-    group: app.ibm.com
 ```
 
 Include the name of your placement rule as the value for the `name` field.  
