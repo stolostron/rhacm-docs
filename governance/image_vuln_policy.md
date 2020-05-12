@@ -1,8 +1,176 @@
 ## Image vulnerability policy
 
-Apply the image vulnerability policy to detect if container images have vulnerabilities by leveraging the Container Security Operator. For more information about the Security Operator, see the _Container Security Operator_ from the [Quay repository](https://github.com/quay/container-security-operator). The policy installs the Container Security Operator on your managed cluster if it is not installed. 
+Apply the image vulnerability policy to detect if container images have vulnerabilities by leveraging the Container Security Operator. The image vulnerability policy is checked by the Configuration policy controller. For more information about the Security Operator, see the _Container Security Operator_ from the [Quay repository](https://github.com/quay/container-security-operator). The policy installs the Container Security Operator on your managed cluster if it is not installed. 
 
-Your image vulnerability policy might resemble the following YAML file:
+## Image vulnerability policy YAML structure 
+
+   ```yaml
+   apiVersion: policy.mcm.ibm.com/v1alpha1
+   kind: Policy
+   metadata:
+     name: policy-imagemanifestvulnpolicy
+     namespace: default
+     annotations:
+       policy.mcm.ibm.com/standards:
+       policy.mcm.ibm.com/categories:
+       policy.mcm.ibm.com/controls:
+   spec:
+     complianceType:
+     remediationAction:
+     disabled:
+     namespaces:
+       exclude:
+       include:
+     object-templates:
+       - complianceType:
+         objectDefinition:
+           apiVersion: operators.coreos.com/v1alpha1
+           kind: ClusterServiceVersion
+           metadata:
+             annotations:
+               capabilities:
+               categories:
+               containerImage:
+               createdAt:
+               description:
+               repository:
+               tectonic-visibility:
+             name:
+             namespace:
+           spec:
+             customresourcedefinitions:
+               owned:
+               - description:
+                 displayName:
+                 kind: ImageManifestVuln
+                 name: imagemanifestvulns.secscan.quay.redhat.com
+                 version: v1alpha1
+             description:
+             displayName:
+             install:
+               spec:
+                 deployments:
+                 - name:
+                   spec:
+                     replicas:
+                     selector:
+                       matchLabels:
+                         name:
+                     template:
+                       metadata:
+                         labels:
+                           name:
+                         name:
+                       spec:
+                         containers:
+                         - command:
+                           -
+                           -
+                           env:
+                           - name:
+                             valueFrom:
+                               fieldRef:
+                                 fieldPath:
+                           - name:
+                             valueFrom:
+                               fieldRef:
+                                 fieldPath:
+                           - name:
+                             valueFrom:
+                               fieldRef:
+                                 fieldPath:
+                           image:
+                           name: 
+                         serviceAccountName:
+                 permissions:
+                 - rules:
+                   - apiGroups:
+                     resources:
+                     verbs:
+                   - apiGroups:
+                     resources:
+                     verbs:
+                   - apiGroups:
+                     - ''
+                     resources:
+                     - secrets
+                     verbs:
+                     - get
+                   serviceAccountName:
+               strategy:
+             installModes:
+             - supported:
+               type:
+             - supported:
+               type:
+             - supported:
+               type:
+             - supported:
+               type:
+             keywords:
+             labels:
+               operated-by:
+             links:
+             - name: 
+               url:
+             - name:
+               url:
+             icon:
+             - base64data:
+               mediatype:
+             maturity:
+             maintainers:
+             - email:
+               name:
+             provider:
+               name:
+             selector:
+               matchLabels:
+                 operated-by:
+             version:
+             replaces:
+       - complianceType:
+         objectDefinition:
+           apiVersion: operators.coreos.com/v1alpha1
+           kind:
+           metadata:
+             name:
+             namespace:
+           spec:
+             channel:
+             installPlanApproval:
+             name:
+             source:
+             sourceNamespace:
+             startingCSV:
+       - complianceType:
+         objectDefinition:
+           apiVersion: secscan.quay.redhat.com/v1alpha1
+           kind:    
+   ```
+   
+## Image vulnerability policy YAML table
+
+<!--need to come back and revise the table, using as a place holder for now-->
+
+|Field|Description|
+|-- | -- |
+| apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
+| kind | Required. Set the value to `Policy` to indicate the type of policy. |
+| metadata.name | Required. The name for identifying the policy resource. |
+| metadata.namespaces | Optional. |
+| spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
+| remediationAction | Optional. Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. **Important**: Some policies may not support the enforce feature.|
+| disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
+| spec.complianceType | Required. Set the value to `"musthave"`|
+| spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
+{: caption="Table 1. Required and optional definition fields" caption-side="top"}
+
+
+<!--Subscription is mentioned in the policy, should consider referenceing users to the application resource page maybe? create a file name Managing image vulnerability policy to add tasks-->
+
+
+## Image vulnerability policy sample
 
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
@@ -171,7 +339,7 @@ Your image vulnerability policy might resemble the following YAML file:
            apiVersion: secscan.quay.redhat.com/v1alpha1
            kind: ImageManifestVuln     
    ```
- 
+
 ### Applying the image vulnerability policy
 
 Complete the following steps to apply the image vulnerability policy from the console:
@@ -180,5 +348,24 @@ Complete the following steps to apply the image vulnerability policy from the co
 2. From the navigation menu, click **Govern risk**. 
 3. Click **Create policy**. 
 4. Select **ImageManifestVulnPolicy** from the _Specifications_ field.
+
+## Viewing image vulnerability violations from the console
+
+1. From the navigation menu, click **Govern risk** to view a table list of your policies.
+2. Select the **`policy-imagemanifestvulnpolicy`** policy > **_Violations_ tab** to view the cluster location of the violation.
+
+   Your image vulnerability violation might resemble the following:
+
+   ```
+   imagemanifestvulns exist and should be deleted: [sha256.7ac7819e1523911399b798309025935a9968b277d86d50e5255465d6592c0266] in namespace default; [sha256.4109631e69d1d562f014dd49d5166f1c18b4093f4f311275236b94b21c0041c0] in namespace calamari; [sha256.573e9e0a1198da4e29eb9a8d7757f7afb7ad085b0771bc6aa03ef96dedc5b743, sha256.a56d40244a544693ae18178a0be8af76602b89abe146a43613eaeac84a27494e, sha256.b25126b194016e84c04a64a0ad5094a90555d70b4761d38525e4aed21d372820] in namespace multicluster-endpoint; [sha256.64320fbf95d968fc6b9863581a92d373bc75f563a13ae1c727af37450579f61a] in namespace openshift-cluster-version
+   ```
+
+3. Navigate to your OpenShift Container Platform console by selecting the _Cluster_ link.
+
+4. From the navigation menu on the OpenShift Container Platform console, click **Administration** > **Custom Resource Definitions**.
+
+5. Select **`imagemanifestvulns`** > **_Instances_ tab** to view all of the `imagemanifestvulns` instances.
+
+6. Select an entry to view more details.
 
 <!--will come back to review this, this a place holder-->
