@@ -14,7 +14,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [_etcd-operator_ does not reconcile the cluster](#etcd-operator-does-not-reconcile-the-cluster)
   - [Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported](#upgrading-an-ibm-red-hat-openshift-kubernetes-service-managed-cluster-is-not-supported)
   - [Importing IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters is not supported](#importing-ibm-red-hat-openshift-kubernetes-service-version-3.11-clusters-is-not-supported)
- 
+  - [All users with access to the Advanced Cluster Management for Kubernetes component namespaces are automatically granted cluster administrator access](#all-users-with-access-to-the-advanced-cluster-management-for-kubernetes-component-namespaces-are-automatically-granted-cluster-administrator-access)
   
 
 ## Certificate manager must not exist during an installation
@@ -117,6 +117,13 @@ When you upgrade your OpenShift Container Platform cluster and the etcd persiste
 You cannot upgrade an IBM Red Hat OpenShift Kubernetes Service managed cluster by using the Red Hat Advanced Cluster Management for Kubernetes interface.
 
 ## Importing IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters is not supported
+{1.0.0:2179}
 
 You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters. Later versions of IBM OpenShift Kubernetes Service are supported.
-{1.0.0:2179}
+
+## All users with access to the Advanced Cluster Management for Kubernetes component namespaces are automatically granted cluster administrator access
+{1.0.0:2135}
+
+The Advanced Cluster Management for Kubernetes components are installed in a single namespace. A `ServiceAgent` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Advanced Cluster Management for Kubernetes and to any ID with access to the namespace. For security, do not give anyone access to this namespace who does not already have at least cluster administrator access. 
+
+The `multicluster-endpoint`, which is the agent on the managed cluster, also requires cluster administrator privileges. The `multicluster-endpoint` is deployed into the `multicluster-endpoint` namespace. For security, do not give anyone access to the `multicluster-endpoint` namespace who does not already have at least cluster administrator access.
