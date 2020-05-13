@@ -132,9 +132,8 @@ When you upgrade your OpenShift Container Platform cluster and the etcd persiste
 
 The _Application Topology_ view from the _Topology_ menu displays only a summary of the application content. 
 
-Navigate to the _Applications_ menu and select an application to view topology and summary cards. To view complete and accurate content of the application, complete the following procedure:
+1. Navigate to _Observe environments_ and select **Topology**.
+2. Click **Go to the Applications page** to view complete and accurate content of the application.
 
-1. Hover on the icon for your _Application_ in the _Resource topology_ view.
-2. Select your application. 
-3. You can view a complete topology and summary cards for your selected application.
+You can also view the content by clicking on your application in the _Application_ table in the overview.
 
