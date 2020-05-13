@@ -1,24 +1,14 @@
 # IAM policy controller
 
-Identity and Access Management (IAM) policy controller can be used to receive notifications about IAM policy non-compliance.
+Identity and Access Management (IAM) policy controller can be used to receive notifications about IAM policies that are non-compliance. The compliance check is based on the parameters that you configure in the IAM policy, and on any backend change that you did to the role bindings in your cluster.
 
-The IAM policy controller checks for compliance of the number of cluster administrators that you allow in your cluster. The compliance check is based on the parameters that you configure in the IAM policy, and on any backend change that you did to the role bindings in your cluster. The IAM policy controller verifies compliance of the role bindings based on the RBAC that you configure in your cluster. The controller reports whether a role binding is compliant or not. For more information about RBAC in Red Hat Advanced Cluster Management for Kubernetes, see [Role-based access control (RBAC)](../governance/security.md).
+The IAM policy controller checks for compliance of the number of cluster administrators that you allow in your cluster. IAM policy controller communicates with the local Kubernetes API server. For more information, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
 
-- You must create an IAM policy, which is a CustomResourceDefinition (CRD) instance that contains the specification of the number of cluster administrators that can be configured in your cluster, and role bindings. The controller uses this policy to verify compliance. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
+The IAM policy controller runs on the hub cluster, and checks for compliance against the IAM policy that you define. IAM policy is created on your managed cluster. The IAM policy controller verifies and reports compliance of the role bindings based on the RBAC that you configure in your cluster. For more information about RBAC in Red Hat Advanced Cluster Management for Kubernetes, see [Role-based access control (RBAC)](../governance/security.md).
 
-- You must add the namespaces in the policy in the `namespaceSelector.include` section for which the controller needs to verify compliance. You can also add the namespaces that you do not want the controller to verify compliance for in the `namespaceSelector.exclude` section.
+<!--add policy controller YAML structure-->
 
-- The IAM policy controller runs on the managed cluster or hub cluster, and checks for compliance against the IAM policy that you define.
-
-**Policy enforcement**
-
-IAM policy controller can only inform the user about a policy violation. Set the `remediationAction` parameter to `inform`. View an example of an IAM policy in the following section.
-
-## IAM policy
-
-The IAM policy controller watches the namespaces that are included in the `namespaceSelector.include` section and reports whether the role binding in the namespaces and the policy itself are compliant or not.
-
-Following is a sample IAM policy definition:
+## IAM policy YAML structure
 
 ```yaml
 apiVersion: iam.policies.ibm.com/v1alpha1
@@ -28,52 +18,30 @@ metadata:
   label:
     category: "System-Integrity"
 spec:
-  # Include are the namespaces for which you want to watch the cluster administrator role and IAM role bindings, while exclude are the namespaces that you explicitly do not want to watch.
   namespaceSelector:
-    include: ["default","kube-*"]
-    exclude: ["kube-system"]
-  #labelSelector:
-    #env: "production"
-  # Options are `enforce` or `inform`. However, only the `inform` option is available in this release.
-  remediationAction: inform # enforce or inform
-  # Maximum number of cluster role bindings that are still valid before a namespace is considered as non-compliant.
-  disabled: false
-  maxClusterRoleBindingUsers: 5
-  # Maximum number of IAM role binding violations that are still valid before a namespace is considered as non-compliant.
-  maxRoleBindingViolationsPerNamespace: 2
+    include:
+    exclude:
+  remediationAction:
+  disabled:
+  maxClusterRoleBindingUsers:
+  maxRoleBindingViolationsPerNamespace:
 ```
 
-## Creating an IAM policy
+## IAM policy YAMl table
 
-You can create a YAML file for your IAM policy or create an IAM policy from the console.
+|Field|Description|
+|-- | -- |
+| apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
+| kind | Required. Set the value to `Policy` to indicate the type of policy. |
+| metadata.name | Required. The name for identifying the policy resource. |
+| metadata.label | Required. <!--add explanation-->|
+| metadata.category | Required. <!--add details-->|
+| spec | Required. Add configuration details for your policy. |
+| spec.namespaceSelector | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
+| remediationAction | Optional. Specifies the remediation of your policy. Enter  `inform`. <!--we can explain what the controller does when the value is set to this-->|
+| disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
+| spec.maxClusterRoleBindingUsers | Required. Maximum number of IAM rolebinding users that are able to create a IAM policy. <!--need to verify-->. |
+| spec.maxRolebindingViolationsPerNamespace | Required. Maximum number of IAM role binding violations that are valid before a namespace is considered as non-compliant.
+{: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-* [Creating a YAML file for an IAM policy](#creating-a-yaml-file-for-an-iam-policy)
-* [Creating an IAM policy from the console](#creating-an-iam-policy-from-the-console)
 
-### Creating a YAML file for an IAM policy
-
-Complete the following steps to create an IAM policy from the command-line interface (CLI):
-
-1. Create a YAML file with the IAM policy definition. See [IAM policy](#iam-policy).
-
-2. Apply the policy by running the following command:
-
-   ```
-   kubectl apply -f <iam-policy-file-name>  --namespace=<mcm_namespace>
-   ```
-
-3. Verify and list the policy by running the following command:
-
-   ```
-   kubectl get <iam-policy-file-name> --namespace=<mcm_namespace>
-   ```
-
-### Creating an IAM policy from the console
-
-1. Log in to your cluster from the console.
-2. From the navigation menu, click **Govern risk**.
-3. Click **Create policy**.
-4. Copy and paste the IAM policy definition in the **Create policy** window. See [IAM policy](#iam-policy).
-5. Click **Create policy**.  
-
-An IAM policy is created. See [Configuration policy samples](../governance/policy_samples.md) to view policy samples that can be applied to your IAM policies.
