@@ -107,7 +107,6 @@
      * [Troubleshooting cluster in console with unknown status](troubleshoot_acm/trouble_import_status.md)
      * [Troubleshooting cluster with unknown status](troubleshoot_acm/trouble_console_status.md)
      * [Troubleshooting a default storage class error when creating a cluster on bare metal](trouble_storage_class.md)
-     * [Troubleshooting cert-manager-webhook](troubleshoot_acm/trouble_cert_webhook.md) 
-     
+     * [Troubleshooting cert-manager-webhook](troubleshoot_acm/trouble_cert_webhook.md)
 
 
