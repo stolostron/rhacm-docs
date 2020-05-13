@@ -59,7 +59,7 @@ Subscriptions can filter the deployables that are promoted to a channel to selec
 
         Ensure that your new subscription is listed in the resulting output.
 
-   * To use REST API, you need to use the [subscription POST API](../apis/mcm/subscriptions.json).
+   * To use REST API, you need to use the [subscription POST API](../apis/subscriptions.json).
 
 After your subscription is created, your subscription can have one of the following statuses:
 
@@ -142,7 +142,7 @@ For more information about the resource definition for an application, see [Crea
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a subscription.
 
-   * To use REST API, use the [subscription PATCH API](../apis/mcm/subscriptions.json).
+   * To use REST API, use the [subscription PATCH API](../apis/subscriptions.json).
 
 ## Scheduling resource deployments for a subscription
 
@@ -199,7 +199,7 @@ To delete a subscription, you can use the console, the Kubernetes command line i
      kubectl get Subscription <name>
      ```
 
-* To use REST API, use the [subscription DELETE API](../apis/mcm/subscriptions.json).
+* To use REST API, use the [subscription DELETE API](../apis/subscriptions.json).
 
 ### Package overrides
 
