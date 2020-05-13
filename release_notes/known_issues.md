@@ -130,8 +130,11 @@ When you upgrade your OpenShift Container Platform cluster and the etcd persiste
 ## Helm release name is not exact on Topology view
 <!--TP:1593-->
 
-The _Application Topology_ view from the _Topology_ menu displays only a summary of the application content. To view complete and accurate content of the application, complete the following procedure:
+The _Application Topology_ view from the _Topology_ menu displays only a summary of the application content. 
 
-1. Navigate to the _Applications_ menu.
+Navigate to the _Applications_ menu and select an application to view topology and summary cards. To view complete and accurate content of the application, complete the following procedure:
+
+1. Hover on the icon for your _Application_ in the _Resource topology_ view.
 2. Select your application. 
 3. You can view a complete topology and summary cards for your selected application.
+
