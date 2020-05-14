@@ -23,7 +23,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [_etcd-operator_ does not reconcile the cluster](#etcd-operator-does-not-reconcile-the-cluster)
   - [Helm release name is not exact on Topology view](#helm-release-name-is-not-exact-on-topology-view)
   - [Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported](#upgrading-an-ibm-red-hat-openshift-kubernetes-service-managed-cluster-is-not-supported)
-  - [Importing IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters is not supported](#importing-ibm-red-hat-openshift-kubernetes-service-version-3.11-clusters-is-not-supported)
+  - [Importing IBM Red Hat OpenShift Kubernetes Service 3.11 clusters is not supported](#importing-IBM-Red-Hat-OpenShift-Kubernetes Service-311-clusters-not-supported)
  
 ## Certificate manager must not exist during an installation
 <!--TP:issue#-->
@@ -140,12 +140,12 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 You can also view the content by clicking on your application in the _Application_ table in the overview.
 
 ## Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported
-{1.0.0:2131}
+<!--1.0.0:2131-->
 
 You cannot upgrade an IBM Red Hat OpenShift Kubernetes Service managed cluster by using the Red Hat Advanced Cluster Management for Kubernetes interface.
 
-## Importing IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters is not supported
+## Importing IBM Red Hat OpenShift Kubernetes Service 3.11 clusters is not supported
+<!--1.0.0:2179-->
 
 You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters. Later versions of IBM OpenShift Kubernetes Service are supported.
-{1.0.0:2179}
 

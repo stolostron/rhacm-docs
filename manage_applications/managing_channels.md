@@ -36,7 +36,9 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
 1. Compose your channel definition YAML content. To create or update a channel resource, you must first compose the YAML file that defines the resource. For more information about the YAML structure, including the required fields, see [Channel definition YAML structure](#channel-yaml-structure).
 
-2. Optional. If you are creating an `Namespace` type channel, create the namespace on your hub cluster. You can define the namespace as part of your YAML definition or use the Kubernetes command line interface (`kubectl`) tool to create the namespace.
+2. Ensure that you create your channel in a unique namespace. All channels need an individual namespace, except GitHub channels, which can share a namespace with another channel.
+
+3. Optional. If you are creating an `Namespace` type channel, create the namespace on your hub cluster. You can define the namespace as part of your YAML definition or use the Kubernetes command line interface (`kubectl`) tool to create the namespace.
   
    To use the Kubernetes CLI tool, run the following command. Replace `namespace name` with the name for your new namespace.
 
@@ -44,7 +46,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
    kubectl create namespace <namespace name>
    ```
 
-3. Optional. If you need or want to use a Kubernetes Secret for authenticating the access to a repository or chart by the channel, create the Kubernetes Secret resource. You can use the Kubernetes command line interface (`kubectl`) tool to create the Kubernetes Secret by running the following command:
+4. Optional. If you need or want to use a Kubernetes Secret for authenticating the access to a repository or chart by the channel, create the Kubernetes Secret resource. You can use the Kubernetes command line interface (`kubectl`) tool to create the Kubernetes Secret by running the following command:
 
     ```
     kubectl create secret <secret name> generic --from-literal=user --from-literal=password=
@@ -52,7 +54,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    You can use a secret for authentication with only `HelmRepo`, `ObjectBucket`, and `GitHub` type channels. To associate a secret with a channel, include the `spec.secretRef.name` setting in your channel YAML definition.
 
-4. Create the channel within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
+5. Create the channel within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:  
 
    * To use the console,
 
