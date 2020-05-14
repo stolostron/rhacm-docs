@@ -57,5 +57,5 @@ There are some things that can affect the time that it takes to run and return r
 
 * Searching for a keyword is not efficient.
 * The first search takes longer than later searches because it takes additional time to build the RBAC filter.
-* The length of time to complete a request is proportional to the number of namespaces on the hub cluster.
+* The length of time to complete a request is proportional to the number of namespaces and resources the user is authorized to access.
 * The worst performance is observed for a request by a non-administrator user with access to all of the namespaces, or all of the managed clusters.
