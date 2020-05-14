@@ -160,3 +160,5 @@ Complete the following steps to replace your BYO ingress certificate:
    ```
    oc delete secret -n open-cluster-management byo-ingress-tls-secret
    ```
+
+Return to the [Security page](../governance/security.md) for more information on securing your cluster.
