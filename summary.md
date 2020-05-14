@@ -60,7 +60,7 @@
        * [Subscription samples](manage_applications/subscription_sample.md)
        * [Placement rule samples](manage_applications/placement_sample.md)
  * [Security](governance/security.md)
-   * [Certificates in Red Hat Advanced Cluster Management for Kubernetes](cert_manager/certificates.md)
+   * [Certificates](cert_manager/certificates.md)
        * [Replacing the root CA certificate](cert_manager/cert_root_ca.md)
        * [Replacing management ingress certificates](cert_manager/cert_mgmt_ingress.md)
    * [Governance and risk](governance/compliance_intro.md)
