@@ -40,4 +40,4 @@ View the following table of the internal services that use `cert-manager` to cre
 | `topology-276c4-ca-cert` | `multicluster-hub-mcm-server-ca-issuer` | `topology-b24e0-topology-secrets` | Topology |
 {: caption="Table 1. Certificates Red Hat Advanced Cluster Management for Kubernetes" caption-side="top"}
 
-Use the certificate policy controller to create and manage certificate policies. See [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md) for more for more information about controllers.
+Use the certificate policy controller to create and manage certificate policies. See [Policy controllers](policy_controllers.md) to learn more about controllers. Return to the [Security page](security.md) for more information. 
