@@ -39,7 +39,7 @@ You can start managing applications on any created and imported managed clusters
 
 You can also manage security and compliance across your created and imported managed clusters.
 
-1. Create a policy using the _policy_ templates. See the [policy overview](../governance/policy_overview.md) for details about how to create a policy with a `.yaml` template.
+1. Create a policy using the _policy_ templates. See the [policy overview](../governance/policy_example.md) for details about how to create a policy with a `.yaml` template.
 
 2. From the _Policies_ page, you can view a summary of cluster and policy violations. 
 

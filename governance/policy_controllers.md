@@ -6,9 +6,9 @@ Create and customize policies with the out of the box policy templates. **Import
 
 View the following topics to learn more about the following Red Hat Advanced Cluster Management for Kubernetes policy controllers:
 
-- [Configuration policy controller](../governance/config_policy_ctrl.md)
-- [Certificate policy controller](../governance/cert_policy_ctrl.md)
-- [IAM policy controller](../governance/iam_policy_ctrl.md)
-- [CIS policy controller](../governance/cis_policy_ctrl.md)
+- [Configuration policy controller](config_policy_ctrl.md)
+- [Certificate policy controller](cert_policy_ctrl.md)
+- [IAM policy controller](iam_policy_ctrl.md)
+- [CIS policy controller](cis_policy_ctrl.md)
 
-
+Refer to [Governance and risk](compliance_intro.md) for more topics about managing your policies.

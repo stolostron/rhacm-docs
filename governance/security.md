@@ -35,5 +35,5 @@ View the RBAC table for the Red Hat Advanced Cluster Management console:
 
 Review the following topics to learn more about securing your cluster:
 
-- [Certificates in Red Hat Advanced Cluster Management for Kubernetes](../cert_manager/certificates.md)
-- [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md)
+- [Certificates](../cert_manager/certificates.md)
+- [Governance and risk](../governance/compliance_intro.md)

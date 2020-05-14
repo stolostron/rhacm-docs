@@ -11,8 +11,7 @@ You can view a table list of violations. The following details are provided in t
 
 Learn about the structure of an Red Hat Advanced Cluster Management for Kubernetes policy, and how to use the Red Hat Advanced Cluster Management for Kubernetes Governance and risk dashboard.
 
-- [Red Hat Advanced Cluster Management for Kubernetes policy overview](policy_example.md)
-- [Red Hat Advanced Cluster Management for Kubernetes policy controllers](policy_controllers.md)
-- [Red Hat Advanced Cluster Management for Kubernetes policy samples](policy_sample_intro.md)
-- [Creating an Red Hat Advanced Cluster Management for Kubernetes policy](create_policy.md)
-- [Managing a security policy](manage_grc_policy.md)
+- [Policy overview](policy_example.md)
+- [Policy controllers](policy_controllers.md)
+- [Policy samples](policy_sample_intro.md)
+- [Manage security policies](manage_policy_overview.md)
