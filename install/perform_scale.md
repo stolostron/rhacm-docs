@@ -24,7 +24,7 @@ The scalability of the Search component depends on the performance of the data s
 
 ### Physical memory
 
-RedisGraph is an in-memory graph database. The memory required is proportional to the number of resources (ConfigMaps, Deployments, Pods, etc) and their relationships in the cluster.
+Search keeps the data in-memory to achieve fast response times. The memory required is proportional to the number of resources (ConfigMaps, Deployments, Pods, etc) and their relationships in the cluster.
 
 | Clusters | Kubernetes resources  | Relationships  | Observed size (with simulated data) |
 | ------- | --------| -----|----- |
