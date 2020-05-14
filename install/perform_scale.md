@@ -16,7 +16,7 @@ The Advanced Cluster Management for Kubernetes hub cluster provided good perform
 
 ## Search scalability
 
-The scalability of the Search component depends on the performance of the data store, RedisGraph. The following variables are important to the search performance:
+The scalability of the Search component depends on the performance of the data store. The following variables are important when analyzing the search performance:
 
 * Physical memory
 * Write throughput (Cache recovery time)
