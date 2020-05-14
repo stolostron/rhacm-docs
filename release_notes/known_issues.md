@@ -23,7 +23,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [_etcd-operator_ does not reconcile the cluster](#etcd-operator-does-not-reconcile-the-cluster)
   - [Helm release name is not exact on Topology view](#helm-release-name-is-not-exact-on-topology-view)
   - [Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported](#upgrading-an-ibm-red-hat-openshift-kubernetes-service-managed-cluster-is-not-supported)
-  - [Importing IBM Red Hat OpenShift Kubernetes Service 3.11 clusters is not supported](#importing-IBM-Red-Hat-OpenShift-Kubernetes Service-311-clusters-not-supported)
+  - [Importing IBM Red Hat OpenShift Kubernetes Service 3.11 clusters is not supported](#importing-ibm-red-hat-openshift-kubernetes-service-311-clusters-is-not-supported)
  
 ## Certificate manager must not exist during an installation
 <!--TP:issue#-->
