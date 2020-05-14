@@ -35,7 +35,7 @@ Search keeps the data in-memory to achieve fast response times. The memory requi
 | 50 medium     | 250,000 | 750,000  | 878 MB | 
 
 Table: Physical memory data
-
+By default, we deploy the datastore with a memory limit of 1Gi.  If you are managing larger clusters, you may need to increase this limit by editing the deployment named `search-prod-xxxxx-redisgraph` in the open-cluster-management namespace.
 ### Write throughput (cache recovery time)
 
 Most clusters in steady state generate a small number of resource updates. The highest rate of updates happen when the data in RedisGraph is cleared, which causes the remote collectors to synchronize their full state around the same time.
