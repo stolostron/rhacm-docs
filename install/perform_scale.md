@@ -38,7 +38,7 @@ Table: Physical memory data
 
 ### Write throughput (cache recovery time)
 
-Most clusters in steady state generate a small number of resource updates. The highest rate of updates happen when the data in RedisGraph is cleared, which causes the remote collectors to get close their full state around the same time.
+Most clusters in steady state generate a small number of resource updates. The highest rate of updates happen when the data in RedisGraph is cleared, which causes the remote collectors to synchronize their full state around the same time.
 
 | Clusters | Kubernetes resources  | Relationships  | Average recovery time from simulation |
 | ------- | --------| -----|----- |
@@ -59,4 +59,3 @@ There are some things that can affect the time that it takes to run and return r
 * The first search takes longer than later searches because it takes additional time to build the RBAC filter.
 * The length of time to complete a request is proportional to the number of namespaces on the hub cluster.
 * The worst performance is observed for a request by a non-administrator user with access to all of the namespaces, or all of the managed clusters.
-
