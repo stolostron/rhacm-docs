@@ -3,10 +3,19 @@
 <!-- 
 Please follow this format:
 
-## Title of known issue, be sure to match header and make title, header unique
-Hidden comment: Release: #issue
+Title of known issue, be sure to match header and make title, header unique
 
-Known issue with workaround. If workaround requires many steps, consider a troubleshooting topic.
+Hidden comment: Release: #issue
+Known issue with workaround if:
+
+- Doesn't work the way it should
+- Straightforward to describe
+- Good to know before getting started
+- Quick workaround, of any
+- Applies to most, if not all, users
+- Something that is likely to be fixed next release (never preannounce)  
+
+Or consider a troubleshooting topic. 
 -->
 
 Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
