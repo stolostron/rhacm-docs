@@ -141,12 +141,11 @@ When you upgrade your OpenShift Container Platform cluster and the etcd persiste
 ## Helm release name is not exact on Topology view
 <!--TP:1593-->
 
-The _Application Topology_ view from the _Topology_ menu displays only a summary of the application content. 
+The _Application Topology_ view from the _Topology_ menu displays only a summary of the application content. To view complete and accurate content of the application, complete the following procedure:
 
-1. Navigate to _Observe environments_ and select **Topology**.
-2. Click **Go to the Applications page** to view complete and accurate content of the application.
-
-You can also view the content by clicking on your application in the _Application_ table in the overview.
+1. Navigate to the _Applications_ menu.
+2. Select your application. 
+3. You can view a complete topology and summary cards for your selected application.
 
 ## Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported
 <!--1.0.0:2131-->
