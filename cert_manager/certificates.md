@@ -1,4 +1,4 @@
-# Certificates in Red Hat Advanced Cluster Management for Kubernetes
+# Certificates
 
 Various certificates are created and used throughout Red Hat Advanced Cluster Management for Kubernetes.
 
