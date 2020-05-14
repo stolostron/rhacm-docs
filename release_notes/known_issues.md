@@ -13,7 +13,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [At logout, user `kubeadmin` gets extra browser tab with blank page](#at-logout-user-kubeadmin-gets-extra-browser-tab-with-blank-page)
   - [_etcd-operator_ does not reconcile the cluster](#etcd-operator-does-not-reconcile-the-cluster)
   - [Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported](#upgrading-an-ibm-red-hat-openshift-kubernetes-service-managed-cluster-is-not-supported)
-  - [Importing IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters is not supported](#importing-ibm-red-hat-openshift-kubernetes-service-version-3.11-clusters-is-not-supported)
+  - [Importing IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters is not supported](#importing-ibm-red-hat-openshift-kubernetes-service-version-311-clusters-is-not-supported)
  
   
 
