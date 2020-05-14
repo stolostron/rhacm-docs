@@ -1,19 +1,14 @@
-# Install on Restricted Networks
+# Install on Restricted Networks for Technical Preview
 
 ACM can be installed into OCP clusters that reside in a restricted networks.
 
-If ACM is available in the OLM Operator Catalogs, you can follow these steps:
+These are the manual steps to follow to copy ACM images into the mirror registry as preperation for installing ACM in a Restricted Network.
 
-1. Enable disconnected OLM
-2. Install ACM (reference the same steps in `install_connected.md`)
-
-If ACM is not yet in the OLM Operator Catalog, then you need to follow these steps:
-
-1. Enable disconnected OLM
-2. Manually mirror ACM
+1. Enable disconnected OLM Redhat Operators and Community Operators
+2. Manually mirror ACM images and setup ImageContentSourcePolicy
 3. Install ACM (reference the same steps in `install_connected.md`)
 
-## Enable disconnected OLM
+## 1. Enable disconnected OLM
 
 Follow the steps in the Openshift documentatoon for configuring disconnected OLM for the Red Hat Operator catalog and the Community Operator catalog here:
 
@@ -23,42 +18,49 @@ If you do not already have a mirror registry, you can follow the instructions he
 
 https://docs.openshift.com/container-platform/4.4/installing/install_config/installing-restricted-networks-preparations.html#installing-restricted-networks-preparations
 
-## Manually Mirror ACM
+## 2. Manually Mirror ACM Images
 
-This section describes the steps that can be followed if installing ACM in a disconnected environment before ACM is added to the OLM Catalog.
+This section describes the steps that can be followed to install ACM in a disconnected environment before ACM is added to the OLM Catalog.
 
-Steps:
+### Dependencies
 
-1. Select the snapshot version of ACM you want to install.
-2. Extract the image manifest.json from the multiclusterhub operator image
-3. Parse the manifest.json and mirror the images into your mirror registry (see Sample Script below)
-4. Create the ImageContentSourcePolicy that maps the quay.io image path to your mirror registry
+- Ensure you have `skopeo` tool on your system that will perform the image mirror
+- Ensure you have a mirror registry. See these steps for guidance.
 
-### 1. Select the SNAPSHOT version of ACM
+### Steps
 
-You can find a list of available tags in the [Quay.io multiclusterhub-operator-index](https://quay.io/open-cluster-management/multiclusterhub-operator-index)
+1. Clone this github repo: https://github.com/cdoan1/tech-preview.git
 
-Then pull the `multiclusterhub-operator` image with the desired SNAPSHOT tag.
+   ```bash
+   git clone https://github.com/cdoan1/tech-preview.git
+   ```
 
-Examples:
+2. Prepare a pull secret that allows access to your mirror registry and the quay.io/acm-d registry. The your pull secret will look something like this, given an example where the mirror registry is `registry.example.com`:
 
-```bash
-podman pull quay.io/open-cluster-management/multiclusterhub-operator:1.0.0-SNAPSHOT-2020-05-07-19-51-26
-```
+   ```bash
+   cat acmd-pull-secret.json
+   {
+   "auths": {
+       "registry.example.com:5000": {
+        "auth": "REDACTED"
+       },
+       "quay.io": {
+        "auth": "REDACTED"
+       },
+       ...
+   }
+   ```
 
-### 2. Extract the manifest.json from the ACM Operator
+3. Run the following python script to mirror the images into your registry.
 
-```bash
-mkdir tmp.work && cd tmp.work
-CONTAINERID=$(podman create quay.io/open-cluster-management/multiclusterhub-operator:1.0.0-SNAPSHOT-2020-05-07-19-51-26 ls)
-podman export ${CONTAINERID} | tar xf -
-cp ./image-manifests/*.json ..
-cd .. && rm -rf tmp.work
-```
+   ```bash
+   ./mirror-image.py -p acmd-pull-secret.json -m registry.example.com:5000
+   ```
 
-### Parse the manifest.json and mirror the images
+4. Apply the generated ICSP manifest.
 
-Reference OCP docs on using `skopeo`
-Reference the python script to do this:
+   > WARNING: Applying the ImageContentSourcePolicy will update and reboot all the nodes in your cluster.
 
-### Create the ImageContentSourcePolicy
+   ```bash
+   oc apply -f 99-acm-images-icsp.yaml
+   ```
