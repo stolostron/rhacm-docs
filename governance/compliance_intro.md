@@ -14,5 +14,4 @@ Learn about the structure of an Red Hat Advanced Cluster Management for Kubernet
 - [Policy overview](policy_example.md)
 - [Policy controllers](policy_controllers.md)
 - [Policy samples](policy_sample_intro.md)
-- [Creating an Red Hat Advanced Cluster Management for Kubernetes policy](create_policy.md)
-- [Managing a security policy](manage_grc_policy.md)
+- [Manage security policies](manage_policy_overview.md)
