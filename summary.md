@@ -78,7 +78,7 @@
        * [Pod nginx policy](governance/pod_nginx_policy.md)
        * [Pod security policy](governance/psp_policy.md)
        * [Role policy](governance/role_policy.md)
-       * [Rolebinding policy](governance/rolebind_policy.md)
+       * [Rolebinding policy](governance/rolebinding_policy.md)
        * [Security context constraints (SCC) policy](governance/scc_policy.md)
        * [Certificate policy controller sample](governance/cert_policy_ctrl.md)
        * [CIS policy controller sample](governance/cis_policy_ctrl.md)
@@ -108,5 +108,3 @@
      * [Troubleshooting cluster with unknown status](troubleshoot_acm/trouble_console_status.md)
      * [Troubleshooting a default storage class error when creating a cluster on bare metal](troubleshoot_acm/trouble_storage_class.md)
      * [Troubleshooting cert-manager-webhook](troubleshoot_acm/trouble_cert_webhook.md)
-
-
