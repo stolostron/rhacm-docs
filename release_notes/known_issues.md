@@ -112,11 +112,11 @@ When you are logged in as `kubeadmin` and you click the **Log out** option in t
 When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, the `etcd-operator` does not reconcile you managed clusters. As a result, your managed clusters are removed and you lose most data. 
 
 ## Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported
-[[1.0.0:2131]]
+//1.0.0:2131
 
 You cannot upgrade an IBM Red Hat OpenShift Kubernetes Service managed cluster by using the Red Hat Advanced Cluster Management for Kubernetes interface.
 
 ## Importing IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters is not supported
-[[1.0.0:2179]]
+//1.0.0:2179
 
 You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters. Later versions of IBM OpenShift Kubernetes Service are supported.
