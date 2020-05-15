@@ -90,22 +90,7 @@ Spec:
 
    ```
 
-### Configuration policy YAML table
-
-|Field|Description|
-|-- | -- |
-| apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
-| kind | Required. Set the value to `Policy` to indicate the type of policy. |
-| metadata.name | Required. The name for identifying the policy resource. |
-| metadata.namespaces | Optional. |
-| spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
-| remediationAction | Optional. Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. **Important**: Some policies may not support the enforce feature.|
-| disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
-| spec.complianceType | Required. Set the value to `"musthave"`|
-| spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
-{: caption="Table 1. Required and optional definition fields" caption-side="top"}
-
 <!--Still need to add doc to create a custom controller #1224-->
 Learn about how policies are applied on your hub cluster. See [Policy samples](policy_sample_intro.md) for more details. Learn how to create and customize policies, see [Manage security policies](manage_policy_overview.md). 
 
-See [Policy controllers](../governance/policy_controllers.md) for more information about controllers.
+See [Policy controllers](policy_controllers.md) for more information about controllers.

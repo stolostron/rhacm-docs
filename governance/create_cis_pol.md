@@ -183,7 +183,7 @@ Complete the following steps to enable the CIS policy controller feature flag fr
 
 4. Save your deployment and close the Visual Web Terminal.
 
-5. The associated pod restarts. Attempt to create the policy again. See, [Creating a CIS policy from the console](#create_policy_console).
+5. The associated pod restarts. Attempt to create the policy again.
 
 ## Remediating CIS policy violation
 
