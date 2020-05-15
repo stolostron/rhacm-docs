@@ -11,7 +11,6 @@ All of the application component resources for Red Hat Advanced Cluster Manageme
 View the following application resource samples:
 
 - [Application samples](app_sample.md)
-- [Deployable samples](deployable_sample.md)
 - [Secret samples](secret_sample.md)
 - [Channel samples](channel_sample.md)
 - [Subscription samples](subscription_sample.md)
