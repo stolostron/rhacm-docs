@@ -6,19 +6,16 @@ Create a security policy to report and validate your cluster compliance based on
 
 As you create your new policy from the console, a YAML file is also created.
 
-  - [Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy](#creating-a-yaml-file-for-an-red-hat-advanced-cluster-management-for-kubernetes-policy)
-  - [Creating a cluster security policy from the Red Hat Advanced Cluster Management for Kubernetes console](#creating-a-cluster-security-policy-from-the-red-hat-advanced-cluster-management-for-kubernetes-console)
-
 The following objects are required for your Red Hat Advanced Cluster Management for Kubernetes policy:
 
   *  _PlacementRule_: Defines a _cluster selector_ where the policy must be deployed.
   * _PlacementBinding_: Binds the placement to a PlacementPolicy.
 
-View more descriptions of the policy YAML files in the [Red Hat Advanced Cluster Management for Kubernetes policy example](policy_example.md).
+View more descriptions of the policy YAML files in the [Policy example](policy_example.md).
 
-## Creating a YAML file for an Red Hat Advanced Cluster Management for Kubernetes policy
+## Creating a YAML file from the command line interface
 
-Complete the following steps to create a policy:
+Complete the following steps to create a policy from the CLI:
 
 1. Create a policy by running the following command:
 
@@ -57,7 +54,7 @@ Complete the following steps to create a policy:
                verbs: ["get", "list", "watch", "create", "delete","patch"]
    ```
 
-3. Define a `PlacementRule`. Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. View the [PlacementRule definition YAML structure](../manage_applications/managing_placement_rules.md#placement-rule-definition-yaml-structure). Your `PlacementRule` might resemble the following content:
+3. Define a `PlacementRule`. Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. View the [PlacementRule definition YAML structure](../manage_applications/managing_placement_rules.md). Your `PlacementRule` might resemble the following content:
 
    ```yaml
    apiVersion: apps.open-cluster-management.io/v1
@@ -179,6 +176,6 @@ Complete the following steps to create a policy:
 
 A cluster policy is created.
 
-To manage your policies, see [Managing a security policy](../governance/manage_grc_policy.md) for more information. You can also create custom policy controllers to enforce specific policies. For more information, see [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
+To manage your policies, see [Manage security policies](manage_policy_overview.md) for more information. You can also create custom policy controllers to enforce specific policies. For more information, see [Policy controllers](policy_controllers.md).
 
-See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md) for more information about policies.
+See [Governance and risk](compliance_intro.md) for more information about policies.
