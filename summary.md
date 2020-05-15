@@ -42,6 +42,7 @@
    * [Upgrading a cluster](manage_cluster/upgrade.md)
  * [Application management](manage_applications/app_management_overview.md)
    * [Application lifecycle](manage_applications/app_lifecycle.md)
+     * [Application model and definitions](manage_applications/app_model.md)
    * [Application resources](manage_applications/app_resources.md)
      * [Managing application resources](manage_applications/managing_apps.md)
        * [Managing deployables](manage_applications/managing_deployables.md)

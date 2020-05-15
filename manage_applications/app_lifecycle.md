@@ -1,47 +1,20 @@
 # Application management lifecycle
 
-Red Hat Advanced Cluster Management for Kubernetes provides enhanced application management capabilities through a Kubernetes resource based application model and channel and subscription based deployment options. The application model and deployment capabilities are designed to unify and simplify the deployment experience for creating and managing your application across both single cluster and multi-cluster scenarios.
+Red Hat Advanced Cluster Management for Kubernetes provides enhanced application management capabilities through a Kubernetes resource based application model. The application model centers around managed clusters subscribing repositories. The application model groups all subscriptions related to an application and displays a topology that is easy to understand and use. The topology view can scale with the number of managed clusters, providing insight and management, without context switching between clusters.
 
-With these application management capabilities, you can use channels and subscriptions to gain improved continuous and automated delivery of your deployables to target managed clusters. For more information about deployables, see [Application resources](app_lifecycle.md#deployables).
+The Application model consists of the following Kubernetes custom resources:
 
-Your developers and DevOps personnel can use these resources to deploy, update, manage, and monitor versions of your applications across multiple environments through complete automation.
+   - Channel: Resource representing a source repository such as a Github repository, Helm chart repository, Objectstore with YAML, or namespace containing Kubernetes resource templates(deployables)
+   - Subscription: Subscribes a repository and delivers kubernetes resources.
+   - Placement Rule: Referenced by subscriptions, and supplies the target managed clusters that must subscribe to a channel.
+   - Application: Used to select all of the subscriptions that are part of your application(a visual aid)
 
-  * [Application model](#application-model)
+Learn more about the Application lifecycle from the following topics.
+
+  * [Application model and definitions](app_model.md)
   * [Application resource interactions and lifecycle](#application-resource-interactions-and-lifecycle)
   * [Deploying application resources](#deploying-application-resources)
   * [Managing applications with the console](#managing-applications-with-the-console)
-
-## Application model
-
-The application model and deployment options work for, and scale, any clustered environment and application management requirements. This scalability supports both a single application developer that builds and deploys an application from their device to a multicloud environment, or a cloud operations personnel that needs to deploy and update hundreds of applications across hundreds of clusters. With this application model and deployment option, you can separate your organizations roles for developing applications and DevOps. Your application developers can focus on developing and defining the application resources. Meanwhile, your DevOps personnel can focus on creating and managing the channels and subscriptions to ensure that resources are deployed correctly. You can use the application model and deployment options to update and deploy one or more applications to hundreds of managed clusters, each in a different physical location.
-
-Within this application model, applications are composed of multiple resources. The main foundation resources for Red Hat Advanced Cluster Management for Kubernetes applications are the `application` resource and the `deployable` resource. The overrides and dependencies for deployables are defined within the definition for the deployables. The placement rules for deployables can be defined as a stand-alone resource and referenced by the deployable.
-
-* Applications (`application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for grouping application components.
-
-* Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that contain templates to wrap other Kubernetes resources or to represent Helm releases for deployment to clusters. Deployables are custom resource definitions that help you deploy to clusters.
-
-* Placement rules (`placementrule.apps.open-cluster-management.io`) define the target clusters where deployables can be deployed. You can use placement rules to help you facilitate the multi-cluster deployment of your deployables. Placement rules can be referenced by deployables and subscriptions. Placement rules that are defined as stand-alone resources can be shared across deployables.
-
-To better integrate with continuous delivery systems, you can use channel and subscription resources. Channels and subscriptions provide you with improved continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications.
-
-* Channels (`channel.apps.open-cluster-management.io`) define a namespace within the hub cluster and point to a physical place where resources are stored for deployment; such as an object store, Kubernetes namespace, Helm repository, or GitHub repository. Channels are custom resource definitions that can help you streamline deployments and separate cluster access. Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables within a channel can be accessed by only the clusters that subscribe to that channel.
-
-* Subscriptions (`subscription.apps.open-cluster-management.io`) are sets of definitions that identify deployables within channels by using annotations, labels, and versions. The subscription operator can monitor the channel for new or updated deployables, such as an updated Helm release or new Kubernetes deployable object. Then, the operator can download the Kubernetes deployable object or Helm release directly from the source location (Helm repository, GitHub repository, object store, or namespace) to the target managed clusters.
-
-Although single and multi-cluster applications both use the same Kubernetes specifications, multi-cluster applications involve more automation of the deployment and application management lifecycle. The application definition is based on the Custom Resource Definition (CRD) of the [Kubernetes SIG Application CRD definition](https://github.com/kubernetes-sigs/application). This definition is used for applications in both single and multi-cluster environments for grouping application resources. The other resource kinds for the application model (deployables, channels, subscriptions, and placement rules) are based on specifications that are created by IBM. These specifications use common Kubernetes resource fields for defining annotations, labels, metadata, and more, and support custom fields and values.
-
-For more information about these resources, see [Application resources](app_resources.md).
-
-All of the application component resources for Red Hat Advanced Cluster Management for Kubernetes applications are defined in YAML files. When you need to create or update an application component resource, you need to create or edit the appropriate spec section to include the labels for defining your resource. For more information about creating and managing application resources, see:
-
-* [Creating and managing application resources](managing_apps.md)
-* [Creating and managing deployables](managing_deployables.md)
-* [Creating and managing channels](managing_channels.md)
-* [Creating and managing subscriptions](managing_subscriptions.md)
-* [Creating and managing placement rules](managing_placement_rules.md)
-
-The Kubernetes apiserver is the main service for providing application management functions. All application resource specs are accessible by using the Kubernetes CLI tool. In addition, a hcmctl is provided to wrap kubectl commands for better and smoother CLI experiences.
 
 ## Application resource interactions and lifecycle
 
