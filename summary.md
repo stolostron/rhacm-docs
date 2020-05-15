@@ -54,7 +54,6 @@
        * [Managing applications with the console](manage_applications/managing_apps_console.md)
     * [Application resource samples](manage_applications/app_resource_samples.md)
        * [Application samples](manage_applications/app_sample.md)
-       * [Deployable samples](manage_applications/deployable_sample.md)
        * [Secret samples](manage_applications/secret_sample.md)
        * [Channel samples](manage_applications/channel_sample.md)
        * [Subscription samples](manage_applications/subscription_sample.md)

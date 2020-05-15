@@ -26,7 +26,7 @@ Apply the namespace policy to define specific rules for your namespace.
         ...
    ```
 
-## Namespace policy table
+## Namespace policy YAML table
 <!--this table is a place holder until i update the parameters-->
 |Field|Description|
 |-- | -- |

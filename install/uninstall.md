@@ -1,12 +1,26 @@
 # Uninstalling
 
-When you uninstall Red Hat Advanced Cluster Management for Kubernetes, you must delete both the MultiClusterHub Instance and the multiclusterhub-operator.
+When you uninstall Red Hat Advanced Cluster Management for Kubernetes, you must delete both the MultiClusterHub Instance and the `multiclusterhub-operator`. You can do that by using scripts, or by using commands. 
 
-There is a script that is provided in the [`open-cluster-management/deploy` GitHub repository](https://github.com/open-cluster-management/deploy) that simplifies the procedures. You can also uninstall them manually by using the `oc` commands.
+There are scripts that are provided in the [`open-cluster-management/deploy` GitHub repository](https://github.com/open-cluster-management/deploy) that simplify the procedures.
 
-## Deleting both components by using the uninstall script file
+## Deleting both components by using script files
 
-When you run the `uninstall.sh` script file that is in the root directory of the [`open-cluster-management/deploy` GitHub repository](https://github.com/open-cluster-management/deploy), it deletes both the MultiClusterHub and the multiclusterhub-operator. To run this script file, run the following command in the root directory of the cloned repository:
+1. Run the `uninstall.sh` script file that is in the root directory of the [`open-cluster-management/deploy` GitHub repository](https://github.com/open-cluster-management/deploy) to remove the MultiClusterHub instance. To run this script file, run the following command in the root directory of the cloned repository:
+
+```
+./uninstall.sh
+```
+
+2. To remove the `multiclusterhub-operator`, any Hive deployments, and detach all imported clusters, run the `clean-clusters.sh` script file by entering the following command: 
+
+```
+./clean-clusters.sh
+```
+
+3. Enter `DESTROY` to delete any Hive deployments and detach all imported clusters.
+
+4. Run the `unistall.sh` script again by entering the following command:
 
 ```
 ./uninstall.sh
@@ -20,18 +34,12 @@ When you run the `uninstall.sh` script file that is in the root directory of the
 kubectl delete -k multiclusterhub/
 ```
 
-This removes the MultiClusterHub instance. 
-
+  This removes the MultiClusterHub instance. 
+ 
 2. Run the `unistall.sh` script in the `multiclusterhub` directory to ensure that all of the objects are removed:
 
 ```
 ./multiclusterhub/uninstall.sh
-```
-
-**Tip:** You can redeploy the `multiclusterhub` instance by running the following command:
-
-```
-kubectl apply -k multiclusterhub/
 ```
 
 ## Deleting the multiclusterhub-operator by using commands
@@ -42,16 +50,10 @@ kubectl apply -k multiclusterhub/
 kubectl delete -k acm-operator/
 ```
 
-This removes the MultiClusterHub instance. 
+This removes the `acm-operator`. 
 
 2. Run the `uninstall.sh` script in the `multiclusterhub` directory to ensure that all of the objects are removed:
 
 ```
 ./acm-operator/uninstall.sh
-```
-
-**Tip:** You can redeploy the `multiclusterhub-operator` by running the following command:
-
-```
-kubectl apply -k acm-operator/
 ```
