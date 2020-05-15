@@ -108,4 +108,4 @@ Spec:
 <!--Still need to add doc to create a custom controller #1224-->
 Learn about how policies are applied on your hub cluster. See [Policy samples](policy_sample_intro.md) for more details. Learn how to create and customize policies, see [Manage security policies](manage_policy_overview.md). 
 
-See [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md) for more information about controllers.
+See [Policy controllers](../governance/policy_controllers.md) for more information about controllers.
