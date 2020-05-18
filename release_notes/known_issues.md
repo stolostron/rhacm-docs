@@ -23,8 +23,8 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
 * [Installation known issues](#installation-known-issues)
 * [Web console known issues](#web-console-known-issues)
 * [Cluster management known issues](#cluster-management-known-issues)
-* [Application management known issues](#appication-management-known-issues) 
-* [Security known issues](security-known-issues)
+* [Application management known issues](#application-management-known-issues) 
+* [Security known issues](#security-known-issues)
 
 ## Installation known issues
 
