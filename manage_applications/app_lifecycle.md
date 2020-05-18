@@ -1,6 +1,6 @@
 # Application management lifecycle
 
-Red Hat Advanced Cluster Management for Kubernetes provides enhanced application management capabilities through a Kubernetes resource based application model. The application model centers around managed clusters subscribing repositories. The application model groups all subscriptions related to an application and displays a topology that is easy to understand and use. The topology view can scale with the number of managed clusters, providing insight and management, without context switching between clusters.
+Red Hat Advanced Cluster Management for Kubernetes provides enhanced application management capabilities through a Kubernetes resource based application model. The application model centers around managed clusters subscribing to repositories. The application model groups all subscriptions related to an application and displays a topology that is easy to understand and use. The topology view can scale with the number of managed clusters, providing insight and management, without context switching between clusters.
 
 The Application model consists of the following Kubernetes custom resources:
 
