@@ -26,7 +26,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
 * [Application management known issues](#appication-management-known-issues) 
 * [Security known issues](security-known-issues)
 
-## Installation issues
+## Installation known issues
 
 ### Host adoption failed
 <!--1.0.0:1220-->
@@ -56,7 +56,7 @@ To resolve this issue, verify if the certificate manager is present in your clus
    kubectl get crd | grep certificates.certmanager
    ```
 
-## Web console issues
+## Web console known issues
 
 ### LDAP user names are case-sensitive
 <!--1.0.0:issue#-->
@@ -90,7 +90,7 @@ For technical preview, documentation links were removed from the console, but a 
 
 When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, the `etcd-operator` does not reconcile you managed clusters. As a result, your managed clusters are removed and you lose most data. 
 
-## Application management issues
+## Application management known issues
 
 ### Application not deployed after an updated placement rule
 <!--1.0.0:1449-->
@@ -151,7 +151,7 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 2. Select your application. 
 3. You can view a complete topology and summary cards for your selected application.
 
-## Security issues
+## Security known issues
 
 ### CIS policy controller is not installed
 <!--1.0.0:1087-->
