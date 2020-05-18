@@ -170,9 +170,9 @@ You can create and apply multiple certificate policies on a single managed clust
 
 For more information, see [Certificate policy controller](../security/cert_policy_ctrl.md).
 
+### Any user can create and import clusters
 
-
-
+In OpenShift Container Platform, any authenticated user can provision projects and have administrator privileges. Any user can create and import clusters from Red Hat Advanced Cluster Management for Kubernetes. As a result, some roles have incorrect access privileges for the hub cluster. In order to create a cluster and generate commands, you must have cluster administrator privileges. For more information view the [Role based access control (RBAC) table](../security/security_intro.md).
 
 
 
