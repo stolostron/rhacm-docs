@@ -33,9 +33,11 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [Helm release name is not exact on Topology view](#helm-release-name-is-not-exact-on-topology-view)
   - [Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported](#upgrading-an-ibm-red-hat-openshift-kubernetes-service-managed-cluster-is-not-supported)
   - [Importing IBM Red Hat OpenShift Kubernetes Service 3.11 clusters is not supported](#importing-ibm-red-hat-openshift-kubernetes-service-311-clusters-is-not-supported)
+  - [Console documentation links in technical preview might be incorrect](#console-documentation-links-in-technical-preview-might-be-incorrect)
+
  
 ## Certificate manager must not exist during an installation
-<!--TP:issue#-->
+<!--1.0.0:issue#-->
 
 Certificate manager must not exist on a cluster when you install Red Hat Advanced Cluster Management for Kubernetes.
 
@@ -48,12 +50,12 @@ To resolve this issue, verify if the certificate manager is present in your clus
    ```
 
 ## LDAP user names are case-sensitive
-<!--TP:issue#-->
+<!--1.0.0:issue#-->
 
 LDAP user names are case-sensitive. You must use the name exactly the way it is configured in your LDAP directory.
 
 ## CIS policy controller is not installed
-<!--TP:issue#-->
+<!--1.0.0:issue#-->
 
 The CIS policy controller is disabled by default when you install Red Hat Advanced Cluster Management for Kubernetes, If you create a CIS policy, you might receive the following message:
 
@@ -64,17 +66,17 @@ The CIS policy controller is disabled by default when you install Red Hat Advanc
 You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../governance/cis_policy_ctrl.md#cis-policy-controller-page).
 
 ## Console features might not display in Firefox earlier versions
-<!--TP:issue#-->
+<!--1.0.0:issue#-->
 
 The product supports Mozilla Firefox 74.0 or the latest version that is available for Linux, macOS, and Windows. Upgrade to the latest version for the best console compatibility. 
 
 ## Host adoption failed
-<!--TP:issue#-->
+<!--1.0.0:issue#-->
 
 Bare metal hosts are not supported. An error message appears when you try to validate the host adoption. 
 
 ## Application not deployed after an updated placement rule
-<!--TP:issue#-->
+<!--1.0.0:issue#-->
 
 If applications are not deploying after an update to a placement rule, verify that the `endpoint-appmgr` pod is running. The `endpoint-appmgr` is the subscription container that needs to run on endpoint clusters.
 
@@ -85,9 +87,9 @@ You can also search for `kind:pod cluster:yourcluster` in the console and see if
 If you cannot verify, attempt to import the cluster again and verify again.
 
 ## Subscription operator does not create an SCC
-<!--TP:issue#-->
+<!--1.0.0:issue#-->
 
-Learn about Red Hat Openshift Container Platform SCC at [Managing Security Context Constraints (SCC)](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth), which is an additional configuration required on the managed cluster. 
+Learn about Red Hat Openshift Container Platform SCC at [Managing Security Context Constraints (SCC)](ht1.0.0s://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth), which is an additional configuration required on the managed cluster. 
 
 Different deployments have different security context and different service accounts. The subscription operator cannot create an SCC automatically. Administrators control permissions for pods. A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace:
 
@@ -124,22 +126,22 @@ users:
 ```
 
 ## Unable to search using values with empty spaces
-<!--TP:issue#-->
+<!--1.0.0:issue#-->
 
 From the console and Visual Web Terminal, users are unable to search for values that contain an empty space. 
 
 ## At logout user kubeadmin gets extra browser tab with blank page
-<!--TP:issue#--> 
+<!--1.0.0:issue#--> 
 
 When you are logged in as `kubeadmin` and you click the **Log out** option in the drop-down menu, the console returns to the login screen, but a browser tab opens with a `/logout` URL. The page is blank and you can close the tab without impact to your console.
 
 ## _etcd-operator_ does not reconcile the cluster
-<!--TP:issue#-->
+<!--1.0.0:issue#-->
 
 When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, the `etcd-operator` does not reconcile you managed clusters. As a result, your managed clusters are removed and you lose most data. 
 
 ## Helm release name is not exact on Topology view
-<!--TP:1593-->
+<!--1.0.0:1593-->
 
 The _Application Topology_ view from the _Topology_ menu displays only a summary of the application content. To view complete and accurate content of the application, complete the following procedure:
 
@@ -157,3 +159,7 @@ You cannot upgrade an IBM Red Hat OpenShift Kubernetes Service managed cluster b
 
 You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters. Later versions of IBM OpenShift Kubernetes Service are supported.
 
+## Console documentation links in technical preview might be incorrect
+<!--1.0.0:816-->
+
+For technical preview, documentation links were removed from the console, but a few might still be exposed. Any links to the documentation for preview are temporarily not updated with the correct links.
