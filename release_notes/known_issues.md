@@ -63,6 +63,19 @@ You cannot upgrade an IBM Red Hat OpenShift Kubernetes Service managed cluster b
 
 You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters. Later versions of IBM OpenShift Kubernetes Service are supported.
 
+### Certificate manager must not exist during an installation
+<!--1.0.0:678-->
+
+Certificate manager must not exist on a cluster when you install Red Hat Advanced Cluster Management for Kubernetes.
+
+When certificate manager already exists on the cluster, Red Hat Advanced Cluster Management for Kubernetes installation fails. 
+
+To resolve this issue, verify if the certificate manager is present in your cluster by running the following command: 
+
+   ```
+   kubectl get crd | grep certificates.certmanager
+   ```
+
 ## Web console issues
 
 ### LDAP user names are case-sensitive
@@ -159,19 +172,6 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 3. You can view a complete topology and summary cards for your selected application.
 
 ## Security issues
-
-### Certificate manager must not exist during an installation
-<!--1.0.0:678-->
-
-Certificate manager must not exist on a cluster when you install Red Hat Advanced Cluster Management for Kubernetes.
-
-When certificate manager already exists on the cluster, Red Hat Advanced Cluster Management for Kubernetes installation fails. 
-
-To resolve this issue, verify if the certificate manager is present in your cluster by running the following command: 
-
-   ```
-   kubectl get crd | grep certificates.certmanager
-   ```
 
 ### CIS policy controller is not installed
 <!--1.0.0:1087-->
