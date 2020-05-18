@@ -34,6 +34,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported](#upgrading-an-ibm-red-hat-openshift-kubernetes-service-managed-cluster-is-not-supported) 
   - [Importing certain versions of IBM Red Hat OpenShift Kubernetes Service clusters is not supported](#importing-certain-versions-of-ibm-red-hat-openshift-kubernetes-service-clusters-is-not-supported)
    - [Console documentation links in technical preview might be incorrect](#console-documentation-links-in-technical-preview-might-be-incorrect)
+   - [Application channels require unique namespaces](#application-channels-require-unique-namespaces)
  
 ## Certificate manager must not exist during an installation
 <!--1.0.0:issue#-->
@@ -162,3 +163,8 @@ You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters
 <!--1.0.0:816-->
 
 For technical preview, documentation links were removed from the console, but a few might still be exposed. Any links to the documentation for preview are temporarily not updated with the correct links.
+
+## Application channels require unique namespaces
+<!--1.0.0:2311-->
+
+Creating a channel in the same namespace can cause errors with the hub cluster. For instance, a namespace that is created for both the channel and the hub cluster, such as namepace `charts-v1` will cause errors. Ensure that you create your channel in a unique namespace. All channels need an individual namespace, except GitHub channels, which can share a namespace with another channel. See the process for Managing channles(../manage_applications/managing_channels.md) for more information.
