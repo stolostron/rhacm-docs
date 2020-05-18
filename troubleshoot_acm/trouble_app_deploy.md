@@ -19,4 +19,6 @@ error: unable to recognize "old.yaml": no matches for kind "Deployment" in versi
 
 ## Resolving the problem: Application deployment version
 
+1. If the current version of Kubernetes API fails, enter the previous version. For example, see the following YAML entry:
 
+2. Validate?
