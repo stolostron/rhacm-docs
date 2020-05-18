@@ -164,9 +164,11 @@ The CIS policy controller is disabled by default when you install Red Hat Advanc
 
 You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../security/create_cis_pol.md) to update the policy.
 
+### Certificate policies fail to report status
 
+When you apply multiple certificate policies onto your managed cluster and the policies share the same value for `namespaceSelector`, only one of the policies work as expected. You are able to create and apply multiple certificate policies on your managed cluster. However, you must have a different parameter value for the `namespaceSelector`. 
 
-
+For more information, see [Certificate policy controller](../security/cert_policy_ctrl.md).
 
 
 
