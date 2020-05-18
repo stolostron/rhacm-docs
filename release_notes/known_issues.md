@@ -20,20 +20,20 @@ Or consider a troubleshooting topic.
 
 Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
 
-* Installation 
-  - [Host adoption failed](#host-adoption-failed)
+* Installation issues
+  <!-- - [Host adoption failed](#host-adoption-failed)
   - [Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported](#upgrading-an-ibm-red-hat-openshift-kubernetes-service-managed-cluster-is-not-supported)
-  - [Importing certain versions of IBM Red Hat OpenShift Kubernetes Service clusters is not supported](#importing-certain-versions-of-ibm-red-hat-openshift-kubernetes-service-clusters-is-not-supported)
+  - [Importing certain versions of IBM Red Hat OpenShift Kubernetes Service clusters is not supported](#importing-certain-versions-of-ibm-red-hat-openshift-kubernetes-service-clusters-is-not-supported) -->
 
-* Web console
-  - [LDAP user names are case-sensitive](#ldap-user-names-are-case-sensitive)
+* Web console issues
+  <!--- [LDAP user names are case-sensitive](#ldap-user-names-are-case-sensitive)
   - [Console features might not display in Firefox earlier versions](#console-features-might-not-display-in-firefox-earlier-versions)
   - [Unable to search using values with empty spaces](#unable-to-search-using-values-with-empty-spaces)
   - [At logout, user `kubeadmin` gets extra browser tab with blank page](#at-logout-user-kubeadmin-gets-extra-browser-tab-with-blank-page)
-  - [Console documentation links in technical preview might be incorrect](#console-documentation-links-in-technical-preview-might-be-incorrect)
+  - [Console documentation links in technical preview might be incorrect](#console-documentation-links-in-technical-preview-might-be-incorrect)-->
 
-* Cluster management
-  - [_etcd-operator_ does not reconcile the cluster](#etcd-operator-does-not-reconcile-the-cluster)
+* Cluster management issues
+  <!--- [_etcd-operator_ does not reconcile the cluster](#etcd-operator-does-not-reconcile-the-cluster)
 
 * Application management 
   - [Application not deployed after an updated placement rule](#application-not-deployed-after-an-updated-placement-rule)
@@ -42,7 +42,7 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
 
 * Security
   - [Certificate manager must not exist during an installation](#certificate-manager-must-not-exist-during-an-installation)
-  - [CIS policy controller is not installed](#cis-policy-controller-is-not-installed)
+  - [CIS policy controller is not installed](#cis-policy-controller-is-not-installed)-->
   
 
    
