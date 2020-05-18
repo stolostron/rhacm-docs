@@ -1,6 +1,6 @@
 # Role policy
 
-Apply a role policy to set rules and permissions for specific roles in your cluster. See [Role-based access control (RBAC)](../governance/security.md) for more information on roles.
+Apply a role policy to set rules and permissions for specific roles in your cluster. See [Role-based access control (RBAC)](security_intro.md) for more information on roles.
 
 ## Role policy YAML structure
 
@@ -55,7 +55,7 @@ Apply a role policy to set rules and permissions for specific roles in your clus
 
 ## Role policy sample
 
-Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](../governance/security.md). Your role policy might resemble the following YAML file:
+Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](security_intro.md). Your role policy might resemble the following YAML file:
 
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
