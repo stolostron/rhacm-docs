@@ -31,10 +31,9 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes.
   - [At logout, user `kubeadmin` gets extra browser tab with blank page](#at-logout-user-kubeadmin-gets-extra-browser-tab-with-blank-page)
   - [_etcd-operator_ does not reconcile the cluster](#etcd-operator-does-not-reconcile-the-cluster)
   - [Helm release name is not exact on Topology view](#helm-release-name-is-not-exact-on-topology-view)
-  - [Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported](#upgrading-an-ibm-red-hat-openshift-kubernetes-service-managed-cluster-is-not-supported)
-  - [Importing IBM Red Hat OpenShift Kubernetes Service 3.11 clusters is not supported](#importing-ibm-red-hat-openshift-kubernetes-service-311-clusters-is-not-supported)
-  - [Console documentation links in technical preview might be incorrect](#console-documentation-links-in-technical-preview-might-be-incorrect)
-
+  - [Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported](#upgrading-an-ibm-red-hat-openshift-kubernetes-service-managed-cluster-is-not-supported) 
+  - [Importing certain versions of IBM Red Hat OpenShift Kubernetes Service clusters is not supported](#importing-certain-versions-of-ibm-red-hat-openshift-kubernetes-service-clusters-is-not-supported)
+   - [Console documentation links in technical preview might be incorrect](#console-documentation-links-in-technical-preview-might-be-incorrect)
  
 ## Certificate manager must not exist during an installation
 <!--1.0.0:issue#-->
@@ -63,7 +62,7 @@ The CIS policy controller is disabled by default when you install Red Hat Advanc
    CIS policy controller is not installed
    ```
 
-You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../governance/cis_policy_ctrl.md#cis-policy-controller-page).
+You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../governance/create_cis_pol.md) to update the policy.
 
 ## Console features might not display in Firefox earlier versions
 <!--1.0.0:issue#-->
@@ -154,7 +153,7 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 
 You cannot upgrade an IBM Red Hat OpenShift Kubernetes Service managed cluster by using the Red Hat Advanced Cluster Management for Kubernetes interface.
 
-## Importing IBM Red Hat OpenShift Kubernetes Service 3.11 clusters is not supported
+## Importing certain versions of IBM Red Hat OpenShift Kubernetes Service clusters is not supported
 <!--1.0.0:2179-->
 
 You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters. Later versions of IBM OpenShift Kubernetes Service are supported.
