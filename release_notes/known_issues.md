@@ -59,12 +59,12 @@ To resolve this issue, verify if the certificate manager is present in your clus
 ## Web console known issues
 
 ### LDAP user names are case-sensitive
-<!--1.0.0:issue#-->
+<!--1.0.0:before 1.0.0.1-->
 
 LDAP user names are case-sensitive. You must use the name exactly the way it is configured in your LDAP directory.
 
 ### Console features might not display in Firefox earlier versions
-<!--1.0.0:issue#-->
+<!--1.0.0:before 1.0.0.1-->
 
 The product supports Mozilla Firefox 74.0 or the latest version that is available for Linux, macOS, and Windows. Upgrade to the latest version for the best console compatibility. 
 
