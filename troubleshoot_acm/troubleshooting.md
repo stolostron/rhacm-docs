@@ -14,6 +14,10 @@ View the list of troubleshoot topics for Red Hat Advanced Cluster Management for
   - [Troubleshooting cluster with unknown status](trouble_console_status.md)
   - [Troubleshooting a default storage class error when creating a cluster on bare metal](trouble_storage_class.md)
 
+* Application management
+
+  - [Troubleshooting application Kubernetes deployment version](trouble_app_deploy.md)
+
 * Governance, risk, and compliance
 
   - [Troubleshooting cert-manager-webhook](trouble_cert_webhook.md)
