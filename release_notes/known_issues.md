@@ -166,7 +166,7 @@ You must enable the CIS policy controller. For more information, see _Enable the
 
 ### Certificate policies fail to report status
 
-When you apply multiple certificate policies onto your managed cluster and the policies share the same value for `namespaceSelector`, only one of the policies work as expected. You are able to create and apply multiple certificate policies on your managed cluster. However, you must have a different parameter value for the `namespaceSelector`. 
+When you apply multiple certificate policies onto the same managed cluster and the policies share the same value for `namespaceSelector`, only one of the policies work as expected. You are able to create and apply multiple certificate policies on your managed cluster. However, you must have a different parameter value for the `namespaceSelector`. 
 
 For more information, see [Certificate policy controller](../security/cert_policy_ctrl.md).
 
