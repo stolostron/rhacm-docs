@@ -2,7 +2,7 @@
 
 You can replace management ingress certificates.
 
-## Before you begin {#cert_mgmt_before_you_begin}
+## Prerequisites to replace management ingress certificate
 
 Prepare and have your `management-ingress` certificates and private keys ready. If needed, you can generate a TLS certificate by using OpenSSL. Set the common name parameter,`CN`, on the certificate to `manangement-ingress`. If you are generating the certificate, include the following settings:
 
