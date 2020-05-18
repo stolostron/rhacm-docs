@@ -20,73 +20,86 @@ Or consider a troubleshooting topic.
 
 Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
 
-* Installation issues
+* [Installation issues](#installation-issues)
   <!-- - [Host adoption failed](#host-adoption-failed)
   - [Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported](#upgrading-an-ibm-red-hat-openshift-kubernetes-service-managed-cluster-is-not-supported)
   - [Importing certain versions of IBM Red Hat OpenShift Kubernetes Service clusters is not supported](#importing-certain-versions-of-ibm-red-hat-openshift-kubernetes-service-clusters-is-not-supported) -->
 
-* Web console issues
+* [Web console issues](#web-console-issues)
   <!--- [LDAP user names are case-sensitive](#ldap-user-names-are-case-sensitive)
   - [Console features might not display in Firefox earlier versions](#console-features-might-not-display-in-firefox-earlier-versions)
   - [Unable to search using values with empty spaces](#unable-to-search-using-values-with-empty-spaces)
   - [At logout, user `kubeadmin` gets extra browser tab with blank page](#at-logout-user-kubeadmin-gets-extra-browser-tab-with-blank-page)
   - [Console documentation links in technical preview might be incorrect](#console-documentation-links-in-technical-preview-might-be-incorrect)-->
 
-* Cluster management issues
+* [Cluster management issues](#cluster-management-issues)
   <!--- [_etcd-operator_ does not reconcile the cluster](#etcd-operator-does-not-reconcile-the-cluster)
 
-* Application management 
-  - [Application not deployed after an updated placement rule](#application-not-deployed-after-an-updated-placement-rule)
+* [Application management issues](#appication-management-issues) 
+  <!--- [Application not deployed after an updated placement rule](#application-not-deployed-after-an-updated-placement-rule)
   - [Subscription operator does not create a Security Context Constraint (SCC)](#subscription-operator-does-not-create-an-scc)
-  - [Helm release name is not exact on Topology view](#helm-release-name-is-not-exact-on-topology-view)
+  - [Helm release name is not exact on Topology view](#helm-release-name-is-not-exact-on-topology-view)-->
 
-* Security
-  - [Certificate manager must not exist during an installation](#certificate-manager-must-not-exist-during-an-installation)
+* [Security issues](security-issues)
+  <!--- [Certificate manager must not exist during an installation](#certificate-manager-must-not-exist-during-an-installation)
   - [CIS policy controller is not installed](#cis-policy-controller-is-not-installed)-->
   
 
    
- 
-## Certificate manager must not exist during an installation
-<!--1.0.0:678-->
+## Installation issues
 
-Certificate manager must not exist on a cluster when you install Red Hat Advanced Cluster Management for Kubernetes.
-
-When certificate manager already exists on the cluster, Red Hat Advanced Cluster Management for Kubernetes installation fails. 
-
-To resolve this issue, verify if the certificate manager is present in your cluster by running the following command: 
-
-   ```
-   kubectl get crd | grep certificates.certmanager
-   ```
-
-## LDAP user names are case-sensitive
-<!--1.0.0:issue#-->
-
-LDAP user names are case-sensitive. You must use the name exactly the way it is configured in your LDAP directory.
-
-## CIS policy controller is not installed
-<!--1.0.0:1087-->
-
-The CIS policy controller is disabled by default when you install Red Hat Advanced Cluster Management for Kubernetes, If you create a CIS policy, you might receive the following message:
-
-   ```
-   CIS policy controller is not installed
-   ```
-
-You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../security/create_cis_pol.md) to update the policy.
-
-## Console features might not display in Firefox earlier versions
-<!--1.0.0:issue#-->
-
-The product supports Mozilla Firefox 74.0 or the latest version that is available for Linux, macOS, and Windows. Upgrade to the latest version for the best console compatibility. 
-
-## Host adoption failed
+### Host adoption failed
 <!--1.0.0:1220-->
 
 Bare metal hosts are not supported. An error message appears when you try to validate the host adoption. 
 
-## Application not deployed after an updated placement rule
+### Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported
+<!--1.0.0:2131-->
+
+You cannot upgrade an IBM Red Hat OpenShift Kubernetes Service managed cluster by using the Red Hat Advanced Cluster Management for Kubernetes interface.
+
+### Importing certain versions of IBM Red Hat OpenShift Kubernetes Service clusters is not supported
+<!--1.0.0:2179-->
+
+You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters. Later versions of IBM OpenShift Kubernetes Service are supported.
+
+## Web console issues
+
+### LDAP user names are case-sensitive
+<!--1.0.0:issue#-->
+
+LDAP user names are case-sensitive. You must use the name exactly the way it is configured in your LDAP directory.
+
+### Console features might not display in Firefox earlier versions
+<!--1.0.0:issue#-->
+
+The product supports Mozilla Firefox 74.0 or the latest version that is available for Linux, macOS, and Windows. Upgrade to the latest version for the best console compatibility. 
+
+### Unable to search using values with empty spaces
+<!--1.0.0:1726-->
+
+From the console and Visual Web Terminal, users are unable to search for values that contain an empty space. 
+
+### At logout user kubeadmin gets extra browser tab with blank page
+<!--1.0.0:issue#--> 
+
+When you are logged in as `kubeadmin` and you click the **Log out** option in the drop-down menu, the console returns to the login screen, but a browser tab opens with a `/logout` URL. The page is blank and you can close the tab without impact to your console.
+
+### Console documentation links in technical preview might be incorrect
+<!--1.0.0:816-->
+
+For technical preview, documentation links were removed from the console, but a few might still be exposed. Any links to the documentation for preview are temporarily not updated with the correct links.
+
+## Cluster management issues
+
+### _etcd-operator_ does not reconcile the cluster
+<!--1.0.0:2010-->
+
+When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, the `etcd-operator` does not reconcile you managed clusters. As a result, your managed clusters are removed and you lose most data. 
+
+## Application management issues
+
+### Application not deployed after an updated placement rule
 <!--1.0.0:1449-->
 
 If applications are not deploying after an update to a placement rule, verify that the `endpoint-appmgr` pod is running. The `endpoint-appmgr` is the subscription container that needs to run on endpoint clusters.
@@ -97,7 +110,7 @@ You can also search for `kind:pod cluster:yourcluster` in the console and see if
 
 If you cannot verify, attempt to import the cluster again and verify again.
 
-## Subscription operator does not create an SCC
+### Subscription operator does not create an SCC
 <!--1.0.0:1764-->
 
 Learn about Red Hat Openshift Container Platform SCC at [Managing Security Context Constraints (SCC)](ht1.0.0s://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth), which is an additional configuration required on the managed cluster. 
@@ -136,22 +149,7 @@ users:
 - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
 ```
 
-## Unable to search using values with empty spaces
-<!--1.0.0:1726-->
-
-From the console and Visual Web Terminal, users are unable to search for values that contain an empty space. 
-
-## At logout user kubeadmin gets extra browser tab with blank page
-<!--1.0.0:issue#--> 
-
-When you are logged in as `kubeadmin` and you click the **Log out** option in the drop-down menu, the console returns to the login screen, but a browser tab opens with a `/logout` URL. The page is blank and you can close the tab without impact to your console.
-
-## _etcd-operator_ does not reconcile the cluster
-<!--1.0.0:2010-->
-
-When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, the `etcd-operator` does not reconcile you managed clusters. As a result, your managed clusters are removed and you lose most data. 
-
-## Helm release name is not exact on Topology view
+### Helm release name is not exact on Topology view
 <!--1.0.0:1593-->
 
 The _Application Topology_ view from the _Topology_ menu displays only a summary of the application content. To view complete and accurate content of the application, complete the following procedure:
@@ -160,17 +158,39 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 2. Select your application. 
 3. You can view a complete topology and summary cards for your selected application.
 
-## Upgrading an IBM Red Hat OpenShift Kubernetes Service managed cluster is not supported
-<!--1.0.0:2131-->
+## Security issues
 
-You cannot upgrade an IBM Red Hat OpenShift Kubernetes Service managed cluster by using the Red Hat Advanced Cluster Management for Kubernetes interface.
+### Certificate manager must not exist during an installation
+<!--1.0.0:678-->
 
-## Importing certain versions of IBM Red Hat OpenShift Kubernetes Service clusters is not supported
-<!--1.0.0:2179-->
+Certificate manager must not exist on a cluster when you install Red Hat Advanced Cluster Management for Kubernetes.
 
-You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters. Later versions of IBM OpenShift Kubernetes Service are supported.
+When certificate manager already exists on the cluster, Red Hat Advanced Cluster Management for Kubernetes installation fails. 
 
-## Console documentation links in technical preview might be incorrect
-<!--1.0.0:816-->
+To resolve this issue, verify if the certificate manager is present in your cluster by running the following command: 
 
-For technical preview, documentation links were removed from the console, but a few might still be exposed. Any links to the documentation for preview are temporarily not updated with the correct links.
+   ```
+   kubectl get crd | grep certificates.certmanager
+   ```
+
+### CIS policy controller is not installed
+<!--1.0.0:1087-->
+
+The CIS policy controller is disabled by default when you install Red Hat Advanced Cluster Management for Kubernetes, If you create a CIS policy, you might receive the following message:
+
+   ```
+   CIS policy controller is not installed
+   ```
+
+You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../security/create_cis_pol.md) to update the policy.
+
+
+
+
+
+
+
+
+
+
+
