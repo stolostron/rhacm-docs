@@ -55,6 +55,17 @@ To resolve this issue, verify if the certificate manager is present in your clus
    ```
    kubectl get crd | grep certificates.certmanager
    ```
+### CIS policy controller is not installed
+<!--1.0.0:1087-->
+
+The CIS policy controller is disabled by default when you install Red Hat Advanced Cluster Management for Kubernetes, If you create a CIS policy, you might receive the following message:
+
+   ```
+   CIS policy controller is not installed
+   ```
+
+You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../security/create_cis_pol.md) to update the policy.
+
 
 ## Web console known issues
 
@@ -153,20 +164,11 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 
 ## Security known issues
 
-### CIS policy controller is not installed
-<!--1.0.0:1087-->
+### Certificate policies fail to report status
 
-The CIS policy controller is disabled by default when you install Red Hat Advanced Cluster Management for Kubernetes, If you create a CIS policy, you might receive the following message:
+You can create and apply multiple certificate policies on a single managed cluster, but each policy must have a different parameter value for the `namespaceSelector`. When mulitiple policies on the same managed cluster use the same `namespaceSelector` value, only one of the policies work as expected.
 
-   ```
-   CIS policy controller is not installed
-   ```
-
-You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../security/create_cis_pol.md) to update the policy.
-
-
-
-
+For more information, see [Certificate policy controller](../security/cert_policy_ctrl.md).
 
 
 
