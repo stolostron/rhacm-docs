@@ -11,9 +11,10 @@ You can use this information to help you plan your environment.
 The Red Hat Advanced Cluster Management for Kubernetes hub cluster provided good performance when managing up to 250 managed clusters. The following table shows the configuration information for the clusters on the Amazon Web Services cloud platfrom that were used to determine the cluster maximums:
 
 | Node | Flavor | vCPU | RAM (GiB) | Disk type | Disk size(GiB)/IOS | Count | Region |
-| ------- | --------| -----|----- |
+| ------- | --------| -----|----- |------ | -------- | -------| ----- |
 | Master | m5.2xlarge | 8 | 32 | gp2 | 100 | 3 | us-east-1 |
 | Worker | m5.2xlarge | 8 | 32 | gp2 | 100 | 3/5 | us-east-1 |
+{: caption="Table 1. Cluster maximums" caption-side="}
 
 ## Search scalability
 
@@ -34,8 +35,7 @@ Search keeps the data in-memory to achieve fast response times. The memory requi
 | 15 medium     | 75,000 | 20,0000  | 263 MB |
 | 30 medium     | 150,000 | 450,000  | 492 MB |
 | 50 medium     | 250,000 | 750,000  | 878 MB | 
-
-Table: Physical memory data
+{: caption="Table 2. Physical memory data" caption-side="}
 
 By default, the datastore is deployed with a memory limit of 1 GB. If you are managing larger clusters, you might need to increase this limit by editing the deployment named `search-prod-xxxxx-redisgraph` in the `open-cluster-management` namespace.
 
@@ -49,8 +49,7 @@ Most clusters in steady state generate a small number of resource updates. The h
 | 5 medium     | 25,000 | 75,000  | less than 15 seconds | 
 | 15 medium     | 75,000 | 200,000  | 2 minutes and 40 seconds |
 | 30 medium     | 150,000 | 450,000  | 5-8 minutes |
-
-Table: Cache recovery time data
+{: caption="Table 3. Cache recovery time data" caption-side="}
 
 **Remember:** Times might increase for clusters that have a slow network connection to the hub.
 
