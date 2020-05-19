@@ -94,6 +94,17 @@ When you are logged in as `kubeadmin` and you click the **Log out** option in t
 
 For technical preview, documentation links were removed from the console, but a few might still be exposed. Any links to the documentation for preview are temporarily not updated with the correct links.
 
+
+### Search component memory leak
+
+The memory used by the search data store is being used at a fast rate and causes pods to restart. Search becomes unavailable or the data is out of sync with the hub cluster. The memory leak accelerates when more managed clusters are added. 
+
+You might encounter the following issues:
+
+* Search is unable to display some cluster status
+* Search is unable to display results for newly created applications
+
+
 ## Cluster management issues
 
 ### _etcd-operator_ does not reconcile the cluster
