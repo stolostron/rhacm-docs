@@ -77,7 +77,7 @@ An image vulnerability policy is created.
 
 ## Updating an image vulnerability policy
 
-### Deleting a certificate policy
+### Deleting an image vulnerability policy
 
 Delete the image vulnerability policy from the CLI or the console. 
 
