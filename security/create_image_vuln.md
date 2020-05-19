@@ -34,7 +34,7 @@ Your image vulnerability policy is created.
 
 Complete the following steps to view your image vulnerability policy from the CLI:
 
-1. View details for a aspecific image vulnerability policy by running the following command:
+1. View details for a specific image vulnerability policy by running the following command:
 
    ```
    kubectl get imagevulnpolicy <policy-name> -n <namespace> -o yaml

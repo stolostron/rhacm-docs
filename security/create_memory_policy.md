@@ -28,7 +28,7 @@ Complete the following steps to create a memory usage from the CLI:
    kubectl get memorypolicy --namespace=<namespace>
    ```
 
-Your memory usage policy is created. 
+Your memory usage policy is created from the CLI. 
 
 #### Viewing your policy from the CLI 
 
@@ -53,11 +53,12 @@ Complete the following steps to create the memory usage policy from the console:
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Governance and risk**. 
 3. Click **Create policy**. 
-4. Select **Limitrange** from the _Specifications_ field.
+4. Select **Limitrange** from the _Specifications_ field. Parameter values are automatically set. You can edit your values.
+5. Click **Create**.
 
-#### Viewing your IAM policy from the console
+#### Viewing your memory usage policy from the console
 
-You can view any IAM policy and its status from the console.
+You can view any memory usage policy and its status from the console.
 
 1. Log in to your cluster from the console.
 
@@ -91,7 +92,7 @@ Delete the memory usage policy from the CLI or the console.
       kubectl get policy <memorypolicy-name> -n <mcm namespace>
       ```
       
-* Delete a memory policy from the console:
+* Delete a memory usage policy from the console:
 
   1. From the navigation menu, click **Govern risk** to view a table list of your policies.
   2. Click the **Options** icon for the policy you want to delete in the policy violation table.
