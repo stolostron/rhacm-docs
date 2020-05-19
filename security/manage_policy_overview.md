@@ -6,6 +6,7 @@ Review the following topics to learn more about creating and updating your secur
 - [Managing an image vulnerability policy](create_image_vuln.md)
 - [Managing a memory usage policy](create_memory_policy.md)
 - [Managing a namespace policy](create_ns_policy.md)
+- [Managing a pod nginx policy](create_nginx_policy.md)
 - [Managing a certificate policy](create_cert_pol.md)
 - [Managing a CIS policy](create_cis_pol.md)
 - [Managing a IAM policy](create_iam_policy.md)
