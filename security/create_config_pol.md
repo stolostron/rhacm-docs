@@ -88,10 +88,14 @@ Complete the following steps to view your configuration policy from the CLI:
 You can view any configuration policy and its status from the console.
 
 1. Log in to your cluster from the console.
+
 2. From the navigation menu, click **Govern risk** to view a table list of your policies.
 
    **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
+
 3. Select one of your policies.
+
+4. View the policy violations by selecting the _Violations_ tab.
 
 ## Updating configuration policies
 

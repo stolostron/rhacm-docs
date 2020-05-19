@@ -48,6 +48,8 @@ Complete the following steps to view your image vulnerability policy from the CL
 
 ## Creating an image vulnerability policy from the console
 
+Complete the following steps to create the image vulnerability policy from the console:
+
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**.
 3. Click **Create policy**.
