@@ -48,7 +48,7 @@ View the following example of a certificate policy and review the element in the
 | Spec | Required. Specifications of which certificates to monitor and refresh.|
 | Spec.Conditions |  Required. <!--add description--> |
 | Spec.Ownership | Required. <!--Add description--> |
-| Spec.NamespaceSelector| Required. <!--add description--> parameter values for `Include` and `Exclude`. |
+| Spec.NamespaceSelector| Required. Namespace to which you want to apply the policy. Enter parameter values for `Include` and `Exclude`. **Note**: When you create multiple certificate policies and apply them to the same managed cluster, each policy `NamespaceSelector` must be assigned a different value.|
 | Spec.RemediationAction | Required. | <!--add description-->|
 | Spec.Disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
 | Spec.MinimumDuration | Required. parameter specifies the smallest duration before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. <!--is there a default parameter value-->| 

@@ -13,7 +13,7 @@ Complete the following steps to create a configuration policy from the (CLI):
 1. Create a YAML file for your configuration policy. Run the following command:
 
   ```
-  kubectl create -f policy-1.yaml
+  kubectl create -f configpolicy-1.yaml
   ```
 
   Your configuration policy might resemble the following policy:
