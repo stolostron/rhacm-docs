@@ -1,4 +1,4 @@
-## Image vulnerability policy
+# Image vulnerability policy
 
 Apply the image vulnerability policy to detect if container images have vulnerabilities by leveraging the Container Security Operator. The image vulnerability policy is checked by the Configuration policy controller. For more information about the Security Operator, see the _Container Security Operator_ from the [Quay repository](https://github.com/quay/container-security-operator). The policy installs the Container Security Operator on your managed cluster if it is not installed. 
 
@@ -340,3 +340,4 @@ Apply the image vulnerability policy to detect if container images have vulnerab
            kind: ImageManifestVuln     
    ```
 
+See [Managing an image vulnerability policy](crete_image_vuln.md) for more information. View other configuration policies on the [Kubernetes configuration policy controller](config_policy_ctrl.md).  
