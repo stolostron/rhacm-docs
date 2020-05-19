@@ -1,6 +1,6 @@
 # Managing a CIS policy
 
-Learn to create, apply, view, and update your CIS policies in the following sections. <!--come back and clean this part-->
+Apply a CIS policy to monitor the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. Learn to create, apply, view, and update your CIS policies in the following sections.
 
 ## Creating a CIS policy 
 
@@ -127,7 +127,7 @@ Complete the following steps to view the CIS policy from the managed cluster CLI
 4. Enter the name for the CIS policy in the **Name** field.
 5. For **Specifications**, select `Cispolicy-cis compliance for OCP` from the drop-down list.
 
-  **Note**: You must enable the feature flag to make the `Cispolicy-cis compliance for OCP` option available.
+   **Note**: You must enable the feature flag to make the `Cispolicy-cis compliance for OCP` option available.
 
 6. Use the drop-down list and make selections for the following parameters:
     - Cluster selector
