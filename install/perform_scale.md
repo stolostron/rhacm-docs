@@ -36,7 +36,8 @@ Search keeps the data in-memory to achieve fast response times. The memory requi
 | 50 medium     | 250,000 | 750,000  | 878 MB | 
 
 Table: Physical memory data
-By default, we deploy the datastore with a memory limit of 1Gi.  If you are managing larger clusters, you may need to increase this limit by editing the deployment named `search-prod-xxxxx-redisgraph` in the open-cluster-management namespace.
+
+By default, the datastore is deployed with a memory limit of 1 GB.  If you are managing larger clusters, you might need to increase this limit by editing the deployment named `search-prod-xxxxx-redisgraph` in the open-cluster-management namespace.
 
 ### Write throughput (cache recovery time)
 
