@@ -30,7 +30,7 @@ Complete the following steps to create an image vulnerability policy from the CL
 
 Your image vulnerability policy is created. 
 
-#### Viewing your policy from the CLI 
+#### Viewing your image vulnerability policy from the CLI 
 
 Complete the following steps to view your image vulnerability policy from the CLI:
 
