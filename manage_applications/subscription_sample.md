@@ -5,7 +5,7 @@ View samples and YAML definitions that you can use to build your files. As with 
 
 ## Example subscription definition YAML structure
 
-The following YAML structure shows the required fields for a subscription and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
+The following YAML structure shows the required fields for a subscription and some of the common optional fields. Your YAML structure needs to include certain required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool:
 
 ```yaml
 apiVersion: apps.open-cluster-management.io/v1
