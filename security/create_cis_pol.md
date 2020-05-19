@@ -1,6 +1,6 @@
 # Managing a CIS policy
 
-Learn to create, apply, view, and update your CIS policies.
+Learn to create, apply, view, and update your CIS policies in the following sections. <!--come back and clean this part-->
 
 ## Creating a CIS policy 
 
