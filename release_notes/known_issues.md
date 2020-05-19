@@ -100,7 +100,35 @@ When you are logged in as `kubeadmin` and you click the **Log out** option in t
 
 For technical preview, documentation links were removed from the console, but a few might still be exposed. Any links to the documentation for preview are temporarily not updated with the correct links.
 
-## Cluster management issues
+
+### Search is unavailable or missing data for a brief period
+<!--1.0.0:1918-->
+
+The memory used by the search data store grows slowly over time and causes pods to restart, when the limit is reached. Search becomes unavailable or the data is out of sync with the managed clusters. The memory leak accelerates when more managed clusters are added. 
+
+You might encounter the following issues:
+
+* Search becomes unavailable or data is out of sync for a brief period.
+* Search is unable to display some cluster status.
+
+To mitigate this problem, you can increase the memory limit in the `search-pod-xxxxx-redisgraph` deployment to reduce the frequency of pod restarts. Complete the following steps to update the deployment:
+
+* Run the following command to increase the memory limit in the `search-pod-xxxxx-redisgraph` deployment from the command line interface (CLI):
+
+   ```
+   oc patch deployment search-prod-xxxxx-redisgraph -n open-cluster-management -p '{"spec": {"template": {"spec": {"containers":[{"name":"redisgraph","resources": {"limits": {"memory": "4Gi"}}}]}}}}'
+   ```
+
+* Update your `search-pod-xxxxx-redisgraph` deployment from the console:
+
+  1. Log in to the Red Hat Advanced Cluster Management for Kubernetes cluster.
+  2. Navigate to the _Search_ page and enter `search-prod-xxxxx-redisgraph` deployment. 
+  3. Update the `containers.resources.limit.memory` parameter and increase the memory value.
+  
+**Note**: Your maximum memory is restricted by either your quota, policies, or physical limits of the nodes on your cluster.
+
+
+## Cluster management known issues
 
 ### _etcd-operator_ does not reconcile the cluster
 <!--1.0.0:2010-->
@@ -171,11 +199,13 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 ## Security known issues
 
 ### Certificate policies fail to report status
+<!--1.0.0:2302-->
 
 You can create and apply multiple certificate policies on a single managed cluster, but each policy must have a different parameter value for the `namespaceSelector`. When mulitiple policies on the same managed cluster use the same `namespaceSelector` value, only one of the policies work as expected.
 
 For more information, see [Certificate policy controller](../security/cert_policy_ctrl.md).
 
 ### Any authenticated user can import clusters
+<!--1.0.0:2312-->
 
 Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information view the [Role based access control (RBAC) table](../security/security_intro.md).
