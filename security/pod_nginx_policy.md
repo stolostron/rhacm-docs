@@ -79,13 +79,4 @@ Your pod policy nginx policy might resemble the following YAML file:
         ...
    ```
 
-<!--the following section will be added in the file describing how to manage pod nginx policies (create_nginx_pol.md)-->
 
-### Applying the pod policy
-
-Complete the following steps to apply the pod policy from the console:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console
-2. From the navigation menu, click **Govern risk**. 
-3. Click **Create policy**. 
-4. Select **Pod** from the _Specifications_ field.
