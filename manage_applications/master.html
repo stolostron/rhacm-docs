@@ -3238,7 +3238,7 @@ The managed cluster namespaces that are updated are defined by the placement rul
 <p>Configuring a rolling update for a subscription</p>
 </li>
 <li>
-<p>Rolling update sample](roll_update_sample.md)</p>
+<p><a href="#rolling-update-samples">Rolling update sample</a></p>
 </li>
 </ul>
 </div>
@@ -5027,13 +5027,150 @@ data:
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="rolling-update-samples">Rolling update samples</h4>
+<div class="paragraph">
+<p>You can configure the deployment to occur on only a percentage of your managed clusters at a time.
+When the deployment on those clusters is successful, the deployment is rolled out incrementally to the remaining clusters.
+For more information about rolling updates, see <a href="deployment_rollout.html">Managing deployables with rolling update</a>.</p>
+</div>
+<div class="sect4">
+<h5 id="rolling-update-yaml-structure">Rolling update YAML structure</h5>
+<div class="paragraph">
+<p>See example YAML definitions show the required fields for deploying an update for a subscription by using a rolling update.
+The following definitions create a <code>predev-ch</code> channel in the <code>ns-ch</code> namespace, and a <code>towhichcluster</code> placementrule in the <code>ns-sub-1</code> to use for the subscriptions:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-ch
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: predev-ch
+  namespace: ns-ch
+  labels:
+    app: nginx-app-details
+spec:
+  type: HelmRepo
+  pathname: https://kubernetes-charts.storage.googleapis.com/
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-sub-1
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: towhichcluster
+  namespace: ns-sub-1
+spec:
+  clusterSelector: {}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The following definitions create the initial and target subscriptions.
+As demonstrated in the following example, the original subscription resource is <code>nginx-ingress</code> Helm chart version <code>1.35.x</code> and the target subscription is <code>nginx-ingress</code> Helm chart version <code>1.36.x</code>.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-orig
+  namespace: ns-sub-1
+  labels:
+    app: nginx-app-details
+spec:
+  channel: ns-ch/predev-ch
+  name: nginx-ingress
+  packageFilter:
+    version: "1.35.x"
+  placement:
+    placementRef:
+      kind: PlacementRule
+      name: towhichcluster
+  overrides:
+  - clusterName: "/"
+    clusterOverrides:
+    - path: "metadata.namespace"
+      value: default
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-target
+  namespace: ns-sub-1
+  labels:
+    app: nginx-app-details
+spec:
+  channel: ns-ch/predev-ch
+  name: nginx-ingress
+  packageFilter:
+    version: "1.36.x"
+  overrides:
+  - clusterName: "/"
+    clusterOverrides:
+    - path: "metadata.namespace"
+      value: default</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The definition for the initial subscription does not include the required fields for using a rolling update:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">apps.open-cluster-management.io/rollingupdate-maxunavaialble: 20
+apps.open-cluster-management.io/rollingupdate-target: subscription-target</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These annotations can be added to the initial subscription with the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">kubectl annotate --overwrite subscriptions.apps.open-cluster-management.io sub-orig -n ns-sub-1 apps.open-cluster-management.io/rollingupdate-target=sub-target apps.open-cluster-management.io/rollingupdate-maxunavaialble=20</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With the annotations added, the definition for the initial subscription resembles the following YAML content:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  annotations:
+    apps.open-cluster-management.io/rollingupdate-maxunavaialble: "20"
+    apps.open-cluster-management.io/rollingupdate-target: sub-target
+  name: subscription-orig
+  namespace: ns-sub-1
+spec:
+  channel: ns-ch/predev-ch
+  name: nginx-ingress
+  packageFilter:
+    version: "1.35.x"</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-05-20 07:57:29 +1000
+Last updated 2020-05-20 09:16:24 +1000
 </div>
 </div>
 </body>
