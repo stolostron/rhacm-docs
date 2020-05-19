@@ -12,6 +12,7 @@
    * [Requirements and recommendations](install/requirements.md)
      * [Supported operating systems and platforms](install/supported_os.md)
      * [Supported browsers](install/supported_browsers.md)
+     * [Performance and scaling](install/perform_scale.md)
    * [Preparing your hub cluster for installation](install/prep.md)
    * [Sizing your hub cluster](install/plan_capacity.md)
    * [Installing while connected online](install/install_connected.md)
