@@ -165,4 +165,4 @@ Delete the certificate policy from the CLI or the console.
 
 Your certificate policy is deleted.
    
-View a sample of a certificate policy, see _Certificate policy sample_ on the [Policy samples page](policy_samples_intro.md). For more information about other policy controllers, see [Policy controllers](policy_controllers.md). See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of a certificate policy, see _Certificate policy sample_ on the [Certificate policy controller](cert_policy_ctrl.md) page. For more information about other policy controllers, see [Policy controllers](policy_controllers.md). See [Manage security policies](manage_policy_overview.md) to manage other policies.
