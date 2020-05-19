@@ -12,28 +12,28 @@ Complete the following steps to create a configuration policy from the (CLI):
 
 1. Create a YAML file for your configuration policy. Run the following command:
 
-  ```
-  kubectl create -f configpolicy-1.yaml
-  ```
+   ```
+   kubectl create -f configpolicy-1.yaml
+   ```
 
   Your configuration policy might resemble the following policy:
 
-    ```yaml
-    apiVersion: policy.mcm.ibm.com/v1alpha1
-    kind: Policy
-    metadata:
-      name: policy-1
-      namespace: kube-system
-    spec:
-      namespaces:
-        include: ["default", "kube-*"]
-        exclude: ["kube-system"]
-      remediationAction: inform
-      disabled: false
-      complianceType: musthave
-      object-templates:
-       ...
-     ```
+   ```yaml
+   apiVersion: policy.mcm.ibm.com/v1alpha1
+   kind: Policy
+   metadata:
+     name: policy-1
+     namespace: kube-system
+   spec:
+     namespaces:
+       include: ["default", "kube-*"]
+       exclude: ["kube-system"]
+     remediationAction: inform
+     disabled: false
+     complianceType: musthave
+     object-templates:
+      ...
+   ```
 
 2. Apply the policy by running the following command:
 
