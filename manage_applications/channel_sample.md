@@ -1,4 +1,4 @@
-# Channels samples
+# Channel samples
 
 View samples and YAML definitions that you can use to build your files. Channels (`channel.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Learn more at [Creating and managing channels](managing_channels.md).
 
