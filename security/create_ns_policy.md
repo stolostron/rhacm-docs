@@ -30,7 +30,7 @@ Complete the following steps to create a namespace policy from the CLI:
 
 Your namespace policy is created from the CLI. 
 
-#### Viewing your policy from the CLI 
+#### Viewing your namespace policy from the CLI 
 
 Complete the following steps to view your namespace policy from the CLI:
 

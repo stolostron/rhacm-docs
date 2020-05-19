@@ -79,4 +79,4 @@ spec:
   minimumDuration: 100h
 ```
 
-Learn how to create a certificate policy, see [Manage security policies](manage_policy_overview.md) for more details.
+Learn how to manage a certificate policy, see [Managing certificate policies](create_cert_pol.md) for more details. Refer to [Policy controllers](policy_controllers.md) for more topics.
