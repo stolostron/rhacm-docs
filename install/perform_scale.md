@@ -25,7 +25,7 @@ The scalability of the Search component depends on the performance of the data s
 
 ### Physical memory
 
-Search keeps the data in-memory to achieve fast response times. The memory required is proportional to the number of resources (ConfigMaps, Deployments, Pods, etc) and their relationships in the cluster.
+Search keeps the data in-memory to achieve fast response times. The memory required is proportional to the number of resources (ConfigMaps, deployments, pods, and so on) and their relationships in the cluster.
 
 | Clusters | Kubernetes resources  | Relationships  | Observed size (with simulated data) |
 | ------- | --------| -----|----- |
@@ -37,7 +37,7 @@ Search keeps the data in-memory to achieve fast response times. The memory requi
 
 Table: Physical memory data
 
-By default, the datastore is deployed with a memory limit of 1 GB. If you are managing larger clusters, you might need to increase this limit by editing the deployment named `search-prod-xxxxx-redisgraph` in the open-cluster-management namespace.
+By default, the datastore is deployed with a memory limit of 1 GB. If you are managing larger clusters, you might need to increase this limit by editing the deployment named `search-prod-xxxxx-redisgraph` in the `open-cluster-management` namespace.
 
 ### Write throughput (cache recovery time)
 
