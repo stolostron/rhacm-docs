@@ -101,4 +101,4 @@ Delete the memory usage policy from the CLI or the console.
 
 Your memory usage policy is deleted.
 
-View a sample of a memory usage policy, see _Memory usage policy sample_ on the [Memory usage policy](memory_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of a memory usage policy, see _Memory usage policy sample_ from the [Memory usage policy](memory_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
