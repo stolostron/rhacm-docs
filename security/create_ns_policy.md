@@ -46,7 +46,7 @@ Complete the following steps to view your namespace policy from the CLI:
    kubectl describe namespacepolicy <name> -n <namespace>
    ```
 
-## Creating a namespace policy from the console
+### Creating a namespace policy from the console
 
 Complete the following steps to create a namespace policy from the console:
 
