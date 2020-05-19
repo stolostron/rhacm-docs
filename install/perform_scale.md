@@ -1,16 +1,17 @@
 # Performance and scalability
 
-Red Hat Advanced Cluster Management for Kubernetes is tested to determine some scalability and performance data. The major areas that are tested are cluster scalability and search performance. 
+Red Hat Advanced Cluster Management for Kubernetes is tested to determine certain scalability and performance data. The major areas that are tested are cluster scalability and search performance. 
 
 You can use this information to help you plan your environment. 
 
-**Important:** This data is based on the results from a lab environment at the time of testing. Your results might vary, depending on your environment, network speed, and changes to the product. 
+**Important:** Data is based on the results from a lab environment at the time of testing. Your results might vary, depending on your environment, network speed, and changes to the product. 
 
 ## Maximum number of managed clusters
 
-The Advanced Cluster Management for Kubernetes hub cluster provided good performance when managing up to 250 managed clusters. The following table shows the configuration information for the clusters on the Amazon Web Services cloud platfrom that were used to determine the cluster maximums:
+The Red Hat Advanced Cluster Management for Kubernetes hub cluster provided good performance when managing up to 250 managed clusters. The following table shows the configuration information for the clusters on the Amazon Web Services cloud platfrom that were used to determine the cluster maximums:
 
 | Node | Flavor | vCPU | RAM (GiB) | Disk type | Disk size(GiB)/IOS | Count | Region |
+| ------- | --------| -----|----- |
 | Master | m5.2xlarge | 8 | 32 | gp2 | 100 | 3 | us-east-1 |
 | Worker | m5.2xlarge | 8 | 32 | gp2 | 100 | 3/5 | us-east-1 |
 
@@ -24,7 +25,7 @@ The scalability of the Search component depends on the performance of the data s
 
 ### Physical memory
 
-Search keeps the data in-memory to achieve fast response times. The memory required is proportional to the number of resources (ConfigMaps, Deployments, Pods, etc) and their relationships in the cluster.
+Search keeps the data in-memory to achieve fast response times. The memory required is proportional to the number of Kubernetes resources and their relationships in the cluster.
 
 | Clusters | Kubernetes resources  | Relationships  | Observed size (with simulated data) |
 | ------- | --------| -----|----- |
@@ -35,7 +36,9 @@ Search keeps the data in-memory to achieve fast response times. The memory requi
 | 50 medium     | 250,000 | 750,000  | 878 MB | 
 
 Table: Physical memory data
-By default, we deploy the datastore with a memory limit of 1Gi.  If you are managing larger clusters, you may need to increase this limit by editing the deployment named `search-prod-xxxxx-redisgraph` in the open-cluster-management namespace.
+
+By default, the datastore is deployed with a memory limit of 1 GB. If you are managing larger clusters, you might need to increase this limit by editing the deployment named `search-prod-xxxxx-redisgraph` in the `open-cluster-management` namespace.
+
 ### Write throughput (cache recovery time)
 
 Most clusters in steady state generate a small number of resource updates. The highest rate of updates happen when the data in RedisGraph is cleared, which causes the remote collectors to synchronize their full state around the same time.
