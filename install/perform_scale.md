@@ -25,7 +25,7 @@ The scalability of the Search component depends on the performance of the data s
 
 ### Physical memory
 
-Search keeps the data in-memory to achieve fast response times. The memory required is proportional to the number of resources (ConfigMaps, deployments, pods, and so on) and their relationships in the cluster.
+Search keeps the data in-memory to achieve fast response times. The memory required is proportional to the number of resources and their relationships in the cluster. Resources can include ConfigMaps, deployments, pods, and more.
 
 | Clusters | Kubernetes resources  | Relationships  | Observed size (with simulated data) |
 | ------- | --------| -----|----- |
