@@ -1,6 +1,6 @@
 # Managing IAM policies 
 
-Learn to create, apply, view, and update your IAM policies.
+Apply an IAM policy to check the number of cluster administrators that you allow in your cluster. Learn to create, apply, view, and update your IAM policies in the following sections.
 
 ## Creating an IAM policy
 
@@ -93,7 +93,7 @@ You can view any IAM policy and its status from the console.
 
 2. From the navigation menu, click Governance and risk to view a table list of your policies.
 
-  **Note**: You can filter the table list of your policies by selecting the All policies tab or Cluster violations tab.
+   **Note**: You can filter the table list of your policies by selecting the All policies tab or Cluster violations tab.
 
 3. Select one of your policies to view more details.
 
