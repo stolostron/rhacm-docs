@@ -66,6 +66,12 @@ The CIS policy controller is disabled by default when you install Red Hat Advanc
 
 You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../security/create_cis_pol.md) to update the policy.
 
+### All users with access to the Advanced Cluster Management for Kubernetes component namespaces are automatically granted cluster administrator access
+<!--1.0.0:2135-->
+
+The Advanced Cluster Management for Kubernetes components are installed in a single namespace. A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Advanced Cluster Management for Kubernetes and to any ID with access to the namespace. For security, do not give anyone access to this namespace who does not already have cluster administrator access. 
+
+The `multicluster-endpoint`, which is the agent on the managed cluster, also requires cluster administrator privileges. The `multicluster-endpoint` is deployed into the `multicluster-endpoint` namespace. For security, do not give anyone access to the `multicluster-endpoint` namespace who does not already have cluster administrator access.
 
 ## Web console known issues
 
@@ -173,6 +179,3 @@ For more information, see [Certificate policy controller](../security/cert_polic
 ### Any authenticated user can import clusters
 
 Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information view the [Role based access control (RBAC) table](../security/security_intro.md).
-
-
-
