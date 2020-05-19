@@ -15,7 +15,7 @@ View more descriptions of the policy YAML files in the [Policy example](policy_e
 
 ### Creating a security policy from the command line interface
 
-Complete the following steps to create a policy from the CLI:
+Complete the following steps to create a policy from the command line interface (CLI):
 
 1. Create a policy by running the following command:
 
