@@ -70,7 +70,7 @@ You can view any memory usage policy and its status from the console.
 
 4. View the policy violations by selecting the _Violations_ tab.
 
-## Updating 
+## Updating memory usage policies
 
 ### Deleting a memory usage policy
 

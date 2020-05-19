@@ -77,7 +77,7 @@ An image vulnerability policy is created.
 
 6. Select an entry to view more details.
 
-## Updating an image vulnerability policy
+## Updating image vulnerability policies
 
 ### Deleting an image vulnerability policy
 

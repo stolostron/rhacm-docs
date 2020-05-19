@@ -99,7 +99,7 @@ You can view any IAM policy and its status from the console.
 
 4. View the IAM policy violations by selecting the _Violations_ tab.
 
-## Updating 
+## Updating IAM policies
 
 ### Disabling IAM policies
 
