@@ -8,7 +8,6 @@ Learn more about subscriptions, then see the following tasks:
   - Matching a subscription to an application
   - Updating a subscription
   - Deleting a subscription
-  - Scheduling a subscription
 
 Subscriptions (`subscription.apps.open-cluster-management.io`) are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources (in GitHub, Objectstores, or hub cluster deployables), and Helm charts within channels by using annotations, labels, and versions.
 
