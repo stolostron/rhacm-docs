@@ -44,13 +44,6 @@ spec:
     clusterOverrides:
       path:
       value:
-  timewindow:
-    windowtype:
-    location:
-    daysofweek:
-    hours:
-      - start:
-        end:
 ```
 ## YAML values table {#subscription-yaml-values}
 
@@ -144,7 +137,7 @@ spec:
   name: nginx-ingress
 ```
 
-### Subscription time window example
+<!-- ### Subscription time window example
 
 The following example subscription includes multiple configured time windows. A time window occurs between 10:20 AM and 10:30 AM occurs every Monday, Wednesday, and Friday. A time window also occurs between 12:40 PM and 1:40 PM every Monday, Wednesday, and Friday. The subscription is active only during these six weekly time windows for deployments to begin.  
 
@@ -175,6 +168,7 @@ spec:
       - start: "12:40PM"
         end: "1:40PM"
 ```
+--> 
 
 ### Subscription with overrides example
 
