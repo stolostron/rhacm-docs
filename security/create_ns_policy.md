@@ -1,6 +1,7 @@
 # Managing a namespace policy 
 
-Kubernetes configuration policy controller monitors the status of your namespace policy. Namespace policies are applied to define specific rules for your namespace.
+Namespace policies are applied to define specific rules for your namespace. Learn to create, apply, view, and update your memory usage policy in the following sections.
+
 
 ## Creating a namespace policy 
 

@@ -108,4 +108,4 @@ Delete the image vulnerability policy from the CLI or the console.
 
 Your image vulnerability policy is deleted.
 
-View a sample of an image vulnerability policy, see _Image vulnerability policy sample_ on the [Policy samples page](policy_samples_intro.md). See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other policies that are monitored by the Kubernetes configuration policy controller. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of an image vulnerability policy, see _Image vulnerability policy sample_ on the [Image vulnerability policy](image_vuln_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other policies that are monitored by the Kubernetes configuration policy controller. See [Manage security policies](manage_policy_overview.md) to manage other policies.

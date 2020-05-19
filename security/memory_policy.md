@@ -1,8 +1,10 @@
 # Memory usage policy 
 
+Kubernetes configuration policy controller monitors the status of the memory usage policy. Use the memory usage policy to limit or restrict your memory and compute usage. For more information, see _Limit Ranges_ in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/policy/limit-range/). Learn more details about the memory usage policy structure in the following sections.
+
 ## Memory usage policy YAML structure
 
-Apply the limit range policy to limit or restrict your memory and compute usage. For more information, see _Limit Ranges_ in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/policy/limit-range/). Your memory usage policy might resemble the following YAML file:
+Your memory usage policy might resemble the following YAML file:
 
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1

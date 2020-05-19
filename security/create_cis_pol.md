@@ -267,4 +267,4 @@ Delete a CIS policy from the CLI or the console.
 
 Your policy is deleted.
 
-View a sample of a CIS policy, see _CIS policy sample_ from the [Configuration policy samples page](policy_sample_intro.md). For more information about other policy controllers, see [Policy controllers](policy_controllers.md).
+View a sample of a CIS policy, see _CIS policy sample_ from the [CIS policy controller](cis_policy_ctrl.md) page. For more information about other policy controllers, see [Policy controllers](policy_controllers.md).
