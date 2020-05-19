@@ -97,3 +97,5 @@ To restore the root CA certificate, update the CA issuer by completing the follo
    ```
    
 Refresh all `cert-manager` certificates that use the CA. For more information, see the forementioned section, Refreshing _cert-manager_ certificates. 
+
+See [Certificates](certificates.md) for more information about certificates that are created and managed by Red Hat Advanced Cluster Management for Kubernates.
