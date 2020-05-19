@@ -13,7 +13,7 @@ The rolling update for a deployment runs on the hub cluster. The deployment roll
 You can configure a percentage rollout for a subscription or directly for a deployable resource.
 
   - Configuring a rolling update for a subscription
-  - Rolling update sample](roll_update_sample.md)
+  - [Rolling update sample](roll_update_sample.md)
 
 A rolling update for a subscription uses the rolling update feature that is included in the Kubernetes resource definition. To configure this feature for a deploying a subscription, you need to create or update the following Kubernetes resources:
 
