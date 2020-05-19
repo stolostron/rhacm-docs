@@ -64,7 +64,7 @@ You can view any pod security policy and its status from the console.
 
 2. From the navigation menu, click Governance and risk to view a table list of your policies.
 
-  **Note**: You can filter the table list of your policies by selecting the All policies tab or Cluster violations tab.
+   **Note**: You can filter the table list of your policies by selecting the All policies tab or Cluster violations tab.
 
 3. Select one of your policies to view more details.
 
