@@ -1,23 +1,8 @@
-# Channels samples
+# Channel samples
 
 View samples and YAML definitions that you can use to build your files. Channels (`channel.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Learn more at [Creating and managing channels](managing_channels.md).
 
 ## Channel YAML structure
-
-The definition structure for a channel can resemble the following YAML content:
-
-```yaml
-apiVersion: apps.open-cluster-management.io/v1
-kind: Channel
-metadata:
-  name: predev-ch
-  namespace: ns-ch
-  labels:
-    app: nginx-app-details
-spec:
-  type: HelmRepo
-  pathname: https://kubernetes-charts.storage.googleapis.com/
-```
 
 The following YAML structures show the required fields for a channel and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
 
@@ -26,7 +11,7 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name:
-  namespace:
+  namespace: # Each channel needs a unique namespace, except GitHub channel.
 spec:
   sourceNamespaces:  
   type:
@@ -44,7 +29,7 @@ spec:
 | apiVersion | Required. Set the value to `apps.open-cluster-management.io/v1`. |
 | kind | Required. Set the value to `Channel` to indicate that the resource is a channel. |
 | metadata.name | Required. The name of the channel. |
-| metadata.namespace | Required. The namespace for the channel. |
+| metadata.namespace | Required. The namespace for the channel; Each channel needs a unique namespace, except GitHub channel.|
 | spec.sourceNamespaces | Optional. Identifies the namespace that the channel controller monitors for new or updated deployables to retrieve and promote to the channel. For a `Namespace` channel, the namespace must be on the hub cluster. |  
 | spec.type | Required. The channel type. The supported types are: `Namespace`, `HelmRepo`, `GitHub`, and `ObjectBucket` |
 | spec.pathname | Required for `HelmRepo`, `GitHub`, `ObjectBucket`, `Namespace` channels. <ul><li>For a `HelmRepo` channel, set the value to be the URL for the Helm repository.</li><li>For an `ObjectBucket` channel, set the value to be the URL for the Object store.</li><li>For a `GitHub` channel, set the value to be the HTTPS URL for the GitHub repository.</li><li>For a `Namespace` channel, set the value to be the namespace where the channel is included.</li></ul> |
@@ -53,6 +38,21 @@ spec:
 | spec.gates.annotations | Optional. The annotations for the channel. Deployables must have matching annotations to be included in the channel. |
 | spec.labels | Optional. The labels for the channel. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
+
+The definition structure for a channel can resemble the following YAML content:
+
+```yaml
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: predev-ch
+  namespace: ns-ch
+  labels:
+    app: nginx-app-details
+spec:
+  type: HelmRepo
+  pathname: https://kubernetes-charts.storage.googleapis.com/
+```
 
 ## Kubernetes namespace (Namespace) channel
 

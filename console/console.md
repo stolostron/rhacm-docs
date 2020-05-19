@@ -57,7 +57,7 @@ You can personalize your view of the page by using the filtering feature. Click 
 
 ## Automate infrastructure
 
-Create clusters or import existing clusters. Scale up or down and delete clusters as needed. For more information, see [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](manage_cluster/intro.md)
+Create clusters or import existing clusters. Scale up or down and delete clusters as needed. For more information, see [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](../manage_cluster/intro.md)
 
 ## Manage applications (Technology preview)
 
@@ -85,7 +85,7 @@ Learn more about the tabs that are available from the Topology page:
 
 ## Governance and risk dashboard
 
-Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](../governance/compliance_intro.md).
+Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Governance and risk](../security/compliance_intro.md).
 
 ## Search 
 

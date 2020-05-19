@@ -1,9 +1,12 @@
 # Upgrading your cluster
 
-After you create clusters that you want to manage with Red Hat Advanced Cluster Management for Kubernetes, you can upgrade those clusters to the latest version by using the console.
-{:shortdesc}
+After you create clusters that you want to manage with Red Hat Advanced Cluster Management for Kubernetes, you can use the Red Hat Advanced Cluster Management for Kubernetes console to upgrade those clusters to the latest minor version that is available in the version channel that the managed cluster uses.
 
-This method of upgrading only works for Red Hat OpenShift Container Platform clusters that are in a *Ready* state.
+**Remember:** To upgrade to a major version, you must verify that you meet all of the prerequisites for upgrading to that version. You must update the version channel on the managed cluster before you can upgrade the cluster with the console. After you update the version channel on the managed cluster, the Red Hat Advanced Cluster Management for Kubernetes console displays the latest versions that are available for the upgrade.
+
+**Note:** You cannot upgrade Red Hat OpenShift Kubernetes Service clusters with the Red Hat Advanced Cluster Management for Kubernetes console. 
+
+This method of upgrading only works for Red Hat OpenShift Container Platform clusters that are in a *Ready* state. 
 
 To upgrade your cluster, complete the following steps:
 

@@ -16,8 +16,7 @@ Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resour
 
 The deployable controller acts as the default propagation engine and synchronizes local instances of the deployable. The controller follows the cluster and cluster-namespace model.
 
-You do not need to wrap or represent all resources as deployables before you deploy the resources. Depending on the resource type and the type of channel where you promote the resource, you might not need to create a deployable for the resource. For instance, you do not need to directly create deployables for resources that are included in Helm repository and GitHub repository channels. For more information, see [Creating and managing channels](managing_channels.md). Samples for all resources, including deployables, are located in the [Application resource samples](app_resource_samples.md) documentation.
-
+You do not need to wrap or represent all resources as deployables before you deploy the resources. Depending on the resource type and the type of channel where you promote the resource, you might not need to create a deployable for the resource. For instance, you do not need to directly create deployables for resources that are included in Helm repository and GitHub repository channels. For more information, see [Creating and managing channels](managing_channels.md).
 ## Create a deployable
 
 1. Compose the definition YAML content for your deployable.
@@ -42,13 +41,13 @@ You do not need to wrap or represent all resources as deployables before you dep
 
         Ensure that your new deployable is listed in the resulting output.
 
-   * To use REST API, you need to use the [deployable POST API](../apis/mcm/deployables_app.json).
+   * To use REST API, you need to use the [deployable POST API](../apis/deployables.json).
 
 ## Update a deployable
 
 To update a deployable with a new version, you can change the deployed resource in managed clusters by changing the deployable resource in the source location on your Hub cluster. The change is started immediately with a rolling update.
 
-1. Compose the definition updates for your deployable. For more information about the YAML structure, including the required fields, see [Application definition](#application-yaml-structure).
+1. Compose the definition updates for your deployable. 
 
 2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
@@ -71,7 +70,7 @@ To update a deployable with a new version, you can change the deployed resource 
 
        2. Update any fields or annotations that you need to change.
 
-   * To use REST API, use the [deployable PATCH API](../apis/mcm/deployables_app.json).
+   * To use REST API, use the [deployable PATCH API](../apis/deployables.json).
 
 When your changes are saved, the changes can be automatically detected by the channel controller for any channel that subscribes to the deployable. If the updated deployable no longer meets the channel requirements, the deployable is removed from the channel. If the deployable still meets the requirements, the updated version can be deployed to any destination clusters where the version was previously deployed.
 
@@ -106,7 +105,7 @@ You can use the console, the Kubernetes command line interface (`kubectl`) tool,
      kubectl get Deployable <name>
      ```
 
-* To use REST API, use the [deployable DELETE API](../apis/mcm/deployables_app.json).
+* To use REST API, use the [deployable DELETE API](../apis/deployables.json).
 
 * If you want to only remove a deployable from a specific application, you can update the application to remove the content that defines the deployable. For more information about updating an application, see [Creating and managing applications](managing_apps.md).
 

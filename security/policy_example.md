@@ -2,7 +2,7 @@
 
 Use the Red Hat Advanced Cluster Management for Kubernetes security policy framework to create custom policy controllers and other policies. Kubernetes CustomResourceDefinition (CRD) instance are used to create policies. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
 
-Each Red Hat Advanced Cluster Management for Kubernetes policy can have at least one or more templates. For more details about the policy elements, view the [Policy YAML table](#policy-parameter-table).
+Each Red Hat Advanced Cluster Management for Kubernetes policy can have at least one or more templates. For more details about the policy elements, view the following _Policy YAML table_ section on this page.
  
 The policy requires a _PlacementPolicy_ that defines the clusters that the policy document is applied to, and a _PlacementBinding_ that binds the Red Hat Advanced Cluster Management for Kubernetes policy to the `PlacementPolicy`.
 
@@ -220,7 +220,7 @@ spec:
                
 ```
 
-See [Creating a Red Hat Advanced Cluster Management for Kubernetes security policy](../create_policy.md) to create a policy. You can also create custom policy controllers to validate the compliance of your policies. See [Red Hat Advanced Cluster Management for Kubernetes policy controllers](../governance/policy_controllers.md).
+See [Creating a Red Hat Advanced Cluster Management for Kubernetes security policy](create_policy.md) to create a policy. You can also create custom policy controllers to validate the compliance of your policies. See [Policy controllers](../security/policy_controllers.md).
 
-See [Red Hat Advanced Cluster Management for Kubernetes Governance and risk](compliance_intro.md) for more policy topics.
+See [Governance and risk](compliance_intro.md) for more policy topics.
 
