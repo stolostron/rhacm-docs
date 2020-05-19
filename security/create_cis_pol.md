@@ -136,8 +136,7 @@ Complete the following steps to view the CIS policy from the managed cluster CLI
     - Controls
 7. Click **Create**.
 
-A policy is created and is embedded into the policy. View a sample of the CIS policy, see _CIS policy sample_ from [CIS policy controller](cis_pol_ctrl.md). 
-
+A policy is created and is embedded into the policy. 
 
 #### Viewing a CIS policy from the console
 
