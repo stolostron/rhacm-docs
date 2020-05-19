@@ -68,6 +68,8 @@ specific IAM policy by running the following command:
    
 ### Creating an IAM policy from the console
 
+As you create your IAM policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create an IAM policy from the console:
+
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Govern risk**.
 3. Click **Create policy**.

@@ -220,7 +220,7 @@ spec:
                
 ```
 
-See [Creating a Red Hat Advanced Cluster Management for Kubernetes security policy](create_policy.md) to create a policy. You can also create custom policy controllers to validate the compliance of your policies. See [Policy controllers](../security/policy_controllers.md).
+See [Creating a security policy](create_policy.md) to create a policy. You can also create custom policy controllers to validate the compliance of your policies. See [Policy controllers](../security/policy_controllers.md).
 
 See [Governance and risk](compliance_intro.md) for more policy topics.
 

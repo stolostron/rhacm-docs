@@ -48,6 +48,8 @@ Complete the following steps to view your certificate policy from the CLI:
 
 ### Creating a certificate policy from the console
 
+As you create a certificate policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create a certificate policy from the console:
+
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**.
 3. Click **Create policy**.
