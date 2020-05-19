@@ -4,10 +4,7 @@ Configuration policy controller can be used to configure any Kubernetes resource
 
 The configuration policy controller communicates with the local Kubernetes API server to get the list of your configurations that are in your cluster. For more information about CRDs, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/). 
 
-<!--Parent policy  vs policy (replicated policy?)-->
-The configuration policy controller is created on the hub cluster during installation.
-
-The configuration policy controller supports the `enforce` feature and monitors the compliance of the following policies:
+The configuration policy controller is created on the hub cluster during installation. Configuration policy controller supports the `enforce` feature and monitors the compliance of the following policies:
 
 * Memory usage policy
 * Namespace policy
@@ -18,7 +15,7 @@ The configuration policy controller supports the `enforce` feature and monitors 
 * Rolebinding policy
 * Security content constraints (SCC) policy
 
-When the `remediationAction` for the configuration policy is set to `enforce`, the controller creates a missing policy on the target managed clusters.
+When the `remediationAction` for the configuration policy is set to `enforce`, the controller creates a replicate policy on the target managed clusters.
 
 ## Configuration policy controller YAML structure
 
