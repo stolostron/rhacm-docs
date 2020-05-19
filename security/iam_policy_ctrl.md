@@ -4,7 +4,7 @@ Identity and Access Management (IAM) policy controller can be used to receive no
 
 The IAM policy controller checks for compliance of the number of cluster administrators that you allow in your cluster. IAM policy controller communicates with the local Kubernetes API server. For more information, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
 
-The IAM policy controller runs on the hub cluster, and checks for compliance against the IAM policy that you define. IAM policy is created on your managed cluster. The IAM policy controller verifies and reports compliance of the role bindings based on the RBAC that you configure in your cluster. For more information about RBAC in Red Hat Advanced Cluster Management for Kubernetes, see [Role-based access control (RBAC)](security.md).
+The IAM policy controller runs on the hub cluster, and checks for compliance against the IAM policy that you define. IAM policy is created on your managed cluster. The IAM policy controller verifies and reports compliance of the role bindings based on the RBAC that you configure in your cluster. For more information about RBAC in Red Hat Advanced Cluster Management for Kubernetes, see [Role-based access control (RBAC)](security_intro.md).
 
 <!--add policy controller YAML structure-->
 
