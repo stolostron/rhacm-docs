@@ -144,11 +144,11 @@ For more information about the resource definition for an application, see [Crea
 
    * To use REST API, use the [subscription PATCH API](../apis/subscriptions.json).
 
-## Scheduling resource deployments for a subscription
+<!-- ## Scheduling resource deployments for a subscription -->
 
-If you need to deploy new or changed Helm charts, deployables, or other Kubernetes resources during only specific times, you can define subscriptions for those resources to begin deployments during only those specific times. For instance, you can define time windows between 10:00 PM and 11:00 PM each Friday to serve as scheduled maintenance windows for applying patches or other application updates to your clusters.
+<!-- If you need to deploy new or changed Helm charts, deployables, or other Kubernetes resources during only specific times, you can define subscriptions for those resources to begin deployments during only those specific times. For instance, you can define time windows between 10:00 PM and 11:00 PM each Friday to serve as scheduled maintenance windows for applying patches or other application updates to your clusters. -->
 
-Alternatively, you can restrict or block deployments from beginning during specific time windows, such as to avoid unexpected deployments during peak business hours. For instance, to avoid peak hours you can define a time window for a subscription to avoid beginning deployments between 8:00 AM and 8:00 PM.
+<!-- Alternatively, you can restrict or block deployments from beginning during specific time windows, such as to avoid unexpected deployments during peak business hours. For instance, to avoid peak hours you can define a time window for a subscription to avoid beginning deployments between 8:00 AM and 8:00 PM.
 
 By defining time windows for your subscriptions, you can coordinate updates for all of your applications and clusters. For instance, you can define subscriptions to deploy only new application resources between 6:01 PM and 11:59 PM and define other subscriptions to deploy only updated versions of existing resources between 12:00 AM to 7:59 AM.
 
@@ -171,7 +171,7 @@ To define a time window for a subscription, you need to add the required fields 
 * You can also define the time window type, which determines whether the time window when deployments can begin occurs during, or outside, the defined timeframe.
   * If the time window type is `active`, deployments can begin only during the defined timeframe. You can use this setting when you want deployments to occur within only specific maintenance windows.
   * If the time window type is `block`, deployments cannot begin during the defined timeframe, but can begin at any other time. You can use this setting when you have critical updates that are required, but still need to avoid deployments during specific time ranges. For instance, you can use this type to define a time window to allow security-related updates to be applied at any time except between 10:00 AM and 2:00 PM.
-* You can define multiple time windows for a subscription, such as to define a time window every Monday and Wednesday.  
+* You can define multiple time windows for a subscription, such as to define a time window every Monday and Wednesday. -->
 
 ## Deleting subscriptions
 
