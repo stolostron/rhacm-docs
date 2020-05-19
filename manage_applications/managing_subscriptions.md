@@ -144,16 +144,15 @@ For more information about the resource definition for an application, see [Crea
 
    * To use REST API, use the [subscription PATCH API](../apis/subscriptions.json).
 
-<!-- ## Scheduling resource deployments for a subscription -->
+<!-- ## Scheduling resource deployments for a subscription (tech preview decision, return for GA see issue 2313 -->
 
 <!-- If you need to deploy new or changed Helm charts, deployables, or other Kubernetes resources during only specific times, you can define subscriptions for those resources to begin deployments during only those specific times. For instance, you can define time windows between 10:00 PM and 11:00 PM each Friday to serve as scheduled maintenance windows for applying patches or other application updates to your clusters. -->
 
-<!-- Alternatively, you can restrict or block deployments from beginning during specific time windows, such as to avoid unexpected deployments during peak business hours. For instance, to avoid peak hours you can define a time window for a subscription to avoid beginning deployments between 8:00 AM and 8:00 PM.
+<!-- Alternatively, you can restrict or block deployments from beginning during specific time windows, such as to avoid unexpected deployments during peak business hours. For instance, to avoid peak hours you can define a time window for a subscription to avoid beginning deployments between 8:00 AM and 8:00 PM. -->
 
-By defining time windows for your subscriptions, you can coordinate updates for all of your applications and clusters. For instance, you can define subscriptions to deploy only new application resources between 6:01 PM and 11:59 PM and define other subscriptions to deploy only updated versions of existing resources between 12:00 AM to 7:59 AM.
+<!-- By defining time windows for your subscriptions, you can coordinate updates for all of your applications and clusters. For instance, you can define subscriptions to deploy only new application resources between 6:01 PM and 11:59 PM and define other subscriptions to deploy only updated versions of existing resources between 12:00 AM to 7:59 AM. -->
 
-When a time window is defined for a subscription, the time ranges when a subscription is active changes. As part of defining a time window, you can define the subscription to be active or blocked during that window. The deployment of new or changed resources begins only when the subscription is active. Regardless of whether a subscription is active or blocked, the subscription continues to monitor for any new or changed resource. The active and blocked setting affects only deployments.
-
+<!-- When a time window is defined for a subscription, the time ranges when a subscription is active changes. As part of defining a time window, you can define the subscription to be active or blocked during that window. The deployment of new or changed resources begins only when the subscription is active. Regardless of whether a subscription is active or blocked, the subscription continues to monitor for any new or changed resource. The active and blocked setting affects only deployments.
 When a new or changed resource is detected, the time window definition determines the next action for the subscription.
 
 * For subscriptions to `HelmRepo`, `ObjectBucket`, and `GitHub` type channels:
