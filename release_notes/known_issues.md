@@ -172,7 +172,7 @@ For more information, see [Certificate policy controller](../security/cert_polic
 
 ### Any authenticated user can import clusters
 
-In OpenShift Container Platform, any authenticated user can provision projects with administrator privileges to the project and associated namespace. As the administrator of a namespace, users can import clusters into Red Hat Advanced Cluster Management for Kubernetes. In order to run the generated import commands on the managed cluster, you must have cluster administrator privileges. For more information view the [Role based access control (RBAC) table](../security/security_intro.md).
+Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information view the [Role based access control (RBAC) table](../security/security_intro.md).
 
 
 
