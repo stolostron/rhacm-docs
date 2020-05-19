@@ -1,14 +1,14 @@
-# Namespace policy
+# Memory usage policy 
 
-Apply the namespace policy to define specific rules for your namespace. 
+## Memory usage policy YAML structure
 
-## Namespace policy YAML structure
+Apply the limit range policy to limit or restrict your memory and compute usage. For more information, see _Limit Ranges_ in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/policy/limit-range/). Your memory usage policy might resemble the following YAML file:
 
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
-     name: policy-namespace-1
+     name: policy-limitrange
      namespace:
    spec:
      complianceType:
@@ -19,15 +19,23 @@ Apply the namespace policy to define specific rules for your namespace.
      object-templates:
        - complianceType:
          objectDefinition:
-           kind:
            apiVersion:
+           kind:
            metadata:
              name:
-        ...
+           spec:
+             limits:
+             - default:
+                 memory:
+               defaultRequest:
+                 memory:
+               type: 
+           ...
    ```
 
-## Namespace policy YAML table
-<!--this table is a place holder until i update the parameters-->
+## Memory policy table
+<!--need to come back and revise according to the memory usage policy; currently a place holder-->
+
 |Field|Description|
 |-- | -- |
 | apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
@@ -40,15 +48,14 @@ Apply the namespace policy to define specific rules for your namespace.
 | spec.complianceType | Required. Set the value to `"musthave"`|
 | spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
-## Namespace policy sample
 
-Apply the namespace policy to define specific rules for your namespace. Your namespace policy might resemble the following YAML file:
-  
+## Memory policy sample
+
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
-     name: policy-namespace-1
+     name: policy-limitrange
      namespace: mcm 
    spec:
      complianceType: musthave
@@ -59,18 +66,19 @@ Apply the namespace policy to define specific rules for your namespace. Your nam
      object-templates:
        - complianceType: musthave
          objectDefinition:
-           kind: Namespace # must have namespace 'prod'
            apiVersion: v1
+           kind: LimitRange # limit memory usage
            metadata:
-             name: prod
-        ...
+             name: mem-limit-range
+           spec:
+             limits:
+             - default:
+                 memory: 512Mi
+               defaultRequest:
+                 memory: 256Mi
+               type: Container
+           ...
    ```
-<!--wil create another file, create_ns_pol where i will add the following tasks-->
-### Applying the namespace policy
 
-Complete the following steps to apply the memory usage policy from the console:
+See [Managing a memory policy](create_memory_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page.
 
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
-2. From the navigation menu, click **Governance and risk**. 
-3. Click **Create policy**. 
-4. Select **Namespace** from the _Specifications_ field.

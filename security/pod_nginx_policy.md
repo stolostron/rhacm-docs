@@ -1,14 +1,14 @@
-# Memory usage policy 
+# Pod nginx policy
 
-## Memory usage policy YAML structure
+Kubernetes configuration policy controller monitors the status of you pod nginx policies. Apply the pod policy to define the container rules for your pods. A nginx pod must exist in your cluster.
 
-Apply the limit range policy to limit or restrict your memory and compute usage. For more information, see _Limit Ranges_ in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/policy/limit-range/). Your memory usage policy might resemble the following YAML file:
+## Pod nginx policy YAML structure
 
-   ```yaml
+  ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
-     name: policy-limitrange
+     name: policy-pod
      namespace:
    spec:
      complianceType:
@@ -20,22 +20,20 @@ Apply the limit range policy to limit or restrict your memory and compute usage.
        - complianceType:
          objectDefinition:
            apiVersion:
-           kind:
+           kind: Pod # nginx pod must exist
            metadata:
              name:
            spec:
-             limits:
-             - default:
-                 memory:
-               defaultRequest:
-                 memory:
-               type: 
-           ...
+             containers:
+             - image:
+               name:
+               ports:
+               - containerPort:
+        ...
    ```
-
-## Memory policy table
-<!--need to come back and revise according to the memory usage policy; currently a place holder-->
-
+   
+## Pod nginx plicy table
+ <!--this is just a place holder until i revise the parameters, focusing on the format right now-->
 |Field|Description|
 |-- | -- |
 | apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
@@ -49,13 +47,15 @@ Apply the limit range policy to limit or restrict your memory and compute usage.
 | spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-## Memory policy sample
+## Pod nginx policy sample
+
+Your pod policy nginx policy might resemble the following YAML file:
 
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
-     name: policy-limitrange
+     name: policy-pod
      namespace: mcm 
    spec:
      complianceType: musthave
@@ -67,26 +67,16 @@ Apply the limit range policy to limit or restrict your memory and compute usage.
        - complianceType: musthave
          objectDefinition:
            apiVersion: v1
-           kind: LimitRange # limit memory usage
+           kind: Pod # nginx pod must exist
            metadata:
-             name: mem-limit-range
+             name: nginx-pod
            spec:
-             limits:
-             - default:
-                 memory: 512Mi
-               defaultRequest:
-                 memory: 256Mi
-               type: Container
-           ...
+             containers:
+             - image: nginx:1.7.9
+               name: nginx
+               ports:
+               - containerPort: 80
+        ...
    ```
-<!--Will create another file named create_memory_pol.md which will have tasks-->
 
-### Applying the memory usage policy
-
-Complete the following steps to apply the memory usage policy from the console:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
-2. From the navigation menu, click **Governance and risk**. 
-3. Click **Create policy**. 
-4. Select **Limitrange** from the _Specifications_ field.
-
+Learn how to manage a pod nginx policy, see [Managing a pod nginx policy](create_nginx_policy.md) for more details. View other configuration policies that are monitored by the configuration controller, see [Kubernetes configuration policy controller](config_policy_ctrl.md). See [Manage security policies](manage_policy_overview.md) to manage other policies.

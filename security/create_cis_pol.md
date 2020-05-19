@@ -16,7 +16,7 @@ Complete the following steps to create a certificate policy from the command lin
   kubectl create -f CisPolicy.yaml
   ```
   
-  Your YAML might resemble teh following file:
+  Your YAML might resemble the following file:
   
   ```yaml	
   apiVersion: policies.ibm.com/v1alpha1	
@@ -148,6 +148,8 @@ View any CIS Policy and its status from the console.
   **Note:** You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
 
 3. Select one of your policies.
+
+4. View the policy violations by selecting the _Violations_ tab.
 
 ## Updating CIS policies
 

@@ -30,7 +30,7 @@ Complete the following steps to create a certificate policy from the CLI:
 
 Your certificate policy is created.
 
-#### Viewing your certificate policy
+#### Viewing your certificate policy from the CLI
 
 Complete the following steps to view your certificate policy from the CLI:
 
@@ -65,7 +65,7 @@ Complete the following steps to view your certificate policy from the CLI:
 
 A certificate policy is created. 
 
-#### Viewing your certificate policy
+#### Viewing your certificate policy from the console
 
 You can view any certificate policy and its status from the console.
 

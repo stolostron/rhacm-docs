@@ -1,14 +1,14 @@
-# Pod nginx policy
+# Namespace policy
 
-Apply the pod policy to define the container rules for your pods. A nginx pod must exist in your cluster.
+Apply the namespace policy to define specific rules for your namespace. 
 
-## Pod nginx policy YAML structure
+## Namespace policy YAML structure
 
-  ```yaml
+   ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
-     name: policy-pod
+     name: policy-namespace-1
      namespace:
    spec:
      complianceType:
@@ -19,21 +19,16 @@ Apply the pod policy to define the container rules for your pods. A nginx pod mu
      object-templates:
        - complianceType:
          objectDefinition:
+           kind:
            apiVersion:
-           kind: Pod # nginx pod must exist
            metadata:
              name:
-           spec:
-             containers:
-             - image:
-               name:
-               ports:
-               - containerPort:
         ...
    ```
-   
-## Pod nginx plicy table
- <!--this is just a place holder until i revise the parameters, focusing on the format right now-->
+
+## Namespace policy YAML table
+<!--this table is a place holder until i update the parameters-->
+
 |Field|Description|
 |-- | -- |
 | apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
@@ -47,15 +42,15 @@ Apply the pod policy to define the container rules for your pods. A nginx pod mu
 | spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-## Pod nginx policy sample
+## Namespace policy sample
 
-Your pod policy nginx policy might resemble the following YAML file:
-
+Your namespace policy might resemble the following YAML file:
+  
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
-     name: policy-pod
+     name: policy-namespace-1
      namespace: mcm 
    spec:
      complianceType: musthave
@@ -66,26 +61,11 @@ Your pod policy nginx policy might resemble the following YAML file:
      object-templates:
        - complianceType: musthave
          objectDefinition:
+           kind: Namespace # must have namespace 'prod'
            apiVersion: v1
-           kind: Pod # nginx pod must exist
            metadata:
-             name: nginx-pod
-           spec:
-             containers:
-             - image: nginx:1.7.9
-               name: nginx
-               ports:
-               - containerPort: 80
+             name: prod
         ...
    ```
 
-<!--the following section will be added in the file describing how to manage pod nginx policies (create_nginx_pol.md)-->
-
-### Applying the pod policy
-
-Complete the following steps to apply the pod policy from the console:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console
-2. From the navigation menu, click **Govern risk**. 
-3. Click **Create policy**. 
-4. Select **Pod** from the _Specifications_ field.
+Manage your namespace policy. See [Managing a namespace policy](create_ns_policy.md) for more information. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies.
