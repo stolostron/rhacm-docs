@@ -340,4 +340,4 @@ Apply the image vulnerability policy to detect if container images have vulnerab
            kind: ImageManifestVuln     
    ```
 
-See [Managing an image vulnerability policy](crete_image_vuln.md) for more information. View other configuration policies on the [Kubernetes configuration policy controller](config_policy_ctrl.md).  
+See [Managing an image vulnerability policy](crete_image_vuln.md) for more information. View other configuration policies that are monitored by the configuration controller, see [Kubernetes configuration policy controller](config_policy_ctrl.md).  

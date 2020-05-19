@@ -15,3 +15,5 @@ Create and manage policies in Red Hat Advanced Cluster Management for Kubernetes
 * [Certificate policy controller sample](cert_policy_ctrl.md)
 * [CIS policy controller sample](cis_policy_ctrl.md)
 * [IAM policy sample](iam_policy_ctrl.md)
+
+Refer to [Governance and risk](compliance_intro.md) for more topics. 
