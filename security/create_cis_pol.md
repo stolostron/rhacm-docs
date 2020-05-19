@@ -121,6 +121,8 @@ Complete the following steps to view the CIS policy from the managed cluster CLI
 
 ### Creating a CIS policy from the console
 
+As you create your CIS policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create CIS policy from the console:
+
 1. Log in to the Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Govern risk**.
 3. Click **Create Policy**.

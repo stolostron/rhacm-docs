@@ -86,6 +86,7 @@
        * [CIS policy controller sample](security/cis_policy_ctrl.md)
        * [IAM policy controller sample](security/iam_policy_ctrl.md)
      * [Manage security policies](security/manage_policy_overview.md)
+       * [Managing a security policy](security/create_policy.md)
        * [Managing a configuration policy](security/create_config_pol.md)
        * [Managing an image vulnerability policy](security/create_image_vuln.md)
        * [Managing a memory usage policy](security/create_memory_policy.md)

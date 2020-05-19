@@ -48,7 +48,7 @@ Complete the following steps to view your memory usage policy from the CLI:
 
 ### Creating an memory usage policy from the console
 
-Complete the following steps to create the memory usage policy from the console:
+As you create a memory usage policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create the memory usage policy from the console:
 
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Governance and risk**. 
