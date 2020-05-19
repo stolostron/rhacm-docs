@@ -80,5 +80,5 @@ Apply the limit range policy to limit or restrict your memory and compute usage.
            ...
    ```
 
-See [Managing a memory policy](create_memory_policy.md) for more information. View other configuration policies on the [Kubernetes configuration policy controller](config_policy_ctrl.md).
+See [Managing a memory policy](create_memory_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page.
 
