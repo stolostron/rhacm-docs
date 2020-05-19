@@ -55,7 +55,7 @@
        * [Deploying an application resource](manage_applications/deployment_app.md)
        * [Deploying an application resource with a rolling update](manage_applications/deployment_rollout.md)
        * [Managing applications with the console](manage_applications/managing_apps_console.md)
-    * [Application resource samples](manage_applications/app_resource_samples.md)
+     * [Application resource samples](manage_applications/app_resource_samples.md)
        * [Application samples](manage_applications/app_sample.md)
        * [Secret samples](manage_applications/secret_sample.md)
        * [Channel samples](manage_applications/channel_sample.md)
