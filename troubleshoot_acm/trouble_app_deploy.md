@@ -1,10 +1,10 @@
 # Troubleshooting application Kubernetes deployment version
 
-A managed cluster with a deprecated Kubernetes `apiversion` might not be supported. See the [Kubernetes issue](https://kubernetes.io/blog/2019/07/18/api-deprecations-in-1-16/) for more details about the deprecated API version.
+A managed cluster with a deprecated Kubernetes `apiVersion` might not be supported. See the [Kubernetes issue](https://kubernetes.io/blog/2019/07/18/api-deprecations-in-1-16/) for more details about the deprecated API version.
 
 ## Symptom: Application deployment version
 
-You might see an error similar to the following if one or more of your application resources use the deprecated API:
+You might see an error similar to the following if one or more of your application resources uses the deprecated API:
 
 ```
 failed to install release: unable to build kubernetes objects from release manifest: unable to recognize "": no matches for
