@@ -18,4 +18,4 @@ The intallation process includes the following topics:
 - [Requirements and recommendations](install/requirements.md)
 - [Preparing your hub cluster for installation](install/prep.md)
 - [Sizing your hub cluster](install/plan_capacity.md)
-- [Installing while connected online](install/install_connected.md)
+- [Installing Red Hat Advanced Cluster Management for Kubernetes when connected](install/install_connected.md)
