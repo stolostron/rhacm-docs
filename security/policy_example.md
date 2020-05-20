@@ -10,7 +10,7 @@ The policy requires a _PlacementPolicy_ that defines the clusters that the polic
 
 * The `PlacementPolicy` and `PlacementBinding` can be included in the same `.yaml` file or separate `.yaml` files.
 
-* When you create a policy, you can only apply it to your managed cluster namespaces.
+* When you create a policy, be sure to apply it to your managed cluster namespaces only. If you create a policy in the hub cluster namespace, it is by deleted by Red Hat Advanced Cluster Management for Kubernetes.
 
 * Each client and provider is responsible for ensuring that their managed cloud environment meets internal enterprise security standards for software engineering, secure engineering, resiliency, security, and regulatory compliance for workloads hosted on Kubernetes clusters. Use the governance and security capability to gain visibility and remediate configurations to meet standards.
 
