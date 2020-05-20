@@ -44,4 +44,4 @@ spec:
 | spec.maxRolebindingViolationsPerNamespace | Required. Maximum number of IAM role binding violations that are valid before a namespace is considered as non-compliant.
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
-Learn how to manage IAM policies, see [Managing IAM  policies](create_iam_policy.md) for more details. Refer to [Policy controllers](policy_controllers.md) for more topics.
+Refer to [Policy controllers](policy_controllers.md) for more topics.
