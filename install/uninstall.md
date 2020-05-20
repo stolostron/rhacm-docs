@@ -1,59 +1,49 @@
 # Uninstalling
 
-When you uninstall Red Hat Advanced Cluster Management for Kubernetes, you must delete both the MultiClusterHub Instance and the `multiclusterhub-operator`. You can do that by using scripts, or by using commands. 
+When you uninstall Red Hat Advanced Cluster Management for Kubernetes, there are two different levels of the process. 
 
-There are scripts that are provided in the [`open-cluster-management/deploy` GitHub repository](https://github.com/open-cluster-management/deploy) that simplify the procedures.
+The first level is a custom resource removal. It is the most basic type of unistallation that removes the custom resource of the MultiClusterHub instance, but leaves other required components. This level of uninstallation is helpful if you plan another installation that uses the same settings and components of the one that you are removing. Your time to install the next version is reduced when you have all of the other components already installed. 
 
-## Deleting both components by using script files
+The second level is a more complete uninstallation, except for a few items, like custom resource definitions. This adds the removal of other required components and settings to the items that are removed. When you continue with this step, it removes all of the components and subscriptions that were not removed with the custom resource removal. If you complete this level of unistallation, you must reinstall the operator before reinstalling the custom resource.
 
-1. Run the `uninstall.sh` script file that is in the root directory of the [`open-cluster-management/deploy` GitHub repository](https://github.com/open-cluster-management/deploy) to remove the MultiClusterHub instance. To run this script file, run the following command in the root directory of the cloned repository:
+## Removing a MultiClusterHub instance by using commands  
 
-```
-./uninstall.sh
-```
-
-2. To remove the `multiclusterhub-operator`, any Hive deployments, and detach all imported clusters, run the `clean-clusters.sh` script file by entering the following command: 
+1. Change to your project namespace by entering the following command:
 
 ```
-./clean-clusters.sh
+oc project <namespace>
 ```
 
-3. Enter `DESTROY` to delete any Hive deployments and detach all imported clusters.
+  Replace <namespace> with the name of your project namespace.
 
-4. Run the `unistall.sh` script again by entering the following command:
-
-```
-./uninstall.sh
-```
-
-## Deleting a MultiClusterHub Instance by using commands  
-
-1. Delete the `yaml` definitions that are contained in the `multiclusterhub` directory by entering the following command:
+2. Enter the following command to remove the MultiClusterHub custom resource:
 
 ```
-kubectl delete -k multiclusterhub/
+oc delete multiclusterhub --all
 ```
 
-  This removes the MultiClusterHub instance. 
- 
-2. Run the `unistall.sh` script in the `multiclusterhub` directory to ensure that all of the objects are removed:
+  **Tip:** If you plan to reinstall a new version and want to keep your other information, you can skip the rest of the steps in this procedure and reinstall.  
+
+3. Enter the following command to remove all of the related components and subscriptions:
 
 ```
-./multiclusterhub/uninstall.sh
+oc delete subs --all
 ```
 
-## Deleting the multiclusterhub-operator by using commands
+## Deleting both components by using the console
 
-1. Delete the `yaml` definitions that are contained in the `multiclusterhub` directory by entering the following command:
+When you use the Red Hat OpenShift Container Platform console to uninstall, you remove the operator. Complete the following steps to unistall by using the console:
 
-```
-kubectl delete -k acm-operator/
-```
+1. In the Red Hat OpenShift Container Platform console navigation, select **Operators** > **Installed Operators** > **Advanced Cluster Manager for Kubernetes**.
 
-This removes the `acm-operator`. 
+2. Select the tab for *Multiclusterhub operator*.
 
-2. Run the `uninstall.sh` script in the `multiclusterhub` directory to ensure that all of the objects are removed:
+3. Select the *Options* menu for the MultiClusterHub operator. 
 
-```
-./acm-operator/uninstall.sh
-```
+4. Select **Delete MultiClusterHub**.
+
+  **Tip:** If you plan to reinstall a new version and want to keep your other information, you can skip the rest of the steps in this procedure and reinstall.  
+
+5. Navigate to **Installed Operators**. 
+
+6. Remove the *Red Hat Advanced Cluster Management* and *etcd* operators by selecting the *Options* menu and selecting **Uninstall operator** for each one.
