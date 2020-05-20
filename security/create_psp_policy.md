@@ -50,7 +50,7 @@ Complete the following steps to view your pod security policy from the CLI:
 
 As you create a pod security policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create the pod security policy from the console:
 
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Govern risk**. 
 3. Click **Create policy**. 
 4. Select **Podsecuritypolicy** from the _Specifications_ field. Parameter values are automatically set. You can edit your values.

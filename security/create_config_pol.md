@@ -70,7 +70,7 @@ Complete the following steps to view your configuration policy from the CLI:
 As you create a configuration policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create a configuration policy from the console:
 
 1. Log in to your cluster from the console.
-2. From the navigation menu, click **Governance and risk**
+2. From the navigation menu, click **Governance and risk**.
 3. Click **Create policy**.
 4. Enter or select the appropriate values for the following fields:
    * Name
