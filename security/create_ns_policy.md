@@ -102,4 +102,4 @@ Delete a namespace policy from the CLI or the console.
 
 Your namespace policy is deleted.
 
-View a sample of a namespace policy, see _Namespace policy sample_ on the [Namespace policy page](namespace_policy.md). See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of a namespace policy, see _Namespace policy sample_ on the [Namespace policy](namespace_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.

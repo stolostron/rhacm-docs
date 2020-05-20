@@ -11,7 +11,7 @@ Create and manage policies in Red Hat Advanced Cluster Management for Kubernetes
 * [Pod security policy](psp_policy.md) sample
 * [Role policy](role_policy.md) sample
 * [Rolebinding policy](rolebinding_policy.md) sample
-* [Security context constraints (SCC) policy](scc_policy.md) sample
+* [Security context constraints policy](scc_policy.md) sample
 * [Certificate policy controller](cert_policy_ctrl.md) sample
 * [CIS policy controller](cis_policy_ctrl.md) sample
 * [IAM policy](iam_policy_ctrl.md) sample

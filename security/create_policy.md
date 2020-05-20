@@ -11,7 +11,7 @@ The following objects are required for your Red Hat Advanced Cluster Management 
   *  _PlacementRule_: Defines a _cluster selector_ where the policy must be deployed.
   * _PlacementBinding_: Binds the placement to a PlacementPolicy.
 
-View more descriptions of the policy YAML files in the [Policy example](policy_example.md).
+View more descriptions of the policy YAML files in the [Policy overview](policy_example.md).
 
 ### Creating a security policy from the command line interface
 
