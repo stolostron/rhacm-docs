@@ -218,15 +218,3 @@ Apply a Security context constraints (SCC) policy to control permissions for pod
        matchExpressions: []
   ```
 
-<!--the following section will be moved to another file where the task will be explained. create_scc.md-->
-
-<!--### Appliying the SCC policy
-
-Complete the following steps to apply the SCC policy from the console:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
-2. From the navigation menu, click **Govern risk**. 
-3. Click **Create policy**. 
-4. Select **SecurityContextConstraintPolicy** from the _Specifications_ field. -->
-
-<!--this section will be removed bc its a task-->
