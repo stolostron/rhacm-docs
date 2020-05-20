@@ -4,7 +4,7 @@ A managed cluster with a deprecated Kubernetes `apiVersion` might not be support
 
 ## Symptom: Application deployment version
 
-You might see an error similar to the following if one or more of your application resources uses the deprecated API:
+You might see an error similar to the following if one or more of your application resources in the Subscription YAML file uses the deprecated API:
 
 ```
 failed to install release: unable to build kubernetes objects from release manifest: unable to recognize "": no matches for
@@ -19,13 +19,13 @@ error: unable to recognize "old.yaml": no matches for kind "Deployment" in versi
 
 ## Resolving the problem: Application deployment version
 
-1. Update the `apiVersion` in the resource. For example, if the error displays for _Deployment_ YAML, you need to update the `apiVersion` from `extensions/v1beta1` to `apps/v1`.
+1. Update the `apiVersion` in the resource. For example, if the error displays for _Deployment_ kind in the subscription YAML file, you need to update the `apiVersion` from `extensions/v1beta1` to `apps/v1`.
 
   See the following example:
   
   ```
   apiVersion: apps/v1
-  kind: Deployable
+  kind: Deployment
   ```
 
 2. Verify the available versions by running the following command on the managed cluster:
