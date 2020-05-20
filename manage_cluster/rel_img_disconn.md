@@ -16,6 +16,6 @@ In some cases, you need to maintain a custom list of release images when the hub
 
   After running this command for each resource you want to add, the list of available release images will be available.
   
-5. Alternately you can paste the image url directly in the the create cluster console in Red Hat Advanced Cluster Management for Kubernetes. This will create new clusterImageSets if they do not exist.
+5. Alternately you can paste the image url directly in the the create cluster console in Red Hat Advanced Cluster Management. This will create new clusterImageSets if they do not exist.
 
-6. View the list of currently available release images in the Advanced Cluster Management for Kubernetes console when you are creating a cluster.
+6. View the list of currently available release images in the Red Hat Advanced Cluster Management console when you are creating a cluster.
