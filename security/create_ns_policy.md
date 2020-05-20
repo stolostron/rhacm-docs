@@ -1,4 +1,4 @@
-# Managing a namespace policy 
+# Managing namespace policies
 
 Namespace policies are applied to define specific rules for your namespace. Learn to create, apply, view, and update your memory usage policy in the following sections.
 

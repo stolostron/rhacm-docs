@@ -1,4 +1,4 @@
-# Managing a pod security policy
+# Managing pod security policies
 
 Apply a pod security policy to secure pods and containers. Learn to create, apply, view, and update your pod security policy in the following sections.
 

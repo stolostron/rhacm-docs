@@ -109,4 +109,4 @@ Your pod security policy might resemble the following YAML file:
         ...
    ```
 
-See [Managing a pod security policy](create_psp_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page.
+See [Managing pod security policies](create_psp_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page.

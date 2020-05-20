@@ -1,4 +1,4 @@
-# Managing a role policy
+# Managing role policies
 
 Kubernetes configuration policy controller monitors the status of role policies. Apply a role policy to set rules and permissions for specific roles in your cluster. Learn to create, apply, view, and update your role policy in the following sections.
 

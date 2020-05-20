@@ -79,4 +79,4 @@ Your pod policy nginx policy might resemble the following YAML file:
         ...
    ```
 
-Learn how to manage a pod nginx policy, see [Managing a pod nginx policy](create_nginx_policy.md) for more details. View other configuration policies that are monitored by the configuration controller, see [Kubernetes configuration policy controller](config_policy_ctrl.md). See [Manage security policies](manage_policy_overview.md) to manage other policies.
+Learn how to manage a pod nginx policy, see [Managing pod nginx policies](create_nginx_policy.md) for more details. View other configuration policies that are monitored by the configuration controller, see [Kubernetes configuration policy controller](config_policy_ctrl.md). See [Manage security policies](manage_policy_overview.md) to manage other policies.

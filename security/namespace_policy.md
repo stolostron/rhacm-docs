@@ -68,4 +68,4 @@ Your namespace policy might resemble the following YAML file:
         ...
    ```
 
-Manage your namespace policy. See [Managing a namespace policy](create_ns_policy.md) for more information. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies.
+Manage your namespace policy. See [Managing namespace policies](create_ns_policy.md) for more information. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies.

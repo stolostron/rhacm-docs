@@ -82,5 +82,5 @@ Your memory usage policy might resemble the following YAML file:
            ...
    ```
 
-See [Managing a memory policy](create_memory_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page.
+See [Managing memory policies](create_memory_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page.
 

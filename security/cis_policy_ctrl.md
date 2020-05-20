@@ -96,4 +96,4 @@ spec:
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 
-Learn to create and manage your CIS policy, see [Managing a CIS policy](create_cis_pol.md). Refer to [Policy controllers](policy_controllers.md) for more topics.
+Learn to create and manage your CIS policy, see [Managing CIS policies](create_cis_pol.md). Refer to [Policy controllers](policy_controllers.md) for more topics.
