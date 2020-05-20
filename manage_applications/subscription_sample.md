@@ -3,7 +3,7 @@
 
 View samples and YAML definitions that you can use to build your files. As with channels, subscriptions (`subscription.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for application management. Learn more at [Creating and managing subscriptions](managing_subscriptions.md).
 
-## Example subscription definition YAML structure
+## Subscription YAML structure
 
 The following YAML structure shows the required fields for a subscription and some of the common optional fields. Your YAML structure needs to include certain required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool:
 
@@ -45,7 +45,7 @@ spec:
       path:
       value:
 ```
-## YAML values table {#subscription-yaml-values}
+## Subscription YAML table
 
 |Field|Description|
 |-- | -- |
@@ -122,7 +122,7 @@ spec:
       value: default
 ```
 
-## Subscription examples
+## Subscription file samples
 
 ```YAML
 apiVersion: apps.open-cluster-management.io/v1
@@ -137,7 +137,7 @@ spec:
   name: nginx-ingress
 ```
 
-<!-- ### Subscription time window example
+<!-- ### Subscription time window example removed intentionally, see Brandi
 
 The following example subscription includes multiple configured time windows. A time window occurs between 10:20 AM and 10:30 AM occurs every Monday, Wednesday, and Friday. A time window also occurs between 12:40 PM and 1:40 PM every Monday, Wednesday, and Friday. The subscription is active only during these six weekly time windows for deployments to begin.  
 
