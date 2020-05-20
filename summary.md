@@ -93,6 +93,7 @@
        * [Managing a namespace policy](security/create_ns_policy.md)
        * [Managing a pod nginx policy](security/create_nginx_policy.md)
        * [Managing a pod security policy](security/create_psp_policy.md)
+       * [Managing a role policy](security/create_role_policy.md)
        * [Managing a certificate policy](security/create_cert_pol.md)
        * [Managing a CIS policy](security/create_cis_pol.md)
        * [Managing an IAM policy](security/create_iam_policy.md)
