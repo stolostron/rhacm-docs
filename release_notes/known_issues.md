@@ -179,5 +179,8 @@ For technical preview, documentation links were removed from the console, but a 
 ## Application channels require unique namespaces
 <!--1.0.0:2311-->
 
-Creating a channel in the same namespace can cause errors with the hub cluster. For instance, a namespace that is created for both the channel and the hub cluster, such as namepace `charts-v1`, will cause errors. Ensure that you create your channel in a unique namespace. All channels need an individual namespace, except GitHub channels, which can share a namespace with another channel. See the process for Managing channles(../manage_applications/managing_channels.md) for more information.
+Creating a channel in the same namespace can cause errors with the hub cluster. 
 
+For instance, namespace `charts-v1` is used by the installer, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
+
+For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with another channel. See the process for [Managing channels](../manage_applications/managing_channels.md) for more information.
