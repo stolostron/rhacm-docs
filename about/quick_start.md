@@ -6,7 +6,7 @@ Review the [Architecture](architecture.md) topic and the [Components](components
 
 After you learn about the hub cluster and managed cluster architecture, learn more about the [Supported clouds](../install/supported_clouds.md), which lists the cloud provider cluster options. 
 
-The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run on any [supported RHOCP infrastructure](https://docs.openshift.com/container-platform/4.3/architecture/architecture-installation.html).
+The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run on any [supported Red Hat OpenShift Container Platform infrastructure](https://docs.openshift.com/container-platform/4.3/architecture/architecture-installation.html).
 
 ## Install
 
