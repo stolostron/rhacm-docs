@@ -10,25 +10,25 @@ The second level is a more complete uninstallation, except for a few items, like
 
 1. Change to your project namespace by entering the following command:
 
-```
-oc project <namespace>
-```
+  ```
+  oc project <namespace>
+  ```
 
   Replace <namespace> with the name of your project namespace.
 
 2. Enter the following command to remove the MultiClusterHub custom resource:
 
-```
-oc delete multiclusterhub --all
-```
+  ```
+  oc delete multiclusterhub --all
+  ```
 
   **Tip:** If you plan to reinstall a new version and want to keep your other information, you can skip the rest of the steps in this procedure and reinstall.  
 
 3. Enter the following command to remove all of the related components and subscriptions:
 
-```
-oc delete subs --all
-```
+  ```
+  oc delete subs --all
+  ```
 
 ## Deleting both components by using the console
 
@@ -42,7 +42,7 @@ When you use the Red Hat OpenShift Container Platform console to uninstall, you 
 
 4. Select **Delete MultiClusterHub**.
 
-  **Tip:** If you plan to reinstall a new version and want to keep your other information, you can skip the rest of the steps in this procedure and reinstall.  
+  **Tip:** If you plan to reinstall a new version and want to keep your other information, you can skip the rest of the steps in this     procedure and reinstall.  
 
 5. Navigate to **Installed Operators**. 
 
