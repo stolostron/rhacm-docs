@@ -9,7 +9,7 @@ Red Hat Advanced Cluster Management for Kubernetes consists of several multiclus
 
 ## Red Hat Advanced Cluster Management for Kubernetes terms
 
-- Application lifecycle: the processes that are used to manage application resources on your managed clusters. A multi-cluster application uses a Kubernetes specification, but with additional automation of the deployment and lifecycle management of resources to individual clusters.
+- Application lifecycle: The processes that are used to manage application resources on your managed clusters. A multi-cluster application uses a Kubernetes specification, but with additional automation of the deployment and lifecycle management of resources to individual clusters.
 
 - Channel: A custom resource definition that points to repositories where Kubernetes resources are stored, such as a GitHub repository, Helm chart repository, object store, or hub cluster namespace. Channels support multiple subscriptions from multiple targets.
 
