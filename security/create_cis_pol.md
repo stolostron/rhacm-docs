@@ -218,7 +218,7 @@ Complete the following steps to enable the CIS policy controller feature flag fr
 
 Verify rule failures to remediate your CIS policy violations. Complete the following steps:
 
-1. Run the following command to find the external IP address and port for the CIS Minio component:
+1. Run the following command to find the external IP address and node port for the CIS Minio component:
    
    ```
    oc get service endpoint-cisctrl-minio -n multicluster-endpoint
