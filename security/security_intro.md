@@ -27,7 +27,7 @@ View the RBAC table for the Red Hat Advanced Cluster Management console:
 |Welcome    | read     | read    | read   | read     |
 |Overview 	 | read 	 | read  	 | read	 | read |
 |Topology 	 | read 	 | read 	 | read 	 | read |
-|Clusters 	 |create, read, update, delete 	 | read 	 | 	read 	 | read |
+|Clusters 	 |create, read, update, delete 	 | create, read, update, delete 	 | 	read, update 	 | read |
 |Manage applications 	 |create, read, update, delete 	 |create, read, update, delete 	 | read   | read |
 |Govern risk 	 |create, read, update, delete 	 |create, read, update, delete 	 |- 	 |- |
 | Provider conections | create, read, update, delete | create, read, update, delete | create, read, update, delete | -|
