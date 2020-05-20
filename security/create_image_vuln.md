@@ -1,4 +1,4 @@
-# Managing an image vulnerability policy 
+# Managing image vulnerability policies 
 
 Configuration policy controller monitors the status of image vulnerability policies. Image vulnerability policies are applied to check if your containers have vulnerabilities. Learn to create, apply, view, and update your image vulnerability policy. 
 
