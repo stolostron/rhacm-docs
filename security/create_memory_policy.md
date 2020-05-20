@@ -1,4 +1,4 @@
-# Managing the memory usage policy 
+# Managing memory usage policy 
 
 Apply a memory usage policy to limit or restrict your memory and compute usage. Learn to create, apply, view, and update your memory usage policy in the following sections.
 
