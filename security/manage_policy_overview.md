@@ -8,6 +8,7 @@ Review the following topics to learn more about creating and updating your secur
 - [Managing a namespace policy](create_ns_policy.md)
 - [Managing a pod nginx policy](create_nginx_policy.md)
 - [Managing a pod security policy](create_psp_policy.md)
+- [Managing a role policy](create_role_policy.md)
 - [Managing a certificate policy](create_cert_pol.md)
 - [Managing a CIS policy](create_cis_pol.md)
 - [Managing a IAM policy](create_iam_policy.md)
@@ -17,7 +18,7 @@ Review the following topics to learn more about creating and updating your secur
 Refer to [Governance and risk](compliance_intro.md) for more topics. 
 
 
-<!-- next files to create: - [Managing a pod security policy](create_psp_policy.md)
+<!-- next files to create: 
 - [Managing a role policy](create_role_policy.md)
 - [Managing a rolebinding policy](create_role_policy.md)
 - [Managing a security content constraint policy](create_scc_policy.md)-->
