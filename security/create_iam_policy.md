@@ -93,7 +93,7 @@ You can view any IAM policy and its status from the console.
 
 1. Log in to your cluster from the console.
 
-2. From the navigation menu, click Governance and risk to view a table list of your policies.
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
 
    **Note**: You can filter the table list of your policies by selecting the All policies tab or Cluster violations tab.
 
