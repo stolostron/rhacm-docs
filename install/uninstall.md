@@ -44,6 +44,6 @@ When you use the Red Hat OpenShift Container Platform console to uninstall, you 
 
   **Tip:** If you plan to reinstall a new version and want to keep your other information, you can skip the rest of the steps in this procedure and reinstall.  
 
-4. Navigate to **Installed Operators**. 
+5. Navigate to **Installed Operators**. 
 
-5. Remove the *Advanced Cluster Management for Kubernetes* and *etcd* operators by selecting the *Options* menu and selecting **Uninstall operator** for each one.
+6. Remove the *Advanced Cluster Management for Kubernetes* and *etcd* operators by selecting the *Options* menu and selecting **Uninstall operator** for each one.
