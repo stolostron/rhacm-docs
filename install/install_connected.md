@@ -4,13 +4,13 @@ Red Hat Advanced Cluster Management for Kubernetes is installed using an operato
 
 ## Prerequisites
 
-You must meet the following requirements before installing Red Hat Advanced Cluster Management for Kubernetes: 
+You must meet the following requirements before you install Red Hat Advanced Cluster Management for Kubernetes: 
 
 * Red Hat OpenShift Container Platform version 4.3, or later, must be deployed in your environment, and you must be logged into it with the CLI. See the [OpenShift version 4.3 documentation](https://docs.openshift.com/container-platform/4.3/welcome/index.html) or [OpenShift version 4.4 documentation](https://docs.openshift.com/container-platform/4.4/welcome/index.html).
 
-* A pre-configured StorageClass in Red Hat OpenShift Container Platform is available that can be used to create storage for Red Hat Advanced Cluster Management for Kubernetes.
+* A StorageClass is preconfigured in Red Hat OpenShift Container Platform, and is available to create storage for Red Hat Advanced Cluster Management for Kubernetes.
 
-* Your Red Hat OpenShift Container Platform CLI must be version 4.3, or later, and configured to run `oc` commands. See [Getting started with the CLI](https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html) for information about installing and configuring the Red Hat OpenShift CLI.
+* Your Red Hat OpenShift Container Platform command line interface (CLI) must be version 4.3, or later, and configured to run `oc` commands. See [Getting started with the CLI](https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html) for information about installing and configuring the Red Hat OpenShift CLI.
 
 * Your Red Hat OpenShift Container Platform permissions must allow you to create a namespace. 
 
@@ -19,7 +19,7 @@ You must meet the following requirements before installing Red Hat Advanced Clus
 * Your Red Hat OpenShift Container Platform must have access to the Red Hat Advanced Cluster Management operator in the OperatorHub catalog. 
 
 
-## Installing Red Hat Advanced Cluster Management for Kubernetes by using the CLI
+## Installing Red Hat Advanced Cluster Management from the CLI
 
 1. Create a namespace where the operator requirements are contained:
 
@@ -29,7 +29,7 @@ You must meet the following requirements before installing Red Hat Advanced Clus
 
   Replace <namespace> with a name for your namespace.
   
-  **Important:** The Advanced Cluster Management for Kubernetes operator must be installed in its own namespace. A `ServiceAgent` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Advanced Cluster Management for Kubernetes and to any ID with access to the namespace. For security, do not give anyone access to this namespace who does not already have at least cluster administrator access. 
+  **Important:** The Red Hat Advanced Cluster Management operator must be installed in its own namespace. A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Red Hat Advanced Cluster Management and to any ID with access to the namespace. For security, make sure that anyone who is added permissions to access to this namespace already has cluster administrator access. 
   
 2. Switch your project namespace to the one that you created:
 
@@ -42,15 +42,15 @@ You must meet the following requirements before installing Red Hat Advanced Clus
  
   1. Create a `.yaml` file that defines the operator group. Your file should look similar to the following example:
   
-  ```
-  apiVersion: operators.coreos.com/v1
-  kind: OperatorGroup
-  metadata:
-    name: <default>
-  spec:
-    targetNamespaces:
-    - <namespace>
-  ```
+    ```
+    apiVersion: operators.coreos.com/v1
+    kind: OperatorGroup
+    metadata:
+      name: <default>
+    spec:
+      targetNamespaces:
+      - <namespace>
+    ```
   
     Replace <default> with the name of your operator group.
     Replace <namespace> with the name of your project namespace. 
@@ -123,7 +123,7 @@ You must meet the following requirements before installing Red Hat Advanced Clus
   oc get routes
   ```
   
-## Installing Red Hat Advanced Cluster Management for Kubernetes by using the console
+## Installing Red Hat Advanced Cluster Management from the console
 
 1. Create a namespace for the operator requirements:
 
@@ -135,7 +135,7 @@ You must meet the following requirements before installing Red Hat Advanced Clus
   
   4. Select **Create**.
   
-  **Important:** The Advanced Cluster Management for Kubernetes operator must be installed in its own namespace. A `ServiceAgent` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Advanced Cluster Management for Kubernetes and to any ID with access to the namespace. For security, do not give anyone access to this namespace who does not already have at least cluster administrator access. 
+  **Important:** The Red Hat Advanced Cluster Management operator must be installed in its own namespace. A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Red Hat Advanced Cluster Management and to any ID with access to the namespace. For security, make sure that anyone who is given access to this namespace already has cluster administrator access. 
   
 2. Switch your project namespace to the one that you created in step 1. This ensures that the steps are completed in the correct namespace. Some resources are namespace-specific.
 
@@ -163,7 +163,7 @@ You must meet the following requirements before installing Red Hat Advanced Clus
 
   1. In the Red Hat OpenShift Container Platform console navigation, select **Operators** > **OperatorHub**.
   
-  2. Select **Advanced Cluster Management for Kubernetes**. **Tip:** You can filter on the *Integration & Delivery* category to narrow the choices.
+  2. Select **Red Hat Advanced Cluster Management**. **Tip:** You can filter on the *Integration & Delivery* category to narrow the choices.
   
   3. Select **Install**.
   
