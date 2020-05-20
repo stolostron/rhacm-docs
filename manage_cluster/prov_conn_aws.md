@@ -42,7 +42,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 9. Enter your *Red Hat OpenShift Pull Secret*. You can download your pull secret from [Pull secret](https://cloud.redhat.com/openshift/install/pull-secret).
 
-10. Add your *SSH Private Key* and *SSH Public Key*, which allows you to connect to the cluster. See [Generating an SSH private key and adding it to the agent](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-default.html#ssh-agent-using_installing-aws-default) for more information about how to generate a key.
+10. Add your *SSH Private Key* and *SSH Public Key*, which allows you to connect to the cluster. You can use an existing key pair, or create a new one with key generation program. See [Generating an SSH private key and adding it to the agent](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-default.html#ssh-agent-using_installing-aws-default) for more information about how to generate a key.
 
 11. Click **Create**. When you create the provider connection, it is added to the list of provider connections.
 

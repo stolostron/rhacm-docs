@@ -3,9 +3,9 @@
 
 View samples and YAML definitions that you can use to build your files. As with channels, subscriptions (`subscription.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for application management. Learn more at [Creating and managing subscriptions](managing_subscriptions.md).
 
-## Example subscription definition YAML structure
+## Subscription YAML structure
 
-The following YAML structure shows the required fields for a subscription and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
+The following YAML structure shows the required fields for a subscription and some of the common optional fields. Your YAML structure needs to include certain required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool:
 
 ```yaml
 apiVersion: apps.open-cluster-management.io/v1
@@ -44,15 +44,8 @@ spec:
     clusterOverrides:
       path:
       value:
-  timewindow:
-    windowtype:
-    location:
-    daysofweek:
-    hours:
-      - start:
-        end:
 ```
-## YAML values table {#subscription-yaml-values}
+## Subscription YAML table
 
 |Field|Description|
 |-- | -- |
@@ -83,13 +76,13 @@ spec:
 | spec.overrides | Optional. Any parameters and values that need to be overridden, such as cluster-specific settings. |
 | spec.overrides.clusterName | Optional. The name of the cluster or clusters where parameters and values are being overridden. |
 | spec.overrides.clusterOverrides | Optional. The configuration of parameters and values to override. |
-| spec.timeWindow | Optional. Defines the settings for configuring a time window when the subscription is active or blocked. |
+<!--| spec.timeWindow | Optional. Defines the settings for configuring a time window when the subscription is active or blocked. |
 | spec.timeWindow.type | Optional, but required for configuring a time window. Indicates whether the subscription is active or blocked during the configured time window. Deployments for the subscription occur only when the subscription is active. |
 | spec.timeWindow.location | Optional, but required for configuring a time window. The time zone of the configured time range for the time window. All time zones must use the Time Zone (tz) database name format. For more information, see [Time Zone Database](https://www.iana.org/time-zones). |
 | spec.timeWindow.daysofweek | Optional, but required for configuring a time window. Indicates the days of the week when the time range is applied to create a time window. The list of days must be defined as an array, such as `daysofweek: ["Monday", "Wednesday", "Friday"]`. |
 | spec.timeWindow.hours | Optional, but required for configuring a time window. Defined the time range for the time window. A start time and end time for the hour range must be defined for each time window. You can define multiple time window ranges for a subscription. |
 | spec.timeWindow.hours.start | Optional, but required for configuring a time window. The timestamp that defines the beginning of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |  
-| spec.timeWindow.hours.end | Optional, but required for configuring a time window. The timestamp that defines the ending of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |
+| spec.timeWindow.hours.end | Optional, but required for configuring a time window. The timestamp that defines the ending of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |-->
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 **Notes:**
@@ -129,7 +122,7 @@ spec:
       value: default
 ```
 
-## Subscription examples
+## Subscription file samples
 
 ```YAML
 apiVersion: apps.open-cluster-management.io/v1
@@ -144,7 +137,7 @@ spec:
   name: nginx-ingress
 ```
 
-### Subscription time window example
+<!-- ### Subscription time window example removed intentionally, see Brandi
 
 The following example subscription includes multiple configured time windows. A time window occurs between 10:20 AM and 10:30 AM occurs every Monday, Wednesday, and Friday. A time window also occurs between 12:40 PM and 1:40 PM every Monday, Wednesday, and Friday. The subscription is active only during these six weekly time windows for deployments to begin.  
 
@@ -175,6 +168,7 @@ spec:
       - start: "12:40PM"
         end: "1:40PM"
 ```
+--> 
 
 ### Subscription with overrides example
 

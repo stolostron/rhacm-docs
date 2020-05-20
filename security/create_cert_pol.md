@@ -30,7 +30,7 @@ Complete the following steps to create a certificate policy from the CLI:
 
 Your certificate policy is created.
 
-#### Viewing your certificate policy
+#### Viewing your certificate policy from the CLI
 
 Complete the following steps to view your certificate policy from the CLI:
 
@@ -47,6 +47,8 @@ Complete the following steps to view your certificate policy from the CLI:
    ```
 
 ### Creating a certificate policy from the console
+
+As you create a certificate policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create a certificate policy from the console:
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**.
@@ -65,7 +67,7 @@ Complete the following steps to view your certificate policy from the CLI:
 
 A certificate policy is created. 
 
-#### Viewing your certificate policy
+#### Viewing your certificate policy from the console
 
 You can view any certificate policy and its status from the console.
 
@@ -165,4 +167,4 @@ Delete the certificate policy from the CLI or the console.
 
 Your certificate policy is deleted.
    
-View a sample of a certificate policy, see _Certificate policy sample_ on the [Policy samples page](policy_samples_intro.md). For more information about other policy controllers, see [Policy controllers](policy_controllers.md). See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of a certificate policy, see _Certificate policy sample_ on the [Certificate policy controller](cert_policy_ctrl.md) page. For more information about other policy controllers, see [Policy controllers](policy_controllers.md). See [Manage security policies](manage_policy_overview.md) to manage other policies.

@@ -1,6 +1,6 @@
 # Managing a CIS policy
 
-Learn to create, apply, view, and update your CIS policies.
+Apply a CIS policy to monitor the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. Learn to create, apply, view, and update your CIS policies in the following sections.
 
 ## Creating a CIS policy 
 
@@ -16,7 +16,7 @@ Complete the following steps to create a certificate policy from the command lin
   kubectl create -f CisPolicy.yaml
   ```
   
-  Your YAML might resemble teh following file:
+  Your YAML might resemble the following file:
   
   ```yaml	
   apiVersion: policies.ibm.com/v1alpha1	
@@ -121,13 +121,15 @@ Complete the following steps to view the CIS policy from the managed cluster CLI
 
 ### Creating a CIS policy from the console
 
+As you create your CIS policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create CIS policy from the console:
+
 1. Log in to the Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Govern risk**.
 3. Click **Create Policy**.
 4. Enter the name for the CIS policy in the **Name** field.
 5. For **Specifications**, select `Cispolicy-cis compliance for OCP` from the drop-down list.
 
-  **Note**: You must enable the feature flag to make the `Cispolicy-cis compliance for OCP` option available.
+   **Note**: You must enable the feature flag to make the `Cispolicy-cis compliance for OCP` option available.
 
 6. Use the drop-down list and make selections for the following parameters:
     - Cluster selector
@@ -136,8 +138,7 @@ Complete the following steps to view the CIS policy from the managed cluster CLI
     - Controls
 7. Click **Create**.
 
-A policy is created and is embedded into the policy. View a sample of the CIS policy, see _CIS policy sample_ from [CIS policy controller](cis_pol_ctrl.md). 
-
+A policy is created and is embedded into the policy. 
 
 #### Viewing a CIS policy from the console
 
@@ -148,6 +149,8 @@ View any CIS Policy and its status from the console.
   **Note:** You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
 
 3. Select one of your policies.
+
+4. View the policy violations by selecting the _Violations_ tab.
 
 ## Updating CIS policies
 
@@ -265,4 +268,4 @@ Delete a CIS policy from the CLI or the console.
 
 Your policy is deleted.
 
-View a sample of a CIS policy, see _CIS policy sample_ from the [Configuration policy samples page](policy_sample_intro.md). For more information about other policy controllers, see [Policy controllers](policy_controllers.md).
+View a sample of a CIS policy, see _CIS policy sample_ from the [CIS policy controller](cis_policy_ctrl.md) page. For more information about other policy controllers, see [Policy controllers](policy_controllers.md).

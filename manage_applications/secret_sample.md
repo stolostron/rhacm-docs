@@ -18,11 +18,3 @@ data:
   AccessKeyID: [ABCdeF1=] #Base64 encoded
   SecretAccessKey: [gHIjk2lmnoPQRST3uvw==] #Base64 encoded
 ```
-
-## Secret YAML table
-
-Insert table here if created
-
-## Secret YAML file samples
-
-Add samples if created

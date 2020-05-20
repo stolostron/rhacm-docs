@@ -12,28 +12,28 @@ Complete the following steps to create a configuration policy from the (CLI):
 
 1. Create a YAML file for your configuration policy. Run the following command:
 
-  ```
-  kubectl create -f configpolicy-1.yaml
-  ```
+   ```
+   kubectl create -f configpolicy-1.yaml
+   ```
 
   Your configuration policy might resemble the following policy:
 
-    ```yaml
-    apiVersion: policy.mcm.ibm.com/v1alpha1
-    kind: Policy
-    metadata:
-      name: policy-1
-      namespace: kube-system
-    spec:
-      namespaces:
-        include: ["default", "kube-*"]
-        exclude: ["kube-system"]
-      remediationAction: inform
-      disabled: false
-      complianceType: musthave
-      object-templates:
-       ...
-     ```
+   ```yaml
+   apiVersion: policy.mcm.ibm.com/v1alpha1
+   kind: Policy
+   metadata:
+     name: policy-1
+     namespace: kube-system
+   spec:
+     namespaces:
+       include: ["default", "kube-*"]
+       exclude: ["kube-system"]
+     remediationAction: inform
+     disabled: false
+     complianceType: musthave
+     object-templates:
+      ...
+   ```
 
 2. Apply the policy by running the following command:
 
@@ -67,8 +67,10 @@ Complete the following steps to view your configuration policy from the CLI:
 
 ### Creating a configuration policy from the console
 
+As you create a configuration policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create a configuration policy from the console:
+
 1. Log in to your cluster from the console.
-2. From the navigation menu, click **Governance and risk**
+2. From the navigation menu, click **Governance and risk**.
 3. Click **Create policy**.
 4. Enter or select the appropriate values for the following fields:
    * Name
@@ -88,10 +90,14 @@ Complete the following steps to view your configuration policy from the CLI:
 You can view any configuration policy and its status from the console.
 
 1. Log in to your cluster from the console.
+
 2. From the navigation menu, click **Govern risk** to view a table list of your policies.
 
    **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
+
 3. Select one of your policies.
+
+4. View the policy violations by selecting the _Violations_ tab.
 
 ## Updating configuration policies
 

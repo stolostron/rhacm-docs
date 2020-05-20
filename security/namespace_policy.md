@@ -1,6 +1,6 @@
 # Namespace policy
 
-Apply the namespace policy to define specific rules for your namespace. 
+Kubernetes configuration policy controller monitors the status of your namespace policy. Apply the namespace policy to define specific rules for your namespace. Learn more details about the namespace policy structure in the following sections.
 
 ## Namespace policy YAML structure
 
@@ -28,6 +28,7 @@ Apply the namespace policy to define specific rules for your namespace.
 
 ## Namespace policy YAML table
 <!--this table is a place holder until i update the parameters-->
+
 |Field|Description|
 |-- | -- |
 | apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
@@ -40,9 +41,10 @@ Apply the namespace policy to define specific rules for your namespace.
 | spec.complianceType | Required. Set the value to `"musthave"`|
 | spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
+
 ## Namespace policy sample
 
-Apply the namespace policy to define specific rules for your namespace. Your namespace policy might resemble the following YAML file:
+Your namespace policy might resemble the following YAML file:
   
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
@@ -65,12 +67,5 @@ Apply the namespace policy to define specific rules for your namespace. Your nam
              name: prod
         ...
    ```
-<!--wil create another file, create_ns_pol where i will add the following tasks-->
-### Applying the namespace policy
 
-Complete the following steps to apply the memory usage policy from the console:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
-2. From the navigation menu, click **Governance and risk**. 
-3. Click **Create policy**. 
-4. Select **Namespace** from the _Specifications_ field.
+Manage your namespace policy. See [Managing a namespace policy](create_ns_policy.md) for more information. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies.

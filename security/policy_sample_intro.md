@@ -4,7 +4,7 @@
 Create and manage policies in Red Hat Advanced Cluster Management for Kubernetes to define rules, processes, and controls on the hub cluster. View the following policy samples to view how specfic policies are applied:
 
 * [Configuration policy controller sample](config_policy_ctrl.md)
-* [Image vulnerability policy sample](image_vul_policy.md)
+* [Image vulnerability policy sample](image_vuln_policy.md)
 * [Memory usage policy sample](memory_policy.md)
 * [Namespace policy sample](namespace_policy.md)
 * [Pod nginx policy sample](pod_nginx_policy.md)
@@ -15,3 +15,5 @@ Create and manage policies in Red Hat Advanced Cluster Management for Kubernetes
 * [Certificate policy controller sample](cert_policy_ctrl.md)
 * [CIS policy controller sample](cis_policy_ctrl.md)
 * [IAM policy sample](iam_policy_ctrl.md)
+
+Refer to [Governance and risk](compliance_intro.md) for more topics. 
