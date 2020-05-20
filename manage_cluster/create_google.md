@@ -44,7 +44,7 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 6. Select **Google Cloud** for the infrastructure platform.
 
-7. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the path to the image that you want to use.
+7. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the url to the image that you want to use. See [Release images](release_images.md) for more information about release images.
 
 8. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on Google Cloud Platform](prov_cloud_google.md).
 

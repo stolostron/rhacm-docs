@@ -21,6 +21,52 @@ You need the following prerequisites before creating a cluster in a bare metal e
 
 * A Red Hat OpenShift image pull secret; see [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html)
 
+* Enable the bare metal feature flag to view the bare metal options. The bare metal selections and options are hidden by a feature flag by default. You can enable the feature flags by completing the following steps:
+
+  1. Start the OpenShift command line interface
+  
+  2. Edit the `consoleui` deployment resource to modify the settings:
+  
+    ```
+    MY_CONSOLEUI=`oc -n open-cluster-management get deploy -o name | grep consoleui`
+    oc edit $MY_CONSOLEUI
+    ```
+    
+  3. Change the feature flag setting to *true*. Your update should look like the following example:
+  
+    ```
+    spec:
+      ...
+      template:
+        ...
+        spec:
+          ...
+          containers:
+          - env:                              # Search for env:
+            - featureFlags_baremetal: "true"
+            ...
+    ```
+  4. Edit the `consoleui` deployment resource to modify the settings:
+  
+    ```
+    MY_HEADER=`oc -n open-cluster-management get deploy -o name | grep header`
+    oc edit $MY_HEADER
+    ```
+
+  5. Change the feature flag setting to *true*. Your update should look like the following example:
+  
+    ```
+    spec:
+      ...
+      template:
+        ...
+        spec:
+          ...
+          containers:
+          - env:                              # Search for env:
+            - featureFlags_baremetal: "true"
+            ...
+    ```
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console {#bare_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console}
 
 To create clusters from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps:
@@ -41,7 +87,7 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 6. Select **Bare Metal** for the infrastructure platform.
 
-7. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the path to the image that you want to use.
+7. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the url to the image that you want to use. See [Release images](release_images.md) for more information about release images.
 
 8. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection for a bare metal environment](prov_conn_bare.md).
 
