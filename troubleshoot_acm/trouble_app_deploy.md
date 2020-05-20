@@ -24,11 +24,11 @@ error: unable to recognize "old.yaml": no matches for kind "Deployment" in versi
   See the following example:
   
   ```
-  apiVersion: apps.open-cluster-management.io/v1
+  apiVersion: apps/v1
   kind: Deployable
   ```
 
-2. Verify the available versions by running the following command:
+2. Verify the available versions by running the following command on the managed cluster:
 
   ```
   kubectl explain <resource>
