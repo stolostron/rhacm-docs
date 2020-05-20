@@ -27,7 +27,9 @@ You must meet the following requirements before you install Red Hat Advanced Clu
   oc create namespace <namespace>
   ```
 
-  Replace <namespace> with a name for your namespace. **Important:** The Red Hat Advanced Cluster Management operator must be installed in its own namespace. A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Red Hat Advanced Cluster Management and to any ID with access to the namespace. For security, make sure that anyone who is given access to this namespace already has cluster-administrator access. 
+  Replace <namespace> with a name for your namespace. 
+	
+  **Important:** The Red Hat Advanced Cluster Management operator must be installed in its own namespace. A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Red Hat Advanced Cluster Management and to any ID with access to the namespace. For security, make sure that anyone who is given access to this namespace already has cluster-administrator access. 
   
 2. Switch your project namespace to the one that you created:
 
@@ -131,7 +133,9 @@ You must meet the following requirements before you install Red Hat Advanced Clu
   
   3. Provide a name for your namespace. This is the namespace that you use throughout the installation process.
   
-  4. Select **Create**.  **Important:** The Red Hat Advanced Cluster Management operator must be installed in its own namespace. A `ServiceAccount` with a       `ClusterRoleBinding` automatically gives cluster administrator privileges to Red Hat Advanced Cluster Management and to any ID with     access to the namespace. For security, make sure that anyone who is given access to this namespace already has cluster-administrator     access. 
+  4. Select **Create**.  
+  
+  **Important:** The Red Hat Advanced Cluster Management operator must be installed in its own namespace. A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Red Hat Advanced Cluster Management and to any ID with     access to the namespace. For security, make sure that anyone who is given access to this namespace already has cluster-administrator     access. 
   
 2. Switch your project namespace to the one that you created in step 1. This ensures that the steps are completed in the correct namespace. Some resources are namespace-specific.
 
