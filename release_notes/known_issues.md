@@ -199,11 +199,11 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 ### Application channels require unique namespaces
 <!--1.0.0:2311-->
 
-Creating a channel in the same namespace can cause errors with the hub cluster. 
+Creating more than one channel in the same namespace can cause errors with the hub cluster. 
 
-For instance, namespace `charts-v1` is used by the installer, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
+For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
 
-For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with another channel. See the process for [Managing channels](../manage_applications/managing_channels.md) for more information.
+For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with andother GitHub channel. See the process for [Managing channels](../manage_applications/managing_channels.md) for more information.
 
 
 ## Security known issues
