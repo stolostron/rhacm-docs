@@ -1,6 +1,6 @@
 # Maintaining a custom list of release images when connected
 
-You might want to ensure that you use the same release image for all of your clusters. To make this easier, you can create your own custom list of release images that are available when creating a cluster. Complete the following steps to manage your available release images:
+You might want to ensure that you use the same release image for all of your clusters. To simplify, you can create your own custom list of release images that are available when creating a cluster. Complete the following steps to manage your available release images:
 
 1. Fork the [acm-hive-openshift-releases GitHub repository](https://github.com/open-cluster-management/acm-hive-openshift-releases).
 
@@ -24,7 +24,7 @@ You might want to ensure that you use the same release image for all of your clu
   oc apply -k subscription/
   ```
   
-  After running this command, the list of available stable release images updates with the currently available images in about 1 minute.
+  After running this command, the list of available stable release images updates with the currently available images in about one minute.
   
 6. By default, only the stable images are listed. To synchronize and display the fast release images, enter the following command:
 
@@ -34,11 +34,11 @@ You might want to ensure that you use the same release image for all of your clu
   
   After running this command, the list of available fast release images updates with the currently available images in about 1 minute.  
 
-7. By default, Red Hat Advanced Cluster Management pre-loads a few ClusterImageSets.  Use the following commands to list what is available and remove the defaults if desired.
+7. By default, Red Hat Advanced Cluster Management pre-loads a few ClusterImageSets. Use the following commands to list what is available and remove the defaults if desired.
 
-```
-oc get clusterImageSets
-oc delete clusterImageSet <clusterImageSet_NAME>
-```
+  ```
+  oc get clusterImageSets
+  oc delete clusterImageSet <clusterImageSet_NAME>
+  ```
 
 8. View the list of currently available release images in the Red Hat Advanced Cluster Management console when you are creating a cluster.
