@@ -115,4 +115,5 @@
      * [Troubleshooting cluster with pending import status](troubleshoot_acm/trouble_import_status.md)
      * [Troubleshooting cluster with unknown status](troubleshoot_acm/trouble_console_status.md)
      * [Troubleshooting a default storage class error when creating a cluster on bare metal](troubleshoot_acm/trouble_storage_class.md)
+     * [Troubleshooting application Kubernetes deployment version](troubleshoot_acm/trouble_app_deploy.md)
      * [Troubleshooting cert-manager-webhook](troubleshoot_acm/trouble_cert_webhook.md)
