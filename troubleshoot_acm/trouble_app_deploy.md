@@ -4,7 +4,7 @@ A managed cluster with a deprecated Kubernetes `apiVersion` might not be support
 
 ## Symptom: Application deployment version
 
-If one or more of your application resources in the Subscription YAML file uses the deprecated API, you might receive the following error:
+If one or more of your application resources in the Subscription YAML file uses the deprecated API, you might receive an error similiar to the following error:
 
 ```
 failed to install release: unable to build kubernetes objects from release manifest: unable to recognize "": no matches for
