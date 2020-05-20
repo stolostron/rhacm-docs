@@ -19,7 +19,7 @@ Or consider a troubleshooting topic.
 -->
 
 Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
-
+ 
 * [Installation known issues](#installation-known-issues)
 * [Web console known issues](#web-console-known-issues)
 * [Cluster management known issues](#cluster-management-known-issues)
@@ -55,6 +55,7 @@ To resolve this issue, verify if the certificate manager is present in your clus
    ```
    kubectl get crd | grep certificates.certmanager
    ```
+   
 ### CIS policy controller is not installed
 <!--1.0.0:1087-->
 
@@ -127,7 +128,6 @@ To mitigate this problem, you can increase the memory limit in the `search-pod-x
   
 **Note**: Your maximum memory is restricted by either your quota, policies, or physical limits of the nodes on your cluster.
 
-
 ## Cluster management known issues
 
 ### _etcd-operator_ does not reconcile the cluster
@@ -195,6 +195,16 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 1. Navigate to the _Applications_ menu.
 2. Select your application. 
 3. You can view a complete topology and summary cards for your selected application.
+
+### Application channels require unique namespaces
+<!--1.0.0:2311-->
+
+Creating more than one channel in the same namespace can cause errors with the hub cluster. 
+
+For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
+
+For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with andother GitHub channel. See the process for [Managing channels](../manage_applications/managing_channels.md) for more information.
+
 
 ## Security known issues
 
