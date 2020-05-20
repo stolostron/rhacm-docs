@@ -14,6 +14,6 @@ Create and manage policies in Red Hat Advanced Cluster Management for Kubernetes
 * [Security context constraints policy](scc_policy.md) sample
 * [Certificate policy controller](cert_policy_ctrl.md) sample
 * [CIS policy controller](cis_policy_ctrl.md) sample
-* [IAM policy](iam_policy_ctrl.md) sample
+* [IAM policy controller](iam_policy_ctrl.md) sample
 
 Refer to [Governance and risk](compliance_intro.md) for more topics. 
