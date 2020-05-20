@@ -1,6 +1,6 @@
 # Pod security policy
 
-Kubernetes configuration policy controller monitors the status of the memory usage policy. Apply a pod security policy to secure pods and containers. For more information, see _Pod Security Policies_ in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/policy/pod-security-policy/). Learn more details about the pod security policy structure in the following sections.
+Kubernetes configuration policy controller monitors the status of the pod security policy. Apply a pod security policy to secure pods and containers. For more information, see _Pod Security Policies_ in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/policy/pod-security-policy/). Learn more details about the pod security policy structure in the following sections.
 
 ## Pod security policy YAML structure
 
