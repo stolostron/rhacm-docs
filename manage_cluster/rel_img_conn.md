@@ -34,11 +34,11 @@ You might want to ensure that you use the same release image for all of your clu
   
   After running this command, the list of available fast release images updates with the currently available images in about 1 minute.  
 
-7. By default, Advanced Cluster Management for Kubernetes pre-loads a few ClusterImageSets.  Use the following commands to list what is available and remove the defaults if desired.
+7. By default, Red Hat Advanced Cluster Management pre-loads a few ClusterImageSets.  Use the following commands to list what is available and remove the defaults if desired.
 
 ```
 oc get clusterImageSets
 oc delete clusterImageSet <clusterImageSet_NAME>
 ```
 
-8. View the list of currently available release images in the Advanced Cluster Management for Kubernetes console when you are creating a cluster.
+8. View the list of currently available release images in the Red Hat Advanced Cluster Management console when you are creating a cluster.
