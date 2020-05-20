@@ -1,4 +1,4 @@
-# Managing a CIS policy
+# Managing CIS policies
 
 Apply a CIS policy to monitor the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. Learn to create, apply, view, and update your CIS policies in the following sections.
 

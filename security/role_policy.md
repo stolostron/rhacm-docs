@@ -92,5 +92,5 @@ Apply a role policy to set rules and permissions for specific roles in your clus
          ...
    ```
    
-See [Managing a role policy](create_role_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page. Learn more about Red Hat Advanced Cluster Management for Kubernates RBAC, see [Role-based access control](security_intro.md).
+See [Managing role policies](create_role_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page. Learn more about Red Hat Advanced Cluster Management for Kubernates RBAC, see [Role-based access control](security_intro.md).
 

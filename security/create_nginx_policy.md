@@ -1,4 +1,4 @@
-# Managing a pod nginx policy
+# Managing pod nginx policies
 
 Kubernetes configuration policy controller monitors the status of you pod nginx policies. Pod nginx policies are applied to to define the container rules for your pods. Learn to create, apply, view, and update your pod nginx policy.
 

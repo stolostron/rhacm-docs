@@ -222,5 +222,5 @@ spec:
                
 ```
 
-See [Managing a security policy](create_policy.md) to create and update a policy. You can also enable and update Red Hat Advanced Cluster Management policy controllers to validate the compliance of your policies. See [Policy controllers](policy_controllers.md). See [Governance and risk](compliance_intro.md) for more policy topics.
+See [Managing security policies](create_policy.md) to create and update a policy. You can also enable and update Red Hat Advanced Cluster Management policy controllers to validate the compliance of your policies. See [Policy controllers](policy_controllers.md). See [Governance and risk](compliance_intro.md) for more policy topics.
 

@@ -1,4 +1,4 @@
-# Managing a configuration policy 
+# Managing configuration policies
 
 Learn to create, apply, view, and update your configuration policies.
 
