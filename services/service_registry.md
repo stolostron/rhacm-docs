@@ -12,7 +12,7 @@ After the Red Hat Advanced Cluster Management for Kubernetes hub cluster and man
 
 Configure the DNS for each managed cluster by completing these steps for each managed cluster:
 
-1. Find the `mcm-svc-registry-dns` service cluster IP by entering the following command, where *<rcm-klusterlet-namespace>* is the namespace that contains your Klusterlet:
+1. Find the `mcm-svc-registry-dns` service cluster IP by entering the following command, where <rcm-klusterlet-namespace> is the namespace that contains your Klusterlet:
 
   ```
   kubectl get -n <rcm-klusterlet-namespace> service mcm-svc-registry-dns -o jsonpath='{.spec.clusterIP}'
@@ -24,7 +24,7 @@ Configure the DNS for each managed cluster by completing these steps for each ma
   kubectl edit -n kube-system configmap kube-dns
   ```
 
-3. Enable the forwarding plugin in the `kube-dns` configuration, similar to the following example, where *<mcm-svc-registry-dns-service-cluster-ip>* is the IP address that you identified in step 1:
+3. Enable the forwarding plugin in the `kube-dns` configuration, similar to the following example, where <mcm-svc-registry-dns-service-cluster-ip> is the IP address that you identified in step 1:
 
   ```
   Corefile: |

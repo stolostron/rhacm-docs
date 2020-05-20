@@ -18,6 +18,7 @@ You must meet the following requirements before installing Red Hat Advanced Clus
 
 * Your Red Hat OpenShift Container Platform must have access to the Red Hat Advanced Cluster Management operator in the OperatorHub catalog. 
 
+
 ## Installing Red Hat Advanced Cluster Management for Kubernetes by using the CLI
 
 1. Create a namespace where the operator requirements are contained:
@@ -25,7 +26,7 @@ You must meet the following requirements before installing Red Hat Advanced Clus
   ```
   oc create namespace <namespace>
   ```
-  
+
   Replace <namespace> with a name for your namespace.
   
   **Important:** The Advanced Cluster Management for Kubernetes operator must be installed in its own namespace. A `ServiceAgent` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Advanced Cluster Management for Kubernetes and to any ID with access to the namespace. For security, do not give anyone access to this namespace who does not already have at least cluster administrator access. 
@@ -102,16 +103,19 @@ You must meet the following requirements before installing Red Hat Advanced Clus
     name: multiclusterhub
     namespace: <namespace>
   spec:
-    imagePullSecret: <pull_secret>
+    imagePullSecret: <secret>
   ```
+ 
+  Replace <namespace> with your project namespace.
+  Replace <secret> with the name of the secret that you created.
   
   **Note:** If this step fails with the following error, the resources are still being created and applied: 
   
-  ```
-  error: unable to recognize "./mch.yaml": no matches for kind "MultiClusterHub" in version "operators.open-cluster-management.io/v1beta1"
-  ```
+    ```
+    error: unable to recognize "./mch.yaml": no matches for kind "MultiClusterHub" in version "operators.open-cluster-management.io/v1beta1"
+    ```
   
-  Run the command again in a few minutes when the resources are created.
+    Run the command again in a few minutes when the resources are created.
   
 7. View the list of routes after about 10 minutes to find your route:
 

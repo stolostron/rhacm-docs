@@ -1,6 +1,8 @@
-# Deploying application resources
+# Deploying an application resource
 
 You can deploy application resources, such as Kubernetes deployable objects or Helm charts to a cluster to update existing applications or to add applications. Red Hat Advanced Cluster Management for Kubernetes supports multiple options for the deployment of deployable objects.
+
+Red Hat Advanced Cluster Management for Kubernetes supports multiple options for the deployment of deployable objects and Helm charts. The deployment option that you use can depend upon whether you need to deploy to a single cluster or multiple clusters and the frequency that you need to deploy updates.
 
 Within the Red Hat Advanced Cluster Management for Kubernetes application model, you use deployables (`deployable.apps.open-cluster-management.io`), which are Kubernetes resources that contain templates to wrap other Kubernetes resources or represent Helm releases for deployment. Deployables are used to wrap other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. For more information about deployables, see [Application resources](app_resources.md).
 
@@ -26,12 +28,12 @@ If you need to deploy a Kubernetes resource or Helm chart to only a single clust
 
 Based on your deployment requirements, review the details and process for the following deployment options:
 
-  * [Deploy by using channels, subscriptions, and placement rules](#deploy-by-using-channels-subscriptions-and-placement-rules)
-    * [Promote a deployable to a channel](#promote-a-deployable-to-a-channel)
-    * [Deploy with a percentage roll out](#deploy-with-a-percentage-roll-out)
-  * [Deploy by using only placement rules](#deploy-by-using-only-placement-rules)
+  - Deploying by using channels, subscriptions, and placement rules
+  - Promote a deployable to a channel
+  - Deploy with a percentage roll out
+  - Deploy by using only placement rules
 
-## Deploy by using channels, subscriptions, and placement rules
+## Deploying by using channels, subscriptions, and placement rules
 
 To set up and use channels, subscriptions, and placement rules for deployments, complete the following procedure:
 
@@ -47,7 +49,7 @@ To set up and use channels, subscriptions, and placement rules for deployments, 
 
 5. Optional. If you created the placement rule as a stand-alone resource, edit the definition for your subscription or deployables to reference your placement rule.
 
-6. Edit the definition for your deployables and your channel to ensure that deployables are promoted to the channel. For more information, see [Promote a deployable to a channel](#promote_channel).
+6. Edit the definition for your deployables and your channel to ensure that deployables are promoted to the channel. For more information, see [Promoting a deployable to a channel](#promoting-a-deployable-to-a-channel).
 
 7. Use the console to monitor the status of the deployment to the target cluster or clusters for the channel.
 
@@ -57,7 +59,7 @@ If you need to deploy new or changed Helm charts or other resources during only 
 
 For more information, see [Scheduling resource deployments for a subscription](managing_subscriptions.md#subscription_timewindow).
 
-## Promote a deployable to a channel
+## Promoting a deployable to a channel
 
 To promote a deployable to a channel, you can use any of the following methods:
 
@@ -117,19 +119,19 @@ To promote a deployable to a channel, you can use any of the following methods:
 
 * Update the subscription definition to identify the deployables. The configuration for promoting a deployable to a channel can also be specified within the subscription definition.
 
-  In the previous example, `packageFilter.version: "1.36.x"` indicates the specific `nginx` version `1.36.x` chart is  promoted through the channel for deployment with the subscription. 
+  In the previous example, `packageFilter.version: "1.36.x"` indicates the specific `nginx` version `1.36.x` chart is  promoted through the channel for deployment with the subscription.
 
 * Update the channel definition to specify channel gate requirements and update the definitions for your deployables to include the fields and values to match the gate requirements.
-  
+
   Channel gate requirements are defined within the `spec.gate` section of a channel definition. If the deployable has the fields to match the channel `spec.gate` values, the deployable is promoted to the channel. In this case, the deployable does not need to point to a specific channel with the  `spec.channels` field.
 
-### Deploy with a percentage roll out  
+### Deploying with a percentage roll out  
 
 If you want to roll out a deployment to your target managed clusters instead of deploying to all target cluster, you can configure the deployment of a deployable or chart to only a percentage of your managed clusters at a time. For instance, you might want to roll out a deployment when you need to deploy an update but you do not want to affect all clusters at once. When the deployment is successful on a cluster, the deployment is rolled out to another cluster.
 
 For more information, see [Deploying application resources with rolling update](deployment_rollout.md).
 
-## Deploy by using only placement rules
+## Deploying by using only placement rules
 
 If you do not want or need to use channels and subscriptions, you can still use placement rules. When you are deploying a deployable by using only a placement rule, the deployable definition can include a reference to a stand-alone placement rule resource.
 

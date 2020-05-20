@@ -1,15 +1,18 @@
 # Creating and managing placement rules
 
-You can create and manage placement rules to define where and how Helm charts and deployables are deployed. Use placement rules to help you facilitate multi-cluster deployments of your deployables.
+You can create and manage placement rules to define where and how Helm charts and deployables are deployed. Placement rules help you facilitate multi-cluster deployments of your deployables. Samples for all resources, including placement rules, are located in the [Application resource samples](app_resource_samples.md) documentation.
 
-  * [Create a placement rule](#create-a-placement-rule)
-  * [Assign a placement rule](#assign-a-placement-rule)
-  * [Placement rule status](#placement-rule-status)
-  * [Update a placement rule](#update-a-placement-rule)
-  * [Delete a placement rule](#delete-a-placement-rule)
-  * [Placement rule definition](#placement-rule-definition)
-  * [Placement rule status definition](#placement-rule-status-definition)
-  * [Examples of placement rule](#examples-of-placement-rule)
+  - Create a placement rule
+  - Assign a placement rule
+  - Placement rule status
+  - Update a placement rule
+  - Delete a placement rule
+  - Placement rule definition
+  * [Placement rule status definition](#placement-rule-sample-files)
+
+The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used for applications in previous versions of Red Hat Advanced Cluster Management for Kubernetes. Placement policies are still used for governance and risk policies.
+
+Placement rules can be defined for subscriptions and for deployables. Define the placement rule at the subscription level for multi-cluster deployments. Define the placement rule for a specific deployable for single-cluster deployments or to override placement settings.  
 
 ## Create a placement rule
 
@@ -17,7 +20,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
 **Prerequisite:** Be sure the `endpoint-appmgr` is running. You can run `oc get pods -n multicluster-endpoint` to check for pods.
 
-1. Compose the definition YAML content for your placement rule. For more information about the YAML structure, including the required fields, see [Placement rule definition](#placement-rule-definition).
+1. Compose the definition YAML content for your placement rule. Samples for all resources, including placement rules, are located in the [Application resource samples](app_resource_samples.md) documentation.
 
 2. Create the placement rule within Red Hat Advanced Cluster Management for Kubernetes. You can define a placement rule as a separate resource or define the rule within the definition for a deployable or subscription. As a best practice, define placement rules as a separate resource when the rule might need to be referenced by multiple resources.
 
@@ -51,7 +54,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
         Ensure that your new placement rule is listed in the resulting output.
 
-   * To use REST API, you need to use the [placement rule POST API](../apis/placementRules.json).
+   * To use REST API, you need to use the [placement rule POST API](../apis/placementrules.json).
 
 ## Assign a placement rule
 
@@ -64,7 +67,6 @@ placement:
   placementRef:
     name:
     kind: PlacementRule
-    group: app.ibm.com
 ```
 
 Include the name of your placement rule as the value for the `name` field.  
@@ -84,7 +86,7 @@ When a placement rule is assigned to a subscription, you can view the assignment
 
 ## Placement rule status
 
-When a placement rule is created and in use, you can view the status details for the rule. This status is appended to the YAML definition for a placement rule and indicates the target clusters where the rule is used for placing deployables. For more information about the available status fields, see [Placement rule status definition](#placement-rule-status-definition).
+When a placement rule is created and in use, you can view the status details for the rule. This status is appended to the YAML definition for a placement rule and indicates the target clusters where the rule is used for placing deployables. For more information about the available status fields, see [Placement rule status definition](#placement-rule-sample-files).
 
 To view the status fields for a placement rule, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.
 
@@ -106,7 +108,7 @@ To view the status fields for a placement rule, you can use the console, the Kub
 
   2. Review the fields and values within the `status` section of the YAML content.
 
-* To use REST API, you need to use the [placement rule GET API](../apis/placementRules.json).
+* To use REST API, you need to use the [placement rule GET API](../apis/placementrules.json).
 
 ## Update a placement rule
 
@@ -131,7 +133,7 @@ To update a placement rule that is a separate resource, you can use the console,
 
 * To use the Kubernetes CLI tool, the steps are the same as for creating a placement rule.
 
-* To use REST API, you need to use the [placement rule PATCH API](../apis/placementRules.json).
+* To use REST API, you need to use the [placement rule PATCH API](../apis/placementrules.json).
 
 To update a placement rule that is defined within the definition for a deployable or subscription, the steps are the same as for updating that resource. For more information, see:
 
@@ -165,126 +167,9 @@ To delete a placement rule that is a separate resource, you can use the console,
      ```
 
 * To use REST API, you need to use the placement rule DELETE API:
-  * [Placement rule APIs](../apis/placementRules.json).
+  * [Placement rule APIs](../apis/placementrules.json).
 
 To delete a placement rule that is defined within the definition for a deployable or subscription, edit the definition for that resource to remove the placement rule definition. The steps are the same as for updating that resource. For more information, see:
 
 * [Creating and managing deployables](managing_deployables.md)
 * [Creating and managing subscriptions](managing_subscriptions.md)
-
-## Placement rule definition
-
-The following YAML structure shows the required fields for a placement rule and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
-
-```yaml
-apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
-  name:
-  namespace:
-  resourceVersion:
-  labels:
-    app: 
-    chart:
-    release:
-    heritage:
-  selfLink:
-  uid:
-spec:
-  clusterLabels:
-    matchLabels:
-      datacenter:
-      environment:
-  clusterReplicas:
-  clusterConditions:
-  ResourceHint:
-    type:
-    order:
-  Policies:
-```
-
-|Field|Description|
-|-- | -- |
-| apiVersion | Required. Set the value to `apps.open-cluster-management.io/v1`. |
-| kind | Required. Set the value to `PlacementRule` to indicate that the resource is a placement rule. |
-| metadata.name | Required. The name for identifying the placement rule. |
-| metadata.namespace | Required. The namespace resource to use for the placement rule. |
-| metadata.resourceVersion | Optional. The version of the placement rule resource. |
-| metadata.labels | Optional. The labels for the placement rule. |
-| spec.clusterLabels | Optional. The labels for identifying the target clusters |
-| spec.clusterLabels.matchLabels | Optional. The labels that must exist for the target clusters. |
-| status.decisions | Optional. Defines the target clusters where deployables are placed. |
-| status.decisions.clusterName | Optional. The name of a target cluster |
-| status.decisions.clusterNamespace | Optional. The namespace for a target cluster. |
-| spec.clusterReplicas | Optional. The number of replicas to create. |
-| spec.clusterConditions | Optional. Define any conditions for the cluster. |
-| spec.ResourceHint | Optional. If more than one cluster matches the labels and values that you provided in the previous fields, you can specify a resource specific criteria to select the clusters. For example, you can select the cluster with the most available CPU cores. |
-| spec.ResourceHint.type | Optional. Set the value to either `cpu` to select clusters based on available CPU cores or `memory` to select clusters based on available memory resources. |
-| spec.ResourceHint.order | Optional. Set the value to either `asc` for ascending order, or `desc` for descending order. |
-| spec.Policies | Optional. The policy filters for the placement rule. |
-{: caption="Table 1. Required and optional definition fields" caption-side="top"}
-
-### Placement rule status definition
-
-Existing placement rules can include the following fields that indicate the status for the placement rule. This status section is appended after the `spec` section in the YAML structure for a rule.
-
-```  
-status:
-  decisions:
-    clusterName:
-    clusterNamespace:
-```
-
-|Field|Description|
-|-- | -- |
-| status | The status information for the placement rule. |
-| status.decisions | Defines the target clusters where deployables are placed. |
-| status.decisions.clusterName | The name of a target cluster |
-| status.decisions.clusterNamespace | The namespace for a target cluster. |
-{: caption="Table 2. Status definition fields" caption-side="top"}
-
-## Examples of placement rule
-
-The following YAML content defines example placement rules:
-
-### Example 1
-
-```yaml
-apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
-metadata:
-  name: gbapp-gbapp
-  namespace: development
-  labels:
-    app: gbapp
-spec:
-  clusterLabels:
-    matchLabels:
-      environment: Dev
-  clusterReplicas: 1
-status:
-  decisions:
-    - clusterName: local-cluster
-      clusterNamespace: local-cluster
-```
-
-### Example 2
-
-```YAML
-apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
-metadata:
-  name: towhichcluster
-  namespace: ns-sub-1
-  labels:
-    app: nginx-app-details
-spec:
-  clusterReplicas: 1
-  clusterConditions:
-    - type: OK
-  clusterSelector:
-    matchExpressions:
-    - key: environment
-      operator: In
-      values:
-      - dev
-```

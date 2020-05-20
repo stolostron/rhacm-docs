@@ -1,7 +1,13 @@
 # Creating and managing subscriptions
 
-You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management. See the examples that are also provided at the end of the topic.
-{:shortdesc}
+You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management. Samples for all resources, including subscriptions, are located in the [Application resource samples](app_resource_samples.md) documentation.
+
+Learn more about subscriptions, then see the following tasks: 
+
+  - Creating a subscription
+  - Matching a subscription to an application
+  - Updating a subscription
+  - Deleting a subscription
 
 Subscriptions (`subscription.apps.open-cluster-management.io`) are Kubernetes resources that serve as sets of definitions for identifying Kubernetes resources (in GitHub, Objectstores, or hub cluster deployables), and Helm charts within channels by using annotations, labels, and versions.
 
@@ -10,22 +16,10 @@ Subscription resources can point to a channel for identifying new and updated He
 When a new or updated Helm chart or Kubernetes resource is detected, the subscription operator downloads the Helm release version for the specified Helm chart version or the specified Kubernetes resource. The subscription operator can download these objects directly, or as deployables, from the storage location to target managed clusters without checking the hub cluster first.
 
 Subscriptions can filter the deployables that are promoted to a channel to select specific deployables. For instance, the subscription can filter the deployables to select a specific deployable version. For this case, the subscription operator checks the `version` parameter to identify the deployable version to select.  
-
-Subscriptions are defined with a `subscription.apps.open-cluster-management.io` custom resource definition (CRD).
-
-For more information about deployables and other application resources, see [Application resources](app_resources.md).
-
-  * [Create a subscription](#create-a-subscription)
-  * [Matching a subscription to an application](#matching-a-subscription-to-an-application)
-  * [Update a subscription](#update-a-subscription)
-  * [Delete a subscription](#delete-a-subscription)
-  * [Schedule a subscription](#schedule-a-subscription)
-  * [View the subscription YAML definition](#view-the-subscription-yaml-definition)
-  * [View an example subscription](#view-an-example-subscription)
-
+  
 ## Creating a subscription
 
-1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription-definition).
+1. Compose the definition YAML content for your subscription. For more information about YAML structure and samples, see [Application resource samples](app_resource_samples.md) documentation.
 
 2. Create the subscription within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
 
@@ -64,7 +58,7 @@ For more information about deployables and other application resources, see [App
 
         Ensure that your new subscription is listed in the resulting output.
 
-   * To use REST API, you need to use the [subscription POST API](../apis/mcm/subscriptions.json).
+   * To use REST API, you need to use the [subscription POST API](../apis/subscriptions.json).
 
 After your subscription is created, your subscription can have one of the following statuses:
 
@@ -115,7 +109,7 @@ For more information about the resource definition for an application, see [Crea
 
 ## Updating a subscription
 
-1. Compose the definition YAML content for your subscription. For more information about the YAML structure, including the required fields, see [Subscription definition](#subscription-definition).
+1. Compose the definition YAML content for your subscription.
 
 2. Create the subscription within Red Hat Advanced Cluster Management for Kubernetes. You can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:  
 
@@ -147,18 +141,17 @@ For more information about the resource definition for an application, see [Crea
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a subscription.
 
-   * To use REST API, use the [subscription PATCH API](../apis/mcm/subscriptions.json).
+   * To use REST API, use the [subscription PATCH API](../apis/subscriptions.json).
 
-## Scheduling resource deployments for a subscription
+<!-- ## Scheduling resource deployments for a subscription (tech preview decision, return for GA see issue 2313 -->
 
-If you need to deploy new or changed Helm charts, deployables, or other Kubernetes resources during only specific times, you can define subscriptions for those resources to begin deployments during only those specific times. For instance, you can define time windows between 10:00 PM and 11:00 PM each Friday to serve as scheduled maintenance windows for applying patches or other application updates to your clusters.
+<!-- If you need to deploy new or changed Helm charts, deployables, or other Kubernetes resources during only specific times, you can define subscriptions for those resources to begin deployments during only those specific times. For instance, you can define time windows between 10:00 PM and 11:00 PM each Friday to serve as scheduled maintenance windows for applying patches or other application updates to your clusters. -->
 
-Alternatively, you can restrict or block deployments from beginning during specific time windows, such as to avoid unexpected deployments during peak business hours. For instance, to avoid peak hours you can define a time window for a subscription to avoid beginning deployments between 8:00 AM and 8:00 PM.
+<!-- Alternatively, you can restrict or block deployments from beginning during specific time windows, such as to avoid unexpected deployments during peak business hours. For instance, to avoid peak hours you can define a time window for a subscription to avoid beginning deployments between 8:00 AM and 8:00 PM. -->
 
-By defining time windows for your subscriptions, you can coordinate updates for all of your applications and clusters. For instance, you can define subscriptions to deploy only new application resources between 6:01 PM and 11:59 PM and define other subscriptions to deploy only updated versions of existing resources between 12:00 AM to 7:59 AM.
+<!-- By defining time windows for your subscriptions, you can coordinate updates for all of your applications and clusters. For instance, you can define subscriptions to deploy only new application resources between 6:01 PM and 11:59 PM and define other subscriptions to deploy only updated versions of existing resources between 12:00 AM to 7:59 AM. -->
 
-When a time window is defined for a subscription, the time ranges when a subscription is active changes. As part of defining a time window, you can define the subscription to be active or blocked during that window. The deployment of new or changed resources begins only when the subscription is active. Regardless of whether a subscription is active or blocked, the subscription continues to monitor for any new or changed resource. The active and blocked setting affects only deployments.
-
+<!-- When a time window is defined for a subscription, the time ranges when a subscription is active changes. As part of defining a time window, you can define the subscription to be active or blocked during that window. The deployment of new or changed resources begins only when the subscription is active. Regardless of whether a subscription is active or blocked, the subscription continues to monitor for any new or changed resource. The active and blocked setting affects only deployments.
 When a new or changed resource is detected, the time window definition determines the next action for the subscription.
 
 * For subscriptions to `HelmRepo`, `ObjectBucket`, and `GitHub` type channels:
@@ -176,7 +169,7 @@ To define a time window for a subscription, you need to add the required fields 
 * You can also define the time window type, which determines whether the time window when deployments can begin occurs during, or outside, the defined timeframe.
   * If the time window type is `active`, deployments can begin only during the defined timeframe. You can use this setting when you want deployments to occur within only specific maintenance windows.
   * If the time window type is `block`, deployments cannot begin during the defined timeframe, but can begin at any other time. You can use this setting when you have critical updates that are required, but still need to avoid deployments during specific time ranges. For instance, you can use this type to define a time window to allow security-related updates to be applied at any time except between 10:00 AM and 2:00 PM.
-* You can define multiple time windows for a subscription, such as to define a time window every Monday and Wednesday.  
+* You can define multiple time windows for a subscription, such as to define a time window every Monday and Wednesday. -->
 
 ## Deleting subscriptions
 
@@ -204,106 +197,7 @@ To delete a subscription, you can use the console, the Kubernetes command line i
      kubectl get Subscription <name>
      ```
 
-* To use REST API, use the [subscription DELETE API](../apis/mcm/subscriptions.json).
-
-## Subscription definition YAML structure
-
-The following YAML structure shows the required fields for a subscription and some of the common optional fields. Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values. You can compose your own YAML content with any tool.
-
-```yaml
-apiVersion: apps.open-cluster-management.io/v1
-kind: Subscription
-metadata:
-  name:
-  namespace:
-  labels:
-spec:
-  sourceNamespace:
-  source:
-  channel:
-  name:
-  packageFilter:
-    version:  
-    labelSelector:
-      matchLabels:  
-        package:
-        component:
-    annotations:  
-  packageOverrides:
-  - packageName:
-    packageAlias:
-    - path:
-      value:
-  placement:
-    local:
-    clusters:
-      name:
-    clusterSelector:
-    placementRef:
-      name:
-      kind: PlacementRule
-  overrides:
-    clusterName:
-    clusterOverrides:
-      path:
-      value:
-  timewindow:
-    windowtype:
-    location:
-    daysofweek:
-    hours:
-      - start:
-        end:
-```
-
-|Field|Description|
-|-- | -- |
-| apiVersion | Required. Set the value to `apps.open-cluster-management.io/v1`. |
-| kind | Required. Set the value to `Subscription` to indicate that the resource is a subscription. |
-| metadata.name | Required. The name for identifying the subscription. |
-| metadata.namespace | Required. The namespace resource to use for the subscription. |
-| metadata.labels | Optional. The labels for the subscription. |
-| spec.channel | Optional. The NamespaceName ("Namespace/Name") that defines the channel for the subscription. Define either the `channel`, or the `source`, or the `sourceNamespace` field. In general, use the `channel` field to point to the channel instead of using the `source` or `sourceNamespace` fields. If more than one field is defined, the first field that is defined is used. |
-| spec.sourceNamespace | Optional. The source namespace where deployables are stored on the Hub cluster. Use this field only for namespace channels. Define either the `channel`, or the `source`, or the `sourceNamespace` field. In general, use the `channel` field to point to the channel instead of using the `source` or `sourceNamespace` fields. |
-| spec.source | Optional. The path name ("URL") to the Helm repository where deployables are stored. Use this field for only Helm repository channels. Define either the `channel`, or the `source`, or the `sourceNamespace` field. In general, use the `channel` field to point to the channel instead of using the `source` or `sourceNamespace` fields. |
-| spec.name | Required for `HelmRepo` type channels, but optional for `Namespace` and `ObjectBucket` type channels. The specific name for the target Helm chart or deployable within the channel. If neither the `name` or `packageFilter` are defined for channel types where the field is optional, all deployables are found and the latest version of each deployable is retrieved. |
-| spec.packageFilter | Optional. Defines the parameters to use to find target deployables or a subset of a deployables. If multiple filter conditions are defined, a deployable must meet all filter conditions. |
-| spec.packageFilter.version | Optional. The version or versions for the deployable. You can use a range of versions in the form `>1.0`, or `<3.0`. By default, the version with the most recent "creationTimestamp" value is used. |
-| spec.packageFilter.annotations | Optional. The annotations for the deployable. |
-| spec.packageOverrides | Optional. Section for defining overrides for the Kubernetes resource that is subscribed to by the subscription, such as a Helm chart, deployable, or other Kubernetes resource within a channel. |
-| spec.packageOverrides.packageName  | Optional, but required for setting an override. Identifies the Kubernetes resource that is being overwritten. |
-| spec.packageOverrides.packageAlias | Optional. Gives an alias to the Kubernetes resource that is being overwritten. |
-| spec.packageOverrides.packageOverrides | Optional. The configuration of parameters and replacement values to use to override the Kubernetes resource. For more information, see [Package overrides](#package-overrides). |
-| spec.placement | Required. Identifies the subscribing clusters where deployables need to be placed, or the placement rule that defines the clusters. Use the placement configuration to define values for multi-cluster deployments. |
-| spec.local | Optional, but required for a stand-alone cluster or cluster that you want to manage directly. Defines whether the subscription must be deployed locally. Set the value to `true` to have the subscription synchronize with the specified channel. Set the value to `false` to prevent the subscription from subscribing to any resources from the specified channel. Use this field when your cluster is a stand-alone cluster or you are managing this cluster directly. If your cluster is part of a multi-cluster and you do not want to manage the cluster directly, use only one of `clusters`, `clusterSelector`, or `placementRef` to define where your subscription is to be placed. If your cluster is the Hub of a multi-cluster and you want to manage the cluster directly, you must register the Hub as a managed cluster before the subscription operator can subscribe to resources locally. |
-| spec.placement.clusters | Optional. Defines the clusters where the subscription is to be placed. Use only one of `clusters`, `clusterSelector`, or `placementRef` to define where your subscription is to be placed for a multi-cluster. If your cluster is a stand-alone cluster that is not your Hub cluster, you can also use `local`. |
-| spec.placement.clusters.name | Optional, but required for defining the subscribing clusters. The name or names of the subscribing clusters. |
-| spec.placement.clusterSelector | Optional. Defines the label selector to use to identify the clusters where the subscription is to be placed. Use only one of `clusters`, `clusterSelector`, or `placementRef` to define where your subscription is to be placed for a multi-cluster. If your cluster is a stand-alone cluster that is not your Hub cluster, you can also use `local`. |
-| spec.placement.placementRef | Optional. Defines the placement rule to use for the subscription. Use only one of `clusters`, `clusterSelector` , or `placementRef` to define where your subscription is to be placed for a multi-cluster. If your cluster is a stand-alone cluster that is not your Hub cluster, you can also use `local`. |
-| spec.placement.placementRef.name | Optional, but required for using a placement rule. The name of the placement rule for the subscription. |
-| spec.placement.placementRef.kind | Optional, but required for using a placement rule. Set the value to `PlacementRule` to indicate that a placement rule is used for deployments with the subscription. |
-| spec.overrides | Optional. Any parameters and values that need to be overridden, such as cluster-specific settings. |
-| spec.overrides.clusterName | Optional. The name of the cluster or clusters where parameters and values are being overridden. |
-| spec.overrides.clusterOverrides | Optional. The configuration of parameters and values to override. |
-| spec.timeWindow | Optional. Defines the settings for configuring a time window when the subscription is active or blocked. |
-| spec.timeWindow.type | Optional, but required for configuring a time window. Indicates whether the subscription is active or blocked during the configured time window. Deployments for the subscription occur only when the subscription is active. |
-| spec.timeWindow.location | Optional, but required for configuring a time window. The time zone of the configured time range for the time window. All time zones must use the Time Zone (tz) database name format. For more information, see [Time Zone Database](https://www.iana.org/time-zones). |
-| spec.timeWindow.daysofweek | Optional, but required for configuring a time window. Indicates the days of the week when the time range is applied to create a time window. The list of days must be defined as an array, such as `daysofweek: ["Monday", "Wednesday", "Friday"]`. |
-| spec.timeWindow.hours | Optional, but required for configuring a time window. Defined the time range for the time window. A start time and end time for the hour range must be defined for each time window. You can define multiple time window ranges for a subscription. |
-| spec.timeWindow.hours.start | Optional, but required for configuring a time window. The timestamp that defines the beginning of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |  
-| spec.timeWindow.hours.end | Optional, but required for configuring a time window. The timestamp that defines the ending of the time window. The timestamp must use the Go programming language Kitchen format `"hh:mmpm"`. For more information, see [Constants](https://godoc.org/time#pkg-constants). |
-{: caption="Table 1. Required and optional definition fields" caption-side="top"}
-
-**Notes:**
-
-* When you are defining your YAML, a subscription can use `packageFilters` to point to multiple Helm charts, deployables, or other Kubernetes resources. The subscription, however, only deploys the latest version of one chart, or deployable, or other resource.
-* Annotations are used by a subscription operator for `Namespace` type channels to search for versions of a deployable. The subscription operator searches the versions to find the appropriate deployable version to retrieve. If your channel is a `Namespace` channel, include the annotations for identifying the deployable version.
-* For time windows, when you are defining the time range for a window, the start time must be set to occur before the end time. If you are defining multiple time windows for a subscription, the time ranges for the windows cannot overlap. The actual time ranges are based on the `subscription-controller` container time, which can be set to a different time and location than the time and location that you are working within.
-* Within your subscription spec, you can also define the placement of a Helm release or deployable as part of the subscription definition. Similar to the definition for deployables, each subscription can reference an existing placement rule, or define a placement rule directly within the subscription definition.
-* When you are defining where to place your subscription in the `spec.placement` section, use only one of `clusters`, `clusterSelector`, or `placementRef` for a multi-cluster environment. If you include more than one of `clusters`, `clusterSelector`, or `placementRef`, the following priority is used to determine which setting the subscription operator uses:
-  1. `placementRef`
-  2. `clusters`
-  3. `clusterSelector`
+* To use REST API, use the [subscription DELETE API](../apis/subscriptions.json).
 
 ### Package overrides
 
@@ -336,4 +230,3 @@ The contents for the `value` field are used to override the values within the `s
   - packageName: nginx-ingress
     packageAlias: my-helm-release-name
   ```
-  For samples YAML files, see [Subscription samples](subscription_sample.md) for more samples.

@@ -1,4 +1,4 @@
-# Deploying application resources with a rolling update
+# Managing deployables with a rolling update
 
 If you want to roll out an update for a subscription to your managed clusters, you can configure the deployment to occur on only a percentage of your managed clusters at a time. When the deployment on those clusters is successful, the deployment is rolled out incrementally to the remaining clusters.
 
@@ -12,13 +12,13 @@ The rolling update for a deployment runs on the hub cluster. The deployment roll
 
 You can configure a percentage rollout for a subscription or directly for a deployable resource.
 
-  - [Configuring a rolling update for a subscription](#configuring-a-rolling-update-for-a-subscription)
-  - [Rolling update sample](#examples)
+  - Configuring a rolling update for a subscription
+  - Rolling update sample](roll_update_sample.md)
 
 A rolling update for a subscription uses the rolling update feature that is included in the Kubernetes resource definition. To configure this feature for a deploying a subscription, you need to create or update the following Kubernetes resources:
 
 1. The initial subscription resource.
-  
+
     This resource is used to define and deploy the initial resource that later updated through the rolling update. As part of the definition for this initial resource, you need to identify that a rolling update is used for deploying updates. You also need to identify the percentage of clusters to be updated at a time, the associated target resource, and the placement rule that identifies the target clusters.
 
 2. The target subscription resource.  
@@ -37,7 +37,7 @@ A rolling update for a subscription uses the rolling update feature that is incl
 
 ## Configuring a rolling update for a subscription
 
-If you have existing subscriptions that you want to configure to use a rolling update, you need to create your target subscription and update your initial existing subscription to include the required annotations. 
+If you have existing subscriptions that you want to configure to use a rolling update, you need to create your target subscription and update your initial existing subscription to include the required annotations.
 
 ### Prerequisites
 
@@ -88,6 +88,6 @@ At this stage no rolling update is configured and any change to the initial vers
    kubectl annotate --overwrite subscriptions.apps.open-cluster-management.io sub-orig -n ns-sub-1 apps.open-cluster-management.io/rollingupdate-target=sub-target apps.open-cluster-management.io/rollingupdate-maxunavaialble=30
    ```
 
-For example definitions of resources that use a rolling update, see [Rolling update sample](#roll_update_sample.md).
+For example definitions of resources that use a rolling update, see [Rolling update sample](roll_update_sample.md).
 
 With the subscription resources created or updated, the rolling update begins and the new target subscription and updated initial subscription are deployed to the managed clusters. Then, the target subscription that is on the managed clusters is used to detect the new version of the resource or chart for deployment.

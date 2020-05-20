@@ -1,7 +1,6 @@
 # Managing secrets
 
-You can create Kubernetes secret resources to store authorization credentials and other sensitive information for your subscriptions and application components. By storing this information as secrets, you can separate the information from the application components that require the information to improve your data security.
-{:shortdesc}
+You can create Kubernetes secret resources to store authorization credentials and other sensitive information for your subscriptions and application components. By storing this information as secrets, you can separate the information from the application components that require the information to improve your data security. Samples for all resources, including secrets, are located in the [Application resource samples](app_resource_samples.md) documentation.
 
 Secrets (`Secret`) are Kubernetes resources that you can use to store authorization and other sensitive information, such as passwords, OAuth tokens, and SSH keys. By storing this information as secrets, you can separate the information from the subscriptions and other application components that require the information to avoid exposing sensitive information to help encrypt your data and better control data security within your application lifecycle.
 
@@ -20,12 +19,10 @@ When you use Kubernetes secrets with your subscriptions to access channel source
  - [Create a Secret](#create-a-secret)
  - [Update a Secret](#update-a-secret)
  - [Delete a Secret](#delete-a-secret)
- - [View the Secret YAML definition](#view-the-secret-yaml-definition)
- - [View an example Secret](#view-an-example-secret)
 
 ## Create a secret
 
-1. Compose the definition YAML content for your secret resource. For more information about the YAML structure, including the required fields, see [Secret definition](#secret-definition).
+1. Compose the definition YAML content for your secret resource. Samples for all resources, including secrets are located in the [Application resource samples](app_resource_samples.md) documentation.
 
 2. Create the secret within Red Hat Advanced Cluster Management for Kubernetes. You can use Kubernetes command line interface (`kubectl`) tool or REST API:
 
@@ -56,7 +53,7 @@ When you use Kubernetes secrets with your subscriptions to access channel source
 
 ## Update a secret
 
-1. Compose the definition updates for your secret. For more information about the YAML structure, including the required fields, see [Secret definition](#secret-definition).
+1. Compose the definition updates for your secret. 
 
 2. Update the definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 
@@ -102,94 +99,3 @@ You can use the console, the Kubernetes command line interface (`kubectl`) tool,
      kubectl get secrets <name>
      ```
 
-## Secret definition YAML structure
-
-The following YAML structure shows the required fields for a secret and some of the common optional fields. Your YAML structure needs to include some required fields and values. 
-
-Depending on your requirements, you might need to include other optional fields and values. For instance, when you are creating a secret that you need to deploy to managed clusters, you need to include additional required fields that are needed for a secret that is referenced by a subscription. To create a secret as a deployable, you need to include specific annotations to indicate that the secret is to be deployed.
-
-You can compose the YAML content with any tool.
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  annotations:
-      apps.open-cluster-management.io/deployables: "true"
-  name:
-  namespace:
-data:
-  username:
-  password:
-  AccessKeyID:
-  SecretAccessKey:
-```
-
-|Field|Description|
-|-- | -- |
-| apiVersion | Required. Set the value to `v1`. |
-| kind | Required. Set the value to `Secret` to indicate that the resource is a secret. |
-| metadata.name | Optional. The name of the secret. If you do not set a name, a `generateName` is created by Kubernetes for identifying the secret. |
-| metadata.namespace | Required. The namespace for the secret. |
-| metadata.annotations | Optional for subscription reference. Required for deploying the secret. The annotations for the secret. The annotation `app.ibm.com/deployables: "true"` must be included to identify a secret as deployable.|
-| data.username | Optional, but required to store a username and password set of credentials. The username or file that includes the username. |
-| data.password | Optional, but required to store a username and password set of credentials. The password for the username or file that includes the password. The password must be encoded as a base64 string. |
-| data.AccessKeyID | Optional, but required to store an access key and secret access key combination. The public access key. |
-| data.SecretAccessKey | Optional, but required to store an access key and secret access key combination. The encoded private access key. The key must be encoded as a base64 string. |
-{: caption="Table 1. Required and optional definition fields" caption-side="top"}
-
-## Example secret YAML 
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  annotations:
-      apps.open-cluster-management.io/deployables: "true"
-  name: secret-namespace
-  namespace: channel-namespace
-data:
-  AccessKeyID: ABCdeF1=
-  SecretAccessKey: gHIjk2lmnoPQRST3uvw==
-```
-
-## Example YAML for creating and referencing a secret with a subscription
-
-The following example includes the YAML definition for a secret, a channel, and a subscription. This example shows the definition for a subscription that uses the secret that is referenced by the channel to access the channel. The referenced secret is defined within the `secretRef` fields for the channel.
-
-```yaml
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: secret-ns
-  namespace: ch-ns
-data:
-  AccessKeyID: <access ID>
-  SecretAccessKey: <access key>
----
-apiVersion: apps.open-cluster-management.io/v1
-kind: Channel
-metadata:
-  name: ns
-  namespace: ch-ns
-spec:
-  type: Namespace
-  pathname: ch-ns
-  sourceNamespaces:
-  - default
-  secretRef:
-    name: secret-ns
-    namespace: ch-ns
----
-apiVersion: apps.open-cluster-management.io/v1
-kind: Subscription
-metadata:
-  name: sub-a
-  namespace: ns-sub-a
-spec:
-  channel: ch-ns/ns
-  placement:
-    local: true
-  sourceNamespace: ch-ns
-```
