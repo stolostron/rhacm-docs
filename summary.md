@@ -81,7 +81,7 @@
        * [Pod security policy](security/psp_policy.md)
        * [Role policy](security/role_policy.md)
        * [Rolebinding policy](security/rolebinding_policy.md)
-       * [Security context constraints (SCC) policy](security/scc_policy.md)
+       * [Security context constraints policy](security/scc_policy.md)
        * [Certificate policy controller](security/cert_policy_ctrl.md)
        * [CIS policy controller](security/cis_policy_ctrl.md)
        * [IAM policy controller](security/iam_policy_ctrl.md)

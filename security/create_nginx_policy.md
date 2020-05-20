@@ -101,4 +101,4 @@ Delete the pod nginx policy from the CLI or the console.
 
 Your pod nginx policy is deleted.
 
-View a sample of a pod nginx policy, see _Pod nginx policy sample_ on the [Pod nginx sample](pod_nginx_policy.md). See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of a pod nginx policy, see _Pod nginx policy sample_ from the [Pod nginx policy](pod_nginx_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
