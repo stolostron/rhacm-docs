@@ -15,7 +15,7 @@ Installing Red Hat Advanced Cluster Management for Kubernetes sets up a multi-no
 
 The intallation process includes the following topics:
 
-- [Requirements and recommendations](install/requirements.md)
-- [Preparing your hub cluster for installation](install/prep.md)
-- [Sizing your hub cluster](install/plan_capacity.md)
-- [Installing online when connected](install/install_connected.md)
+- [Requirements and recommendations](requirements.md)
+- [Preparing your hub cluster for installation](prep.md)
+- [Sizing your hub cluster](plan_capacity.md)
+- [Installing online when connected](install_connected.md)
