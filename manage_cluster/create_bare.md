@@ -23,24 +23,50 @@ You need the following prerequisites before creating a cluster in a bare metal e
 
 * Enable the bare metal feature flag to view the bare metal options. The bare metal selections and options are hidden by a feature flag by default. You can enable the feature flags by completing the following steps:
 
-  1. Start the command line interface:
+  1. Start the OpenShift command line interface
+  
+  2. Edit the `consoleui` deployment resource to modify the settings:
   
     ```
-    oc cli edit commands
-    ```
-    
-  2. Open the deploy script to modify the settings:
-  
-    ```
-    oc get deploy
+    MY_CONSOLEUI=`oc -n open-cluster-management get deploy -o name | grep consoleui`
+    oc edit $MY_CONSOLEUI
     ```
     
   3. Change the feature flag setting to *true*. Your update should look like the following example:
   
     ```
-    featureFlags_baremetal: "true"
+    spec:
+      ...
+      template:
+        ...
+        spec:
+          ...
+          containers:
+          - env:                              # Search for env:
+            - featureFlags_baremetal: "true"
+            ...
     ```
-    
+  4. Edit the `consoleui` deployment resource to modify the settings:
+  
+    ```
+    MY_HEADER=`oc -n open-cluster-management get deploy -o name | grep header`
+    oc edit $MY_HEADER
+    ```
+
+  5. Change the feature flag setting to *true*. Your update should look like the following example:
+  
+    ```
+    spec:
+      ...
+      template:
+        ...
+        spec:
+          ...
+          containers:
+          - env:                              # Search for env:
+            - featureFlags_baremetal: "true"
+            ...
+    ```
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console {#bare_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console}
 
 To create clusters from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps:
