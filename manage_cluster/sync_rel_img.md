@@ -1,13 +1,19 @@
 # Synchronizing available release images
 
-The release images are updated frequently, so you might want to synchronize the list of release images to ensure that you can select the latest available versions. Complete the following steps to refresh the list:
+The release images are updated frequently, so you might want to synchronize the list of release images to ensure that you can select the latest available versions. The release images are available in the [acm-hive-openshift-releases](https://github.com/open-cluster-management/acm-hive-openshift-releases) GitHub repository. Complete the following steps to refresh the list:
 
-1. Connect to your Red Hat Advanced Cluster Management for Kubernetes hub cluster.
+1. Connect to your Red Hat Advanced Cluster Management for Kubernetes hub cluster. 
 
-2. To synchronize your list of stable release images, enter the following command:
+2. To synchronize your list of stable release images, enter one of the following commands:
 
   ```
   oc apply -k subscription/
+  ```
+  
+  or 
+  
+  ```
+  make subscribe-stable
   ```
   
   After running this command, the list of available stable release images updates with the currently available images in about 1 minute.
@@ -18,6 +24,18 @@ The release images are updated frequently, so you might want to synchronize the 
   oc apply -f subscription/subscription-fast.yaml
   ```
   
+  or enter:
+  
+  ```
+  make subscribe-fast
+  ```
+    
   After running this command, the list of available fast release images updates with the currently available images in about 1 minute.
+  
+4. To synchronize and display the list of candidate release images, enter the following command:
 
-4. View the list of currently available release images in the Advanced Cluster Management for Kubernetes console when you are creating a cluster.
+  ```
+  make subscribe-candidate
+  ```
+  
+5. View the list of currently available release images in the Red Hat Advanced Cluster Management console when you are creating a cluster.
