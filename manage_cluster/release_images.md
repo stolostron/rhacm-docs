@@ -10,4 +10,4 @@ The `clusterImageSets` directory contains the following directories:
 * releases - Contains files that reference all of the release images for each OpenShift Container Platform version that is supported. **Note:** These releases have not all been tested and determined to be stable.
 * stable - Contains files that reference the latest two stable versions of the release images for each OpenShift Container Platform version that is supported. The release images in this folder are tested and verified
 
-The `subscription` directory contains files that specify where the list of release images is pulled from. The default release images for Advanced Cluster Management for Kubernetes are provided in a Quay.io directory. They are referenced by the files in the `acm-hive-openshift-releases` GitHub repository.
+The `subscription` directory contains files that specify where the list of release images is pulled from. The default release images for Red Hat Advanced Cluster Management are provided in a Quay.io directory. They are referenced by the files in the [acm-hive-openshift-releases GitHub repository](https://github.com/open-cluster-management/acm-hive-openshift-releases).
