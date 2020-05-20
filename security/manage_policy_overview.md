@@ -14,8 +14,6 @@ Review the following topics to learn more about creating and updating your secur
 - [Managing CIS policies](create_cis_pol.md)
 - [Managing IAM policies](create_iam_policy.md) 
 
-<!--the next links will Managing configuration-XXX policy; for example Managing an image vulnerability policy-->
-
 Refer to [Governance and risk](compliance_intro.md) for more topics. 
 
 
