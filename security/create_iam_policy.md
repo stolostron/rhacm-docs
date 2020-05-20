@@ -146,4 +146,4 @@ Delete a configuration policy from the CLI or the console.
 
 Your policy is deleted.
 
-View the _IAM policy sample_ from the [IAM policy comtroller](iam_policy_ctrl.md) page. See [Manage security policies](manage_policy_overview.md) for more topics.
+View the _IAM policy sample_ from the [IAM policy controller](iam_policy_ctrl.md) page. See [Manage security policies](manage_policy_overview.md) for more topics.
