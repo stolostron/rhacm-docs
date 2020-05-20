@@ -55,7 +55,7 @@ Kubernetes configuration policy controller monitors the status of role policies.
 
 ## Role policy sample
 
-Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](security_intro.md). Your role policy might resemble the following YAML file:
+Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control](security_intro.md). Your role policy might resemble the following YAML file:
 
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
@@ -92,5 +92,5 @@ Apply a role policy to set rules and permissions for specific roles in your clus
          ...
    ```
    
-See [Managing a role policy](create_role_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page. Learn more about Red Hat Advanced Cluster Management for Kubernates RBAC, see [Role-based access control (RBAC)](security_intro.md).
+See [Managing a role policy](create_role_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page. Learn more about Red Hat Advanced Cluster Management for Kubernates RBAC, see [Role-based access control](security_intro.md).
 
