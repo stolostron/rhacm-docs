@@ -1,8 +1,8 @@
-# Managing a certificate policy
+# Managing certificate policies
 
 Learn to create, apply, view, and update your certificate policies.
 
-## Creating a certificate policy 
+## Creating a certificate policy
 
 You can create a YAML file for your certificate policy from the command line interface (CLI) or from the console. View the following sections to create a certificate policy:
 
@@ -65,7 +65,7 @@ As you create a certificate policy from the console, a YAML file is also created
 
 5. Click **Create**.
 
-A certificate policy is created. 
+A certificate policy is created.
 
 #### Viewing your certificate policy from the console
 
@@ -76,7 +76,7 @@ You can view any certificate policy and its status from the console.
 
    **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
 4. Select one of your policies to view more details.
-5. View the certificate policy violations by selecting the _Violations_ tab. 
+5. View the certificate policy violations by selecting the _Violations_ tab.
 
 ## Updating certificate policies
 
@@ -140,7 +140,7 @@ Your policy is disbaled.
 
 ### Deleting a certificate policy
 
-Delete the certificate policy from the CLI or the console. 
+Delete the certificate policy from the CLI or the console.
 
 * Delete a certificate policy from the CLI:
 
@@ -157,7 +157,7 @@ Delete the certificate policy from the CLI or the console.
       ```
       kubectl get policy <policy-name> -n <mcm namespace>
       ```
-      
+
 * Delete a certificate policy from the console:
 
   1. From the navigation menu, click **Govern risk** to view a table list of your policies.
@@ -166,5 +166,5 @@ Delete the certificate policy from the CLI or the console.
   4. From the _Remove policy_ dialog box, click **Remove policy**.
 
 Your certificate policy is deleted.
-   
+
 View a sample of a certificate policy, see _Certificate policy sample_ on the [Certificate policy controller](cert_policy_ctrl.md) page. For more information about other policy controllers, see [Policy controllers](policy_controllers.md). See [Manage security policies](manage_policy_overview.md) to manage other policies.
