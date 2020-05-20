@@ -2,7 +2,7 @@
 
 Red Hat Advanced Cluster Management for Kubernetes is installed using an operator that deploys all of the required components.  
 
-## Prerequisites
+## Prerequisites {#connect_prerequisites}
 
 You must meet the following requirements before you install Red Hat Advanced Cluster Management for Kubernetes: 
 
