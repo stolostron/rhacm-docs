@@ -11,12 +11,12 @@ Certificate policy controller does not support the `enforce` feature.
 View the following example of a certificate policy and review the element in the YAML table:
 
   ```yaml
-  Name:         certificate-policy-example
-  Namespace:
-  Labels:       category=system-and-information-integrity
   APIVersion:  policies.ibm.com/v1alpha1
   Kind:         CertificatePolicy
   Metadata:
+    Name:         certificate-policy-example
+    Namespace:
+    Labels:       category=system-and-information-integrity 
   Spec:
     Conditions:
       Ownership:
@@ -26,12 +26,12 @@ View the following example of a certificate policy and review the element in the
     RemediationAction:
     Disabled:
     MinimumDuration:
- Status:
-   CompliancyDetails:
-     Certificate-Policy-Example:
-       Default:
-       Kube - Public:
-   Compliant:
+  Status:
+    CompliancyDetails:
+      Certificate-Policy-Example:
+        Default:
+        Kube - Public:
+    Compliant:
   Events:
   ```
 
