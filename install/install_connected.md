@@ -27,7 +27,7 @@ You must meet the following requirements before you install Red Hat Advanced Clu
   oc create namespace <namespace>
   ```
 
-  Replace <namespace> with a name for your namespace. 
+  Replace _namespace_ with a name for your namespace. 
 	
   **Important:** The Red Hat Advanced Cluster Management operator must be installed in its own namespace. A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Red Hat Advanced Cluster Management and to any ID with access to the namespace. For security, make sure that anyone who is given access to this namespace already has cluster-administrator access. 
   
@@ -36,7 +36,7 @@ You must meet the following requirements before you install Red Hat Advanced Clu
   ```
   oc project <namespace>
   ```  
-  Replace <namespace> with the name of the namespace that you created in step 1.
+  Replace _namespace_ with the name of the namespace that you created in step 1.
 
 3. Create an operator group. Each namespace can have only one operator group.
  
@@ -52,15 +52,15 @@ You must meet the following requirements before you install Red Hat Advanced Clu
       - <namespace>
     ```
   
-    Replace <default> with the name of your operator group.
-    Replace <namespace> with the name of your project namespace. 
+    Replace _default_ with the name of your operator group.
+    Replace _namespace_ with the name of your project namespace. 
     
   2. Apply the file that you created to define the operator group:
   
     ```
     oc apply -f local/<operator-group>.yaml
     ```
-    Replace <operator-group> with the name of the operator group `.yaml` file that you created.
+    Replace _operator-group_ with the name of the operator group `.yaml` file that you created.
     
 4. Apply the subscription.
 
@@ -90,9 +90,9 @@ You must meet the following requirements before you install Red Hat Advanced Clu
   ```
   oc create secret docker-registry <secret> --docker-server=registry.access.redhat.com/rhacm1-tech-preview --docker-username=<docker_username> --docker-password=<docker_password>
   ```
-  Replace <secret> with the name of the secret that you created.
-  Replace <docker_username> with your username for the distribution registry that you identified as the `docker-server`. 
-  Replace <docker_password> with your password or token for the distribution registry that you identified as the `docker-server`.
+  Replace _secret_ with the name of the secret that you created.
+  Replace _docker_username_ with your username for the distribution registry that you identified as the `docker-server`. 
+  Replace _docker_password_ with your password or token for the distribution registry that you identified as the `docker-server`.
 
 6. Create the MultiClusterHub custom resource by creating a `.yaml` file that defines the custom resource. Your file should look similar to the following example:
   
@@ -106,8 +106,8 @@ You must meet the following requirements before you install Red Hat Advanced Clu
     imagePullSecret: <secret>
   ```
  
-  Replace <namespace> with your project namespace.
-  Replace <secret> with the name of the secret that you created.
+  Replace _namespace_ with your project namespace.
+  Replace _secret_ with the name of the secret that you created.
   
   If this step fails with the following error, the resources are still being created and applied: 
   
@@ -191,8 +191,8 @@ You must meet the following requirements before you install Red Hat Advanced Clu
       imagePullSecret: <secret>
     ```
 
-    Replace <secret> with the name of the pull secret that you created.
-    Confirm that the <namespace> is your project namespace.
+    Replace _secret_ with the name of the pull secret that you created.
+    Confirm that the _namespace_ is your project namespace.
    
   5. Select **Create** to initialize the custom resource. It can take up to 10 minutes for the hub to build and start.
    
