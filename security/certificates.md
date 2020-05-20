@@ -23,7 +23,7 @@ The following certificates are automatically created during the installation of 
 
 The Red Hat Advanced Cluster Management for Kubernetes Root CA Certificate is stored within the Kubernetes Secret `multicloud-ca-cert` in the `open-cluster-management` namespace. The certificate can be imported into your client truststores to access Red Hat Advanced Cluster Management for Kubernetes Platform APIs.
 
-### Created and managed by Red Hat Advanced Cluster Management for Kubernetes Certificate manager (_cert-manager_)
+### Created and managed by Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)
 
 View the following table of the internal services that use `cert-manager` to create and manage their certificates: 
 
