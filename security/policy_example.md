@@ -8,7 +8,7 @@ The policy requires a _PlacementPolicy_ that defines the clusters that the polic
 
 **Important**:
 
-* The `PlacementPolicy` and `PlacementBinding` can be included in the same `.yaml` file or separate `.yaml` files.
+* You must create a `PlacementPolicy` with `PlacementRules` to apply your policies to the managed cluster, and bind the `PlacementRule` with a `PlacementBinding`.
 
 * You can create a policy in any namespace on the hub cluster except the cluster namespace. If you create a policy in the cluster namespace, it is by deleted by Red Hat Advanced Cluster Management for Kubernetes.
 
