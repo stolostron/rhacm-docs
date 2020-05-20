@@ -11,12 +11,12 @@ Certificate policy controller does not support the `enforce` feature.
 View the following example of a certificate policy and review the element in the YAML table:
 
   ```yaml
-  APIVersion:  policies.ibm.com/v1alpha1
-  Kind:         CertificatePolicy
+  APIVersion: policies.ibm.com/v1alpha1
+  Kind: CertificatePolicy
   Metadata:
-    Name:         certificate-policy-example
+    Name: certificate-policy-example
     Namespace:
-    Labels:       category=system-and-information-integrity 
+    Labels: category=system-and-information-integrity 
   Spec:
     Conditions:
       Ownership:
@@ -39,22 +39,21 @@ View the following example of a certificate policy and review the element in the
 
 |Field|Description|
 |-- | -- |
-| Name | Required. <!--Add explanation--> |
-| Namespace | Required. <!--Add explanation--> |
-| Labels | Optional. In a certificate policy, the `category=system-and-information-integrity` label categorizes the policy and facilitates querying the certificate policies. If there is a different value for the `category` key in your certificate policy, the value is overridden by the certificate controller. |
 | APIVersion | Required. Set the value to `policies.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
 | Kind | Required. Set the value to `CertificatePolicy` to indicate the type of policy. |
-| Metadata | Required. <!--add description--> |
+| Metadata.Name | Required. The name to identify the policy.|
+| Metadata.Namespace | Required. The namespaces within the managed cluster that the policy is applied to. <!--is there a default value--> |
+| Metadata.Labels | Optional. In a certificate policy, the `category=system-and-information-integrity` label categorizes the policy and facilitates querying the certificate policies. If there is a different value for the `category` key in your certificate policy, the value is overridden by the certificate controller. |
 | Spec | Required. Specifications of which certificates to monitor and refresh.|
-| Spec.Conditions |  Required. <!--add description--> |
+| Spec.Conditions |  Required. |
 | Spec.Ownership | Required. <!--Add description--> |
-| Spec.NamespaceSelector| Required. Namespace to which you want to apply the policy. Enter parameter values for `Include` and `Exclude`. **Note**: When you create multiple certificate policies and apply them to the same managed cluster, each policy `NamespaceSelector` must be assigned a different value.|
-| Spec.RemediationAction | Required. | <!--add description-->|
+| Spec.NamespaceSelector| Required. Hub cluster namespace to which you want to apply the policy. Enter parameter values for `Include` and `Exclude`. **Note**: When you create multiple certificate policies and apply them to the same managed cluster, each policy `NamespaceSelector` must be assigned a different value.|
+| Spec.RemediationAction | Required. Specifies the remediation of your policy. Set the parameter value to `inform`. Certificate policy controller only supports `inform` feature.|
 | Spec.Disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
-| Spec.MinimumDuration | Required. parameter specifies the smallest duration before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. <!--is there a default parameter value-->| 
-| Status | Required. Reports the status of the policy. <!--expand explanation if possible--> |
-| Status.CompliancyDetails | Required. <!--details needed--> |
-| Status.Events| Required. <!--add details-->
+| Spec.MinimumDuration | Required. parameter specifies the smallest duration before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. The default parameter value is `100h`. | 
+| Status | Required. Reports the compliance status of the policy.|
+| Status.CompliancyDetails | Required.   |
+| Status.Events| Required. <!--add details-->|
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 
