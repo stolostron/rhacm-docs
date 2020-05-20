@@ -1,4 +1,4 @@
-# Replacing management ingress certificates
+# Replacing the management ingress certificates
 
 You can replace management ingress certificates.
 
@@ -128,10 +128,10 @@ Complete the following steps to replace your BYO ingress certificate:
 
    ```
    oc get deployment -n open-cluster-management
-   
+
    oc edit deployment management-ingress -n open-cluster-management
    ```
-  
+
    * Replace the string similar to `multicloud-ca-cert` with `ingress-ca-cert`.
 
    * Save your deployment and close the editor. The management ingress automatically restarts.
@@ -144,12 +144,12 @@ Complete the following steps to replace your BYO ingress certificate:
 
       ```
       oc get deployment -n open-cluster-management
-      
+
       oc edit deployment management-ingress -n open-cluster-management
       ```
-      
+
    1. Replace the `ingress-ca-cert` string  with `multicloud-ca-cert`.
-   
+
    2. Replace the `byo-ingress-tls-secret` string with the correct secret name similar to `management-ingress-b6417-tls-secret`.
    3. Save your deployment and close the editor. The management ingress automatically restarts.
 
@@ -161,4 +161,4 @@ Complete the following steps to replace your BYO ingress certificate:
    oc delete secret -n open-cluster-management byo-ingress-tls-secret
    ```
 
-See [Certificates](certificates.md) for more information about certificates that are created and managed by Red Hat Advanced Cluster Management for Kubernates. Return to the [Security page](security_intro.md) for more information on securing your cluster. 
+See [Certificates](certificates.md) for more information about certificates that are created and managed by Red Hat Advanced Cluster Management for Kubernates. Return to the [Security page](security_intro.md) for more information on securing your cluster.
