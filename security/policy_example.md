@@ -10,7 +10,7 @@ The policy requires a _PlacementPolicy_ that defines the clusters that the polic
 
 * The `PlacementPolicy` and `PlacementBinding` can be included in the same `.yaml` file or separate `.yaml` files.
 
-* When you create a policy, you can only apply it to your hub cluster namesapces.
+* When you create a policy, you can only apply it to your managed cluster namespaces.
 
 * Each client and provider is responsible for ensuring that their managed cloud environment meets internal enterprise security standards for software engineering, secure engineering, resiliency, security, and regulatory compliance for workloads hosted on Kubernetes clusters. Use the governance and security capability to gain visibility and remediate configurations to meet standards.
 
