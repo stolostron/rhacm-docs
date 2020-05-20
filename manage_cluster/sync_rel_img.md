@@ -4,18 +4,12 @@ The release images are updated frequently, so you might want to synchronize the 
 
 1. Connect to your Red Hat Advanced Cluster Management for Kubernetes hub cluster. 
 
-2. To synchronize your list of stable release images, enter one of the following commands:
+2. To synchronize your list of stable release images, enter the following command:
 
   ```
   oc apply -k subscription/
   ```
-  
-  or 
-  
-  ```
-  make subscribe-stable
-  ```
-  
+    
   After running this command, the list of available stable release images updates with the currently available images in about 1 minute.
   
 3. By default, only the stable images are listed. To synchronize and display the fast release images, enter the following command:
@@ -24,18 +18,6 @@ The release images are updated frequently, so you might want to synchronize the 
   oc apply -f subscription/subscription-fast.yaml
   ```
   
-  or enter:
-  
-  ```
-  make subscribe-fast
-  ```
-    
   After running this command, the list of available fast release images updates with the currently available images in about 1 minute.
   
-4. To synchronize and display the list of candidate release images, enter the following command:
-
-  ```
-  make subscribe-candidate
-  ```
-  
-5. View the list of currently available release images in the Red Hat Advanced Cluster Management console when you are creating a cluster.
+4. View the list of currently available release images in the Red Hat Advanced Cluster Management console when you are creating a cluster.
