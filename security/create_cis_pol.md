@@ -202,12 +202,18 @@ Complete the following steps to enable the CIS policy controller feature flag fr
    oc edit deployment $(oc get deployment -o custom-columns=:.metadata.name | grep 'grcui$')
    ```
 
-3. Update the `env.value` parameter to `"yes"`. Your deployment might resemble the following content:
+3. Add the following contents to the deployment. Your deployment might resemble the following content:
 
    ```
    -env
+     - name: grcUiApiUrl
+       value: https://grc-590ea-grcuiapi:4000/grcuiapi
+     - name: searchApiUrl
+       value: https://search-search-api:4010/searchapi
      - name: featureFlags_cisPolicyTemplate
        value: "yes"
+     image: quay.io/open-cluster-management/grc-ui@sha256:6f3bd3490d61305e4ddad46fc21fee3ac8151dadd604d1240de3b2a0a3ee29fa
+     imagePullPolicy: Always
    ```
 
 4. Save your deployment and close the Visual Web Terminal.
