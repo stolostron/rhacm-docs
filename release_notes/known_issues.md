@@ -196,6 +196,16 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 2. Select your application. 
 3. You can view a complete topology and summary cards for your selected application.
 
+### Application channels require unique namespaces
+<!--1.0.0:2311-->
+
+Creating a channel in the same namespace can cause errors with the hub cluster. 
+
+For instance, namespace `charts-v1` is used by the installer, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
+
+For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with another channel. See the process for [Managing channels](../manage_applications/managing_channels.md) for more information.
+
+
 ## Security known issues
 
 ### Certificate policies fail to report status
@@ -209,13 +219,3 @@ For more information, see [Certificate policy controller](../security/cert_polic
 <!--1.0.0:2312-->
 
 Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information view the [Role based access control (RBAC) table](../security/security_intro.md).
-
-
-## Application channels require unique namespaces
-<!--1.0.0:2311-->
-
-Creating a channel in the same namespace can cause errors with the hub cluster. 
-
-For instance, namespace `charts-v1` is used by the installer, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
-
-For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with another channel. See the process for [Managing channels](../manage_applications/managing_channels.md) for more information.
