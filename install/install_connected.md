@@ -1,4 +1,4 @@
-# Installing Red Hat Advanced Cluster Management for Kubernetes when connected
+# Installing while connected online
 
 Red Hat Advanced Cluster Management for Kubernetes is installed using an operator that deploys all of the required components.  
 
