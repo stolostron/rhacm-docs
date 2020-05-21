@@ -100,7 +100,7 @@ To promote a deployable to a channel, you can use any of the following methods:
 
 If you want to roll out a deployment to your target managed clusters instead of deploying to all target clusters, you can configure the deployment of a deployable or chart to only a percentage of your managed clusters at a time. For instance, you might want to roll out a deployment when you need to deploy an update but you do not want to affect all clusters at once. When the deployment is successful on a cluster, the deployment is rolled out to another cluster.
 
-For more information, see [Deploying application resources with rolling update](deployment_rollout.md).
+For more information, see [Managing deployables with a rolling update](deployment_rollout.md).
 
 ## Deploying by using only placement rules
 
