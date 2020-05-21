@@ -25,7 +25,7 @@
    * [Managing your cluster with the Visual Web Terminal](console/vwt_search.md)
    * [Managing cluster labels](console/cluster_label.md)
  * [Cluster management](manage_cluster/intro.md)
-   * [Supported cloud providers](install/supported_clouds.md)
+   * [Supported cloud providers](manage_cluster/supported_clouds.md) 
    * [Resizing your clusters](manage_cluster/scale.md)
    * [Release images](manage_cluster/release_images.md)
      * [Synchronizing available release images](manage_cluster/sync_rel_img.md)
