@@ -63,7 +63,6 @@ You can view any role policy and its status from the console.
 1. Log in to your cluster from the console.
 
 2. From the navigation menu, click **Govern risk** to view a table list of your policies.
-
    **Note**: You can filter the table list of your policies by selecting the All policies tab or Cluster violations tab.
 
 3. Select one of your policies to view more details.
