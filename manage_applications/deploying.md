@@ -4,7 +4,7 @@ To set up and use channels, subscriptions, and placement rules for deployments, 
 
 1. If the channel to represent the object store, Kubernetes namespace, or Helm repository does not exist, create a channel. 
 
-Ensure that you define any labels or annotations that deployables need before they are promoted to the channel. For more information, see [Creating and managing channels](managing_channels.md).
+  Ensure that you define any labels or annotations that deployables need before they are promoted to the channel. For more information, see [Creating and managing channels](managing_channels.md).
 
 2. Create your deployables. For more information, see [Creating and managing deployables](managing_deployables.md).
 
