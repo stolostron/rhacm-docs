@@ -4,9 +4,11 @@
 
 Review the [Architecture](architecture.md) topic and the [Components](components.md) topics to learn more about what is installed with Red Hat Advanced Cluster Management for Kubernetes.
 
-After you learn about the hub cluster and managed cluster architecture, learn more about the [Supported clouds](../install/supported_clouds.md), which lists the cloud provider cluster options. 
+After you learn about the hub cluster and managed cluster architecture, learn more about the [Supported clouds](../manage_cluster/supported_clouds.md), which lists the cloud provider cluster options. 
 
 The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run on any [supported Red Hat OpenShift Container Platform infrastructure](https://docs.openshift.com/container-platform/4.3/architecture/architecture-installation.html).
+
+The [Glossary of terms](glossary_terms.md) defines common terms for the product.
 
 ## Install
 
@@ -14,9 +16,9 @@ The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run 
 
 2. You also need to ensure that your hub cluster has the appropriate capacity. To prepare your hub cluster, see [Preparing your hub cluster for installation](../install/prep.md).
 
-3. With a supported version of OpenShift Container Platform installed and running on your hub cluster, you can proceed with [Installing while connected online](../install/install_connected.md).
+3. With a supported version of OpenShift Container Platform installed and running on your hub cluster, you can proceed with [Installing while connected online](../install/install_connected.md). 
 
-After installation, review the [Web console](../console/console_intro.md) guide to learn how to access your console and what features are available in the console.
+After installation, review the [Web console](../console/console_intro.md) guide to learn how to access your console and what features are available in the console. <!--broken link, not sure why. the syntax is correct-->
 
 ## Manage clusters
 
@@ -27,6 +29,7 @@ You are now ready to create and import clusters. From your hub cluster, you can 
 2. If you have a cluster that you want to import manually, you can view [Importing a cluster](../manage_cluster/import.md) to learn how to import a managed cluster.
 
 3. When you no longer need to manage a cluster, you can detach that cluster from the _Cluster page_.
+
 ## Manage applications
 
 You can start managing applications on any created and imported managed clusters. The types of resources that you can create are applications, channels, subscriptions, and placement rules. 

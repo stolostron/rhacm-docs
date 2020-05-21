@@ -13,3 +13,4 @@ Learn more about the Application lifecycle from the following topics.
 
   * [Application model and definitions](app_model.md)
   * [Applications console](app_console.md)
+  * [Deploying applications](deployment_app.md)

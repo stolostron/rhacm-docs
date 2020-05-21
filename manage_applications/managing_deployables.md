@@ -1,6 +1,6 @@
 # Creating and managing deployables
 
-You can create deployables to represent Helm releases or to use as a template to wrap Kubernetes resources for deployment to target clusters for constructing or updating applications. You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management. Samples for all resources, including deployables, are located in the [Application resource samples](app_resource_samples.md) documentation.
+You can create deployables to represent Helm releases or to use as a template to wrap Kubernetes resources for deployment to target clusters for constructing or updating applications. You can create and manage subscriptions to identify, retrieve, and deploy new and updated resources to managed clusters. By using subscriptions, you can improve the continuous delivery capabilities of your application management. Samples for all resources are located in the [Application resource samples](app_resource_samples.md) documentation.
 
 Learn more about deployments, then see the following tasks:
 
