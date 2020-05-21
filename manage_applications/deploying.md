@@ -18,11 +18,11 @@ To set up and use channels, subscriptions, and placement rules for deployments, 
 
 7. Use the console to monitor the status of the deployment to the target cluster or clusters for the channel.
 
-## Scheduling a deployment
+<!-- Brandi to remove per stop ship, return for GA ## Scheduling a deployment
 
 If you need to deploy new or changed Helm charts or other resources during only specific times, you can define subscriptions for those resources to begin deployments during only those specific times. Alternatively, you can restrict deployments from beginning during specific time windows, such as to avoid unexpected deployments during peak business hours.
 
-For more information, see [Scheduling resource deployments for a subscription](managing_subscriptions.md#subscription_timewindow).
+For more information, see [Scheduling resource deployments for a subscription](managing_subscriptions.md#subscription_timewindow). -->
 
 ## Promoting a deployable to a channel
 
