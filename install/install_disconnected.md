@@ -24,17 +24,17 @@ Follow these steps to install Advanced Cluster Management for Kubernetes in a di
 
 1. Create a mirror registry, if necessary.
 
-If you do not already have a mirror registry, create one by completing the procedure in the [Creating a mirror registry for installation in a restricted network](https://docs.openshift.com/container-platform/4.4/installing/install_config/installing-restricted-networks-preparations.html#installing-restricted-networks-preparations) topic of the Red Hat OpenShift Container Platform documentation.
+   If you do not already have a mirror registry, create one by completing the procedure in the [Creating a mirror registry for installation in a restricted network](https://docs.openshift.com/container-platform/4.4/installing/install_config/installing-restricted-networks-preparations.html#installing-restricted-networks-preparations) topic of the Red Hat OpenShift Container Platform documentation.
 
-If you already have a mirror registry, you can configure and use your existing one. 
+   If you already have a mirror registry, you can configure and use your existing one. 
 
-**Note:** Red Hat Advanced Cluster Management for Kubernetes must deploy the Community Operator catalog, so the container image must support the Kubernetes V1 container specification. See [Container v1 core](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#container-v1-core) in the Kubernetes documentation for more information about the V1 container specification.
+   **Note:** Red Hat Advanced Cluster Management for Kubernetes must deploy the Community Operator catalog, so the container image must support the Kubernetes V1 container specification. See [Container v1 core](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#container-v1-core) in the Kubernetes documentation for more information about the V1 container specification.
 
 2. Enable the disconnected Operator Lifecycle Manager (OLM) Red Hat Operators and Community Operators. 
 
-Advanced Cluster Management for Kubernetes is included in the OLM Red Hat Operator catalog, and has a dependency on the Community Operator catalog for the `etcd` operator.
+   Advanced Cluster Management for Kubernetes is included in the OLM Red Hat Operator catalog, and has a dependency on the Community Operator catalog for the `etcd` operator.
 
-**Tip:** Make sure that your default storageClass is configured. See [Change the default storageClass](https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/) for more information about setting your default storageClass. 
+   **Tip:** Make sure that your default storageClass is configured. See [Change the default storageClass](https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/) for more information about setting your default storageClass. 
 
 3. Configure the disconnected OLM for the Red Hat Operator catalog and the Community Operator catalog. Follow the steps in the Using Operator Lifecycle Manager on restricted networks topic of the Red Hat OpenShift Container Platform documentation.
 
