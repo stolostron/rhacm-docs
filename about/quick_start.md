@@ -8,6 +8,8 @@ After you learn about the hub cluster and managed cluster architecture, learn mo
 
 The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run on any [supported Red Hat OpenShift Container Platform infrastructure](https://docs.openshift.com/container-platform/4.3/architecture/architecture-installation.html).
 
+The [Glossary of terms](glossary_terms.md) defines common terms for the product.
+
 ## Install
 
 1. Before you install Red Hat Advanced Cluster Management for Kubernetes, review the system configuration requirements and settings at [Requirements and recommendations](../install/requirements.md). Get information about required operating systems and supported browsers. For instance, you want to ensure that you have a supported Red Hat OpenShift Container Platform version so that you can set up your hub cluster.
