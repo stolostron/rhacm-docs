@@ -18,8 +18,6 @@ View the following example of a certificate policy and review the element in the
     Namespace:
     Labels: category=system-and-information-integrity 
   Spec:
-    Conditions:
-      Ownership:
     NamespaceSelector:
       Exclude:
       Include:
@@ -42,19 +40,16 @@ View the following example of a certificate policy and review the element in the
 | APIVersion | Required. Set the value to `policies.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
 | Kind | Required. Set the value to `CertificatePolicy` to indicate the type of policy. |
 | Metadata.Name | Required. The name to identify the policy.|
-| Metadata.Namespace | Required. The namespaces within the managed cluster that the policy is applied to. <!--is there a default value--> |
+| Metadata.Namespace | Required. The namespaces within the managed cluster where the policy is created. |
 | Metadata.Labels | Optional. In a certificate policy, the `category=system-and-information-integrity` label categorizes the policy and facilitates querying the certificate policies. If there is a different value for the `category` key in your certificate policy, the value is overridden by the certificate controller. |
 | Spec | Required. Specifications of which certificates to monitor and refresh.|
-| Spec.Conditions |  Required. |
-| Spec.Ownership | Required. <!--Add description--> |
-| Spec.NamespaceSelector| Required. Hub cluster namespace to which you want to apply the policy. Enter parameter values for `Include` and `Exclude`. **Note**: When you create multiple certificate policies and apply them to the same managed cluster, each policy `NamespaceSelector` must be assigned a different value.|
+| Spec.NamespaceSelector| Required. Managed cluster namespace to which you want to apply the policy. Enter parameter values for `Include` and `Exclude`. **Note**: When you create multiple certificate policies and apply them to the same managed cluster, each policy `NamespaceSelector` must be assigned a different value.|
 | Spec.RemediationAction | Required. Specifies the remediation of your policy. Set the parameter value to `inform`. Certificate policy controller only supports `inform` feature.|
-| Spec.Disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
-| Spec.MinimumDuration | Required. parameter specifies the smallest duration before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. The default parameter value is `100h`. | 
-| Status | Required. Reports the compliance status of the policy.|
+| Spec.MinimumDuration | Required. parameter specifies the smallest duration (in hours) before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. Default value is `100h`. The parameter value uses the time duration format from Golang. See [Golang Parse Duration](https://golang.org/pkg/time/#ParseDuration) for more information.| 
+| Status | Output only. Information provided by the controller that shows the status of the policy.|
 | Status.CompliancyDetails | Required.   |
 | Status.Events| Required. <!--add details-->|
-{: caption="Table 1. Required and optional definition fields" caption-side="top"}
+{: caption="Table 1. Required and optional definition fields, along with output parameters." caption-side="top"}
 
 
 ## Certificate policy sample
@@ -77,5 +72,8 @@ spec:
   disabled: false
   minimumDuration: 100h
 ```
+
+* The `disabled` parameter provides the ability to enable and disable your policies. Set the `disabled` parameter value to `true` or `false`.
+
 
 Learn how to manage a certificate policy, see [Managing certificate policies](create_cert_pol.md) for more details. Refer to [Policy controllers](policy_controllers.md) for more topics.
