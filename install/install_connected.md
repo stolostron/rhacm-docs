@@ -23,9 +23,9 @@ You must meet the following requirements before you install Red Hat Advanced Clu
 
 1. Create a namespace where the operator requirements are contained:
 
-  ```
-  oc create namespace <namespace>
-  ```
+```
+oc create namespace <namespace>
+```
 
   Replace _namespace_ with a name for your namespace. 
 	
@@ -33,95 +33,95 @@ You must meet the following requirements before you install Red Hat Advanced Clu
   
 2. Switch your project namespace to the one that you created:
 
-  ```
-  oc project <namespace>
-  ```  
+```
+oc project <namespace>
+```  
   Replace _namespace_ with the name of the namespace that you created in step 1.
 
 3. Create an operator group. Each namespace can have only one operator group.
  
   1. Create a `.yaml` file that defines the operator group. Your file should look similar to the following example:
   
-    ```
-    apiVersion: operators.coreos.com/v1
-    kind: OperatorGroup
-    metadata:
-      name: <default>
-    spec:
-      targetNamespaces:
-      - <namespace>
-    ```
+  ```
+  apiVersion: operators.coreos.com/v1
+  kind: OperatorGroup
+  metadata:
+    name: <default>
+  spec:
+    targetNamespaces:
+    - <namespace>
+  ```
   
     Replace _default_ with the name of your operator group.
     Replace _namespace_ with the name of your project namespace. 
     
   2. Apply the file that you created to define the operator group:
   
-    ```
-    oc apply -f local/<operator-group>.yaml
-    ```
+  ```
+  oc apply -f local/<operator-group>.yaml
+  ```
     Replace _operator-group_ with the name of the operator group `.yaml` file that you created.
     
 4. Apply the subscription.
 
   1.  Create a `.yaml` file that defines the subscription. Your file should look similar to the following example:
 
-    ```
-    apiVersion: operators.coreos.com/v1alpha1
-    kind: Subscription
-    metadata:
-      name: acm-operator-subscription
-    spec:
-      sourceNamespace: openshift-marketplace
-      source: redhat-operators
-      channel: release-1.0
-      installPlanApproval: Automatic
-      name: advanced-cluster-management
-      ```
+  ```
+  apiVersion: operators.coreos.com/v1alpha1
+  kind: Subscription
+  metadata:
+    name: acm-operator-subscription
+  spec:
+    sourceNamespace: openshift-marketplace
+    source: redhat-operators
+    channel: release-1.0
+    installPlanApproval: Automatic
+    name: advanced-cluster-management
+  ```
            
   2. Apply the subscription:
 
-    ```
-    oc apply -f local/<subscription>.yaml
-    ```
+  ```
+  oc apply -f local/<subscription>.yaml
+  ```
 
 5. Generate a pull secret to access the entitled content from the distribution registry. **Important:** Pull secrets are namespace-specific, so make sure that you are in the namespace that you created in step 1.
   
-  ```
-  oc create secret docker-registry <secret> --docker-server=registry.access.redhat.com/rhacm1-tech-preview --docker-username=<docker_username> --docker-password=<docker_password>
-  ```
+```
+oc create secret docker-registry <secret> --docker-server=registry.access.redhat.com/rhacm1-tech-preview --docker-username=<docker_username> --docker-password=<docker_password>
+```
   Replace _secret_ with the name of the secret that you created.
   Replace _docker_username_ with your username for the distribution registry that you identified as the `docker-server`. 
   Replace _docker_password_ with your password or token for the distribution registry that you identified as the `docker-server`.
 
 6. Create the MultiClusterHub custom resource by creating a `.yaml` file that defines the custom resource. Your file should look similar to the following example:
   
-  ```
-  apiVersion: operators.open-cluster-management.io/v1beta1
-  kind: MultiClusterHub
-  metadata:
-    name: multiclusterhub
-    namespace: <namespace>
-  spec:
-    imagePullSecret: <secret>
-  ```
+```
+apiVersion: operators.open-cluster-management.io/v1beta1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  imagePullSecret: <secret>
+```
  
   Replace _namespace_ with your project namespace.
   Replace _secret_ with the name of the secret that you created.
   
   If this step fails with the following error, the resources are still being created and applied: 
   
-    ```
-    error: unable to recognize "./mch.yaml": no matches for kind "MultiClusterHub" in version "operators.open-cluster-                       management.io/v1beta1"
-    ```
+  ```
+  error: unable to recognize "./mch.yaml": no matches for kind "MultiClusterHub" in version "operators.open-cluster-                       management.io/v1beta1"
+  ```
   
     Run the command again in a few minutes when the resources are created.
   
 7. View the list of routes after about 10 minutes to find your route:
 
-  ```
-  oc get routes
-  ```
+```
+oc get routes
+```
   
 ## Installing Red Hat Advanced Cluster Management from the console
 
@@ -181,15 +181,15 @@ You must meet the following requirements before you install Red Hat Advanced Clu
   
   4. Update the default values in the `.yaml` file, according to your needs. The following example shows some sample data:
   
-    ```
-    apiVersion: operators.open-cluster-management.io/v1beta1
-    kind: MultiClusterHub
-    metadata:
-      name: multiclusterhub
-      namespace: <namespace>
-    spec:
-      imagePullSecret: <secret>
-    ```
+  ```
+  apiVersion: operators.open-cluster-management.io/v1beta1
+  kind: MultiClusterHub
+  metadata:
+    name: multiclusterhub
+    namespace: <namespace>
+  spec:
+    imagePullSecret: <secret>
+  ```
 
     Replace _secret_ with the name of the pull secret that you created.
     Confirm that the _namespace_ is your project namespace.
