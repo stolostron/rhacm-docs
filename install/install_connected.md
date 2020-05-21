@@ -66,24 +66,24 @@ You must meet the following requirements before you install Red Hat Advanced Clu
 
    1.  Create a `.yaml` file that defines the subscription. Your file should look similar to the following example:
 
-      ```
-      apiVersion: operators.coreos.com/v1alpha1
-      kind: Subscription
-      metadata:
-        name: acm-operator-subscription
-      spec:
-        sourceNamespace: openshift-marketplace
-        source: redhat-operators
-        channel: release-1.0
-        installPlanApproval: Automatic
-        name: advanced-cluster-management
-      ```
+       ```
+       apiVersion: operators.coreos.com/v1alpha1
+       kind: Subscription
+       metadata:
+         name: acm-operator-subscription
+       spec:
+         sourceNamespace: openshift-marketplace
+         source: redhat-operators
+         channel: release-1.0
+         installPlanApproval: Automatic
+         name: advanced-cluster-management
+       ```
            
-  2. Apply the subscription:
+   2. Apply the subscription:
 
-     ```
-     oc apply -f local/<subscription>.yaml
-     ```
+      ```
+      oc apply -f local/<subscription>.yaml
+      ```
 
 5. Generate a pull secret to access the entitled content from the distribution registry. **Important:** Pull secrets are namespace-specific, so make sure that you are in the namespace that you created in step 1.
   
