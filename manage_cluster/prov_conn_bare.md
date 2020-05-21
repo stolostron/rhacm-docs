@@ -23,7 +23,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 2. On the _Clusters_ page, select the *Provider connections* tab.
 
-  Existing provider connections are displayed.
+   Existing provider connections are displayed.
 
 3. Select **Add connection**.
 
@@ -33,7 +33,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 6. Select a namespace for your provider connection from the list.
 
-  **Tip:** Create a namespace specifically to host your provider connections, both for convenience and added security.
+   **Tip:** Create a namespace specifically to host your provider connections, both for convenience and added security.
 
 7. Add your *libvirt URI*. See [Connection URIs](https://libvirt.org/uri.html) for more information.
 

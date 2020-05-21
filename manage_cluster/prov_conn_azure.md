@@ -24,7 +24,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 2. On the _Clusters_ page, select the *Provider connections* tab.
 
-  Existing provider connections are displayed.
+   Existing provider connections are displayed.
 
 3. Select **Add a connection**.
 
@@ -34,30 +34,30 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 6. Select a namespace for your provider connection from the list.
 
-  **Tip:** You can create a namespace specifically to host your provider connections, both for convenience and added security.
+   **Tip:** You can create a namespace specifically to host your provider connections, both for convenience and added security.
 
 7. Add your *Base Domain Resource Group Name* for your Azure account. This entry is the resource name that you created with your Azure account. You can find your Base Domain Resource Group Name by selecting **Home** > **DNS Zones** in the Azure interface. Your Base Domain Resource Group name is in the *Resource Group* column of the entry that contains the Base DNS domain that applies to your account.
 
 8. Add your *Azure Service Principal JSON* file name. You can determine this name by entering the following command: 
 
-```
-cat ~/.azure/osServicePrincipal.json
-```
+   ```
+   cat ~/.azure/osServicePrincipal.json
+   ```
 
-  **Tip:** If you need to generate an `osServicePrincipal.json` file, you can create it when you create the service principle by entering a command similar to the following example:
+   **Tip:** If you need to generate an `osServicePrincipal.json` file, you can create it when you create the service principle by entering a command similar to the following example:
   
-  ```
-  az ad sp create-for-rbac --role Owner --name <service_principal> \
-   | jq --arg sub_id "$(az account show | jq -r '.id')" \
-     '{subscriptionId:$sub_id,clientId:.appId, clientSecret:.password,tenantId:.tenant}' \
-     > ~/.azure/osServicePrincipal.json
-  ```
+   ```
+   az ad sp create-for-rbac --role Owner --name <service_principal> \
+    | jq --arg sub_id "$(az account show | jq -r '.id')" \
+      '{subscriptionId:$sub_id,clientId:.appId, clientSecret:.password,tenantId:.tenant}' \
+      > ~/.azure/osServicePrincipal.json
+   ```
   
-  Replace <service_principal> with the name of your new file.
+   Replace <service_principal> with the name of your new file.
   
-  **Note:** You must have the `jq` package installed to run the command.
+   **Note:** You must have the `jq` package installed to run the command.
   
-  For more information about creating a service principal, see [Creating a service principal for your Microsoft Azure account](https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-account.html#installation-azure-service-principal_installing-azure-account) in the Red Hat OpenShift Container Platform documentation.
+   For more information about creating a service principal, see [Creating a service principal for your Microsoft Azure account](https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-account.html#installation-azure-service-principal_installing-azure-account) in the Red Hat OpenShift Container Platform documentation.
 
 9. Enter your *Red Hat OpenShift Pull Secret*. You can download your pull secret from [Pull secret](https://cloud.redhat.com/openshift/install/pull-secret).
 

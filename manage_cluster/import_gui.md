@@ -44,7 +44,7 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
 9. From your terminal, authenticate to your managed cluster. Configure your `kubectl` for your targeted managed cluster.
 
-  See [Supported cloud providers](../install/supported_clouds.md) to learn how to configure your `kubectl`.
+   See [Supported cloud providers](../install/supported_clouds.md) to learn how to configure your `kubectl`.
 
 10. To deploy the `multicluster-endpoint` to the managed cluster, run the command that you generated and copied from _step 8_.
 

@@ -10,11 +10,11 @@ In some cases, you need to maintain a custom list of release images when the hub
 
 4. Create `clusterImageSets` command:
 
-  ```
-  oc create -f <clusterImageSet_FILE>
-  ```
+   ```
+   oc create -f <clusterImageSet_FILE>
+   ```
 
-  After running this command for each resource you want to add, the list of available release images will be available.
+   After running this command for each resource you want to add, the list of available release images will be available.
   
 5. Alternately you can paste the image url directly in the the create cluster console in Red Hat Advanced Cluster Management. This will create new clusterImageSets if they do not exist.
 
