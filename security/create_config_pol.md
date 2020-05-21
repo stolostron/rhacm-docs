@@ -16,24 +16,24 @@ Complete the following steps to create a configuration policy from the (CLI):
    kubectl create -f configpolicy-1.yaml
    ```
 
-  Your configuration policy might resemble the following policy:
+     Your configuration policy might resemble the following policy:
 
-   ```yaml
-   apiVersion: policy.mcm.ibm.com/v1alpha1
-   kind: Policy
-   metadata:
-     name: policy-1
-     namespace: kube-system
-   spec:
-     namespaces:
-       include: ["default", "kube-*"]
-       exclude: ["kube-system"]
-     remediationAction: inform
-     disabled: false
-     complianceType: musthave
-     object-templates:
+     ```yaml
+     apiVersion: policy.mcm.ibm.com/v1alpha1
+     kind: Policy
+     metadata:
+       name: policy-1
+       namespace: kube-system
+     spec:
+       namespaces:
+         include: ["default", "kube-*"]
+         exclude: ["kube-system"]
+       remediationAction: inform
+       disabled: false
+       complianceType: musthave
+       object-templates:
       ...
-   ```
+     ```
 
 2. Apply the policy by running the following command:
 
@@ -92,7 +92,6 @@ You can view any configuration policy and its status from the console.
 1. Log in to your cluster from the console.
 
 2. From the navigation menu, click **Govern risk** to view a table list of your policies.
-
    **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
 
 3. Select one of your policies.

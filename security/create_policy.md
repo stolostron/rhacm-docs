@@ -125,7 +125,10 @@ As you create your new policy from the console, a YAML file is also created in t
 
 4. View the example Red Hat Advanced Cluster Management for Kubernetes security policy definition. Copy and paste the YAML file for your policy.
 
-   **Important**: You must define a PlacementPolicy and PlacementBinding to apply your policy to a specific cluster. Enter a value for the Cluster select field to define a PlacementPolicy and PlacementBinding.
+   **Important**: 
+   
+   * You must define a PlacementPolicy and PlacementBinding to apply your policy to a specific cluster. Enter a value for the Cluster select field to define a PlacementPolicy and PlacementBinding.
+   * Be sure to add values for the `policy.mcm.ibm.com/controls` and `policy.mcm.ibm.com/standards` to display modal cards of what controls and standards are violated in the _Policy Overview_ section.
 
     Your YAML file might resemble the following policy:
 
@@ -186,8 +189,6 @@ As you create your new policy from the console, a YAML file is also created in t
           cloud: "IBM"
     ```
 
- **Important**: Be sure to add values for the `policy.mcm.ibm.com/controls` and `policy.mcm.ibm.com/standards` to display modal cards of what controls and standards are violated in the _Policy Overview_ section.
-
 4. Click **Create Policy**.
 
    Your policy is enabled by default. You can disable your policy by selecting the `Disabled` check box.
@@ -201,8 +202,7 @@ You can view any security policy and its status from the console.
 1. Log in to your cluster from the console.
 
 2. From the navigation menu, click **Governance and risk** to view a table list of your policies.
-
-  **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
+   **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
 
 3. Select one of your policies to view more details.
 
