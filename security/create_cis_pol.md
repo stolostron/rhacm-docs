@@ -205,7 +205,7 @@ Complete the following steps to enable the CIS policy controller feature flag fr
    oc edit deployment $(oc get deployment -o custom-columns=:.metadata.name | grep 'grcui$')
    ```
 
-3. Update the `env.value` parameter to `"yes"`. Your deployment might resemble the following content:
+3. Add the `env.value` parameter with the value, `"yes"`. Your deployment might resemble the following content:
 
    ```
    -env
