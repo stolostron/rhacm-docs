@@ -30,7 +30,7 @@ To create a bare metal asset using the Red Hat Advanced Cluster Management for K
 
 3. Enter a name for your asset that identifies it when you create a cluster. 
 
-  **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**. 
+   **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**. 
 
 4. Enter the namespace where you want to create the bare metal asset. Users who have access to this namespace can associate this asset to the cluster when creating a cluster.
 
