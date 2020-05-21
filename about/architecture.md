@@ -1,6 +1,6 @@
 # Multicluster architecture
 
-Red Hat Advanced Cluster Management for Kubernetes consists of several multicluster components, which are used to access and manage your clusters. 
+Red Hat Advanced Cluster Management for Kubernetes consists of several multicluster components, which are used to access and manage your clusters. Learn more about the architecture in the following sections, then follow the links to more detailed documentation. 
 
 ![Architecture diagram](RHACM-arch.png)
 
