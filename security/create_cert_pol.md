@@ -122,10 +122,6 @@ Update the `metadata` parameter in your TLS Secret by adding the `certificate_ke
 
 When you create a certificate policy, it is enabled by default. Complete the following steps to disable a certificate policy from the CLI or the console:
 
-* Disable a certificate policy from the CLI:
-
-<!--add info here-->
-
 * Disable a certificate policy from the console:
 
   1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
