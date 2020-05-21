@@ -10,13 +10,13 @@ Learn about the cloud providers that are available with Red Hat Advanced Cluster
 
 ## Supported hub cluster provider
 
-Red Hat OpenShift Container Platform 4.2 and 4.3 are supported for the hub cluster.
+Red Hat OpenShift Container Platform 4.3 and 4.4 are supported for the hub cluster.
 
 - See [OpenShift on Amazon Web Services](https://www.openshift.com/learn/partners/amazon-web-services).
 
 ## Supported managed cluster providers
 
-Red Hat OpenShift Container Platform 3.11, 4.2, and 4.3 are supported for the managed clusters. 
+Red Hat OpenShift Container Platform 3.11, 4.1, 4.2, 4.3, and 4.4 are supported for the managed clusters. 
 
 See the available managed cluster options and documentation:
 
