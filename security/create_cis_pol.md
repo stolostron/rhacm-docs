@@ -157,10 +157,14 @@ As you create your CIS policy from the console, a YAML file is also created in t
    **Note**: You must enable the feature flag to make the `Cispolicy-cis compliance for OCP` option available.
 
 6. Use the drop-down list and make selections for the following parameters:
-    - Cluster selector
-    - Standards
-    - Categories
-    - Controls
+    * Name
+    * Specifications
+    * Cluster selector
+    * Standards
+    * Categories
+    * Controls
+    * Disabled
+
 7. Click **Create**.
 
 A policy is created and is embedded into the policy. 
