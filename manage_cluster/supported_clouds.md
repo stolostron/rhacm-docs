@@ -34,4 +34,4 @@ See the available managed cluster options and documentation:
 
 ## Configuring kubectl
 
-From vendor documentation previously listed, you might need to learn how configure your `kubectl`. You must have `kubectl` installed. When you [Import an existing cluster](../manage_cluster/import.md), view the provider product documentation for details.
+From vendor documentation previously listed, you might need to learn how configure your `kubectl`. You must have `kubectl` installed. When you [Importing a target managed cluster to the hub cluster](../manage_cluster/import.md), view the provider product documentation for details.
