@@ -50,7 +50,7 @@ To promote a deployable to a channel, you can use any of the following methods:
 
 * Update the channel definition to identify the deployables to include in the channel. Use the `spec.package` and `spec.packageFilter` fields to specify the deployables.
 
-  As an example, the following channel automatically pull the most recent, or latest, `nginx` chart when a new chart is published to the source Helm repository for the channel. The chart deployable must have a matching version `1.x` to be promoted to the channel.
+  As an example, the following channel automatically pulls the most recent, or latest, `nginx` chart when a new chart is published to the source Helm repository for the channel. The chart deployable must have a matching version `1.x` to be promoted to the channel.
 
     ```yaml
     apiVersion: apps.open-cluster-management.io/v1
@@ -92,7 +92,7 @@ To promote a deployable to a channel, you can use any of the following methods:
 
 ### Deploying with a percentage roll out  
 
-If you want to roll out a deployment to your target managed clusters instead of deploying to all target cluster, you can configure the deployment of a deployable or chart to only a percentage of your managed clusters at a time. For instance, you might want to roll out a deployment when you need to deploy an update but you do not want to affect all clusters at once. When the deployment is successful on a cluster, the deployment is rolled out to another cluster.
+If you want to roll out a deployment to your target managed clusters instead of deploying to all target clusters, you can configure the deployment of a deployable or chart to only a percentage of your managed clusters at a time. For instance, you might want to roll out a deployment when you need to deploy an update but you do not want to affect all clusters at once. When the deployment is successful on a cluster, the deployment is rolled out to another cluster.
 
 For more information, see [Deploying application resources with rolling update](deployment_rollout.md).
 
