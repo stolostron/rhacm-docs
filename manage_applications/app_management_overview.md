@@ -12,7 +12,7 @@ The application management functions provide you with unified and simplified opt
 - [Managing subscriptions](managing_subscriptions.md)
 - [Managing placement rules](managing_placement_rules.md)
 - [Managing secrets](managing_secrets.md)
-- [Deploying an application resource](deployment_app.md)
+- [Deploying applications](deployment_app.md)
 - [Deploying application resources with a rolling update](deployment_rollout.md)
 - [Managing applications with the console](managing_apps_console.md)
 - [Application resources samples](app_resource_samples.md)
