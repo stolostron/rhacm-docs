@@ -6,19 +6,19 @@ When you have multiple instances of a Kubernetes service, a Kubernetes ingress s
 
 **Required user type or access level:** Cluster administrator.
 
- When you import your target managed cluster (see [Importing a target managed cluster](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/manage_cluster/import.md)) from your Red Hat Advanced Cluster Management for Kubernetes, you can configure your service registry component by editing the `serviceRegistry` section in your cluster import YAML file, for example:
+When you import your target managed cluster (see [Importing a target managed cluster](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/manage_cluster/import.md)) from your Red Hat Advanced Cluster Management for Kubernetes, you can configure your service registry component by editing the `serviceRegistry` section in your cluster import YAML file, for example:
 
-```
-...
+   ```
+   ...
 
-# Configure multicluster service registry feature
-serviceRegistry:
-  enabled: true
-  dnsSuffix: "mcm.svc"
-  plugins: "kube-service"
-...
+   # Configure multicluster service registry feature
+   serviceRegistry:
+     enabled: true
+     dnsSuffix: "mcm.svc"
+     plugins: "kube-service"
+   ...
 
-```
+   ```
 
 Table 1: The following table lists the parameters and descriptions that are available in the YAML file:
 
@@ -32,34 +32,34 @@ Table 1: The following table lists the parameters and descriptions that are avai
 
 Configure the DNS for each target managed cluster by completing these steps:
 
-**Note:** The DNS configuration is depented on the kind of your managed cluster, you can consult your cluster administrator for more details, the below steps base on OpenShift Container Platform 4.3
+**Note:** The DNS configuration is dependent on the kind of your managed cluster. You can consult your cluster administrator for more details. The following steps are based on Red Hat OpenShift Container Platform 4.3:
 
-1. Find the `mcm-svc-registry-dns` service cluster IP by entering the following command, where <rcm-klusterlet-namespace> is the namespace that contains your registry component:
+1. Find the `mcm-svc-registry-dns` service cluster IP by entering the following command, where _rcm-klusterlet-namespace_ is the namespace that contains your registry component:
 
-  ```
-  kubectl get -n <rcm-klusterlet-namespace> service mcm-svc-registry-dns -o jsonpath='{.spec.clusterIP}'
-  ```
+   ```
+   kubectl get -n <rcm-klusterlet-namespace> service mcm-svc-registry-dns -o jsonpath='{.spec.clusterIP}'
+   ```
 
 2. Configure your cluster DNS configuration by entering the following command:
 
-  ```
-  oc edit dns.operator/default
-  ```
+   ```
+   oc edit dns.operator/default
+   ```
 
-3. Enable the forwarding plugin in the `default` configuration, similar to the following example, where <mcm-svc-registry-dns-service-cluster-ip> is the IP address that you identified in step 1:
+3. Enable the forwarding plugin in the `default` configuration. Your content should look similar to the following example, where _mcm-svc-registry-dns-service-cluster-ip_ is the IP address that you identified in step 1:
 
-  ```
-  spec:
-    servers:
+   ```
+   spec:
+     servers:
 
-    ...
+     ...
 
-    - name: mcm-server
-      zones:
-        - mcm.svc
-      forwardPlugin:
-        upstreams:
-          - <mcm-svc-registry-dns-service-cluster-ip>
-  ```
+     - name: mcm-server
+       zones:
+         - mcm.svc
+       forwardPlugin:
+         upstreams:
+           - <mcm-svc-registry-dns-service-cluster-ip>
+   ```
 
-  The value `mcm.svc` is from the value of `dnsSuffix` in the `serviceRegistry` configuration above
+   The value `mcm.svc` is from the value of `dnsSuffix` in the `serviceRegistry` previous configuration.
