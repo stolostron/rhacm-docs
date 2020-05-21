@@ -6,18 +6,18 @@ The release images are updated frequently, so you might want to synchronize the 
 
 2. To synchronize your list of stable release images, enter the following command:
 
-  ```
-  oc apply -k subscription/
-  ```
+   ```
+   oc apply -k subscription/
+   ```
     
-  After running this command, the list of available stable release images updates with the currently available images in about 1 minute.
+   After running this command, the list of available stable release images updates with the currently available images in about 1 minute.
   
 3. By default, only the stable images are listed. To synchronize and display the fast release images, enter the following command:
 
-  ```
-  oc apply -f subscription/subscription-fast.yaml
-  ```
+   ```
+   oc apply -f subscription/subscription-fast.yaml
+   ```
   
-  After running this command, the list of available fast release images updates with the currently available images in about 1 minute.
+   After running this command, the list of available fast release images updates with the currently available images in about 1 minute.
   
 4. View the list of currently available release images in the Red Hat Advanced Cluster Management console when you are creating a cluster.

@@ -24,7 +24,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 2. On the Clusters page, select the *Provider connections* tab.
 
-  Existing provider connections are displayed.
+   Existing provider connections are displayed.
 
 3. Select **Add a connection**.
 
@@ -34,7 +34,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 6. Select a namespace for your provider connection from the list.
 
-  **Tip:** Create a namespace specifically to host your provider connections, for both convenience and security.
+   **Tip:** Create a namespace specifically to host your provider connections, for both convenience and security.
 
 7. Add your *Google Cloud Platform Project ID* for your GCP account. Log in to [GCP](https://console.cloud.google.com/apis/credentials/serviceaccountkey) to retrieve your settings.
 

@@ -2,11 +2,6 @@
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to create a Red Hat OpenShift Container Platform cluster in a bare metal environment.
 
-  - [Prerequisites](#bare_prerequisites)
-  - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#bare_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console)
-  - [Accessing your cluster](#bare_accessing-your-cluster)
-  - [Removing a cluster from management](#bare_removing-a-cluster-from-management)
-
 ## Prerequisites {#bare_prerequisites}
 
 You need the following prerequisites before creating a cluster in a bare metal environment:
@@ -23,50 +18,51 @@ You need the following prerequisites before creating a cluster in a bare metal e
 
 * Enable the bare metal feature flag to view the bare metal options. The bare metal selections and options are hidden by a feature flag by default. You can enable the feature flags by completing the following steps:
 
-  1. Start the OpenShift command line interface
+  1. Start the OpenShift command line interface.
   
   2. Edit the `consoleui` deployment resource to modify the settings:
   
-    ```
-    MY_CONSOLEUI=`oc -n open-cluster-management get deploy -o name | grep consoleui`
-    oc edit $MY_CONSOLEUI
-    ```
+     ```
+     MY_CONSOLEUI=`oc -n open-cluster-management get deploy -o name | grep consoleui`
+     oc edit $MY_CONSOLEUI
+     ```
     
   3. Change the feature flag setting to *true*. Your update should look like the following example:
   
-    ```
-    spec:
-      ...
-      template:
-        ...
-        spec:
-          ...
-          containers:
-          - env:                              # Search for env:
-            - featureFlags_baremetal: "true"
-            ...
-    ```
+     ```
+     spec:
+       ...
+       template:
+         ...
+         spec:
+           ...
+           containers:
+           - env:                              # Search for env:
+             - featureFlags_baremetal: "true"
+             ...
+     ```
   4. Edit the `consoleui` deployment resource to modify the settings:
   
-    ```
-    MY_HEADER=`oc -n open-cluster-management get deploy -o name | grep header`
-    oc edit $MY_HEADER
-    ```
+     ```
+     MY_HEADER=`oc -n open-cluster-management get deploy -o name | grep header`
+     oc edit $MY_HEADER
+     ```
 
   5. Change the feature flag setting to *true*. Your update should look like the following example:
   
-    ```
-    spec:
-      ...
-      template:
-        ...
-        spec:
-          ...
-          containers:
-          - env:                              # Search for env:
-            - featureFlags_baremetal: "true"
-            ...
-    ```
+     ```
+     spec:
+       ...
+       template:
+         ...
+         spec:
+           ...
+           containers:
+           - env:                              # Search for env:
+             - featureFlags_baremetal: "true"
+             ...
+     ```
+
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console {#bare_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console}
 
 To create clusters from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps:
@@ -77,11 +73,11 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 3. Select **Create a cluster**.
 
-  **Note:** This procedure is for creating a cluster. If you have an existing cluster that you want to import, see [Importing a target managed cluster to the hub cluster](import.md) for those steps.
+   **Note:** This procedure is for creating a cluster. If you have an existing cluster that you want to import, see [Importing a target managed cluster to the hub cluster](import.md) for those steps.
 
 4. Enter a name for your cluster. This name is used in the hostname of the cluster.
 
-  **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**.
+   **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**.
 
 5. Enter the base domain information that you configured in your bare metal environment. This name is used in the hostname of the cluster.
 
@@ -119,7 +115,7 @@ To access a cluster that is managed by Red Hat Advanced Cluster Management for K
 
 7. Select **Launch to cluster**.
 
-  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
+   **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
 
 ## Removing a cluster from management {#bare_removing-a-cluster-from-management}
 
@@ -135,4 +131,4 @@ Destroying a cluster removes it from management and deletes the components of th
 
 3. Select **Destroy cluster** or **Detach cluster**.
 
-  **Tip:** You can detach or destroy multiple clusters by selecting the check boxes of the clusters that you want to detach or destroy. Then select **Detach** or **Destroy**.
+   **Tip:** You can detach or destroy multiple clusters by selecting the check boxes of the clusters that you want to detach or destroy. Then select **Detach** or **Destroy**.

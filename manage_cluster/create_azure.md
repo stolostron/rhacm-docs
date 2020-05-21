@@ -2,11 +2,6 @@
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to deploy a Red Hat OpenShift Container Platform cluster on Microsoft Azure.
 
-  - [Prerequisites](#azure_prerequisites)
-  - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#azure_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console)
-  - [Accessing your cluster](#azure_accessing-your-cluster)
-  - [Removing a cluster from management](#azure_removing-a-cluster-from-management)
-
 ## Prerequisites {#azure_prerequisites}
 
 You must have the following prerequisites before creating a cluster on Azure:
@@ -35,11 +30,11 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 3. Select **Create a cluster**.
 
-  **Note:** This procedure is for creating a cluster. If you have an existing cluster that you want to import, see [Importing a target managed cluster to the hub cluster](import.md) for those steps.
+   **Note:** This procedure is for creating a cluster. If you have an existing cluster that you want to import, see [Importing a target managed cluster to the hub cluster](import.md) for those steps.
 
 4. Enter a name for your cluster. This name is used in the hostname of the cluster.
 
-  **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**.
+   **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**.
 
 5. Enter the base domain information that you configured for your Azure account. See [Configuring a custom domain name for an Azure cloud service](https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-custom-domain-name-portal) for more information. This name is used in the hostname of the cluster.
 
@@ -51,13 +46,13 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 9. Configure the *Node pools* for your cluster.
 
-  The node pools define the location and size of the nodes that are used for your cluster.
+   The node pools define the location and size of the nodes that are used for your cluster.
 
-  The *Region* specifies where the nodes are located geographically. A closer region might provide faster performance, but a more distant region might be more distributed.
+   The *Region* specifies where the nodes are located geographically. A closer region might provide faster performance, but a more distant region might be more distributed.
 
-  * Master pool: There are three Master nodes that are created for your cluster in the master pool. The master nodes share the management of the cluster activity. You can select multiple zones within the region for a more distributed group of master nodes. You can change the type and size of your instance after it is created, but you can also specify it in this section. The default values are *Standard_D2s_v3 - 2 vCPU, 8 GiB RAM - General Purpose* with 512 GiB of root storage.
+   * Master pool: There are three Master nodes that are created for your cluster in the master pool. The master nodes share the management of the cluster activity. You can select multiple zones within the region for a more distributed group of master nodes. You can change the type and size of your instance after it is created, but you can also specify it in this section. The default values are *Standard_D2s_v3 - 2 vCPU, 8 GiB RAM - General Purpose* with 512 GiB of root storage.
 
-  * Worker pools: You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.  
+   * Worker pools: You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.  
 
 10. **Optional:** Configure the cluster networking options.
 
@@ -83,7 +78,7 @@ To access a cluster that is managed by Red Hat Advanced Cluster Management for K
 
 7. Select **Launch to cluster**.
 
-  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
+   **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
 
 ## Removing a cluster from management {#azure_removing-a-cluster-from-management}
 
@@ -99,4 +94,4 @@ Destroying a cluster removes it from management and deletes the components of th
 
 3. Select **Destroy cluster** or **Detach cluster**.
 
-  **Tip:** You can detach or destroy multiple clusters by selecting the check boxes of the clusters that you want to detach or destroy. Then select **Detach** or **Destroy**.
+   **Tip:** You can detach or destroy multiple clusters by selecting the check boxes of the clusters that you want to detach or destroy. Then select **Detach** or **Destroy**.
