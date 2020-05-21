@@ -16,9 +16,9 @@ The [Glossary of terms](glossary_terms.md) defines common terms for the product.
 
 2. You also need to ensure that your hub cluster has the appropriate capacity. To prepare your hub cluster, see [Preparing your hub cluster for installation](../install/prep.md).
 
-3. With a supported version of OpenShift Container Platform installed and running on your hub cluster, you can proceed with [Installing while connected online](../install/install_connected.md).
+3. With a supported version of OpenShift Container Platform installed and running on your hub cluster, you can proceed with [Installing while connected online](../install/install_connected.md). 
 
-After installation, review the [Web console](../console/console_intro.md) guide to learn how to access your console and what features are available in the console.
+After installation, review the [Web console](../console/console_intro.md) guide to learn how to access your console and what features are available in the console. <!--broken link, not sure why. the syntax is correct-->
 
 ## Manage clusters
 
