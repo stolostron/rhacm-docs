@@ -2,19 +2,25 @@
 
 To set up and use channels, subscriptions, and placement rules for deployments, complete the following procedure:
 
-1. If the channel for representing the object store, Kubernetes namespace, or Helm repository does not exist, create the channel. Ensure that you define any labels or annotations that deployables must have before they can be promoted to the channel. For more information, see [Creating and managing channels](managing_channels.md).
+1. If the channel to represent the object store, Kubernetes namespace, or Helm repository does not exist, create a channel. 
 
-2. If your deployables do not exist, create your deployables. For more information, see [Creating and managing deployables](managing_deployables.md).
+Ensure that you define any labels or annotations that deployables need before they are promoted to the channel. For more information, see [Creating and managing channels](managing_channels.md).
+
+2. Create your deployables. For more information, see [Creating and managing deployables](managing_deployables.md).
 
 3. If your target cluster or clusters are not subscribed to the channel, create the subscription. For more information, see [Creating and managing subscriptions](managing_subscriptions.md).
 
-4. Define the placement rule for the deployables that are to be deployed from the channel. For more information, see [Creating and managing placement rules](managing_placement_rules.md).
+4. Define the placement rule for the deployables that are to be deployed from the channel. For more information, see [Creating and managing placement rules](managing_placement_rules.md). A placement rule can be defined for a subscription and for deployables. 
 
-    A placement rule can be defined for a subscription and for deployables. Define the placement rule or reference to the placement rule in the subscription definition to have the rule apply to multiple deployables and clusters. Define the placement rule or reference to the rule in the deployables definitions when you do not want to have the same settings apply to all deployables for the subscription or when you want to override a subscription-level placement rule. If you are referencing a placement rule, you can also include override settings for a deployable to override some placement rule values with values specific to the deployable.
+  - Define the placement rule for a subscription to have the rule apply to multiple deployables and clusters. 
+  
+  - Define the placement rule for a deployable to prevent the rule from applyin to all deployables for the subscription, or when you want to override a subscription-level placement rule. 
+  
+  - If you are referencing a placement rule, you can also include override settings for a deployable to override some placement rule values with values specific to the deployable.
 
 5. Optional. If you created the placement rule as a stand-alone resource, edit the definition for your subscription or deployables to reference your placement rule.
 
-6. Edit the definition for your deployables and your channel to ensure that deployables are promoted to the channel. For more information, see [Promoting a deployable to a channel](#promoting-a-deployable-to-a-channel).
+6. Edit the definition for your deployables and your channel to ensure that deployables are promoted to the channel. For more information, see the _Promoting a deployable to a channel_ section.
 
 7. Use the console to monitor the status of the deployment to the target cluster or clusters for the channel.
 
@@ -36,8 +42,8 @@ To promote a deployable to a channel, you can use any of the following methods:
     apiVersion: apps.open-cluster-management.io/v1
     kind: Deployable
     metadata:
-        name: deployable1
-        namespace: default
+      name: deployable1
+      namespace: default
       spec:
         template:
         placement:
@@ -82,7 +88,7 @@ To promote a deployable to a channel, you can use any of the following methods:
           name: towhichcluster
     ```
 
-* Update the subscription definition to identify the deployables. The configuration for promoting a deployable to a channel can also be specified within the subscription definition.
+* Update the channel definition to specify channel gate requirements, and update the definitions for your deployables to include the fields and values to match the gate requirements.
 
   In the previous example, `packageFilter.version: "1.36.x"` indicates the specific `nginx` version `1.36.x` chart is  promoted through the channel for deployment with the subscription.
 
