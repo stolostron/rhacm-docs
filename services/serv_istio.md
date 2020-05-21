@@ -16,34 +16,34 @@ To discover an Istio service within the managed clusters, complete the following
 
 1. Add a service discovery annotation to the Istio service. You must add the annotation to your Istio service definition YAML file for the service that you want to discover.
 
-  ```
-  mcm.ibm.com/service-discovery	
-  ```
+   ```
+   mcm.ibm.com/service-discovery	
+   ```
 
-  The following example shows how to add the annotation to the service definition YAML file:	
+   The following example shows how to add the annotation to the service definition YAML file:	
 
-  ```	
-  apiVersion: v1	
-  kind: Service	
-  metadata:	
-   annotations:	
-     mcm.ibm.com/service-discovery: "{}"	
-   name: dbservice	
-   namespace: database	
-  spec:	
-   ports:	
-   - name: http	
-      nodePort: 8080	
-      port: 8000	
-      protocol: TCP	
-   selector:	
-     app: dbservice	
-  ```
+   ```	
+   apiVersion: v1	
+   kind: Service	
+   metadata:	
+    annotations:	
+      mcm.ibm.com/service-discovery: "{}"	
+    name: dbservice	
+    namespace: database	
+   spec:	
+    ports:	
+    - name: http	
+       nodePort: 8080	
+       port: 8000	
+       protocol: TCP	
+    selector:	
+      app: dbservice	
+   ```
 
 2. By default, the annotated service can be discovered on all managed clusters. If you want to discover the service on specific managed clusters, add `target-clusters` in the annotation, as shown in the following example:
 
-  ```
-  mcm.ibm.com/service-discovery: '{"target-clusters": ["cluster1", "cluster2"]}'
-  ```
+   ```
+   mcm.ibm.com/service-discovery: '{"target-clusters": ["cluster1", "cluster2"]}'
+   ```
 
 3. Access the discovered service by using the service hostname. In this example, the hostname is `dbservice.database`.
