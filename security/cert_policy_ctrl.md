@@ -47,8 +47,6 @@ View the following example of a certificate policy and review the element in the
 | Spec.RemediationAction | Required. Specifies the remediation of your policy. Set the parameter value to `inform`. Certificate policy controller only supports `inform` feature.|
 | Spec.MinimumDuration | Required. parameter specifies the smallest duration (in hours) before a certificate is considered non-compliant. When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant. Default value is `100h`. The parameter value uses the time duration format from Golang. See [Golang Parse Duration](https://golang.org/pkg/time/#ParseDuration) for more information.| 
 | Status | Output only. Information provided by the controller that shows the status of the policy.|
-| Status.CompliancyDetails | Required.   |
-| Status.Events| Required. <!--add details-->|
 {: caption="Table 1. Required and optional definition fields, along with output parameters." caption-side="top"}
 
 
