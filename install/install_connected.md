@@ -196,7 +196,7 @@ You must meet the following requirements before you install Red Hat Advanced Clu
    
   5. Select **Create** to initialize the custom resource. It can take up to 10 minutes for the hub to build and start.
    
-     After the hub is created, the status for the operator is *Running* on the *Installed Operators* page.
+      After the hub is created, the status for the operator is *Running* on the *Installed Operators* page.
 	 
 6. Access the console for the hub.
 

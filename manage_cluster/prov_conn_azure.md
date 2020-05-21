@@ -53,7 +53,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
       > ~/.azure/osServicePrincipal.json
    ```
   
-   Replace <service_principal> with the name of your new file.
+   Replace _service_principal_ with the name of your new file.
   
    **Note:** You must have the `jq` package installed to run the command.
   
