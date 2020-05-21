@@ -67,11 +67,7 @@ spec:
     include: ["default", "kube-*"]
     exclude: ["kube-system"]
   remediationAction: inform
-  disabled: false
   minimumDuration: 100h
 ```
-
-* The `disabled` parameter provides the ability to enable and disable your policies. Set the `disabled` parameter value to `true` or `false`.
-
 
 Learn how to manage a certificate policy, see [Managing certificate policies](create_cert_pol.md) for more details. Refer to [Policy controllers](policy_controllers.md) for more topics.
