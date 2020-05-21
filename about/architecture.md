@@ -32,6 +32,6 @@ Red Hat Advanced Cluster Management for Kubernetes _application lifecycle_ defin
 
 ## Governance and risk
 
-Governance and risk is the term used to define the processes used to manage security and compliance. After you configure a Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can view and create policies for Red Hat Advanced Cluster Management for Kubernetes with templates from the _Governance and risk_ page. For more information see, [Governance and risk](../security/compliance_intro.md).
+Governance and risk is the term used to define the processes used to manage security and compliance from a central interface page. After you configure a Red Hat Advanced Cluster Management for Kubernetes hub cluster and a managed cluster, you can view and create policies with the Advanced Cluster Management policy framework. For more information see, [Security](../security/security_intro.md).
 
 See [Red Hat Advanced Cluster Management for Kubernetes installation](../install/install_overview.md) to prepare your cluster and get configuration information. See the [components](components.md) topic to learn more about what is installed with the product.

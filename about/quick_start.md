@@ -4,7 +4,7 @@
 
 Review the [Architecture](architecture.md) topic and the [Components](components.md) topics to learn more about what is installed with Red Hat Advanced Cluster Management for Kubernetes.
 
-After you learn about the hub cluster and managed cluster architecture, learn more about the [Supported clouds](../install/supported_clouds.md), which lists the cloud provider cluster options. 
+After you learn about the hub cluster and managed cluster architecture, learn more about the [Supported clouds](../manage_cluster/supported_clouds.md), which lists the cloud provider cluster options. 
 
 The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run on any [supported Red Hat OpenShift Container Platform infrastructure](https://docs.openshift.com/container-platform/4.3/architecture/architecture-installation.html).
 
