@@ -12,9 +12,9 @@ Complete the following steps to create a certificate policy from the CLI:
 
 1. Create a YAML file for your certificate policy. Run the following command:
 
-  ```
-  kubectl create -f policy-1.yaml
-  ```
+   ```
+   kubectl create -f policy-1.yaml
+   ```
 
 2. Apply the policy by running the following command:
 
@@ -73,8 +73,8 @@ You can view any certificate policy and its status from the console.
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk** to view a table list of your policies.
-
    **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
+
 4. Select one of your policies to view more details.
 5. View the certificate policy violations by selecting the _Violations_ tab.
 
@@ -89,17 +89,16 @@ You can monitor your own certificates with the certificate policy controller. Yo
 
 Create a Kubernetes TLS secret to monitor your own certificates by running the following command:
 
-   ```
-   kubectl -n <namespace> create secret tls <secret name> --cert=<path to certificate>/<certificate name> --key=<path to key>/<key name>
-   ```
+```
+kubectl -n <namespace> create secret tls <secret name> --cert=<path to certificate>/<certificate name> --key=<path to key>/<key name>
+```
 
 ### Adding a label into your Kubernetes secret
 
 Update the `metadata` parameter in your TLS Secret by adding the `certificate_key_name` label. Run the following command to add the `certificate_key_name` label:
-
-   ```
-   kubectl label secret my-certificate -n default certificate_key_name=cert
-   ```
+  ```
+  kubectl label secret my-certificate -n default certificate_key_name=cert
+  ```
 
    Your updated TLS Secret might resemble the following content:
 
@@ -146,17 +145,17 @@ Delete the certificate policy from the CLI or the console.
 
   1. Delete a certificate policy by running the following command: <!--verify command `namespace`-->
 
-      ```
-      kubectl delete policy <cert-policy-name> -n <mcm namespace>  
-      ```
+     ```
+     kubectl delete policy <cert-policy-name> -n <mcm namespace>  
+     ```
 
-      After your policy is deleted, it is removed from your target cluster or clusters.
+     After your policy is deleted, it is removed from your target cluster or clusters.
 
   2. Verify that your policy is removed by running the following command:
 
-      ```
-      kubectl get policy <policy-name> -n <mcm namespace>
-      ```
+     ```
+     kubectl get policy <policy-name> -n <mcm namespace>
+     ```
 
 * Delete a certificate policy from the console:
 
