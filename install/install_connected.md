@@ -55,12 +55,12 @@ You must meet the following requirements before you install Red Hat Advanced Clu
       Replace _default_ with the name of your operator group.
       Replace _namespace_ with the name of your project namespace. 
     
-  2. Apply the file that you created to define the operator group:
+   2. Apply the file that you created to define the operator group:
   
-     ```
-     oc apply -f local/<operator-group>.yaml
-     ```
-     Replace _operator-group_ with the name of the operator group `.yaml` file that you created.
+      ```
+      oc apply -f local/<operator-group>.yaml
+      ```
+      Replace _operator-group_ with the name of the operator group `.yaml` file that you created.
     
 4. Apply the subscription.
 
