@@ -4,7 +4,7 @@ To set up and use channels, subscriptions, and placement rules for deployments, 
 
 1. If the channel to represent the object store, Kubernetes namespace, or Helm repository does not exist, create a channel. 
 
-  Ensure that you define any labels or annotations that deployables need before they are promoted to the channel. For more information, see [Creating and managing channels](managing_channels.md).
+   Ensure that you define any labels or annotations that deployables need before they are promoted to the channel. For more information, see [Creating and managing channels](managing_channels.md).
 
 2. Create your deployables. For more information, see [Creating and managing deployables](managing_deployables.md).
 
@@ -12,11 +12,11 @@ To set up and use channels, subscriptions, and placement rules for deployments, 
 
 4. Define the placement rule for the deployables that are to be deployed from the channel. For more information, see [Creating and managing placement rules](managing_placement_rules.md). A placement rule can be defined for a subscription and for deployables. 
 
-  - Define the placement rule for a subscription to have the rule apply to multiple deployables and clusters. 
+   - Define the placement rule for a subscription to have the rule apply to multiple deployables and clusters. 
   
-  - Define the placement rule for a deployable to prevent the rule from applyin to all deployables for the subscription, or when you want to override a subscription-level placement rule. 
+   - Define the placement rule for a deployable to prevent the rule from applyin to all deployables for the subscription, or when you want to override a subscription-level placement rule. 
   
-  - If you are referencing a placement rule, you can also include override settings for a deployable to override some placement rule values with values specific to the deployable.
+   - If you are referencing a placement rule, you can also include override settings for a deployable to override some placement rule values with values specific to the deployable.
 
 5. Optional. If you created the placement rule as a stand-alone resource, edit the definition for your subscription or deployables to reference your placement rule.
 
