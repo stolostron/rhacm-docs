@@ -14,7 +14,7 @@ You might want to ensure that you use the same release image for all of your clu
   
   Replace <forked_content> with the path to your forked repository.
 
-3. Add the `yaml` files for the images that you want available when you create a cluster by using the Red Hat Advanced Cluster Management for Kubernetes console to the `./clusterImageSets/stable/*` or `./clusterImageSets/fast/*` directory. **Tip:** You can retrieve the available `yaml` files from the main repository by merging changes into your forked repository.
+3. Add the `yaml` files for the images that you want available when you create a cluster by using the Red Hat Advanced Cluster Management for Kubernetes console to the _./clusterImageSets/stable/*_ or _./clusterImageSets/fast/*_ directory. **Tip:** You can retrieve the available `yaml` files from the main repository by merging changes into your forked repository.
 
 4. Commit and merge your changes to your forked repository.
 
