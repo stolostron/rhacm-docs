@@ -8,7 +8,7 @@ Subscriptions (`subscription.apps.open-cluster-management.io`) are sets of defin
 
 Placement rules (`placementrule.apps.open-cluster-management.io`) define the target clusters where subscriptions deploy and maintain the Kubernetes resources. You can use placement rules to help you facilitate the multi-cluster deployment. Placement rules that are defined as stand-alone resources can be shared across deployables.
 
-Channels, subscriptions, and placement rules can help you to unify and simplify your continuous deliveries that involve frequent updates and deployments to multiple clusters. Use a combination of these resources when you need to make deploy to multiple clusters, deploy frequent updates, and share deployment settings across multiple deployables.
+Channels, subscriptions, and placement rules can help you to unify and simplify your continuous deliveries that involve frequent updates and deployments to multiple clusters. Use a combination of these resources when you need to deploy to multiple clusters, deploy frequent updates, and share deployment settings across multiple deployables.
 Based on your deployment requirements, review the details and process for the following deployment options:
 
 See [Deploying by using channels, subscriptions, and placement rules](deploying.md) to learn to set up and use channels, subscriptions, and placement rules for deployments.
