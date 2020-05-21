@@ -4,7 +4,7 @@ You can use the Center for Internet Security (CIS) policy controller to receive 
 
 The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list.
 
-The controller uses `aqua-security` and `kube-bench` tool to check the master and worker nodes in the managed cluster for compliance. 
+The controller uses `aqua-security` and `kube-bench` tool to check the master and worker nodes in the managed cluster for compliance.
 
 When a managed cluster is non-compliant, the CIS controller assigns a risk score. Each CIS rule that fails the check is assigned a score. The risk score that is assigned to the non-compliant cluster is the maximum of all the scores that are assigned to failed checks.
 
@@ -35,7 +35,7 @@ apiVersion: policy.mcm.ibm.com/v1alpha1
 kind: Policy
 metadata:
   name:
-  namespace: 
+  namespace:
   annotations:
     policy.mcm.ibm.com/categories:
     policy.mcm.ibm.com/controls:
@@ -58,7 +58,7 @@ spec:
         metadata:
           name:
           labels:
-            controller-tools.k8s.io: 
+            controller-tools.k8s.io:
             pci-category: system-integrity
         spec:
           cisSpecVersion: 1.4
@@ -89,11 +89,11 @@ spec:
 | policy-template.objectDefinition | Optional. <!--Add description-->|
 | obejctDefinition.labels| Optional. <!--add description-->|
 | objectDefinition.cisSpecVersion | Required. <!--Add description-->|
-| objectDefintion.kubernetesCisPolicy| Required. Refer to OpenShift Container Platform CIS rules when you create CIS policies. Enter parameter values for the `masterNodeExcludeRules` and `workerNodeExcludeRules`. See [CIS rules specification](cis_policy_rules.md) for a list of the rules. |
+| objectDefintion.kubernetesCisPolicy| Required. Refer to OpenShift Container Platform CIS rules when you create CIS policies. Enter parameter values for the `masterNodeExcludeRules` and `workerNodeExcludeRules`. See [CIS rules specifications](cis_policy_rules.md) for a list of the rules. |
 | objectDefinition.severity | Required. <!--Add info-->
 | disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies. CIS policy controller is disabled by default.<!--needs work-->|
 | remediationAction | Required. Specifies the remediation of your policy. Enter `inform`. <!--clean this up-->|
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 
-Learn to create and manage your CIS policy, see [Managing a CIS policy](create_cis_pol.md). Refer to [Policy controllers](policy_controllers.md) for more topics.
+Learn to create and manage your CIS policy, see [Managing CIS policies](create_cis_pol.md). Refer to [Policy controllers](policy_controllers.md) for more topics.

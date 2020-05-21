@@ -24,7 +24,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 2. On the Clusters page, select the *Provider connections* tab.
 
-  Existing provider connections are displayed.
+   Existing provider connections are displayed.
 
 3. Select **Add a connection**.
 
@@ -34,7 +34,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 6. Select a namespace for your provider connection from the list.
 
-  **Tip:** Create a namespace specifically to host your provider connections, for both convenience and security.
+   **Tip:** Create a namespace specifically to host your provider connections, for both convenience and security.
 
 7. Add your *Google Cloud Platform Project ID* for your GCP account. Log in to [GCP](https://console.cloud.google.com/apis/credentials/serviceaccountkey) to retrieve your settings.
 
@@ -42,7 +42,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 9. Enter your *Red Hat OpenShift Pull Secret*. You can download your pull secret from [Pull secret](https://cloud.redhat.com/openshift/install/pull-secret).
 
-10. Add your *SSH Private Key* and *SSH Public Key* so you can access the cluster. See [Generating an SSH private key and adding it to the agent](https://docs.openshift.com/container-platform/4.3/installing/installing_gcp/installing-gcp-default.html) for more information about how to generate a key.
+10. Add your *SSH Private Key* and *SSH Public Key* so you can access the cluster. You can use an existing key pair, or create a new pair using a key generation program. See [Generating an SSH private key and adding it to the agent](https://docs.openshift.com/container-platform/4.3/installing/installing_gcp/installing-gcp-default.html) for more information about how to generate a key.
 
 11. Click **Create**. When you create the provider connection, it is added to the list of provider connections.
 

@@ -43,9 +43,9 @@ You must have access to the `multicluster endpoint` namespace to modify your set
 
 2. Enter the following command to edit the resource:
 
-  ```
-  kubectl edit endpoint.multicloud.ibm.com endpoint -n multicluster -endpoint
-  ```
+   ```
+   kubectl edit endpoint.multicloud.ibm.com endpoint -n multicluster -endpoint
+   ```
 
 3. Find the `spec` section.
 

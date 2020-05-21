@@ -64,9 +64,9 @@ To update a deployable with a new version, you can change the deployed resource 
 
        1. Run the following command against the source deployable:
 
-         ```
-         kubectl edit deployables.app.ibm.com <deployableName>
-         ```
+          ```
+          kubectl edit deployables.app.ibm.com <deployableName>
+          ```
 
        2. Update any fields or annotations that you need to change.
 

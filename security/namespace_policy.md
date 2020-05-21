@@ -1,6 +1,6 @@
 # Namespace policy
 
-Apply the namespace policy to define specific rules for your namespace. 
+Kubernetes configuration policy controller monitors the status of your namespace policy. Apply the namespace policy to define specific rules for your namespace. Learn more details about the namespace policy structure in the following sections.
 
 ## Namespace policy YAML structure
 
@@ -68,4 +68,4 @@ Your namespace policy might resemble the following YAML file:
         ...
    ```
 
-Manage your namespace policy. See [Managing a namespace policy](create_ns_policy.md) for more information. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies.
+Manage your namespace policy. See [Managing namespace policies](create_ns_policy.md) for more information. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies.

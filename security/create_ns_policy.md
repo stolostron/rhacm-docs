@@ -1,6 +1,7 @@
-# Managing a namespace policy 
+# Managing namespace policies
 
-Kubernetes configuration policy controller monitors the status of your namespace policy. Namespace policies are applied to define specific rules for your namespace.
+Namespace policies are applied to define specific rules for your namespace. Learn to create, apply, view, and update your memory usage policy in the following sections.
+
 
 ## Creating a namespace policy 
 
@@ -48,7 +49,7 @@ Complete the following steps to view your namespace policy from the CLI:
 
 ### Creating a namespace policy from the console
 
-Complete the following steps to create a namespace policy from the console:
+As you create a namespace policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create a namespace policy from the console:
 
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Governance and risk**. 
@@ -63,8 +64,8 @@ You can view any namespace policy and its status from the console.
 1. Log in to your cluster from the console.
 
 2. From the navigation menu, click **Governance and risk** to view a table list of your policies.
-
-  **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
+   
+   **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
 
 3. Select one of your policies to view more details.
 
@@ -101,4 +102,4 @@ Delete a namespace policy from the CLI or the console.
 
 Your namespace policy is deleted.
 
-View a sample of a namespace policy, see _Namespace policy sample_ on the [Namespace policy page](namespace_policy.md). See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of a namespace policy, see _Namespace policy sample_ on the [Namespace policy](namespace_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.

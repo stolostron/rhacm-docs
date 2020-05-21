@@ -23,7 +23,7 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 2. On the _Clusters_ page, select the *Provider connections* tab.
 
-  Existing provider connections are displayed.
+   Existing provider connections are displayed.
 
 3. Select **Add connection**.
 
@@ -33,13 +33,13 @@ To create a provider connection from the Red Hat Advanced Cluster Management for
 
 6. Select a namespace for your provider connection from the list.
 
-  **Tip:** Create a namespace specifically to host your provider connections, both for convenience and added security.
+   **Tip:** Create a namespace specifically to host your provider connections, both for convenience and added security.
 
 7. Add your *libvirt URI*. See [Connection URIs](https://libvirt.org/uri.html) for more information.
 
 8. Enter your *Red Hat OpenShift Pull Secret*. You can download your pull secret from [Pull secret](https://cloud.redhat.com/openshift/install/pull-secret).
 
-9. Add your *SSH Private Key* so you can access the cluster. See [Generating an SSH private key and adding it to the agent](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.3/html/installing_on_bare_metal/installing-on-bare-metal#ssh-agent-using_installing-bare-metal) for more information about how to generate a key.
+9. Add your *SSH Private Key* so you can access the cluster. You can use an existing key, or use a key generation program to create a new one. See [Generating an SSH private key and adding it to the agent](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.3/html/installing_on_bare_metal/installing-on-bare-metal#ssh-agent-using_installing-bare-metal) for more information about how to generate a key.
 
 10. Add a list of your SSH known hosts.
 

@@ -1,4 +1,4 @@
-# Security context constraints (SCC) policy
+# Security context constraints policy
 
 Apply a Security context constraints (SCC) policy to control permissions for pods by defining conditions in the policy. For more information see, [Managing Security Context Constraints (SCC)](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth).
 
@@ -218,15 +218,3 @@ Apply a Security context constraints (SCC) policy to control permissions for pod
        matchExpressions: []
   ```
 
-<!--the following section will be moved to another file where the task will be explained. create_scc.md-->
-
-### Appliying the SCC policy
-
-Complete the following steps to apply the SCC policy from the console:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
-2. From the navigation menu, click **Govern risk**. 
-3. Click **Create policy**. 
-4. Select **SecurityContextConstraintPolicy** from the _Specifications_ field. 
-
-<!--this section will be removed bc its a task-->

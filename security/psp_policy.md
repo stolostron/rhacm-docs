@@ -1,6 +1,6 @@
 # Pod security policy
 
-Apply a pod security policy to secure pods and containers. For more information, see _Pod Security Policies_ in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/policy/pod-security-policy/).
+Kubernetes configuration policy controller monitors the status of the pod security policy. Apply a pod security policy to secure pods and containers. For more information, see _Pod Security Policies_ in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/policy/pod-security-policy/). Learn more details about the pod security policy structure in the following sections.
 
 ## Pod security policy YAML structure
 
@@ -108,12 +108,5 @@ Your pod security policy might resemble the following YAML file:
                rule: 'RunAsAny'
         ...
    ```
-<!-- move this section onto a file that describes managing ps policies; create_psp.md-->   
-### Applying a pod security policy
 
-Complete the following steps to apply the pod security policy from the console:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console
-2. From the navigation menu, click **Govern risk**. 
-3. Click **Create policy**. 
-4. Select **Podsecuritypolicy** from the _Specifications_ field.
+See [Managing pod security policies](create_psp_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page.

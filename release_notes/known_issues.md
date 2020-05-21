@@ -19,7 +19,7 @@ Or consider a troubleshooting topic.
 -->
 
 Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
-
+ 
 * [Installation known issues](#installation-known-issues)
 * [Web console known issues](#web-console-known-issues)
 * [Cluster management known issues](#cluster-management-known-issues)
@@ -55,6 +55,7 @@ To resolve this issue, verify if the certificate manager is present in your clus
    ```
    kubectl get crd | grep certificates.certmanager
    ```
+   
 ### CIS policy controller is not installed
 <!--1.0.0:1087-->
 
@@ -66,10 +67,10 @@ The CIS policy controller is disabled by default when you install Red Hat Advanc
 
 You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../security/create_cis_pol.md) to update the policy.
 
-### All users with access to the Advanced Cluster Management for Kubernetes component namespaces are automatically granted cluster administrator access
+### All users with access to the Red Hat Advanced Cluster Management component namespaces are automatically granted cluster administrator access
 <!--1.0.0:2135-->
 
-The Advanced Cluster Management for Kubernetes components are installed in a single namespace. A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Advanced Cluster Management for Kubernetes and to any ID with access to the namespace. For security, do not give anyone access to this namespace who does not already have cluster administrator access. 
+The Red Hat Advanced Cluster Management components are installed in a single namespace. A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to Red Hat Advanced Cluster Management and to any ID with access to the namespace. For security, do not give anyone access to this namespace who does not already have cluster administrator access. 
 
 The `multicluster-endpoint`, which is the agent on the managed cluster, also requires cluster administrator privileges. The `multicluster-endpoint` is deployed into the `multicluster-endpoint` namespace. For security, do not give anyone access to the `multicluster-endpoint` namespace who does not already have cluster administrator access.
 
@@ -126,7 +127,6 @@ To mitigate this problem, you can increase the memory limit in the `search-pod-x
   3. Update the `containers.resources.limit.memory` parameter and increase the memory value.
   
 **Note**: Your maximum memory is restricted by either your quota, policies, or physical limits of the nodes on your cluster.
-
 
 ## Cluster management known issues
 
@@ -196,6 +196,16 @@ The _Application Topology_ view from the _Topology_ menu displays only a summary
 2. Select your application. 
 3. You can view a complete topology and summary cards for your selected application.
 
+### Application channels require unique namespaces
+<!--1.0.0:2311-->
+
+Creating more than one channel in the same namespace can cause errors with the hub cluster. 
+
+For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
+
+For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with andother GitHub channel. See the process for [Managing channels](../manage_applications/managing_channels.md) for more information.
+
+
 ## Security known issues
 
 ### Certificate policies fail to report status
@@ -208,4 +218,4 @@ For more information, see [Certificate policy controller](../security/cert_polic
 ### Any authenticated user can import clusters
 <!--1.0.0:2312-->
 
-Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information view the [Role based access control (RBAC) table](../security/security_intro.md).
+Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information view the [Role-based access control](../security/security_intro.md) table.

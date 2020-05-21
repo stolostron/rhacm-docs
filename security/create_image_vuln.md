@@ -1,4 +1,4 @@
-# Managing an image vulnerability policy 
+# Managing image vulnerability policies 
 
 Configuration policy controller monitors the status of image vulnerability policies. Image vulnerability policies are applied to check if your containers have vulnerabilities. Learn to create, apply, view, and update your image vulnerability policy. 
 
@@ -30,7 +30,7 @@ Complete the following steps to create an image vulnerability policy from the CL
 
 Your image vulnerability policy is created. 
 
-#### Viewing your policy from the CLI 
+#### Viewing your image vulnerability policy from the CLI 
 
 Complete the following steps to view your image vulnerability policy from the CLI:
 
@@ -48,7 +48,7 @@ Complete the following steps to view your image vulnerability policy from the CL
 
 ## Creating an image vulnerability policy from the console
 
-Complete the following steps to create the image vulnerability policy from the console:
+As you create an image vulnerability policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create the image vulnerability policy from the console:
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**.
@@ -108,4 +108,4 @@ Delete the image vulnerability policy from the CLI or the console.
 
 Your image vulnerability policy is deleted.
 
-View a sample of an image vulnerability policy, see _Image vulnerability policy sample_ on the [Policy samples page](policy_samples_intro.md). See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other policies that are monitored by the Kubernetes configuration policy controller. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of an image vulnerability policy, see _Image vulnerability policy sample_ from the [Image vulnerability policy](image_vuln_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other policies that are monitored by the Kubernetes configuration policy controller. See [Manage security policies](manage_policy_overview.md) to manage other policies.

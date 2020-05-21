@@ -1,6 +1,6 @@
 # Role policy
 
-Apply a role policy to set rules and permissions for specific roles in your cluster. See [Role-based access control (RBAC)](security_intro.md) for more information on roles.
+Kubernetes configuration policy controller monitors the status of role policies. Apply a role policy to set rules and permissions for specific roles in your cluster. Learn more details about the role policy structure in the following sections. 
 
 ## Role policy YAML structure
 
@@ -55,7 +55,7 @@ Apply a role policy to set rules and permissions for specific roles in your clus
 
 ## Role policy sample
 
-Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control (RBAC)](security_intro.md). Your role policy might resemble the following YAML file:
+Apply a role policy to set rules and permissions for specific roles in your cluster. For more information on roles, see [Role-based access control](security_intro.md). Your role policy might resemble the following YAML file:
 
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
@@ -92,13 +92,5 @@ Apply a role policy to set rules and permissions for specific roles in your clus
          ...
    ```
    
-<!--this section will be moved to the task oriented file create_role.md-->
+See [Managing role policies](create_role_policy.md) for more information. View other configuration policies that are monitored by controller, see the [Kubernetes configuration policy controller](config_policy_ctrl.md) page. Learn more about Red Hat Advanced Cluster Management for Kubernates RBAC, see [Role-based access control](security_intro.md).
 
-### Applying a role policy
-
-Complete the following steps to apply the role policy from the console:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console
-2. From the navigation menu, click **Govern risk**. 
-3. Click **Create policy**. 
-4. Select **Role** from the _Specifications_ field.

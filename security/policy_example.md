@@ -8,7 +8,9 @@ The policy requires a _PlacementPolicy_ that defines the clusters that the polic
 
 **Important**:
 
-* The `PlacementPolicy` and `PlacementBinding` can be included in the same `.yaml` file or separate `.yaml` files.
+* You must create a `PlacementPolicy` with `PlacementRules` to apply your policies to the managed cluster, and bind the `PlacementRule` with a `PlacementBinding`.
+
+* You can create a policy in any namespace on the hub cluster except the cluster namespace. If you create a policy in the cluster namespace, it is deleted by Red Hat Advanced Cluster Management for Kubernetes.
 
 * Each client and provider is responsible for ensuring that their managed cloud environment meets internal enterprise security standards for software engineering, secure engineering, resiliency, security, and regulatory compliance for workloads hosted on Kubernetes clusters. Use the governance and security capability to gain visibility and remediate configurations to meet standards.
 
@@ -99,7 +101,7 @@ spec:
 | annotations.policy.mcm.ibm.com/controls | The name of the security control that is being checked. For example, Center of Internet Security (CIS) and certificate policy controller.|
 | spec | Required. <!--Add a description-->
 | spec.complianceType | Reqired. Set the value to `"musthave"`|
-| spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to.**Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
+| spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to.**Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding controller policy.|
 | spec.policy-template | Optional. Used to create one or more policies for third party or external security controls. |
 | spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
 | spec.role-template| Optional. Used to list RBAC roles that must be evaluated or applied to the managed clusters. |
@@ -220,7 +222,5 @@ spec:
                
 ```
 
-See [Creating a Red Hat Advanced Cluster Management for Kubernetes security policy](create_policy.md) to create a policy. You can also create custom policy controllers to validate the compliance of your policies. See [Policy controllers](../security/policy_controllers.md).
-
-See [Governance and risk](compliance_intro.md) for more policy topics.
+See [Managing security policies](create_policy.md) to create and update a policy. You can also enable and update Red Hat Advanced Cluster Management policy controllers to validate the compliance of your policies. See [Policy controllers](policy_controllers.md). See [Governance and risk](compliance_intro.md) for more policy topics.
 

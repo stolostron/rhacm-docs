@@ -1,10 +1,10 @@
-# Managing a pod nginx policy
+# Managing pod nginx policies
 
-Kubernetes configuration policy controller monitors the status of you pod nginx policies. Pod nginx policies are applied to to define the container rules for your pods. Learn to create, apply, view, and update your pod nginx policy. 
+Kubernetes configuration policy controller monitors the status of you pod nginx policies. Pod nginx policies are applied to to define the container rules for your pods. Learn to create, apply, view, and update your pod nginx policy.
 
-## Creating a pod nginx policy 
+## Creating a pod nginx policy
 
-You can create a YAML for your pod nginx policy from the command line interface (CLI) or from the console. View the following sections to create a pod nginx policy: 
+You can create a YAML for your pod nginx policy from the command line interface (CLI) or from the console. View the following sections to create a pod nginx policy:
 
 ### Creating a pod nginx policy from the CLI
 
@@ -28,9 +28,9 @@ Complete the following steps to create a pod nginx policy from the CLI:
    kubectl get podnginxpolicy --namespace=<namespace>
    ```
 
-Your image pod nginx policy is created from the CLI. 
+Your image pod nginx policy is created from the CLI.
 
-#### Viewing your policy from the CLI 
+#### Viewing your nginx policy from the CLI 
 
 Complete the following steps to view your pod nginx policy from the CLI:
 
@@ -48,11 +48,11 @@ Complete the following steps to view your pod nginx policy from the CLI:
 
 ## Creating an pod nginx policy from the console
 
-Complete the following steps to create the pod nginx policy from the console:
+As you create a pod nginx policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create the pod nginx policy from the console:
 
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
-2. From the navigation menu, click **Govern risk**. 
-3. Click **Create policy**. 
+2. From the navigation menu, click **Govern risk**.
+3. Click **Create policy**.
 4. Select **Pod** from the _Specifications_ field. Parameter values are automatically set. You can edit your values.
 5. Click **Create**.
 
@@ -62,9 +62,9 @@ You can view any pod nginx policy and its status from the console.
 
 1. Log in to your cluster from the console.
 
-2. From the navigation menu, click Governance and risk to view a table list of your policies.
-
-  **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
+   
+   **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
 
 3. Select one of your policies to view more details.
 
@@ -74,7 +74,7 @@ You can view any pod nginx policy and its status from the console.
 
 ### Deleting a pod nginx policy
 
-Delete the pod nginx policy from the CLI or the console. 
+Delete the pod nginx policy from the CLI or the console.
 
 * Delete a pod nginx policy from the CLI:
 
@@ -91,7 +91,7 @@ Delete the pod nginx policy from the CLI or the console.
       ```
       kubectl get policy <podnginxpolicy-name> -n <mcm namespace>
       ```
-      
+
 * Delete a pod nginx policy from the console:
 
   1. From the navigation menu, click **Govern risk** to view a table list of your policies.
@@ -101,4 +101,4 @@ Delete the pod nginx policy from the CLI or the console.
 
 Your pod nginx policy is deleted.
 
-View a sample of a pod nginx policy, see _Pod nginx policy sample_ on the [Pod nginx sample](pod_nginx_policy.md). See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of a pod nginx policy, see _Pod nginx policy sample_ from the [Pod nginx policy](pod_nginx_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.

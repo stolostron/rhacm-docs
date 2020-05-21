@@ -1,14 +1,14 @@
-# Managing the memory usage policy 
+# Managing memory usage policies 
 
-Kubernetes configuration policy controller monitors the status of the memory usage policy. Apply a memory usage policy to limit or restrict your memory and compute usage. Learn to create, apply, view, and update your memory usage policy.
+Apply a memory usage policy to limit or restrict your memory and compute usage. Learn to create, apply, view, and update your memory usage policy in the following sections.
 
 ## Creating a memory usage policy 
 
-You can create a YAML for your memory usage policy from the command line interface (CLI) or from the console. View the following sections to create a memory usage policy: 
+You can create a YAML file for your memory usage policy from the command line interface (CLI) or from the console. View the following sections to create a memory usage policy: 
 
 ### Creating a memory usage policy from the CLI
 
-Complete the following steps to create a memory usage from the CLI:
+Complete the following steps to create a memory usage policy from the CLI:
 
 1. Create a YAML file for your memory usage policy by running the following command:
 
@@ -46,9 +46,9 @@ Complete the following steps to view your memory usage policy from the CLI:
    kubectl describe memorypolicy <name> -n <namespace>
    ```
 
-## Creating an memory usage policy from the console
+### Creating an memory usage policy from the console
 
-Complete the following steps to create the memory usage policy from the console:
+As you create a memory usage policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create the memory usage policy from the console:
 
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 2. From the navigation menu, click **Governance and risk**. 
@@ -62,9 +62,9 @@ You can view any memory usage policy and its status from the console.
 
 1. Log in to your cluster from the console.
 
-2. From the navigation menu, click Governance and risk to view a table list of your policies.
-
-  **Note**: You can filter the table list of your policies by selecting the All policies tab or Cluster violations tab.
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
+   
+   **Note**: You can filter the table list of your policies by selecting the All policies tab or Cluster violations tab.
 
 3. Select one of your policies to view more details.
 
@@ -101,4 +101,4 @@ Delete the memory usage policy from the CLI or the console.
 
 Your memory usage policy is deleted.
 
-View a sample of a memory usage policy, see _Memory usage policy sample_ on the [Memory usage samples](memory_policy.md). See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of a memory usage policy, see _Memory usage policy sample_ from the [Memory usage policy](memory_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.

@@ -2,11 +2,6 @@
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to create a Red Hat OpenShift Container Platform cluster on Amazon Web Services (AWS).
 
-  - [Prerequisites](#aws_prerequisites)
-  - [Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console](#aws_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console)
-  - [Accessing your cluster](#aws_accessing-your-cluster)
-  - [Removing a cluster from management](#aws_removing-a-cluster-from-management)
-
 ## Prerequisites {#aws_prerequisites}
 
 You must have the following prerequisites before creating a cluster on AWS:
@@ -33,29 +28,29 @@ To create clusters from the Red Hat Advanced Cluster Management for Kubernetes c
 
 3. Select **Create a cluster**.
 
-  **Note:** This procedure is for creating a cluster. If you have an existing cluster that you want to import, see [Importing a target managed cluster to the hub cluster](import.md) for those steps.
+   **Note:** This procedure is for creating a cluster. If you have an existing cluster that you want to import, see [Importing a target managed cluster to the hub cluster](import.md) for those steps.
 
 4. Enter a name for your cluster. This name is used in the hostname of the cluster.
 
-  **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**.
+   **Tip:** You can view the `yaml` content updates as you enter the information in the console by setting the *YAML* switch to **ON**.
 
 5. Enter the base domain information that you configured for your AWS account. See [Configuring an AWS account](https://docs.openshift.com/container-platform/4.3/installing/installing_aws/installing-aws-account.html) for more information. This name is used in the hostname of the cluster.
 
 6. Select **Amazon Web Services** for the infrastructure platform.
 
-7. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the path to the image that you want to use.
+7. Specify a **Release image** that you want to use for the cluster. This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the url to the image that you want to use. See [Release images](release_images.md) for more information about release images.
 
 8. Select your provider connection from the available connections on the list. If you do not have one configured, or want to configure a new one, see [Creating a provider connection on AWS](prov_conn_aws.md).
 
 9. Configure the *Node pools* for your cluster.
 
-  The node pools define the location and size of the nodes that are used for your cluster.
+   The node pools define the location and size of the nodes that are used for your cluster.
 
-  The *Region* specifies where the nodes are located geographically. A closer region might provide faster performance, but a more distant region might be more distributed.
+   The *Region* specifies where the nodes are located geographically. A closer region might provide faster performance, but a more distant region might be more distributed.
 
-  * Master pool: There are three Master nodes that are created for your cluster in the master pool. The master nodes share the management of the cluster activity. You can select multiple zones within the region for a more distributed group of master nodes. You can change the type and size of your instance after it is created, but you can also specify it in this section. The default values are *mx4.xlarge - 4 vCPU, 16 GiB RAM - General Purpose* with 500 GiB of root storage.
+      * Master pool: There are three Master nodes that are created for your cluster in the master pool. The master nodes share the management of the cluster activity. You can select multiple zones within the region for a more distributed group of master nodes. You can change the type and size of your instance after it is created, but you can also specify it in this section. The default values are *mx4.xlarge - 4 vCPU, 16 GiB RAM - General Purpose* with 500 GiB of root storage.
 
-  * Worker pools: You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.  
+      * Worker pools: You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.  
 
 10. **Optional:** Configure the cluster networking options.
 
@@ -81,7 +76,7 @@ To access a cluster that is managed by Red Hat Advanced Cluster Management for K
 
 7. Select **Launch to cluster**.
 
-  **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
+   **Tip:** If you already know the log in credentials, you can access the cluster by selecting the *Actions* menu for the cluster, and selecting **Launch to cluster**.
 
 ## Removing a cluster from management {#aws_removing-a-cluster-from-management}
 
