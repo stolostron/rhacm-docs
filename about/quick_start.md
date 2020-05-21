@@ -1,6 +1,6 @@
 # Getting started 
 
-## Getting started: Introduction
+## Introduction
 
 Review the [Architecture](architecture.md) topic and the [Components](components.md) topics to learn more about what is installed with Red Hat Advanced Cluster Management for Kubernetes.
 
@@ -8,7 +8,7 @@ After you learn about the hub cluster and managed cluster architecture, learn mo
 
 The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run on any [supported Red Hat OpenShift Container Platform infrastructure](https://docs.openshift.com/container-platform/4.3/architecture/architecture-installation.html).
 
-## Getting started: Install
+## Install
 
 1. Before you install Red Hat Advanced Cluster Management for Kubernetes, review the system configuration requirements and settings at [Requirements and recommendations](../install/requirements.md). Get information about required operating systems and supported browsers. For instance, you want to ensure that you have a supported Red Hat OpenShift Container Platform version so that you can set up your hub cluster.
 
@@ -18,7 +18,7 @@ The hub cluster is a Red Hat OpenShift cluster version 4.3.x or 4.4 and can run 
 
 After installation, review the [Web console](../console/console_intro.md) guide to learn how to access your console and what features are available in the console.
 
-## Getting started: Manage clusters
+## Manage clusters
 
 You are now ready to create and import clusters. From your hub cluster, you can create clusters from other Kubernetes services to manage, and you can view cluster information. 
 
@@ -28,7 +28,7 @@ You are now ready to create and import clusters. From your hub cluster, you can 
 
 3. When you no longer need to manage a cluster, you can detach that cluster from the _Cluster page_.
 
-## Getting started: Manage applications
+## Manage applications
 
 You can start managing applications on any created and imported managed clusters. The types of resources that you can create are applications, channels, subscriptions, and placement rules. 
 
@@ -36,7 +36,7 @@ You can start managing applications on any created and imported managed clusters
 
 2. View and edit your resources from the _Applications Dashboard_.
 
-## Getting started: Manage security
+## Manage security
 
 You can also manage security and compliance across your created and imported managed clusters.
 
