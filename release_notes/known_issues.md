@@ -151,7 +151,7 @@ If you cannot verify, attempt to import the cluster again and verify again.
 ### Subscription operator does not create an SCC
 <!--1.0.0:1764-->
 
-Learn about Red Hat Openshift Container Platform SCC at [Managing Security Context Constraints (SCC)](ht1.0.0s://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth), which is an additional configuration required on the managed cluster. 
+Learn about Red Hat Openshift Container Platform SCC at [Managing Security Context Constraints (SCC)](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth), which is an additional configuration required on the managed cluster. 
 
 Different deployments have different security context and different service accounts. The subscription operator cannot create an SCC automatically. Administrators control permissions for pods. A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace:
 
