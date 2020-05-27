@@ -100,6 +100,7 @@
        * [Managing pod nginx policies](security/create_nginx_policy.md)
        * [Managing pod security policies](security/create_psp_policy.md)
        * [Managing role policy](security/create_role_policy.md)
+       * [Managing Security Context Constraints policies](security/create_scc_policy.md)
        * [Managing certificate policies](security/create_cert_pol.md)
        * [Managing CIS policies](security/create_cis_pol.md)
        * [Managing IAM policies](security/create_iam_policy.md)

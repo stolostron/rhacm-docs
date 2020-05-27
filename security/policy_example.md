@@ -106,7 +106,7 @@ spec:
 | spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
 | spec.role-template| Optional. Used to list RBAC roles that must be evaluated or applied to the managed clusters. |
 | disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
-| remediationAction | Optional. Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. **Important**: Some policies may not support the enforce feature.|
+| remediationAction | Optional. Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. **Important**: Some policies might not support the enforce feature.|
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 ## Policy sample file
