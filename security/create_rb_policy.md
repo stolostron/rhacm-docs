@@ -81,6 +81,8 @@ You can view any rolebinding policy and its status from the console.
 
 ## Updating rolebinding policies
 
+Learn to update rolebinding policies by viewing the following section. 
+
 ### Deleting a rolebinding policy
 
 Delete the rolebinding policy from the CLI or the console. 
@@ -90,7 +92,7 @@ Delete the rolebinding policy from the CLI or the console.
   1. Delete a rolebinding policy by running the following command: <!--verify command `namespace`-->
 
       ```
-      kubectl delete policy <podsecurity-policy-name> -n <mcm namespace>  
+      kubectl delete policy <podsecurity-policy-name> -n <namespace>  
       ```
 
       After your policy is deleted, it is removed from your target cluster or clusters.
@@ -98,7 +100,7 @@ Delete the rolebinding policy from the CLI or the console.
   2. Verify that your policy is removed by running the following command:
 
       ```
-      kubectl get policy <podsecurity-policy-name> -n <mcm namespace>
+      kubectl get policy <podsecurity-policy-name> -n <namespace>
       ```
       
 * Delete a rolebinding policy from the console:
