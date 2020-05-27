@@ -1,6 +1,6 @@
 # Rolebinding policy
 
-Apply a rolebinding policy to bind a policy to a namespace in your cluster.
+Kubernetes configuration policy controller monitors the status of your rolebinding policy. Apply a rolebinding policy to bind a policy to a namespace in your managed cluster. Learn more details about the namespace policy structure in the following sections.
 
 ## Rolebinding policy YAML structure
 
@@ -9,7 +9,7 @@ Apply a rolebinding policy to bind a policy to a namespace in your cluster.
    apiVersion: policy.mcm.ibm.com/v1alpha1
    kind: Policy
    metadata:
-     name: policy-rolebinding
+     name:
      namespace:
    spec:
      complianceType:
@@ -37,23 +37,22 @@ Apply a rolebinding policy to bind a policy to a namespace in your cluster.
 
 ## Rolebinding policy table 
 
-<!--place holder until i update the table with the appropriate parameters-->
 |Field|Description|
 |-- | -- |
 | apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
 | kind | Required. Set the value to `Policy` to indicate the type of policy. |
-| metadata.name | Required. The name for identifying the policy resource. |
-| metadata.namespaces | Optional. |
-| spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
-| remediationAction | Optional. Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. **Important**: Some policies may not support the enforce feature.|
-| disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
+| metadata.name | Required. The name to identify the policy resource. |
+| metadata.namespaces | Required. The namespace within the managed cluster where the policy is created. |
+| spec | Required. Specifications of how compliancy violations are identified and fixed. |
 | spec.complianceType | Required. Set the value to `"musthave"`|
-| spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
+| spec.remediationAction | Optional. Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. **Important**: Some policies may not support the enforce feature.|
+| spec.namespace | Required. Managed cluster namespace to which you want to apply the policy. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
+| spec.object-template| Required. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 ## Rolebinding policy sample
 
-Apply a role binding policy to bind a policy to a namespace in your cluster. Your role binding policy might resemble the following YAML file:
+Your role binding policy might resemble the following YAML file:
 
    ```yaml
    apiVersion: policy.mcm.ibm.com/v1alpha1
