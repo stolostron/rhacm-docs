@@ -84,13 +84,5 @@ Apply a role binding policy to bind a policy to a namespace in your cluster. You
              apiGroup: rbac.authorization.k8s.io
        ...
    ```
-<!--the following section will be moved to the task page create_rb_pol.md when it is created-->
 
-### Apply a rolebinding policy
-
-Complete the following steps to apply the role binding policy from the console:
-
-1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console
-2. From the navigation menu, click **Govern risk**. 
-3. Click **Create policy**. 
-4. Select **Rolebinding** from the _Specifications_ field.
+Learn how to managa a rolebinding policy, see [Managing rolebinding policies](create_rb_policy.md) for more details. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
