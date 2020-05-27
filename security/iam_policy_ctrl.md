@@ -37,7 +37,7 @@ spec:
 | metadata.label | Required. <!--add explanation-->|
 | metadata.category | Required. <!--add details-->|
 | spec | Required. Add configuration details for your policy. |
-| spec.namespaceSelector | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
+| spec.namespaceSelector | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller overrides the namespace in the corresponding parent policy.|
 | remediationAction | Optional. Specifies the remediation of your policy. Enter  `inform`. <!--we can explain what the controller does when the value is set to this-->|
 | disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
 | spec.maxClusterRoleBindingUsers | Required. Maximum number of IAM rolebinding users that are able to create a IAM policy. <!--need to verify-->. |
