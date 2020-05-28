@@ -84,7 +84,7 @@ spec:
 | annotations.policy.mcm.ibm.com/controls | The name of the security control that is being checked. For example, Center of Internet Security (CIS) and certificate policy controller.|
 | spec | Required. <!--Add a description-->
 | spec.complianceType | Required. Set the value to `"musthave"`|
-| spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to.**Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
+| spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. The `exclude` parameter specifies the namespaces you explicitly do not want to apply the policy to.**Note**: A namespace that is specified in the object template of a policy controller overrides the namespace in the corresponding parent policy.|
 | spec.policy-template | Optional. Used to create one or more policies for third party or external security controls. |
 | policy-template.objectDefinition | Optional. <!--Add description-->|
 | obejctDefinition.labels| Optional. <!--add description-->|

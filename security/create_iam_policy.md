@@ -73,7 +73,7 @@ As you create your IAM policy from the console, a YAML file is also created in t
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Govern risk**.
 3. Click **Create policy**.
-4. Enter or select the apapropriate values for the following fields:
+4. Enter or select the appropriate values for the following fields:
   * Name
   * Specifications
   * Cluster selector
@@ -105,7 +105,7 @@ You can view any IAM policy and its status from the console.
 
 ### Disabling IAM policies
 
-Complete the following steps to disbale your IAM policy: <!--add steps to disable from the CLI if available-->
+Complete the following steps to disable your IAM policy: <!--add steps to disable from the CLI if available-->
 
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
@@ -115,7 +115,7 @@ Complete the following steps to disbale your IAM policy: <!--add steps to disabl
 
 4. Click **Disable policy**.
 
-Your policy is disbaled.
+Your policy is disabled.
 
 ## Deleting an IAM policy
 
