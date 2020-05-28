@@ -63,7 +63,7 @@ spec:
 | metadata.name | Required. The name to identify the policy resource. |
 | metadata.namespace | Required. The namespace within the managed cluster where the policy is created. |
 | spec.complianceType | Required. Set the value to `"musthave"`|
-| remediationAction | Optional. Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. **Important**: Some policies might not support the enforce feature.|
+| spec.remediationAction | Required. Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. **Important**: Some policies might not support the enforce feature.|
 | spec.namespace | Required. Managed cluster namespace to which you want to apply the policy.  Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. The `exclude` parameter specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller overrides the namespace in the corresponding parent policy.|
 | spec.object-template| Required. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
