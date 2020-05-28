@@ -49,6 +49,8 @@ You can view any SCC policy and its status from the console.
 
 ## Updating SCC policies
 
+Learn to update SCC policies by viewing the following sections. 
+
 ### Deleting a SCC policy
 
 Delete the SCC policy from the CLI or the console. 
