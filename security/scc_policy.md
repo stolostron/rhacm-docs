@@ -1,6 +1,6 @@
 # Security Context Constraints policy
 
-Kubernetes configuration policy controller monitors the status of your Security Context Constraints (SCC) policy. Apply a Security Context Constraints (SCC) policy to control permissions for pods by defining conditions in the policy. Learn more details about SCC policies in the following sections.
+Kubernetes configuration policy controller monitors the status of your Security Context Constraints (SCC) policy. Apply an Security Context Constraints (SCC) policy to control permissions for pods by defining conditions in the policy. Learn more details about SCC policies in the following sections.
 
 ## SCC policy YAML structure
 
