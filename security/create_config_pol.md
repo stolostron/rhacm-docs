@@ -103,7 +103,7 @@ You can view any configuration policy and its status from the console.
 
 ### Disabling configuration policies
 
-Complete the following steps to disbale your policy: <!--add steps to disable from the CLI if available-->
+Complete the following steps to disable your policy: <!--add steps to disable from the CLI if available-->
 
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
@@ -113,7 +113,7 @@ Complete the following steps to disbale your policy: <!--add steps to disable fr
 
 4. Click **Disable policy**.
 
-Your policy is disbaled.
+Your policy is disabled.
 
 ## Deleting a configuration policy
 

@@ -132,7 +132,7 @@ When you create a certificate policy, it is enabled by default. Complete the fol
 
   4. Click **Disable policy**.
 
-Your policy is disbaled.
+Your policy is disabled.
 
 ### Deleting a certificate policy
 
