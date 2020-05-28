@@ -99,9 +99,9 @@ spec:
 | annotations.policy.mcm.ibm.com/standards | Optional. The name or names of security standards the policy is related to. For example, National Institute of Standards and Technology (NIST) and Payment Card Industry (PCI).|
 | annotations.policy.mcm.ibm.com/categories | A security control category represent specific requirements for one or more standards. For example, a System and Information Integrity category might indicate that your policy contains a data transfer protocol to protect personal information, as required by the HIPAA and PCI standards. |
 | annotations.policy.mcm.ibm.com/controls | The name of the security control that is being checked. For example, Center of Internet Security (CIS) and certificate policy controller.|
-| spec | Required. <!--Add a description-->
+| spec | Required. <!--Add a description-->|
 | spec.complianceType | Reqired. Set the value to `"musthave"`|
-| spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. The `exclude` parameter specifies the namespaces you explicitly do not want to apply the policy to.**Note**: A namespace that is specified in the object template of a policy controller overrides the namespace in the corresponding controller policy.|
+| spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. The `exclude` parameter specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller overrides the namespace in the corresponding controller policy.|
 | spec.policy-template | Optional. Used to create one or more policies for third party or external security controls. |
 | spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
 | spec.role-template| Optional. Used to list RBAC roles that must be evaluated or applied to the managed clusters. |
