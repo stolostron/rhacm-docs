@@ -101,6 +101,7 @@
        * [Managing pod security policies](security/create_psp_policy.md)
        * [Managing role policies](security/create_role_policy.md)
        * [Managing rolebinding policies](security/create_rb_policy.md)
+       * [Managing Security Context Constraints policies](security/create_scc_policy.md)
        * [Managing certificate policies](security/create_cert_pol.md)
        * [Managing CIS policies](security/create_cis_pol.md)
        * [Managing IAM policies](security/create_iam_policy.md)

@@ -1,6 +1,6 @@
-# Security context constraints policy
+# Security Context Constraints policy
 
-Apply a Security context constraints (SCC) policy to control permissions for pods by defining conditions in the policy. For more information see, [Managing Security Context Constraints (SCC)](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth).
+Kubernetes configuration policy controller monitors the status of your Security Context Constraints (SCC) policy. Apply an Security Context Constraints (SCC) policy to control permissions for pods by defining conditions in the policy. Learn more details about SCC policies in the following sections.
 
 ## SCC policy YAML structure
 
@@ -10,14 +10,9 @@ kind: Policy
 metadata:
   name: policy-scc
   namespace: open-cluster-management-policies
-  annotations:
-    policy.mcm.ibm.com/standards:
-    policy.mcm.ibm.com/categories:
-    policy.mcm.ibm.com/controls:
 spec:
   complianceType:
   remediationAction:
-  disabled:
   namespaces:
     exclude:
     include:
@@ -54,45 +49,7 @@ spec:
           type:
         users:
         volumes:
-   ---
-   apiVersion:
-   kind: PlacementBinding
-   metadata:
-     name: binding-policy-scc
-     namespace:
-   placementRef:
-     name: placement-policy-scc
-     kind: PlacementRule
-     apiGroup:
-   subjects:
-   - name:
-     kind:
-     apiGroup:
-   ---
-   apiVersion: mcm.ibm.com/v1alpha1
-   kind: PlacementBinding
-   metadata:
-     name: policy-scc-production-clusters
-     namespace: open-cluster-management-policies
-   placementRef:
-     name: production-clusters
-     kind: PlacementRule
-     apiGroup: apps.open-cluster-management.io
-   subjects:
-   - name: policy-scc
-     kind: Policy
-     apiGroup: policy.mcm.ibm.com
-   ---
-   apiVersion:
-   kind: PlacementRule
-   metadata:
-     name: placement-policy-scc
-     namespace:
-   spec:
-     clusterConditions:
-     - type:
-     clusterSelector:
-       matchExpressions:
+
   ```
 
 ## SCC policy table
@@ -103,18 +60,19 @@ spec:
 |-- | -- |
 | apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
 | kind | Required. Set the value to `Policy` to indicate the type of policy. |
-| metadata.name | Required. The name for identifying the policy resource. |
-| metadata.namespaces | Optional. |
-| spec.namespace | Required. The namespaces within the hub cluster that the policy is applied to. Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. `exclude` specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller, overrides the namespace in the corresponding parent policy.|
-| remediationAction | Optional. Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. **Important**: Some policies may not support the enforce feature.|
-| disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
+| metadata.name | Required. The name to identify the policy resource. |
+| metadata.namespace | Required. The namespace within the managed cluster where the policy is created. |
 | spec.complianceType | Required. Set the value to `"musthave"`|
-| spec.object-template| Optional. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
+| spec.remediationAction | Required. Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. **Important**: Some policies might not support the enforce feature.|
+| spec.namespace | Required. Managed cluster namespace to which you want to apply the policy.  Enter parameter values for `include`, which are the namespaces you want to apply to the policy to. The `exclude` parameter specifies the namespaces you explicitly do not want to apply the policy to. **Note**: A namespace that is specified in the object template of a policy controller overrides the namespace in the corresponding parent policy.|
+| spec.object-template| Required. Used to list any other Kubernetes object that must be evaluated or applied to the managed clusters. |
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
+
+For explanations on the contents of a SCC policy, see [About Security Context Constraints](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth) from the OpenShift Container Platform documentation.
 
 ## SCC policy sample
 
-Apply a Security context constraints (SCC) policy to control permissions for pods by defining conditions in the policy. For more information see, [Managing Security Context Constraints (SCC)](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth).  Your SCC policy might resemble the following YAML file:
+Apply an Security context constraints (SCC) policy to control permissions for pods by defining conditions in the policy. For more information see, [Managing Security Context Constraints (SCC)](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth).  Your SCC policy might resemble the following YAML file:
 
 
    ```yaml
@@ -218,3 +176,4 @@ Apply a Security context constraints (SCC) policy to control permissions for pod
        matchExpressions: []
   ```
 
+Learn how to manage an SCC policy, see [Managing Security Context Constraint policies](create_scc_policy.md) for more details. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
