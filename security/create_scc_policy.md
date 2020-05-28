@@ -4,7 +4,7 @@ Learn to create, apply, view, and update your Security Context Constraints (SCC)
 
 ## Creating an SCC policy 
 
-You can create a YAML file for your SCC policy from the command line interface (CLI) or from the console. View the following sections to create a SCC policy:
+You can create a YAML file for your SCC policy from the command line interface (CLI) or from the console. View the following sections to create an SCC policy:
 
 ### Creating an SCC policy from the CLI
 
@@ -16,7 +16,7 @@ See [Examining an SCC](https://docs.openshift.com/container-platform/4.3/authent
 
 ### Creating an SCC policy from the console
 
-As you create an SCC policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create a SCC policy from the console:
+As you create an SCC policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create an SCC policy from the console:
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**.
