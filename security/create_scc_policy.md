@@ -2,21 +2,21 @@
 
 Learn to create, apply, view, and update your Security Context Constraints (SCC) policies.
 
-## Creating a SCC policy 
+## Creating an SCC policy 
 
 You can create a YAML file for your SCC policy from the command line interface (CLI) or from the console. View the following sections to create a SCC policy:
 
-### Creating a SCC policy from the CLI
+### Creating an SCC policy from the CLI
 
-See [Creating Security Context Constraints](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-creating_configuring-internal-oauth) from the OpenShift Container Platform documentation for more details.
+See [Creating Security Context Constraints](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-creating_configuring-internal-oauth) in the OpenShift Container Platform documentation for more details.
 
 #### Viewing your SCC policy from the CLI
 
-See [Examining an SCC](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#examining-a-security-context-constraints-object_configuring-internal-oauth) from the OpenShift Container Platform documentation for more details.
+See [Examining an SCC](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#examining-a-security-context-constraints-object_configuring-internal-oauth) in the OpenShift Container Platform documentation for more details.
 
-### Creating a SCC policy from the console
+### Creating an SCC policy from the console
 
-As you create a SCC policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create a SCC policy from the console:
+As you create an SCC policy from the console, a YAML file is also created in the YAML editor. Complete the following steps to create a SCC policy from the console:
 
 1. Log in to your cluster from the console.
 2. From the navigation menu, click **Governance and risk**.
@@ -33,7 +33,7 @@ As you create a SCC policy from the console, a YAML file is also created in the 
 
 5. Click **Create**.
 
-A SCC policy is created.
+An SCC policy is created.
 
 #### Viewing your SCC policy from the console
 
@@ -49,13 +49,13 @@ You can view any SCC policy and its status from the console.
 
 ## Updating SCC policies
 
-### Deleting a SCC policy
+### Deleting an SCC policy
 
 Delete the SCC policy from the CLI or the console. 
 
-See [Deleting a SCC](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#deleting-security-context-constraints_configuring-internal-oauth) from the OpenShift Container Platform documentation to learn more on deleting a SCC policy from the CLI.
+See [Deleting an SCC](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#deleting-security-context-constraints_configuring-internal-oauth) in the OpenShift Container Platform documentation to learn more about deleting an SCC policy from the CLI.
 
-* Delete a SCC policy from the console:
+* Delete an SCC policy from the console:
 
   1. From the navigation menu, click **Govern risk** to view a table list of your policies.
   2. Click the **Options** icon for the policy you want to delete in the policy violation table.
@@ -64,4 +64,4 @@ See [Deleting a SCC](https://docs.openshift.com/container-platform/4.3/authentic
 
 Your SCC policy is deleted.
 
-View a sample of a SCC policy, see _Security context constraint policy sample_ on the [Security context constraint policy](create_scc_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+View a sample of an SCC policy, see _Security context constraint policy sample_ on the [Security context constraint policy](create_scc_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
