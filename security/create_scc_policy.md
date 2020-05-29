@@ -66,4 +66,4 @@ See [Deleting an SCC](https://docs.openshift.com/container-platform/4.3/authenti
 
 Your SCC policy is deleted.
 
-View a sample of an SCC policy, see _Security context constraint policy sample_ on the [Security context constraint policy](create_scc_policy.md) page. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+<!--View a sample of an SCC policy, see _Security context constraint policy sample_ on the [Managing Security Context Constraints policies](create_scc_policy.md) page.--> See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
