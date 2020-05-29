@@ -24,7 +24,7 @@ If you have applications that require secret resources to operate, you can use s
 If you have applications that require Kubernetes resources or Helm charts from channels that require authorization, such as entitled GitHub repositories, you can use secrets to provide access to these channels. You can include a reference to a secret within your subscriptions to provide your subscriptions the required credentials to access secure channels. With this access, your subscriptions can access Kubernetes resources and Helm charts for deployment from these channels while maintaining data security.
 
 - Channels (`channel.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your Red Hat Advanced Cluster Management for Kubernetes applications. Channels are custom resource definitions that can help you streamline deployments and separate cluster access. 
-For more information about creating and managing channels, see [Managing channels](managing_channels.md). See [Channel samples](channel_sample.md) for sample YAML files.
+For more information about creating and managing channels, see [Creating and managing channels](managing_channels.md). See [Channel samples](channel_sample.md) for sample YAML files.
 
 Channels define a namespace within the hub cluster and point to a physical place where resources are stored for deployment, such as an object store, Kubernetes namespace, Helm repository, or GitHub repository. Clusters can subscribe to channels for identifying the deployables to deploy to each cluster. Deployables within a channel can be accessed by only the clusters that subscribe to that channel.
 
