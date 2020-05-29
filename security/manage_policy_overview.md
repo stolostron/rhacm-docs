@@ -19,5 +19,5 @@ Refer to [Governance and risk](compliance_intro.md) for more topics.
 
 <!-- next files to create: 
 - [Managing role policy](create_role_policy.md)
-- [Managing rolebinding policy](create_role_policy.md)
-- [Managing security content constraint policy](create_scc_policy.md)-->
+- [Managing rolebinding policies](create_rb_policy.md)
+- [Managing Security Content Constraint policies](create_scc_policy.md)-->
