@@ -26,7 +26,7 @@ The graphical user interface for Red Hat Advanced Cluster Management.
 
 ### Deployable {d-term-deployable}
 
-A resource that retrieves and contains the output of a build, packages the output with configuration properties, and installs the package in a pre-defined location so that it can be tested or run.
+A resource that retrieves the output of a build, packages the output with configuration properties, and installs the package in a predefined location so that it can be tested or run.
 
 ### Governance and risk {#g-term-3-govern}
 
