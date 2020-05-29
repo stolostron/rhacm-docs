@@ -6,7 +6,6 @@ Red Hat Advanced Cluster Management for Kubernetes consists of several multiclus
 
 - [Kubernetes glossary](https://kubernetes.io/docs/reference/glossary/?fundamental=true)
 
-
 ## Red Hat Advanced Cluster Management for Kubernetes terms
 
 ### Application lifecycle {#a-term-app-life}
@@ -25,7 +24,7 @@ Defines the process of creating, importing, and managing clusters across public 
 
 The graphical user interface for Red Hat Advanced Cluster Management.
 
-### Governance and risk {#g-term-3-gover}
+### Governance and risk {#g-term-3-govern}
 
 The  Red Hat Advanced Cluster Management processes used to manage security and compliance.
 
@@ -37,7 +36,7 @@ The central controller that runs in a Red Hat Advanced Cluster Management for Ku
 
 Created and imported clusters with the `multicluster-endpoint`, which is the agent that initiates a connection to the Red Hat Advanced Cluster Management for Kubernetes hub cluster. The managed cluster receives and applies requests, then returns the results. 
 
-### Multicluster-endpoint {#m-term-multi}
+### Multicluster-endpoint {#m-term-endpoint}
 
 The agent on the managed cluster that initiates a connection to the Red Hat Advanced Cluster Management for Kubernetes hub cluster.  
 
@@ -52,4 +51,3 @@ A rule that defines the target clusters where subscriptions are delivered. For i
 ### Subscriptions {#s-term-sub}
 
 Identify Kubernetes resources within channels (resource repositories). The subscription places the Kubernetes resources in the same namespace, where it is created on the subscribed target clusters. 
-
