@@ -231,7 +231,7 @@ The application uses the following route to expose the internal service to the f
       targetPort: 80
   ```
 
-Run the `kubectl get services` to confirm the port.
+Run `kubectl get services` to confirm the port. See the following example output:
 
 ```
 NAME           TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
