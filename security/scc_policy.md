@@ -176,4 +176,4 @@ Apply an Security context constraints (SCC) policy to control permissions for po
        matchExpressions: []
   ```
 
-Learn how to manage an SCC policy, see [Managing Security Context Constraint policies](create_scc_policy.md) for more details. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
+To learn how to manage an SCC policy, see [Managing Security Context Constraints policies](create_scc_policy.md) for more details. See [Kubernetes configuration policy controller](config_policy_ctrl.md) to learn about other configuration policies. See [Manage security policies](manage_policy_overview.md) to manage other policies.
