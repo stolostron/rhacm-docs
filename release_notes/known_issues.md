@@ -212,7 +212,7 @@ Creating more than one channel in the same namespace can cause errors with the h
 
 For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
 
-For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with andother GitHub channel. See the process for [Managing channels](../manage_applications/managing_channels.md) for more information.
+For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with andother GitHub channel. See the process for [Creating and managing channels](../manage_applications/managing_channels.md) for more information.
 
 
 ## Security known issues
