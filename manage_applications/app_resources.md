@@ -10,7 +10,7 @@ All of the application component resources for Red Hat Advanced Cluster Manageme
 
 View the following application resource sections:
 
-- Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for viewing the application components. For more information about creating and managing secrets, see [Managing applications](managing_apps.md). See [Application samples](app_sample.md) for sample YAML files.
+- Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for viewing the application components. For more information about creating and managing secrets, see [Creating and managing applications](managing_apps.md). See [Application samples](app_sample.md) for sample YAML files.
 
 
 Deployables are used to wrap other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. By wrapping the resources, deployables can be directly deployed to one or more target clusters from the hub cluster where the deployable source is stored. When the deployables are on the target cluster or clusters, the resources are unwrapped so that required actions can then run against the resources.
