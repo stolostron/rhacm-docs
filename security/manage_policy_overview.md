@@ -11,7 +11,7 @@ Review the following topics to learn more about creating and updating your secur
 - [Managing pod security policies](create_psp_policy.md)
 - [Managing role policies](create_role_policy.md)
 - [Managing rolebinding policies](create_rb_policy.md)
-- [Managing Security Context Constraint policies](create_scc_policy.md)
+- [Managing Security Context Constraints policies](create_scc_policy.md)
 - [Managing certificate policies](create_cert_pol.md)
 - [Managing CIS policies](create_cis_pol.md)
 - [Managing IAM policies](create_iam_policy.md) 
