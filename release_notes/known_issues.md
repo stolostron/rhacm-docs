@@ -65,7 +65,7 @@ The CIS policy controller is disabled by default when you install Red Hat Advanc
    CIS policy controller is not installed
    ```
 
-You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../security/create_cis_pol.md) to update the policy.
+You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ in [Managing CIS policies](../security/create_cis_pol.md) to update the policy.
 
 ### All users with access to the Red Hat Advanced Cluster Management component namespaces are automatically granted cluster administrator access
 <!--1.0.0:2135-->
