@@ -211,15 +211,6 @@ If none of the targeted managed clusters for a deployed application is a Red Hat
 
 This is the case for all Kubernetes resources that are platform-specific, such as the Route resource. The Application defines these resources, but they are created on the managed clusters only if they match the resource platform.
 
-**Note:** The application uses default external port `80`. 
-
-Run `kubectl get services` to confirm the port. See the following example output:
-
-  ```
-  NAME           TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
-  frontend       NodePort    10.0.183.194   <none>        80:32186/TCP   7s`
-  ```
-
 ## Security known issues
 
 ### Certificate policies fail to report status
