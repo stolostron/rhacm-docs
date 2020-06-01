@@ -101,7 +101,6 @@ When you are logged in as `kubeadmin` and you click the **Log out** option in t
 
 For technical preview, documentation links were removed from the console, but a few might still be exposed. Any links to the documentation for preview are temporarily not updated with the correct links.
 
-
 ### Search is unavailable or missing data for a brief period
 <!--1.0.0:1918-->
 
@@ -159,33 +158,33 @@ To manually create an SCC CR in your namespace, complete the following:
 
 1. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
 
-```
-nginx-ingress-52edb
-nginx-ingress-52edb-backend
-```
+   ```
+   nginx-ingress-52edb
+   nginx-ingress-52edb-backend
+   ```
 
 2. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example where `kind: SecurityContextConstraints` is added:
 
-```
-apiVersion: security.openshift.io/v1
-defaultAddCapabilities:
-kind: SecurityContextConstraints
-metadata:
-  name: ingress-nginx
-  namespace: ns-sub-1
-priority: null
-readOnlyRootFilesystem: false
-requiredDropCapabilities: 
-fsGroup:
-  type: RunAsAny
-runAsUser:
-  type: RunAsAny
-seLinuxContext:
-  type: RunAsAny
-users:
-- system:serviceaccount:my-operator:nginx-ingress-52edb
-- system:serviceaccount:my-operator:nginx-ingress-52edb-backend
-```
+   ```
+   apiVersion: security.openshift.io/v1
+   defaultAddCapabilities:
+   kind: SecurityContextConstraints
+   metadata:
+     name: ingress-nginx
+     namespace: ns-sub-1
+   priority: null
+   readOnlyRootFilesystem: false
+   requiredDropCapabilities: 
+   fsGroup:
+     type: RunAsAny
+   runAsUser:
+     type: RunAsAny
+   seLinuxContext:
+     type: RunAsAny
+   users:
+   - system:serviceaccount:my-operator:nginx-ingress-52edb
+   - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
+   ```
 
 ### Helm release name is not exact on Topology view
 <!--1.0.0:1593-->
@@ -233,10 +232,10 @@ The application uses the following route to expose the internal service to the f
 
 Run `kubectl get services` to confirm the port. See the following example output:
 
-```
-NAME           TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
-frontend       NodePort    10.0.183.194   <none>        80:32186/TCP   7s`
-```
+  ```
+  NAME           TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+  frontend       NodePort    10.0.183.194   <none>        80:32186/TCP   7s`
+  ```
 
 ## Security known issues
 
