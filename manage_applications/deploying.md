@@ -1,4 +1,4 @@
-## Deploying by using channels, subscriptions, and placement rules
+## Deploying by using application resources
 
 To set up and use channels, subscriptions, and placement rules for deployments, complete the following procedure:
 
