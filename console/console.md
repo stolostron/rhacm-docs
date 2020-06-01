@@ -10,7 +10,7 @@ Red Hat Advanced Cluster Management for Kubernetes console components:
 - [Welcome page](#welcome-page) 
 - [Observe environment details](#observe-environment-details)
 - [Automate Infrastructure](#automate-infrastructure)
-- [Manage applications (Technology preview)](#manage-applications-technology-preview)
+- [Manage applications](#manage-applications)
 - [Governance and risk dashboard](#governance-and-risk-dashboard)
 - [Topology page](#topology-page)
 
