@@ -53,7 +53,7 @@
      * [Application model and definitions](manage_applications/app_model.md)
      * [Application console](manage_applications/app_console.md)
      * [Deploying applications](manage_applications/deployment_app.md)
-     * [Deploying by using application resources](manage_applications/deployment_app.md)
+     * [Deploying by using application resources](manage_applications/deploying.md)
    * [Application resources](manage_applications/app_resources.md)
      * [Creating and managing application resources](manage_applications/managing_apps.md)
        * [Creating and managing deployables](manage_applications/managing_deployables.md)
