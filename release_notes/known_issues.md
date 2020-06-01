@@ -204,31 +204,14 @@ For instance, namespace `charts-v1` is used by the installer as a Helm type chan
 
 For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with andother GitHub channel. See the process for [Managing channels](../manage_applications/managing_channels.md) for more information.
 
-### Application route does not list in the search page for GKE cluster
+### Application route does not list in the Search page for cluster
 <!--1.0.0:1908-->
 
-If the target managed cluster is a Google Cloud cluster, the cluster might not have the `Route` resource. Without the route, a random port will be assigned to the front-end service.  
+If none of the targeted managed clusters for a deployed application is a Red Hat OpenShift cluster, the Route resource is not created, even if the _Application Topology_ displays the object. Since the object is not deployed, it does not display during a Search. 
 
-The application uses the following route to expose the internal service to the fixed, default external port `80`. The default port for HTTP web server that you can easily open the application without specifying the port number:
+This is the case for all Kubernetes resources that are platform-specific, such as the Route resource. The Application defines these resources, but they are created on the managed clusters only if they match the resource platform.
 
-  ```
-  apiVersion: route.openshift.io/v1
-  kind: Route
-  metadata:
-    annotations:
-      openshift.io/host.generated: "true"
-    labels:
-      app: guestbook
-    name: guestbook-route
-  spec:
-    path: /
-    to:
-      kind: Service
-      name: frontend
-      weight: 100
-    port:
-      targetPort: 80
-  ```
+**Note:** The application uses default external port `80`. 
 
 Run `kubectl get services` to confirm the port. See the following example output:
 
