@@ -22,6 +22,7 @@
  * [Web console](console/console_intro.md)
    * [Accessing the console](console/console_access.md)
    * [Observability from the console](console/console.md)
+   * [Search in the console](console/search.md)
    * [Managing your cluster with the Visual Web Terminal](console/vwt_search.md)
    * [Managing cluster labels](console/cluster_label.md)
  * [Cluster management](manage_cluster/intro.md)
