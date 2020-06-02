@@ -9,7 +9,6 @@ Learn more about deployments, then see the following tasks:
   - Delete a deployable
   - Promote a deployable to a channel
 
-
 Deployables (`deployable.apps.open-cluster-management.io`) are Kubernetes resources that wrap or represent other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. By wrapping the resources, deployables can be directly deployed to one or more target clusters from the storage locations that include the deployables. When the deployables are on the target cluster or clusters, the resources are unwrapped so that required actions can then run against the resources.  
 
 **Note:** The `deployable.apps.open-cluster-management.io` Kind is a replacement for the `Deployable.mcm.ibm.com` kind that is used in previous versions of the product.
