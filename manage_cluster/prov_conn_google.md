@@ -14,7 +14,7 @@ You must have the following prerequisites before creating a provider connection:
 
 * GCP login credentials, which include user Google Cloud Platform Project ID and Google Cloud Platform service account JSON key. See [Creating and managing projects](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
 
-* Account permissions that allow installing clusters on GCP
+* Account permissions that allow installing clusters on GCP. See [Configuring a GCP project](https://docs.openshift.com/container-platform/4.3/installing/installing_gcp/installing-gcp-account.html) for instructions on how to configure an account.
 
 ## Creating a provider connection by using the console {#gcp_provider_conn}
 
