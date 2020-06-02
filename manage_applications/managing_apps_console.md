@@ -82,7 +82,7 @@ From the search results, you can view identifying details for each resource, inc
 
 By clicking the resource name in the search results, a YAML editor opens and displays the YAML definition for the resource. You can choose to edit the definition within the editor. Any changes that you save are applied to the resource immediately.  
 
-For more information about using search, see [console components](../console/console.md).
+For more information about using search, see [Search in the console](../console/search.md).
 
 ## Topology
 
