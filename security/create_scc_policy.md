@@ -51,6 +51,20 @@ You can view any SCC policy and its status from the console.
 
 Learn to update SCC policies by viewing the following sections. 
 
+### Disabling SCC policies
+
+Complete the following steps to disable your SCC policy:
+
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
+
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
+
+3. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
+
+4. Click **Disable policy**.
+
+Your policy is disabled.
+
 ### Deleting an SCC policy
 
 Delete the SCC policy from the CLI or the console. 

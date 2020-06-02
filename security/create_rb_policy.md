@@ -83,6 +83,20 @@ You can view any rolebinding policy and its status from the console.
 
 Learn to update rolebinding policies by viewing the following section. 
 
+### Disabling rolebinding policies
+
+Complete the following steps to disable your rolebinding policy:
+
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
+
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
+
+3. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
+
+4. Click **Disable policy**.
+
+Your policy is disabled.
+
 ### Deleting a rolebinding policy
 
 Delete the rolebinding policy from the CLI or the console. 
