@@ -24,7 +24,7 @@ You need the following prerequisites before creating a cluster in a bare metal e
   
      ```
      MY_CONSOLEUI=`oc -n open-cluster-management get deploy -o name | grep consoleui`
-     oc edit $MY_CONSOLEUI
+     oc -n open-cluster-management edit $MY_CONSOLEUI
      ```
     
   3. Change the feature flag setting to *true*. Your update should look like the following example:
@@ -38,14 +38,15 @@ You need the following prerequisites before creating a cluster in a bare metal e
            ...
            containers:
            - env:                              # Search for env:
-             - featureFlags_baremetal: "true"
+             - name: featureFlags_baremetal
+               value: "true"
              ...
      ```
   4. Edit the `consoleui` deployment resource to modify the settings:
   
      ```
      MY_HEADER=`oc -n open-cluster-management get deploy -o name | grep header`
-     oc edit $MY_HEADER
+     oc -n open-cluster-management edit $MY_HEADER
      ```
 
   5. Change the feature flag setting to *true*. Your update should look like the following example:
@@ -59,9 +60,15 @@ You need the following prerequisites before creating a cluster in a bare metal e
            ...
            containers:
            - env:                              # Search for env:
-             - featureFlags_baremetal: "true"
+             - name: featureFlags_baremetal
+               value: "true"
              ...
      ```
+  6. Watch to make sure the `console-chart-...-consoleui...` and `console-header-...` pods are running:
+  ```
+  oc -n open-cluster-management get pods
+  ```
+  7. When the pods are running again, log out of the Red Hat Advanced Cluster Management for Kubernetes console and log back in.
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console {#bare_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console}
 
