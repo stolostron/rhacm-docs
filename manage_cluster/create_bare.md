@@ -14,11 +14,11 @@ You need the following prerequisites before creating a cluster in a bare metal e
 
 * Login credentials for your bare metal environment, which include user name, password, and Baseboard Management Controller Address
 
-* A Red Hat OpenShift image pull secret; see [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html)
+* A Red Hat OpenShift Container Platform image pull secret; see [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html)
 
 * Enable the bare metal feature flag to view the bare metal options. The bare metal selections and options are hidden by a feature flag by default. You can enable the feature flags by completing the following steps:
 
-  1. Start the OpenShift command line interface.
+  1. Start the Red Hat OpenShift Container Platform command line interface.
   
   2. Edit the `consoleui` deployment resource to modify the settings:
   
