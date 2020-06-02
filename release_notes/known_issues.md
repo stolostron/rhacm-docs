@@ -101,7 +101,6 @@ When you are logged in as `kubeadmin` and you click the **Log out** option in t
 
 For technical preview, documentation links were removed from the console, but a few might still be exposed. Any links to the documentation for preview are temporarily not updated with the correct links.
 
-
 ### Search is unavailable or missing data for a brief period
 <!--1.0.0:1918-->
 
@@ -168,34 +167,34 @@ To manually create an SCC CR in your namespace, complete the following:
 
 1. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
 
- ```
- nginx-ingress-52edb
- nginx-ingress-52edb-backend
- ```
+   ```
+   nginx-ingress-52edb
+   nginx-ingress-52edb-backend
+   ```
 
 2. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example where `kind: SecurityContextConstraints` is added:
 
- ```
- apiVersion: security.openshift.io/v1
- defaultAddCapabilities:
- kind: SecurityContextConstraints
- metadata:
-   name: ingress-nginx
-   namespace: ns-sub-1
- priority: null
- readOnlyRootFilesystem: false
- requiredDropCapabilities: 
- fsGroup:
-   type: RunAsAny
- runAsUser:
-   type: RunAsAny
- seLinuxContext:
-   type: RunAsAny
- users:
- - system:serviceaccount:my-operator:nginx-ingress-52edb
- - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
- ```
-
+   ```
+   apiVersion: security.openshift.io/v1
+   defaultAddCapabilities:
+   kind: SecurityContextConstraints
+   metadata:
+     name: ingress-nginx
+     namespace: ns-sub-1
+   priority: null
+   readOnlyRootFilesystem: false
+   requiredDropCapabilities: 
+   fsGroup:
+     type: RunAsAny
+   runAsUser:
+     type: RunAsAny
+   seLinuxContext:
+     type: RunAsAny
+   users:
+   - system:serviceaccount:my-operator:nginx-ingress-52edb
+   - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
+   ```
+   
 ### Helm release name is not exact on Topology view
 <!--1.0.0:1593-->
 
@@ -214,6 +213,12 @@ For instance, namespace `charts-v1` is used by the installer as a Helm type chan
 
 For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with andother GitHub channel. See the process for [Creating and managing channels](../manage_applications/managing_channels.md) for more information.
 
+### Application route does not list in the Search page for cluster
+<!--1.0.0:1908-->
+
+If none of the targeted managed clusters for a deployed application is a Red Hat OpenShift cluster, the Route resource is not created, even if the _Application Topology_ displays the object. Since the object is not deployed, it does not display during a Search. 
+
+This is the case for all Kubernetes resources that are platform-specific, such as the Route resource. The Application defines these resources, but they are created on the managed clusters only if they match the resource platform.
 
 ## Security known issues
 
