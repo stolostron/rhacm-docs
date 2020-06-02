@@ -183,6 +183,8 @@ View any CIS Policy and its status from the console.
 
 ## Updating CIS policies
 
+Learn to update CIS policies by viewing the following section.
+
 ### Enabling the CIS policy controller from the CLI
 
 The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list.

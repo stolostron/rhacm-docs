@@ -79,6 +79,22 @@ An image vulnerability policy is created.
 
 ## Updating image vulnerability policies
 
+Learn to update image vulnerability policies by viewing the following section.
+
+### Disabling image vulnerability policies
+
+Complete the following steps to disable your image vulnerability policy:
+
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
+
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
+
+3. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
+
+4. Click **Disable policy**.
+
+Your policy is disabled.
+
 ### Deleting an image vulnerability policy
 
 Delete the image vulnerability policy from the CLI or the console. 

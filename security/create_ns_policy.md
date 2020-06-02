@@ -73,6 +73,22 @@ You can view any namespace policy and its status from the console.
 
 ## Updating namespace policies
 
+Learn to update namespace policies by viewing the following section.
+
+### Disabling namespace policies
+
+Complete the following steps to disable your namespace policy:
+
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
+
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
+
+3. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
+
+4. Click **Disable policy**.
+
+Your policy is disabled.
+
 ### Deleting a namespace policy
 
 Delete a namespace policy from the CLI or the console. 

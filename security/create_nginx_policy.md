@@ -72,6 +72,22 @@ You can view any pod nginx policy and its status from the console.
 
 ## Updating pod nginx policies
 
+Learn to update pod nginx policies by viewing the following section.
+
+### Disabling pod nginx policies
+
+Complete the following steps to disable your pod nginx policy:
+
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
+
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
+
+3. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
+
+4. Click **Disable policy**.
+
+Your policy is disabled.
+
 ### Deleting a pod nginx policy
 
 Delete the pod nginx policy from the CLI or the console.

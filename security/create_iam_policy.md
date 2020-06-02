@@ -103,6 +103,8 @@ You can view any IAM policy and its status from the console.
 
 ## Updating IAM policies
 
+Learn to update IAM policies by viewing the following section.
+
 ### Disabling IAM policies
 
 Complete the following steps to disable your IAM policy:
