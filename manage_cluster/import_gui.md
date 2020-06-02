@@ -40,7 +40,7 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
 7. Click **Generate Command** to retrieve the command to deploy the `multicluster-endpoint`.
 
-8. From the _Import an existing cluster_ window, hover and click the **Copy command** icon to copy the import command and the token that you are provided. You must click the **Copy** icon to receive the accurate copy.
+8. From the _Import an existing cluster_ window, hover and click the **Copy command** icon to copy the import command and the token that you are provided. You must click the **Copy** icon to receive the accurate copy. **Important:** The command contains pull secret information that is copied to each of the imported clusters. Anyone who can access the imported clusters can also view the pull secret information. Consider creating a secondary pull secret at https://cloud.redhat.com/ or by creating a service account so your personal credentials are not compromised. See [Using image pull secrets](https://docs.openshift.com/container-platform/4.4/openshift_images/managing_images/using-image-pull-secrets.html) or [Understanding and creating service accounts](https://docs.openshift.com/container-platform/4.4/authentication/understanding-and-creating-service-accounts.html) for more information.  
 
 9. From your terminal, authenticate to your managed cluster. Configure your `kubectl` for your targeted managed cluster.
 

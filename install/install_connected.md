@@ -85,10 +85,10 @@ You must meet the following requirements before you install Red Hat Advanced Clu
       oc apply -f local/<subscription>.yaml
       ```
 
-5. Generate a pull secret to access the entitled content from the distribution registry. **Important:** Pull secrets are namespace-specific, so make sure that you are in the namespace that you created in step 1.
+5. If you plan to import Kuberntetes clusters that were not created by OpenShift Container Platform or Red Hat Advanced Cluster Management, generate a pull secret to access the entitled content from the distribution registry. Pull secret requirements for OpenShift Container Platform clusters are automatically resolved by OpenShift Container Platform and Red Hat Advanced Cluster Management. You do not have to generate the pull secret if you are not importing other types of Kubernetes clusters to be managed. **Important:** Pull secrets are namespace-specific, so make sure that you are in the namespace that you created in step 1.
   
    ```
-   oc create secret docker-registry <secret> --docker-server=registry.access.redhat.com/rhacm1-tech-preview --docker-username=<docker_username> --docker-password=<docker_password>
+   oc create secret docker-registry <secret> --docker-server=registry.redhat.io/rhacm1-tech-preview --docker-username=<docker_username> --docker-password=<docker_password>
    ```
    Replace _secret_ with the name of the secret that you created.
    Replace _docker_username_ with your username for the distribution registry that you identified as the `docker-server`. 
@@ -153,7 +153,7 @@ You must meet the following requirements before you install Red Hat Advanced Clu
   
    4. Select **Image Registry Credentials** as the authentication type.
   
-   5. In the *Registry Server Address* field, enter the address of the distribution registry that contains your image. In most cases, it is `registry.access.redhat.com/rhacm1-tech-preview`.
+   5. In the *Registry Server Address* field, enter the address of the distribution registry that contains your image. In most cases, it is `registry.redhat.io/rhacm1-tech-preview`.
   
    6. Enter your username and password or token for the distribution registry that contains the image. 
   
