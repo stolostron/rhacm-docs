@@ -183,6 +183,8 @@ View any CIS Policy and its status from the console.
 
 ## Updating CIS policies
 
+Learn to update CIS policies by viewing the following section.
+
 ### Enabling the CIS policy controller from the CLI
 
 The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list.
@@ -217,7 +219,7 @@ Complete the following steps to enable the CIS policy controller feature flag fr
 
 5. The associated pod restarts. Attempt to create the policy again.
 
-## Remediating CIS policy violation
+### Remediating CIS policy violation
 
 Verify rule failures to remediate your CIS policy violations. Complete the following steps:
 
@@ -276,6 +278,20 @@ Verify rule failures to remediate your CIS policy violations. Complete the follo
 
    8.4 audit test did not run: failed to run: stat -c %U:%G $nodesvc, command: [stat -c %U:%G $nodesvc], error: exit status 1
    ```
+
+### Disabling CIS policies
+
+Complete the following steps to disable your CIS policy:
+
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
+
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
+
+3. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
+
+4. Click **Disable policy**.
+
+Your policy is disabled.
 
 ### Deleting a CIS poicy
 

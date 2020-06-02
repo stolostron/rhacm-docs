@@ -103,9 +103,11 @@ You can view any IAM policy and its status from the console.
 
 ## Updating IAM policies
 
+Learn to update IAM policies by viewing the following section.
+
 ### Disabling IAM policies
 
-Complete the following steps to disable your IAM policy: <!--add steps to disable from the CLI if available-->
+Complete the following steps to disable your IAM policy:
 
 1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
 
