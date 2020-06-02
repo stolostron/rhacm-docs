@@ -107,7 +107,7 @@ You can use the console, the Kubernetes command line interface (`kubectl`) tool,
 
 * To use REST API, use the [deployable DELETE API](../apis/deployables.json).
 
-* If you want to only remove a deployable from a specific application, you can update the application to remove the content that defines the deployable. For more information about updating an application, see [Creating and managing applications](managing_apps.md).
+* If you want to only remove a deployable from a specific application, you can update the application to remove the content that defines the deployable. For more information about updating an application, see [Creating and managing application resources](managing_apps.md).
 
 * If you only need to remove the deployable for a specific channel, edit the subscription to no longer include the deployable. You can also change the defined annotations for the deployable to remove the deployable. If you change the annotations of the source Kubernetes resource or Helm release so that the deployable no longer meets the required annotations for the channel, the deployable is removed from the channel. A deployable that is included in a channel must continue to meet the requirements for a channel to remain in that channel. For instance, the annotations for the deployable must match the defined annotations for the channel (`spec.gate.annotations`).
 

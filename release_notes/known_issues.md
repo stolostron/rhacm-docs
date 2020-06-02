@@ -65,7 +65,7 @@ The CIS policy controller is disabled by default when you install Red Hat Advanc
    CIS policy controller is not installed
    ```
 
-You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ on the [CIS policy controller page](../security/create_cis_pol.md) to update the policy.
+You must enable the CIS policy controller. For more information, see _Enable the CIS controller_ in [Managing CIS policies](../security/create_cis_pol.md) to update the policy.
 
 ### All users with access to the Red Hat Advanced Cluster Management component namespaces are automatically granted cluster administrator access
 <!--1.0.0:2135-->
@@ -127,6 +127,15 @@ To mitigate this problem, you can increase the memory limit in the `search-pod-x
   
 **Note**: Your maximum memory is restricted by either your quota, policies, or physical limits of the nodes on your cluster.
 
+### Visual Web Terminal command (oc logs) incomplete or frozen log output
+<!--1.0.0:2343-->
+
+The `oc logs` command in Visual Web Terminal attempts to display a total log output for the specified pod and container if the user does not specify a `--tail=` line limit as a parameter. 
+
+A large amount of log data limits the terminal response time as data is retrieved and displayed. If the amount of data is large enough, Visual Web Terminal can appear to be frozen or blocked. To get the output quickly, leave or close the Visual Web Terminal to delete the session, then reopen.
+
+To avoid this known issue, either always specify a reasonable value on the `--tail=` flag for the `oc logs` command, or use `kubectl logs`, which defaults to the last 30 lines unless you specify a different `--tail` value.
+
 ## Cluster management known issues
 
 ### _etcd-operator_ does not reconcile the cluster
@@ -185,7 +194,7 @@ To manually create an SCC CR in your namespace, complete the following:
    - system:serviceaccount:my-operator:nginx-ingress-52edb
    - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
    ```
-
+   
 ### Helm release name is not exact on Topology view
 <!--1.0.0:1593-->
 
@@ -202,7 +211,7 @@ Creating more than one channel in the same namespace can cause errors with the h
 
 For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
 
-For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with andother GitHub channel. See the process for [Managing channels](../manage_applications/managing_channels.md) for more information.
+For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with andother GitHub channel. See the process for [Creating and managing channels](../manage_applications/managing_channels.md) for more information.
 
 ### Application route does not list in the Search page for cluster
 <!--1.0.0:1908-->

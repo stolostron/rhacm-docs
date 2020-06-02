@@ -54,7 +54,7 @@ Complete the following steps to create a policy from the command line interface 
                verbs: ["get", "list", "watch", "create", "delete","patch"]
    ```
 
-3. Define a `PlacementRule`. Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. View the [PlacementRule definition YAML structure](../manage_applications/managing_placement_rules.md). Your `PlacementRule` might resemble the following content:
+3. Define a `PlacementRule`. Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. View [Creating and managing placement rules](../manage_applications/managing_placement_rules.md). Your `PlacementRule` might resemble the following content:
 
    ```yaml
    apiVersion: apps.open-cluster-management.io/v1

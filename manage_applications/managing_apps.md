@@ -48,7 +48,7 @@ Within the subscription resource definition, the definition must include the req
 
 When the subscription is associated with an application, the subscription uses the `spec.placement` settings for the subscription or deployable to deploy any subscribed charts, deployables or other Kubernetes resources for the application.
 
-For more information about the resource definition for an application, see [Creating and managing applications](managing_apps.md).
+For more information about the resource definition for an application, see [Creating and managing application resources](managing_apps.md).
 
 ## Update an application
 

@@ -11,4 +11,4 @@ Placement rules (`placementrule.apps.open-cluster-management.io`) define the tar
 Channels, subscriptions, and placement rules can help you to unify and simplify your continuous deliveries that involve frequent updates and deployments to multiple clusters. Use a combination of these resources when you need to deploy to multiple clusters, deploy frequent updates, and share deployment settings across multiple deployables.
 Based on your deployment requirements, review the details and process for the following deployment options:
 
-<!--See [Deploying by using channels, subscriptions, and placement rules](deploying.md) to learn to set up and use channels, subscriptions, and placement rules for deployments.-->
+See [Deploying by using application resources](deploying.md) to learn to set up and use channels, subscriptions, and placement rules for deployments.
