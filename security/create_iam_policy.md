@@ -119,7 +119,7 @@ Complete the following steps to disable your IAM policy:
 
 Your policy is disabled.
 
-## Deleting an IAM policy
+### Deleting an IAM policy
 
 Delete a configuration policy from the CLI or the console.
 
