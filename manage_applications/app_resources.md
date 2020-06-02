@@ -12,7 +12,6 @@ View the following application resource sections:
 
 - Applications (`Application.app.k8s.io`) in Red Hat Advanced Cluster Management for Kubernetes are used for viewing the application components. For more information about creating and managing secrets, see [Creating and managing application resources](managing_apps.md). See [Application samples](app_sample.md) for sample YAML files.
 
-
 Deployables are used to wrap other resources to prevent actions from being run against the resources by Kubernetes and other controllers before the resources are placed on target clusters. By wrapping the resources, deployables can be directly deployed to one or more target clusters from the hub cluster where the deployable source is stored. When the deployables are on the target cluster or clusters, the resources are unwrapped so that required actions can then run against the resources.
 
 The placement, overrides, and dependencies for deployables are defined within the spec for the deployables. The placement for deployables can also be defined within a subscription, such as for multi-cluster deployments.
