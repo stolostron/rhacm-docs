@@ -12,9 +12,9 @@ You must have the following prerequisites before creating a provider connection:
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so that it can create the Kubernetes cluster on Azure
 
-* Account permissions that allow installing on Azure. See [How to configure a cloud service](https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-how-to-configure-portal) for more information.
-
 * Azure login credentials, which include your Base Domain Resource Group and Azure Service Principal JSON. See [azure.microsoft.com](https://azure.microsoft.com/en-ca/features/azure-portal).
+
+* Account permissions that allow installing clusters on Azure. See [How to configure Cloud Services](https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-how-to-configure-portal) and [Configuring an Azure account](https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-account.html) for more information.
 
 ## Creating a provider connection by using the console {#azure_provider_conn}
 
