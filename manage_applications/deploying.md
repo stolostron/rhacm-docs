@@ -92,13 +92,13 @@ To promote a deployable, which is a _resource template_, to a channel, you can u
 
 The following example subscription indicates that the most recent `nginx` version `1.x` chart is to be promoted through the channel for deployment with the subscription.
 
-  ```yaml
-  apiVersion: apps.open-cluster-management.io/v1
-  kind: Subscription
-  metadata:
+   ```yaml
+   apiVersion: apps.open-cluster-management.io/v1
+   kind: Subscription
+   metadata:
       name: mydevsub
       namespace: myspace
-  spec:
+   spec:
     source: https://kubernetes-charts.storage.googleapis.com/
     package: nginx
     packageFilter:
@@ -106,7 +106,7 @@ The following example subscription indicates that the most recent `nginx` versio
     placement:
       clusters:
       - name: mydevcluster1
-  ```
+   ```
 
 * Update the channel definition to specify channel gate requirements, and update the definitions for your deployables to include the fields and values to match the gate requirements.
 
