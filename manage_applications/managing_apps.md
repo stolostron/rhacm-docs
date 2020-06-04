@@ -52,7 +52,7 @@ For more information about the resource definition for an application, see [Crea
 
 ## Update an application
 
-1. Compose your application definition updates. For more information about the YAML structure, including the required fields, see [Application definition](#application-yaml-structure).
+1. Compose your application definition updates. Samples for all resources are located in the [Application resource samples](app_resource_samples.md) documentation.
 
 2. Update the application definition. You can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API:
 

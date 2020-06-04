@@ -12,8 +12,7 @@ The Application model consists of the following Kubernetes custom resources: cha
 
  For more information about creating and managing application resources, see:
  
-* [Creating and managing application resources](managing_apps.md)
-<!--* [Creating and managing deployables](managing_deployables.md) deployable doc needs to be withing channel namespace -->
 * [Creating and managing channels](managing_channels.md)
 * [Creating and managing subscriptions](managing_subscriptions.md)
 * [Creating and managing placement rules](managing_placement_rules.md)
+* [Creating and managing application resources](managing_apps.md)
