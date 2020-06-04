@@ -39,7 +39,7 @@ Create and manage applications across environments through channel and subscript
 With the Governance and risk dashboard, you can view and manage the number of security risks and policy violations in your clusters and applications. Create custom policy controllers to report and validate the compliance of your policies on your cluster. Enable and manage the following policy controllers that are installed by default:
 
 * [Certificate policy controller](../security/cert_policy_ctrl.md)
-* [Configuration policy controller](../security/config_policy_ctrl.md)
+* [Kubernetes configuration policy controller](../security/config_policy_ctrl.md)
 * [IAM policy controller](../security/iam_policy_ctrl.md)
 
 See [Governance and risk](../security/compliance_intro.md) to learn more about the dashboard and the policy framework.
