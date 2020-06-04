@@ -118,7 +118,7 @@ To mitigate this problem, you can increase the memory limit in the `search-pod-x
    ```
    oc patch deployment search-prod-xxxxx-redisgraph -n open-cluster-management -p '{"spec": {"template": {"spec": {"containers":[{"name":"redisgraph","resources": {"limits": {"memory": "4Gi"}}}]}}}}'
    ```
-
+   
 * Update your `search-pod-xxxxx-redisgraph` deployment from the console:
 
   1. Log in to the Red Hat Advanced Cluster Management for Kubernetes cluster.
@@ -166,12 +166,12 @@ Different deployments have different security context and different service acco
 To manually create an SCC CR in your namespace, complete the following:
 
 1. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
-
+<!--
     ```
     nginx-ingress-52edb
     nginx-ingress-52edb-backend
     ```
-
+ 
 2. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example where `kind: SecurityContextConstraints` is added:
 
     ```
@@ -194,7 +194,7 @@ To manually create an SCC CR in your namespace, complete the following:
     - system:serviceaccount:my-operator:nginx-ingress-52edb
     - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
     ```
-   
+  --> 
 ### Helm release name is not exact on Topology view
 <!--1.0.0:1593-->
 
