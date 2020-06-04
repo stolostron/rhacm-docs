@@ -25,7 +25,6 @@
    * [Search in the console](console/search.md)
    * [Managing your cluster with the Visual Web Terminal](console/vwt_search.md)
    * [Managing cluster labels](console/cluster_label.md)
-   * [Search in the console](search.md)
  * [Cluster management](manage_cluster/intro.md)
    * [Supported cloud providers](manage_cluster/supported_clouds.md) 
    * [Resizing your clusters](manage_cluster/scale.md)
