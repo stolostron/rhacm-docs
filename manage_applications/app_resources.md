@@ -33,7 +33,7 @@ Channels define a namespace within the hub cluster and point to a physical place
 
  - Secrets are Kubernetes resources that you can use to store authorization and other sensitive information, such as passwords, OAuth tokens, and SSH keys.
 
-    By storing this information as secrets, you can separate the information from the application components that require the information to improve your data security. See [Creating and managing secrets](managing_secrets.md). See [Secret samples](secret_sample.md) for sample YAML files.
+    By storing this information as secrets, you can separate the information from the application components that require the information to improve your data security. See [Managing secrets](managing_secrets.md). See [Secret samples](secret_sample.md) for sample YAML files.
 
 For `Namespace` and `ObjectBucket` channel types, the spec for each channel can define conditions that a deployable must match to be included in the channel. These conditions are defined as Kubernetes labels for the channel, such as the source namespace, package name, labels, and annotations. A deployable must have the same labels for the deployable to be included in the channel. A deployable can be included in a channel only when the deployable is labeled with the same labels as the channel.
 
