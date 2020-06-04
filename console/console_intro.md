@@ -9,3 +9,4 @@ Learn how to access the console for your Red Hat Advance Cluster Management cons
 - [Search in the console](search.md)  
 - [Managing your cluster with the Visual Web Terminal](vwt_search.md)
 - [Managing cluster labels](cluster_label.md)
+- [Search in the console](search.md)
