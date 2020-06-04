@@ -44,4 +44,4 @@ With the Governance and risk dashboard, you can view and manage the number of se
 
 See [Governance and risk](../security/compliance_intro.md) to learn more about the dashboard and the policy framework.
 
-As you create policies, use the policy element, `templates` to describe how your resource is defined. For more information about the policy elements, see [Policy overview](../security/policy_overview.md). 
+As you create policies, use the policy element, `templates` to describe how your resource is defined. For more information about the policy elements, see [Policy overview](../security/policy_example.md). 
