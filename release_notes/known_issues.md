@@ -138,7 +138,7 @@ To avoid this known issue, either always specify a reasonable value on the `--ta
 
 ## Cluster management known issues
 
-### _etcd-operator_ does not reconcile the cluster
+### etcd-operator does not reconcile the cluster
 <!--1.0.0:2010-->
 
 When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, the `etcd-operator` does not reconcile you managed clusters. As a result, your managed clusters are removed and you lose most data. 
