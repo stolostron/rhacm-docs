@@ -60,6 +60,8 @@
        * [Creating and managing subscriptions](manage_applications/managing_subscriptions.md)
        * [Creating and managing placement rules](manage_applications/managing_placement_rules.md)
        * [Managing deployables with a rolling update](manage_applications/deployment_rollout.md)
+       * [Deploying by using application resources](deploying.md)
+       * [Managing applications with the console](managing_apps_console.md)
    * [Application resource samples](app_resource_samples.md)
      * [Channel samples](manage_applications/channel_sample.md)
        * [Secret samples](manage_applications/secret_sample.md)

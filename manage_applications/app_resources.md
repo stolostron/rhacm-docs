@@ -10,6 +10,11 @@ All of the application component resources for Red Hat Advanced Cluster Manageme
 
 View the following application resource sections:
 
+- [Creating and managing channels](managing_channels.md)   
+- [Creating and managing subscriptions](managing_subscriptions.md)
+- [Creating and managing placement rules](managing_placement_rules.md)
+- [Creating and managing application resources](managing_apps.md)
+
 If you have applications that require secret resources to operate, you can use subscriptions to deploy the secrets to the managed clusters where the resources are needed.
 
 If you have applications that require Kubernetes resources or Helm charts from channels that require authorization, such as entitled GitHub repositories, you can use secrets to provide access to these channels. You can include a reference to a secret within your subscriptions to provide your subscriptions the required credentials to access secure channels. With this access, your subscriptions can access Kubernetes resources and Helm charts for deployment from these channels while maintaining data security.
