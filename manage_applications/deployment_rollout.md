@@ -48,7 +48,7 @@ If you have existing subscriptions that you want to configure to use a rolling u
 
 At this stage no rolling update is configured and any change to the initial version at the source is then deployed to all managed clusters.
 
-### Procedure
+### Procedure  {#procedure_deploy}
 
 1. Create the target subscription resource YAML definition to point to the newer version of the resource or chart to deploy. This definition must use the same definition structure as any subscription application resource kind. However, this target subscription must not include the annotations for defining a rolling update and must not define any placement rule.
 
