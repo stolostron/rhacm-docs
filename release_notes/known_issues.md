@@ -166,7 +166,7 @@ Different deployments have different security context and different service acco
 To manually create an SCC CR in your namespace, complete the following:
 
 1. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
-<!--
+
     ```
     nginx-ingress-52edb
     nginx-ingress-52edb-backend
@@ -194,7 +194,7 @@ To manually create an SCC CR in your namespace, complete the following:
     - system:serviceaccount:my-operator:nginx-ingress-52edb
     - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
     ```
-  --> 
+    
 ### Helm release name is not exact on Topology view
 <!--1.0.0:1593-->
 
