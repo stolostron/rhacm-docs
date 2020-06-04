@@ -98,4 +98,3 @@ You can use the console, the Kubernetes command line interface (`kubectl`) tool,
      ```
      kubectl get secrets <name>
      ```
-

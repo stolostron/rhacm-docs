@@ -7,8 +7,6 @@ You can create and manage placement rules to define where and how Helm charts an
   - Placement rule status
   - Update a placement rule
   - Delete a placement rule
-  - Placement rule definition
-  * [Placement rule status definition](#placement-rule-sample-files)
 
 The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used for applications in previous versions of Red Hat Advanced Cluster Management for Kubernetes. Placement policies are still used for governance and risk policies.
 
@@ -171,5 +169,5 @@ To delete a placement rule that is a separate resource, you can use the console,
 
 To delete a placement rule that is defined within the definition for a deployable or subscription, edit the definition for that resource to remove the placement rule definition. The steps are the same as for updating that resource. For more information, see:
 
-* [Creating and managing deployables](managing_deployables.md)
+* [Creating and managing deployable resources](managing_deployables.md)
 * [Creating and managing subscriptions](managing_subscriptions.md)

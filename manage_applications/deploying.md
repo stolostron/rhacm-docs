@@ -6,7 +6,7 @@ To set up and use channels, subscriptions, and placement rules for deployments, 
 
    Ensure that you define any labels or annotations that deployables need before they are promoted to the channel. For more information, see [Creating and managing channels](managing_channels.md).
 
-2. Create your deployables. For more information, see [Creating and managing deployables](managing_deployables.md).
+2. Create your deployables. For more information, see [Creating and managing deployable resources](managing_deployables.md).
 
 3. If your target cluster or clusters are not subscribed to the channel, create the subscription. For more information, see [Creating and managing subscriptions](managing_subscriptions.md).
 
