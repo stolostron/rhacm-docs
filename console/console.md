@@ -10,10 +10,11 @@ Red Hat Advanced Cluster Management for Kubernetes console components:
 - [Welcome page](#welcome-page) 
 - [Observe environment details](#observe-environment-details)
 - [Automate Infrastructure](#automate-infrastructure)
-- [Manage applications (Technology preview)](#manage-applications-technology-preview)
+- [Manage applications](#manage-applications)
 - [Governance and risk dashboard](#governance-and-risk-dashboard)
 - [Topology page](#topology-page)
-- [Search](#search) 
+
+To learn about Search, see [Search in the console](search.md)
 
 ## Access your console
 
@@ -59,7 +60,7 @@ You can personalize your view of the page by using the filtering feature. Click 
 
 Create clusters or import existing clusters. Scale up or down and delete clusters as needed. For more information, see [Managing your clusters with Red Hat Advanced Cluster Management for Kubernetes](../manage_cluster/intro.md)
 
-## Manage applications (Technology preview)
+## Manage applications
 
 Click **New application** to edit a `.yaml` file and create your application. Click Resources to view the information of each application. For more information about application resources, see [Application management (Technology preview)](../manage_applications/app_management_overview.md).
 

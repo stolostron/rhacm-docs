@@ -8,11 +8,7 @@ With a percentage rollout, you can phase in a deployment to your clusters to fin
 
 The rolling update for a deployment runs on the hub cluster. The deployment rollout occurs for the managed cluster namespaces that exist on the hub cluster. When the rolling update is completed, the updates can be propagated to the actual managed clusters, such as by using an existing subscription for each managed cluster. The managed cluster namespaces that are updated are defined by the placement rule for the subscription or deployable.
 
-## About this task
-
 You can configure a percentage rollout for a subscription or directly for a deployable resource.
-
-  - Configuring a rolling update for a subscription
 
 A rolling update for a subscription uses the rolling update feature that is included in the Kubernetes resource definition. To configure this feature for a deploying a subscription, you need to create or update the following Kubernetes resources:
 
@@ -29,7 +25,7 @@ A rolling update for a subscription uses the rolling update feature that is incl
     This placement rule identifies the clusters where the initial and target resource is deployed. The rolling update does not target any clusters that are not defined by the placement rule.  
     **Note:** This placement rule must be associated with only the initial resource. The rolling update uses only the placement rule that is associated with the initial resource. Do not include parameters in the target subscription resource to associate that resource with a placement rule.
 
-### Limitations and known issues
+**Note:** Limitations and known issues
 
 - For a subscription rolling update, the initial and target subscription must be included within the same namespace.
 - Target subscriptions cannot define any placement rule. The initial subscription must define the placement rule for the rolling update.
@@ -38,7 +34,7 @@ A rolling update for a subscription uses the rolling update feature that is incl
 
 If you have existing subscriptions that you want to configure to use a rolling update, you need to create your target subscription and update your initial existing subscription to include the required annotations.
 
-### Prerequisites
+### Prerequisites {#deploy_pre}
 
 - You have an initial subscription that points to the initial version of a Kubernetes resource or Helm chart and a placement rule for defining the resource or chart deployment.
 
@@ -52,7 +48,7 @@ If you have existing subscriptions that you want to configure to use a rolling u
 
 At this stage no rolling update is configured and any change to the initial version at the source is then deployed to all managed clusters.
 
-### Procedure
+### Procedure  {#procedure_deploy}
 
 1. Create the target subscription resource YAML definition to point to the newer version of the resource or chart to deploy. This definition must use the same definition structure as any subscription application resource kind. However, this target subscription must not include the annotations for defining a rolling update and must not define any placement rule.
 

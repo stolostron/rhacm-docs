@@ -72,6 +72,22 @@ You can view any role policy and its status from the console.
 
 ## Updating role policies
 
+Learn to update role policies by viewing the following section.
+
+### Disabling role policies
+
+Complete the following steps to disable your role policy:
+
+1. Log in to your Red Hat Advanced Cluster Management for Kubernetes console.
+
+2. From the navigation menu, click **Govern risk** to view a table list of your policies.
+
+3. Disable your policy by clicking the **Options** icon > **Disable**. The _Disable Policy_ dialog box appears.
+
+4. Click **Disable policy**.
+
+Your policy is disabled.
+
 ### Deleting a role policy
 
 Delete the role policy from the CLI or the console. 

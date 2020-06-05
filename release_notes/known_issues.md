@@ -101,7 +101,6 @@ When you are logged in as `kubeadmin` and you click the **Log out** option in t
 
 For technical preview, documentation links were removed from the console, but a few might still be exposed. Any links to the documentation for preview are temporarily not updated with the correct links.
 
-
 ### Search is unavailable or missing data for a brief period
 <!--1.0.0:1918-->
 
@@ -119,7 +118,7 @@ To mitigate this problem, you can increase the memory limit in the `search-pod-x
    ```
    oc patch deployment search-prod-xxxxx-redisgraph -n open-cluster-management -p '{"spec": {"template": {"spec": {"containers":[{"name":"redisgraph","resources": {"limits": {"memory": "4Gi"}}}]}}}}'
    ```
-
+   
 * Update your `search-pod-xxxxx-redisgraph` deployment from the console:
 
   1. Log in to the Red Hat Advanced Cluster Management for Kubernetes cluster.
@@ -139,7 +138,7 @@ To avoid this known issue, either always specify a reasonable value on the `--ta
 
 ## Cluster management known issues
 
-### _etcd-operator_ does not reconcile the cluster
+### etcd-operator does not reconcile the cluster
 <!--1.0.0:2010-->
 
 When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, the `etcd-operator` does not reconcile you managed clusters. As a result, your managed clusters are removed and you lose most data. 
@@ -168,34 +167,34 @@ To manually create an SCC CR in your namespace, complete the following:
 
 1. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
 
-```
-nginx-ingress-52edb
-nginx-ingress-52edb-backend
-```
-
+    ```
+    nginx-ingress-52edb
+    nginx-ingress-52edb-backend
+    ```
+ 
 2. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example where `kind: SecurityContextConstraints` is added:
 
-```
-apiVersion: security.openshift.io/v1
-defaultAddCapabilities:
-kind: SecurityContextConstraints
-metadata:
-  name: ingress-nginx
-  namespace: ns-sub-1
-priority: null
-readOnlyRootFilesystem: false
-requiredDropCapabilities: 
-fsGroup:
-  type: RunAsAny
-runAsUser:
-  type: RunAsAny
-seLinuxContext:
-  type: RunAsAny
-users:
-- system:serviceaccount:my-operator:nginx-ingress-52edb
-- system:serviceaccount:my-operator:nginx-ingress-52edb-backend
-```
-
+    ```
+    apiVersion: security.openshift.io/v1
+    defaultAddCapabilities:
+    kind: SecurityContextConstraints
+    metadata:
+      name: ingress-nginx
+      namespace: ns-sub-1
+    priority: null
+    readOnlyRootFilesystem: false
+    requiredDropCapabilities: 
+    fsGroup:
+      type: RunAsAny
+    runAsUser:
+      type: RunAsAny
+    seLinuxContext:
+      type: RunAsAny
+    users:
+    - system:serviceaccount:my-operator:nginx-ingress-52edb
+    - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
+    ```
+    
 ### Helm release name is not exact on Topology view
 <!--1.0.0:1593-->
 
@@ -212,8 +211,14 @@ Creating more than one channel in the same namespace can cause errors with the h
 
 For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
 
-For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with andother GitHub channel. See the process for [Creating and managing channels](../manage_applications/managing_channels.md) for more information.
+For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with another GitHub channel. See the process for [Creating and managing channels](../manage_applications/managing_channels.md) for more information.
 
+### Application route does not list in the Search page for cluster
+<!--1.0.0:1908-->
+
+If none of the targeted managed clusters for a deployed application is a Red Hat OpenShift cluster, the Route resource is not created, even if the _Application Topology_ displays the object. Since the object is not deployed, it does not display during a Search. 
+
+This is the case for all Kubernetes resources that are platform-specific, such as the Route resource. The Application defines these resources, but they are created on the managed clusters only if they match the resource platform.
 
 ## Security known issues
 
@@ -227,4 +232,4 @@ For more information, see [Certificate policy controller](../security/cert_polic
 ### Any authenticated user can import clusters
 <!--1.0.0:2312-->
 
-Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information view the [Role-based access control](../security/security_intro.md) table.
+Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information, view the Role-based access control table in the [Security](../security/security_intro.md) topic.

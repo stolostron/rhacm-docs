@@ -14,17 +14,17 @@ You need the following prerequisites before creating a cluster in a bare metal e
 
 * Login credentials for your bare metal environment, which include user name, password, and Baseboard Management Controller Address
 
-* A Red Hat OpenShift image pull secret; see [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html)
+* A Red Hat OpenShift Container Platform image pull secret; see [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html)
 
 * Enable the bare metal feature flag to view the bare metal options. The bare metal selections and options are hidden by a feature flag by default. You can enable the feature flags by completing the following steps:
 
-  1. Start the OpenShift command line interface.
+  1. Start the Red Hat OpenShift Container Platform command line interface.
   
   2. Edit the `consoleui` deployment resource to modify the settings:
   
      ```
      MY_CONSOLEUI=`oc -n open-cluster-management get deploy -o name | grep consoleui`
-     oc edit $MY_CONSOLEUI
+     oc -n open-cluster-management edit $MY_CONSOLEUI
      ```
     
   3. Change the feature flag setting to *true*. Your update should look like the following example:
@@ -38,14 +38,15 @@ You need the following prerequisites before creating a cluster in a bare metal e
            ...
            containers:
            - env:                              # Search for env:
-             - featureFlags_baremetal: "true"
+             - name: featureFlags_baremetal
+               value: "true"
              ...
      ```
   4. Edit the `consoleui` deployment resource to modify the settings:
   
      ```
      MY_HEADER=`oc -n open-cluster-management get deploy -o name | grep header`
-     oc edit $MY_HEADER
+     oc -n open-cluster-management edit $MY_HEADER
      ```
 
   5. Change the feature flag setting to *true*. Your update should look like the following example:
@@ -59,9 +60,15 @@ You need the following prerequisites before creating a cluster in a bare metal e
            ...
            containers:
            - env:                              # Search for env:
-             - featureFlags_baremetal: "true"
+             - name: featureFlags_baremetal
+               value: "true"
              ...
      ```
+  6. Watch to make sure the `console-chart-...-consoleui...` and `console-header-...` pods are running:
+  ```
+  oc -n open-cluster-management get pods
+  ```
+  7. When the pods are running again, log out of the Red Hat Advanced Cluster Management for Kubernetes console and log back in.
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console {#bare_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console}
 

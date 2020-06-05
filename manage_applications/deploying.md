@@ -1,4 +1,4 @@
-## Deploying by using channels, subscriptions, and placement rules
+## Deploying by using application resources
 
 To set up and use channels, subscriptions, and placement rules for deployments, complete the following procedure:
 
@@ -6,7 +6,7 @@ To set up and use channels, subscriptions, and placement rules for deployments, 
 
    Ensure that you define any labels or annotations that deployables need before they are promoted to the channel. For more information, see [Creating and managing channels](managing_channels.md).
 
-2. Create your deployables. For more information, see [Creating and managing deployables](managing_deployables.md).
+2. Create your deployables. For more information, see [Creating and managing deployable resources](managing_deployables.md).
 
 3. If your target cluster or clusters are not subscribed to the channel, create the subscription. For more information, see [Creating and managing subscriptions](managing_subscriptions.md).
 
@@ -32,11 +32,11 @@ For more information, see [Scheduling resource deployments for a subscription](m
 
 ## Promoting a deployable to a channel
 
-To promote a deployable to a channel, you can use any of the following methods:
+To promote a deployable, which is a _resource template_, to a channel, you can use any of the following methods:
 
 * Point the deployable to a specific channel by configuring the `spec.channels` field within the deployable definition with the correct annotations to identify the channel.
 
-    The `spec.channels` parameter is available for deployable (`deployable.apps.open-cluster-management.io`) resources to identify the channels where the deployable is to be promoted. The following example shows a deployable that defines the channels where the deployable is to be included.
+    The `spec.channels` parameter is available for deployable (`deployable.apps.open-cluster-management.io`) resources to identify the channels where the deployable is to be promoted. The following example shows a deployable that defines the channels where the deployable is to be included:
 
     ```yaml
     apiVersion: apps.open-cluster-management.io/v1
@@ -87,29 +87,37 @@ To promote a deployable to a channel, you can use any of the following methods:
           kind: PlacementRule
           name: towhichcluster
     ```
+    
+* Update the subscription definition to identify the deployables. The configuration for promoting a deployable to a channel can also be specified within the subscription definition.
+
+The following example subscription indicates that the most recent `nginx` version `1.x` chart is to be promoted through the channel for deployment with the subscription.
+
+    ```yaml
+    apiVersion: apps.open-cluster-management.io/v1
+    kind: Subscription
+    metadata:
+       name: mydevsub
+       namespace: myspace
+    spec:
+     source: https://kubernetes-charts.storage.googleapis.com/
+     package: nginx
+     packageFilter:
+       version: 1.x
+     placement:
+       clusters:
+       - name: mydevcluster1
+    ```
 
 * Update the channel definition to specify channel gate requirements, and update the definitions for your deployables to include the fields and values to match the gate requirements.
 
-  In the previous example, `packageFilter.version: "1.36.x"` indicates the specific `nginx` version `1.36.x` chart is  promoted through the channel for deployment with the subscription.
+  Channel gate requirements are defined within the `spec.gate` section of a channel definition. If the deployable has the fields to match the channel `spec.gate` values, the deployable is promoted to the channel. In this case, the deployable does not need to point to a specific channel with the `spec.channels` field.
 
-* Update the channel definition to specify channel gate requirements and update the definitions for your deployables to include the fields and values to match the gate requirements.
-
-  Channel gate requirements are defined within the `spec.gate` section of a channel definition. If the deployable has the fields to match the channel `spec.gate` values, the deployable is promoted to the channel. In this case, the deployable does not need to point to a specific channel with the  `spec.channels` field.
+  In the previous example, `packageFilter.version: "1.36.x"` indicates the specific `nginx` version `1.36.x` chart is promoted through the channel for deployment with the subscription.
 
 ### Deploying with a percentage roll out  
 
-If you want to roll out a deployment to your target managed clusters instead of deploying to all target clusters, you can configure the deployment of a deployable or chart to only a percentage of your managed clusters at a time. For instance, you might want to roll out a deployment when you need to deploy an update but you do not want to affect all clusters at once. When the deployment is successful on a cluster, the deployment is rolled out to another cluster.
+If you want to roll out a deployment to your target managed clusters instead of deploying to all target clusters, you can configure the deployment of a deployable or chart to only a percentage of your managed clusters at a time. 
+
+For instance, you might want to roll out a deployment when you need to deploy an update but you do not want to affect all clusters at once. When the deployment is successful on a cluster, the deployment is rolled out to another cluster.
 
 For more information, see [Managing deployables with a rolling update](deployment_rollout.md).
-
-## Deploying by using only placement rules
-
-If you do not want or need to use channels and subscriptions, you can still use placement rules. When you are deploying a deployable by using only a placement rule, the deployable definition can include a reference to a stand-alone placement rule resource.
-
-In this scenario, the placement rule defines how to deploy the deployable on target clusters. This placement rule can also be referenced by other deployables so that those deployables are handled with the same deployment settings.
-
-Alternatively, a deployable can include a placement rule definition within the deployable definition. In this scenario, the deployable does not reference any stand-alone placement rule. The placement rule definition that is defined within a deployable is not referenced and shared by other deployables.
-
-To deploy by using a placement rule, define the placement rule for the deployable either as a stand-alone placement rule resource or as part of the deployable definition. If you define the rule as a separate resource, include the `placementRef` field in the definition for the deployable to point to the placement rule.
-
-For more information about defining a placement rule, see [Creating and managing placement rules](managing_placement_rules.md).

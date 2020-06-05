@@ -7,8 +7,6 @@ You can create and manage placement rules to define where and how Helm charts an
   - Placement rule status
   - Update a placement rule
   - Delete a placement rule
-  - Placement rule definition
-  * [Placement rule status definition](#placement-rule-sample-files)
 
 The custom resource definition (CRD) and controller for placement rules replaces the placement policies that were used for applications in previous versions of Red Hat Advanced Cluster Management for Kubernetes. Placement policies are still used for governance and risk policies.
 
@@ -25,7 +23,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 2. Create the placement rule within Red Hat Advanced Cluster Management for Kubernetes. You can define a placement rule as a separate resource or define the rule within the definition for a deployable or subscription. As a best practice, define placement rules as a separate resource when the rule might need to be referenced by multiple resources.
 
    For more information about creating the definition for a deployable or subscriptions, see:
-    * [Creating and managing deployables](managing_deployables.md)
+    * [Creating and managing deployable resources](managing_deployables.md)
     * [Creating and managing subscriptions](managing_subscriptions.md)
 
    To create a placement rule as a separate resource, you can use the console, the Kubernetes CLI (`kubectl`) tool, or REST API:
@@ -73,7 +71,7 @@ Include the name of your placement rule as the value for the `name` field.
 
 For more information about updating the definition for a deployable or subscription, see:
 
-* [Creating and managing deployables](managing_deployables.md)
+* [Creating and managing deployable resources](managing_deployables.md)
 * [Creating and managing subscriptions](managing_subscriptions.md)
 
 When a placement rule is assigned to a subscription, you can view the assignment on the Applications dashboard within the console. To view the assignment:  
@@ -137,7 +135,7 @@ To update a placement rule that is a separate resource, you can use the console,
 
 To update a placement rule that is defined within the definition for a deployable or subscription, the steps are the same as for updating that resource. For more information, see:
 
-  * [Creating and managing deployables](managing_deployables.md)
+  * [Creating and managing deployable resources](managing_deployables.md)
   * [Creating and managing subscriptions](managing_subscriptions.md)
 
 ## Delete a placement rule
@@ -171,5 +169,5 @@ To delete a placement rule that is a separate resource, you can use the console,
 
 To delete a placement rule that is defined within the definition for a deployable or subscription, edit the definition for that resource to remove the placement rule definition. The steps are the same as for updating that resource. For more information, see:
 
-* [Creating and managing deployables](managing_deployables.md)
+* [Creating and managing deployable resources](managing_deployables.md)
 * [Creating and managing subscriptions](managing_subscriptions.md)
