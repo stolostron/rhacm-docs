@@ -80,8 +80,6 @@ Learn more about the tabs that are available from the Topology page:
 
   - Clusters: You can monitor your cluster network, object network, and security policies in a graphical format. View your hub clusters, all your managed clusters, and monitor security violations.
 
-  - Networking: View Kubernetes objects for each cluster and any networks between your Kubernetes objects. Objects display changes if they were recently started. Pods also indicate `pending` and `failed` status.
-
   - Policies: View the policy, policy placement, and clusters that are being validated. Check for violations for the selected policy.
 
 ## Governance and risk dashboard
