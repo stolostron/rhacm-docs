@@ -1,6 +1,6 @@
 # Troubleshooting subscription is not linked to the application
 
-An application is created and set to use a subscription the uses the `matchLabel` annotation. This issue is  specifically related to product version 1.0.0.
+An application is created and set to use a subscription the uses the `matchLabel` annotation. This issue is  specifically related to product version `1.0.0`.
 
 ## Symptom: Subscription is not linked to the application
 
@@ -25,16 +25,18 @@ From the application console, the application is not linked to the subscription.
    % kubectl logs -n open-cluster-management multicluster-operators-application-5d68b77964-fppqc multicluster-operators-application
    ```
 
-3. The error shows the `MatchExpressions` selector has invalid data, with such as the following errors:
+3. The error shows the `MatchExpressions` selector has invalid data, such as the following errors:
 
    ```
-   Failed to list <application> : v1.LabelSelectorRequirement.Values: []string: decode slice: expect [ or n, but found ", error found in #10 byte of ...|"values":"val-app-1"|..., bigger context ...|ressions":[{"key":"app","operator":"In","values":"val-app-1"}]}}},{"apiVersion":"app.k8s.io/v1beta1"|...
+   ... Failed to list <application> : v1.LabelSelectorRequirement.Values: []string: decode slice: expect [ or n, but found ", error found in #10 byte of ...|"values":"val-app-1"|..., bigger context ...|ressions":[{"key":"app","operator":"In","values":"val-app-1"}]}}},{"apiVersion":"app.k8s.io/v1beta1"|...
    ```
 4. List all applications and open each application individually:
 
    ```
    % oc get applications --all-namespaces 
    ```
+   See example: 
+
    ```
    NAMESPACE                 NAME                AGE
    default                   guestbook-app       9d
