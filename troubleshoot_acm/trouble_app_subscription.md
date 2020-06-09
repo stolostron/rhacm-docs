@@ -1,6 +1,6 @@
 # Troubleshooting subscription is not linked to the application
 
-An application is created and set to use a subscription the uses the `matchLabel` annotation. This issue is  specifically related to product version `1.0.0`.
+An application is created and set to use a subscription that uses the `matchLabel` annotation. This issue is specifically related to product version `1.0.0`.
 
 ## Symptom: Subscription is not linked to the application
 
