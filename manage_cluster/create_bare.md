@@ -2,11 +2,13 @@
 
 You can use the Red Hat Advanced Cluster Management for Kubernetes console to create a Red Hat OpenShift Container Platform cluster in a bare metal environment.
 
+**Note:** The options for bare metal in the console are for technical preview only, and are hidden by a feature flag by default. See the instructions for enabling the feature flag in the _Prerequisites_ section.
+
 ## Prerequisites {#bare_prerequisites}
 
-You need the following prerequisites before creating a cluster in a bare metal environment:
+You need the following prerequisites before creating a cluster in a bare metal environment: 
 
-* A deployed Red Hat Advanced Cluster Management for Kubernetes hub cluster
+* A deployed Red Hat Advanced Cluster Management for Kubernetes hub cluster on OpenShift Container Platform version 4.4, or later. 
 
 * Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster in the bare metal environment
 
@@ -14,9 +16,9 @@ You need the following prerequisites before creating a cluster in a bare metal e
 
 * Login credentials for your bare metal environment, which include user name, password, and Baseboard Management Controller Address
 
-* A Red Hat OpenShift Container Platform image pull secret; see [Using image pull secrets](https://docs.openshift.com/container-platform/4.3/openshift_images/managing_images/using-image-pull-secrets.html)
+* A Red Hat OpenShift Container Platform image pull secret; see [Using image pull secrets](https://docs.openshift.com/container-platform/4.4/openshift_images/managing_images/using-image-pull-secrets.html)
 
-* Enable the bare metal feature flag to view the bare metal options. The bare metal selections and options are hidden by a feature flag by default. You can enable the feature flags by completing the following steps:
+* Bare metal feature flags that are enabled to view the bare metal options. The bare metal options are hidden by feature flags by default. Complete the following steps to enable the feature flags:
 
   1. Start the Red Hat OpenShift Container Platform command line interface.
   
@@ -64,10 +66,13 @@ You need the following prerequisites before creating a cluster in a bare metal e
                value: "true"
              ...
      ```
+  
   6. Watch to make sure the `console-chart-...-consoleui...` and `console-header-...` pods are running:
-  ```
-  oc -n open-cluster-management get pods
-  ```
+
+     ```
+     oc -n open-cluster-management get pods
+     ```
+  
   7. When the pods are running again, log out of the Red Hat Advanced Cluster Management for Kubernetes console and log back in.
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console {#bare_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console}
