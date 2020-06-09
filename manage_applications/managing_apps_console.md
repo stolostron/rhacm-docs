@@ -12,15 +12,15 @@ The console includes different tools that each provide different application man
 
 From the main _Applications_ dashboard, you can view information about all applications and select a specific application to view the dashboard for more information about that specific application.
 
-### Applications dashboard (all applications)
+### Applications dashboard 
 
-From the _Overview_ tab on this dashboard, you can complete the following tasks:
+From the _Overview_ tab on this dashboard, you can complete the following tasks for all applications:
 
-* View a table that lists all applications. If needed, you can use the search box to filter the applications that are listed.
+* View a table that lists all applications. If needed, you can use the _Search_ box to filter the applications that are listed.
 * From the _Applications_ page, you can view the following information:
   * The application name and namespace.
   * The number of managed clusters where the application is deployed through a subscription.
-  * The number of subscriptions that are used to deploy the application and the associated status.
+  * The number of subscriptions on the _hub_ cluster that are used to deploy the application and the associated status. Click to see the subscriptions on the managed clusters.
   * The date when the application was created.
   * The Grafana dashboard for the application. 
   
