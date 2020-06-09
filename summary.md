@@ -132,3 +132,4 @@
      * [Troubleshooting a default storage class error when creating a cluster on bare metal](troubleshoot_acm/trouble_storage_class.md)
      * [Troubleshooting application Kubernetes deployment version](troubleshoot_acm/trouble_app_deploy.md)
      * [Troubleshooting cert-manager-webhook](troubleshoot_acm/trouble_cert_webhook.md)
+     * [Troubleshooting subscription is not linked to the application](troubleshoot_acm/trouble_app_subscription.md)
