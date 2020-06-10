@@ -279,9 +279,6 @@ When Red Hat Advanced Cluster Management for Kubernetes is installed and the Ope
         - --openshift-ca=/etc/tls/ocp/tls.crt
       ```
       
-      
-       
-
    2. Add the following parameter value for the volume mount:
    
       ```
