@@ -1,6 +1,6 @@
 # Replacing the management ingress certificates
 
-You can replace management ingress certificates.
+You can replace management ingress certificates. If you replace the default ingress certificate for OpenShift Container Platform, you need to make modifications to the management ingress. For more information see, _500 Internal error during login to the console_ in the <!--update the link-->
 
 ## Prerequisites to replace management ingress certificate
 
