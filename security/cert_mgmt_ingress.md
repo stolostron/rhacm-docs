@@ -151,13 +151,12 @@ Complete the following steps to replace your BYO ingress certificate:
       ```
 
    1. Replace the `ingress-ca-cert` string  with `multicloud-ca-cert`.
-
-   2. Replace the `byo-ingress-tls-secret` string with the correct secret name similar to `$MANAGEMENT_INGRESS-tls-secret`.
+   2. Replace the `byo-ingress-tls-secret` string with the `$MANAGEMENT_INGRESS-tls-secret`.
    3. Save your deployment and close the editor. The management ingress automatically restarts.
 
 2. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
 
-3. Delete the Bring Your Own (BYO) ingress secret by running the following command:
+3. Delete the Bring Your Own (BYO) ingress secret and ingress CA certificate by running the following command:
 
    ```
    oc delete secret -n open-cluster-management byo-ingress-tls-secret
