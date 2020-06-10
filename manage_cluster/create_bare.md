@@ -20,60 +20,60 @@ You need the following prerequisites before creating a cluster in a bare metal e
 
 * Bare metal feature flags that are enabled to view the bare metal options. The bare metal options are hidden by feature flags by default. Complete the following steps to enable the feature flags:
 
-  1. Start the Red Hat OpenShift Container Platform command line interface.
+   1. Start the Red Hat OpenShift Container Platform command line interface.
   
-  2. Edit the `consoleui` deployment resource to modify the settings:
+   2. Edit the `consoleui` deployment resource to modify the settings:
   
-     ```
-     MY_CONSOLEUI=`oc -n open-cluster-management get deploy -o name | grep consoleui`
-     oc -n open-cluster-management edit $MY_CONSOLEUI
-     ```
+      ```
+      MY_CONSOLEUI=`oc -n open-cluster-management get deploy -o name | grep consoleui`
+      oc -n open-cluster-management edit $MY_CONSOLEUI
+      ```
     
-  3. Change the feature flag setting to *true*. Your update should look like the following example:
+   3. Change the feature flag setting to *true*. Your update should look like the following example:
   
-     ```
-     spec:
-       ...
-       template:
-         ...
-         spec:
-           ...
-           containers:
-           - env:                              # Search for env:
-             - name: featureFlags_baremetal
-               value: "true"
-             ...
-     ```
-  4. Edit the `consoleui` deployment resource to modify the settings:
+      ```
+      spec:
+        ...
+        template:
+          ...
+          spec:
+            ...
+            containers:
+            - env:                              # Search for env:
+              - name: featureFlags_baremetal
+                value: "true"
+              ...
+      ```
+   4. Edit the `consoleui` deployment resource to modify the settings:
   
-     ```
-     MY_HEADER=`oc -n open-cluster-management get deploy -o name | grep header`
-     oc -n open-cluster-management edit $MY_HEADER
-     ```
+      ```
+      MY_HEADER=`oc -n open-cluster-management get deploy -o name | grep header`
+      oc -n open-cluster-management edit $MY_HEADER
+      ```
 
-  5. Change the feature flag setting to *true*. Your update should look like the following example:
+   5. Change the feature flag setting to *true*. Your update should look like the following example:
   
-     ```
-     spec:
-       ...
-       template:
-         ...
-         spec:
-           ...
-           containers:
-           - env:                              # Search for env:
-             - name: featureFlags_baremetal
-               value: "true"
-             ...
-     ```
+      ```
+      spec:
+        ...
+        template:
+          ...
+          spec:
+            ...
+            containers:
+            - env:                              # Search for env:
+              - name: featureFlags_baremetal
+                value: "true"
+              ...
+      ```
   
-  6. Watch to make sure the `console-chart-...-consoleui...` and `console-header-...` pods are running:
+   6. Watch to make sure the `console-chart-...-consoleui...` and `console-header-...` pods are running:
 
-     ```
-     oc -n open-cluster-management get pods
-     ```
+      ```
+      oc -n open-cluster-management get pods
+      ```
   
-  7. When the pods are running again, log out of the Red Hat Advanced Cluster Management for Kubernetes console and log back in.
+   7. When the pods are running again, log out of the Red Hat Advanced Cluster Management for Kubernetes console and log back in.
 
 ## Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console {#bare_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console}
 
