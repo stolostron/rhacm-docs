@@ -236,7 +236,7 @@ Any authenticated user of OpenShift Container Platform can provision projects an
 
 ### 500 Internal error during login to the console 
 
-When Red Hat Advanced Cluster Management for Kubernetes is installed and the OpenShift Container Platform is customized, a `500 Internal Error` message appears. You are unable to access the console because the OpenShift Container Platform certificate is not ancluded in the Red Hat Advanced Cluster Management for Kuberentes. Add the OpenShift Container Platform certificate by completing the following steps: 
+When Red Hat Advanced Cluster Management for Kubernetes is installed and the OpenShift Container Platform is customized, a `500 Internal Error` message appears. You are unable to access the console because the OpenShift Container Platform certificate is not included in the Red Hat Advanced Cluster Management for Kuberentes management ingress. Add the OpenShift Container Platform certificate by completing the following steps: 
 
 1. Edit the management ingress deployment:
 
