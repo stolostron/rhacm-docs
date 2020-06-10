@@ -235,6 +235,7 @@ For more information, see [Certificate policy controller](../security/cert_polic
 Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information, view the Role-based access control table in the [Security](../security/security_intro.md) topic.
 
 ### 500 Internal error during login to the console 
+<!--1.0.1:2414-->
 
 When Red Hat Advanced Cluster Management for Kubernetes is installed and the OpenShift Container Platform is customized, a `500 Internal Error` message appears. You are unable to access the console because the OpenShift Container Platform certificate is not included in the Red Hat Advanced Cluster Management for Kuberentes management ingress. Add the OpenShift Container Platform certificate by completing the following steps: 
 
@@ -338,7 +339,7 @@ When Red Hat Advanced Cluster Management for Kubernetes is installed and the Ope
 
 2. Optional. Create a secret named `byo-ingress-tls-secret` to contain the OpenShift ingress certificate if you completed the previous step, 1.4. Ensure that the secret is contained in the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.
 
-   1. Run the following command to create a `byo-ingress-tls-secret`:
+   * Run the following command to create a `byo-ingress-tls-secret`:
       
       ```
       oc create secret tls byo-ingress-tls-secret \
