@@ -233,3 +233,41 @@ For more information, see [Certificate policy controller](../security/cert_polic
 <!--1.0.0:2312-->
 
 Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information, view the Role-based access control table in the [Security](../security/security_intro.md) topic.
+
+### 500 Internal error during login to the console 
+
+When Red Hat Advanced Cluster Management for Kubernetes is installed and the OpenShift Container Platform is customized, a `500 Internal Error` message appears. You are unable to access the console because the OpenShift Container Platform certificate is not ancluded in the Red Hat Advanced Cluster Management for Kuberentes. Add the OpenShift Container Platform certificate by completing the following steps: 
+
+1. Edit the `oauth-proxy` resource. Add the following lines to the `oauth-proxy` arguments:
+
+   ```
+   - --openshift-ca=/etc/tls/ocp/tls.crt
+   - --openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+   ```
+
+2. Add the following parameter value for the volume mount:
+   
+   ```
+   - mountPath: /etc/tls/ocp
+     name: ocp-tls-secret
+   ```
+
+3. Modify the volume for the deployment to reference the custom certificate:
+
+   ```
+   - name: tls-secret
+     secret:
+       defaultMode: 420
+       secretName: byo-ingress-tls-secret
+   ```
+
+4. Add the volume to the deployment: 
+
+   ```
+   - name: ocp-tls-secret
+     secret:
+       defaultMode: 420
+       secretName: ocp-byo-ca
+   ```
+
+5. You must create a `byo-ingress-tls-secret` and `ocp-byo-ca` to contain the OpenShift ingress certificate, and the OpenShift Container Platform ingress CA is contained in the `open-cluster-management` namespace. <!--still need to add links so that users can complete this-->
