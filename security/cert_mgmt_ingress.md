@@ -1,6 +1,6 @@
 # Replacing the management ingress certificates
 
-You can replace management ingress certificates.
+You can replace management ingress certificates. If you replace the default ingress certificate for OpenShift Container Platform, you need to make modifications to the management ingress. For more information see, _500 Internal error during login to the console_ in the [Security known issues](../release_notes/known_issues.md#security-known-issues).
 
 ## Prerequisites to replace management ingress certificate
 
@@ -127,12 +127,14 @@ Complete the following steps to replace your BYO ingress certificate:
 4. Edit the management ingress deployment. Get the name of the deployment. Run the following commands:
 
    ```
-   oc get deployment -n open-cluster-management
+   export MANAGEMENT_INGRESS=`oc get deployment -o custom-columns=:.metadata.name | grep management-ingress`
 
-   oc edit deployment management-ingress -n open-cluster-management
+   oc edit deployment $MANAGEMENT_INGRESS -n open-cluster-management
    ```
 
-   * Replace the string similar to `multicloud-ca-cert` with `ingress-ca-cert`.
+   * Replace the `multicloud-ca-cert` string with `ingress-ca-cert`.  
+
+   * Replace the `$MANAGEMENT_INGRESS-tls-secret` string with `byo-ingress-tls-secret`.
 
    * Save your deployment and close the editor. The management ingress automatically restarts.
 
@@ -143,22 +145,22 @@ Complete the following steps to replace your BYO ingress certificate:
 1. Edit the management ingress deployment. Replace the string `multicloud-ca-cert` with `ingress-ca-cert`. Get the name of the deployment. Run the following commands:
 
       ```
-      oc get deployment -n open-cluster-management
+      export MANAGEMENT_INGRESS=`oc get deployment -o custom-columns=:.metadata.name | grep management-ingress`
 
-      oc edit deployment management-ingress -n open-cluster-management
+      oc edit deployment $MANAGEMENT_INGRESS -n open-cluster-management
       ```
 
    1. Replace the `ingress-ca-cert` string  with `multicloud-ca-cert`.
-
-   2. Replace the `byo-ingress-tls-secret` string with the correct secret name similar to `management-ingress-b6417-tls-secret`.
+   2. Replace the `byo-ingress-tls-secret` string with the `$MANAGEMENT_INGRESS-tls-secret`.
    3. Save your deployment and close the editor. The management ingress automatically restarts.
 
 2. After all pods are restarted, navigate to the Red Hat Advanced Cluster Management for Kubernetes console from your browser. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
 
-3. Delete the Bring Your Own (BYO) ingress secret by running the following command:
+3. Delete the Bring Your Own (BYO) ingress secret and ingress CA certificate by running the following commands:
 
    ```
    oc delete secret -n open-cluster-management byo-ingress-tls-secret
+   oc delete secret -n open-cluster-management ingress-ca-cert
    ```
 
 See [Certificates](certificates.md) for more information about certificates that are created and managed by Red Hat Advanced Cluster Management for Kubernates. Return to the [Security page](security_intro.md) for more information on securing your cluster.

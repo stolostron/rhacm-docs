@@ -4,11 +4,13 @@ Bare metal assets are virtual or physical servers that are configured to run you
 
 You must create a bare metal asset in Red Hat Advanced Cluster Management for Kubernetes to create a cluster on it. Use the following procedure to create a bare metal asset that can host a cluster that is managed by Red Hat Advanced Cluster Management for Kubernetes.
 
+**Note:** The bare metal features are only provided as a technical preview. The bare metal options are hidden by feature flags, by default. To view the bare metal options, you must enable the feature flags by completing the instructions in the _Prerequisites_ section.
+
 ## Prerequisites {#bma-prerequisites}
 
 You need the following prerequisites before creating a bare metal asset:
 
-* A deployed Red Hat Advanced Cluster Management for Kubernetes hub cluster
+* A deployed Red Hat Advanced Cluster Management for Kubernetes hub cluster on OpenShift Container Platform version 4.4, or later. 
 
 * Access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster to connect to the bare metal asset.
 
@@ -19,6 +21,63 @@ You need the following prerequisites before creating a bare metal asset:
    * password
    * Baseboard Management Controller Address
    * boot NIC MAC address
+   
+* Bare metal feature flags that are enabled to view the bare metal options. The bare metal options are hidden by feature flags by default. Complete the following steps to enable the feature flags:
+
+  1. Start the Red Hat OpenShift Container Platform command line interface.
+  
+  2. Edit the `consoleui` deployment resource to modify the settings:
+  
+     ```
+     MY_CONSOLEUI=`oc -n open-cluster-management get deploy -o name | grep consoleui`
+     oc -n open-cluster-management edit $MY_CONSOLEUI
+     ```
+    
+  3. Change the feature flag setting to *true*. Your update should look like the following example:
+  
+     ```
+     spec:
+       ...
+       template:
+         ...
+         spec:
+           ...
+           containers:
+           - env:                              # Search for env:
+             - name: featureFlags_baremetal
+               value: "true"
+             ...
+     ```
+  4. Edit the `consoleui` deployment resource to modify the settings:
+  
+     ```
+     MY_HEADER=`oc -n open-cluster-management get deploy -o name | grep header`
+     oc -n open-cluster-management edit $MY_HEADER
+     ```
+
+  5. Change the feature flag setting to *true*. Your update should look like the following example:
+  
+     ```
+     spec:
+       ...
+       template:
+         ...
+         spec:
+           ...
+           containers:
+           - env:                              # Search for env:
+             - name: featureFlags_baremetal
+               value: "true"
+             ...
+     ```
+  
+  6. Watch to make sure the `console-chart-...-consoleui...` and `console-header-...` pods are running:
+  
+     ```
+     oc -n open-cluster-management get pods
+     ```
+  
+  7. When the pods are running again, log out of the Red Hat Advanced Cluster Management for Kubernetes console and log back in.
 
 ## Creating a bare metal asset with the console {#creating-a-bare-metal-asset-with-the-console}
 

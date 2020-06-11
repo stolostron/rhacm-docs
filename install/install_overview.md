@@ -6,8 +6,8 @@ You can install the Red Hat Advanced Cluster Management for Kubernetes online on
 
 High-level installation flow:
 
-1. You must have a supported version of OpenShift Container Platform installed on premise.
-2. You must complete an online installation.
+1. You must have a supported version of OpenShift Container Platform installed and configured.
+2. Install the Operator for Red Hat Advanced Cluster Management for Kubernetes from the catalog.
 
 After you install and deploy the Red Hat Advanced Cluster Management for Kubernetes, view the documentation on how to use the features. 
 
