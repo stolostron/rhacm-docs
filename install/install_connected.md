@@ -84,15 +84,22 @@ You must meet the following requirements before you install Red Hat Advanced Clu
       ```
       oc apply -f local/<subscription>.yaml
       ```
+      
+      Replace _subscription_ with the name of the subscription file that you created. 
 
-5. Generate a pull secret to access the entitled content from the distribution registry. **Important:** Pull secrets are namespace-specific, so make sure that you are in the namespace that you created in step 1.
+5. If you plan to import Kubernetes clusters that were not created by OpenShift Container Platform or Red Hat Advanced Cluster Management, generate a pull secret to access the entitled content from the distribution registry. Pull secret requirements for OpenShift Container Platform clusters are automatically resolved by OpenShift Container Platform and Red Hat Advanced Cluster Management. You do not have to generate the pull secret if you are not importing other types of Kubernetes clusters to be managed. **Important:** Pull secrets are namespace-specific, so make sure that you are in the namespace that you created in step 1.
+
+   1. Download your OpenShift Container Platform pull secret file from [cloud.redhat.com](https://cloud.redhat.com/openshift/install/pull-secret) by selecting **Download pull secret**. Your OpenShift Container Platform pull secret is associated with your Red Hat Customer Portal ID, and is the same across all Kubernetes providers.
+   
+   2. Run the following command to generate your pull secret:
+   
+      ```
+      oc create secret generic <secret> -n <namespace> --from-file=.dockerconfigjson=<path-to-pull-secret> --type=kubernetes.io/dockerconfigjson
+      ```
   
-   ```
-   oc create secret docker-registry <secret> --docker-server=registry.access.redhat.com/rhacm1-tech-preview --docker-username=<docker_username> --docker-password=<docker_password>
-   ```
-   Replace _secret_ with the name of the secret that you created.
-   Replace _docker_username_ with your username for the distribution registry that you identified as the `docker-server`. 
-   Replace _docker_password_ with your password or token for the distribution registry that you identified as the `docker-server`.
+      Replace _secret_ with the name of the secret that you want to create.
+      Replace _namespace_ with your project namespace.
+      Replace _path-to-pull-secret_ with the path to your OpenShift Container Platform pull secret that you downloaded.
 
 6. Create the MultiClusterHub custom resource by creating a `.yaml` file that defines the custom resource. Your file should look similar to the following example:
   
@@ -145,17 +152,17 @@ You must meet the following requirements before you install Red Hat Advanced Clu
   
 3. Create a pull secret that provides the entitlement to the downloads.
 
-   1. In the Red Hat OpenShift Container Platform console navigation, select **Workloads** > **Secrets**. 
+   1. Copy your OpenShift Container Platform pull secret from [cloud.redhat.com](https://cloud.redhat.com/openshift/install/pull-secret) by selecting **Copy pull secret**. You will use the content of this pull secret in an step later in this procedure. Your OpenShift Container Platform pull secret is associated with your Red Hat Customer Portal ID, and is the same across all Kubernetes providers.
+
+   2. In the Red Hat OpenShift Container Platform console navigation, select **Workloads** > **Secrets**. 
   
-   2. Select **Create** > **Image Pull Secret**. 
+   3. Select **Create** > **Image Pull Secret**. 
   
-   3. Enter a name for your secret.
+   4. Enter a name for your secret.
   
-   4. Select **Image Registry Credentials** as the authentication type.
+   5. Select **Upload Configuration File** as the authentication type.
   
-   5. In the *Registry Server Address* field, enter the address of the distribution registry that contains your image. In most cases, it is `registry.access.redhat.com/rhacm1-tech-preview`.
-  
-   6. Enter your username and password or token for the distribution registry that contains the image. 
+   6. In the *Configuration file* field, paste the pull secret that you copied from `cloud.redhat.com`.
   
    7. Select **Create** to create the pull secret. 
 
