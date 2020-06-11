@@ -61,7 +61,6 @@ As you create a certificate policy from the console, a YAML file is also created
    * Standards
    * Categories
    * Controls
-   * Disabled
 
 5. Click **Create**.
 
