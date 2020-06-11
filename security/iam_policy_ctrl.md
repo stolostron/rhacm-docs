@@ -1,6 +1,6 @@
 # IAM policy controller
 
-Identity and Access Management (IAM) policy controller can be used to receive notifications about IAM policies that are non-compliance. The compliance check is based on the parameters that you configure in the IAM policy.
+Identity and Access Management (IAM) policy controller can be used to receive notifications about IAM policies that are non-compliant. The compliance check is based on the parameters that you configure in the IAM policy.
 
 The IAM policy controller checks for compliance of the number of cluster administrators that you allow in your cluster. IAM policy controller communicates with the local Kubernetes API server. For more information, see [Extend the Kubernetes API with CustomResourceDefinitions](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/).
 
