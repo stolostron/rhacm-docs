@@ -4,7 +4,7 @@ You can use the Center for Internet Security (CIS) policy controller to receive 
 
 The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list.
 
-The controller uses the Aqua security `kube-bench` tool to check the master and worker nodes in the managed cluster for compliance. For information, see the [aquasecurity/kube-bench repository](https://github.com/aquasecurity/kube-bench).
+The controller uses the Aqua security [`kube-bench` tool](https://github.com/aquasecurity/kube-bench) to check the master and worker nodes in the managed cluster for compliance. For information, see [Aqua security](https://www.aquasec.com/).
 
 When a managed cluster is non-compliant, the CIS controller assigns a risk score. Each CIS rule that fails the check is assigned a score. The risk score that is assigned to the non-compliant cluster is the maximum of all the scores that are assigned to failed checks.
 
