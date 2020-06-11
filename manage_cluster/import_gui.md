@@ -8,8 +8,10 @@
 
 ## Prerequisites {#gui_prerequisites}
 
-* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed.
+* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed. If you are importing bare metal clusters, you must have the hub cluster installed on Red Hat OpenShift Container Platform version 4.4, or later.
+
 * You need a cluster that you want to manage and Internet connectivity.
+
 * Install `kubectl`. To install `kubectl`, see _Install and Set Up kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos).
 
 <!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters. (wait for testing, elder sending RFE, see Brandi or elder for history here)-->

@@ -13,7 +13,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
 ## Prerequisites {#cli_prerequisites}
 
-* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed.
+* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed. If you are importing bare metal clusters, you must have the hub cluster installed on Red Hat OpenShift Container Platform version 4.4, or later. 
 
 * You need a separate cluster that you want to manage and Internet connectivity.
 
