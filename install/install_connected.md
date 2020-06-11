@@ -10,7 +10,7 @@ You must meet the following requirements before you install Red Hat Advanced Clu
 
 * Red Hat OpenShift Container Platform version 4.3, or later, must be deployed in your environment, and you must be logged into it with the CLI. See the [OpenShift version 4.3 documentation](https://docs.openshift.com/container-platform/4.3/welcome/index.html) or [OpenShift version 4.4 documentation](https://docs.openshift.com/container-platform/4.4/welcome/index.html).
 
-   **Note**: You must create and configure a StorageClass in Red Hat OpenShift Container Platform that is available to storage for Red Hat Advanced Cluster Management for Kubernetes. For more information, see [Installing the Local Storage Operator](https://docs.openshift.com/container-platform/4.3/storage/persistent_storage/persistent-storage-local.html#local-storage-install_persistent-storage-local) for OpenShift Container Platform. 
+  **Note**: You must create and configure a StorageClass in Red Hat OpenShift Container Platform that is available to storage for Red Hat Advanced Cluster Management for Kubernetes. For more information, see [Installing the Local Storage Operator](https://docs.openshift.com/container-platform/4.3/storage/persistent_storage/persistent-storage-local.html#local-storage-install_persistent-storage-local) for OpenShift Container Platform. 
 
 * Your Red Hat OpenShift Container Platform command line interface (CLI) must be version 4.3, or later, and configured to run `oc` commands. See [Getting started with the CLI](https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html) for information about installing and configuring the Red Hat OpenShift CLI.
 
