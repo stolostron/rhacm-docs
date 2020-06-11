@@ -113,3 +113,8 @@ We use the following milestones to triage issues:
 ### Transforming the docs (doc team future)
 
 Example: https://docs.openshift.com/container-platform/4.3/welcome/index.html
+
+### Security Response
+
+If you find a security issue that you want to address confidentially, contact the Red Hat product Security team. 
+See details at [Security Contacts and Procedures](https://access.redhat.com/security/team/contact).
