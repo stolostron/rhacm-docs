@@ -2,12 +2,13 @@
 
 Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.
 
-**Note:** Three worker nodes of approximately equal capacity spread across three availability zones are required. The requirements that are listed are not minimum requirements.
+**Note:** The requirements that are listed are not minimum requirements.
 
 ### Worker nodes (workloads)
 
 As you determine the number of worker nodes and the resource configurations, consider the workload that is running.
 
+- Three worker nodes of approximately equal capacity spread across three availability zones are required. 
 - If your cluster has a few worker nodes, consider increasing the number of worker nodes while decreasing the size of the nodes for adequate headspace, efficiency, mobility, and resiliency.
 - Accommodate the workload mobility.
 - Consider the memory that is required for a specific type of workload.
