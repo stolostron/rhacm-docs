@@ -116,5 +116,5 @@ Example: https://docs.openshift.com/container-platform/4.3/welcome/index.html
 
 ### Security Response
 
-If you've found a security issue that you'd like to disclose confidentially please contact Red Hat's Product Security team. 
-Details at https://access.redhat.com/security/team/contact
+If you find a security issue that you want to address confidentially, please contact the Red Hat product Security team. 
+See details at [Security Contacts and Procedures](https://access.redhat.com/security/team/contact).
