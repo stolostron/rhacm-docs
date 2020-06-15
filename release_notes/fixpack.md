@@ -4,7 +4,7 @@ View a summarized list of Red Hat Advanced Cluster Management for Kubernetes fix
 
 1. Upgrade from product version 1.0 is now supported. 
 2. Search sync performance was improved.
-3. Security vulnerabilities were fixed. 
+3. Known security vulnerabilities were fixed. 
 4. Bare metal hosts stuck in `power on` state were fixed to allow for local management.
 5. Added support for provisioning newer versions of Red Hat OpenShift Container Platform.
 6. Fixed issue with Visual Web Terminal command.
