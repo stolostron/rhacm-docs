@@ -91,6 +91,11 @@ The product supports Mozilla Firefox 74.0 or the latest version that is availabl
 
 From the console and Visual Web Terminal, users are unable to search for values that contain an empty space. 
 
+### A saved search in the console might display incorrect value in Visual Web Terminal
+<!--1.0.0:1726-->
+
+If you save your search query, you might see inconsistencies between the number of _Search_ page results and the results from the Visual Web Terminal.
+
 ### At logout user kubeadmin gets extra browser tab with blank page
 <!--1.0.0:2191--> 
 
