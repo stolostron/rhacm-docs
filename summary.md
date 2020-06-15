@@ -7,6 +7,7 @@
    * [Glossary of terms](about/glossary_terms.md)   
  * [Release Notes](release_notes/release_notes.md)
    * [What's new](release_notes/whats_new.md)
+   * [Fix pack updates](fixpack.md)
    * [Known issues and limitations](release_notes/known_issues.md)
    * [Considerations for GDPR readiness](release_notes/gdpr_readiness.md)
  * [Installation](install/install_overview.md)
