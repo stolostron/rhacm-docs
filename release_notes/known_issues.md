@@ -96,7 +96,7 @@ From the console and Visual Web Terminal, users are unable to search for values 
 
 When you are logged in as `kubeadmin` and you click the **Log out** option in the drop-down menu, the console returns to the login screen, but a browser tab opens with a `/logout` URL. The page is blank and you can close the tab without impact to your console.
 
-### Console documentation links in technical preview might be incorrect
+### Console documentation links temporarily removed
 <!--1.0.0:816 -- fixed for 2.0 -->
 
 For version 1.0 and fix pack version 1.0.1, documentation links were temporarily removed from the console.
@@ -126,15 +126,6 @@ To mitigate this problem, you can increase the memory limit in the `search-pod-x
   3. Update the `containers.resources.limit.memory` parameter and increase the memory value.
   
 **Note**: Your maximum memory is restricted by either your quota, policies, or physical limits of the nodes on your cluster.
-
-### Visual Web Terminal command (oc logs) incomplete or frozen log output
-<!--1.0.0:2343-->
-
-The `oc logs` command in Visual Web Terminal attempts to display a total log output for the specified pod and container if the user does not specify a `--tail=` line limit as a parameter. 
-
-A large amount of log data limits the terminal response time as data is retrieved and displayed. If the amount of data is large enough, Visual Web Terminal can appear to be frozen or blocked. To get the output quickly, leave or close the Visual Web Terminal to delete the session, then reopen.
-
-To avoid this known issue, either always specify a reasonable value on the `--tail=` flag for the `oc logs` command, or use `kubectl logs`, which defaults to the last 30 lines unless you specify a different `--tail` value.
 
 ## Cluster management known issues
 
