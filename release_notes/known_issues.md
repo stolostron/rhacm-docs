@@ -91,15 +91,20 @@ The product supports Mozilla Firefox 74.0 or the latest version that is availabl
 
 From the console and Visual Web Terminal, users are unable to search for values that contain an empty space. 
 
+### A saved search in the console might display incorrect value in Visual Web Terminal
+<!--1.0.0:1726-->
+
+If you save your search query and use `savedsearches`, you might see incorrect results in the Visual Web Terminal. The result from the _Search_ page is correct.
+
 ### At logout user kubeadmin gets extra browser tab with blank page
 <!--1.0.0:2191--> 
 
 When you are logged in as `kubeadmin` and you click the **Log out** option in the drop-down menu, the console returns to the login screen, but a browser tab opens with a `/logout` URL. The page is blank and you can close the tab without impact to your console.
 
-### Console documentation links in technical preview might be incorrect
-<!--1.0.0:816-->
+### Console documentation links temporarily removed
+<!--1.0.0:816 -- fixed for 2.0 -->
 
-For technical preview, documentation links were removed from the console, but a few might still be exposed. Any links to the documentation for preview are temporarily not updated with the correct links.
+For version 1.0 and fix pack version 1.0.1, documentation links were temporarily removed from the console.
 
 ### Search is unavailable or missing data for a brief period
 <!--1.0.0:1918-->
@@ -127,15 +132,6 @@ To mitigate this problem, you can increase the memory limit in the `search-pod-x
   
 **Note**: Your maximum memory is restricted by either your quota, policies, or physical limits of the nodes on your cluster.
 
-### Visual Web Terminal command (oc logs) incomplete or frozen log output
-<!--1.0.0:2343-->
-
-The `oc logs` command in Visual Web Terminal attempts to display a total log output for the specified pod and container if the user does not specify a `--tail=` line limit as a parameter. 
-
-A large amount of log data limits the terminal response time as data is retrieved and displayed. If the amount of data is large enough, Visual Web Terminal can appear to be frozen or blocked. To get the output quickly, leave or close the Visual Web Terminal to delete the session, then reopen.
-
-To avoid this known issue, either always specify a reasonable value on the `--tail=` flag for the `oc logs` command, or use `kubectl logs`, which defaults to the last 30 lines unless you specify a different `--tail` value.
-
 ## Cluster management known issues
 
 ### etcd-operator does not reconcile the cluster
@@ -143,6 +139,47 @@ To avoid this known issue, either always specify a reasonable value on the `--ta
 
 When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, the `etcd-operator` does not reconcile you managed clusters. As a result, your managed clusters are removed and you lose most data. 
 
+### Unsupported value when generating a new import cluster command causes imports to fail
+<!--1.0.0:2747-->
+
+When you enter an unsupported value into the `yaml` content before creating your import command, it causes the import command that you are creating and future import commands to fail with the following error:
+
+   ```
+   Failed creating cluster resource for import,:secrets "<your_cluster_name>-import" not found. 
+   ```
+
+   You can fix this issue by identifying which `endpointconfig` is causing the problem and manually changing the unsupported value to a supported value. 
+
+   1. Check the rcm-controller’s log to try to determine which `endpointconfig` is causing the problem. It is often something like `"yes"` used as a value when `true` is the supported value. An example of the log entry follows:
+   
+      ```
+      E0611 19:28:03.137671       1 reflector.go:123] pkg/mod/k8s.io/client-go@v0.0.0-20191016111102-bec269661e48/tools/cache/reflector.go:96: Failed to list *v1alpha1.EndpointConfig: v1alpha1.EndpointConfigList.Items: []v1alpha1.EndpointConfig: v1alpha1.EndpointConfig.Spec: v1beta1.EndpointSpec.CISControllerConfig: v1beta1.EndpointCISControllerSpec.Enabled: ReadBool: expect t or f, but found ", error found in #10 byte of ...|enabled":"yes"},"clu|..., bigger context ...|ler":{"enabled":true},"cisController":{"enabled":"yes"},"clusterLabels":{"cloud":"auto-detect","vend|...
+      ```
+      
+      In this example, the `cisController` value should be `true`, but is `"yes"`. 
+      
+   2. Determine which `endpointconfig` contains the issue. by entering the following command:
+   
+      ```
+      oc get endpointconfig --all-namespaces -o yaml | grep -B40 "yes"  | grep 'name: ' | tail -n1
+      ```
+      
+      This command finds the name of the `endpointconfig` that contains the value of `"yes"`.
+      
+      A result that is similar to the following content is displayed: 
+      
+      ```
+      name: mycluster1
+      ```
+   
+   3. Replace the value `"yes"` with the value `true` by editing the file with a command similar to the following:
+   
+      ```
+      oc edit -n mycluster1 mycluster1 
+      ```
+
+   **Notice:** If you have this problem in one of your imported clusters, you cannot import another cluster successfully until you fix it. Even if you import a different cluster, the import fails until the problem is fixed.   
+   
 ## Application management known issues
 
 ### Application not deployed after an updated placement rule
@@ -211,7 +248,7 @@ Creating more than one channel in the same namespace can cause errors with the h
 
 For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. 
 
-For technical preview, all channels need an individual namespace, except GitHub channels, which can share a namespace with another GitHub channel. See the process for [Creating and managing channels](../manage_applications/managing_channels.md) for more information.
+For product version 1.0, all channels need an individual namespace, except GitHub channels, which can share a namespace with another GitHub channel. See the process for [Creating and managing channels](../manage_applications/managing_channels.md) for more information.
 
 ### Application route does not list in the Search page for cluster
 <!--1.0.0:1908-->
@@ -232,157 +269,153 @@ For more information, see [Certificate policy controller](../security/cert_polic
 ### Any authenticated user can import clusters
 <!--1.0.0:2312-->
 
-Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information, view the Role-based access control table in the [Security](../security/security_intro.md) topic.
+Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information, view the Role-based access control table in the [Security](../security/security_intro.md) topic. 
 
-### Internal error 500 during login to the console 
-<!--1.0.1:2414-->
+## Internal error 500 during login to the console
+<!--1.0.1:2414-->	
 
-When Red Hat Advanced Cluster Management for Kubernetes is installed and the OpenShift Container Platform is customized, a `500 Internal Error` message appears. You are unable to access the console because the OpenShift Container Platform certificate is not included in the Red Hat Advanced Cluster Management for Kuberentes management ingress. Add the OpenShift Container Platform certificate by completing the following steps: 
+When Red Hat Advanced Cluster Management for Kubernetes is installed and the OpenShift Container Platform is customized with a custom ingress certificate, a `500 Internal Error` message appears. You are unable to access the console because the OpenShift Container Platform certificate is not included in the Red Hat Advanced Cluster Management for Kuberentes management ingress. Add the OpenShift Container Platform certificate by completing the following steps: 
 
-1. Edit the management ingress deployment:
+1. Edit the management ingress deployment:	
 
-   1. Update the `oauth-proxy` container arguments. Run the following command to edit the management ingress deployment:
-   
-      ```
-      oc edit deployment management-ingress -n open-cluster-management
-      ```
-      
-      * Add the following lines to the `oauth-proxy` arguments:
+   1. Update the `oauth-proxy` container arguments. Run the following command to edit the management ingress deployment:	
 
-        ```
-        - --openshift-ca=/etc/tls/ocp/tls.crt
-        - --openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-        ```   
-      
-      Your `oauth-proxy` might resemble the following content:
+      ```	
+      oc edit deployment management-ingress -n open-cluster-management	
+      ```	
 
-      ```
-      containers:
-      - args:
-        - --provider=openshift
-        - --upstream=https://localhost:8443
-        - --upstream-ca=/etc/tls/ca/tls.crt
-        - --https-address=:443
-        - --client-id=multicloudingress
-        - --client-secret=multicloudingresssecret
-        - --pass-user-bearer-token=true
-        - --pass-access-token=true
-        - --scope=user:full
-        - '-openshift-delegate-urls={"/": {"resource": "projects", "verb": "list"}}'
-        - --skip-provider-button=true
-        - --cookie-secure=true
-        - --cookie-expire=12h0m0s
-        - --cookie-refresh=8h0m0s
-        - --tls-cert=/etc/tls/private/tls.crt
-        - --tls-key=/etc/tls/private/tls.key
-        - --cookie-secret=AAECAwQFBgcICQoLDA0OFw==
-        - --openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-        - --openshift-ca=/etc/tls/ocp/tls.crt
-      ```
-      
-   2. Add the following parameter value for the volume mount:
-   
-      ```
-      - mountPath: /etc/tls/ocp
-        name: ocp-tls-secret
-      ```
+      * Add the following lines to the `oauth-proxy` arguments:	
 
-      Your updated depolyment might resemble the following content:
-   
-      ```
-      volumeMounts:
-           - mountPath: /etc/tls/private
-             name: tls-secret
-           - mountPath: /etc/tls/ca
-             name: ca-tls-secret
-           - mountPath: /etc/tls/ocp
-             name: ocp-tls-secret
-      ```
+        ```	
+        - --openshift-ca=/etc/tls/ocp/tls.crt	
+        - --openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt	
+        ```   	
 
-   3. Add the volume to the deployment: 
+      Your `oauth-proxy` might resemble the following content:	
 
-      ```
-      - name: ocp-tls-secret
-        secret:
-          defaultMode: 420
-          secretName: ocp-byo-ca
-      ```
+      ```	
+      containers:	
+      - args:	
+        - --provider=openshift	
+        - --upstream=https://localhost:8443	
+        - --upstream-ca=/etc/tls/ca/tls.crt	
+        - --https-address=:443	
+        - --client-id=multicloudingress	
+        - --client-secret=multicloudingresssecret	
+        - --pass-user-bearer-token=true	
+        - --pass-access-token=true	
+        - --scope=user:full	
+        - --openshift-delegate-urls={"/": {"resource": "projects", "verb": "list"}}	
+        - --skip-provider-button=true	
+        - --cookie-secure=true	
+        - --cookie-expire=12h0m0s	
+        - --cookie-refresh=8h0m0s	
+        - --tls-cert=/etc/tls/private/tls.crt	
+        - --tls-key=/etc/tls/private/tls.key	
+        - --cookie-secret=AAECAwQFBgcICQoLDA0OFw==	
+        - --openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt	
+        - --openshift-ca=/etc/tls/ocp/tls.crt	
+      ```	
 
-   4. Optional. Modify the volume for the deployment to reference the customized OpenShift Container Platform certificate:
+   2. Add the following parameter value for the volume mount:	
 
-      ```
-      - name: tls-secret
-        secret:
-          defaultMode: 420
-          secretName: byo-ingress-tls-secret
-      ```
-      
-      View the following sample of the updated `management-ingress` deployment:
+      ```	
+      - mountPath: /etc/tls/ocp	
+        name: ocp-tls-secret	
+      ```	
 
-      ```
-      volumes:
-      - name: tls-secret
-        secret:
-          defaultMode: 420
-          secretName: byo-ingress-tls-secret
-      - name: ocp-tls-secret
-        secret:
-          defaultMode: 420
-          secretName: ocp-byo-ca
-      - name: ca-tls-secret
-        secret:
-          defaultMode: 420
-          secretName: multicloud-ca-cert
-      ```
-    
-    5. Save your deployment.
+      Your updated deployment might resemble the following content:	
 
-2. Optional. Create a secret named `byo-ingress-tls-secret` to contain the OpenShift ingress certificate if you completed the previous step, 1.4. Ensure that the secret is contained in the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.
+      ```	
+      volumeMounts:	
+           - mountPath: /etc/tls/private	
+             name: tls-secret	
+           - mountPath: /etc/tls/ca	
+             name: ca-tls-secret	
+           - mountPath: /etc/tls/ocp	
+             name: ocp-tls-secret	
+      ```	
 
-   * Run the following command to create a `byo-ingress-tls-secret`:
-      
-      ```
-      oc create secret tls byo-ingress-tls-secret \
-      --cert=</path/to/cert.crt> \
-      --key=</path/to/cert.key> \
-      -n <namespace>
-      ```
-      
-3. Create a secret named `ocp-byo-ca` to contain the OpenShift Container Platform ingress Ceritificate Authority (CA) used to sign the new certificate. Ensure that the secret is contained in the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.
+   3. Add the volume to the deployment: 	
 
-   1. Create the YAML file for the `ocp-byo-ca`. Your content might resemble the following file:
-      
-      ```
-      apiVersion: v1
-      data:
-        tls.crt: <base64 encoded CA certificate>
-        tls.key: ""
-      kind: Secret
-      metadata:
-        name: ocp-byo-ca
-      type: kubernetes.io/tls
-      ```
-      
-      1. Encode the CA certificate by running the following command: 
-      
-         ```
-         cat ca.crt | base64
-         ```
-         `ca.crt` is your CA file.
-         
-      2. Customize the `tls.crt` entry with the encoded value in the yaml file.  
-         
+      ```	
+      - name: ocp-tls-secret	
+        secret:	
+          defaultMode: 420	
+          secretName: ocp-byo-ca	
+      ```	
+
+   4. Optional. Modify the volume for the deployment to reference the customized OpenShift Container Platform certificate:	
+
+      ```	
+      - name: tls-secret	
+        secret:	
+          defaultMode: 420	
+          secretName: byo-ingress-tls-secret	
+      ```	
+
+      View the following sample of the updated `management-ingress` deployment:	
+
+      ```	
+      volumes:	
+      - name: tls-secret	
+        secret:	
+          defaultMode: 420	
+          secretName: byo-ingress-tls-secret	
+      - name: ocp-tls-secret	
+        secret:	
+          defaultMode: 420	
+          secretName: ocp-byo-ca	
+      - name: ca-tls-secret	
+        secret:	
+          defaultMode: 420	
+          secretName: multicloud-ca-cert	
+      ```	
+
+    5. Save your deployment.	
+
+2. Optional. Create a secret named `byo-ingress-tls-secret` to contain the OpenShift ingress certificate if you completed the previous step, 1.4. Ensure that the secret is contained in the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.	
+
+   * Run the following command to create a `byo-ingress-tls-secret`:	
+
+      ```	
+      oc create secret tls byo-ingress-tls-secret \	
+      --cert=</path/to/cert.crt> \	
+      --key=</path/to/cert.key> \	
+      -n <namespace>	
+      ```	
+
+3. Create a secret named `ocp-byo-ca` to contain the OpenShift Container Platform ingress Ceritificate Authority (CA) used to sign the new certificate. Ensure that the secret is contained in the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.	
+
+   1. Create the YAML file for the `ocp-byo-ca`. Your content might resemble the following file:	
+
+      ```	
+      apiVersion: v1	
+      data:	
+        tls.crt: <base64 encoded CA certificate>	
+        tls.key: ""	
+      kind: Secret	
+      metadata:	
+        name: ocp-byo-ca	
+      type: kubernetes.io/tls	
+      ```	
+
+      1. Encode the CA certificate by running the following command: 	
+
+         ```	
+         cat ca.crt | base64	
+         ```	
+         `ca.crt` is your CA file.	
+
+      2. Customize the `tls.crt` entry with the encoded value in the yaml file.  	
+
+
+   2. Save your content in `ocp-ca.yaml` and create the secret. Run the following command:	
+
+      ```	
+      oc create -f ocp-ca.yaml	
+      ```	
   
-   2. Save your content in `ocp-ca.yaml` and create the secret. Run the following command:
-  
-      ```
-      oc create -f ocp-ca.yaml
-      ```
-     
-     
-     
-     
-   
 
 
  
