@@ -160,7 +160,7 @@ When you enter an unsupported value into the `yaml` content before creating your
       E0611 19:28:03.137671       1 reflector.go:123] pkg/mod/k8s.io/client-go@v0.0.0-20191016111102-bec269661e48/tools/cache/reflector.go:96: Failed to list *v1alpha1.EndpointConfig: v1alpha1.EndpointConfigList.Items: []v1alpha1.EndpointConfig: v1alpha1.EndpointConfig.Spec: v1beta1.EndpointSpec.CISControllerConfig: v1beta1.EndpointCISControllerSpec.Enabled: ReadBool: expect t or f, but found ", error found in #10 byte of ...|enabled":"yes"},"clu|..., bigger context ...|ler":{"enabled":true},"cisController":{"enabled":"yes"},"clusterLabels":{"cloud":"auto-detect","vend|...
       ```
       
-      In this example, the `cisController` value should be `true`, but is `yes`. 
+      In this example, the `cisController` value should be `true`, but is `"yes"`. 
       
    2. Determine which `endpointconfig` contains the issue. by entering the following command:
    
@@ -168,7 +168,7 @@ When you enter an unsupported value into the `yaml` content before creating your
       oc get endpointconfig --all-namespaces -o yaml | grep -B40 "yes"  | grep 'name: ' | tail -n1
       ```
       
-      This command finds the name of the cluster that contains the value of `yes`.
+      This command finds the name of the `endpointconfig` that contains the value of `"yes"`.
       
       A result that is similar to the following content is displayed: 
       
@@ -176,7 +176,7 @@ When you enter an unsupported value into the `yaml` content before creating your
       name: mycluster1
       ```
    
-   3. Replace the value `yes` with the value `true` by editing the file with a command similar to the following:
+   3. Replace the value `"yes"` with the value `true` by editing the file with a command similar to the following:
    
       ```
       oc edit -n mycluster1 mycluster1 
