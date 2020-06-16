@@ -18,6 +18,7 @@
    * [Sizing your hub cluster](install/plan_capacity.md)
    * [Installing while connected online](install/install_connected.md)
    * [Installing on disconnected networks](install/install_disconnected.md)
+   * [Upgrading](install/upgrade_ver.md)
    * [Uninstalling](install/uninstall.md)
  * [Web console](console/console_intro.md)
    * [Accessing the console](console/console_access.md)
