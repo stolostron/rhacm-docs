@@ -224,8 +224,152 @@ For more information, see [Certificate policy controller](../security/cert_polic
 <!--1.0.0:2312-->
 
 Any authenticated user of OpenShift Container Platform can provision projects and have administrator privileges to the project and its associated namespace. As the administrator of a namespace, you can generate commands to import clusters into Red Hat Advanced Cluster Management for Kubernetes. To run the generated commands and import the cluster, you must have cluster administrator privileges on the managed cluster. For more information, view the Role-based access control table in the [Security](../security/security_intro.md) topic. 
-     
-   
+
+## Internal error 500 during login to the console
+<!--1.0.1:2414-->	
+
+When Red Hat Advanced Cluster Management for Kubernetes is installed and the OpenShift Container Platform is customized with a custom ingress certificate, a `500 Internal Error` message appears. You are unable to access the console because the OpenShift Container Platform certificate is not included in the Red Hat Advanced Cluster Management for Kuberentes management ingress. Add the OpenShift Container Platform certificate by completing the following steps: 
+
+1. Edit the management ingress deployment:	
+
+   1. Update the `oauth-proxy` container arguments. Run the following command to edit the management ingress deployment:	
+
+      ```	
+      oc edit deployment management-ingress -n open-cluster-management	
+      ```	
+
+      * Add the following lines to the `oauth-proxy` arguments:	
+
+        ```	
+        - --openshift-ca=/etc/tls/ocp/tls.crt	
+        - --openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt	
+        ```   	
+
+      Your `oauth-proxy` might resemble the following content:	
+
+      ```	
+      containers:	
+      - args:	
+        - --provider=openshift	
+        - --upstream=https://localhost:8443	
+        - --upstream-ca=/etc/tls/ca/tls.crt	
+        - --https-address=:443	
+        - --client-id=multicloudingress	
+        - --client-secret=multicloudingresssecret	
+        - --pass-user-bearer-token=true	
+        - --pass-access-token=true	
+        - --scope=user:full	
+        - --openshift-delegate-urls={"/": {"resource": "projects", "verb": "list"}}	
+        - --skip-provider-button=true	
+        - --cookie-secure=true	
+        - --cookie-expire=12h0m0s	
+        - --cookie-refresh=8h0m0s	
+        - --tls-cert=/etc/tls/private/tls.crt	
+        - --tls-key=/etc/tls/private/tls.key	
+        - --cookie-secret=AAECAwQFBgcICQoLDA0OFw==	
+        - --openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt	
+        - --openshift-ca=/etc/tls/ocp/tls.crt	
+      ```	
+
+   2. Add the following parameter value for the volume mount:	
+
+      ```	
+      - mountPath: /etc/tls/ocp	
+        name: ocp-tls-secret	
+      ```	
+
+      Your updated deployment might resemble the following content:	
+
+      ```	
+      volumeMounts:	
+           - mountPath: /etc/tls/private	
+             name: tls-secret	
+           - mountPath: /etc/tls/ca	
+             name: ca-tls-secret	
+           - mountPath: /etc/tls/ocp	
+             name: ocp-tls-secret	
+      ```	
+
+   3. Add the volume to the deployment: 	
+
+      ```	
+      - name: ocp-tls-secret	
+        secret:	
+          defaultMode: 420	
+          secretName: ocp-byo-ca	
+      ```	
+
+   4. Optional. Modify the volume for the deployment to reference the customized OpenShift Container Platform certificate:	
+
+      ```	
+      - name: tls-secret	
+        secret:	
+          defaultMode: 420	
+          secretName: byo-ingress-tls-secret	
+      ```	
+
+      View the following sample of the updated `management-ingress` deployment:	
+
+      ```	
+      volumes:	
+      - name: tls-secret	
+        secret:	
+          defaultMode: 420	
+          secretName: byo-ingress-tls-secret	
+      - name: ocp-tls-secret	
+        secret:	
+          defaultMode: 420	
+          secretName: ocp-byo-ca	
+      - name: ca-tls-secret	
+        secret:	
+          defaultMode: 420	
+          secretName: multicloud-ca-cert	
+      ```	
+
+    5. Save your deployment.	
+
+2. Optional. Create a secret named `byo-ingress-tls-secret` to contain the OpenShift ingress certificate if you completed the previous step, 1.4. Ensure that the secret is contained in the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.	
+
+   * Run the following command to create a `byo-ingress-tls-secret`:	
+
+      ```	
+      oc create secret tls byo-ingress-tls-secret \	
+      --cert=</path/to/cert.crt> \	
+      --key=</path/to/cert.key> \	
+      -n <namespace>	
+      ```	
+
+3. Create a secret named `ocp-byo-ca` to contain the OpenShift Container Platform ingress Ceritificate Authority (CA) used to sign the new certificate. Ensure that the secret is contained in the namespace where Red Hat Advanced Cluster Management for Kubernetes is installed.	
+
+   1. Create the YAML file for the `ocp-byo-ca`. Your content might resemble the following file:	
+
+      ```	
+      apiVersion: v1	
+      data:	
+        tls.crt: <base64 encoded CA certificate>	
+        tls.key: ""	
+      kind: Secret	
+      metadata:	
+        name: ocp-byo-ca	
+      type: kubernetes.io/tls	
+      ```	
+
+      1. Encode the CA certificate by running the following command: 	
+
+         ```	
+         cat ca.crt | base64	
+         ```	
+         `ca.crt` is your CA file.	
+
+      2. Customize the `tls.crt` entry with the encoded value in the yaml file.  	
+
+
+   2. Save your content in `ocp-ca.yaml` and create the secret. Run the following command:	
+
+      ```	
+      oc create -f ocp-ca.yaml	
+      ```	
+  
 
 
  
