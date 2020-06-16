@@ -21,9 +21,8 @@ From the _Overview_ tab on this dashboard, you can complete the following tasks 
   * The application name and namespace.
   * The number of managed clusters where the application is deployed through a subscription.
   * The number of subscriptions on the _hub_ cluster that are used to deploy the application and the associated status.
-  * On the _Search_ page, see hub cluster subscriptions and all subscriptions that are deployed to managed clusters.
   * The date when the application was created.
-  * The Grafana dashboard for the application. 
+  * The Resource pipeline. Click on **Subscription** to see _Search_ page, then see hub cluster subscriptions and all subscriptions that are deployed to managed clusters.
   
 * From this page, you can also select **New application** to create an application, which opens a YAML editor where you can define an application resource. For more information, see [Creating and managing application resources](managing_apps.md#app_create).
 * You can click on an application name to go to the _Applications_ dashboard for that specific application to view more information about that application. You can also access _Grafana_.
