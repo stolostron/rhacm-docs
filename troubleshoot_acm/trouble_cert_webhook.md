@@ -105,10 +105,3 @@ failed calling webhook "certificates.admission.certmanager.io": the server is cu
          - If you did not, no action is required. If you did, ensure that `ValidatingAdmissionWebhook` displays in the list.
          - For Red Hat OpenShift environments, check the `master-config.yaml`. If `admissionConfig.pluginConfig` does not contain `ValidatingAdmissionWebhook`, you must add it.
 
-4. If previous steps fail, uninstall the webhook to disable it. Run the following command:
-
-   ```
-   helm delete cert-manager-webhook --purge --tls
-   ```
-
-   **Note:** If you uninstall the webhook, you lose the functions that the webhook provides, which is validating the cert-manager resources and preventing non-cluster administrators from using `ClusterIssuers` to issue their certificates.
