@@ -70,10 +70,6 @@ View the pod health for all of your clusters by expanding the Heatmap.
 
 Click **Show details** to view the map. The size of the color-coordinated boxes represents the number of nodes on your cluster. Hover your cursor over the box to view the response time of your cluster. 
 
-## Governance and risk dashboard
-
-Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Governance and risk](../security/compliance_intro.md).
-
 ## Topology page 
 
 The Topology page uses information from Weave Scope probe to display Kubernetes objects within a cluster. You can view hub cluster resources. As you configure managed clusters, you see more clusters in the Topology view. 
@@ -86,4 +82,7 @@ Learn more about the tabs that are available from the Topology page:
 
   - Policies: View the policy, policy placement, and clusters that are being validated. Check for violations for the selected policy.
 
+## Governance and risk dashboard
+
+Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Governance and risk](../security/compliance_intro.md).
 
