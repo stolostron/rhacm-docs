@@ -154,7 +154,7 @@ When you enter an unsupported value into the `yaml` content before creating your
 
    You can fix this issue by identifying which `endpointconfig` is causing the problem and manually changing the unsupported value to a supported value. 
 
-   1. Check the rcm-controller’s log to try to determine which `endpointconfig` is causing the problem. It is often something like `yes` used as a value when `true` is the supported value. An example of the log entry follows:
+   1. Check the rcm-controller’s log to try to determine which `endpointconfig` is causing the problem. It is often something like `"yes"` used as a value when `true` is the supported value. An example of the log entry follows:
    
       ```
       E0611 19:28:03.137671       1 reflector.go:123] pkg/mod/k8s.io/client-go@v0.0.0-20191016111102-bec269661e48/tools/cache/reflector.go:96: Failed to list *v1alpha1.EndpointConfig: v1alpha1.EndpointConfigList.Items: []v1alpha1.EndpointConfig: v1alpha1.EndpointConfig.Spec: v1beta1.EndpointSpec.CISControllerConfig: v1beta1.EndpointCISControllerSpec.Enabled: ReadBool: expect t or f, but found ", error found in #10 byte of ...|enabled":"yes"},"clu|..., bigger context ...|ler":{"enabled":true},"cisController":{"enabled":"yes"},"clusterLabels":{"cloud":"auto-detect","vend|...
