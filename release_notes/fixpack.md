@@ -10,5 +10,4 @@ View a summarized list of Red Hat Advanced Cluster Management for Kubernetes fix
 6. Fixed issue with Visual Web Terminal command.
 7. Fixed subscriptions that were not deploying all subscribed resources.
 8. Management ingress certificate deployment simplified and documented.
-9. Fixed internal error 500 during login to the console. 
 
