@@ -176,7 +176,7 @@ When you enter an unsupported value into the `yaml` content before creating your
       name: mycluster1
       ```
    
-   3. Replace the value `yes` with the value of `true` with a command similar to the following:
+   3. Replace the value `yes` with the value `true` by editing the file with a command similar to the following:
    
       ```
       oc edit -n mycluster1 mycluster1 
