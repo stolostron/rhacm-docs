@@ -148,6 +148,47 @@ To avoid this known issue, either always specify a reasonable value on the `--ta
 
 When you upgrade your OpenShift Container Platform cluster and the etcd persistence is not enabled, the `etcd-operator` does not reconcile you managed clusters. As a result, your managed clusters are removed and you lose most data. 
 
+### Unsupported value when generating a new import cluster command causes imports to fail
+<!--1.0.0:2747-->
+
+When you enter an unsupported value into the `yaml` content before creating your import command, it causes the import command that you are creating and future import commands to fail with the following error:
+
+   ```
+   Failed creating cluster resource for import,:secrets "<your_cluster_name>-import" not found. 
+   ```
+
+   You can fix this issue by identifying which `endpointconfig` is causing the problem and manually changing the unsupported value to a supported value. 
+
+   1. Check the rcm-controller’s log to try to determine which `endpointconfig` is causing the problem. It is often something like `"yes"` used as a value when `true` is the supported value. An example of the log entry follows:
+   
+      ```
+      E0611 19:28:03.137671       1 reflector.go:123] pkg/mod/k8s.io/client-go@v0.0.0-20191016111102-bec269661e48/tools/cache/reflector.go:96: Failed to list *v1alpha1.EndpointConfig: v1alpha1.EndpointConfigList.Items: []v1alpha1.EndpointConfig: v1alpha1.EndpointConfig.Spec: v1beta1.EndpointSpec.CISControllerConfig: v1beta1.EndpointCISControllerSpec.Enabled: ReadBool: expect t or f, but found ", error found in #10 byte of ...|enabled":"yes"},"clu|..., bigger context ...|ler":{"enabled":true},"cisController":{"enabled":"yes"},"clusterLabels":{"cloud":"auto-detect","vend|...
+      ```
+      
+      In this example, the `cisController` value should be `true`, but is `"yes"`. 
+      
+   2. Determine which `endpointconfig` contains the issue. by entering the following command:
+   
+      ```
+      oc get endpointconfig --all-namespaces -o yaml | grep -B40 "yes"  | grep 'name: ' | tail -n1
+      ```
+      
+      This command finds the name of the `endpointconfig` that contains the value of `"yes"`.
+      
+      A result that is similar to the following content is displayed: 
+      
+      ```
+      name: mycluster1
+      ```
+   
+   3. Replace the value `"yes"` with the value `true` by editing the file with a command similar to the following:
+   
+      ```
+      oc edit -n mycluster1 mycluster1 
+      ```
+
+   **Notice:** If you have this problem in one of your imported clusters, you cannot import another cluster successfully until you fix it. Even if you import a different cluster, the import fails until the problem is fixed.   
+   
 ## Application management known issues
 
 ### Application not deployed after an updated placement rule
