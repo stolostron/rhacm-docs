@@ -6,8 +6,6 @@ The IAM policy controller checks for compliance of the number of cluster adminis
 
 The IAM policy controller runs on your managed cluster.
 
-<!--add policy controller YAML structure-->
-
 ## IAM policy YAML structure
 
 ```yaml
