@@ -74,7 +74,7 @@ The Red Hat Advanced Cluster Management components are installed in a single nam
 
 The `multicluster-endpoint`, which is the agent on the managed cluster, also requires cluster administrator privileges. The `multicluster-endpoint` is deployed into the `multicluster-endpoint` namespace. For security, do not give anyone access to the `multicluster-endpoint` namespace who does not already have cluster administrator access.
 
-**The etcd-operator might not install correctly**
+### The etcd-operator might not install correctly
 <!--1.0.1:no issue-->
 
 When installing Red Hat Advanced Cluster Management on Red Hat OpenShift Container Platform version 4.4.8, or later, the `etcd-operator` might not install in the correct default channel. When this happens, the `etcd-operator` pods do not start. 
