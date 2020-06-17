@@ -32,7 +32,6 @@ Complete the following steps to create an IAM policy from the CLI:
      remediationAction: inform
      disabled: false
      maxClusterRoleBindingUsers: 5
-     maxRoleBindingViolationsPerNamespace: 2
    ```
    
 2. Apply the policy by running the following command:
