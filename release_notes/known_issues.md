@@ -74,6 +74,37 @@ The Red Hat Advanced Cluster Management components are installed in a single nam
 
 The `multicluster-endpoint`, which is the agent on the managed cluster, also requires cluster administrator privileges. The `multicluster-endpoint` is deployed into the `multicluster-endpoint` namespace. For security, do not give anyone access to the `multicluster-endpoint` namespace who does not already have cluster administrator access.
 
+### The etcd-operator might not install correctly
+<!--1.0.1:no issue-->
+
+When installing Red Hat Advanced Cluster Management on Red Hat OpenShift Container Platform version 4.4.8, or later, the `etcd-operator` might not install in the correct default channel. When this happens, the `etcd-operator` pods do not start. 
+
+These solutions only work when the `etcdcluster` subscription is installed in `clusterwide` mode. You can determine if it is in `clusterwide` mode when the `etcdcluster` subscription is using the `clusterwide-alpha` channel. 
+
+To work around this issue, complete one of the following procedures:
+
+* Run the following command to add the required annotation to the cluster resource: 
+
+   ```
+   oc annotate etcdcluster etcd-cluster etcd.database.coreos.com/scope=clusterwide
+   ```
+   
+* Add the following annotations to the cluster resource: 
+
+   ```
+   apiVersion: "etcd.database.coreos.com/v1beta2"
+   kind: "EtcdCluster"
+   metadata:
+     name: "example-etcd-cluster"
+     ## Adding this annotation make this cluster managed by clusterwide operators
+     ## namespaced operators ignore it
+     # annotations:
+     #   etcd.database.coreos.com/scope: clusterwide
+   spec:
+     size: 3
+     version: "3.2.13"
+   ```
+
 ## Web console known issues
 
 ### LDAP user names are case-sensitive
