@@ -103,6 +103,7 @@ To work around this issue, complete one of the following procedures:
    spec:
      size: 3
      version: "3.2.13"
+   ```
 
 ## Web console known issues
 
