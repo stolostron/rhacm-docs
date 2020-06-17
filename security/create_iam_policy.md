@@ -1,6 +1,6 @@
 # Managing IAM policies 
 
-Apply an IAM policy to check the number of cluster administrators that you allow in your cluster. Learn to create, apply, view, and update your IAM policies in the following sections.
+Apply an IAM policy to check the number of cluster administrators that you allow in your managed cluster. Learn to create, apply, view, and update your IAM policies in the following sections.
 
 ## Creating an IAM policy
 
@@ -52,8 +52,7 @@ Your IAM policy is created.
 
 Complete the following steps to view your IAM policy:
 
-1. View details for. 
-specific IAM policy by running the following command:
+1. View details for specific IAM policy by running the following command:
 
    ```
    kubectl get iampolicy <policy-name> -n <namespace> -o yaml
@@ -94,7 +93,7 @@ You can view any IAM policy and its status from the console.
 
 2. From the navigation menu, click **Govern risk** to view a table list of your policies.
 
-   **Note**: You can filter the table list of your policies by selecting the All policies tab or Cluster violations tab.
+   **Note**: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
 
 3. Select one of your policies to view more details.
 
