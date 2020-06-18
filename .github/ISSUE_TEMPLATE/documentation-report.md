@@ -21,7 +21,7 @@ See the default staged branch in the [RHACM docs repo](https://github.com/open-c
 5. Provide a detailed description of the change, or link to draft content. 
 6. Submit.
 
-The ID team adds the `doc awaiting input` label if the issue is waiting for details, and `in-review` label when dev is reviewing the changes.
+The ID team adds the `doc awaiting input` label if the issue is waiting for details, and `in-review` label when dev/QE/peer is reviewing the changes.
 -->
 
 ## Documentation Report
