@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Review the [Architecture](architecture.md) topic and the [Components](components.md) topics to learn more about what is installed with Red Hat Advanced Cluster Management for Kubernetes.
+Review the [Multicluster architecture](architecture.md) topic and the [Components](components.md) topics to learn more about what is installed with Red Hat Advanced Cluster Management for Kubernetes.
 
 After you learn about the hub cluster and managed cluster architecture, learn more about the [Supported clouds](../manage_cluster/supported_clouds.md), which lists the cloud provider cluster options. 
 
@@ -18,7 +18,7 @@ The [Glossary of terms](glossary_terms.md) defines common terms for the product.
 
 3. With a supported version of OpenShift Container Platform installed and running on your hub cluster, you can proceed with [Installing while connected online](../install/install_connected.md). 
 
-After installation, review the [Web console](../console/console_intro.md) guide to learn how to access your console and what features are available in the console. <!--broken link, not sure why. the syntax is correct-->
+After installation, review the [Web console](../console/console_intro.md) guide to learn how to access your console and what features are available in the console. 
 
 ## Manage clusters
 
@@ -42,7 +42,7 @@ You can start managing applications on any created and imported managed clusters
 
 You can also manage security and compliance across your created and imported managed clusters.
 
-1. Create a policy using the _policy_ templates. See the [policy overview](../security/policy_example.md) for details about how to create a policy with a `.yaml` template.
+1. Create a policy using the _policy_ templates. See the [Policy overview](../security/policy_example.md) for details about how to create a policy with a `.yaml` template.
 
 2. From the _Policies_ page, you can view a summary of cluster and policy violations. 
 
