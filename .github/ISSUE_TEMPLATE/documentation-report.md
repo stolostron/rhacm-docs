@@ -9,13 +9,19 @@ assignees: ''
 
 <!--
 
-Use the [summary.md](https://github.com/open-cluster-management/rhacm-docs/blob/doc_stage/summary.md) file as the table of contents. The `summary.md` file provides direct linking within the repository to the corresponding files. 
+View the recent published documentation and the navigation from the [Customer portal](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/1.0/html/release_notes/red-hat-advanced-cluster-management-for-kubernetes-release-notes).
 
-1. Provide detailed descriptions of the changes. If you provide your contact information, we can contact you with any questions related to your issue. 
-2. Add _squad-doc_ label to the issue. 
-3. Submit the issue. Please add `squad:doc` label.
+See the default staged branch in the [RHACM docs repo](https://github.com/open-cluster-management/rhacm-docs) to see what is staged for the next release.
 
-The ID team adds the `in-review` label when it is time to start reviewing the changes.
+1. Open an issue using content from this template.
+2. Label your issue with your dev squad issue. (Example: `squad:installer`)
+3. Label your issue `squad doc`.
+4. Assign the correct writer for your development squad.
+4. Link to the development issue if there is one.
+5. Provide a detailed description of the change, or link to draft content. 
+6. Submit.
+
+The ID team adds the `doc awaiting input` label if the issue is waiting for details, and `in-review` label when dev is reviewing the changes.
 -->
 
 ## Documentation Report
