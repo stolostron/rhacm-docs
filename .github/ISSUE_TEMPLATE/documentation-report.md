@@ -11,7 +11,7 @@ assignees: ''
 
 View the recent published documentation and the navigation from the [Customer portal](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/1.0/html/release_notes/red-hat-advanced-cluster-management-for-kubernetes-release-notes).
 
-See the default staged branch in the [RHACM docs repo](https://github.com/open-cluster-management/rhacm-docs) to see what is staged for the next release. Note: The source format is now ASCIIDoc, rather than markdown.
+See the default staged branch in the [RHACM docs repo](https://github.com/open-cluster-management/rhacm-docs) to see what is staged for the next release. Note: The source format is now ASCIIDoc, rather than Markdown.
 
 1. Open an issue using this template.
 2. Label your issue with your dev squad label. (Example: `squad:installer`)
