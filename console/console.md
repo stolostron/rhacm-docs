@@ -11,8 +11,8 @@ Red Hat Advanced Cluster Management for Kubernetes console components:
 - [Observe environment details](#observe-environment-details)
 - [Automate Infrastructure](#automate-infrastructure)
 - [Manage applications](#manage-applications)
-- [Governance and risk dashboard](#governance-and-risk-dashboard)
 - [Topology page](#topology-page)
+- [Governance and risk dashboard](#governance-and-risk-dashboard)
 
 To learn about Search, see [Search in the console](search.md)
 
@@ -37,7 +37,7 @@ To learn about Search, see [Search in the console](search.md)
 
 ## Welcome page
 
-From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you get more information about the product and you can access header features, such as _Search_ and _Create resource_. Also from the _Header_, you can click the **Help** (?) icon to view the _About_ page and the documentation. From the _User_ menu, you can access the _Configure Client_ page. Additionally, you can use the [Visual Web Terminal](vwt_search.md). 
+From the Red Hat Advanced Cluster Management for Kubernetes Welcome page, you get more information about the product and you can access header features, such as _Search_ and _Create resource_. When you select _Create resource_, you can create a YAML file or JSON file for a deployment. Also from the _Header_, you can click the **Help** (?) icon to view the _About_ page and the documentation. From the _User_ menu, you can access the _Configure Client_ page. Additionally, you can access the [Visual Web Terminal](vwt_search.md) from the header. 
 
 ## Observe environment details
 
@@ -85,3 +85,4 @@ Learn more about the tabs that are available from the Topology page:
 ## Governance and risk dashboard
 
 Use the Governance and risk dashboard to create and manage policies and policy controllers. For more information, see [Governance and risk](../security/compliance_intro.md).
+

@@ -5,4 +5,4 @@ Learn how to create Red Hat OpenShift Container Platform clusters across cloud p
 - [Creating a cluster on Amazon Web Services](create_ocp_aws.md)  
 - [Creating a cluster on Google Cloud Platform](create_google.md)  
 - [Creating a cluster on Microsoft Azure](create_azure.md)
-- [Creating a cluster on bare metal](create_bare.md)
+- [Creating a cluster on bare metal](create_bare.md) (Requires Red Hat OpenShift Container Platform version 4.4, or later)

@@ -8,8 +8,10 @@
 
 ## Prerequisites {#gui_prerequisites}
 
-* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster deployed.
+* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed. If you are importing bare metal clusters, you must have the hub cluster installed on Red Hat OpenShift Container Platform version 4.4, or later.
+
 * You need a cluster that you want to manage and Internet connectivity.
+
 * Install `kubectl`. To install `kubectl`, see _Install and Set Up kubectl_ in the [Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos).
 
 <!--Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters. (wait for testing, elder sending RFE, see Brandi or elder for history here)-->
@@ -40,7 +42,7 @@ You can import existing clusters from the Red Hat Advanced Cluster Management fo
 
 7. Click **Generate Command** to retrieve the command to deploy the `multicluster-endpoint`.
 
-8. From the _Import an existing cluster_ window, hover and click the **Copy command** icon to copy the import command and the token that you are provided. You must click the **Copy** icon to receive the accurate copy.
+8. From the _Import an existing cluster_ window, hover and click the **Copy command** icon to copy the import command and the token that you are provided. You must click the **Copy** icon to receive the accurate copy. **Important:** The command contains pull secret information that is copied to each of the imported clusters. Anyone who can access the imported clusters can also view the pull secret information. Consider creating a secondary pull secret at https://cloud.redhat.com/ or by creating a service account so your personal credentials are not compromised. See [Using image pull secrets](https://docs.openshift.com/container-platform/4.4/openshift_images/managing_images/using-image-pull-secrets.html) or [Understanding and creating service accounts](https://docs.openshift.com/container-platform/4.4/authentication/understanding-and-creating-service-accounts.html) for more information.  
 
 9. From your terminal, authenticate to your managed cluster. Configure your `kubectl` for your targeted managed cluster.
 

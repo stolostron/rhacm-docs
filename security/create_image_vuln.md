@@ -13,7 +13,7 @@ Complete the following steps to create an image vulnerability policy from the CL
 1. Create a YAML file for your image vulnerability policy by running the following command:
 
    ```
-   kubectl create -f iamgevulnpolicy-1.yaml
+   kubectl create -f imagevulnpolicy-1.yaml
    ```
 
 2. Apply the policy by running the following command:

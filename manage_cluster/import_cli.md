@@ -13,7 +13,7 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
 
 ## Prerequisites {#cli_prerequisites}
 
-* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed.
+* You need a Red Hat Advanced Cluster Management for Kubernetes hub cluster that is deployed. If you are importing bare metal clusters, you must have the hub cluster installed on Red Hat OpenShift Container Platform version 4.4, or later. 
 
 * You need a separate cluster that you want to manage and Internet connectivity.
 
@@ -42,11 +42,13 @@ After you install Red Hat Advanced Cluster Management for Kubernetes, you are re
    oc new-project ${CLUSTER_NAME}
    ```
 
-3. Run the following command to create a secret:
+3. If you are importing a Kubernetes cluster that is not a Red Hat OpenShift Container Platform cluster, run the following command to create a secret:
 
    ```
-   oc create -n ${CLUSTER_NAME} secret docker-registry quay-secret --docker-server=quay.io --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS}
+   oc create -n ${CLUSTER_NAME} secret docker-registry quay-secret --docker-server=registry.redhat.io --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS}
    ```
+
+   **Important:** The command contains pull secret information that is copied to each of the imported clusters. Anyone who can access the imported clusters can also view the pull secret information. Consider creating a secondary pull secret at https://cloud.redhat.com/ or by creating a service account so your personal credentials are not compromised. See [Using image pull secrets](https://docs.openshift.com/container-platform/4.4/openshift_images/managing_images/using-image-pull-secrets.html) or [Understanding and creating service accounts](https://docs.openshift.com/container-platform/4.4/authentication/understanding-and-creating-service-accounts.html) for more information.
 
 4. Edit the example ClusterRegistry cluster with the following sample of YAML:
 
