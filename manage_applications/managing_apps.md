@@ -83,7 +83,7 @@ To delete an application, you can use the console, the Kubernetes command line i
   1. Open the console.
   2. From the Navigation menu, click **Manage applications**. The **Overview** tab for all applications opens.
   3. Within the list of all applications, find the row for the application that you want to delete. For that row expand the _Options_ menu and click **Delete application**. A confirmation window opens.
-  4. Confirm the removal to delete the application. When the list of all applications is refreshed, the application is no longer included.
+  4. Confirm the removal to delete the application.
   5. When the list of all applications is refreshed, the application is no longer displayed.
 
   You can also use the console search to find and delete an application:
