@@ -36,7 +36,7 @@ Create application resources to group and view the application components that m
 
         Ensure that your new application is listed in the resulting output.
 
-   * To use REST API, use the [application POST API](../apis/application.json).
+      See the [Application API](../apis/application.json).
 
 ## Matching an application to a subscription
 
@@ -73,7 +73,7 @@ For more information about the resource definition for an application, see [Crea
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating an application.
 
-   * To use REST API, use the [application PATCH API](../apis/application.json).
+    See the [Application API](../apis/application.json).
 
 ## Delete an application
 
@@ -106,4 +106,4 @@ To delete an application, you can use the console, the Kubernetes command line i
      kubectl get Application <name>
      ```
 
-* To use REST API, use the [application DELETE API](../apis/application.json).
+   See the [Application API](../apis/application.json).
