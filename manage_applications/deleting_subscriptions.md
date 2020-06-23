@@ -24,4 +24,4 @@ To delete a subscription, you can use the console, the Kubernetes command line i
      kubectl get Subscription <name>
      ```
 
-* To use REST API, use the [subscription DELETE API](../apis/subscriptions.json).
+* See the [Subscription API](../apis/subscriptions.json).

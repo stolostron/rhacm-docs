@@ -39,7 +39,7 @@
 
         Ensure that your new subscription is listed in the resulting output.
 
-   * To use REST API, you need to use the [subscription POST API](../apis/subscriptions.json).
+   * See the [Subscription API](../apis/subscriptions.json).
 
 After your subscription is created, your subscription can have one of the following statuses:
 

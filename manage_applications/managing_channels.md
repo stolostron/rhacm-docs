@@ -89,7 +89,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
         Ensure that your new channel is listed in the resulting output.
 
-   * To use REST API, you need to use the [channel POST API](../apis/channels.json).
+        See the [Channels API](../apis/channels.json).
 
 ## Update a channel
 
@@ -115,7 +115,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a channel.
 
-   * To use REST API, use the [channel PATCH API](../apis/channels.json).
+     See the [Channels API](../apis/channels.json).
 
 ## Delete a channel
 
@@ -143,7 +143,7 @@ To delete a channel, you can use the console, the Kubernetes command line interf
      kubectl get Channel <name>
      ```
 
-* To use REST API, use the [channel DELETE API](../apis/channels.json).
+    See the [Channels API](../apis/channels.json).
 
 ## Managing deployments with channels
 

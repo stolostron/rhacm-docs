@@ -12,6 +12,8 @@ The custom resource definition (CRD) and controller for placement rules replaces
 
 Placement rules can be defined for subscriptions and for deployables. Define the placement rule at the subscription level for multi-cluster deployments. Define the placement rule for a specific deployable for single-cluster deployments or to override placement settings.  
 
+See the [Placement rule APIs](../apis/placementrules.json) for API documentation.
+
 ## Create a placement rule
 
 Placement rules can be defined for subscriptions and for deployables. Define the placement rule at the subscription level for multi-cluster deployments. Define the placement rule for a specific deployable for single-cluster deployments or to override placement settings.
@@ -50,9 +52,9 @@ Placement rules can be defined for subscriptions and for deployables. Define the
         kubectl get PlacementRule
         ```
 
-        Ensure that your new placement rule is listed in the resulting output.
+        Ensure that your new placement rule is listed in the resulting output. 
 
-   * To use REST API, you need to use the [placement rule POST API](../apis/placementrules.json).
+        See the [Placement rule APIs](../apis/placementrules.json) for API documentation.
 
 ## Assign a placement rule
 
@@ -106,8 +108,6 @@ To view the status fields for a placement rule, you can use the console, the Kub
 
   2. Review the fields and values within the `status` section of the YAML content.
 
-* To use REST API, you need to use the [placement rule GET API](../apis/placementrules.json).
-
 ## Update a placement rule
 
 To update a placement rule that is a separate resource, you can use the console, the Kubernetes command line interface (`kubectl`) tool, or REST API.  
@@ -129,9 +129,9 @@ To update a placement rule that is a separate resource, you can use the console,
   4. From the expanded view for the application, you can see the available subscriptions for each channel. The details for each subscription include any assigned placement rule. Click the link for the placement rule to open the _Edit placement rule_ editor. The YAML for the rule is displayed.
   5. When you are finished your edits, click **Save**. Your changes are saved and applied automatically.  
 
-* To use the Kubernetes CLI tool, the steps are the same as for creating a placement rule.
+* To use the Kubernetes CLI tool, the steps are the same as for creating a placement rule. 
 
-* To use REST API, you need to use the [placement rule PATCH API](../apis/placementrules.json).
+  See the [Placement rule APIs](../apis/placementrules.json).
 
 To update a placement rule that is defined within the definition for a deployable or subscription, the steps are the same as for updating that resource. For more information, see:
 
@@ -163,9 +163,6 @@ To delete a placement rule that is a separate resource, you can use the console,
      ```
      kubectl get PlacementRule <name>
      ```
-
-* To use REST API, you need to use the placement rule DELETE API:
-  * [Placement rule APIs](../apis/placementrules.json).
 
 To delete a placement rule that is defined within the definition for a deployable or subscription, edit the definition for that resource to remove the placement rule definition. The steps are the same as for updating that resource. For more information, see:
 
