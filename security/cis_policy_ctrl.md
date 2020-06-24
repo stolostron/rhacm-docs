@@ -1,6 +1,6 @@
 # CIS policy controller
 
-You can use the Center for Internet Security (CIS) policy controller to receive notifications about non-compliant clusters. **Note**: THe CIS policy controller is only supported on OpenShift Container Platform 3.11.
+You can use the Center for Internet Security (CIS) policy controller to receive notifications about non-compliant clusters. **Note**: The CIS policy controller is only supported on OpenShift Container Platform 3.11.
 
 The CIS policy controller monitors the nodes in a cluster for compliance against CIS Kubernetes benchmark checks. The CIS policies that list the rules to exclude can be applied to the managed clusters. The controller checks the cluster for any violations that are not in the exclude list.
 
