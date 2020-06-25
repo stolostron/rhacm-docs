@@ -1,4 +1,4 @@
-## Creating a subscription
+# Creating a subscription
 
 1. Compose the definition YAML content for your subscription. For more information about YAML structure and samples, see [Application resource samples](app_resource_samples.md) documentation.
 
@@ -39,7 +39,7 @@
 
         Ensure that your new subscription is listed in the resulting output.
 
-   * To use REST API, you need to use the [subscription POST API](../apis/subscriptions.json).
+   * See [APIs](../apis/api.md).
 
 After your subscription is created, your subscription can have one of the following statuses:
 

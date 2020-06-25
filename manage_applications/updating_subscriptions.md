@@ -1,4 +1,4 @@
-## Updating a subscription
+# Updating a subscription
 
 1. Compose the definition YAML content for your subscription.
 
@@ -32,4 +32,4 @@
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a subscription.
 
-   * To use REST API, use the [subscription PATCH API](../apis/subscriptions.json).
+   See [APIs](../apis/api.md).

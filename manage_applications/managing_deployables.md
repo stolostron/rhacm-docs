@@ -15,7 +15,7 @@ The deployable controller acts as the default propagation engine and synchronize
 
 You do not need to wrap or represent all resources as deployables before you deploy the resources. Depending on the resource type and the type of channel where you promote the resource, you might not need to create a deployable for the resource. For instance, you do not need to directly create deployables for resources that are included in Helm repository and GitHub repository channels. For more information, see [Creating and managing channels](managing_channels.md).
 
-**Important:** To use REST API, you need to use the [deployable POST API](../apis/deployables.json).
+See [APIs](../apis/api.md).
 
 ## Create a deployable
 
