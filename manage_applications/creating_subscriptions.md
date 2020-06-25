@@ -1,4 +1,4 @@
-## Creating a subscription
+# Creating a subscription
 
 1. Compose the definition YAML content for your subscription. For more information about YAML structure and samples, see [Application resource samples](app_resource_samples.md) documentation.
 
