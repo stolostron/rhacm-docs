@@ -12,7 +12,7 @@ The custom resource definition (CRD) and controller for placement rules replaces
 
 Placement rules can be defined for subscriptions and for deployables. Define the placement rule at the subscription level for multi-cluster deployments. Define the placement rule for a specific deployable for single-cluster deployments or to override placement settings.  
 
-See the [Placement rule APIs](../apis/placementrules.json) for API documentation.
+See [APIs](../apis/api.md).
 
 ## Create a placement rule
 
@@ -54,7 +54,7 @@ Placement rules can be defined for subscriptions and for deployables. Define the
 
         Ensure that your new placement rule is listed in the resulting output. 
 
-        See the [Placement rule APIs](../apis/placementrules.json) for API documentation.
+        See [APIs](../apis/api.md).
 
 ## Assign a placement rule
 
@@ -131,7 +131,7 @@ To update a placement rule that is a separate resource, you can use the console,
 
 * To use the Kubernetes CLI tool, the steps are the same as for creating a placement rule. 
 
-  See the [Placement rule APIs](../apis/placementrules.json).
+  See [APIs](../apis/api.md).
 
 To update a placement rule that is defined within the definition for a deployable or subscription, the steps are the same as for updating that resource. For more information, see:
 
