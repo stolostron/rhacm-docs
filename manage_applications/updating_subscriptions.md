@@ -1,4 +1,4 @@
-## Updating a subscription
+# Updating a subscription
 
 1. Compose the definition YAML content for your subscription.
 
