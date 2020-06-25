@@ -32,4 +32,4 @@
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a subscription.
 
-   * See the [Subscription API](../apis/subscriptions.json).
+   See [APIs](../apis/api.md).

@@ -39,7 +39,7 @@
 
         Ensure that your new subscription is listed in the resulting output.
 
-   * See the [Subscription API](../apis/subscriptions.json).
+   * See [APIs](../apis/api.md).
 
 After your subscription is created, your subscription can have one of the following statuses:
 
