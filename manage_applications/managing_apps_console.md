@@ -90,5 +90,5 @@ The Topology page provides you with a visualization of your applications, cluste
 
 You can select any component from the topology view to view more details. You can also hover your cursor over a resource to view the component kind, name, and namespace and links to view the search results for the resource or namespace. When you are viewing the details for a pod, you can select to view the logs for that pod.
 
-The _Topology_ page is available from the _Observe environments_ sub-menu within the console main menu. For more information about using the topology page, see [console components](../console/console.md).
+The _Topology_ page is available from the _Observe environments_ sub-menu within the console main menu. For more information about using the topology page, see [Observability in the console](../console/console.md).
 
