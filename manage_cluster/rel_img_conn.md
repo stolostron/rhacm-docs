@@ -18,15 +18,27 @@ You might want to ensure that you use the same release image for all of your clu
 
 4. Commit and merge your changes to your forked repository.
 
-5. To synchronize your list of stable release images, enter the following command:
+5. To synchronize your list of stable release images after you have cloned the `acm-hive-openshift-releases` repository, enter the following command to update the stable images: 
 
+   ```
+   make subscribe-stable
+   ```
+   
+   **Note:** You can only run this `make` command when you are using the Linux or MacOS operating system. If you are using the Windows operating system, enter the following command:
+   
    ```
    oc apply -k subscription/
    ```
   
    After running this command, the list of available stable release images updates with the currently available images in about one minute.
   
-6. By default, only the stable images are listed. To synchronize and display the fast release images, enter the following command:
+6. By default, only the stable images are listed with the commands in step 5. To synchronize and display the fast release images and the stable images, enter the following command:
+
+   ```
+   make subscribe-fast
+   ```
+   
+    **Note:** You can only run this `make` command when you are using the Linux or MacOS operating system. If you are using the Windows operating system, enter the following command:
 
    ```
    oc apply -f subscription/subscription-fast.yaml
