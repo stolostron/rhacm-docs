@@ -35,7 +35,6 @@ Spec:
       Exclude:
       Include:
     RemediationAction:
-    Disabled:
  Status:
    CompliancyDetails:
      Configuration-Policy-Example:
@@ -61,7 +60,6 @@ Spec:
 | Spec.Ownership | Required. <!--Add description--> |
 | Spec.NamespaceSelector| Required. <!--add description--> parameter values for `Include` and `Exclude`. |
 | Spec.RemediationAction | Required. | <!--add description-->|
-| Spec.Disabled | Required. Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.|
 | Spec.Status | Required. Reports the status of the policy. <!--expand explanation if possible--> |
 | Status.CompliancyDetails | Required. <!--details needed--> |
 | Status.Events| Required. <!--add details-->
@@ -81,7 +79,6 @@ Spec:
        include:
        exclude:
      remediationAction:
-     disabled:
      complianceType:
      object-templates:
       ...
