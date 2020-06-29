@@ -28,11 +28,13 @@ You might want to ensure that you use the same release image for all of your clu
    
    ```
    oc apply -k subscription/
+   oc delete -f subscription/subscription-fast.yaml
+   oc apply -f subscription/subscription-stable.yaml
    ```
   
    After running this command, the list of available stable release images updates with the currently available images in about one minute.
   
-6. By default, only the stable images are listed with the commands in step 5. To synchronize and display the fast release images and the stable images, enter the following command:
+6. To synchronize and display the fast release images and the stable images, enter the following command:
 
    ```
    make subscribe-fast
@@ -41,7 +43,7 @@ You might want to ensure that you use the same release image for all of your clu
     **Note:** You can only run this `make` command when you are using the Linux or MacOS operating system. If you are using the Windows operating system, enter the following command:
 
    ```
-   oc apply -f subscription/subscription-fast.yaml
+   oc apply -k subscription/
    ```
   
    After running this command, the list of available fast release images updates with the currently available images in about 1 minute.  
