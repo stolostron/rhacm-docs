@@ -17,7 +17,7 @@ Complete the following steps to refresh the list:
 
 2. Connect to your Red Hat Advanced Cluster Management for Kubernetes hub cluster. 
 
-3. To synchronize your list of `stable` release images after you have cloned the `acm-hive-openshift-releases` repository, enter the following command to update the `stable` images: 
+3. To synchronize your list of `stable` release images after you have cloned the `acm-hive-openshift-releases` repository, enter the following command: 
 
    ```
    make subscribe-stable
