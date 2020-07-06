@@ -63,7 +63,7 @@ Please `squad:doc` issues where we have a known issue or limitation in the produ
 
 **Note for UI guild:** We have set up numerous doc links from the UI in the course of the product evolution. For LR, these docs will not be live. Brandi will follow up with how these icons/links will be updated for GA. Ping for questions.
 
-**Note: Moving to [AsciiDoc is a text document format](http://asciidoc.org/).** 
+**Note: Documentation is in [AsciiDoc is a text document format](http://asciidoc.org/).** 
 
 ### Writer assignments
 
