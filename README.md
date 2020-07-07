@@ -30,9 +30,9 @@ Identify documentation content updates (features, enhancements, and bug fixes) a
    
 **Link issues to commits** This is important for file history and if something has to be undone. Link an issue to a commit, add a reference to the issue to the commit message and a quick note about the update. See the following syntax:
 
-     ```
-     open-cluster-management/backlog#147/#<issue_number> command updated
-     ```     
+   ```
+   open-cluster-management/backlog#147/#<issue_number> command updated
+   ```     
 ### Pull requests
 
    - Dev can use PRs for small content changes. For larger changes, devs can provide the details inside the GitHub issue comment.
