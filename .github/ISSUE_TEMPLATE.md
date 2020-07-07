@@ -12,7 +12,7 @@ title: ''
 - [ ] [ACM 1.0 tech preview]
 
 
-**Note:** ID will update the current version and the two previous versions (n-2). For earlier versions, we will address only P1 or Sev 1 Bugs for releases in support.
+**Note:** ID will update the current version and the two previous versions (n-2). For earlier versions, we will address only P1 or Sev 1 customer reported bugs for releases in support.
 
 ## Locations of the suggested changes?
 
