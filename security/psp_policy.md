@@ -47,6 +47,7 @@ Kubernetes configuration policy controller monitors the status of the pod securi
 ## Pod security policy table
 
 <!--just a place holder until i go through the parameters-->
+
 | Field | Description |
 | -- | -- |
 | apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
