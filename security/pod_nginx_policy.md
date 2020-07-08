@@ -34,6 +34,7 @@ Kubernetes configuration policy controller monitors the status of you pod nginx 
    
 ## Pod nginx policy table
  <!--this is just a place holder until i revise the parameters, focusing on the format right now-->
+ 
 | Field | Description |
 | -- | -- |
 | apiVersion | Required. Set the value to `policy.mcm.ibm.com/v1alpha1`. <!--current place holder until this info is updated--> |
