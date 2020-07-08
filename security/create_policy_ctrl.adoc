@@ -18,13 +18,14 @@ Complete the following steps to create a policy controller from the CLI:
 
 . Clone the `multicloud-operators-policy-controller` repository by running the following command:
 +
----
+----
 git clone git@github.com:open-cluster-management/multicloud-operators-policy-controller.git
----
+----
 
 . Customize the controller policy by updating the policy schema definition. Your policy might resemble the following content:
 +
----
+[source,yaml]
+----
 metadata: 
   name: samplepolicies.policies.open-cluster-management.io
 spec:
@@ -34,10 +35,9 @@ spec:
     listKind: SamplePolicyList
     plural: samplepolicies
     singular: samplepolicy
----
+----
 
 Your policy controller is created.
-
 
 [#viewing-your-policy-controller-yaml-file-from-the-console]
 ==== Viewing your policy controller YAML file from the console
@@ -63,26 +63,26 @@ Update the schema definition for the controller by completing the following step
 .. Copy and paste the configuration information into your command line, and press **Enter**.
 .. Run the following commands to apply your policy CRD and start the controller:
    
-   +
-   ---
-   export GO111MODULE=on
++
+----
+export GO111MODULE=on
    
-   kubectl apply -f deploy/crds/policy.open-cluster-management.io_samplepolicies_crd.yaml
+kubectl apply -f deploy/crds/policy.open-cluster-management.io_samplepolicies_crd.yaml
    
-   operator-sdk run --local --verbose
-   ---
+operator-sdk run --local --verbose
+----
 
-   When the policy is applied, a message appears to indicate that policy is monitored and detected by your custom controller. The mesasge might resemble the following contents:
-   
-   +
-   ---
-   {"level":"info","ts":1578503685.643426,"logger":"controller_samplepolicy","msg":"Reconciling SamplePolicy","Request.Namespace":"default","Request.Name":"example-samplepolicy"}
-   {"level":"info","ts":1578503685.855259,"logger":"controller_samplepolicy","msg":"Reconciling SamplePolicy","Request.Namespace":"default","Request.Name":"example-samplepolicy"}
-   Available policies in namespaces: 
-   namespace = kube-public; policy = example-samplepolicy 
-   namespace = default; policy = example-samplepolicy 
-   namespace = kube-node-lease; policy = example-samplepolicy
-   ---
+When the policy is applied, a message appears to indicate that policy is monitored and detected by your custom controller. The mesasge might resemble the following contents:
+
+[source,yaml]
+----
+{"level":"info","ts":1578503685.643426,"logger":"controller_samplepolicy","msg":"Reconciling SamplePolicy","Request.Namespace":"default","Request.Name":"example-samplepolicy"}
+{"level":"info","ts":1578503685.855259,"logger":"controller_samplepolicy","msg":"Reconciling SamplePolicy","Request.Namespace":"default","Request.Name":"example-samplepolicy"}
+Available policies in namespaces: 
+namespace = kube-public; policy = example-samplepolicy 
+namespace = default; policy = example-samplepolicy 
+namespace = kube-node-lease; policy = example-samplepolicy
+----
 
 . Verify a list of the policies by running the following command:
 +
@@ -91,9 +91,9 @@ kubectl get samplepolicy example-samplepolicy -oyaml
 ----
 
 . Check the `status` field for compliance details. Your output might resemble the following contents:
-
++
 [source,yaml]
----
+----
 status:
   compliancyDetails:
     example-samplepolicy:
@@ -110,20 +110,20 @@ status:
       - 1 violations detected in namespace `kube-public`, there are 0 users violations
         and 1 groups violations
   compliant: NonCompliant
----
+----
 
 Your policy controller YAML file is updated.
 
-[#updating-policy-rules]
+[#updating-policy-rules-and-execution-logic]
 === Updating policy rules
 
 Update the policy rules and policy logic by completing the following steps:
 
 . Add new fields in your YAML file to introduce new rules for your policy controller.
 . Update the `SamplePolicySpec` with new fields. Your specification might resemble the following content:
-
++
 [source,yaml]
----
+----
 spec:
   description: SamplePolicySpec defines the desired state of SamplePolicy
   properties:
@@ -139,10 +139,86 @@ spec:
       type: integer
     maxRoleBindingUsersPerNamespace:
       type: integer
----
+----
 
-. Update the `PeriodicallyExecSamplePolicies` function in the `samplepolicy_controller.go` file. View an example of the `PeriodicallyExecSamplePolicies` field, see link:https://github.com/open-cluster-management/multicloud-operators-policy-controller/blob/master/pkg/controller/samplepolicy/samplepolicy_controller.go#L208[open-cluster-management/multicloud-operators-policy-controller]
+. Update the `PeriodicallyExecSamplePolicies` function in the `samplepolicy_controller.go` file. View an example of the `PeriodicallyExecSamplePolicies` field, see link:https://github.com/open-cluster-management/multicloud-operators-policy-controller/blob/master/pkg/controller/samplepolicy/samplepolicy_controller.go#L208[open-cluster-management/multicloud-operators-policy-controller].
 
+[#deploying-your-controller-to-the-cluster]
+=== Deploying your controller to the cluster
+
+Deploy your custom policy controller to your cluster by completing the following steps:
+
+. Build the policy controller image by running the following command:
++
+----
+operator-sdk build <username>/multicloud-operators-policy-controller:latest
+----
+
+. Run the following command to push the image to a repository of your choice. For example, run the following commands to push the image to Docker Hub:
++
+----
+docker login
+
+docker push <username>/multicloud-operators-policy-controller
+----
+
+. Configure `kubectl` to point to a cluster managed by Red Hat Advanced Cluster Management for Kubernetes.
+
+. Replace the operator manifest to use the built-in image name and update the namespace to watch for policies. The namespace must be the cluster namespace. Your manifest might resemble the following contents:
++
+----
+sed -i "" 's|open-cluster-management/multicloud-operators-policy-controller|ycao/multicloud-operators-policy-controller|g' deploy/operator.yaml
+sed -i "" 's|value: default|value: <namespace>|g' deploy/operator.yaml
+----
+
+. Update the RBAC role by running the following commands:
++
+----
+sed -i "" 's|samplepolicies|testpolicies|g' deploy/cluster_role.yaml
+sed -i "" 's|namespace: default|namespace: <namespace>|g' deploy/cluster_role_binding.yaml
+----
+
+. Deploy your policy controller to your cluster:
+.. Set up a service account for cluster by runnng the following command:
++
+----
+kubectl apply -f deploy/service_account.yaml -n <namespace>
+----
+
+.. Set up RBAC for the operator by running the following commands:
++
+----
+kubectl apply -f deploy/role.yaml -n <namespace>
+
+kubectl apply -f deploy/role_binding.yaml -n <namespace>
+----
+
+.. Set up RBAC for your PolicyController. Run the following commands:
++
+----
+kubectl apply -f deploy/cluster_role.yaml
+kubectl apply -f deploy/cluster_role_binding.yaml
+----
+
+.. Set up a CustomResourceDefinition (CRD) by running the following command:
++
+----
+kubectl apply -f deploy/crds/policies.open-cluster-management.io_samplepolicies_crd.yaml
+----
+
+.. Deploy the `multicloud-operator-policy-controller` by running the following command:
++
+----
+kubectl apply -f deploy/operator.yaml -n <namespace>
+----
+
+.. Verify that the controller is functional by running the following command:
++
+----
+kubectl get pod -n <namespace>
+----
+
+Your policy controller is deployed.
 
 [#deleting-a-policy-controller]
 === Deleting a policy controller
@@ -154,7 +230,7 @@ Delete the policy controller from the CLI.
 // verify command `namespace`
 +
 ----
-kubectl delete policy <policy-name> -n <open-cluster-management-namespace>
+kubectl delete policy <policy-controller-name> -n <open-cluster-management-namespace>
 ----
 +
 After your policy is deleted, it is removed from your target cluster or clusters.
@@ -167,6 +243,6 @@ kubectl get policy <policy-name> -n <open-cluster-management-namespace>
 
 Your policy controller is deleted.
 
-View a sample of a certificate policy, see _Certificate policy sample_ on the xref:../security/cert_policy_ctrl.adoc#certificate-policy-sample[Certificate policy controller] page.
-For more information about other policy controllers, see xref:../security/policy_controllers.adoc#policy-controllers[Policy controllers].
-See xref:../security/create_policy.adoc#managing-security-policies[Managing security policies] to manage other policies.
+View the product policy controllers, see xref:../policy_controllers.adoc[Policy controllers] for more information.
+
+
