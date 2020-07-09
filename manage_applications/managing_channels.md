@@ -89,7 +89,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
         Ensure that your new channel is listed in the resulting output.
 
-        See [APIs](../apis/api.md).
+        See [APIs](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/1.0/html/apis/index).
 
 ## Update a channel
 
@@ -115,7 +115,7 @@ The channel type can be specified with the `spec.sourceNamespaces` and `spec.typ
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a channel.
 
-    See [APIs](../apis/api.md)
+    See [APIs](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/1.0/html/apis/index)
 
 ## Delete a channel
 
@@ -143,7 +143,7 @@ To delete a channel, you can use the console, the Kubernetes command line interf
      kubectl get Channel <name>
      ```
 
-    See [APIs](../apis/api.md).
+    See [APIs](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/1.0/html/apis/index).
 
 ## Managing deployments with channels
 

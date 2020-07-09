@@ -24,4 +24,4 @@ To delete a subscription, you can use the console, the Kubernetes command line i
      kubectl get Subscription <name>
      ```
 
-* See [APIs](../apis/api.md).
+* See [APIs](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/1.0/html/apis/index).
