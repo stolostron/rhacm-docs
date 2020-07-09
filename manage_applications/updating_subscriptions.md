@@ -32,4 +32,4 @@
 
    * To use the Kubernetes CLI tool, the steps are the same as for creating a subscription.
 
-   See [APIs](../apis/api.md).
+   See [APIs](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/1.0/html/apis/index).
