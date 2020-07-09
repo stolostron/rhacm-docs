@@ -59,7 +59,7 @@ Spec:
 | Spec.Conditions |  Required. <!--add description--> |
 | Spec.Ownership | Required. <!--Add description--> |
 | Spec.NamespaceSelector| Required. <!--add description--> parameter values for `Include` and `Exclude`. |
-| Spec.RemediationAction | Required. | <!--add description-->|
+| Spec.RemediationAction | Required. <!--add description--> |
 | Spec.Status | Required. Reports the status of the policy. <!--expand explanation if possible--> |
 | Status.CompliancyDetails | Required. <!--details needed--> |
 | Status.Events| Required. <!--add details-->|
