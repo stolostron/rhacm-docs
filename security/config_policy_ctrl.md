@@ -62,7 +62,7 @@ Spec:
 | Spec.RemediationAction | Required. | <!--add description-->|
 | Spec.Status | Required. Reports the status of the policy. <!--expand explanation if possible--> |
 | Status.CompliancyDetails | Required. <!--details needed--> |
-| Status.Events| Required. <!--add details-->
+| Status.Events| Required. <!--add details-->|
 {: caption="Table 1. Required and optional definition fields" caption-side="top"}
 
 
