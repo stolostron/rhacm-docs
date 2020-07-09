@@ -39,7 +39,7 @@
 
         Ensure that your new subscription is listed in the resulting output.
 
-   * See [APIs](../apis/api.md).
+   * See [APIs](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/1.0/html/apis/index).
 
 After your subscription is created, your subscription can have one of the following statuses:
 
