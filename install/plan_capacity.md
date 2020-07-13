@@ -5,12 +5,8 @@ Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own char
 Red Had Advanced Cluster Management for Kubernetes applies the following 3 dimensions for sizing and placement of supporting services:
 
 1. Availability Zones that isolate potential fault domains across the cluster. Typical clusters should have roughly equivalent worker node capacity in 3 or more availability zones. 
-2. vCPU reservations and limits establish vCPU capacity on a worker node to assign to a container. 
-3. Memory reservations and limits establish memory capacity on a worker node to assign to a container. 
-
-A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu).
-
-Reservations establish a lower bound of CPU or memory and limits establish an upper bound. 
+2. vCPU reservations and limits establish vCPU capacity on a worker node to assign to a container. A vCPU is equivalent to a Kubernetes compute unit. For more information, see Kubernetes [Meaning of CPU](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu).
+3. Memory reservations and limits establish memory capacity on a worker node to assign to a container. Reservations establish a lower bound of CPU or memory and limits establish an upper bound. 
 
 The persistent data managed by the product is stored in the etcd cluster used by Kubernetes. Best practices for OpenShift recommend distributing the master nodes of the cluster across three (3) availability zones as well.
 
