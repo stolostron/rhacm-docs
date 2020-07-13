@@ -2,7 +2,7 @@
 
 Each Red Hat Advanced Cluster Management for Kubernetes cluster has its own characteristics. There are guidelines that provide sample deployment sizes. They have been classified by size and purpose. The considerations are focused on clusters that are either deployed to VMware or OpenStack environments.
 
-Red Had Advanced Cluster Management for Kubernetes applies 3 dimensions for sizing and placement of supporting services:
+Red Had Advanced Cluster Management for Kubernetes applies the following 3 dimensions for sizing and placement of supporting services:
 
 1. Availability Zones that isolate potential fault domains across the cluster. Typical clusters should have roughly equivalent worker node capacity in 3 or more availability zones. 
 2. vCPU reservations and limits establish vCPU capacity on a worker node to assign to a container. 
