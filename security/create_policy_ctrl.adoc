@@ -39,22 +39,85 @@ spec:
 
 Your policy controller is created.
 
-[#viewing-your-policy-controller-yaml-file-from-the-console]
-==== Viewing your policy controller YAML file from the console
+[#deploying-your-controller-to-the-cluster]
+=== Deploying your controller to the cluster
 
-// verify that this is possible
-You can view any policy controller and its status from the console.
+Deploy your custom policy controller to your cluster and integrate the policy controller with the Governance and risk dashboard. Complete the following steps:
 
-. Log in to your cluster from the console.
-. From the navigation menu, click *Governance and risk* to view a table list of your policies.
+. Build the policy controller image by running the following command:
 +
-NOTE: You can filter the table list of your policies by selecting the _All policies_ tab or _Cluster violations_ tab.
+----
+operator-sdk build <username>/multicloud-operators-policy-controller:latest
+----
 
-. Select one of your policies to view more details.
-. View a specific policy controller policy violations by selecting the _Violations_ tab.
+. Run the following command to push the image to a repository of your choice. For example, run the following commands to push the image to Docker Hub:
++
+----
+docker login
+
+docker push <username>/multicloud-operators-policy-controller
+----
+
+. Configure `kubectl` to point to a cluster managed by Red Hat Advanced Cluster Management for Kubernetes.
+
+. Replace the operator manifest to use the built-in image name and update the namespace to watch for policies. The namespace must be the cluster namespace. Your manifest might resemble the following contents:
++
+----
+sed -i "" 's|open-cluster-management/multicloud-operators-policy-controller|ycao/multicloud-operators-policy-controller|g' deploy/operator.yaml
+sed -i "" 's|value: default|value: <namespace>|g' deploy/operator.yaml
+----
+
+. Update the RBAC role by running the following commands:
++
+----
+sed -i "" 's|samplepolicies|testpolicies|g' deploy/cluster_role.yaml
+sed -i "" 's|namespace: default|namespace: <namespace>|g' deploy/cluster_role_binding.yaml
+----
+
+. Deploy your policy controller to your cluster:
+.. Set up a service account for cluster by runnng the following command:
++
+----
+kubectl apply -f deploy/service_account.yaml -n <namespace>
+----
+
+.. Set up RBAC for the operator by running the following commands:
++
+----
+kubectl apply -f deploy/role.yaml -n <namespace>
+
+kubectl apply -f deploy/role_binding.yaml -n <namespace>
+----
+
+.. Set up RBAC for your PolicyController. Run the following commands:
++
+----
+kubectl apply -f deploy/cluster_role.yaml
+kubectl apply -f deploy/cluster_role_binding.yaml
+----
+
+.. Set up a CustomResourceDefinition (CRD) by running the following command:
++
+----
+kubectl apply -f deploy/crds/policies.open-cluster-management.io_samplepolicies_crd.yaml
+----
+
+.. Deploy the `multicloud-operator-policy-controller` by running the following command:
++
+----
+kubectl apply -f deploy/operator.yaml -n <namespace>
+----
+
+.. Verify that the controller is functional by running the following command:
++
+----
+kubectl get pod -n <namespace>
+----
+
+Your policy controller is deployed.
 
 [#updating-policy-controllers]
-== Updating policy controllers
+=== Updating policy controllers
 
 Update the schema definition for the controller by completing the following steps:
 
@@ -143,83 +206,6 @@ spec:
 
 . Update the `PeriodicallyExecSamplePolicies` function in the `samplepolicy_controller.go` file. View an example of the `PeriodicallyExecSamplePolicies` field, see link:https://github.com/open-cluster-management/multicloud-operators-policy-controller/blob/master/pkg/controller/samplepolicy/samplepolicy_controller.go#L208[open-cluster-management/multicloud-operators-policy-controller].
 
-[#deploying-your-controller-to-the-cluster]
-=== Deploying your controller to the cluster
-
-Deploy your custom policy controller to your cluster by completing the following steps:
-
-. Build the policy controller image by running the following command:
-+
-----
-operator-sdk build <username>/multicloud-operators-policy-controller:latest
-----
-
-. Run the following command to push the image to a repository of your choice. For example, run the following commands to push the image to Docker Hub:
-+
-----
-docker login
-
-docker push <username>/multicloud-operators-policy-controller
-----
-
-. Configure `kubectl` to point to a cluster managed by Red Hat Advanced Cluster Management for Kubernetes.
-
-. Replace the operator manifest to use the built-in image name and update the namespace to watch for policies. The namespace must be the cluster namespace. Your manifest might resemble the following contents:
-+
-----
-sed -i "" 's|open-cluster-management/multicloud-operators-policy-controller|ycao/multicloud-operators-policy-controller|g' deploy/operator.yaml
-sed -i "" 's|value: default|value: <namespace>|g' deploy/operator.yaml
-----
-
-. Update the RBAC role by running the following commands:
-+
-----
-sed -i "" 's|samplepolicies|testpolicies|g' deploy/cluster_role.yaml
-sed -i "" 's|namespace: default|namespace: <namespace>|g' deploy/cluster_role_binding.yaml
-----
-
-. Deploy your policy controller to your cluster:
-.. Set up a service account for cluster by runnng the following command:
-+
-----
-kubectl apply -f deploy/service_account.yaml -n <namespace>
-----
-
-.. Set up RBAC for the operator by running the following commands:
-+
-----
-kubectl apply -f deploy/role.yaml -n <namespace>
-
-kubectl apply -f deploy/role_binding.yaml -n <namespace>
-----
-
-.. Set up RBAC for your PolicyController. Run the following commands:
-+
-----
-kubectl apply -f deploy/cluster_role.yaml
-kubectl apply -f deploy/cluster_role_binding.yaml
-----
-
-.. Set up a CustomResourceDefinition (CRD) by running the following command:
-+
-----
-kubectl apply -f deploy/crds/policies.open-cluster-management.io_samplepolicies_crd.yaml
-----
-
-.. Deploy the `multicloud-operator-policy-controller` by running the following command:
-+
-----
-kubectl apply -f deploy/operator.yaml -n <namespace>
-----
-
-.. Verify that the controller is functional by running the following command:
-+
-----
-kubectl get pod -n <namespace>
-----
-
-Your policy controller is deployed.
-
 [#deleting-a-policy-controller]
 === Deleting a policy controller
 
@@ -227,7 +213,7 @@ Delete the policy controller from the CLI.
 
 * Delete a policy controller from the CLI:
  .. Delete a policy controller by running the following command:
-// verify command `namespace`
+// command is incorrect, this is used to delete a policy 
 +
 ----
 kubectl delete policy <policy-controller-name> -n <open-cluster-management-namespace>
