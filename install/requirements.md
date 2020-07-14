@@ -27,24 +27,22 @@ See the [Red Hat Advanced Cluster Management for Kubernetes Support matrix](http
 
 # Networking configuration
 
+Configure your network settings to allow the following connections:
+
 Hub cluster:
-- outbound connectivity to cloud provider's API, port 443 for Google Cloud Platfrom Amazon Web Service
-- outbound connectivity to the Kubernetes API server of the Hive provisioned managed cluster (so Hive-driven `openshift-install` is successful)
-- outbound connectivity to the `WorkManager` service endpoint on the managed cluster (for gathering logs)
-- inbound connectivity to the hub cluster's Kubernetes API server from the managed cluster (for Klusterlet/KlusterletAddon)
+- Outbound connectivity to cloud provider's API
+- Outbound connectivity to the Kubernetes API server of the Hive provisioned `ManagedCluster` on port 443 (so Hive-driven `openshift-install` is successful)
+- Outbound connectivity from the Hub to the channel source, including Github, Object Store, and Helm repository
+- Outbound and inbound connectivity to the `WorkManager` service route on the ManagedCluster on port 443 (for gathering logs)
+- Inbound connectivity to the hub cluster's kube API server from the `ManagedCluster` on port 6443 (for Klusterlet/KlusterletAddon)
+- Inbound connectivity for post-commit hook from GitHub to the Hub
+- Inbound connectivity from the Observatorium prometheus collector on the managed cluster to the Hub Thanos datastore
+
 
 Managed cluster:
-- inbound connectivity to the Kubernetes API server from the hub cluster (Hive)
-- inbound connectivity to `WorkManager` service endpoint from the hub cluster (for logging)
-- outbound connectivity to the hub cluster's Kubernetes API server (for Klusterlet/KlusterletAddon)
-
-Hive:
-- outbound connectivity from Hub to the cloud provider's API
-- inbound/outbound connectivity from Hub to the kube API server of the provisioned cluster
-
-Klusterlet/KlusterletAddon
-- inbound connectivity from ManagedCluster to Hub's kube API server
-
-WorkManager log feature:
-- inbound/outbound connectivity from Hub to ManagedCluster's WorkManager endpoint
+- Inbound connectivity to the Kubernetes API server from the hub cluster on port 6443 (Hive)
+- Inbound connectivity to `WorkManager` service endpoint from the hub cluster on port 443 (for logging)
+- Outbound connectivity to the hub cluster's Kubernetes API server on port 6443 (for Klusterlet/KlusterletAddon)
+- Outbound connectivity from the Hub to channel source, including Github, Object Store, and Helm repository
+- Outbound connectivity from the Observatorium prometheus collector on the managed cluster to the Hub Thanos datastore
 
