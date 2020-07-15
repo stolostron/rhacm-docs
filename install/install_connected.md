@@ -154,7 +154,7 @@ You must meet the following requirements before you install Red Hat Advanced Clu
   
 3. Create a pull secret that provides the entitlement to the downloads.
 
-   1. Copy your OpenShift Container Platform pull secret from [cloud.redhat.com](https://cloud.redhat.com/openshift/install/pull-secret) by selecting **Copy pull secret**. You will use the content of this pull secret in an step later in this procedure. Your OpenShift Container Platform pull secret is associated with your Red Hat Customer Portal ID, and is the same across all Kubernetes providers.
+   1. Copy your OpenShift Container Platform pull secret from [cloud.redhat.com/openshift/install/pull-secret](https://cloud.redhat.com/openshift/install/pull-secret) by selecting **Copy pull secret**. You will use the content of this pull secret in an step later in this procedure. Your OpenShift Container Platform pull secret is associated with your Red Hat Customer Portal ID, and is the same across all Kubernetes providers.
 
    2. In the Red Hat OpenShift Container Platform console navigation, select **Workloads** > **Secrets**. 
   
