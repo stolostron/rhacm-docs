@@ -91,7 +91,7 @@ You must meet the following requirements before you install Red Hat Advanced Clu
 
 5. If you plan to import Kubernetes clusters that were not created by OpenShift Container Platform or Red Hat Advanced Cluster Management, generate a pull secret to access the entitled content from the distribution registry. Pull secret requirements for OpenShift Container Platform clusters are automatically resolved by OpenShift Container Platform and Red Hat Advanced Cluster Management. You do not have to generate the pull secret if you are not importing other types of Kubernetes clusters to be managed. **Important:** Pull secrets are namespace-specific, so make sure that you are in the namespace that you created in step 1.
 
-   1. Download your OpenShift Container Platform pull secret file from [cloud.redhat.com](https://cloud.redhat.com/openshift/install/pull-secret) by selecting **Download pull secret**. Your OpenShift Container Platform pull secret is associated with your Red Hat Customer Portal ID, and is the same across all Kubernetes providers.
+   1. Download your OpenShift Container Platform pull secret file from [cloud.redhat.com/openshift/install/pull-secret](https://cloud.redhat.com/openshift/install/pull-secret) by selecting **Download pull secret**. Your OpenShift Container Platform pull secret is associated with your Red Hat Customer Portal ID, and is the same across all Kubernetes providers.
    
    2. Run the following command to generate your pull secret:
    
