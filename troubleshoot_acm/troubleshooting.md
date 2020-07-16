@@ -10,6 +10,7 @@ View the list of troubleshoot topics for Red Hat Advanced Cluster Management for
 
 * Cluster management
 
+  - [Troubleshooting an offline cluster](trouble_cluster_offline.md)
   - [Troubleshooting cluster with pending import status](trouble_import_status.md)
   - [Troubleshooting cluster with unknown status](trouble_console_status.md)
   - [Troubleshooting a default storage class error when creating a cluster on bare metal](trouble_storage_class.md)
