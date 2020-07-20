@@ -29,6 +29,60 @@ spec:
     singular: samplepolicy
 ----
 
+. Update the policy controller to watch for `SamplePolicy` kind. Run the following command:
++
+----
+for file in $(find . -name "*.go" -type f); do  sed -i "" "s/SamplePolicy/g" $file; done
+for file in $(find . -name "*.go" -type f); do  sed -i "" "s/samplepolicy-controller/samplepolicy-controller/g" $file; done
+----
+
+. Recompile and run the policy controller by completing the following steps:
+
+.. Log in to your cluster.
+.. Select the user icon, then click **Configure client**.
+.. Copy and paste the configuration information into your command line, and press **Enter**.
+.. Run the following commands to apply your policy CRD and start the controller:
+   
++
+----
+export GO111MODULE=on
+   
+kubectl apply -f deploy/crds/policy.open-cluster-management.io_samplepolicies_crd.yaml
+   
+operator-sdk run --local --verbose
+----
+
++
+You might receive the following output that indicates that your controller runs:
+
++
+----
+{“level”:”info”,”ts”:1578503280.511274,”logger”:”controller-runtime.manager”,”msg”:”starting metrics server”,”path”:”/metrics”}
+{“level”:”info”,”ts”:1578503281.215883,”logger”:”controller-runtime.controller”,”msg”:”Starting Controller”,”controller”:”samplepolicy-controller”}
+{“level”:”info”,”ts”:1578503281.3203468,”logger”:”controller-runtime.controller”,”msg”:”Starting workers”,”controller”:”samplepolicy-controller”,”worker count”:1}
+Waiting for policies to be available for processing…
+----
+
+.. Create a policy and verify that the controller retrieves it and applies the policy onto your cluster. Run the following command: 
++
+----
+kubectl apply -f deploy/crds/policy.open-cluster-management.io_samplepolicies_crd.yaml
+----
+
++
+When the policy is applied, a message appears to indicate that policy is monitored and detected by your custom controller. The mesasge might resemble the following contents:
+
++
+[source,yaml]
+----
+{"level":"info","ts":1578503685.643426,"logger":"controller_samplepolicy","msg":"Reconciling SamplePolicy","Request.Namespace":"default","Request.Name":"example-samplepolicy"}
+{"level":"info","ts":1578503685.855259,"logger":"controller_samplepolicy","msg":"Reconciling SamplePolicy","Request.Namespace":"default","Request.Name":"example-samplepolicy"}
+Available policies in namespaces: 
+namespace = kube-public; policy = example-samplepolicy 
+namespace = default; policy = example-samplepolicy 
+namespace = kube-node-lease; policy = example-samplepolicy
+----
+
 . Check the `status` field for compliance details by running the following command: 
 
 +
@@ -60,7 +114,7 @@ status:
   compliant: NonCompliant
 ----
 
-. Update the policy rules and policy logic to introduce new rules for your policy controller. Complete the following steps:
+. Change the policy rules and policy logic to introduce new rules for your policy controller. Complete the following steps:
 
 .. Add new fields in your YAML file by updating the `SamplePolicySpec`. Your specification might resemble the following content:
 +
@@ -83,42 +137,13 @@ spec:
       type: integer
 ----
 
-.. Update the `PeriodicallyExecSamplePolicies` function in the `samplepolicy_controller.go` file. View an example of the `PeriodicallyExecSamplePolicies` field, see link:https://github.com/open-cluster-management/multicloud-operators-policy-controller/blob/master/pkg/controller/samplepolicy/samplepolicy_controller.go#L208[open-cluster-management/multicloud-operators-policy-controller].
+.. Update the `SamplePolicySpec` structure in the link:https://github.com/open-cluster-management/multicloud-operators-policy-controller/blob/master/pkg/controller/samplepolicy/samplepolicy_controller.go[samplepolicy_controller.go] with new fields.
 
-Your policy controller is created.
+.. Update the `PeriodicallyExecSamplePolicies` function in the `samplepolicy_controller.go` file with new logic to run the policy controller. View an example of the `PeriodicallyExecSamplePolicies` field, see link:https://github.com/open-cluster-management/multicloud-operators-policy-controller/blob/master/pkg/controller/samplepolicy/samplepolicy_controller.go#L208[open-cluster-management/multicloud-operators-policy-controller].
 
-[#testing-a-custom-policy-controller-with-the-governance-and-risk-dashboard]
-=== Testing a custom policy controller with the Governance and risk dashboard
+.. Recompile and run the policy controller. See xref:../security/create_policy_ctrl.adoc#writing-a-policy-controller[Writing a policy controller]
 
-Update the schema definition and test the policy controller by completing the following steps:
-
-. Log in to your cluster.
-.. Select the user icon, then click **Configure client**.
-.. Copy and paste the configuration information into your command line, and press **Enter**.
-.. Run the following commands to apply your policy CRD and start the controller:
-   
-+
-----
-export GO111MODULE=on
-   
-kubectl apply -f deploy/crds/policy.open-cluster-management.io_samplepolicies_crd.yaml
-   
-operator-sdk run --local --verbose
-----
-
-+
-When the policy is applied, a message appears to indicate that policy is monitored and detected by your custom controller. The mesasge might resemble the following contents:
-
-+
-[source,yaml]
-----
-{"level":"info","ts":1578503685.643426,"logger":"controller_samplepolicy","msg":"Reconciling SamplePolicy","Request.Namespace":"default","Request.Name":"example-samplepolicy"}
-{"level":"info","ts":1578503685.855259,"logger":"controller_samplepolicy","msg":"Reconciling SamplePolicy","Request.Namespace":"default","Request.Name":"example-samplepolicy"}
-Available policies in namespaces: 
-namespace = kube-public; policy = example-samplepolicy 
-namespace = default; policy = example-samplepolicy 
-namespace = kube-node-lease; policy = example-samplepolicy
-----
+Your policy controller is functional.
 
 [#deploying-your-controller-to-the-cluster]
 == Deploying your controller to the cluster
@@ -196,6 +221,18 @@ kubectl get pod -n <namespace>
 ----
 
 . You must integrate your policy controller by creating a `policy-template` for the controller to monitor. For more information, see xref:../security/create_policy.adoc#creating-a-cluster-security-policy-from-the-console[Creating a cluster security policy from the console]. 
+
+[#scaling-your-controller-deployment]
+=== Scaling your controller deployment
+
+Policy controller deployments do not support deletetion or removal. You can scale your deployment to update which pods the deployment is applied to. Complete the following steps:
+
+. Log in to your hub cluster. 
+. Navigate to your OpenShift Container Platform cluster. Hover your cursor on the *Applications* icon > select *Red Hat OpenShift Container Platform*.
+. From your OpenShift Container Platform cluster, navigate to the _Deployment_ page. From the navigation menu, select *Workload* > *Deployments*.
+. Scale the `grc-policy-propagator` by selecting to increase or decrease the number of pods the deployment is applied to.
+
+For more information on deployments, see link:https:https://docs.openshift.com/container-platform/4.5/applications/deployments/what-deployments-are.html#deployments-kube-deployments_what-deployments-are[OpenShift Container Platform Deployments].
 
 Your policy controller is deployed and integrated on your cluster. View the product policy controllers, see xref:../policy_controllers.adoc[Policy controllers] for more information.
 
