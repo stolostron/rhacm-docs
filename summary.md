@@ -129,6 +129,7 @@
      * [Helm](apis/helmreleases.json)     
 * [Troubleshooting](troubleshoot_acm/troubleshooting.md)
      * [Troubleshooting multiclusterhub-operator start](troubleshoot_acm/install_operator_start.md)
+     * [Troubleshooting an offline cluster](troubleshoot_acm/trouble_cluster_offline.md)
      * [Troubleshooting cluster with pending import status](troubleshoot_acm/trouble_import_status.md)
      * [Troubleshooting cluster with unknown status](troubleshoot_acm/trouble_console_status.md)
      * [Troubleshooting a default storage class error when creating a cluster on bare metal](troubleshoot_acm/trouble_storage_class.md)
