@@ -31,18 +31,15 @@ Configure your network settings to allow the following connections:
 
 Hub cluster:
 - Outbound connectivity to cloud provider's API
-- Outbound connectivity to the Kubernetes API server of the Hive provisioned `ManagedCluster` on port 443 (so Hive-driven `openshift-install` is successful)
-- Outbound connectivity from the Hub to the channel source, including Github, Object Store, and Helm repository
-- Outbound and inbound connectivity to the `WorkManager` service route on the ManagedCluster on port 443 (for gathering logs)
-- Inbound connectivity to the hub cluster's kube API server from the `ManagedCluster` on port 6443 (for Klusterlet/KlusterletAddon)
-- Inbound connectivity for post-commit hook from GitHub to the Hub
-- Inbound connectivity from the Observatorium prometheus collector on the managed cluster to the Hub Thanos datastore
+- Outbound connectivity to the Kubernetes API server of theprovisioned `ManagedCluster` on port 6443
+- Outbound connectivity from the Hub to the channel source, including Github, Object Store, and Helm repository. This is only required when you are using application lifecycle to connect to these sources.
+- Outbound and inbound connectivity to the `WorkManager` service route on the ManagedCluster on port 443
+- Inbound connectivity to the hub cluster's kube API server from the `ManagedCluster` on port 6443
+- Inbound connectivity for post-commit hook from GitHub to the Hub. This setting is only required when you use certain application management functions.
 
 
 Managed cluster:
-- Inbound connectivity to the Kubernetes API server from the hub cluster on port 6443 (Hive)
-- Inbound connectivity to `WorkManager` service endpoint from the hub cluster on port 443 (for logging)
-- Outbound connectivity to the hub cluster's Kubernetes API server on port 6443 (for Klusterlet/KlusterletAddon)
-- Outbound connectivity from the Hub to channel source, including Github, Object Store, and Helm repository
-- Outbound connectivity from the Observatorium prometheus collector on the managed cluster to the Hub Thanos datastore
-
+- Inbound connectivity to the Kubernetes API server from the hub cluster on port 6443
+- Inbound connectivity to `WorkManager` service endpoint from the hub cluster on port 443
+- Outbound connectivity to the hub cluster's Kubernetes API server on port 6443
+- Outbound connectivity from the Hub to channel source, including Github, Object Store, and Helm repository. This is only required when you are using application lifecycle to connect to these sources.
