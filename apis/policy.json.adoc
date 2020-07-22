@@ -1,10 +1,9 @@
-= Policy (policy.open-cluster-management.io/v1) API
+= Policy (policy.open-cluster-management.io/v1) APIs
 
 
 [[_rhacm-docs_apis_policy_jsonoverview]]
 == Overview
-This documentation is for the Policy resource for Red Hat Advanced Cluster Management for Kubernetes. Policy resource has four possible requests: create, query, delete and update. 
-// not sure if this last sentence applies
+This documentation is for the Policy resource for Red Hat Advanced Cluster Management for Kubernetes. The Policy resource has four possible requests: create, query, delete and update. 
 
 
 === Version information
@@ -49,12 +48,12 @@ __URL__ : http://swagger.io
 [[_rhacm-docs_apis_policy_jsoncreateapplication]]
 === Create a policy
 ....
-POST /policy.open-cluster-management.io/v1/namespaces/{namespace}/policy
+POST /policy.open-cluster-management.io/v1/v1alpha1/namespaces/{namespace}/policies/{policy_name}
 ....
 
 
 ==== Description
-Create a application.
+Create a policy.
 
 
 ==== Parameters
@@ -67,7 +66,7 @@ __required__|Authorization: Bearer {ACCESS_TOKEN} ; ACCESS_TOKEN is the user acc
 |**Path**|**namespace** +
 __required__|Namespace that you want to use, for example, default.|string
 |**Body**|**body** +
-__required__|Parameters describing the application to be created.|<<_rhacm-docs_apis_application_jsonapplication,Application>>
+__required__|Parameters describing the policy to be created.|<<_rhacm-docs_apis_application_jsonapplication,Application>>
 |===
 
 
@@ -86,12 +85,12 @@ __required__|Parameters describing the application to be created.|<<_rhacm-docs_
 
 ==== Consumes
 
-* `application/yaml`
+* `application/json`
 
 
 ==== Tags
 
-* applications.app.k8s.io
+* policy.open-cluster-management.io
 
 
 ==== Example HTTP request
@@ -100,40 +99,104 @@ __required__|Parameters describing the application to be created.|<<_rhacm-docs_
 [source,json]
 ----
 {
-  "apiVersion" : "app.k8s.io/v1beta1",
-  "kind" : "Application",
-  "metadata" : {
-    "labels" : {
-      "app" : "nginx-app-details"
+  "apiVersion": "policy.open-cluster-management.io/v1/v1alpha1",
+  "kind": "Policy",
+  "metadata": {
+    "name": "test-policy-swagger",
+    "description": "Example body for Policy API Swagger docs"
+  },
+  "spec": {
+    "remediationAction": "enforce",
+    "namespaces": {
+      "include": [
+        "default"
+      ],
+      "exclude": [
+        "kube*"
+      ]
     },
-    "name" : "nginx-app-3",
-    "namespace" : "ns-sub-1"
-  },
-  "spec" : {
-    "componentKinds" : [ {
-      "group" : "apps.open-cluster-management.io",
-      "kind" : "Subscription"
-    } ]
-  },
-  "selector" : {
-    "matchLabels" : {
-      "app" : "nginx-app-details"
-    }
-  },
-  "status" : { }
+    "roleTemplates": {
+      "kind": "RoleTemplate",
+      "apiVersion": "roletemplate.open-cluster-management.io/v1alpha1",
+      "complianceType": "musthave",
+      "metadata": {
+        "namespace": null,
+        "name": "test-role"
+      },
+      "selector": {
+        "matchLabels": {
+          "cloud": "IBM"
+        }
+      }
+    },
+    "rules": [
+      {
+        "complianceType": "musthave",
+        "PolicyRule": {
+          "apiGroups": [
+            "extensions",
+            "apps"
+          ],
+          "resources": [
+            "deployments"
+          ],
+          "verbs": [
+            "get",
+            "list",
+            "watch",
+            "delete"
+          ]
+        }
+      },
+      {
+        "complianceType": "mustnothave",
+        "PolicyRule": {
+          "apiGroups": [
+            "core"
+          ],
+          "resources": [
+            "pods"
+          ],
+          "verbs": [
+            "create",
+            "update",
+            "patch"
+          ]
+        }
+      },
+      {
+        "PolicyRule": null,
+        "apiGroups": [
+          "core"
+        ],
+        "resources": [
+          "secrets"
+        ],
+        "verbs": [
+          "get",
+          "watch",
+          "list",
+          "create",
+          "delete",
+          "update",
+          "patchß"
+        ]
+      }
+    ]
+  }
 }
 ----
 
 
-[[_rhacm-docs_apis_application_jsonqueryapplications]]
-=== Query all applications
+[[_rhacm-docs_apis_policy_jsonquerypolicies]]
+=== Query all policies
 ....
-GET /app.k8s.io/v1beta1/namespaces/{namespace}/applications
+GET /policy.open-cluster-management.io/v1/v1alpha1/namespaces/{namespace}/policies/{policy_name}
 ....
 
 
 ==== Description
-Query your applications for more details.
+Query your policies for more details.
 
 
 ==== Parameters
@@ -163,23 +226,23 @@ __required__|Namespace that you want to apply the policy to, for example, defaul
 
 ==== Consumes
 
-* `application/yaml`
+* `application/json`
 
 
 ==== Tags
 
-* applications.app.k8s.io
+* policy.open-cluster-management.io
 
 
-[[_rhacm-docs_apis_application_jsonqueryapplication]]
-=== Query a single application
+[[_rhacm-docs_apis_policy_jsonquerypolicy]]
+=== Query a single policy
 ....
-GET /app.k8s.io/v1beta1/namespaces/{namespace}/applications/{application_name}
+GET /policy.open-cluster-management.io/v1/v1alpha1/namespaces/{namespace}/policies/{policy_name}
 ....
 
 
 ==== Description
-Query a single application for more details.
+Query a single policy for more details.
 
 
 ==== Parameters
@@ -189,8 +252,8 @@ Query a single application for more details.
 |Type|Name|Description|Schema
 |**Header**|**COOKIE** +
 __required__|Authorization: Bearer {ACCESS_TOKEN} ; ACCESS_TOKEN is the user access token.|string
-|**Path**|**application_name** +
-__required__|Name of the application that you wan to query.|string
+|**Path**|**policy_name** +
+__required__|Name of the policy that you want to query.|string
 |**Path**|**namespace** +
 __required__|Namespace that you want to use, for example, default.|string
 |===
@@ -211,13 +274,13 @@ __required__|Namespace that you want to use, for example, default.|string
 
 ==== Tags
 
-* applications.app.k8s.io
+* policy.open-cluster-management.io
 
 
-[[_rhacm-docs_apis_application_jsondeleteapplication]]
-=== Delete a application
+[[_rhacm-docs_apis_policy_jsondeletepolicy]]
+=== Delete a policy
 ....
-DELETE /app.k8s.io/v1beta1/namespaces/{namespace}/applications/{application_name}
+DELETE /policy.open-cluster-management.io/v1/v1alpha1/namespaces/{namespace}/policies/{policy_name}
 ....
 
 
@@ -228,8 +291,8 @@ DELETE /app.k8s.io/v1beta1/namespaces/{namespace}/applications/{application_name
 |Type|Name|Description|Schema
 |**Header**|**COOKIE** +
 __required__|Authorization: Bearer {ACCESS_TOKEN} ; ACCESS_TOKEN is the user access token.|string
-|**Path**|**application_name** +
-__required__|Name of the application that you want to delete.|string
+|**Path**|**policy_name** +
+__required__|Name of the policy that you want to delete.|string
 |**Path**|**namespace** +
 __required__|Namespace that you want to use, for example, default.|string
 |===
@@ -250,16 +313,16 @@ __required__|Namespace that you want to use, for example, default.|string
 
 ==== Tags
 
-* applications.app.k8s.io
+* policy.open-cluster-management.io
 
 
 
 
-[[_rhacm-docs_apis_application_jsondefinitions]]
+[[_rhacm-docs_apis_policy_jsondefinitions]]
 == Definitions
 
-[[_rhacm-docs_apis_application_jsonapplication]]
-=== Application
+[[_rhacm-docs_apis_policy_jsonpolicy]]
+=== Policy
 
 [options="header", cols=".^3a,.^4a"]
 |===
@@ -269,239 +332,81 @@ __required__|string
 |**kind** +
 __required__|string
 |**metadata** +
-__required__|object
+__required__|string
 |**spec** +
-__required__|<<_rhacm-docs_apis_application_jsonapplication_spec,spec>>
+__required__|<<_rhacm-docs_apis_policy_jsonpolicy_spec,spec>>
 |===
 
-[[_rhacm-docs_apis_application_jsonapplication_spec]]
+[[_rhacm-docs_apis_policy_jsonpolicy_spec]]
 **spec**
 
 [options="header", cols=".^3a,.^4a"]
 |===
 |Name|Schema
-|**assemblyPhase** +
+|**remediationAction** +
 __optional__|string
-|**componentKinds** +
-__optional__|< object > array
-|**descriptor** +
-__optional__|<<_rhacm-docs_apis_application_jsonapplication_descriptor,descriptor>>
-|**info** +
-__optional__|< <<_rhacm-docs_apis_application_jsonapplication_info,info>> > array
+|**namespaces** +
+__required__|< object > array
+|**policyTemplate** +
+__optional__|<<_rhacm-docs_apis_policy_jsonpolicy_policytemplate,policyTemplate>>
+|===
+
+[[_rhacm-docs_apis_policy_jsonpolicy_policytemplate]]
+**policyTemplate**
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**kind** +
+__optional__|string
+|**apiVersion** +
+__required__| string
+|**complianceType** +
+__required__| string
+|**metadata** +
+__required__| string
 |**selector** +
-__optional__|object
+__optional__|<<_rhacm-docs_apis_policy_jsonpolicy_selector,selector>> string
+|**rules** +
+__optional__|<<_rhacm-docs_apis_policy_jsonpolicy_rules,rules>> string
 |===
 
-[[_rhacm-docs_apis_application_jsonapplication_descriptor]]
-**descriptor**
-
-[options="header", cols=".^3a,.^4a"]
-|===
-|Name|Schema
-|**description** +
-__optional__|string
-|**icons** +
-__optional__|< <<_rhacm-docs_apis_application_jsonapplication_descriptor_icons,icons>> > array
-|**keywords** +
-__optional__|< string > array
-|**links** +
-__optional__|< <<_rhacm-docs_apis_application_jsonapplication_descriptor_links,links>> > array
-|**maintainers** +
-__optional__|< <<_rhacm-docs_apis_application_jsonapplication_descriptor_maintainers,maintainers>> > array
-|**notes** +
-__optional__|string
-|**owners** +
-__optional__|< <<_rhacm-docs_apis_application_jsonapplication_descriptor_owners,owners>> > array
-|**type** +
-__optional__|string
-|**version** +
-__optional__|string
-|===
-
-[[_rhacm-docs_apis_application_jsonapplication_descriptor_icons]]
-**icons**
+[[_rhacm-docs_apis_policy_jsonpolicy_selector]]
+**selector**
 
 [options="header", cols=".^3a,.^4a"]
 |===
 |Name|Schema
-|**size** +
-__optional__|string
-|**src** +
-__required__|string
-|**type** +
-__optional__|string
+|**matchLabels** +
+__optional__| object
+|**rules** +
+__optional__| <<_rhacm-docs_apis_policy_jsonpolicy_rules,rules>> string
 |===
 
-[[_rhacm-docs_apis_application_jsonapplication_descriptor_links]]
-**links**
+[[_rhacm-docs_apis_policy_jsonpolicy_rules]]
+**rules**
 
 [options="header", cols=".^3a,.^4a"]
 |===
 |Name|Schema
-|**description** +
-__optional__|string
-|**url** +
-__optional__|string
+|**complianceType** +
+__required__| string
+|**PolicyRule** +
+__required__|<<_rhacm-docs_apis_policy_jsonpolicy_policyrule,rules>> object
 |===
 
-[[_rhacm-docs_apis_application_jsonapplication_descriptor_maintainers]]
-**maintainers**
-
-[options="header", cols=".^3a,.^4a"]
-|===
-|Name|Schema
-|**email** +
-__optional__|string
-|**name** +
-__optional__|string
-|**url** +
-__optional__|string
-|===
-
-[[_rhacm-docs_apis_application_jsonapplication_descriptor_owners]]
-**owners**
+[[_rhacm-docs_apis_policy_jsonpolicy_policyrule]]
+**PolicyRule**
 
 [options="header", cols=".^3a,.^4a"]
 |===
 |Name|Schema
-|**email** +
+|**apiGroups** +
 __optional__|string
-|**name** +
+|**resources** +
 __optional__|string
-|**url** +
-__optional__|string
-|===
-
-[[_rhacm-docs_apis_application_jsonapplication_info]]
-**info**
-
-[options="header", cols=".^3a,.^4a"]
-|===
-|Name|Schema
-|**name** +
-__optional__|string
-|**type** +
-__optional__|string
-|**value** +
-__optional__|string
-|**valueFrom** +
-__optional__|<<_rhacm-docs_apis_application_jsonapplication_info_valuefrom,valueFrom>>
-|===
-
-[[_rhacm-docs_apis_application_jsonapplication_info_valuefrom]]
-**valueFrom**
-
-[options="header", cols=".^3a,.^4a"]
-|===
-|Name|Schema
-|**configMapKeyRef** +
-__optional__|<<_rhacm-docs_apis_application_jsonapplication_info_valuefrom_configmapkeyref,configMapKeyRef>>
-|**ingressRef** +
-__optional__|<<_rhacm-docs_apis_application_jsonapplication_info_valuefrom_ingressref,ingressRef>>
-|**secretKeyRef** +
-__optional__|<<_rhacm-docs_apis_application_jsonapplication_info_valuefrom_secretkeyref,secretKeyRef>>
-|**serviceRef** +
-__optional__|<<_rhacm-docs_apis_application_jsonapplication_info_valuefrom_serviceref,serviceRef>>
-|**type** +
+|**verbs** +
 __optional__|string
 |===
 
-[[_rhacm-docs_apis_application_jsonapplication_info_valuefrom_configmapkeyref]]
-**configMapKeyRef**
 
-[options="header", cols=".^3a,.^4a"]
-|===
-|Name|Schema
-|**apiVersion** +
-__optional__|string
-|**fieldPath** +
-__optional__|string
-|**key** +
-__optional__|string
-|**kind** +
-__optional__|string
-|**name** +
-__optional__|string
-|**namespace** +
-__optional__|string
-|**resourceVersion** +
-__optional__|string
-|**uid** +
-__optional__|string
-|===
-
-[[_rhacm-docs_apis_application_jsonapplication_info_valuefrom_ingressref]]
-**ingressRef**
-
-[options="header", cols=".^3a,.^4a"]
-|===
-|Name|Schema
-|**apiVersion** +
-__optional__|string
-|**fieldPath** +
-__optional__|string
-|**host** +
-__optional__|string
-|**kind** +
-__optional__|string
-|**name** +
-__optional__|string
-|**namespace** +
-__optional__|string
-|**path** +
-__optional__|string
-|**resourceVersion** +
-__optional__|string
-|**uid** +
-__optional__|string
-|===
-
-[[_rhacm-docs_apis_application_jsonapplication_info_valuefrom_secretkeyref]]
-**secretKeyRef**
-
-[options="header", cols=".^3a,.^4a"]
-|===
-|Name|Schema
-|**apiVersion** +
-__optional__|string
-|**fieldPath** +
-__optional__|string
-|**key** +
-__optional__|string
-|**kind** +
-__optional__|string
-|**name** +
-__optional__|string
-|**namespace** +
-__optional__|string
-|**resourceVersion** +
-__optional__|string
-|**uid** +
-__optional__|string
-|===
-
-[[_rhacm-docs_apis_application_jsonapplication_info_valuefrom_serviceref]]
-**serviceRef**
-
-[options="header", cols=".^3a,.^4a"]
-|===
-|Name|Schema
-|**apiVersion** +
-__optional__|string
-|**fieldPath** +
-__optional__|string
-|**kind** +
-__optional__|string
-|**name** +
-__optional__|string
-|**namespace** +
-__optional__|string
-|**path** +
-__optional__|string
-|**port** +
-__optional__|integer (int32)
-|**resourceVersion** +
-__optional__|string
-|**uid** +
-__optional__|string
-|===
