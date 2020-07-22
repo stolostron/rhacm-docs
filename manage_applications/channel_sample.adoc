@@ -19,7 +19,7 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
   name:
-  namespace: # Each channel needs a unique namespace, except GitHub channel.
+  namespace: # Each channel needs a unique namespace, except Git channel.
 spec:
   sourceNamespaces:
   type:
@@ -52,7 +52,7 @@ The name of the channel.
 | metadata.namespace
 | Required.
 The namespace for the channel;
-Each channel needs a unique namespace, except GitHub channel.
+Each channel needs a unique namespace, except Git channel.
 
 | spec.sourceNamespaces
 | Optional.
@@ -62,22 +62,21 @@ For a `Namespace` channel, the namespace must be on the hub cluster.
 | spec.type
 | Required.
 The channel type.
-The supported types are: `Namespace`, `HelmRepo`, `GitHub`, and `ObjectBucket`
+The supported types are: `Namespace`, `HelmRepo`, `Git`, and `ObjectBucket`
 
 | spec.pathname
-| Required for `HelmRepo`, `GitHub`, `ObjectBucket`, `Namespace` channels.
-<ul><li>For a `HelmRepo` channel, set the value to be the URL for the Helm repository.</li><li>For an `ObjectBucket` channel, set the value to be the URL for the Object store.</li><li>For a `GitHub` channel, set the value to be the HTTPS URL for the GitHub repository.</li><li>For a `Namespace` channel, set the value to be the namespace where the channel is included.</li></ul>
+| Required for `HelmRepo`, `Git`, `ObjectBucket`, `Namespace` channels. For a `HelmRepo` channel, set the value to be the URL for the Helm repository. For an `ObjectBucket` channel, set the value to be the URL for the Object store. For a `Git` channel, set the value to be the HTTPS URL for the Git repository. For a `Namespace` channel, set the value to be the namespace where the channel is included.
 
 | spec.secretRef.name
 | Optional.
 Identifies a Kubernetes Secret resource to use for authentication, such as for accessing a repository or chart.
-You can use a secret for authentication with only `HelmRepo`, `ObjectBucket`, and `GitHub` type channels.
+You can use a secret for authentication with only `HelmRepo`, `ObjectBucket`, and `Git` type channels.
 
 | spec.gates
 | Optional.
 Defines requirements for promoting a deployable within the channel.
 If no requirements are set, any deployable that is added to the channel namespace or source is promoted to the channel.
-`gates` do not apply for `HelmRepo` and `GitHub` channel types, only for `Namespace` and `ObjectBucket` channel types.
+`gates` do not apply for `HelmRepo` and `Git` channel types, only for `Namespace` and `ObjectBucket` channel types.
 
 | spec.gates.annotations
 | Optional.
@@ -108,7 +107,21 @@ spec:
 [#kubernetes-namespace-namespace-channel]
 == Kubernetes namespace (Namespace) channel
 
-The following example channel definition abstracts a namespace as a channel that holds deployable resources.
+You need to manually create deployable resources within the channel namespace. 
+
+To create deployable resources correctly, add the following two labels that are required in the deployable to the subscription controller that identifies which deployable resources are added:
+
+----
+labels:
+    apps.open-cluster-management.io/channel: <channel name>
+    apps.open-cluster-management.io/channel-type: Namespace
+----
+
+Don't specify template namespace in each deployable `spec.template.metadata.namespace`. 
+
+For the namespace type channel and subscription, all the deployable templates are deployed to the subscription namespace on managed clusters. As a result, those deployable templates that are defined outside of the subscription namespace are skipped.
+
+The following example channel definitions abstracts a namespace as a channel that holds deployable resources.
 When this YAML is applied, a namespace `ch-qa` is created for the channel that is named `qa`.
 When created, this channel points to the source default namespace for identifying deployables.
 The channel controller maintains the resources at the actual namespace location and ensures that the resources are kept up-to-date.
@@ -130,6 +143,34 @@ The channel controller maintains the resources at the actual namespace location 
         dev-ready: approved
 ----
 
+[source,yaml]
+----
+
+apiVersion: apps.open-cluster-management.io/v1
+kind: Deployable
+metadata:
+  labels:
+    app: gbchn
+    apps.open-cluster-management.io/channel: gbchn
+    apps.open-cluster-management.io/channel-type: Namespace
+    release: gbchn
+  name: gbchn-service
+  namespace: gbchn
+spec:
+  template:
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: gbchn
+        release: gbchn
+      name: gbchn
+    spec:
+      ports:
+      - port: 80
+      selector:
+        app: gbchn
+----        
 [#object-store-bucket-objectbucket-channel]
 == Object store bucket (ObjectBucket) channel
 
@@ -201,10 +242,10 @@ spec:
 ----
 
 [#github-repository-channel]
-== GitHub (`GitHub`) repository channel
+== Git (`Git`) repository channel
 
-The following example channel definition shows an example of a channel for the GitHub Repository.
-In the following example, `secretRef` refers to the user identity used to access the GitHub repo that is specified in the `pathname`.
+The following example channel definition shows an example of a channel for the Git Repository.
+In the following example, `secretRef` refers to the user identity used to access the Git repo that is specified in the `pathname`.
 If you have a public repo, you do not need the `secretRef`:
 
 [source,yaml]
@@ -215,7 +256,7 @@ metadata:
   name: hive-cluster-gitrepo
   namespace: gitops-cluster-lifecycle
 spec:
-  type: GitHub
+  type: Git
   pathname: https://github.com/open-cluster-management/gitops-clusters.git
   secretRef:
     name: github-gitops-clusters

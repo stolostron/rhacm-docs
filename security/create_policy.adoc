@@ -45,27 +45,32 @@ spec:
   namespaces:
     include: ["default"]
     exclude: ["kube*"]
-  role-templates:
-    - apiVersion: roletemplate.mcm.ibm.com/v1alpha1
-      kind: RoleTemplate
-      metadata:
-        namespace: kube-system # will be inferred
-        name: operator
-      selector:
-        matchLabels:
-          dev: "true"
-      complianceType: "musthave" # at this level, it means the role must exist and must have the following rules
-      rules:
-        - complianceType: "musthave" # at this level, it means if the role exists the rule is a musthave
-          policyRule:
-            apiGroups: ["extensions", "apps"]
-            resources: ["deployments"]
-            verbs: ["get", "list", "watch", "create", "delete","patch"]
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          namespace: kube-system # will be inferred
+          name: operator
+        spec:
+          remediationAction: "inform"
+          object-templates:
+            complianceType: "musthave" # at this level, it means the role must exist and must have the following rules
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: Role
+            metadata:
+              name: example
+            objectDefinition:
+              rules:
+                - complianceType: "musthave" # at this level, it means if the role exists the rule is a musthave
+                  apiGroups: ["extensions", "apps"]
+                  resources: ["deployments"]
+                  verbs: ["get", "list", "watch", "create", "delete","patch"]
 ----
 
 . Define a `PlacementRule`.
 Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`.
-View link:../manage_applications/managing_placement_rules.adoc[Creating and managing placement rules].
+View link:../manage_applications[Creating and managing placement rules].
 Your `PlacementRule` might resemble the following content:
 +
 [source,yaml]
@@ -90,7 +95,7 @@ Your `PlacementBinding` might resemble the following YAML sample:
 +
 [source,yaml]
 ----
-apiVersion: mcm.ibm.com/v1alpha1
+apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: binding1
@@ -160,9 +165,9 @@ Your YAML file might resemble the following policy:
  metadata:
    name: policy-pod
    annotations:
-     policy.open-cluster-management.com/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
-     policy.open-cluster-management.com/controls: 'control example'
-     policy.open-cluster-management.com/standards: 'NIST,HIPAA'
+     policy.open-cluster-management.io/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
+     policy.open-cluster-management.io/controls: 'control example'
+     policy.open-cluster-management.io/standards: 'NIST,HIPAA'
  spec:
    complianceType: musthave
    namespaces:
@@ -276,4 +281,4 @@ After your policy is deleted, it is removed from your target cluster or clusters
  .. From the _Remove policy_ dialog box, click *Remove policy*
 
 To manage other policies, see xref:../security/create_policy.adoc#managing-security-policies[Managing security policies] for more information.
-Refer to xref:../security/compliance_intro.adoc#governance-and-risk[Governance and risk] for more topics about policies.
+Refer to xref:../security/grc_intro.adoc#governance-and-risk[Governance and risk] for more topics about policies.
