@@ -1,4 +1,6 @@
-# Symptom: Cluster status is offline
+#Troubleshooting an offline cluster
+
+## Symptom: Cluster status is offline
 
 After you complete the procedure for creating a cluster, you cannot access it from the Red Hat Advanced Cluster Management console, and it shows a status of `offline`.
 
