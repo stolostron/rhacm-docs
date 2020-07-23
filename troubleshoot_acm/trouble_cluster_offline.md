@@ -1,4 +1,4 @@
-#Troubleshooting an offline cluster
+# Troubleshooting an offline cluster
 
 ## Symptom: Cluster status is offline
 
