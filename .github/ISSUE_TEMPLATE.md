@@ -30,7 +30,7 @@ Section:
 
 The doc team and dev team works together to ensure the following standards are implemented in every task or concept:
 
-1. **Quality introductions** (formally known as Short Descriptions) that briefly discuss the component or feature and why the user should continue to read or complete the task. Style guides recommend no more that 50-word introductions.
+1. **Quality introductions** (formally known as Short Descriptions) that briefly discuss the component or feature and why the user should continue to read or complete the task. Style guides recommend no more than 50-word introductions.
 
 2. **Required access level** for each task, displayed at the beginning of the topic.
 
