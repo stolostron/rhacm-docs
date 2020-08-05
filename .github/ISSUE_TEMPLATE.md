@@ -34,4 +34,4 @@ The doc team and dev team works together to ensure the following standards are i
 
 2. **Required access level** for each task, displayed at the beginning of the topic.
 
-3. **Verification** at the end of the task. How does the user verify success.
+3. **Verification** at the end of the task. How does the user verify success?
