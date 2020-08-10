@@ -222,7 +222,7 @@ In some cases, a component operator crashes. When the component operator crashes
    kubectl api-resources -o name --namespaced=true); do echo "===$api==="; kubectl get $api -n multicluster-endpoint
    ```
 
-2. Get a list of your subscriptions and delete them. Run the following command:
+2. Get a list of your subscriptions and delete them. Run the following commands:
 
    ```
    kubectl get subscriptions.apps.open-cluster-management.io
@@ -230,7 +230,7 @@ In some cases, a component operator crashes. When the component operator crashes
    kubectl delete subscriptions.apps.open-cluster-management.io
    ```
 
-3. Get a list of your CustomResourceDefinitions (CRDs). Delete the application CRDs by running the following command:
+3. Get a list of your CustomResourceDefinitions (CRDs). Delete the application CRDs by running the following commands:
 
    ```
    kubectl get crd |grep apps.open-cluster-management.io
@@ -254,8 +254,11 @@ In some cases, a component operator crashes. When the component operator crashes
    kubectl delete clusterrolebinding endpoint-appmgr
    ```
 
-6. What command can the user run to verify that the target cluster is clean? 
+6. Verify that there are no pods that exist in the `multicluster-endpoint` namespace by running the following command:
 
+   ```
+   kubectl get pods -n multicluster-endpoint
+   ```
 
 Your target cluster is cleaned.
 
