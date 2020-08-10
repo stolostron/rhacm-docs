@@ -159,7 +159,7 @@ oc set data secret/{CLUSTER-NAME}-gcp-creds -n {CLUSTER-NAME} --from-file=osServ
 oc set data secret/{CLUSTER-NAME}-azure-creds -n {CLUSTER-NAME} --from-file=osServiceAccount.json=$HOME/.azure/osServiceAccount.json
 ----
 
-[#clean-offline-cluster-when-detach]
+[#resources-remain-after-you-detach-an-offline-managed-cluster]
 === Resources remain after you detach an offline managed cluster
 
 // 2.0:3210
@@ -194,6 +194,59 @@ oc get ns | grep open-cluster-management-agent
 You must be logged in as `root` to run the `management-ingress` service. 
 
 // 2.0:3532
+
+[#self-destruct-script-does-not-clean-target-clusters]
+=== Self-destruct script does not clean target clusters 
+
+In some cases, a component operator crashes. When the component operator crashes, the self-destruct script does not remove all resources from target clusters. Complete the following steps to clean your target clusters:
+
+. Remove your API resources by running the following command:
+
++
+----
+kubectl api-resources -o name --namespaced=true); do echo "===$api==="; kubectl get $api -n multicluster-endpoint
+----
+
+. Get a list of your subscriptions and delete them. Run the following command:
+
++
+----
+kubectl get subscriptions.apps.open-cluster-management.io
+
+kubectl delete subscriptions.apps.open-cluster-management.io
+----
+
+. Get a list of your CustomResourceDefinitions (CRDs). Delete the application CRDs by running the following command:
+
++
+----
+kubectl get crd |grep apps.open-cluster-management.io
+
+kubectl delete apps.open-cluster-management.io
+----
+
+. Run the following commands to delete the cluster role for the `endpoint-appmgr`:
+
++
+----
+kubectl get clusterrolebinding | grep ^endpoint | awk '{print $1}'
+
+kubectl delete clusterrole endpoint-appmgr
+----
+
+. Run the following commands to delete the cluster rolebinding for the `endpoint-appmgr`:
+
++
+----
+kubectl get clusterrolebinding | grep ^endpoint | awk '{print $1}'
+
+kubectl delete clusterrolebinding endpoint-appmgr
+----
+
+. What command can the user run to verify that the target cluster is clean? 
+
+
+Your target cluster is cleaned. 
 
 [#application-management-known-issues]
 == Application management known issues
