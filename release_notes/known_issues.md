@@ -210,7 +210,55 @@ When you enter an unsupported value into the `yaml` content before creating your
       ```
 
    **Notice:** If you have this problem in one of your imported clusters, you cannot import another cluster successfully until you fix it. Even if you import a different cluster, the import fails until the problem is fixed.   
+
+## Self-destruct script does not clean target clusters 
+<!--1.0.0:2757-->
+
+In some cases, a component operator crashes. When the component operator crashes, the self-destruct script does not remove all resources from target clusters. Complete the following steps to clean your target clusters:
+
+1. Remove your API resources by running the following command:
+
+   ```
+   kubectl api-resources -o name --namespaced=true); do echo "===$api==="; kubectl get $api -n multicluster-endpoint
+   ```
+
+2. Get a list of your subscriptions and delete them. Run the following command:
+
+   ```
+   kubectl get subscriptions.apps.open-cluster-management.io
+
+   kubectl delete subscriptions.apps.open-cluster-management.io
+   ```
+
+3. Get a list of your CustomResourceDefinitions (CRDs). Delete the application CRDs by running the following command:
+
+   ```
+   kubectl get crd |grep apps.open-cluster-management.io
+
+   kubectl delete apps.open-cluster-management.io
+   ```
+
+4. Run the following commands to delete the cluster role for the `endpoint-appmgr`:
    
+   ```
+   kubectl get clusterrolebinding | grep ^endpoint | awk '{print $1}'
+
+   kubectl delete clusterrole endpoint-appmgr
+   ```
+
+5. Run the following commands to delete the cluster rolebinding for the `endpoint-appmgr`:
+
+   ```
+   kubectl get clusterrolebinding | grep ^endpoint | awk '{print $1}'
+
+   kubectl delete clusterrolebinding endpoint-appmgr
+   ```
+
+6. What command can the user run to verify that the target cluster is clean? 
+
+
+Your target cluster is cleaned.
+
 ## Application management known issues
 
 ### Application not deployed after an updated placement rule
