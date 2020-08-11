@@ -214,9 +214,9 @@ When you enter an unsupported value into the `yaml` content before creating your
 ## Managed cluster not clean after it is detached from the hub cluster 
 <!--1.0.0:2757-->
 
-In some cases, a component operator crashes. When the component operator crashes, the self-destruct script does not remove all resources from target clusters. See the self-destruct script in the [`endpoint-operator` folder](https://github.com/open-cluster-management/endpoint-operator/blob/release-1.0.0/hack/self-destruct.sh). Complete the following steps to clean your target clusters:
+In some cases, a component operator crashes. When the component operator crashes, the self-destruct script does not remove all resources from target clusters.  Complete the following steps to clean your target clusters:
 
-1. List the remaining Advanced Cluster Management for Kubernetes resources by running the following command:
+1. Delete the namesapce resources for Advanced Cluster Management for Kubernetes resources by running the following command:
 
    ```
    for api in $(kubectl api-resources -o name --namespaced=true); do echo "===$api==="; kubectl get $api -n multicluster-endpoint; done
@@ -247,7 +247,7 @@ In some cases, a component operator crashes. When the component operator crashes
 5. Run the following commands to delete the cluster rolebinding for the `endpoint-appmgr`:
 
    ```
-   kubectl delete clusterrolebinding $(kubectl get clusterrole | grep ^endpoint | awk '{print $1}')
+   kubectl delete clusterrolebinding $(kubectl get clusterrolebinding | grep ^endpoint | awk '{print $1}')
    ```
 
 6. Verify that there are no pods that exist in the `multicluster-endpoint` namespace by running the following command:
