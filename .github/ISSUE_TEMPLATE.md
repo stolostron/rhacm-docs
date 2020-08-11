@@ -11,7 +11,10 @@ title: ''
 - [ ] [ACM 2.0 GA] 
 - [ ] [ACM 1.0 tech preview]
 
-**THIS IS FOR EXTERNAL USERS ONLY** Internal users please open issues in the [developer backlog](https://github.com/open-cluster-management/backlog/issues/new/choose), as normal.
+**THIS IS FOR EXTERNAL USERS ONLY** 
+
+
+Internal users please open issues in the [developer backlog](https://github.com/open-cluster-management/backlog/issues/new/choose), as normal.
 
 **Note:** Doc team will update the current version and the two previous versions (n-2). For earlier versions, we will address only Sev 1, customer-reported bugs for releases in support.
 
