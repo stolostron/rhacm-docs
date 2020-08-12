@@ -216,10 +216,12 @@ When you enter an unsupported value into the `yaml` content before creating your
 
 In some cases, a component operator crashes. When the component operator crashes, the target clusters are not clean after they are detached from the hub cluster.  Complete the following steps to clean your target clusters:
 
-1. Delete the namesapce resources for Advanced Cluster Management for Kubernetes resources by running the following command:
+1. Delete the namespace resources for Advanced Cluster Management for Kubernetes resources by running the following commands:
 
    ```
    for api in $(kubectl api-resources -o name --namespaced=true); do echo "===$api==="; kubectl get $api -n multicluster-endpoint; done
+   
+   kubectl delete -n multicluster-endpoint <resource>
    ```
 
 2. Get a list of your subscriptions and delete them. Run the following commands:
