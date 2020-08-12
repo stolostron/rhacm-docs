@@ -214,7 +214,7 @@ When you enter an unsupported value into the `yaml` content before creating your
 ## Managed cluster not clean after it is detached from the hub cluster 
 <!--1.0.0:2757-->
 
-In some cases, a component operator crashes. When the component operator crashes, the self-destruct script does not remove all resources from target clusters.  Complete the following steps to clean your target clusters:
+In some cases, a component operator crashes. When the component operator crashes, the target clusters are not clean after they are detached from the hub cluster.  Complete the following steps to clean your target clusters:
 
 1. Delete the namesapce resources for Advanced Cluster Management for Kubernetes resources by running the following command:
 
