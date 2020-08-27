@@ -1,0 +1,122 @@
+[#upgrading-disconnected-clusters-with-cincinnati]
+= Upgrading disconnected clusters with {cincinnati}
+
+You can use the {cincinnati} with {product-title} to upgrade your clusters in a disconnected environment.
+
+{cincinnati} is a separate operator and operand that monitors the available versions of your managed clusters in a disconnected environment. After {cincinnati} is configured, you can upgrade your disconnected managed clusters with {product-title-short} and the {cincinnati} operator and instance. 
+
+[#cincinnati_prerequisites]
+== Prerequisites
+
+You must have the following prerequisites before you can use {cincinnati} to upgrade your disconnected clusters:
+
+* An environment that is running {ocp} version 4.5, or later   
+* A deployed {product-title-short} hub cluster
+* A cluster that is managed by the {product-title-short} hub cluster
+* Access credentials to a local repository with Internet access where you can store the cluster images 
+
+[#configuring-the-upgrade-policy]
+== Configuring the upgrade policy
+
+To create a policy that specifies your disconnected local registry as the source for upgrades, complete the following steps:
+
+. Deploy the {cincinnati} operator on your hub cluster.
++
+.. Access the {ocp-short} hub cluster operator hub. 
+.. Deploy the operator by selecting `{cincinnati} Operator`. Update the default values, if necessary. The deployment of the operator creates a new project named `openshift-{cincinnati}`.
+.. Wait for the installation of the operator to finish. Tip: You can check the status of the installation by entering the `oc get pods` command on your hub cluster command line. The operator should be in the `running` state.
+
+. Deploy the {cincinnati} instance on your hub cluster. When you finish with this procedure, this instance is where the images for the cluster upgrades are mirrored and made available to the managed cluster.
+.. In the Operator Hub, select *{cincinnati} Operator*.
+.. Select *{cincinnati} Instance* in the menu.
+.. Select *Create {cincinnati}*.
+.. Paste text that is similar to the following manifest:
++
+....
+{
+  "apiVersion": "Cincinnati.openshift.io/v1beta1",
+  "kind": "Cincinnati",
+  "metadata": {
+    "name": "cincinnati-instance",
+	"namespace": "openshift-cincinnati"
+  },
+  "spec": {
+    "registry": "registry.qe.lab.redhat.com:5000",
+	"replicas": 1,
+	"repository": "localimages/local-release-image/images",
+	"graphDataImage": "registry.qe.lab.redhat.com:5000/cincinnati-graph-data-container:latest"
+  }
+}
+....
++
+Replace the `spec: registry` value with the path to your local disconnected registry.
++
+Replace the `spec: repository` value with the path to the {ocp-short} images. 
++
+Replace the `spec: graphDataImage` value with the path to the {ocp-short} upgrade path data from GitHub.
+*************CD: Can you just use this with those replacements?************
+*************CD: How do you find the endpoint address to this?************ 
+.. Select *Create* to create the instance. 
+
+.. From the hub cluster CLI, enter the `oc get pods` command to view the status of the instance creation. It might take a while, but the process is complete when the result of the command shows that the instance and the operator are running.
+
+. Configure a policy for the managed cluster to replace the default registry with the path to the {cincinnati} instance that you created.
+.. From the {product-title-short} console, select *Govern risk* > *Create policy*.
+.. In addition to entering the other required items for the policy, enter the following information that is specific to this policy:
+... Specifications: *******CD: Anything special here?*************.
+... Select the name of the managed cluster that you are updating in the _Cluster binding_ field. Tip: You can find this name by viewing the _Cluster details_ page in the {product-title-short} console.
+... ******CD: Any special Categories or Controls?***********
+... Select the box for *Enforce if supported*.
+.. Set the `YAML` switch to _On_ to view the YAML version of the policy.
+.. Change the `items: spec: upstream:` value to the path to your local {cincinnati} instance. This value points to where your disconnected images are stored.
++
+See link:../security/create_policy.adoc#managing-security-policies[Managing security policies] for information about creating a policy.
+.. Select *Create* to create the policy. 
+
+. Push the policy to the managed cluster to change the default location. ********CD: Is this managed cluster YAML?****************When you push a policy, the following items are created in your YAML file:
++
+* Policy: The configuration that you are changing. Note: The cluster ID for the managed cluster is required to apply the policy.
+* Placement rule: Identifies which managed cluster to apply the policy to.
+* Placement binding: Binds the placement rule to the policy.
++
+See link:../security/create_policy.adoc#managing-security-policies[Managing security policies] for information about these items.
+.. In the {product-title-short} console, select *Automate infrastructure* > *Clusters*.
+.. Find the managed cluster to receive the policy in the list of clusters.
+.. Note the value of the `name` label for the managed cluster. The label format is `name=managed-cluster-name`. This value is used when pushing the policy.
+.. Apply the policy by entering the following command from the hub cluster:
++
+....
+oc apply -f policy-name.yaml
+....
++
+Replace _policy-name_ with the name of your policy.
+
+.. In the {product-title-short} console navigation, select *Automate infrastructure* > *Clusters* to check the status of the managed cluster. When the policy is applied, the cluster status shows as `ready`.
+
+[#viewing-available-upgrades]
+== Viewing available upgrades
+
+You can view a list of available upgrades for your managed cluster by entering the following curl command on the managed cluster command line:
+....
+curl -k -H 'Accept: application/json' <route-to-local-registry-instance>
+....
+Replace _<route-to-local-registry-instance>_ with the path to your {cincinnati} instance. 
+
+Note: To provide a backup image in case the upgrade fails, you must have the image for the current version of the cluster available in the instance. If you only have upgrade versions in the instance, no instances are listed. 
+
+[#upgrading-the-cluster]
+== Upgrading the cluster
+
+After configuring the disconnnected registry, {product-title-short} and {cincinnati} use the disconnected registry to determine if updates are available. Note: You must have a minimum of two images available in the registry for you to be notified of an upgrade. 
+
+. In the {product-title-short} console, select *Automate infrastructure* > *Clusters*.
+
+. Find the cluster that you want to determine if there is an available upgrade. 
+
+. If there is an upgrade available, the *Distribution version* column for the cluster indicates that there is an upgrade available. 
+
+. Select the _Actions_ menu for the cluster, and select *Upgrade cluster*.
+
+. Select the target version for the upgrade, and select *Upgrade*. 
+
+The managed cluster is updated to the selected version. 
