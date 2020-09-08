@@ -1,8 +1,10 @@
 [#certificate-policy-controller]
 = Certificate policy controller
 
-Certificate policy controller can be used to detect certificates that are close to expiring. Create durations that are long, or contain DNS names that fail to match specified patterns to notify you about the policy expiration. Configure and customize the certificate policy controller by updating the following parameters in your controller policy: `minimumDuration`, `minimumCADuration`, `maximumDuration`, `maximumCADuration`, `allowedSANPattern`, `disallowedSANPattern`.
-When a certificate expires in less than the minimum duration amount of time, the policy becomes noncompliant.
+Certificate policy controller can be used to detect certificates that are close to expiring. Create time durations (hours) that are long, or contain DNS names that fail to match specified patterns to notify you about the policy expiration.
+
+Configure and customize the certificate policy controller by updating the following parameters in your controller policy: `minimumDuration`, `minimumCADuration`, `maximumDuration`, `maximumCADuration`, `allowedSANPattern`, `disallowedSANPattern`.
+When a certificate expires in less than the minimum duration amount of time, the policy becomes non-compliant.
 The certificate policy controller is created on your hub cluster.
 
 The certificate policy controller communicates with the local Kubernetes API server to get the list of secrets that contain certificates and determine all non-compliant certificates.
@@ -30,11 +32,17 @@ spec:
   remediationAction:
   severity: 
   minimumDuration:
+  minimumCADuration:
+  maximumDuration:
+  maximumCADuration:
+  allowedSANPattern:
+  disallowedSANPattern:
 ----
 
 [#certificate-policy-controller-yaml-table]
 === Certificate policy controller YAML table
 
+.Parameter table
 |===
 | Field | Description
 
@@ -80,14 +88,25 @@ Set the parameter value to `inform`.
 Certificate policy controller only supports `inform` feature.
 
 | spec.severity
-| Required. Specifies the severity when the policy is non-compliant. Use the following parameter values: `low`, `medium`, or `high`.
+| Required. Informs the user of the severity when the policy is non-compliant. Use the following parameter values: `low`, `medium`, or `high`.
 
 | spec.minimumDuration
-| Required. Parameter specifies the smallest duration (in hours) before a certificate is considered non-compliant.
-When the certificate expiration is greater than the `minimumDuration`, then the certificate is considered compliant.
-Default value is `100h`.
-The parameter value uses the time duration format from Golang.
-See link:https://golang.org/pkg/time/#ParseDuration[Golang Parse Duration] for more information.
+| Required. Set a value to identify when certificates might expire soon. 
+
+| spec.minimumCADuration
+| Optional. Set a value to identify signed certificates that might expire soon with a different value from other certificates. 
+
+| spec.maximumDuration
+| Optional. Set a value to identify certificates that have been created with a duration that exceeds your desired limit.
+
+| spec.maximumCADuration
+| Optional. Set a value to identify signed certificates that have been created with a duration that exceeds your defined limit.
+
+| spec.allowedSANPattern
+| Optional. A regular expression that must match every SAN entry that you have defined in your certificates. See the https://golang.org/pkg/regexp/syntax/[Golang Regular Expression syntax] for more information.
+
+| spec.disallowedSANPattern
+| Optional. A regular expression that must not match any SAN entries you have defined in your certificates. See the https://golang.org/pkg/regexp/syntax/[Golang Regular Expression syntax] for more information.
 |===
 
 [#certificate-policy-sample]
@@ -111,6 +130,11 @@ spec:
     exclude: ["kube-system"]
   remediationAction: inform
   minimumDuration: 100h
+  minimumCADuration: 200h
+  maximumDuration: 2161h
+  maximumCADuration: 43920h
+  allowedSANPattern: "[[:alpha:]]"
+  disallowedSANPattern: "[\\*]"
 ----
 
 Learn how to manage a certificate policy, see xref:../security/create_cert_pol.adoc#managing-certificate-policies[Managing certificate policies] for more details.
