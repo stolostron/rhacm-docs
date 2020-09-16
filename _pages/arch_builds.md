@@ -92,9 +92,9 @@ After you get all the access that you need, you can refresh by following these s
 
 6. Open the Pantheon UI that lists the books for the release that you are building. 
 
-7. Confirm that the number that is listed beside the stage line for each book matches the commit number that you noted in step 5 (in this example, `5bfee54`). If it does not, then Pantheon (a different build) has not rebuilt with the new content. It should rebuild automatically by Pantheon, but sometimes it doesn't. If it doesn't, select the down arrow beside the stage version of the book select **Rebuild**. You might have to do this with several of the books. 
+7. Confirm that the commit number that you noted in step 5 is listed beside the stage line for each book (in this example, `5bfee54`). If it does not, select the down arrow beside the stage version of the book select **Rebuild** for each book that requires it. 
 
-8. After all of the stage commits for the books are clean and match the commit from when you built, you are ready to publish if you want to refresh the live site. Continue with "Publish a GA version".
+8. After all of the builds for the books are clean and the commits match your build, you are ready to publish. Continue with "Publish a GA version".
 
 ## Publish a GA version
    
