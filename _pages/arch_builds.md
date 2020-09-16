@@ -50,7 +50,7 @@ After you get all the access that you need, you can refresh by following these s
   4. Insert `prod` where you just removed `stage`.
   5. Press the `esc` key to leave insert mode. 
 
-6. Enter `:wq` to save the `crontab file and close it.
+6. Enter `:wq` to save the `crontab` file and close it.
    
 7. Continue with "Run a build".
 
