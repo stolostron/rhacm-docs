@@ -74,7 +74,7 @@ After you get all the access that you need, you can refresh by following these s
    cd /root/sync/
    ```
 
-4. Run the following command, where `X.X doc_branch` is the version number and either `stage` for daily work, or `prod` for a live refresh or stage build. **Note:** The branch setting here must match the branch setting that is set in the `crontab` file. See the "Confirm build branch" section for information about how to verify or change this. For example, if the branch in the `crontab` file for your release is set to `2.1_prod`, then your branch in this command must be `2.1_prod`.   
+4. Run the following command, where `X.X doc_branch` is the version number and either `stage` for daily work, or `prod` for a live refresh or stage build. **Note:** The branch setting must match the branch setting that is set in the `crontab` file. See the "Confirm build branch" section for information about how to view that file. For example, if the branch in the `crontab` file for your release is set to `2.1_prod`, then your branch in this command must be `2.1_prod`.   
 
    ```
    ./acm_sync_asciidoc.sh <X.X X.X_branch>
