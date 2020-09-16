@@ -42,7 +42,21 @@ To create the pull request (PR), complete the following steps:
    ```
    crontab -e
    ```
-   The file is opened in the vi editor. Close the file when you locate the branch.<!--add example of crontab-->
+   
+   The file is opened in the vi editor. Your crontab might resemble the following content:
+   
+   ```
+   20 */4 * * * /root/sync/sync.sh 4.3 > /root/sync/4.3_cron_log
+   10 */3 * * * /root/sync/sync.sh 4.4 > /root/sync/4.4_cron_log
+   0 * * * * /root/sync/sync.sh 4.5 > /root/sync/4.5_cron_log
+   0 0 * * 0 /root/sync/acm_sync.sh 1.0 doc_prod> /root/sync/1.0_acm_cron_log
+   0 0 * * 0 /root/sync/acm_sync_asciidoc.sh 2.0 2.0_stage > /root/sync/2.0_acm_cron_log
+   0 0 * * 0 /root/sync/acm_sync_asciidoc.sh 2.1 2.1_stage > /root/sync/2.1_acm_cron_log
+   0 */12 * * * /root/sync/sync_moa.sh 4.3 > /root/sync/moa_4_cron_log
+   0 0 * * 0 /root/sync/sync_aro.sh 4.3 > /root/sync/aro_4_cron_log
+   ```
+   
+   Close the file when you locate the branch.
    
 4. If the branch is not the one that you want to build (for example, the line is `0 0 * * 0 /root/sync/acm_sync_asciidoc.sh 2.1 2.1_stage > /root/sync/2.1_acm_cron_log`), change it to the one that you want. 
   1. Move your cursor to the beginning of `stage` in the branch name of the entry (2.1_stage). 
