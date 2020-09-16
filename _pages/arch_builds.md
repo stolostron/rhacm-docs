@@ -9,6 +9,11 @@ After you get all the access that you need, you can refresh by following these s
 
 ## Prerequisites
 
+You must have the following prerequisites to publish live:
+- KCS2 access to the Customer Portal
+- Connection to the VPN
+- Logged in to the customer portal
+
 (Maybe prereqs/access info here)
 
 1. If you are refreshing the current published version, create a PR from `stage` to `prod`. Get it approved and merged.
