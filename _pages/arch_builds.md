@@ -10,11 +10,12 @@ After you get all the access that you need, you can refresh by following these s
 ## Prerequisites
 
 You must have the following prerequisites to publish live:
-- KCS2 access to the Customer Portal
+- at minimum KCS1 access to the Customer Portal and Pantheon
 - Connection to the VPN
 - Logged in to the customer portal
+- Logged in to the Pantheon UI
 
-(Maybe prereqs/access info here)
+To create the pull request (PR), complete the following steps:
 
 1. If you are refreshing the current published version, create a PR from `stage` to `prod`. Get it approved and merged.
 
@@ -36,28 +37,23 @@ You must have the following prerequisites to publish live:
    redhat1!
    ```
    
-3. Run the following command to open the crontab file, which is where you indicate which branch you will build:
+3. Run the following command to open the crontab file to verify the branch you want to build:
 
    ```
    crontab -e
    ```
-   The file is opened in the vi editor.
+   The file is opened in the vi editor. Close the file when you locate the branch.<!--add example of crontab-->
    
-4. Ensure that the line that contains the release that you are building has the correct branch on it. For example, if you want to build the 2.1_prod branch for a refresh, the line should read: 
-   ```
-   0 0 * * 0 /root/sync/acm_sync_asciidoc.sh 2.1 2.1_prod > /root/sync/2.1_acm_cron_log
-   ```
-   
-5. If the branch is not the one that you want to build (for example, the line is `0 0 * * 0 /root/sync/acm_sync_asciidoc.sh 2.1 2.1_stage > /root/sync/2.1_acm_cron_log`), change it to the one that you want. 
+4. If the branch is not the one that you want to build (for example, the line is `0 0 * * 0 /root/sync/acm_sync_asciidoc.sh 2.1 2.1_stage > /root/sync/2.1_acm_cron_log`), change it to the one that you want. 
   1. Move your cursor to the beginning of `stage` in the branch name of the entry (2.1_stage). 
   2. Use the `x` key to delete the characters in `stage`.
   3. Type the `i` key to go into insert mode.
   4. Insert `prod` where you just removed `stage`.
   5. Press the `esc` key to leave insert mode. 
 
-6. Enter `:wq` to save the `crontab` file and close it.
+5. Enter `:wq` to save the `crontab` file and close it.
    
-7. Continue with "Run a build".
+6. Continue with "Run a build".
 
 ## Run a build
 
@@ -79,7 +75,9 @@ You must have the following prerequisites to publish live:
    cd /root/sync/
    ```
 
-4. Run the following command, where `X.X doc_branch` is the version number and either `stage` for daily work, or `prod` for a live refresh or stage build. **Note:** The branch setting must match the branch setting that is set in the `crontab` file. See the "Confirm build branch" section for information about how to view that file. For example, if the branch in the `crontab` file for your release is set to `2.1_prod`, then your branch in this command must be `2.1_prod`.   
+4. Run the following command, where `X.X doc_branch` is the version number and either `stage` for daily work, or `prod` for a live refresh. 
+
+   **Note:** Be sure to verify your branch in the `crontab` file matches the branch you are building. See the "Confirm build branch" section for information about how to view that file. 
 
    ```
    ./acm_sync_asciidoc.sh <X.X X.X_branch>
@@ -90,16 +88,18 @@ You must have the following prerequisites to publish live:
    ./acm_sync_asciidoc.sh 2.1 2.1_stage 
    ```
    
-5. When the build indicates that it is finished, there should be two sets of character strings separated by periods in the line before the line that says "DONE". These are commits that it created to do the build. Make a note of the last one that is listed (in this case, `5bfee54`). A sample of this line looks like this:
-```
-+ 81781d5...5bfee54 2.1_stage -> 2.1 (forced update)
-```
+5. When the build output says `"DONE"` the commit number and branch are displayed. Make a note of the last one that is listed (in this case, `5bfee54`). See the following example:
+   ```
+   + 81781d5...5bfee54 2.1_stage -> 2.1 (forced update)
+   ```
 
 6. Open the Pantheon UI that lists the books for the release that you are building. 
 
 7. Confirm that the commit number that you noted in step 5 is listed beside the stage line for each book (in this example, `5bfee54`). If it does not, select the down arrow beside the stage version of the book select **Rebuild** for each book that requires it. 
 
-8. After all of the builds for the books are clean and the commits match your build, you are ready to publish. Continue with "Publish a GA version".
+   You can review build logs to check for failures.
+
+8. **Important** Only if you are publishing live. After all of the builds for the books are clean and the commits match your build, you are ready to publish. See the following steps to _Publish a GA version_.
 
 ## Publish a GA version
    
