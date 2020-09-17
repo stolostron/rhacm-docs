@@ -1,30 +1,34 @@
 [#managing-apps-with-local-cluster-repositories]
-= Managing apps with Local cluster repositories
+= Managing apps with Namespace repositories
 
-When you deploy Kubernetes resources using an application, the resources are located in specific repositories. Learn how to deploy resources that are available in the Local cluster within a specific Namespace in the following procedure. Learn more about the application model at xref:../manage_applications/app_model.adoc#application-model-and-definitions[Application model and definitions]
+When you deploy Kubernetes resources using an application, the resources are located in specific repositories. Learn how to deploy resources that are available in the Namespace within a specific Namespace in the following procedure. Learn more about the application model at xref:../manage_applications/app_model.adoc#application-model-and-definitions[Application model and definitions].
+
+*User required access:* A user role that can create applications. Learn about access requirements from the link:../security/rbac.adoc#role-based-access-control[Role-based access control] documentation.
+
 
 1. From the console navigation menu, click *Manage applications*.
 
 2. Click *Create application*.
 
-3. Enter the following values in the correct fields:
- +
- .. Name: Enter an application name. This name can be any value.
- .. Namespace: Select a namespace from the list or create one, depending on user access role.
-
-4. Choose *Local cluster* from the list of repositories that you can use.
 +
-With the Local cluster repository, you can....
+For the following steps, you can view the YAML in the console as you create your application. See YAML samples later in the topic.
+
+3. Enter the following values in the correct fields:
++
+* Name: Enter an application name. This name can be any value.
+* Namespace: Select a namespace from the list or create one, depending on user access role.
+
+4. Choose *Namespace* from the list of repositories that you can use.
 
 5. Enter the required URL path or select an existing path.
 
 +
-If you select an existing Local cluster repository path, you do not need to specify connection information if this is a private repository. The connection information is pre-set and you do not need to view these values. 
+If you select an existing Namespace repository path, you do not need to specify connection information if this is a private repository. The connection information is pre-set and you do not need to view these values. 
 
 +
-If you enter a new Local cluster repository path, you can optionally enter Local cluster connection information if this is a private Local cluster repository.
+If you enter a new Namespace repository path, you can optionally enter Namespace connection information if this is a private Namespace repository.
 
-6. Enter values for the following optional fields, such as branch and folder.
+6. Enter values for the following optional fields.
  
 7. Set any optional pre and post-deployment tasks. 
 
@@ -44,7 +48,39 @@ If you enter a new Ansible Tower secret name to create a new secret, you need to
 
 10. You are redirected to the _Overiew_ page where you can view the details and topology.
 
-SAMPLE HERE
+[#sample-yaml-namespace]
+== Sample YAML
 
-*Note* To see REST API, use the link:../apis/api.adoc#apis[APIs].
+To create resources correctly, add the following two labels that are required in the deployable to the subscription controller that identifies which deployable resources are added:
+
+----
+labels:
+    apps.open-cluster-management.io/channel: <channel name>
+    apps.open-cluster-management.io/channel-type: Namespace
+----
+
+Don't specify template namespace in each resource template `spec.template.metadata.namespace`. 
+
+For the namespace type channel and subscription, all the templates are deployed to the subscription namespace on managed clusters. As a result, those templates that are defined outside of the subscription namespace are skipped.
+
+The following example channel definitions abstracts a namespace as a channel that holds deployable resources. When this YAML is applied, a namespace `ch-qa` is created for the channel that is named `qa`. The channel controller maintains the resources at the actual namespace location and ensures that the resources are kept up-to-date.
+
+[source,yaml]
+----
+  apiVersion: apps.open-cluster-management.io/v1
+  kind: Channel
+  metadata:
+    name: qa
+    namespace: ch-qa
+  spec:
+    sourceNamespaces:
+    - default
+    type: Namespace
+    pathname: ch-qa
+    gates:
+      annotations:
+        dev-ready: approved
+----
+
+*Note:* To see REST API, use the link:../apis/api.adoc#apis[APIs].
  
