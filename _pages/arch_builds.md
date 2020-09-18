@@ -127,7 +127,7 @@ Use this process to refresh a public version or build internally.
 
 ## Publish a GA version
    
-1. When you have completed all of the previous steps for the `prod` branch of your release, you can publish by selecting **Publish** beside each book on the Pantheon UI. We do not publish the `*.stage` branches live. 
+1. When you have completed all of the previous steps for the `prod` branch of your release, you can publish by selecting **Publish** for each book on Pantheon.
 
 **Note:** If the publish button is grayed out, make sure that you are logged in to Pantheon. 
 
