@@ -40,7 +40,7 @@ You want to make sure you are building the branch that you need.
 2. Enter the following password: 
 
    ```
-   redhat1!
+   see team for pw!
    ```
    
 3. Run the following command to open the `crontab` file to verify the branch you want to build:
