@@ -1,6 +1,6 @@
 ---
-permalink: /arch_builds
-title: "Portal refreshes"
+permalink: /publish_builds
+title: "Build and publish"
 ---
 
 We refresh weekly. These directions walk you through a refresh but also just an internal build to check for errors in between publish dates.
