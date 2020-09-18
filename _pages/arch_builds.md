@@ -89,7 +89,7 @@ Use this process to refresh a public version or build internally.
 2. Enter the following password, if you are not already connected from the previous procedure: 
 
    ```
-   redhat1!
+   see team for pw!
    ```
 
 3. Run the following to change your directory: 
