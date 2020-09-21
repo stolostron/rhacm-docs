@@ -52,7 +52,7 @@ To create a new guide in the product documentation, you must create a new folder
    <xi:include href="Common_Content/Legal_Notice.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
    ```
 
-**Create a new folder from your text editor
+**Create a new folder from your text editor**
 
 1. Verify that you are in the `rhacm-docs` repository by running the following command from your terminal:
    
