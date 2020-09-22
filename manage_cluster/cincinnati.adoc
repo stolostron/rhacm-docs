@@ -18,13 +18,15 @@ In some cases, security concerns prevent clusters from being connected directly 
 You must have the following prerequisites before you can use {cincinnati} to upgrade your disconnected clusters:
 
 * A deployed {product-title-short} hub cluster that is running on {ocp} version 4.5, or later with restricted OLM configured. See https://docs.openshift.com/container-platform/4.5/operators/olm-restricted-networks.html[Using Operator Lifecycle Manager on restricted networks] for details about how to configure restricted OLM. *Tip:* Make a note of the catalog source image when you configure restricted OLM.
-* A cluster that is managed by the {product-title-short} hub cluster
-* Access credentials to a local repository with Internet access where you can store the cluster images. See https://docs.openshift.com/container-platform/4.5/installing/install_config/installing-restricted-networks-preparations.html[Creating a mirror registry for installation in a restricted network] for more information about how to create this repository.
+* An {ocp-short} cluster that is managed by the {product-title-short} hub cluster
+* Access credentials to a local repository where you can store the cluster images, and at least 2 release images are mirrored. See https://docs.openshift.com/container-platform/4.5/installing/install_config/installing-restricted-networks-preparations.html[Creating a mirror registry for installation in a restricted network] for more information about how to create this repository.
++
+*Note:* The image for the current version must be one of the mirrored images that are available. If an upgrade fails, the cluster reverts back to the previous version.
 
 [#build-the-graph-data-init-container]
 == Build the graph data init container
 
-Typically, {cincinnati} finds upgrades directly in the Cincinnati graph data repository in the https://github.com/openshift/cincinnati-graph-data[Cincinnati graph data GitHub repository]. Because you are configuring a disconnected environment, you can make the graph data available in a local repository by using an init container. Complete the following steps to create a graph data init container:
+Typically, {cincinnati} pulls upgrades directly from the https://github.com/openshift/cincinnati-graph-data[Cincinnati graph data GitHub repository]. Because you are configuring a disconnected environment, you can make the graph data available in a local repository by using an `init container`. Complete the following steps to create a graph data init container:
 
 . Create a file that contains the information for your graph data init. See the information in the following sample graph data file for details:
 +
@@ -38,18 +40,22 @@ CMD exec /bin/bash -c "tar xvzf cincinnati-graph-data.tar.gz -C /var/lib/cincinn
 +
 In this example:
 +
-*The `From` value is the default location where {cincinnati} finds the images.
+* The `FROM` value is the external registry where {cincinnati} finds the images.
 
-* The `RUN` command packages the upgrade files.  
+* The `RUN` command packages the upgrade files. 
 
-* The `CMD` command copies the packages file to the local repository and extracts the files for an upgrade. 
+* The `CMD` command copies the package file to the local repository and extracts the files for an upgrade. Replace `var/lib/cincinnati/graph-data/` with the path to your local repository. 
 
-. Build the graph data init container by entering the following commands:
+. Run the following commands to build the `graph data init container`:
 +
 ----
 podman build -f ./dev/Dockerfile -t quay.io/rwsu/cincinnati-graph-data-container:latest
 podman push quay.io/rwsu/cincinnati-graph-data-container:latest
 ----
++
+Replace _.dev/Dockerfile_ with the path to the file that you created in the previous step.
++
+Replace _quay.io/rwsu/cincinnati-graph-data-container_ with the path to your local graph data init container.
 
 [#deploy-the-cincinnati-operator]
 == Deploy the {cincinnati} operator
@@ -91,11 +97,9 @@ When you finish deploying the {cincinnati} instance on your hub cluster, this in
 }
 ----
 +
-Replace the `spec: registry` value with the path to your local disconnected registry that you set up for the prerequisites.
+Replace the `spec: registry` value with the path to your local disconnected registry for your images that you set up in the prerequisites.
 +
-Replace the `spec: repository` value with the path to the {ocp-short} images. 
-+
-Replace the `spec: graphDataImage` value with the path to the {ocp-short} upgrade path data from GitHub.
+Replace the `spec: graphDataImage` value with the path to your `graph data init` container. *Tip:* This is the same value that you used when you ran the `podman push` command to push your `graph data init` container.
 . Select *Create* to create the instance. 
 . From the hub cluster CLI, enter the `oc get pods` command to view the status of the instance creation. It might take a while, but the process is complete when the result of the command shows that the instance and the operator are running.
 
@@ -182,7 +186,7 @@ items:
     upstream: https://api.openshift.com/api/upgrades_info/v1/graph
 ----
 +
-. Replace the value of _items: spec: upstream_ with the path to the external location where your upgrade images are stored. 
+. Replace the value of _items: spec: upstream_ with the path to the local registry where your upgrade images are stored. 
  
 . From the hub cluster, identify the route URL to the {cincinnati} endpoint by entering the following command: `oc get routes`. *Tip:* Note this value for later steps.
 
@@ -234,7 +238,7 @@ You can view a list of available upgrades for your managed cluster by completing
 . From the *Options* menu, select *Upgrade cluster*. 
 . Verify that the optional upgrade paths are available. 
 +
-*Note:* To provide a backup image in case the upgrade fails, you must have the image for the current version of the cluster available in the instance. If you only have upgrade versions in the instance, no upgrades are listed. 
+*Note:* No available upgrade versions are shown if the current version is not mirrored into the local image repository.  
 
 [#upgrading-the-cluster]
 == Upgrading the cluster
