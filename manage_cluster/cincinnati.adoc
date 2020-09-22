@@ -21,6 +21,36 @@ You must have the following prerequisites before you can use {cincinnati} to upg
 * A cluster that is managed by the {product-title-short} hub cluster
 * Access credentials to a local repository with Internet access where you can store the cluster images. See https://docs.openshift.com/container-platform/4.5/installing/install_config/installing-restricted-networks-preparations.html[Creating a mirror registry for installation in a restricted network] for more information about how to create this repository.
 
+[#build-the-graph-data-init-container]
+== Build the graph data init container
+
+Typically, {cincinnati} finds upgrades directly in the Cincinnati graph data repository in the https://github.com/openshift/cincinnati-graph-data[Cincinnati graph data GitHub repository]. Because you are configuring a disconnected environment, you can make the graph data available in a local repository by using an init container. Complete the following steps to create a graph data init container:
+
+. Create a file that contains the information for your graph data init. See the information in the following sample graph data file for details:
++
+----
+FROM registry.access.redhat.com/ubi8/ubi:8.1
+
+RUN curl -L -o cincinnati-graph-data.tar.gz https://github.com/openshift/cincinnati-graph-data/archive/master.tar.gz
+
+CMD exec /bin/bash -c "tar xvzf cincinnati-graph-data.tar.gz -C /var/lib/cincinnati/graph-data/ --strip-components=1"  
+----
++
+In this example:
++
+*The `From` value is the default location where {cincinnati} finds the images.
+
+* The `RUN` command packages the upgrade files.  
+
+* The `CMD` command copies the packages file to the local repository and extracts the files for an upgrade. 
+
+. Build the graph data init container by entering the following commands:
++
+----
+podman build -f ./dev/Dockerfile -t quay.io/rwsu/cincinnati-graph-data-container:latest
+podman push quay.io/rwsu/cincinnati-graph-data-container:latest
+----
+
 [#deploy-the-cincinnati-operator]
 == Deploy the {cincinnati} operator
 
