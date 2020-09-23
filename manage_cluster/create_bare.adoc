@@ -1,9 +1,11 @@
 [#creating-a-cluster-on-bare-metal]
 = Creating a cluster on bare metal
 
-You can use the Red Hat Advanced Cluster Management for Kubernetes console to create a Red Hat OpenShift Container Platform cluster in a bare metal environment.
+**Important:** The bare metal cluster function is a technology preview,and should not be used in production environments.
 
-NOTE: The options for bare metal in the console are for technical preview only, and are hidden by a feature flag by default.
+You can use the {product-title} console to create a {ocp} cluster in a bare metal environment.
+
+NOTE: The options for bare metal in the console are a technology preview only, and are hidden by a feature flag by default.
 See the instructions for enabling the feature flag in the _Prerequisites_ section.
 
 [#bare_prerequisites]
@@ -11,25 +13,47 @@ See the instructions for enabling the feature flag in the _Prerequisites_ sectio
 
 You need the following prerequisites before creating a cluster in a bare metal environment:
 
-* A deployed Red Hat Advanced Cluster Management for Kubernetes hub cluster on OpenShift Container Platform version 4.4, or later.
-* Internet access for your Red Hat Advanced Cluster Management for Kubernetes hub cluster so it can create the Kubernetes cluster in the bare metal environment
+* A deployed {product-title} hub cluster on {ocp-short} version 4.5, or later.
+* Internet access for your {product-title} hub cluster so it can create the Kubernetes cluster in the bare metal environment
 * Bare metal provider connection;
 see xref:../manage_cluster/prov_conn_bare.adoc#creating-a-provider-connection-for-bare-metal[Creating a provider connection for bare metal] for more information
 * Login credentials for your bare metal environment, which include user name, password, and Baseboard Management Controller Address
-* A Red Hat OpenShift Container Platform image pull secret;
+* A {ocp} image pull secret;
 see https://docs.openshift.com/container-platform/4.4/openshift_images/managing_images/using-image-pull-secrets.html[Using image pull secrets]
 * Bare metal feature flags that are enabled to view the bare metal options.
 The bare metal options are hidden by feature flags by default.
 Complete the following steps to enable the feature flags:
- .. Start the Red Hat OpenShift Container Platform command line interface.
- .. Edit the `consoleui` deployment resource to modify the settings:
+ .. Start the {ocp} command line interface.
+ .. Set the `featureFlags_baremetal` setting to *true* for the `console-header` container by entering the following command:
 +
 ----
-MY_CONSOLEUI=`oc -n open-cluster-management get deploy -o name | grep consoleui`
-oc -n open-cluster-management edit $MY_CONSOLEUI
+oc patch deploy console-header -n <namespace> -p '{"spec":{"template":{"spec":{"containers":[{"name":"console-header","env": [{"name": "featureFlags_baremetal","value":"true"}]}]}}}}'
+----
+Replace <namespace> with your {product-title-short} project namespace.
++
+After the update, your `consoleui` CRD should look like the following example:
++
+----
+spec:
+  ...
+  template:
+    ...
+    spec:
+      ...
+      containers:
+      - env:                              # Search for env:
+        - name: featureFlags_baremetal
+          value: "true"
+        ...
 ----
 
- .. Change the feature flag setting to _true_.
+ .. Set the `featureFlags_baremetal` value to *true* for the `hmc-ui` container:
++
+----
+oc patch -n <namespace> $(oc get deploy -o name | grep consoleui) -p '{"spec":{"template":{"spec":{"containers":[{"name":"hcm-ui","env": [{"name": "featureFlags_baremetal","value":"true"}]}]}}}}'
+----
+Replace <namespace> with your {product-title-short} project namespace.
++
 Your update should look like the following example:
 +
 ----
@@ -46,42 +70,20 @@ spec:
         ...
 ----
 
- .. Edit the `consoleui` deployment resource to modify the settings:
-+
-----
-MY_HEADER=`oc -n open-cluster-management get deploy -o name | grep header`
-oc -n open-cluster-management edit $MY_HEADER
-----
-
- .. Change the feature flag setting to _true_.
-Your update should look like the following example:
-+
-----
-spec:
-  ...
-  template:
-    ...
-    spec:
-      ...
-      containers:
-      - env:                              # Search for env:
-        - name: featureFlags_baremetal
-          value: "true"
-        ...
-----
-
- .. Watch to make sure the `+console-chart-...-consoleui...+` and `+console-header-...+` pods are running:
+ .. Make sure the `+console-chart-...-consoleui...+` and `+console-header-...+` pods are running:
 +
 ----
 oc -n open-cluster-management get pods
 ----
 
- .. When the pods are running again, log out of the Red Hat Advanced Cluster Management for Kubernetes console and log back in.
+ .. When the pods are running again, log out of the {product-title} console and log back in. The bare metal options are now included in the console.
+
+**Note**: If you change your cloud provider access key, you must manually update the provisioned cluster access key. For more information, see the known issue, link:../release_notes/known_issues.adoc#automatic-secret-updates-for-provisioned-clusters-is-not-supported[Automatic secret updates for provisioned clusters is not supported].
 
 [#bare_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console]
-== Creating your cluster with the Red Hat Advanced Cluster Management for Kubernetes console
+== Creating your cluster with the {product-title} console
 
-To create clusters from the Red Hat Advanced Cluster Management for Kubernetes console, complete the following steps:
+To create clusters from the {product-title} console, complete the following steps:
 
 . From the navigation menu, navigate to *Automate infrastructure* > *Clusters*.
 . On the Clusters page, Click *Add Cluster*.
@@ -97,7 +99,7 @@ TIP: You can view the `yaml` content updates as you enter the information in the
 
 . Select *Bare Metal* for the infrastructure platform.
 . Specify a *Release image* that you want to use for the cluster.
-This identifies the version of the Red Hat OpenShift Container Platform image that is used to create the cluster.
+This identifies the version of the {ocp} image that is used to create the cluster.
 If the version that you want to use is available, you can select the image from the list of images.
 If the image that you want to use is not a standard image, you can enter the url to the image that you want to use.
 See xref:../manage_cluster/release_images.adoc#release-images[Release images] for more information about release images.
@@ -111,15 +113,17 @@ Select a minimum of three assets that are on the same bridge networks as the hyp
 . *Optional:* Configure a label for the cluster.
 . *Optional:* Update the advanced settings, if you want to change the setting for including a configmap.
 . Click *Create*.
-When you create the cluster, it is automatically managed by Red Hat Advanced Cluster Management for Kubernetes.
 You can view your cluster details after the create and import process is complete.
+
++
+NOTE: You do not have to run the `kubectl` command that is provided with the cluster details to import the cluster. When you create the cluster, it is automatically configured under the management of {product-title}. 
 
 [#bare_accessing-your-cluster]
 == Accessing your cluster
 
-To access a cluster that is managed by Red Hat Advanced Cluster Management for Kubernetes, complete the following steps:
+To access a cluster that is managed by {product-title}, complete the following steps:
 
-. From the Red Hat Advanced Cluster Management for Kubernetes navigation menu, navigate to *Automate infrastructure* > *Clusters*.
+. From the {product-title} navigation menu, navigate to *Automate infrastructure* > *Clusters*.
 . Select the name of the cluster that you created or want to access.
 The cluster details are displayed.
 . Select *Reveal credentials* to view the user name and password for the cluster.
@@ -134,7 +138,7 @@ TIP: If you already know the log in credentials, you can access the cluster by s
 [#bare_removing-a-cluster-from-management]
 == Removing a cluster from management
 
-When you remove a Red Hat OpenShift Container Platform cluster from management that was created with Red Hat Advanced Cluster Management for Kubernetes, you can either _detach_ it or _destroy_ it.
+When you remove a {ocp} cluster from management that was created with {product-title}, you can either _detach_ it or _destroy_ it.
 
 Detaching a cluster removes it from management, but does not completely delete it.
 You can import it again, if you decide that you want to bring it back under management.

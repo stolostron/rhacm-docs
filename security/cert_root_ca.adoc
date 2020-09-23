@@ -6,12 +6,12 @@ You can replace the root CA certificate.
 [#prerequisites-for-root-ca-certificate]
 == Prerequisites for root CA certificate
 
-Verify that your Red Hat Advanced Cluster Management for Kubernetes cluster is running.
+Verify that your {product-title} cluster is running.
 
-Back up the existing Red Hat Advanced Cluster Management for Kubernetes certificate resource by running the following command:
+Back up the existing {product-title} certificate resource by running the following command:
 
 ----
-   oc get cert multicloud-ca-cert -n open-cluster-management -o yaml > multicloud-ca-cert-backup.yaml
+oc get cert multicloud-ca-cert -n open-cluster-management -o yaml > multicloud-ca-cert-backup.yaml
 ----
 
 [#creating-the-root-ca-certificate-with-openssl]
@@ -35,23 +35,23 @@ openssl req -x509 -new -nodes -key ca.key -days 400 -out ca.crt -config req.cnf
 Your `req.cnf` file might resemble the following file:
 +
 ----
-   [ req ]               # Main settings
-   default_bits = 4096       # Default key size in bits.
-   prompt = no               # Disables prompting for certificate values so the configuration file values are used.
-   default_md = sha256       # Specifies the digest algorithm.
-   distinguished_name = dn   # Specifies the section that includes the distinguished name information.
-   x509_extensions = v3_ca   # The extentions to add to the self signed cert
+[ req ]               # Main settings
+default_bits = 4096       # Default key size in bits.
+prompt = no               # Disables prompting for certificate values so the configuration file values are used.
+default_md = sha256       # Specifies the digest algorithm.
+distinguished_name = dn   # Specifies the section that includes the distinguished name information.
+x509_extensions = v3_ca   # The extentions to add to the self signed cert
 
-   [ dn ]               # Distinguished name settings
-   C = US                    # Country
-   ST = North Carolina             # State or province
-   L = Raleigh                # Locality
-   O = Red Hat Open Shift     # Organization
-   OU = Red Hat Advanced Container Management        # Organizational unit
-   CN = www.redhat.com  # Common name.
+[ dn ]               # Distinguished name settings
+C = US                    # Country
+ST = North Carolina             # State or province
+L = Raleigh                # Locality
+O = Red Hat Open Shift     # Organization
+OU = Red Hat Advanced Container Management        # Organizational unit
+CN = www.redhat.com  # Common name.
 
-   [ v3_ca ]          # x509v3 extensions
-   basicConstraints=critical,CA:TRUE # Indicates whether the certificate is a CA certificate during the certificate chain verification process.
+[ v3_ca ]          # x509v3 extensions
+basicConstraints=critical,CA:TRUE # Indicates whether the certificate is a CA certificate during the certificate chain verification process.
 ----
 
 [#replacing-root-ca-certificates]
@@ -72,6 +72,16 @@ oc edit issuer -n open-cluster-management multicloud-ca-issuer
 
 . Replace the string `mulicloud-ca-cert` with `byo-ca-cert`.
 Save your deployment and quit the editor.
+
+. Edit the management ingress deployment to reference the Bring Your Own (BYO) CA certificate. Run the following command:
+
++
+----
+oc edit deployment management-ingress-435ab
+----
+
+. Replace the `multicloud-ca-cert` string with the `byo-ca-cert`. Save your deployment and quit the editor.
+
 . Validate the custom CA is in use by logging in to the console and view the details of the certificate being used.
 
 [#refreshing-cert-manager-certificates]
@@ -84,7 +94,7 @@ Delete the Kubernetes secrets associated with each `cert-manager` certificate to
 Run the following command:
 
 ----
-   oc delete secret -n open-cluster-management $(oc get cert -n open-cluster-management -o wide | grep multicloud-ca-issuer | awk '{print $3}')
+oc delete secret -n open-cluster-management $(oc get cert -n open-cluster-management -o wide | grep multicloud-ca-issuer | awk '{print $3}')
 ----
 
 [#restoring-root-ca-certificates]
@@ -100,7 +110,18 @@ oc edit issuer -n open-cluster-management multicloud-ca-issuer
 ----
 
 . Replace the `byo-ca-cert` string with `multicloud-ca-cert` in the editor.
-Save the issuer and quit the editor.
+Save the issuer and quit the editor. 
+
+. Edit the management ingress depolyment to reference the original CA certificate. Run the following command: 
+
++
+----
+oc edit deployment management-ingress-435ab
+----
+
+. Replace the `byo-ca-cert` string with the `multicloud-ca-cert` string. Save your deployment and quit the editor. 
+// whats the original ca certificate? Is the self-signed CA?
+
 . Delete the BYO CA certificate.
 Run the following commnad:
 +
@@ -111,4 +132,4 @@ oc delete secret -n open-cluster-management byo-ca-cert
 Refresh all `cert-manager` certificates that use the CA.
 For more information, see the forementioned section, Refreshing _cert-manager_ certificates.
 
-See xref:../security/certificates.adoc#certificates[Certificates] for more information about certificates that are created and managed by Red Hat Advanced Cluster Management for Kubernates.
+See xref:../security/certificates.adoc#certificates[Certificates] for more information about certificates that are created and managed by {product-title-short}.

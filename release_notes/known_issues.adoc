@@ -19,7 +19,7 @@ Known issue with workaround if:
 Or consider a troubleshooting topic.
 ////
 
-Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. The following list contains known issues for this release, or known issues that continued from the previous release.
+Review the known issues for {product-title}. The following list contains known issues for this release, or known issues that continued from the previous release.
 
 * <<installation-known-issues,Installation known issues>>
 * <<web-console-known-issues,Web console known issues>>
@@ -30,19 +30,26 @@ Review the known issues for Red Hat Advanced Cluster Management for Kubernetes. 
 [#installation-known-issues]
 == Installation known issues
 
+[#openshift-container-platform-cluster-upgrade-failed-status]
+=== {ocp-short} cluster upgrade failed status
+
+// 2.0.0:3442
+
+When an {ocp-short} cluster is in the upgrade stage, the cluster pods are restarted and the cluster might remain in `upgrade failed` status for a variation of 1-5 minutes. This behavior is expected and resolves after a few minutes.
+
 [#certificate-manager-must-not-exist-during-an-installation]
 === Certificate manager must not exist during an installation
 
 // 1.0.0:678
 
-Certificate manager must not exist on a cluster when you install Red Hat Advanced Cluster Management for Kubernetes.
+Certificate manager must not exist on a cluster when you install {product-title}.
 
-When certificate manager already exists on the cluster, Red Hat Advanced Cluster Management for Kubernetes installation fails.
+When certificate manager already exists on the cluster, {product-title} installation fails.
 
 To resolve this issue, verify if the certificate manager is present in your cluster by running the following command:
 
 ----
-   kubectl get crd | grep certificates.certmanager
+kubectl get crd | grep certificates.certmanager
 ----
 
 [#web-console-known-issues]
@@ -82,6 +89,43 @@ The page is blank and you can close the tab without impact to your console.
 [#cluster-management-issues]
 == Cluster management known issues
 
+[#console-managed-cluster-inconsistency]
+=== Console might report managed cluster policy inconsistency
+// 2.0.0:3850
+
+After a cluster is imported, log in to the imported cluster and make sure all pods that are deployed by the {klusterlet} are running. Otherwise, you might see inconsistent data in the console.
+
+For example, if a policy controller is not running, you might not get the same results of violations on the _Governance and risk_ page and the _Cluster status_. 
+
+For instance, you might see 0 violations listed in the _Overview_ status, but you might have 12 violations reported on the _Governance and risk_ page. 
+
+In this case, inconsistency between the pages represents a disconnection between the `policy-controller-addon` on managed clusters and the policy controller on the hub cluster. Additionally, the managed cluster might not have enough resources to run all the {klusterlet} components. 
+
+As a result, the policy was not propagated to managed cluster, or the violation was not reported back from managed clusters.
+
+[#importing-clusters-might-require-two-attempts]
+=== Importing clusters might require two attempts
+
+// 2.0.0:3596
+
+When you import a cluster that was previously managed and detached by a {product-title-short} hub cluster, the import process might fail the first time. The cluster status is `pending import`. Run the command again, and the import should be successful. 
+
+[#klusterlet-runs-on-a-detached-cluster]
+=== {klusterlet} runs on a detached cluster
+
+// 2.0.0:3460
+
+If you detach an online cluster immediately after it was attached, the {klusterlet} starts to run on the detached cluster before the `manifestwork` syncs. Removal of the managed cluster from the hub cluster does not uninstall the {klusterlet}. Complete the following steps to fix the issue:
+
+. Download the link:https://github.com/open-cluster-management/deploy/blob/master/hack/cleanup-managed-cluster.sh[`cleanup-managed-cluster`] script from the `deploy` Git repository.
+
+. Run the `cleanup-managed-cluster.sh` script by entering the following command:
+
++
+----
+./cleanup-managed-cluster.sh
+----
+
 [#importing-certain-versions-of-ibm-red-hat-openshift-kubernetes-service-clusters-is-not-supported]
 === Importing certain versions of IBM Red Hat OpenShift Kubernetes Service clusters is not supported
 
@@ -90,17 +134,159 @@ The page is blank and you can close the tab without impact to your console.
 You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters.
 Later versions of IBM OpenShift Kubernetes Service are supported.
 
+[#detaching-openshift-container-platform-3.11-does-not-remove-the-open-cluster-manangement-agent]
+=== Detaching {ocp-short} 3.11 does not remove the _open-cluster-manangement-agent_
+
+// 2.0.0:3847
+
+When you detach managed clusters on {ocp-short} 3.11, the `open-cluster-management-agent` namesapce is not automatically deleted. Manually remove the namespace by running the following command:
+
+----
+oc delete ns open-cluster-management-agent
+----
+
+[#automatic-secret-updates-for-provisioned-clusters-is-not-supported]
+=== Automatic secret updates for provisioned clusters is not supported
+
+// 2.0.0:3702
+
+When you change your cloud provider access key, the provisioned cluster access key is not updated in the namespace. Run the following command for your cloud provider to update the access key: 
+
+* Amazon Web Services (AWS)
+
++
+----
+oc patch secret {CLUSTER-NAME}-aws-creds -n {CLUSTER-NAME} --type json -p='[{"op": "add", "path": "/stringData", "value":{"aws_access_key_id": "{YOUR-NEW-ACCESS-KEY-ID}","aws_secret_access_key":"{YOUR-NEW-aws_secret_access_key}"} }]'
+----
+
+* Google Cloud Platform (GCP)
+
++
+----
+oc set data secret/{CLUSTER-NAME}-gcp-creds -n {CLUSTER-NAME} --from-file=osServiceAccount.json=$HOME/.gcp/osServiceAccount.json
+----
+
+* Microsoft Azure 
+
++
+----
+oc set data secret/{CLUSTER-NAME}-azure-creds -n {CLUSTER-NAME} --from-file=osServiceAccount.json=$HOME/.azure/osServiceAccount.json
+----
+
+[#clean-offline-cluster-when-detach]
+=== Resources remain after you detach an offline managed cluster
+
+// 2.0:3210
+
+When you detach a managed cluster that is in an offline state, there are some resources that cannot be removed from managed cluster. Complete the following steps to remove the additional resources:
+
+. Make sure you have the `oc` command line interface configured.
+. Make sure you have `KUBECONFIG` configured on your managed cluster.
++ 
+If you run `oc get ns | grep open-cluster-management-agent` you should see two namespaces:
++
+----
+open-cluster-management-agent         Active   10m
+open-cluster-management-agent-addon   Active   10m
+----
+
+. Download the link:https://github.com/open-cluster-management/deploy/blob/master/hack/cleanup-managed-cluster.sh[`cleanup-managed-cluster`] script from the `deploy` Git repository.
+. Run the `cleanup-managed-cluster.sh` script by entering the following command:
++
+----
+./cleanup-managed-cluster.sh
+----
+. Run the following command to ensure that both namespaces are removed: 
++
+----
+oc get ns | grep open-cluster-management-agent 
+----
+
+[#no-run-mgt-ingress-nonroot]
+=== Cannot run `management ingress` as non-root user
+
+// 2.0:3532
+
+You must be logged in as `root` to run the `management-ingress` service. 
+
+[#node-information-from-the-managed-cluster-cannot-be-viewed-in-search]
+=== Node information from the managed cluster cannot be viewed in search
+// 2.0.2:4598
+
+Search maps RBAC for resources in the hub cluster. Depending on user RBAC settings for {product-title-short}, users might not see node data from the managed cluster. Results from search might be different from what is displayed on the _Nodes_ page for a cluster.
+
 [#application-management-known-issues]
 == Application management known issues
+
+[#yaml-manifest-cannot-create-multiple-resources]
+=== YAML manifest cannot create multiple resoures
+// 2.0.0:3583
+
+The `managedclusteraction` doesn't support multiple resources. You cannot apply the YAML manifest with multiple resource from console create resources features.
+
+[#console-pipeline-card-different-data]
+=== Console pipeline cards might display different data
+// 2.0.0:3703
+
+Search results for your pipeline return an accurate number of resources, but that number might be different in the pipeline card because the card displays resources not yet used by an application.
+
+For instance, after you search for `kind:channel`, you might see you have 10 channels, but the pipeline card on the console might represent only 5 channels that are used.
+
+[#namespace-channel-subscription-remains-in-failed-state]
+=== Namespace channel subscription remains in failed state
+// 2.0.0:3581
+
+When you subscribe to a namespace channel and the subscription remains in `FAILED` state after you fixed other associated resources such as channel, secret, configmap, or placement rule, the namespace subscription is not continuously reconciled. 
+
+To force the subscription reconcile again to get out of `FAILED` state, complete the following steps:
+
+. Log in to your hub cluster.
+. Manually add a label to the subscription using the following command:
+
+----
+oc label subscriptions.apps.open-cluster-management.io the_subscription_name reconcile=true
+----
+
+[#deployable-resources-in-a-namespace-channel]
+=== Deployable resources in a namespace channel
+
+// 2.0.0:3435
+
+You need to manually create deployable resources within the channel namespace. 
+
+To create deployable resources correctly, add the following two labels that are required in the deployable to the subscription controller that identifies which deployable resources are added:
+
+----
+labels:
+    apps.open-cluster-management.io/channel: <channel name>
+    apps.open-cluster-management.io/channel-type: Namespace
+----
+
+Don't specify template namespace in each deployable `spec.template.metadata.namespace`. 
+
+For the namespace type channel and subscription, all the deployable templates are deployed to the subscription namespace on managed clusters. As a result, those deployable templates that are defined outside of the subscription namespace are skipped.
+
+See link:../manage_applications/managing_channels.adoc#creating-and-managing-channels[Creating and managing channels] for more information.
 
 [#edit-role-for-application-error]
 === Edit role for application error
 
 // 2.0.0:1681
 
-A user performing in an `Editor` role should only have `read` or `update` authority on an application, but erroneously editor can also `create` and `delete` an application. Red Hat Open Shift Operator Lifecycle Manager default settings change the setting for the product. To workaround the issue, see the following procedure:
+A user performing in an `Editor` role should only have `read` or `update` authority on an application, but erroneously editor can also `create` and `delete` an application. Red Hat OpenShift Operator Lifecycle Manager default settings change the setting for the product. To workaround the issue, see the following procedure:
 
 1. Run `oc edit clusterrole applications.app.k8s.io-v1beta1-edit -o yaml` to open the application edit cluster role.
+2. Remove `create` and `delete` from the verbs list.
+3. Save the change.
+
+[#edit-role-for-placement-rule-error]
+=== Edit role for placement rule error
+
+// 2.0.0:3693
+
+A user performing in an `Editor` role should only have `read` or `update` authority on an placement rule, but erroneously editor can also `create` and `delete`, as well. Red Hat OpenShift Operator Lifecycle Manager default settings change the setting for the product. To workaround the issue, see the following procedure:
+
+1. Run `oc edit clusterrole placementrules.apps.open-cluster-management.io-v1-edit` to open the application edit cluster role.
 2. Remove `create` and `delete` from the verbs list.
 3. Save the change.
 
@@ -123,7 +309,7 @@ If you cannot verify, attempt to import the cluster again and verify again.
 
 // 1.0.0:1764
 
-Learn about Red Hat Openshift Container Platform SCC at https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth[Managing Security Context Constraints (SCC)], which is an additional configuration required on the managed cluster.
+Learn about {ocp-short} SCC at https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth[Managing Security Context Constraints (SCC)], which is an additional configuration required on the managed cluster.
 
 Different deployments have different security context and different service accounts.
 The subscription operator cannot create an SCC automatically.
@@ -164,30 +350,26 @@ See the following example where `kind: SecurityContextConstraints` is added:
  - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
 ----
 
-[#application-channels-require-unique-namespaces]
-=== Application channels require unique namespaces
+[#application-channels-in-unique-namespaces]
+=== Application channels in unique namespaces
 
 // 1.0.0:2311
 
-Creating more than one channel in the same namespace can cause errors with the hub cluster.
+Creating more than one channel in the same namespace can cause errors with the hub cluster. For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. 
 
-For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`.
-Ensure that you create your channel in a unique namespace.
-
-For product version 1.0, all channels need an individual namespace, except GitHub channels, which can share a namespace with another GitHub channel.
-See the process for link:../manage_applications[Creating and managing channels] for more information.
+It is best practice to create each channel in a unique namespace. However, a Git channel can share a namespace with another type of channel including Git, Helm, Kubernetes Namespace, and Object store.
 
 [#security-known-issues]
 == Security known issues
 
 [#internal-error-500-during-login-to-the-console]
-== Internal error 500 during login to the console
+=== Internal error 500 during login to the console
 
 // 1.0.1:2414
 
-When Red Hat Advanced Cluster Management for Kubernetes is installed and the OpenShift Container Platform is customized with a custom ingress certificate, a `500 Internal Error` message appears.
-You are unable to access the console because the OpenShift Container Platform certificate is not included in the Red Hat Advanced Cluster Management for Kuberentes management ingress.
-Add the OpenShift Container Platform certificate by completing the following steps:
+When {product-title} is installed and the {ocp-short} is customized with a custom ingress certificate, a `500 Internal Error` message appears.
+You are unable to access the console because the {ocp-short} certificate is not included in the {product-title} management ingress.
+Add the {ocp-short} certificate by completing the following steps:
 
 . Create a ConfigMap that includes the certificate authority used to sign the new certificate. Your ConfigMap must be identical to the one you created in the `openshift-config` namespace. Run the following command:
 
@@ -212,4 +394,18 @@ oc edit multiclusterhub multiclusterhub
 customCAConfigmap: custom-ca
 ----
 
-After you complete the steps, wait a few minutes for the changes to propagate to the charts and log in again. The OpenShift Container Platform certificate is added.
+After you complete the steps, wait a few minutes for the changes to propagate to the charts and log in again. The {ocp-short} certificate is added.
+
+[#cluster-name-is-not-listed-in-the-policy-detail-panel]
+=== Cluster name is not listed in the policy detail panel
+
+// 2.0.1:4605
+
+All cluster violations from specific policies are listed in the policy detail panel. If a user does not have role access to a cluster, the cluster name is not visible. The cluster name is displayed with the following symbol: `-`
+
+[#empty-status-in-policies]
+=== Empty status in policies
+
+// 2.0.2:3032
+
+The policies that are applied to the cluster are considered `NonCompliant` when clusters are not running. When you view violation details, the `status` parameter is empty.

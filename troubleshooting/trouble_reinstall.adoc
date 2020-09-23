@@ -1,0 +1,50 @@
+[#troubleshooting-reinstallation-failure]
+= Troubleshooting reinstallation failure
+
+When reinstalling {product-title}, the pods do not start.
+
+[#symptom-reinstallation-failure]
+== Symptom: Reinstallation failure
+
+If your pods do not start after you install {product-title}, it is likely that {product-title-short} was previously installed, and not all of the pieces were removed before you attempted this installation. 
+
+In this case, the pods do not start after completing the installation process. 
+
+[#resolving-the-problem-reinstallation-failure]
+== Resolving the problem: Reinstallation failure
+
+If you have this problem, complete the following steps: 
+
+. Run the uninstallation process to remove the current components by following the steps in link:../install/uninstall.adoc#uninstalling[Uninstalling].
+
+. Install the Helm CLI binary version 3.2.0, or later, by following the instructions at https://helm.sh/docs/intro/install/[Installing Helm].
+
+. Ensure that your {ocp} CLI is configured to run `oc` commands. See https://docs.openshift.com/container-platform/4.5/cli_reference/openshift_cli/getting-started-cli.html[Getting started with the CLI] in the Red Hat OpenShift documentation for more information about how to configure the `oc` commands. 
+
+. Copy the following script into a file:
++
+----
+#!/bin/bash
+ACM_NAMESPACE=<namespace>
+oc delete mch --all -n $ACM_NAMESPACE
+helm ls --namespace $ACM_NAMESPACE | cut -f 1 | tail -n +2 | xargs -n 1 helm delete --namespace $ACM_NAMESPACE
+oc delete apiservice v1.admission.cluster.open-cluster-management.io v1beta1.webhook.certmanager.k8s.io
+oc delete clusterimageset --all
+oc delete configmap -n $ACM_NAMESPACE cert-manager-controller cert-manager-cainjector-leader-election cert-manager-cainjector-leader-election-core
+oc delete consolelink acm-console-link
+oc delete crd klusterletaddonconfigs.agent.open-cluster-management.io placementbindings.policy.open-cluster-management.io policies.policy.open-cluster-management.io userpreferences.console.open-cluster-management.io searchservices.search.acm.com
+oc delete mutatingwebhookconfiguration cert-manager-webhook
+oc delete oauthclient multicloudingress
+oc delete rolebinding -n kube-system cert-manager-webhook-webhook-authentication-reader
+oc delete scc kui-proxy-scc
+oc delete validatingwebhookconfiguration cert-manager-webhook 
+----
++
+
+Replace `<namespace>` in the script with the name of the namespace where {product-title-short} was installed. Ensure that you specify the correct namespace, as the namespace is cleaned out and deleted. 
+
+. Run the script to remove the artifacts from the previous installation. 
+
+. Run the installation. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online].
+
+
