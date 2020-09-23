@@ -21,12 +21,12 @@ You must have the following prerequisites before you can use {cincinnati} to upg
 * An {ocp-short} cluster that is managed by the {product-title-short} hub cluster
 * Access credentials to a local repository where you can store the cluster images, and at least 2 release images are mirrored. See https://docs.openshift.com/container-platform/4.5/installing/install_config/installing-restricted-networks-preparations.html[Creating a mirror registry for installation in a restricted network] for more information about how to create this repository.
 +
-*Note:* The image for the current version must be one of the mirrored images that are available. If an upgrade fails, the cluster reverts back to the previous version.
+*Note:* The image for the current version must be available as one of the mirrored images. If an upgrade fails, the cluster reverts back to the previous version.
 
 [#build-the-graph-data-init-container]
 == Build the graph data init container
 
-Typically, {cincinnati} pulls upgrades directly from the https://github.com/openshift/cincinnati-graph-data[Cincinnati graph data GitHub repository]. Because you are configuring a disconnected environment, you can make the graph data available in a local repository by using an `init container`. Complete the following steps to create a graph data init container:
+{cincinnati} uses graph data information to determine the available upgrades. Typically, {cincinnati} pulls the graph data information for available upgrades directly from the https://github.com/openshift/cincinnati-graph-data[Cincinnati graph data GitHub repository]. Because you are configuring a disconnected environment, you must make the graph data available in a local repository by using an `init container`. Complete the following steps to create a graph data init container:
 
 . Create a file that contains the information for your graph data init. See the information in the following sample graph data file for details:
 +
@@ -49,18 +49,20 @@ In this example:
 . Run the following commands to build the `graph data init container`:
 +
 ----
-podman build -f ./dev/Dockerfile -t quay.io/rwsu/cincinnati-graph-data-container:latest
-podman push quay.io/rwsu/cincinnati-graph-data-container:latest
+podman build -f ./dev/Dockerfile -t host/user/cincinnati-graph-data-container:latest
+podman push host/user/cincinnati-graph-data-container:latest
 ----
 +
 Replace _.dev/Dockerfile_ with the path to the file that you created in the previous step.
 +
-Replace _quay.io/rwsu/cincinnati-graph-data-container_ with the path to your local graph data init container.
+Replace _host/user/cincinnati-graph-data-container_ with the path to your local graph data init container.
++
+*Note:* You can also replace `podman` with `docker`, if the `podman` command is not available.
 
-[#deploy-the-cincinnati-operator]
-== Deploy the {cincinnati} operator
+[#deploy-the-operator-for-cincinnati]
+== Deploy the operator for {cincinnati}
 
-To deploy the {cincinnati} operator in your {ocp-short} environment, complete the following steps:
+To deploy the operator for {cincinnati} in your {ocp-short} environment, complete the following steps:
 
 . Access the {ocp-short} operator hub. 
 . Deploy the operator by selecting `{cincinnati} Operator`. Update the default values, if necessary. The deployment of the operator creates a new project named `openshift-{cincinnati}`.
@@ -81,20 +83,16 @@ When you finish deploying the {cincinnati} instance on your hub cluster, this in
 . Paste text that is similar to the following manifest:
 +
 ----
-{
-  "apiVersion": "Cincinnati.openshift.io/v1beta1",
-  "kind": "Cincinnati",
-  "metadata": {
-    "name": "cincinnati-instance",
-	"namespace": "openshift-cincinnati"
-  },
-  "spec": {
-    "registry": "registry.qe.lab.redhat.com:5000",
-	"replicas": 1,
-	"repository": "localimages/local-release-image/images",
-	"graphDataImage": "registry.qe.lab.redhat.com:5000/cincinnati-graph-data-container:latest"
-  }
-}
+apiVersion: cincinnati.openshift.io/v1beta1
+kind: Cincinnati
+metadata:
+  name: openshift-update-service-instance
+  namespace: openshift-cincinnati
+spec:
+  registry: quay.io
+  replicas: 1
+  repository: openshift-release-dev/ocp-release
+  graphDataImage: 'host/user/cincinnati-graph-data-container'
 ----
 +
 Replace the `spec: registry` value with the path to your local disconnected registry for your images that you set up in the prerequisites.
@@ -103,10 +101,12 @@ Replace the `spec: graphDataImage` value with the path to your `graph data init`
 . Select *Create* to create the instance. 
 . From the hub cluster CLI, enter the `oc get pods` command to view the status of the instance creation. It might take a while, but the process is complete when the result of the command shows that the instance and the operator are running.
 
-[#deploy-a-policy-to-replace-the-default-registry]
-== Deploy a policy to replace the default registry
+[#deploy-a-policy-to-override-the-default-registry]
+== Deploy a policy to override the default registry
 
-Deploy a {product-title-short} policy to replace the default registry value with the value of your local registry. For these steps, the policy is named _imageContentSourcePolicy_ for the managed cluster to replace the default registry with the path to the {cincinnati} instance that you created.
+{ocp-short} has a default image registry value that specifies where it finds the upgrade packages. In a disconnected environment, you can create a policy to replace that value with the path to your local image registry. 
+
+For these steps, the policy is named _imageContentSourcePolicy_.  Complete the following steps to create the policy:
 
 . From the {product-title-short} console, select *Govern risk* > *Create policy*.
 . Set the `YAML` switch to _On_ to view the YAML version of the policy.
@@ -115,9 +115,6 @@ Deploy a {product-title-short} policy to replace the default registry value with
 . Copy the contents of the `imageContentSourcePolicy.yaml` into the _Custom Resource_ section of the _Custom policy template_.
 .. Replace *Unique name* with a name for your policy.
 .. Replace *Managed clusters* with the name of the managed cluster that you are updating in the _Cluster binding_ field. *Tip:* You can find this name by viewing the _Cluster details_ page in the {product-title-short} console. 
-.. Change the `items: spec: upstream:` value to the path to your local {cincinnati} instance. This value points to where your disconnected images are stored.
-+
-See link:../security/create_policy.adoc#managing-security-policies[Managing security policies] for information about creating a policy. 
 . Select the box for *Enforce if supported*.
 . Select *Create* to create the policy. 
 
@@ -182,11 +179,10 @@ items:
 [..]
   spec:
     channel: stable-4.4
-    clusterID: 46ahere-471a-45c8-9a59-0fac0685dec6
     upstream: https://api.openshift.com/api/upgrades_info/v1/graph
 ----
 +
-. Replace the value of _items: spec: upstream_ with the path to the local registry where your upgrade images are stored. 
+. Replace the value of _items: spec: upstream_ with the path to the local registry where your upgrade images are stored. See link:../security/create_policy.adoc#managing-security-policies[Managing security policies] for information about creating a policy. 
  
 . From the hub cluster, identify the route URL to the {cincinnati} endpoint by entering the following command: `oc get routes`. *Tip:* Note this value for later steps.
 
@@ -206,7 +202,7 @@ apiVersion: config.openshift.io/v1
     upstream: https://example-cincinnati-policy-engine-uri/api/upgrades_info/v1/graph
 ----
 +
-Replace the value of _spec: upstream:_ with the path to your hub cluster {cincinnati} endpoint.
+Replace the value of _spec: upstream:_ with the path to your hub cluster {cincinnati} operand.
 . In the managed cluster CLI, confirm that the upstream parameter in the `ClusterVersion` is updated with the local hub cluster {cincinnati} URL by entering: 
 +
 ----
