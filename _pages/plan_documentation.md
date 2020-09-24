@@ -68,7 +68,9 @@ To create a new guide in the product documentation, you must create a new folder
    
 2. If you are using Visual Studio Code (VSC), select the **New Folder** icon to create a folder. 
 
-## Add a `symlink` to the _modules_ folder to resolve the conrefs.
+### Add a _symlink_ to the _modules_ folder 
+
+You must add a `symlink` to the `modules` folder in your new folder, to resolve the conrefs. See the following steps:
 
 1. Open a terminal, and navigate to the new GitHub folder.
 
@@ -93,9 +95,6 @@ You must complete the _Set up new title_ form to create a new book. Log in to Pa
    8. Select **Book** for the _Content Type_.
    7. Ensure that the checkbox for _Use default content directory_ is selected, also select `AsciiDoc` as the _Content Markup_.
    8. You can add multiple new titles by selecting the **Add additional title** button. Otherwise, select **Submit** when the form is complete. 
-
-## Run a manual build to pick up the new book
-
-Run a manual build using the process in the _Running a build_ section. 
+   9. Run a manual build to pick up the new book. For more information, see [Build and publish](../_pages/arch_build.md).
    
 
