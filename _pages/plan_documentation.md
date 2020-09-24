@@ -95,6 +95,6 @@ You must complete the _Set up new title_ form to create a new book. Log in to Pa
    8. Select **Book** for the _Content Type_.
    7. Ensure that the checkbox for _Use default content directory_ is selected, also select `AsciiDoc` as the _Content Markup_.
    8. You can add multiple new titles by selecting the **Add additional title** button. Otherwise, select **Submit** when the form is complete. 
-   9. Run a manual build to pick up the new book. For more information, see [Build and publish](../_pages/arch_build.md).
+   9. Run a manual build to pick up the new book. For more information, see [Build and publish](arch_builds.md#build-and-publish).
    
 
