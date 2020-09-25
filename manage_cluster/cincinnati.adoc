@@ -3,32 +3,31 @@
 
 You can use {cincinnati} with {product-title} to upgrade your clusters in a disconnected environment.
 
-In some cases, security concerns prevent clusters from being connected directly to the Internet. This makes it difficult to know when upgrades are available, and how to process those upgrades. Configuring {cincinnati} can help. 
+In some cases, security concerns prevent clusters from being connected directly to the Internet. This makes it difficult to know when upgrades are available, and how to process those upgrades. Configuring {cincinnati-short} can help. 
 
-{cincinnati} is a separate operator and operand that monitors the available versions of your managed clusters in a connected environment, and makes them available for upgrading your clusters in a disconnected environment. After {cincinnati} is configured, it can perform the following actions:
+{cincinnati-short} is a separate operator and operand that monitors the available versions of your managed clusters in a disconnected environment, and makes them available for upgrading your clusters in a disconnected environment. After {cincinnati-short} is configured, it can perform the following actions:
+
 . Monitors when upgrades are available for your disconnected clusters
-. Downloads the upgrades to a specified connected location
+. Identifies which updates are mirrored to your local site for upgrading by using the graph data file
 . Notifies you that an upgrade is available for your cluster by using the {product-title-short} console
-. Copies the downloaded release images to a disconnected location that you specify
-. Provides the release image upgrades for you to upgrade the cluster by using the {product-title-short} console 
 
 [#cincinnati-prerequisites]
 == Prerequisites
 
-You must have the following prerequisites before you can use {cincinnati} to upgrade your disconnected clusters:
+You must have the following prerequisites before you can use {cincinnati-short} to upgrade your disconnected clusters:
 
 * A deployed {product-title-short} hub cluster that is running on {ocp} version 4.5, or later with restricted OLM configured. See https://docs.openshift.com/container-platform/4.5/operators/olm-restricted-networks.html[Using Operator Lifecycle Manager on restricted networks] for details about how to configure restricted OLM. *Tip:* Make a note of the catalog source image when you configure restricted OLM.
 * An {ocp-short} cluster that is managed by the {product-title-short} hub cluster
-* Access credentials to a local repository where you can store the cluster images, and at least 2 release images are mirrored. See https://docs.openshift.com/container-platform/4.5/installing/install_config/installing-restricted-networks-preparations.html[Creating a mirror registry for installation in a restricted network] for more information about how to create this repository.
+* Access credentials to a local repository where you can store the cluster images. At least two release images must be mirrored. See https://docs.openshift.com/container-platform/4.5/installing/install_config/installing-restricted-networks-preparations.html[Creating a mirror registry for installation in a restricted network] for more information about how to create this repository.
 +
-*Note:* The image for the current version must be available as one of the mirrored images. If an upgrade fails, the cluster reverts back to the previous version.
+*Note:* The image for the current version of the cluster that you upgrade must be available as one of the mirrored images. If an upgrade fails, the cluster reverts back to the version of the cluster at the time that the upgrade was attempted.
 
 [#build-the-graph-data-init-container]
 == Build the graph data init container
 
-{cincinnati} uses graph data information to determine the available upgrades. Typically, {cincinnati} pulls the graph data information for available upgrades directly from the https://github.com/openshift/cincinnati-graph-data[Cincinnati graph data GitHub repository]. Because you are configuring a disconnected environment, you must make the graph data available in a local repository by using an `init container`. Complete the following steps to create a graph data init container:
+{cincinnati-short} uses graph data information to determine the available upgrades. In a connected environment, {cincinnati-short} pulls the graph data information for available upgrades directly from the https://github.com/openshift/cincinnati-graph-data[Cincinnati graph data GitHub repository]. Because you are configuring a disconnected environment, you must make the graph data available in a local repository by using an `init container`. Complete the following steps to create a graph data `init container`:
 
-. Create a file that contains the information for your graph data init. See the information in the following sample graph data file for details:
+. Create a file that contains the information for your graph data init. You can find this sample https://github.com/openshift/cincinnati-operator/blob/master/dev/Dockerfile[Dockerfile] in the `cincinnati-operator` GitHub repository. The contents of the file is shown in the following sample:
 +
 ----
 FROM registry.access.redhat.com/ubi8/ubi:8.1
@@ -40,7 +39,7 @@ CMD exec /bin/bash -c "tar xvzf cincinnati-graph-data.tar.gz -C /var/lib/cincinn
 +
 In this example:
 +
-* The `FROM` value is the external registry where {cincinnati} finds the images.
+* The `FROM` value is the external registry where {cincinnati-short} finds the images.
 
 * The `RUN` command packages the upgrade files. 
 
@@ -57,23 +56,23 @@ Replace _.dev/Dockerfile_ with the path to the file that you created in the prev
 +
 Replace _host/user/cincinnati-graph-data-container_ with the path to your local graph data init container.
 +
-*Note:* You can also replace `podman` with `docker`, if the `podman` command is not available.
+*Note:* You can also replace `podman` with `docker`, if you don't have `podman` installed.
 
 [#deploy-the-operator-for-cincinnati]
-== Deploy the operator for {cincinnati}
+== Deploy the operator for {cincinnati-short}
 
-To deploy the operator for {cincinnati} in your {ocp-short} environment, complete the following steps:
+To deploy the operator for {cincinnati-short} in your {ocp-short} environment, complete the following steps:
 
 . Access the {ocp-short} operator hub. 
-. Deploy the operator by selecting `{cincinnati} Operator`. Update the default values, if necessary. The deployment of the operator creates a new project named `openshift-{cincinnati}`.
+. Deploy the operator by selecting `{cincinnati} Operator`. Update the default values, if necessary. The deployment of the operator creates a new project named `openshift-cincinnati`.
 . Wait for the installation of the operator to finish. Tip: You can check the status of the installation by entering the `oc get pods` command on your {ocp-short} command line. The operator should be in the `running` state.
 
 [#deploy-the-cincinnati-instance]
-== Deploy the {cincinnati} instance
+== Deploy the {cincinnati-short} instance
 
-When you finish deploying the {cincinnati} instance on your hub cluster, this instance is where the images for the cluster upgrades are mirrored and made available to the disconnected managed cluster.
+When you finish deploying the {cincinnati-short} instance on your hub cluster, this instance is where the images for the cluster upgrades are mirrored and made available to the disconnected managed cluster.
 
-. Create a namespace for your {cincinnati} instance:
+. Create a namespace for your {cincinnati-short} instance:
 .. In the {ocp-short} hub cluster console navigation menu, select *Administration* > *Namespaces*.
 .. Select *Create Namespace*.
 .. Add the name of your namespace, and any other information for your namespace.
@@ -89,7 +88,7 @@ metadata:
   name: openshift-update-service-instance
   namespace: openshift-cincinnati
 spec:
-  registry: quay.io
+  registry: local/registry
   replicas: 1
   repository: openshift-release-dev/ocp-release
   graphDataImage: 'host/user/cincinnati-graph-data-container'
@@ -97,14 +96,14 @@ spec:
 +
 Replace the `spec: registry` value with the path to your local disconnected registry for your images that you set up in the prerequisites.
 +
-Replace the `spec: graphDataImage` value with the path to your `graph data init` container. *Tip:* This is the same value that you used when you ran the `podman push` command to push your `graph data init` container.
+Replace the `spec: graphDataImage` value with the path to your graph data init container. *Tip:* This is the same value that you used when you ran the `podman push` command to push your graph data init container.
 . Select *Create* to create the instance. 
 . From the hub cluster CLI, enter the `oc get pods` command to view the status of the instance creation. It might take a while, but the process is complete when the result of the command shows that the instance and the operator are running.
 
 [#deploy-a-policy-to-override-the-default-registry]
 == Deploy a policy to override the default registry
 
-{ocp-short} has a default image registry value that specifies where it finds the upgrade packages. In a disconnected environment, you can create a policy to replace that value with the path to your local image registry. 
+{ocp-short} has a default image registry value that specifies where it finds the upgrade packages. In a disconnected environment, you can create a policy to replace that value with the path to your local image registry where you mirrored your release images. 
 
 For these steps, the policy is named _imageContentSourcePolicy_.  Complete the following steps to create the policy:
 
@@ -154,16 +153,16 @@ spec:
   publisher: grpc
 ----
 +
-Replace the value of _image:__ with the path to your restricted catalog source image.
+Replace the value of _image:_ with the path to your local restricted catalog source image.
 
 . In the {product-title-short} console navigation, select *Automate infrastructure* > *Clusters* to check the status of the managed cluster. When the policy is applied, the cluster status is `ready`.
 
-[#deploy-a-policy-to-change-managed-cluster-parameter]
-== Deploy a policy to change managed cluster parameter
+[#deploy-a-policy-to-change-the-managed-cluster-parameter]
+== Deploy a policy to change the managed cluster parameter
 
 Push the _ClusterVersion_ policy to the managed cluster to change the default location where it retrieves its upgrades. 
 
-. From the managed cluster, confirm that the _ClusterVersion_ upstream parameter is currently the default public {cincinnati} endpoint by entering the following command:
+. From the managed cluster, confirm that the _ClusterVersion_ upstream parameter is currently the default public {cincinnati-short} operand by entering the following command:
 +
 ----
 oc get clusterversion -o yaml
@@ -184,12 +183,12 @@ items:
 +
 . Replace the value of _items: spec: upstream_ with the path to the local registry where your upgrade images are stored. See link:../security/create_policy.adoc#managing-security-policies[Managing security policies] for information about creating a policy. 
  
-. From the hub cluster, identify the route URL to the {cincinnati} endpoint by entering the following command: `oc get routes`. *Tip:* Note this value for later steps.
+. From the hub cluster, identify the route URL to the {cincinnati-short} operand by entering the following command: `oc get routes`. *Tip:* Note this value for later steps.
 
 . In the hub cluster {product-title-short} console menu, select *Governance and Risk* > *Create a policy*.
 . Set the `YAML` switch to _On_ to view the YAML version of the policy.
 . Find the _Custom Resource_ section of the custom policy template in the setup section. 
-. Add the following content to the _custom policy template in the _setup_ section:
+. Add the following content to the _custom policy template_ in the _setup_ section:
 +
 ----
 apiVersion: config.openshift.io/v1
@@ -202,8 +201,8 @@ apiVersion: config.openshift.io/v1
     upstream: https://example-cincinnati-policy-engine-uri/api/upgrades_info/v1/graph
 ----
 +
-Replace the value of _spec: upstream:_ with the path to your hub cluster {cincinnati} operand.
-. In the managed cluster CLI, confirm that the upstream parameter in the `ClusterVersion` is updated with the local hub cluster {cincinnati} URL by entering: 
+Replace the value of _spec: upstream:_ with the path to your hub cluster {cincinnati-short} operand.
+. In the managed cluster CLI, confirm that the upstream parameter in the `ClusterVersion` is updated with the local hub cluster {cincinnati-short} URL by entering: 
 +
 ----
 oc get clusterversion -o yaml
@@ -239,7 +238,7 @@ You can view a list of available upgrades for your managed cluster by completing
 [#upgrading-the-cluster]
 == Upgrading the cluster
 
-After configuring the disconnnected registry, {product-title-short} and {cincinnati} use the disconnected registry to determine if updates are available. Note: You must have a minimum of two images available in the registry for you to be notified of an upgrade. 
+After configuring the disconnnected registry, {product-title-short} and {cincinnati-short} use the disconnected registry to determine if updates are available. If no available upgrades are displayed, make sure that you have the release image of the current level of the cluster and at least one later level mirrored in the local repository. If the release image for the current version of the cluster is not available, no upgrades are available. 
 
 . In the {product-title-short} console, select *Automate infrastructure* > *Clusters*.
 
