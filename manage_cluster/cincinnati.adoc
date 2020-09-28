@@ -18,9 +18,51 @@ You must have the following prerequisites before you can use {cincinnati-short} 
 
 * A deployed {product-title-short} hub cluster that is running on {ocp} version 4.5, or later with restricted OLM configured. See https://docs.openshift.com/container-platform/4.5/operators/olm-restricted-networks.html[Using Operator Lifecycle Manager on restricted networks] for details about how to configure restricted OLM. *Tip:* Make a note of the catalog source image when you configure restricted OLM.
 * An {ocp-short} cluster that is managed by the {product-title-short} hub cluster
-* Access credentials to a local repository where you can store the cluster images. At least two release images must be mirrored. See https://docs.openshift.com/container-platform/4.5/installing/install_config/installing-restricted-networks-preparations.html[Creating a mirror registry for installation in a restricted network] for more information about how to create this repository.
+* Access credentials to a local repository where you can mirror the cluster images. See https://docs.openshift.com/container-platform/4.5/installing/install_config/installing-restricted-networks-preparations.html[Creating a mirror registry for installation in a restricted network] for more information about how to create this repository.
 +
-*Note:* The image for the current version of the cluster that you upgrade must be available as one of the mirrored images. If an upgrade fails, the cluster reverts back to the version of the cluster at the time that the upgrade was attempted.
+*Note:* The image for the current version of the cluster that you upgrade must always be available as one of the mirrored images. If an upgrade fails, the cluster reverts back to the version of the cluster at the time that the upgrade was attempted.
+
+[#configure-certificate-for-the-mirrored-registry]
+== Configure certificate for the mirrored registry 
+
+If you are using a secure external container registry to store your mirrored {ocp-short} release images, {cincinnati-short} requires access to this registry to build
+an upgrade graph. Complete the following steps to configure your CA certificate to work with the {cincinnati-short} pod:
+
+. Find the {ocp-short} external registry API, which is located in `image.config.openshift.io`. This is where the external registry CA certificate is stored.  
++
+See https://docs.openshift.com/container-platform/4.3/registry/configuring-registry-operator.html#images-configuration-cas_configuring-registry-operator[Image Registry Operator in OpenShift Container Platform] in the {ocp-short} documentation for more information.
+
+. Create a ConfigMap in the `openshift-config` namespace. 
+
+. Add your CA certificate under the key `cincinnati-registry`. {cincinnati-short} uses this setting to locate your Cert:
++
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trusted-ca
+data:
+  cincinnati-registry: |
+    -----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----
+----
+
+. Edit the `cluster` resource in the `image.config.openshift.io` API to set the `additionalTrustedCA` field to the name of the ConfigMap you just created.
++
+----
+$ oc edit image.config.openshift.io cluster
+spec:
+  additionalTrustedCA:
+    name: trusted-ca
+----
++
+Replace _trusted-ca_ with the path to your new ConfigMap.
+
+The Cincinnati Operator will watch the `image.config.openshift.io` API and the
+ConfigMap you created in the `openshift-config` namespace for changes, then
+restart the deployment if the CA cert has changed.
+
 
 [#build-the-graph-data-init-container]
 == Build the graph data init container
