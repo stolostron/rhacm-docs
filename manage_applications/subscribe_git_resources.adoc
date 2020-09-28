@@ -1,26 +1,35 @@
 [#subscribing-git-resources]
 == Subscribing Git resources 
 
-You can subscribe Git resources to multiple namespaces. By default, when you subscribe to an application, the application is deployed into that subscription namespace. To apply these resources to namespaces outside of that subscription namespace, see the following procedure:
+A subscription administrator can change default behavior. By default, when a subscription deploys subscribed applications to target clusters, the applications are deployed to that subscription namespace, even if the application resources are associated with other namespaces. Additionally, if an application resource exists in the cluster and was not created by the subscription, the subscription cannot apply a new resource on that existing resource. See the following processes to change default settings as the subscription administrator.
 
-*Required access:* Cluster administrator 
+*Required access:* Cluster administrator
 
-. From the console, log in to your hub cluster.
+[#granting-users-and-groups-subscription-admin-privilege]
+== Granting users and groups subscription admin privilege
 
-. Create one or more users. 
+Learn how to grant subscription administrator access.
+
+. From the console, log in to your {ocp} cluster.
+
+. Create one or more users. See link:https://docs.openshift.com/container-platform/4.5/post_installation_configuration/preparing-for-users.html[Preparing for users] for information about creating users.
 
 +
-These users represent administrators for the `app.open-cluster-management.io/subscription` application. With {ocp-short}, you can group these users to represent a subscription administrative group, which is demonstrated later in this topic.
+Users that you create are administrators for the `app.open-cluster-management.io/subscription` application. With {ocp-short}, a subscription administrator can change default behavior. You can group these users to represent a subscription administrative group, which is demonstrated in later examples.
 
-. From the terminal, log in to your {product-title-short} hub cluster again.
+. From the terminal, log in to your {product-title-short} cluster.
 
 . Add the following subjects into `open-cluster-management:subscription-admin` ClusterRoleBinding with the following command:
+
 +
 ----
 oc edit clusterrolebinding open-cluster-management:subscription-admin
 ----
+
 +
-*Note:* `open-cluster-management:subscription-admin` ClusterRoleBinding has no subject initially.
+
+*Note:* Initially, `open-cluster-management:subscription-admin` ClusterRoleBinding has no subject.
+
 +
 Your subjects might display as the following example:
 +
@@ -34,13 +43,20 @@ subjects:
   name: example-group-name
 ----
 
-To verify, see an example where you are logged in as a subscription administrator. In the example, you subscribe the sample resource YAML file from a Git repository, follow the previous procedure, then see updated Configmap settings. The example file contains subscriptions that are located within the following different namespaces:
+Next, see more useful examples of how a subscription administrator can change default behavior.
 
-* Configmap `test-configmap-1` gets created in `multins` namespace. 
+[#namespace-example]
+== Application namespace example
 
-* Configmap `test-configmap-2` gets created in `default` namespace.
+In this example, you are logged in as a subscription administrator. Create a subscription to subscribe the sample resource YAML file from a Git repository. The example file contains subscriptions that are located within the following different namespaces:
 
-* Configmap `test-configmap-3` gets created in the `subscription` namespace.
+*Applicable channel types:* Git
+
+* ConfigMap `test-configmap-1` gets created in `multins` namespace. 
+
+* ConfigMap `test-configmap-2` gets created in `default` namespace.
+
+* ConfigMap `test-configmap-3` gets created in the `subscription` namespace.
 +
 ----
 ---
@@ -72,3 +88,102 @@ metadata:
 data:
   path: resource3
 ----
+
+If the subscription was created by other users, all the ConfigMaps get created in the same namespace as the subscription.
+
+
+[#resource-overwrite-example]
+== Resource overwrite example
+
+*Applicable channel types:* Git, ObjectBucket
+
+In this example, the following ConfigMap already exists in the target cluster. 
+
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-configmap-1
+  namespace: sub-ns
+data:
+  name: user1
+  age: 19
+----
+
+Subscribe the following sample resource YAML file from a Git repository and replace the existing ConfigMap:
+
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-configmap-1
+  namespace: sub-ns
+data:
+  age: 20
+----
+
+You log in as a subscription administrator and create a subscription with `apps.open-cluster-management.io/reconcile-option: replace` annotation. See the following example:
+
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: subscription-example
+  namespace: sub-ns
+  annotations:
+    apps.open-cluster-management.io/git-path: sample-resources
+    apps.open-cluster-management.io/reconcile-option: replace
+spec:
+  channel: channel-ns/somechannel
+  placement:
+    placementRef:
+      name: dev-clusters
+----
+
+When this subscription is created by a subscription administrator and subscribes the ConfigMap resource, the existing ConfigMap is replaced by the following:
+
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-configmap-1
+  namespace: sub-ns
+data:
+  age: 20
+----
+
+If you want to subscribe the following sample resource YAML file from a Git repository and `merge` with the existing ConfigMap, use the `apps.open-cluster-management.io/reconcile-option: merge` annotation. See the following example:
+
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: subscription-example
+  namespace: sub-ns
+  annotations:
+    apps.open-cluster-management.io/git-path: sample-resources
+    apps.open-cluster-management.io/reconcile-option: merge
+spec:
+  channel: channel-ns/somechannel
+  placement:
+    placementRef:
+      name: dev-clusters
+----
+
+When this subscription is created by a subscription administrator and subscribes the ConfigMap resource, the existing ConfigMap is merged, as you can see in the following example:
+
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-configmap-1
+  namespace: sub-ns
+data:
+  name: user1
+  age: 20
+----
+
+When the `merge` option is used, entries from subscribed resource are either created or updated in the existing resource. No entry is removed from the existing resource.
+
+*Important:* If the exising resource you want to overwrite with a subscription is automatically reconciled by another operator or controller, the resource configuration
+is updated by both subscription and the controller or operator. Do not use this method in this case.
