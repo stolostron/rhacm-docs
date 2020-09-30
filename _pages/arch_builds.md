@@ -6,7 +6,7 @@ title: "Build and publish"
 
 # Build and publish
 
-We refresh weekly. These directions walk you through a refresh but also just an internal build to check for errors in between publish dates.
+We refresh weekly. These directions walk you through a refresh, as well as an internal build to check drafts and error logs in between publish dates.
 
 ## Prerequisites
 
@@ -19,15 +19,15 @@ You must have the following prerequisites to publish live:
 
 ## PR for live refresh
 
-**Note:** Do not create a PR to `prod` if you are only building `stage` for internal purposes. Move on to the later sections in this case.
+**Note:** Do not create a PR to the `prod` branch if you are only building `stage` for internal purposes. Move on to the later sections in this case.
 
-You have to get a copy of `stage` to `prod` to refresh. To create the pull request (PR), complete the following steps:
+You have to get a copy of `stage` to `prod` to refresh live docs. To create the pull request (PR) to refresh live, complete the following steps:
 
 1. Create a PR from `stage` to `prod`. 
 
 2. Get it approved, then merge. If the PR has conflicts, you and the team will have to work through those.
 
-   **Note:** If you are publishing a staged version for GA, you will need to create the `prod` branch first. You will only have stage because you have not yet published the version.
+   **Note:** If you are publishing a previously staged version for GA, you will need to create the `prod` branch first. You will only have stage because you have not yet published the version.
   
 
 ## Confirm build branch
