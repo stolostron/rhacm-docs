@@ -1,0 +1,54 @@
+[#troubleshooting-all-imported-clusters-offline-after-certificate-change]
+= Troubleshooting all imported clusters offline after certificate change
+
+Installing a custom `apiserver` certificate is supported, but all clusters that were imported before you changed the certificate information can have an `offline` status. 
+
+[#symptom-all-clusters-offline-after-certificate-change]
+== Symptom: All clusters offline after certificate change
+
+After you complete the procedure for updating a certificate secret, all of your clusters that were online are now displaying an `offline` status in the {product-title} console.
+
+[#identifying-all-clusters-offline-after-certificate-change]
+== Identifying the problem: All clusters offline after certificate change 
+
+After updating the information for a custom API server certificate, the clusters that were imported and running before the new certificate are now in an `offline` state. 
+
+The errors that indicate that the certificate is the problem are found in the logs for the pods in the `open-cluster-management-agent` namespace of the offline managed cluster. The following examples are similar to the errors that are displayed in the logs: 
+
+*Log of `work-agent`:*
+
+----
+E0917 03:04:05.874759       1 manifestwork_controller.go:179] Reconcile work test-1-klusterlet-addon-workmgr fails with err: Failed to update work status with err Get "https://api.aaa-ocp.dev02.location.com:6443/apis/cluster.management.io/v1/namespaces/test-1/manifestworks/test-1-klusterlet-addon-workmgr": x509: certificate signed by unknown authority
+E0917 03:04:05.874887       1 base_controller.go:231] "ManifestWorkAgent" controller failed to sync "test-1-klusterlet-addon-workmgr", err: Failed to update work status with err Get "api.aaa-ocp.dev02.location.com:6443/apis/cluster.management.io/v1/namespaces/test-1/manifestworks/test-1-klusterlet-addon-workmgr": x509: certificate signed by unknown authority
+E0917 03:04:37.245859       1 reflector.go:127] k8s.io/client-go@v0.19.0/tools/cache/reflector.go:156: Failed to watch *v1.ManifestWork: failed to list *v1.ManifestWork: Get "api.aaa-ocp.dev02.location.com:6443/apis/cluster.management.io/v1/namespaces/test-1/manifestworks?resourceVersion=607424": x509: certificate signed by unknown authority
+----
+
+*Log of `registration-agent`:*
+
+----
+I0917 02:27:41.525026       1 event.go:282] Event(v1.ObjectReference{Kind:"Namespace", Namespace:"open-cluster-management-agent", Name:"open-cluster-management-agent", UID:"", APIVersion:"v1", ResourceVersion:"", FieldPath:""}): type: 'Normal' reason: 'ManagedClusterAvailableConditionUpdated' update managed cluster "test-1" available condition to "True", due to "Managed cluster is available"
+E0917 02:58:26.315984       1 reflector.go:127] k8s.io/client-go@v0.19.0/tools/cache/reflector.go:156: Failed to watch *v1beta1.CertificateSigningRequest: Get "https://api.aaa-ocp.dev02.location.com:6443/apis/cluster.management.io/v1/managedclusters?allowWatchBookmarks=true&fieldSelector=metadata.name%3Dtest-1&resourceVersion=607408&timeout=9m33s&timeoutSeconds=573&watch=true"": x509: certificate signed by unknown authority
+E0917 02:58:26.598343       1 reflector.go:127] k8s.io/client-go@v0.19.0/tools/cache/reflector.go:156: Failed to watch *v1.ManagedCluster: Get "https://api.aaa-ocp.dev02.location.com:6443/apis/cluster.management.io/v1/managedclusters?allowWatchBookmarks=true&fieldSelector=metadata.name%3Dtest-1&resourceVersion=607408&timeout=9m33s&timeoutSeconds=573&watch=true": x509: certificate signed by unknown authority
+E0917 02:58:27.613963       1 reflector.go:127] k8s.io/client-go@v0.19.0/tools/cache/reflector.go:156: Failed to watch *v1.ManagedCluster: failed to list *v1.ManagedCluster: Get "https://api.aaa-ocp.dev02.location.com:6443/apis/cluster.management.io/v1/managedclusters?allowWatchBookmarks=true&fieldSelector=metadata.name%3Dtest-1&resourceVersion=607408&timeout=9m33s&timeoutSeconds=573&watch=true"": x509: certificate signed by unknown authority
+----
+
+[#resolving-all-clusters-offline-after-certificate-change]
+== Resolving the problem: All clusters offline after certificate change
+
+To manually restore your clusters after updating your certificate information, complete the following steps for each managed cluster:
+
+. Add the new certificate authority to the certificate chain.
+. Wait for the certificate rotation to complete to pick up the new certificate authority, which happens every 2 hours.
+. Manually import the cluster again. {opc} clusters that were created from {product-title-short} will resynchronize every 2 hours, so you can skip this step for those clusters.
+.. On the hub cluster, display the import command by entering the following command:
++ 
+----
+oc get secret -n ${CLUSTER_NAME} ${CLUSTER_NAME}-import -ojsonpath='{.data.import\.yaml}' | base64 --decode  > import.yaml
+----
++
+Replace _CLUSTER_NAME_ with the name of the managed cluster that you are importing.
+.. On the managed cluster, apply the `import.yaml` file:
++
+----
+oc apply -f import.yaml
+----
