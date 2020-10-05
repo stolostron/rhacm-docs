@@ -1,0 +1,93 @@
+[#creating-a-managedclusterset-resource]
+= Creating a ManagedClusterSet resource
+
+Create a ManagedClusterSet resource to limit the user access on managed clusters. You must also create a ManagedClusterSetBinding resource to bind a ManagedClusterSet resource to a namespace. 
+
+*Required access*: Cluster administrator
+
+[#managedclusterset]
+== ManagedClusterSet resource
+A ManagedClusterSet can have multiple `clusterSelectors` to select managed clusters. The `clusterSelectors` can contain a list of cluster names, or contain a list of labels. View the following options to create ManagedClusterSet resources:
+
+* Create a ManagedClusterSet resource that contains a list of cluster names. Your resource might resemble the following information:
+
++
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: ManagedClusterSet
+metadata:
+  name: clusterset1
+spec:
+  clusterSelectors:
+  - clusterNames:
+    - cluster1
+    - cluster2
+----
+
+* Create a ManagedClusterSet resource that contain a list of labels. Your resource might resemble the following information:
+
++
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: ManagedClusterSet
+metadata:
+  name: clusterset-prod
+spec:
+  clusterSelectors:
+  - labelSelector:
+      matchLabels:
+        env: Prod
+----
+
+* Create a ManagedClusterSet resource that contains multiple `clusterSelectors`. Your resource might resemble the following information:
+
++
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: ManagedClusterSet
+metadata:
+  name: clusterset-us-west
+spec:
+  clusterSelectors:
+  - labelSelector:
+      matchLabels:
+        region: us-west-1
+  - labelSelector:
+      matchLabels:
+        region: us-west-2
+----
+
+[#managedclustersetbinding]
+== ManagedClusterSetBinding resource
+
+Create a ManagedClusterSetBinding resource to bind a ManagedClusterSet resource to a namespace. Application and policies that are created in the same namespace can only access managed clusters that are included in the bound ManagedClusterSet resource.
+
+When you create a ManagedClusterSetBinding, the name of the ManagedClusterSetBinding must match the name of the ManagedClusterSet to bind.
+
+Your ManagedClusterSetBinding resource might resemble the following information:
+
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: ManagedClusterSetBinding
+metadata:
+  namespace: project1
+  name: clusterset1
+spec:
+  clusterSet: clusterset1
+----
+
+A user must have the bind permission on the target ManagedClusterSet. View the following example of a ClusterRole resource, which contain rules that allow the user to bind to `clusterset1`:
+
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: clusterrole1
+rules:
+  - apiGroups: ["cluster.open-cluster-management.io"]
+    resources: ["managedclustersets/bind"]
+    resourceNames: ["clusterset1"]
+    verbs: ["create"]
+----
+
+For more information about role actions, see link:..security/rbac.adoc#role-based-access-control[Role-based access control].
