@@ -1,11 +1,11 @@
 [#role-based-access-control]
 = Role-based access control
 
-{product-title} supports role-based access control (RBAC). Your role determines the actions that you can perform. RBAC is based on the authorization mechanisms in Kubernetes, similar to {ocp}. For more information about RBAC, see the OpenShift _RBAC_ overview in the link:https://docs.openshift.com/container-platform/4.3/authentication/using-rbac.html[OpenShift Container Platform documentation].
+{product-title} supports role-based access control (RBAC). Your role determines the actions that you can perform. RBAC is based on the authorization mechanisms in Kubernetes, similar to {ocp}. For more information about RBAC, see the OpenShift _RBAC_ overview in the link:https://docs.openshift.com/container-platform/4.3/authentication/using-rbac.html[{ocp-short} documentation].
 
-*Note*: Action buttons are disabled from the console if the user-role access is impermissible. 
+*Note*: Action buttons are disabled from the console if the user-role access is impermissible.
 
-View the following sections for  details of supported RBAC by component:
+View the following sections for details of supported RBAC by component:
 
 * <<overview-of-roles,Overview of roles>>
 * <<rbac-implementation,RBAC implementation>>
@@ -17,29 +17,29 @@ View the following sections for  details of supported RBAC by component:
 [#overview-of-roles]
 == Overview of roles
 
-Some product resources are cluster-scoped and some are namespace-scoped. You must apply cluster rolebindings and namespace rolebindings to your users for consistent access controls. View the table list of the following role definitions that are supported in {product-title}:
+Some product resources are cluster-wide and some are namespace-scoped. You must apply cluster rolebindings and namespace rolebindings to your users for consistent access controls. View the table list of the following role definitions that are supported in {product-title}:
 
 .Role definition table
 |===
 | Role | Definition
 
 | *cluster-admin*
-| An user with cluster-wide binding to the `cluster-admin` role is an OpenShift Container Platform super user, who has all access.
+| A user with cluster-wide binding to the `cluster-admin` role is an {ocp-short} super user, who has all access.
 
 | *open-cluster-management:cluster-manager-admin*
-| An user with cluster-wide binding to the `cluster-manager-admin` role is a {product-title} super user, who has all access.
+| A user with cluster-wide binding to the `cluster-manager-admin` role is a {product-title} super user, who has all access.
 
 | *open-cluster-management:managed-cluster-x (admin)*
-| An user with cluster binding to the `managed-cluster-x` role has administrator access to `managedcluster “X”` resource.
+| A user with cluster binding to the `managed-cluster-x` role has administrator access to `managedcluster “X”` resource.
 
 | *open-cluster-management:managed-cluster-x (viewer)*
-| An user with cluster-wide binding to the `managed-cluster-x` role has view access to `managedcluster “X”` resource.
+| A user with cluster-wide binding to the `managed-cluster-x` role has view access to `managedcluster “X”` resource.
 
 | *open-cluster-management:subscription-admin*
-| An user with the `subscription-admin` role can create Git subscriptions that deploy resources to multiple namespaces. The resources are specified in Kubernetes resource YAMLs in the subscribed Git repository. *Note*: When an non-subscription-admin user creates a subscription, all resources are deployed into the subscription namespace regardless of specified namespaces in the resources.
+| A user with the `subscription-admin` role can create Git subscriptions that deploy resources to multiple namespaces. The resources are specified in Kubernetes resource YAML files in the subscribed Git repository. *Note*: When an non-subscription-admin user creates a subscription, all resources are deployed into the subscription namespace regardless of specified namespaces in the resources.
 
 | *admin, edit, view*
-| Admin, edit, and view are OpenShift Container Platform default roles. An user with a namespace binding has access to open-cluster-management resources in that namespace, and to the `managedcluster` resource. An user with cluster-wide binding to the roles has access to the `open-cluster-management` resources, and to `managedcluster` resource. *Note*: An user with cluster-wide binding to `admin` or `view` have write and read access to all policies and all management clusters on the hub cluster.
+| Admin, edit, and view are {ocp-short} default roles. A user with a namespace-scoped binding to these roles has access to `open-cluster-management` resources in a specific namespace, while cluster-wide binding to the same roles gives access to all of the `open-cluster-management` resources cluster-wide.
 |===
 
 *Important*: Any user can create projects from {ocp-short}, which gives administrator role permissions for the namespace.
@@ -47,24 +47,27 @@ Some product resources are cluster-scoped and some are namespace-scoped. You mus
 [#rbac-implementation]
 == RBAC implementation
 
-RBAC is validated at the API level. When an user attempts an action from the console, the API might be allowed or rejected based on access role permissions. View the following sections for more information on RBAC for specific lifecyles in the product.
+RBAC is validated at the console level and the API level. Actions in the console can be enabled or disabled based on user access role permissions. View the following sections for more information on RBAC for specific lifecyles in the product.
 
 [#cluster-lifecycle-RBAC]
 === Cluster lifecycle RBAC
 
-To perform cluster lifecycle operations, users must have access to the `managedcluster` namespace and custom resource. An user with cluster-wide binding to `admin` or `view` roles, has `admin` or `view` access to all management clusters and namespaces.
+To perform cluster lifecycle operations, users must have access to both the `managedcluster` custom resource and namespace, for consistent role behavior from the console. A user that has access to only the cluster namespace and not the custom resource can see the cluster, but is not permitted to perform any actions on the managed cluster.
 
 View the following examples:
 
 * To view `managedcluster x` cluster information, the following roles are required:
 
-  ** A cluster-wide binding to the `view` role for `open-cluster-management`.
-  ** A namespace binding to the `view` role for namespace "X".
+  ** A cluster-wide binding to the role `open-cluster-management:view:X `.
+  ** A namespace-scoped binding to the `view` role for namespace "X".
 
 * To perform an upgrade to `managedcluster x`, the following roles are required:
 
-  ** A cluster-wide binding to the `admin` role for `open-cluster-management`.
-  ** A namespace binding to the `admin` role for namespace "X".
+  ** A cluster-wide binding to the role `open-cluster-management:admin:X`.
+  ** A namespace-scoped binding to the `admin` role for namespace "X".
+
++
+Learn about creating ManagedClusterSet resources to group clusters, see link:../managed_cluster/custom_resource.adoc#creating-a-managedclusterset-resource[Creating a ManagedClusterSet resource].
 
 View the following console and API RBAC tables for Cluster lifecycle:
 
@@ -92,12 +95,18 @@ View the following console and API RBAC tables for Cluster lifecycle:
 |===
 | API | Admin | Edit | View
 
-| klusterletaddonconfigs.agent.open-cluster-management.io
+
+| manageclusters.cluster.open-cluster-management.io
 | create, read, update, delete
 | read, update
 | read
 
-| manageclusters.cluster.open-cluster-management.io
+| baremetalassets.inventory.open-cluster-management.io
+| create, read, update, delete
+| read, update
+| read
+
+| klusterletaddonconfigs.agent.open-cluster-management.io
 | create, read, update, delete
 | read, update
 | read
@@ -129,7 +138,7 @@ View the following console and API RBAC tables for Cluster lifecycle:
 
 When you create an application, the `subscription` namespace is created and the configuration map is created in the `subscription` namespace. When you want to apply a subscription, you must be a subscription administrator. For more information on managing applications, see link:../manage_applications/managing_subscriptions.adoc#creating-and-managing-subscriptions[Creating and managing subscriptions].
 
-To perform Application lifecycle tasks, users must have access to the namespace where the application is created and the `managedcluster` namespace. For example, the required access to create applications in namespace "N" is a namespace binding to the `admin` role for namespace "N".
+To perform Application lifecycle tasks, users must have access to the namespace where the application is created and to the `managedcluster` namespace. For example, the required access to create applications in namespace "N" is a namespace-scoped binding to the `admin` role for namespace "N".
 
 View the following console and API RBAC tables for Application lifecycle:
 
@@ -212,18 +221,18 @@ View the following console and API RBAC tables for Application lifecycle:
 [#governance-lifecycle-RBAC]
 === Governance lifecycle RBAC
 
-To perform Governance lifecylce operations, users must have access to the namespace where a policy is created, and access to the `managedcluster` namespace. An user with cluster-wide binding to `admin`  access, also has write and read access to all policies and all management clusters on the hub cluster.
+To perform Governance lifecycle operations, users must have access to the namespace where the policy is created, along with access to the `managedcluster` namespace where the policy is applied.
 
 View the following examples:
 
 * To view policies in namespace "N" the following role is required:
 
-  ** A namespace binding to the `view` role for namespace "N".
+  ** A namespace-scoped binding to the `view` role for namespace "N".
 
 * To create a policy in namespace "N" and apply it on `managedcluster` "X", the following roles are required:
 
-  ** A namespace binding to the `admin` role for namespace "N".
-  ** A namespace binding to the `admin` role for namespace "X".
+  ** A namespace-scoped binding to the `admin` role for namespace "N".
+  ** A namespace-scoped binding to the `admin` role for namespace "X".
 
 View the following console and API RBAC tables for Governance lifecycle:
 
