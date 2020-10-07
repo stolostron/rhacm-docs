@@ -1,41 +1,68 @@
 [#install-observability]
 = Install observability service
 
-Monitor the health of your managed clusters with the observability service (`multicluster-observability-operator`). By default, the observability service is configured for high availability environments.
+Monitor the health of your managed clusters with the observability service (`multicluster-observability-operator`). 
+
+//should add how users can install on a high availability environment vs. standard. seems like it is a easy //change. According to the google doc, the user would update the AvailabilityConfig parameter from High to //Basic and vice versa 
 
 *Required access:* Cluster admininstrator
 
-Collect logs about new information that is created for observability resources with the `must-gather` command. For more information, see the _Must-gather_ section in the link:../troubleshooting/troubleshooting_intro.adoc[Troubleshooting documentation].
-
+*Prerequisites*:
+//in this case is the hub an OCP cluster, or is it dependent on what's the "central controller for the cluster"
+* You must have a hub cluster installed. 
+* You must install Grafana. For more information, see https://grafana.com/docs/grafana/latest/installation/[Install Grafana].
+* You must have data storage for the time series data. Configure your object store to create a storage solution. For example, Thanos can be used as a storage solution. For more information, see  _Object Storage_ in the https://thanos.io/tip/thanos/storage.md/#configuration[Thanos documentation]. 
+* {ocp} must be installed. For more information, see https://docs.openshift.com/container-platform/4.5/architecture/architecture-installation.html[{ocp-short} installation overview].
+// Note from Brandi, is a managed cluster also required?
 [#enablement-for-observability]
 == Enablement for observability
 
-Enable or disbale the observability service by creating a `multicluster-observability` CRD. 
+Enable the observability service by creating a `multicluster-observability` CRD. Complete the following steps to enable the observability service: 
 
-*Prerequisites*:
-//add info about what the user will see from the Grafana dashboard
-* You must install Grafana. For more information, see https://grafana.com/docs/grafana/latest/installation/[Install Grafana].
-* You must have data storage. Observability supports different types of storage solutions, such as Thanos. For more information, see  _Object Storage_ in the https://thanos.io/tip/thanos/storage.md/#configuration[Thanos documentation]. 
-* {ocp} must be installed.
-// NOTE from Brandi, I think we should tell them: hub cluster, is a managed cluster also required?
+. Create and configure object storage for the observability service. Your object storage might resemble the following information:
 
-Complete the following steps to enable the observability service: 
++
+----
+type: s3
+config:
+  bucket: YOUR-BUCKET
+  endpoint: S3-ENDPOINT
+  insecure: true
+  access_key: ACCESS_KEY
+  secret_key: SECRET_KEY
+----
 
-. Log in to your hub cluster from the command line interface (CLI). //Log in to OCP or RHACM? It is two different logins.
+. Log in to your hub cluster. 
+//Log in to OCP or RHACM? It is two different logins.
 . Create a namespace for the observability service with the following commad:
 
-  ----
-  oc create namespace open-cluster-management-observability
-  ---
++
+----
+oc create-namespace open-cluster-management-observability
+----
 
 . Generate a pull-secret for the `observability` namespace by running the following command:
+//--export flag is expected to be deprecated, command might need to be updated
++
+----
+oc get secret multiclusterhub-operator-pull-secret -n open-cluster-management --export -o yaml |   kubectl apply --namespace=open-cluster-management-observability -f -
+----
 
-  ----
-  oc get secret multiclusterhub-operator-pull-secret -n open-cluster-management --export -o yaml |   kubectl apply --namespace=open-cluster-management-observability -f -
-  ----
+. Create a secret for your object storage. Your secret must contain the credentials to your storage solution. For example, if you are using Thanos, run the following command:
 
-. Create a secret for your object storage. You must first create object storage. //Maybe these are two steps? or something like: If you already created object storage, create a secret for that object storage. 
++
+----
+kubectl create -f thanos-object-storage.yaml
+----
 
+. Create a MultiClusterObservability resource by running the following command:
+
++
+----
+kubectl create -f mco_cr.yaml
+----
+
+. You can also disable the observability service by scaling the `metrics-collector` deployment to zero. When the deployment is scaled to zero, data is no longer collected from Promethus.
 
 
 //still working to add steps
@@ -45,3 +72,5 @@ Complete the following steps to enable the observability service:
 
 //5236
 
+
+Collect logs about new information that is created for observability resources with the `must-gather` command. For more information, see the _Must-gather_ section in the link:../troubleshooting/troubleshooting_intro.adoc[Troubleshooting documentation].
