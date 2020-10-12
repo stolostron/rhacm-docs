@@ -146,19 +146,102 @@ Replace the `spec: graphDataImage` value with the path to your graph data init c
 . From the hub cluster CLI, enter the `oc get pods` command to view the status of the instance creation. It might take a while, but the process is complete when the result of the command shows that the instance and the operator are running.
 
 [#deploy-a-policy-to-override-the-default-registry]
-== Deploy a policy to override the default registry
+== Deploy a policy to override the default registry (optional)
+
+*Note:* The steps in this section only apply if you have mirrored your releases into your mirrored registry. 
 
 {ocp-short} has a default image registry value that specifies where it finds the upgrade packages. In a disconnected environment, you can create a policy to replace that value with the path to your local image registry where you mirrored your release images. 
 
-For these steps, the policy is named _imageContentSourcePolicy_.  Complete the following steps to create the policy:
+For these steps, the policy is named _ImageContentSourcePolicy_. Complete the following steps to create the policy:
+
+. Log in to the {ocp-short} environment of your hub cluster.
+. In the {ocp-short} navigation, select *Administration* > *Custom Resource Definitions*.
+. Select the _Instances_ tab.
+. Select the name of the _ImageContentSourcePolicy_ that you created when you set up your disconnected OLM to view the contents.
+. Select the _YAML_ tab to view the content in `YAML` format. 
+. Copy the entire contents of the ImageContentSourcePolicy.
 
 . From the {product-title-short} console, select *Govern risk* > *Create policy*.
 . Set the `YAML` switch to _On_ to view the YAML version of the policy.
-. Find the _Setup_ section and locate the _Custom policy template_.
-. Find the `imageContentSourcePolicy.yaml` file on the {product-title-short} hub cluster. This file was created when the restricted OLM was configured.
-. Copy the contents of the `imageContentSourcePolicy.yaml` into the _Custom Resource_ section of the _Custom policy template_.
-.. Replace *Unique name* with a name for your policy.
-.. Replace *Managed clusters* with the name of the managed cluster that you are updating in the _Cluster binding_ field. *Tip:* You can find this name by viewing the _Cluster details_ page in the {product-title-short} console. 
+. Delete all of the content in the `YAML` code. 
+. Paste the following `YAML` content into the window to create a custom policy:
++
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-pod
+  namespace: default
+  annotations:
+    policy.open-cluster-management.io/standards: 
+    policy.open-cluster-management.io/categories: 
+    policy.open-cluster-management.io/controls: 
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-pod-sample-nginx-pod
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Pod
+                metadata:
+                  name: sample-nginx-pod
+                  namespace: default
+                status:
+                  phase: Running
+          remediationAction: inform
+          severity: low
+  remediationAction: enforce
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-pod
+  namespace: default
+placementRef:
+  name: placement-policy-pod
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-pod
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-pod
+  namespace: default
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      []  # selects all clusters if not specified
+----
+
+. Add content that is similar to the following content to the custom policy to add the settings for your ImageContentSourcePolicy: 
++
+----
+apiVersion: operator.openshift.io/v1alpha1
+kind: ImageContentSourcePolicy
+metadata:
+  name: ImageContentSourcePolicy
+spec:
+  repositoryDigestMirrors:
+  - mirrors:
+    - <path-to-local-mirror>
+----
++
+* Replace _path-to-local-mirror_ with the path to your local mirror repository.
+
 . Select the box for *Enforce if supported*.
 . Select *Create* to create the policy. 
 
@@ -170,9 +253,10 @@ Push the _Catalogsource_ policy to the managed cluster to change the default loc
 . In the {product-title-short} console, select *Automate infrastructure* > *Clusters*.
 . Find the managed cluster to receive the policy in the list of clusters.
 . Note the value of the `name` label for the managed cluster. The label format is `name=managed-cluster-name`. This value is used when pushing the policy.
-. In the {product-title-short} console menu, select *Govern risk* > *Create a policy*.
+. In the {product-title-short} console menu, select *Govern risk* > *Create policy*.
 . Set the `YAML` switch to _On_ to view the YAML version of the policy.
-. Find the _Custom Resource_ section of the custom policy template in the setup section. Add the following content to the _setup_ section of the custom policy template:
+. Delete all of the content in the `YAML` code. 
+. Paste the following `YAML` content into the window to create a custom policy:
 +
 ----
 apiVersion: config.openshift.io/vi
@@ -183,7 +267,7 @@ spec:
  disableAllDefaultSources: true
 ----
 +
-. Add the following content into the _Custom Resource_ section:
+. Add the following content:
 +
 ----
 apiVersion: operators.coreos.com/v1alpha1
@@ -224,9 +308,7 @@ items:
   spec:
     channel: stable-4.4
     upstream: https://api.openshift.com/api/upgrades_info/v1/graph
-----
-+
-. Replace the value of _items: spec: upstream_ with the path to the local registry where your upgrade images are stored. See link:../security/create_policy.adoc#managing-security-policies[Managing security policies] for information about creating a policy. 
+---- 
  
 . From the hub cluster, identify the route URL to the {cincinnati-short} operand by entering the following command: `oc get routes`. 
 +
@@ -234,8 +316,70 @@ items:
 
 . In the hub cluster {product-title-short} console menu, select *Govern risk* > *Create a policy*.
 . Set the `YAML` switch to _On_ to view the YAML version of the policy.
-. Find the _Custom Resource_ section of the custom policy template in the setup section. 
-. Add the following content to the _custom policy template_ in the _setup_ section:
+. Delete all of the content in the `YAML` code. 
+. Paste the following `YAML` content into the window to create a custom policy:
++
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-pod
+  namespace: default
+  annotations:
+    policy.open-cluster-management.io/standards: 
+    policy.open-cluster-management.io/categories: 
+    policy.open-cluster-management.io/controls: 
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-pod-sample-nginx-pod
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Pod
+                metadata:
+                  name: sample-nginx-pod
+                  namespace: default
+                status:
+                  phase: Running
+          remediationAction: inform
+          severity: low
+  remediationAction: enforce
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-pod
+  namespace: default
+placementRef:
+  name: placement-policy-pod
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-pod
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-pod
+  namespace: default
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      []  # selects all clusters if not specified
+----
+. Add the following content to the `policy`:`spec` in the _policy_ section:
 +
 ----
 apiVersion: config.openshift.io/v1
