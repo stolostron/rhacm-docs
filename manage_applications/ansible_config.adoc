@@ -1,7 +1,120 @@
 [#setting-up-ansible]
-== Setting up Ansible Tower tasks
+== Setting up AnsibleTower tasks (Technology preview)
 
-Text here and text there
+{product-title-short} is integrated with AnsibleTower automation so that you can create pre and posthook Ansiblejob instances for application management. With AnsibleToer jobs, you can automate developer tasks, such as _____
 
 *Required access:* Cluster administrator
 
+[#prerequisites-for-ansible-integration]
+== Prerequisites 
+
+* Kubernetes or {ocp-short} version 4.5, or later.
+* You must have 
+
+See link:https://docs.ansible.com/ansible-tower/[Red Hat AnsibleTower documentation] for more details about AnsibleTower jobs.
+
+[#ansible-integration]
+== Ansibleintegration
+
+You can integrate Ansiblejobs into Git subscriptions. For instance, for a database front-end and back-end application, the database is required to be installed on Ansibletower with an Anbile job, and the application is installed by a Git subscription. The database is installed before you deploy the front-end and back-end application with the subscription.
+
+The application subscription operator is enhanced to define two subfolders: prehook and posthook. Both folders are in the Git repo resource root path and contain all prehook and posthook Anible jobs, respectively.
+
+When the git subscription is created, all of the pre and post Ansiblejob resources are parsed and stored in memory as an object. The application subscription controller decides when to create the pre and post Ansiblejob instances.
+
+[#install-ansible-operator]
+== Install Ansibleoperator
+
+To get started, you need to install the AnsibleAutomation Platform Resource Operator. 
+
+1. Log in to your {ocp-short} cluster.
+2. Navigate to OperatorHub.
+3. Search and install the AnsibleAutomation Platform Resource Operator.
+
+In general, when using the AnsibleJob to launch Tower Jobs. It's recommended that the Tower Job to be idempotent. The template must have PROMPT ON LAUNCH checkbox checked for both INVENTORY and EXTRA VARIABLES see https://docs.ansible.com/ansible-tower/latest/html/userguide/job_templates.html[]
+
+AnsibleJob KIND CRD and yaml sample, spec, status, statusAnsibleJob
+how the Ansiblejob operator works to launch a Ansiblejob to Tower and get the job status updated.
+
+tie Ansiblejobs into the lifecycle of Git Subscriptions
+
+[#ansible-operator-components]
+== Ansibleoperator components
+
+When you create a subscription CR, the Git-branch/Git-path points to a Git repo root location. In the Git root location, see the two subfolders that store multiple `yaml` files, each one contains multiple `AnsibleJob` `Kind` resources.
+
+[#prehook]
+=== Prehook
+
+The application subscription controller searches all the `AnsibleJob` `Kind` CRs in the prehook folder as the prehook Ansiblejob objects, then generates a new prehook Ansiblejob. The new instance name is the prehook Ansiblejob object name and a random suffix string.
+
+The application subscription controller requeues the reconcile request in a 1 minute loop, where it checks all the prehook Ansiblejob `status.anisibleJob` results. When the prehook anisibleJob results are found, the application subscription moves forward to deploy the main subscription.
+
+If the `anisibleJobResult` is not found, you must requeue the request.
+
+[#posthook]
+=== Posthook
+
+When the app subscription status is updated, if the subscription status is subscribed or propagated to all target cluster status is subscribed, the app subscription controller searches all the AnsibleJob Kind CRs in the posthook folder as the posthook Ansiblejob objects. Then it generates new posthook Ansiblejob instances based on the prehook Ansiblejob objects. The new instance name is the posthook Ansiblejob object name + a random suffix string.
+
+[#ansible-placement-rule]
+=== Ansibleplacement rules
+
+If there is a valid prehook AnsibleJob, the subscription launches the prehook AnsibleJob regardless of placementrule's decision. For example, it's possible to have a prehook AnsibleJob with a failed to propagate placementrule subscription. Whenever the placementrule decision changes, there will always be a new prehook and posthook AnsibleJob created.
+
+
+[#ansible-configuration]
+== Ansibleconfiguration
+
+With the following tasks, you can configure Ansibletower tasks.
+
+[#ansible-secrets]
+=== Ansiblesecrets
+
+You can create an Ansibletower secret CR in the same subscription namespace. The Ansibletower secret is limited to be in the same subscription namespace.
+
+Create secrets from the console or the terminal by filling in the secret name to the main subscription `spec.hooksecretref`.
+
+When the app subscription controller creates prehook and posthook Ansiblejobs, the secret is sent to the Ansiblejob CR `spec.tower_auth_secret` and the Ansiblejob is able to access the Ansibletower.
+
+[#ansible-secret-reconciliation]
+== Set secret reconciliation
+
+For a main-sub subscription with prehook and posthook Ansiblejobs, the main-sub subscription should be reconciled after all prehook and posthook Ansiblejobs or main subscription are updated in the Git repo. 
+
+1. Prehook Ansiblejobs and the main subscription continuously reconcile and relaunch a new pre-Ansiblejob instance.
+
+2. After the pre-Ansiblejob is done, re-run the main subscription. If there is any spec change in the main subscription, re-deploy the subscription. 
+
+4. The main subscription status should be updated to align with the redeployment procedure. 
+
+5. Reset the hub subscription status to `nil` and it will be refreshed along with the subscription deployment on target clusters. 
+
+When the deployment is finished on the target cluster, the subscription status on the target cluster is updated to `"subscribed"` or `“failed”`, and will be synced up to the hub cluster subscription status.
+
+6. After the main subscription is done, relaunch a new post-Ansiblejob instance
+
+7. Verify that the DONE subscription is updated:
+
+- subscription.status == “subscribed”
+- subscription.status == “propagated” and all of the target clusters are “subscribed”
+
+[#check-ansible-job]
+== Check Ansiblejob status
+
+When a AnsibleJob CR is created, A Kubernetes job CR is created to launch an Ansibletower job by communicating to the target Ansible Tower. When the job is complete, the final status for the job is returned to Ansible Job statusAnsibleJob. 
+
+*Note:* the Ansible Job status.conditions is reserved by the Ansible Job operator for storing the Ansible results. It is not the Ansiblejob status. The subscription controller checks the Ansible job status by its AnsibleJob.status.ansibleJobResult instead of AnsibleJob.status.
+
+You need to save the most recent Ansiblejobs and Ansiblejobs history in the main subscription status.
+
+As previously mentioned in the prehook and posthook Ansiblejob workflow, whenever the main subscription is updated in Git repo, a new prehook and posthook Ansiblejob instance is created. As a result, one main subscription could link to multiple Ansiblejob instances. 
+
+Four fields are defined in subscription.status.ansibleJobs:
+
+- lastPrehookJobs: The most recent prehook Ansiblejobs
+- prehookJobsHistory: All the prehook Ansiblejobs history
+- lastPosthookJobs: The most recent posthook Ansiblejobs
+- posthookJobsHistory: All the posthook Ansiblejobs history
+
+//Left: Review, revisions, what is next, what can the use do, why, add yaml
