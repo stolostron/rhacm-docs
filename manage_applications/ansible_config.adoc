@@ -1,19 +1,19 @@
 [#setting-up-ansible]
 == Setting up Ansible Tower tasks (Technology preview)
 
-{product-title-short} is integrated with Ansible Tower automation so that you can create prehook and posthook AnsibleJob instances for Git subscription application management. With Ansible Tower jobs, you can automate tasks and integrate with external services, such as Slack and pager duty services. Your Git repo resource root path will contain `prehook` and `posthook` directories for Ansible Tower jobs that run as part of deploying the app, updating the app or removing the app from a cluster.
+{product-title-short} is integrated with Ansible Tower automation so that you can create prehook and posthook AnsibleJob instances for Git subscription application management. With Ansible Tower jobs, you can automate tasks and integrate with external services, such as Slack and pager duty services. Your Git repository resource root path will contain `prehook` and `posthook` directories for Ansible Tower jobs that run as part of deploying the app, updating the app, or removing the app from a cluster.
 
 *Required access:* Cluster administrator
 
 [#prerequisites-for-ansible-integration]
 == Prerequisites 
 
-* You must have Ansible Tower version 3.7.3 installed. The recommended version is the latest version. See link:https://docs.ansible.com/ansible-tower/[Red Hat AnsibleTower documentation] for more details about Ansible Tower.
+* You must have Ansible Tower version 3.7.3 or a later version installed. It is best practice to install the latest supported version. See link:https://docs.ansible.com/ansible-tower/[Red Hat AnsibleTower documentation] for more details about Ansible Tower.
 
 [#ansible-integration]
 == Ansible integration
 
-You can integrate Ansible Tower jobs into Git subscriptions. For instance, for a database front-end and back-end application, the database is required to be instantiated using Ansible Tower with an Ansible Job, and the application is installed by a Git subscription. The database is instantiated before you deploy the front-end and back-end application with the subscription.
+You can integrate Ansible Tower jobs into Git subscriptions. For instance, for a database front-end and back-end application, the database is required to be instantiated using Ansible Tower with an Ansible Job, and the application is installed by a Git subscription. The database is instantiated _before you deploy the front-end and back-end application with the subscription.
 
 The application subscription operator is enhanced to define two subfolders: `prehook` and `posthook`. Both folders are in the Git repo resource root path and contain all prehook and posthook Anible jobs, respectively.
 
@@ -22,60 +22,66 @@ When the Git subscription is created, all of the pre and post AnsibleJob resourc
 [#install-ansible-operator]
 == Install Ansible operator
 
-To get started, you need to install the Ansible Automation Platform Resource Operator to connect Ansible jobs to the lifecycle of Git subscriptions. In general, when using the AnsibleJob to launch Ansible Tower jobs, the Ansible Tower job template is recommended to be idempotent when ran. The template must have `PROMPT ON LAUNCH` checked for both INVENTORY and EXTRA VARIABLES. See link:https://docs.ansible.com/ansible-tower/latest/html/userguide/job_templates.html[Job templates] for more information.
+To get started, you need to install the Ansible Automation Platform Resource Operator to connect Ansible jobs to the lifecycle of Git subscriptions. For best practice when using the AnsibleJob to launch Ansible Tower jobs, the Ansible Tower job template should be idempotent when ran. 
 
-. Log in to your {ocp-short} cluster.
-. Navigate to OperatorHub.
-. Search and install the Ansible Automation Platform Resource Operator.
+Check `PROMPT ON LAUNCH` on the template for both INVENTORY and EXTRA VARIABLES. See link:https://docs.ansible.com/ansible-tower/latest/html/userguide/job_templates.html[Job templates] for more information.
+
+To install, complete the following procedure.
+
+. Log in to your {ocp-short} cluster console.
+. Click *OperatorHub* in the console navigation.
+. Search for and install the _Ansible Automation Platform Resource Operator_.
 
 [#ansible-operator-components]
 == Ansible operator components
 
-When you create a subscription CR, the Git-branch/Git-path points to a Git repo root location. In the Git root location, see the two subfolders `prehook` and `posthook`. Each one should contain at least one `AnsibleJob` `Kind` resources.
+When you create a subscription CR, the Git-branch and Git-path points to a Git repository root location. In the Git root location, the two subfolders `prehook` and `posthook` should contain at least one `AnsibleJob` `Kind` resource.
 
 [#prehook]
 === Prehook
 
-The application subscription controller searches all the `AnsibleJob` `Kind` CRs in the prehook folder as the prehook AnsibleJob objects, then generates a new prehook AnsibleJob instance. The new instance name is the prehook AnsibleJob object name and a random suffix string.
+The application subscription controller searches all the `AnsibleJob` `Kind` CRs in the prehook folder as the prehook AnsibleJob objects, then generates a new prehook AnsibleJob instance. The new instance name is the prehook AnsibleJob object name and a random suffix string. *(DO we want to add example?)*
 
-The application subscription controller requeues the reconcile request in a 1 minute loop, where it checks all the prehook AnsibleJob `status.anisibleJobResult`. When the prehook `status.ansibleJobResult.status` is `successful` and the application subscription moves forward to deploy the main subscription.
+The application subscription controller queues the reconcile request again in a 1 minute loop, where it checks all the prehook AnsibleJob `status.anisibleJobResult`. When the prehook `status.ansibleJobResult.status` is `successful` the application subscription continues to deploy the main subscription.
 
 [#posthook]
 === Posthook
 
-When the app subscription status is updated, if the subscription status is subscribed or propagated to all target cluster status is subscribed, the app subscription controller searches all the AnsibleJob Kind CRs in the posthook folder as the posthook AnsibleJob objects. Then it generates new posthook AnsibleJob instances. The new instance name is the posthook AnsibleJob object name + a random suffix string.
+When the app subscription status is updated, if the subscription status is subscribed or propagated to all target clusters in subscribed status, the app subscription controller searches all the `AnsibleJob` `Kind` CRs in the posthook folder as the posthook AnsibleJob objects. Then, it generates new posthook `AnsibleJob` instances. The new instance name is the posthook `AnsibleJob` object name and a random suffix string. *(DO we want to add example?)*
 
 [#ansible-placement-rule]
 === Ansible placement rules
 
-If there is a valid prehook AnsibleJob, the subscription launches the prehook AnsibleJob regardless of placementrule's decision. For example, it's possible to have a prehook AnsibleJob with a failed to propagate placementrule subscription. Whenever the placementrule decision changes, there will always be a new prehook and posthook AnsibleJob instances created.
+If there is a valid prehook AnsibleJob, the subscription launches the prehook AnsibleJob regardless of the decision from the placementrule. For example, you can have a prehook AnsibleJob that failed to propagate a placement rule subscription. Whenever the placement rule decision changes, new prehook and posthook AnsibleJob instances created are created.
 
 
 [#ansible-configuration]
 == Ansible configuration
 
-With the following tasks, you can configure Ansible Tower configurations.
+With the following tasks, you can configure Ansible Tower configurations:
 
 [#ansible-secrets]
 === Ansible secrets
 
-You must create an Ansible Tower secret CR in the same subscription namespace. The Ansible Tower secret is limited to be in the same subscription namespace.
+You must create an Ansible Tower secret CR in the same subscription namespace. The Ansible Tower secret is limited to the same subscription namespace.
 
-To create the secret from the console by filling in the "Ansible Tower secret name" section. To create the secret using terminal, edit and apply the following `yaml`:
+Create the secret from the console by filling in the `Ansible Tower secret name` section. To create the secret using terminal, edit and apply the following `yaml`:
 
-```
+*Notes:* The `namespace` is the same namspace as the subscription namespace. The `string data` `token` and `host` are from the Ansible Tower.
+
+----
 apiVersion: v1
 kind: Secret
 metadata:
   name: toweraccess
-  namespace: _the_same_namespace_as_the_subscription_
+  namespace: same-as-subscription
 type: Opaque
 stringData:
-  token: _ansible_tower_api_token_here_
-  host: https://_ansible_tower_host_url_here_
-```
+  token: ansible-tower-api-token
+  host: https://ansible-tower-host-url
+----
 
-When the app subscription controller creates prehook and posthook AnsibleJobs, if the secret from subscription `spec.hooksecretref` is available then it is sent to the AnsibleJob CR `spec.tower_auth_secret` and the AnsibleJob is able to access the Ansible Tower.
+When the app subscription controller creates prehook and posthook AnsibleJobs, if the secret from subscription `spec.hooksecretref` is available, then it is sent to the AnsibleJob CR `spec.tower_auth_secret` and the AnsibleJob is able to access the Ansible Tower.
 
 [#ansible-secret-reconciliation]
 == Set secret reconciliation
