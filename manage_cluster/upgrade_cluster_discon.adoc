@@ -106,7 +106,7 @@ Replace _host/user/cincinnati-graph-data-container_ with the path to your local 
 
 To deploy the operator for {cincinnati-short} in your {ocp-short} environment, complete the following steps:
 
-. Access the {ocp-short} operator hub. 
+. On the hub cluster, access the {ocp-short} operator hub. 
 . Deploy the operator by selecting `{cincinnati} Operator`. Update the default values, if necessary. The deployment of the operator creates a new project named `openshift-cincinnati`.
 . Wait for the installation of the operator to finish. 
 +
@@ -117,7 +117,7 @@ To deploy the operator for {cincinnati-short} in your {ocp-short} environment, c
 
 When you finish deploying the {cincinnati-short} instance on your hub cluster, this instance is located where the images for the cluster upgrades are mirrored and made available to the disconnected managed cluster. Complete the following steps to deploy the instance:
 
-. Create a namespace for your {cincinnati-short} instance:
+. If you do not want to use the default namespace of the operator, which is `openshift-cincinnati`, create a namespace for your {cincinnati-short} instance:
 .. In the {ocp-short} hub cluster console navigation menu, select *Administration* > *Namespaces*.
 .. Select *Create Namespace*.
 .. Add the name of your namespace, and any other information for your namespace.
@@ -139,9 +139,9 @@ spec:
   graphDataImage: 'host/user/cincinnati-graph-data-container'
 ----
 +
-Replace the `spec: registry` value with the path to your local disconnected registry for your images that you set up in the prerequisites.
+Replace the `spec.registry` value with the path to your local disconnected registry for your images that you set up in the prerequisites.
 +
-Replace the `spec: graphDataImage` value with the path to your graph data init container. *Tip:* This is the same value that you used when you ran the `podman push` command to push your graph data init container.
+Replace the `spec.graphDataImage` value with the path to your graph data init container. *Tip:* This is the same value that you used when you ran the `podman push` command to push your graph data init container.
 . Select *Create* to create the instance. 
 . From the hub cluster CLI, enter the `oc get pods` command to view the status of the instance creation. It might take a while, but the process is complete when the result of the command shows that the instance and the operator are running.
 
@@ -227,7 +227,7 @@ spec:
       []  # selects all clusters if not specified
 ----
 
-. Add content that is similar to the following content to the custom policy to add the settings for your ImageContentSourcePolicy: 
+. Replace the content inside the `objectDefinition` section of the template with content that is similar to the following content to add the settings for your ImageContentSourcePolicy: 
 +
 ----
 apiVersion: operator.openshift.io/v1alpha1
@@ -238,9 +238,11 @@ spec:
   repositoryDigestMirrors:
   - mirrors:
     - <path-to-local-mirror>
+    source: registry.redhat.io
 ----
 +
 * Replace _path-to-local-mirror_ with the path to your local mirror repository.
+* Tip: You can find your path to your local mirror by entering the `oc adm release mirror` command.
 
 . Select the box for *Enforce if supported*.
 . Select *Create* to create the policy. 
@@ -257,6 +259,70 @@ Push the _Catalogsource_ policy to the managed cluster to change the default loc
 . Set the `YAML` switch to _On_ to view the YAML version of the policy.
 . Delete all of the content in the `YAML` code. 
 . Paste the following `YAML` content into the window to create a custom policy:
+. Paste the following `YAML` content into the window to create a custom policy:
++
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-pod
+  namespace: default
+  annotations:
+    policy.open-cluster-management.io/standards: 
+    policy.open-cluster-management.io/categories: 
+    policy.open-cluster-management.io/controls: 
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-pod-sample-nginx-pod
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Pod
+                metadata:
+                  name: sample-nginx-pod
+                  namespace: default
+                status:
+                  phase: Running
+          remediationAction: inform
+          severity: low
+  remediationAction: enforce
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-pod
+  namespace: default
+placementRef:
+  name: placement-policy-pod
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-pod
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-pod
+  namespace: default
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      []  # selects all clusters if not specified
+----
+
+. Add the following content to the policy:
 +
 ----
 apiVersion: config.openshift.io/vi
@@ -379,7 +445,7 @@ spec:
     matchExpressions:
       []  # selects all clusters if not specified
 ----
-. Add the following content to the `policy`:`spec` in the _policy_ section:
+. Add the following content to `policy.spec` in the _policy_ section:
 +
 ----
 apiVersion: config.openshift.io/v1
@@ -392,7 +458,15 @@ apiVersion: config.openshift.io/v1
     upstream: https://example-cincinnati-policy-engine-uri/api/upgrades_info/v1/graph
 ----
 +
-Replace the value of _spec: upstream:_ with the path to your hub cluster {cincinnati-short} operand.
+Replace the value of _spec.upstream_ with the path to your hub cluster {cincinnati-short} operand.
++
+*Tip:* You can complete the following steps to determine the path to the operand:
++
+ .. Run the `oc get get routes -A` command on the hub cluster.
+ .. Find the route to `cincinnati`.
+ +
+ The path to the operand is the value in the `HOST/PORT` field.
+
 . In the managed cluster CLI, confirm that the upstream parameter in the `ClusterVersion` is updated with the local hub cluster {cincinnati-short} URL by entering: 
 +
 ----
