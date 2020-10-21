@@ -5,80 +5,51 @@ Various certificates are created and used throughout {product-title}.
 
 You can bring your own certificates. 
 You must create a Kubernetes TLS Secret for your certificate.
-After you create your certificates, you can replace certain certificates that are created by the {product-title} installer.
+After you create your certificates, you can replace certain certificates that are created by the {product-title-short} installer.
 
 *Required access*: Cluster administrator or team administrator.
 
-*Note:* Replacing certificates is supported only on native {product-title} installations.
+*Note:* Replacing certificates is supported only on native {product-title-short} installations.
 
-All certificates required by services that run on {product-title} are created during the installation of {product-title}.
-Certificates are created and managed by the {product-title} Certificate manager (`cert-manager`) service. 
+All certificates required by services that run on {product-title-short} are created during the installation of {product-title-short}.
+Certificates are created and managed by the {product-title-short} Certificate manager (`cert-manager`) service. The {product-title-short} Root Certificate Authority (CA) certificate is stored within the Kubernetes Secret `multicloud-ca-cert` in the hub cluster namespace.
+The certificate can be imported into your client truststores to access {product-title-short} Platform APIs. 
 
 See the following topics to replace certificates:
 
 * xref:../security/cert_root_ca.adoc#replacing-the-root-ca-certificate[Replacing the root CA certificate]
 * xref:../security/cert_mgmt_ingress.adoc#replacing-the-management-ingress-certificates[Replacing the management ingress certificates]
 
-[#certificates-2]
-== Certificates
+[#list-certificates]
+== List certificates
 
-The {product-title} Root CA Certificate is stored within the Kubernetes Secret `multicloud-ca-cert` in the hub cluster namespace.
-The certificate can be imported into your client truststores to access {product-title} Platform APIs. 
+You can view a list of certificates that use `cert-manager` internally by running the following command:
 
-[#created-and-managed-by-red-hat-advanced-cluster-management-for-kubernetes-certificate-manager-cert-manager]
-=== Created and managed by Red Hat Advanced Cluster Management for Kubernetes Certificate manager (cert-manager)
+----
+oc get certificates.certmanager.k8s.io -n open-cluster-management
+----
 
-View the following table of the internal services that use `cert-manager` to create and manage their certificates:
+*Note*: If observability is enabled, there are additional namespaces where certificates are created.
 
-.Internal services for certificate manager
-|===
-| Certificate Name | Issuer Name | Secret Name | Usage
 
-| `console-chart-ef680-ca-cert`
-| `multicluster-hub-mcm-server-ca-issuer`
-| `console-chart-ef680-uiapi-secrets`
-| {product-title} Console CA cert
+[#refresh-a-certificate]
+== Refresh a certificate 
 
-| `grc-59010-ca-cert`
-| `multicluster-hub-mcm-server-ca-issuer`
-| `grc-59010-grc-secrets`
-| {product-title} Govern and risk CA cert
+You can refresh a certificate by running the command in the <<list-certificates>> section. When you identify the certificate that you need to refresh, delete the secret that is associated with the certificate. For example, you can delete a secret by running the following command:
 
-| `kui-proxy`
-| `multicloud-ca-issuer`
-| `kui-proxy-secret`
-| Visual Web Terminal
+----
+oc delete secret grc-0c925-grc-secrets -n open-cluster-management
+----
 
-| `management-ingress-a0ae5-cert`
-| `multicloud-ca-issuer`
-| `management-ingress-c38ac-tls-secret`
-| Ingress
+[#refresh-certificates-ca]
+== Refresh certificates for {product-title}
 
-| `multicloud-ca-cert`
-| `cert-manager-rhacm-selfsign`
-| `multicloud-ca-cert`
-| {product-title} root CA
+You can refresh all certificates that are issued by the {product-title-short} CA. During the refresh, the Kubernetes secret that is associated with each `cert-manager` certificate is deleted. The service restarts automatically to use the certifcate. Run the following command:
 
-| `search-prod-c62a6-aggregator-ca-cert`
-| `multicloud-ca-issuer`
-| `search-prod-95fcc-search-secrets`
-| Search
+----
+oc delete secret -n open-cluster-management $(oc get certificates.certmanager.k8s.io -n open-cluster-management -o wide | grep multicloud-ca-issuer | awk '{print $3}')
+----
 
-| `search-prod-c62a6-redis-ca-cert`
-| `multicloud-ca-issuer`
-| `search-prod-95fcc-redisgraph-secrets`
-| Search
 
-| `search-prod-c62a6-search-ca-cert`
-| `multicloud-ca-issuer`
-| `search-prod-95fcc-search-api-secrets`
-| Search
-
-| `topology-276c4-ca-cert`
-| `multicluster-hub-mcm-server-ca-issuer`
-| `topology-b24e0-topology-secrets`
-| Topology
-|===
-
-The OpenShift Container Platform certificate is not included in the Red Hat Advanced Cluster Management for Kuberentes management ingress. For more information, see the link:../release_notes/known_issues.adoc#security-known-issues[Security known issues]. Use the certificate policy controller to create and manage certificate policies on managed clusters. See xref:../security/policy_controllers.adoc#policy-controllers[Policy controllers] to learn more about controllers.
+The {ocp} certificate is not included in the {product-title} management ingress. For more information, see the link:../release_notes/known_issues.adoc#security-known-issues[Security known issues]. Use the certificate policy controller to create and manage certificate policies on managed clusters. See xref:../security/policy_controllers.adoc#policy-controllers[Policy controllers] to learn more about controllers.
 Return to the xref:../security/security_intro.adoc#security[Security] page for more information.
