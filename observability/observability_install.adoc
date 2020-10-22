@@ -7,8 +7,8 @@ Monitor the health of your managed clusters with the observability service (`mul
 
 *Prerequisites*:
 
-- You must have {product-title} hub cluster installed as a managed cluster to use the observability feature.  
-- You must install Grafana version 6.0 or later. For more information, see https://grafana.com/docs/grafana/latest/installation/[Install Grafana].
+- You must install {ocp}. For more information, see https://docs.openshift.com/container-platform/4.5/architecture/architecture-installation.html[{ocp-short} installation overview]. 
+- You must install {product-title}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.  
 - You must have data storage for the time series data. Configure your object store to create a storage solution. For example, Thanos can be used as a storage solution. Your object storage might resemble the following information:
 +
 ----
@@ -21,14 +21,12 @@ config:
   secret_key: SECRET_KEY
 ----
 +
-For more information, see  _Object Storage_ in the https://thanos.io/tip/thanos/storage.md/#configuration[Thanos documentation]. 
-- {ocp} must be installed. For more information, see https://docs.openshift.com/container-platform/4.5/architecture/architecture-installation.html[{ocp-short} installation overview].
-
+For more information, see  _Object Storage_ in the https://thanos.io/tip/thanos/storage.md/#configuration[Thanos documentation].
 
 [#enablement-for-observability]
 == Enablement for observability
 
-Enable the observability service by creating a `multicluster-observability` CustomResourceDefinition (CRD). Complete the following steps to enable the observability service: 
+Enable the observability service by creating a MultiClusterObservability CustomResource (CR) instance. Complete the following steps to enable the observability service: 
 
 . Log in to your {product-title-short} hub cluster. 
 . Verify that the observaility components are installed:
@@ -37,24 +35,18 @@ Enable the observability service by creating a `multicluster-observability` Cust
 ----
 kubectl get pods -n open-cluster-management|grep observability
 ----
-.. For the `observability-addons` run the following command:
-+
-----
- kubectl get crd |grep obser
-----
 
 . Create a namespace for the observability service with the following commad:
-
 +
 ----
 oc create-namespace open-cluster-management-observability
 ----
 
-. Generate a pull-secret for the `observability` namespace by running the following command:
-//--export flag is expected to be deprecated, command might need to be updated
+. Generate a pull-secret for the `open-cluster-management-observability` namespace by running the following command:
+
 +
 ----
-oc get secret multiclusterhub-operator-pull-secret -n open-cluster-management --export -o yaml |   kubectl apply --namespace=open-cluster-management-observability -f -
+oc get secret multiclusterhub-operator-pull-secret -n open-cluster-management --export -o yaml |  kubectl apply --namespace=open-cluster-management-observability -f -
 ----
 
 . Create a secret for your object storage. Your secret must contain the credentials to your storage solution. For example, if you are using Thanos, run the following command:
@@ -84,14 +76,9 @@ stringData:
 
 ----
 
-. Create a `MultiClusterObservability` CRD by running the following command:
-
+. Create a `MultiClusterObservability` resource for your managed cluster by running the following command:
 +
-----
-kubectl create -f mco_cr.yaml
-----
-+
-Your `MultiClusterObservability` CRD might resemble the following file:
+Your `MultiClusterObservability` resource might resemble the following file:
 +
 ----
 apiVersion: observability.open-cluster-management.io/v1beta1
@@ -122,20 +109,20 @@ spec:
 oc apply -f multiclusterobservability_cr.yaml
 ----
 
-After you install observability, all of the pods in your `open-cluster-management-observability` namespace for your object storage, Grafana, and AlertManager are automatically installed. All managed clusters that are connected to {product-title-short} can send metrics to the cluster.
+Based on the previous resource example, all of the pods in your `open-cluster-management-observability` namespace for Thanos, Grafana, and AlertManager are automatically installed after you install observability.
 
 == Uninstall observability
 
 Uninstall the observability service by completing the following steps:
 
 . Log in to your hub cluster.
-. Delete the `multicluster-observability-operator` resource instance with the following command:
+. Delete the `MultiClusterObservability` resource with the following command:
 +
 ----
-kubectl delete multicluster-observability-operator observability
+kubectl delete multicluster-observability-operator
 ----
 
-When you delete the resource, the `multicluster-observability-operator` that run on {product-title-short} hub cluster, and the `multicluster-observability-addon` that run on all managed clusters are removed. 
+When you delete the resource, the pods in the `open-cluster-management-observability` namespace on {product-title-short} hub cluster, and the pods in `open-cluster-management-addon-observability` namespace on all managed clusters are removed. 
 
 *Important*:
 
