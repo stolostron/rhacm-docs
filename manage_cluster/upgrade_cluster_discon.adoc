@@ -24,46 +24,43 @@ You must have the following prerequisites before you can use {cincinnati-short} 
 +
 *Note:* The image for the current version of the cluster that you upgrade must always be available as one of the mirrored images. If an upgrade fails, the cluster reverts back to the version of the cluster at the time that the upgrade was attempted.
 
-[#configure-certificate-for-the-mirrored-registry]
-== Configure certificate for the mirrored registry 
+[#prepare-your-disconnected-mirror-registry]
+== Prepare your disconnected mirror registry
 
-If you are using a secure external container registry to store your mirrored {ocp-short} release images, {cincinnati-short} requires access to this registry to build
-an upgrade graph. Complete the following steps to configure your CA certificate to work with the {cincinnati-short} pod:
+You must mirror both the image that you want to upgrade to and the current image that you are upgrading from to your local mirror registry. Complete the following steps to mirror the images:
 
-. Find the {ocp-short} external registry API, which is located in `image.config.openshift.io`. This is where the external registry CA certificate is stored.  
-+
-See https://docs.openshift.com/container-platform/4.3/registry/configuring-registry-operator.html#images-configuration-cas_configuring-registry-operator[Image Registry Operator in OpenShift Container Platform] in the {ocp-short} documentation for more information.
-
-. Create a ConfigMap in the `openshift-config` namespace. 
-
-. Add your CA certificate under the key `cincinnati-registry`. {cincinnati-short} uses this setting to locate your certificate:
+. Create a script file that contains content that resembles the following example:
 +
 ----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: trusted-ca
-data:
-  cincinnati-registry: |
-    -----BEGIN CERTIFICATE-----
-    ...
-    -----END CERTIFICATE-----
-----
+UPSTREAM_REGISTRY=quay.io
+PRODUCT_REPO=openshift-release-dev
+RELEASE_NAME=ocp-release
+OCP_RELEASE=4.5.2-x86_64
+LOCAL_REGISTRY=$(hostname):5000
+LOCAL_SECRET_JSON=/path/to/pull/secret
 
-. Edit the `cluster` resource in the `image.config.openshift.io` API to set the `additionalTrustedCA` field to the name of the ConfigMap that you created.
-+
-----
-$ oc edit image.config.openshift.io cluster
-spec:
-  additionalTrustedCA:
-    name: trusted-ca
+oc adm -a ${LOCAL_SECRET_JSON} release mirror \
+--from=${UPSTREAM_REGISTRY}/${PRODUCT_REPO}/${RELEASE_NAME}:${OCP_RELEASE} \
+--to=${LOCAL_REGISTRY}/ocp4 \
+--to-release-image=${LOCAL_REGISTRY}/ocp4/release:${OCP_RELEASE}
 ----
 +
-Replace _trusted-ca_ with the path to your new ConfigMap.
+Replace `/path/to/pull/secret` with the path to your {ocp-short} pull secret.
 
-The {cincinnati-short} Operator watches the `image.config.openshift.io` API and the
-ConfigMap you created in the `openshift-config` namespace for changes, then
-restart the deployment if the CA cert has changed.
+. Run the script that you created to mirror the images, configure settings, and separate the release images from the release content.
+
+*Tip:* You can use the information in this script when you create your `ImageContentSourcePolicy`.
+
+[#deploy-the-operator-for-cincinnati]
+== Deploy the operator for {cincinnati-short}
+
+To deploy the operator for {cincinnati-short} in your {ocp-short} environment, complete the following steps:
+
+. On the hub cluster, access the {ocp-short} operator hub. 
+. Deploy the operator by selecting `{cincinnati} Operator`. Update the default values, if necessary. The deployment of the operator creates a new project named `openshift-cincinnati`.
+. Wait for the installation of the operator to finish. 
++
+**Tip:** You can check the status of the installation by entering the `oc get pods` command on your {ocp-short} command line. Verify that the operator is in the `running` state.
 
 [#build-the-graph-data-init-container]
 == Build the graph data init container
@@ -101,23 +98,51 @@ Replace _host/user/cincinnati-graph-data-container_ with the path to your local 
 +
 *Note:* You can also replace `podman` in the commands with `docker`, if you don't have `podman` installed.
 
-[#deploy-the-operator-for-cincinnati]
-== Deploy the operator for {cincinnati-short}
 
-To deploy the operator for {cincinnati-short} in your {ocp-short} environment, complete the following steps:
+[#configure-certificate-for-the-mirrored-registry]
+== Configure certificate for the mirrored registry 
 
-. Access the {ocp-short} operator hub. 
-. Deploy the operator by selecting `{cincinnati} Operator`. Update the default values, if necessary. The deployment of the operator creates a new project named `openshift-cincinnati`.
-. Wait for the installation of the operator to finish. 
+If you are using a secure external container registry to store your mirrored {ocp-short} release images, {cincinnati-short} requires access to this registry to build
+an upgrade graph. Complete the following steps to configure your CA certificate to work with the {cincinnati-short} pod:
+
+. Find the {ocp-short} external registry API, which is located in `image.config.openshift.io`. This is where the external registry CA certificate is stored.  
 +
-**Tip:** You can check the status of the installation by entering the `oc get pods` command on your {ocp-short} command line. Verify that the operator is in the `running` state.
+See https://docs.openshift.com/container-platform/4.3/registry/configuring-registry-operator.html#images-configuration-cas_configuring-registry-operator[Image Registry Operator in OpenShift Container Platform] in the {ocp-short} documentation for more information.
+
+. Create a ConfigMap in the `openshift-config` namespace. 
+
+. Add your CA certificate under the key `cincinnati-registry`. {cincinnati-short} uses this setting to locate your certificate:
++
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trusted-ca
+data:
+  cincinnati-registry: |
+    -----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----
+----
+
+. Edit the `cluster` resource in the `image.config.openshift.io` API to set the `additionalTrustedCA` field to the name of the ConfigMap that you created.
++
+----
+oc patch image.config.openshift.io cluster -p '{"spec":{"additionalTrustedCA":{"name":"trusted-ca"}}}' --type merge
+----
++
+Replace _trusted-ca_ with the path to your new ConfigMap.
+
+The {cincinnati-short} Operator watches the `image.config.openshift.io` API and the
+ConfigMap you created in the `openshift-config` namespace for changes, then
+restart the deployment if the CA cert has changed.
 
 [#deploy-the-cincinnati-instance]
 == Deploy the {cincinnati-short} instance
 
 When you finish deploying the {cincinnati-short} instance on your hub cluster, this instance is located where the images for the cluster upgrades are mirrored and made available to the disconnected managed cluster. Complete the following steps to deploy the instance:
 
-. Create a namespace for your {cincinnati-short} instance:
+. If you do not want to use the default namespace of the operator, which is `openshift-cincinnati`, create a namespace for your {cincinnati-short} instance:
 .. In the {ocp-short} hub cluster console navigation menu, select *Administration* > *Namespaces*.
 .. Select *Create Namespace*.
 .. Add the name of your namespace, and any other information for your namespace.
@@ -139,9 +164,9 @@ spec:
   graphDataImage: 'host/user/cincinnati-graph-data-container'
 ----
 +
-Replace the `spec: registry` value with the path to your local disconnected registry for your images that you set up in the prerequisites.
+Replace the `spec.registry` value with the path to your local disconnected registry for your images.
 +
-Replace the `spec: graphDataImage` value with the path to your graph data init container. *Tip:* This is the same value that you used when you ran the `podman push` command to push your graph data init container.
+Replace the `spec.graphDataImage` value with the path to your graph data init container. *Tip:* This is the same value that you used when you ran the `podman push` command to push your graph data init container.
 . Select *Create* to create the instance. 
 . From the hub cluster CLI, enter the `oc get pods` command to view the status of the instance creation. It might take a while, but the process is complete when the result of the command shows that the instance and the operator are running.
 
@@ -227,7 +252,7 @@ spec:
       []  # selects all clusters if not specified
 ----
 
-. Add content that is similar to the following content to the custom policy to add the settings for your ImageContentSourcePolicy: 
+. Replace the content inside the `objectDefinition` section of the template with content that is similar to the following content to add the settings for your ImageContentSourcePolicy: 
 +
 ----
 apiVersion: operator.openshift.io/v1alpha1
@@ -238,9 +263,11 @@ spec:
   repositoryDigestMirrors:
   - mirrors:
     - <path-to-local-mirror>
+    source: registry.redhat.io
 ----
 +
 * Replace _path-to-local-mirror_ with the path to your local mirror repository.
+* Tip: You can find your path to your local mirror by entering the `oc adm release mirror` command.
 
 . Select the box for *Enforce if supported*.
 . Select *Create* to create the policy. 
@@ -257,6 +284,70 @@ Push the _Catalogsource_ policy to the managed cluster to change the default loc
 . Set the `YAML` switch to _On_ to view the YAML version of the policy.
 . Delete all of the content in the `YAML` code. 
 . Paste the following `YAML` content into the window to create a custom policy:
+. Paste the following `YAML` content into the window to create a custom policy:
++
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-pod
+  namespace: default
+  annotations:
+    policy.open-cluster-management.io/standards: 
+    policy.open-cluster-management.io/categories: 
+    policy.open-cluster-management.io/controls: 
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-pod-sample-nginx-pod
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Pod
+                metadata:
+                  name: sample-nginx-pod
+                  namespace: default
+                status:
+                  phase: Running
+          remediationAction: inform
+          severity: low
+  remediationAction: enforce
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-pod
+  namespace: default
+placementRef:
+  name: placement-policy-pod
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-pod
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-pod
+  namespace: default
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      []  # selects all clusters if not specified
+----
+
+. Add the following content to the policy:
 +
 ----
 apiVersion: config.openshift.io/vi
@@ -379,7 +470,7 @@ spec:
     matchExpressions:
       []  # selects all clusters if not specified
 ----
-. Add the following content to the `policy`:`spec` in the _policy_ section:
+. Add the following content to `policy.spec` in the _policy_ section:
 +
 ----
 apiVersion: config.openshift.io/v1
@@ -391,7 +482,15 @@ apiVersion: config.openshift.io/v1
     upstream: https://example-cincinnati-policy-engine-uri/api/upgrades_info/v1/graph
 ----
 +
-Replace the value of _spec: upstream:_ with the path to your hub cluster {cincinnati-short} operand.
+Replace the value of _spec.upstream_ with the path to your hub cluster {cincinnati-short} operand.
++
+*Tip:* You can complete the following steps to determine the path to the operand:
++
+ .. Run the `oc get get routes -A` command on the hub cluster.
+ .. Find the route to `cincinnati`.
+ +
+ The path to the operand is the value in the `HOST/PORT` field.
+
 . In the managed cluster CLI, confirm that the upstream parameter in the `ClusterVersion` is updated with the local hub cluster {cincinnati-short} URL by entering: 
 +
 ----
