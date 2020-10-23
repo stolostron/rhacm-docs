@@ -47,9 +47,9 @@ oc adm -a ${LOCAL_SECRET_JSON} release mirror \
 +
 Replace `/path/to/pull/secret` with the path to your {ocp-short} pull secret.
 
-. Run the script that you created to mirror the images, configure settings, and separate the release images from the release content.
+. Run the script to mirror the images, configure settings, and separate the release images from the release content.
 
-*Tip:* You can use the information in this script when you create your `ImageContentSourcePolicy`.
+*Tip:* You can use the output of the last line of this script when you create your `ImageContentSourcePolicy`.
 
 [#deploy-the-operator-for-cincinnati]
 == Deploy the operator for {cincinnati-short}
@@ -67,6 +67,12 @@ To deploy the operator for {cincinnati-short} in your {ocp-short} environment, c
 
 {cincinnati-short} uses graph data information to determine the available upgrades. In a connected environment, {cincinnati-short} pulls the graph data information for available upgrades directly from the https://github.com/openshift/cincinnati-graph-data[Cincinnati graph data GitHub repository]. Because you are configuring a disconnected environment, you must make the graph data available in a local repository by using an `init container`. Complete the following steps to create a graph data `init container`:
 
+. Clone the _graph data_ Git repository by entering the following command:
++
+----
+git clone https://github.com/openshift/cincinnati-graph-data
+----
+
 . Create a file that contains the information for your graph data `init`. You can find this sample https://github.com/openshift/cincinnati-operator/blob/master/dev/Dockerfile[Dockerfile] in the `cincinnati-operator` GitHub repository. The contents of the file is shown in the following sample:
 +
 ----
@@ -74,27 +80,32 @@ FROM registry.access.redhat.com/ubi8/ubi:8.1
 
 RUN curl -L -o cincinnati-graph-data.tar.gz https://github.com/openshift/cincinnati-graph-data/archive/master.tar.gz
 
-CMD exec /bin/bash -c "tar xvzf cincinnati-graph-data.tar.gz -C /var/lib/cincinnati/graph-data/ --strip-components=1"  
+RUN mkdir -p /var/lib/cincinnati/graph-data/
+
+CMD exec /bin/bash -c "tar xvzf cincinnati-graph-data.tar.gz -C /var/lib/
+cincinnati/graph-data/ --strip-components=1"  
 ----
 +
 In this example:
 +
 * The `FROM` value is the external registry where {cincinnati-short} finds the images.
 
-* The `RUN` command packages the upgrade files. 
+* The `RUN` commands create the directory and package the upgrade files. 
 
-* The `CMD` command copies the package file to the local repository and extracts the files for an upgrade. Replace `var/lib/cincinnati/graph-data/` with the path to your local repository. 
+* The `CMD` command copies the package file to the local repository and extracts the files for an upgrade.
 
 . Run the following commands to build the `graph data init container`:
 +
 ----
-podman build -f <path_to_graph_data_init-file> -t host/user/cincinnati-graph-data-container:latest
-podman push host/user/cincinnati-graph-data-container:latest
+podman build -f <path_to_Dockerfile> -t ${DISCONNECTED_REGISTRY}/cincinnati/cincinnati-graph-data-container:latest
+podman push ${DISCONNECTED_REGISTRY}/cincinnati/cincinnati-graph-data-container:latest --authfile=/path/to/pull_secret.json
 ----
 +
-Replace _path_to_graph_data_init-file_ with the path to the file that you created in the previous step.
+Replace _path_to_Dockerfile_ with the path to the file that you created in the previous step.
 +
-Replace _host/user/cincinnati-graph-data-container_ with the path to your local graph data init container.
+Replace _${DISCONNECTED_REGISTRY}/cincinnati/cincinnati-graph-data-container_ with the path to your local graph data init container.
++
+Replace _/path/to/pull_secret_ with the path to your pull secret file.
 +
 *Note:* You can also replace `podman` in the commands with `docker`, if you don't have `podman` installed.
 
@@ -107,7 +118,7 @@ an upgrade graph. Complete the following steps to configure your CA certificate 
 
 . Find the {ocp-short} external registry API, which is located in `image.config.openshift.io`. This is where the external registry CA certificate is stored.  
 +
-See https://docs.openshift.com/container-platform/4.3/registry/configuring-registry-operator.html#images-configuration-cas_configuring-registry-operator[Image Registry Operator in OpenShift Container Platform] in the {ocp-short} documentation for more information.
+See https://docs.openshift.com/container-platform/4.5/registry/configuring-registry-operator.html#images-configuration-cas_configuring-registry-operator[Image Registry Operator in OpenShift Container Platform] in the {ocp-short} documentation for more information.
 
 . Create a ConfigMap in the `openshift-config` namespace. 
 
@@ -158,10 +169,10 @@ metadata:
   name: openshift-update-service-instance
   namespace: openshift-cincinnati
 spec:
-  registry: local/registry
+  registry: <registry_host_name>:<port>
   replicas: 1
-  repository: openshift-release-dev/ocp-release
-  graphDataImage: 'host/user/cincinnati-graph-data-container'
+  repository: ${LOCAL_REGISTRY}/ocp4/release
+  graphDataImage: '<host_name>:<port>/cincinnati-graph-data-container'
 ----
 +
 Replace the `spec.registry` value with the path to your local disconnected registry for your images.
@@ -373,7 +384,7 @@ spec:
   publisher: grpc
 ----
 +
-Replace the value of _image:_ with the path to your local restricted catalog source image.
+Replace the value of _spec.image_ with the path to your local restricted catalog source image.
 
 . In the {product-title-short} console navigation, select *Automate infrastructure* > *Clusters* to check the status of the managed cluster. When the policy is applied, the cluster status is `ready`.
 
