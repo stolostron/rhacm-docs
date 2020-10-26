@@ -13,22 +13,14 @@ Collect logs about new information that is created for observability resources w
 [#creating-rules]
 == Creating custom rules
 
-//Prometheus== recording rules and alerting rules
-// https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/
-// https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
-// Note, the metrics that are available in the system are outlined in the section: List of Metrics Collected 
-// List of Metrics Collected from the Managed Clusters
-//This is an immutable list. But by looking at this configmap, you can see the current list of metrics being collected from all the managed clusters: `kubectl describe cm observability-metrics-whitelist`Create rules only the metrics that are listed
+You can create custom rules for the observability installation by adding Prometheus link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see link:https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
 
+*Note*: You can only create custom rules on the metrics that are collected from all managed clusters. View a list of of the metrics that are colled by running the following command: `kubectl describe cm observability-metrics-whitelist`.
 
-In order to add Prometheus Recording Rules and Alerting Rules to the Observability installation, create them as usual using the Prometheus guidelines. You can customize the observability resource by configuring Prometheus rules. For more information, see https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration]. 
-
-Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. 
-
-Complete the following steps to create a custom rule: 
+Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. Complete the following steps to create a custom rule: 
 
 . Log in to your {product-title-short} hub cluster.
-. Create a ConfigMap named `thanos-rule-custom-rules` in the `open-cluster-observability` namespace. The key must be named, `custome-rules.yaml`, as shown in the following example. You can create multple rules in the configuration.
+. Create a ConfigMap named `thanos-rule-custom-rules` in the `open-cluster-management-observability` namespace. The key must be named, `custome-rules.yaml`, as shown in the following example. You can create multple rules in the configuration.
 +
 By default, the out of the box alert rules are defined in the  ConfigMap in the `open-cluster-management-observability` namespace. 
 
@@ -53,21 +45,35 @@ data:
            severity: critical
 ----
 
-*Note*: The rule creation takes about five minutes to complete.
+*Note*: If this is the first new custom rule, it is created immediately. For changes to the ConfigMap you must restart the observability pods with the following command: `kubectl get pods -n open-cluster-management-observability|grep thanos-rule`.
 
-. Verify that the rule is created. Access your Grafana dashboard and select the *Explore* icon. 
-
-. Filter your view on the dashboard to display the alert metrics by searching "Alerts". 
+. If you want to verify that the alert rules is functioning appropriately, complete the following steps:
+.. Access your Grafana dashboard and select the *Explore* icon.
+.. In the Metrics exploration bar type in "ALERTS" and run the query. All the ALERTS that are currently in pending or firing state in the system are displayed.
+.. If your alert is not displayed, revisit the rule to see if the expression is accurate.
 
 A custom rule is created.
 
 [#configuring-rules-for-alertmanager]
 === Configuring rules for AlertManager
 
-Integrate external messaging tools such as email, Slack, and PagerDuty to receive notifications from AlertManager. You must update the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for AlertManager. Complete the following steps to update the custom receiver rules:
+Integrate external messaging tools such as email, Slack, and PagerDuty to receive notifications from AlertManager. You must override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for AlertManager. Complete the following steps to update the custom receiver rules:
 
-. Log in to your {ocp} hub cluster.
-. Access the AlertManager secret configuration. From the navigation menu click *Workloads* > *Secrets* > *alertmanager-config*.
+. Extract the data from the `alertmanager-config` secret. Run the following command:
++
+----
+oc -n open-cluster-management-observability get secret alertmanager-config --template='{{ index .data "alertmanager.yaml" }}' |base64 -d > alertmanager.yaml
+----
+
+. Edit the alertmanager.yaml file to add the configuration
+While the secret can be edited, directly, here is a structured way to do this:
+Extract the data out of the secret and save it to a alertmanager.yaml file: oc -n open-cluster-management-observability get secret alertmanager-config --template='{{ index .data "alertmanager.yaml" }}' |base64 -d > alertmanager.yaml
+Edit the alertmanager.yaml file to add the configuration
+Save it back as a secret: oc -n open-cluster-management-observability create secret generic alertmanager-config --from-file=alertmanager.yaml --dry-run -o=yaml |  oc -n open-cluster-management-observability replace secret --filename=-
+
+Your changes take into effect immediately 
+
+
 . Edit and update the secret. Your update might resemble the following content:
 +
 ----
