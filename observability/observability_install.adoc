@@ -9,7 +9,8 @@ Monitor the health of your managed clusters with the observability service (`mul
 
 - You must install {ocp}. For more information, see https://docs.openshift.com/container-platform/4.5/architecture/architecture-installation.html[{ocp-short} installation overview]. 
 - You must install {product-title}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.  
-- You must have data storage for the time series data. Configure your object store to create a storage solution. For example, Amaazon S3 can be used as a storage solution. Your object storage might resemble the following information:
+- You must have data storage for the time series data. Configure an object store to create a storage solution. For example, Thanos support different object stores to store the time series data, such as Amazon S3 and Ceph. For a complete list of the supported object stores, see link:https://thanos.io/tip/thanos/storage.md/[Thanos documentation]. If your storage is Amazon S3 or S3 compatible, then you need the following information to create a secret as explained in the <<enablement-for-observability,Enablement for observability>> section:
+
 +
 ----
 type: s3
@@ -37,37 +38,37 @@ Enable the observability service by creating a MultiClusterObservability CustomR
 ----
 kubectl get pods -n open-cluster-management|grep observability
 ----
-
+.. 
 . Create a namespace for the observability service with the following commad:
 +
 ----
 oc create-namespace open-cluster-management-observability
 ----
 
-. Generate a pull-secret for the `open-cluster-management-observability` namespace by running the following command:
+. Copy the `multiclusterhub-operator-pull-secret` from the `open-cluster-management` namespace to the `open-cluster-management-observability` namespace by running the following command:
 
 +
 ----
 oc get secret multiclusterhub-operator-pull-secret -n open-cluster-management --export -o yaml |  kubectl apply --namespace=open-cluster-management-observability -f -
 ----
 
-. Create a secret for your object storage. Your secret must contain the credentials to your storage solution. For example, if you are using Amazon S3, run the following command:
+. Create a secret for your object storage. Your secret must contain the credentials to your storage solution. For example, run the following command:
 
 +
 ----
-kubectl create -f aws-object-storage.yaml
+kubectl create -f thanos-object-storage.yaml
 ----
 +
-Your secret might resemble the following file:
+Your secret might resemble the following file (the following example is for Amazon S3 or S3 compatible):
 +
 ----
 apiVersion: v1
 kind: Secret
 metadata:
-  name: aws-object-storage
+  name: thanos-object-storage
 type: Opaque
 stringData:
-  aws.yaml: |
+  thanos.yaml: |
     type: s3
     config:
       bucket: YOUR_S3_BUCKET
@@ -78,9 +79,11 @@ stringData:
 
 ----
 
-. Create a `MultiClusterObservability` resource for your managed cluster by running the following command:
+. Create the `MultiClusterObservability` custom resource (mco CR) for your managed cluster by completing the following steps:
 +
-Your `MultiClusterObservability` resource might resemble the following file:
+.. Create the `MultiClusterObservability` custom resource YAML file named `multiclusterobservability_cr.yaml`. 
+
+// Will receive info from Marco - For most cases, the default file might resemble the 
 +
 ----
 apiVersion: observability.open-cluster-management.io/v1beta1
@@ -105,7 +108,7 @@ spec:
     statefulSetStorageClass:gp2
 ----
 
-. Apply the observability YAML to your cluster by running the following command:
+.. Apply the observability YAML to your cluster by running the following command:
 +
 ----
 oc apply -f multiclusterobservability_cr.yaml
