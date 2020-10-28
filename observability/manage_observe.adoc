@@ -1,9 +1,128 @@
-[#manage-observability]
-= Manage observability
+[#managing-observability]
+= Managing observability
 
-Review the following topics to learn more about creating and updating the observability service. 
-
-
-// * xref:../observability/observe_config_rules.adoc#mconfiguring-rules-and-receivers[Configuring rules and receivers]
+Review the following sections to learn more about customizing, managing, and viewing data that is collected by the observability service.
 
 Collect logs about new information that is created for observability resources with the `must-gather` command. For more information, see the _Must-gather_ section in the link:../troubleshooting/troubleshooting_intro.adoc[Troubleshooting documentation].
+
+* <<creating-custom-rules,Creating custom rules>>
+* <<configuring-rules-for-alertmanager,Configuring rules for AlertManager>>
+* <<viewing-and-exploring-data,Viewing and exploring data>>
+* <<disable-observability,Disable observability>>
+
+[#creating-rules]
+== Creating custom rules
+
+You can create custom rules for the observability installation by adding Prometheus link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see link:https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
+
+*Note*: You can only create custom rules on the metrics that are collected from all managed clusters. View a list of of the metrics that are collected by running the following command: `kubectl describe cm observability-metrics-whitelist`.
+
+Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. Complete the following steps to create a custom rule: 
+
+. Log in to your {product-title-short} hub cluster.
+. Create a ConfigMap named `thanos-rule-custom-rules` in the `open-cluster-management-observability` namespace. The key must be named, `custome-rules.yaml`, as shown in the following example. You can create multple rules in the configuration:
++
+By default, the out-of-the-box alert rules are defined in the ConfigMap in the `open-cluster-management-observability` namespace. 
++
+For example, you can create a custom alert rule that notifies you when your CPU usage passes your defined value: 
++
+----
+data:
+  custom_rules.yaml: |
+    groups:
+      - name: cluster-health
+        rules:
+        - alert: ClusterCPUHealth-jb
+          annotations:
+            summary: Notify when CPU utiliazation on a cluster is greater than the defined utilization limit
+            description: "The cluster has a high CPU usage: {{ $value }} core for {{ $labels.cluster }} {{ $labels.clusterID }}."
+         expr: |
+           max(cluster:cpu_usage_cores:sum) by (clusterID, cluster, prometheus) > 0
+         for: 5s
+         labels:
+           cluster: "{{ $labels.cluster }}"
+           prometheus: "{{ $labels.prometheus }}"
+           severity: critical
+----
++
+*Note*: If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, you must restart the observability pods with the following command: `kubectl get pods -n open-cluster-management-observability|grep thanos-rule`.
+
+. If you want to verify that the alert rules is functioning appropriately, complete the following steps:
+.. Access your Grafana dashboard and select the *Explore* icon.
+.. In the Metrics exploration bar, type in "ALERTS" and run the query. All the ALERTS that are currently in pending or firing state in the system are displayed.
+.. If your alert is not displayed, revisit the rule to see if the expression is accurate.
+
+A custom rule is created.
+
+[#configuring-rules-for-alertmanager]
+=== Configuring rules for AlertManager
+
+Integrate external messaging tools such as email, Slack, and PagerDuty to receive notifications from AlertManager. You must override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for AlertManager. Complete the following steps to update the custom receiver rules:
+
+. Extract the data from the `alertmanager-config` secret. Run the following command:
++
+----
+oc -n open-cluster-management-observability get secret alertmanager-config --template='{{ index .data "alertmanager.yaml" }}' |base64 -d > alertmanager.yaml
+----
+
+. Edit and save the `alertmanager.yaml` file configuration by running the following command:
++
+----
+oc -n open-cluster-management-observability create secret generic alertmanager-config --from-file=alertmanager.yaml --dry-run -o=yaml |  oc -n open-cluster-management-observability replace secret --filename=-
+----
++
+Your updated secret might resemble the following content:
++
+----
+global
+  smtp_smarthost: 'localhost:25'
+  smtp_from: 'alertmanager@example.org'
+  smtp_auth_username: 'alertmanager'
+  smtp_auth_password: 'password'
+templates: 
+- '/etc/alertmanager/template/*.tmpl'
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h 
+  receiver: team-X-mails
+  routes:
+  - match_re:
+      service: ^(foo1|foo2|baz)$
+    receiver: team-X-mails
+----
+
+Your changes are applied immediately after it is modified. For an example of AlertManager, see link:https://github.com/prometheus/alertmanager/blob/master/doc/examples/simple.yml[prometheus/alertmanager].
+
+[#viewing-and-exploring-data]
+== Viewing and exploring data
+
+View the data from your managed clusters by accessing Grafana. Complete the following steps to view the Grafana dashbords from the console:
+
+. Log in to your {product-title-short} hub cluster. 
+. From the navigation menu, select *Observe environments* > *Overview* > *Grafana link*. 
++
+You can also  access Grafana dashboards from the _Clusters_ page. From the navigation menu, select *Automate infrastructure* > *Clusters* > *Grafana*.
+. Access the Prometheus metric explorer by selecting the *Explore* icon from the Grafana navigation menu.
+
+[#disable-observability]
+== Disable observability 
+
+Disable the observability service to stop data from being collected and sent to the observability service on the {product-title-short} hub cluster. 
+
+Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
+
+----
+spec:
+  availabilityConfig: High # Available values are High or Basic
+  imagePullPolicy: Always
+  imagePullSecret: multiclusterhub-operator-pull-secret
+  observabilityAddonSpec: # The ObservabilityAddonSpec defines the global settings for all managed clusters which have observability add-on enabled
+    enableMetrics: false #indicates the observability addon push metrics to hub server
+----
+
+When you disable observability, the `multicluster-observability-operator` continues to run on the managed cluster, while the `metrics-collector` deployment is scaled to zero. When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
+
+For more information on monitoring data from the console with the observability service, see xref:../observability/observe_intro.adoc#observing-environments[Observing environments].
+
