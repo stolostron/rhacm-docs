@@ -6,12 +6,13 @@ Monitor the health of your managed clusters with the observability service (`mul
 *Required access:* Cluster administrator or the `open-cluster-management:cluster-manager-admin` role.
 
 *Prerequisites*:
-
-- You must install {ocp}. For more information, see https://docs.openshift.com/container-platform/4.5/architecture/architecture-installation.html[{ocp-short} installation overview]. 
+ 
 - You must install {product-title}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.  
-- You must configure an object store to create a storage solution. {product-title-short} only supports cloud providers with stable object stores, such as Amazon S3 (or other S3 compatible object stores like Ceph), Google Cloud Storage, and Azure storage. For a complete list of the supported object stores, see link:https://thanos.io/tip/thanos/storage.md/[Thanos documentation]. If your storage is Amazon S3 (or S3 compatible), then you need values for the following parameter in your secret: `access_key` and `secret_key`. 
+- You must configure an object store to create a storage solution. {product-title-short} only supports cloud providers with stable object stores, such as Amazon S3 (or other S3 compatible object stores like Ceph), Google Cloud Storage, and Azure storage.
 +
-For more information, see link:https://docs.aws.amazon.com/whitepapers/latest/aws-overview/storage-services.html[Amazon S3].
+*Important*: When you configure your object store, ensure that you meet the encryption requirements necessary when sensitive data is persisted.
+
+// find another location: For a complete list of the supported object stores, see link:https://thanos.io/tip/thanos/storage.md/[Thanos documentation]. 
 
 [#enabling-observability]
 == Enabling observability
@@ -39,7 +40,8 @@ oc get secret multiclusterhub-operator-pull-secret -n open-cluster-management --
 kubectl create -f thanos-object-storage.yaml
 ----
 +
-If your object storage is Amazon S3 or S3 compatible, your secret might resemble the following file:
+.. View the following examples of secrets for the supported object stores:
+... For Amazon S3 or S3 compatible, your secret might resemble the following file:
 +
 ----
 apiVersion: v1
@@ -59,6 +61,12 @@ stringData:
 
 ----
 
+... For Google 
++
+
+
+
+... For Azure 
 . Create the `MultiClusterObservability` custom resource (mco CR) for your managed cluster by completing the following steps:
 +
 .. Create the `MultiClusterObservability` custom resource YAML file named `multiclusterobservability_cr.yaml`. 
@@ -89,63 +97,21 @@ spec:
 ----
 +
 For more information to optimize the `retentionResolution` or `statefulSetSize`, see link:../apis/observability.json.adoc#observability-api[Observability API].
-
+// Joydeep to Provide info about modifying the `retentionResolution` or `statefulSetSize`
 .. Apply the observability YAML to your cluster by running the following command:
 +
 ----
 oc apply -f multiclusterobservability_cr.yaml
 ----
 +
-All the pods in `open-cluster-management-observability` namespace for Thanos, Grafana and AlertManager are created. All the managed clusters connected to the {product-title-short} hub cluster are able to send metrics back to the {product-title-short} Observability. Data is populated in the Grafana dashboards.
-// consider adding substep to explain how to apply the service to specific managed clusters with clusterLabels.
-. Verify that the data is populated in the Grafana dashboards by completing the following steps:
+All the pods in `open-cluster-management-observability` namespace for Thanos, Grafana and AlertManager are created. All the managed clusters connected to the {product-title-short} hub cluster are enabled to send metrics back to the {product-title-short} Observability service.
+
+. To validate that the observabilty service is enabled, launch the Grafana dashboards to make sure the data is populated. Complete the following steps:
 .. Log in to the {product-title-short} console.
 .. From the navigation menu, select *Observe environments* > *Overview* page.
-.. Click the Grafana link to view the metrics from your managed clusters.
-.. You can also view the data from the command line interface (CLI) for each of the managed clusters. For example, run the following command for the managed cluster, `local-cluster`:
+.. Click the Grafana link that is near the console header, to view the metrics from your managed clusters.
 +
-----
-oc get managedclusteraddon -n local-cluster observability-controller -o yaml
-----
-+
-Your output might resemble the following resource:
-+
-----
-apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: ManagedClusterAddOn
-metadata:
-  creationTimestamp: "2020-10-19T19:19:32Z"
-  generation: 1
-  name: observability-controller
-  namespace: local-cluster
-  resourceVersion: "30409880"
-  selfLink: /apis/addon.open-cluster-management.io/v1alpha1/namespaces/self/managedclusteraddons/observability-controller
-  uid: ae1dacb7-4fe6-4abd-bef0-e479b6f44157
-spec: {}
-status:
-  addOnConfiguration:
-    crName: ""
-    crdName: ""
-  addOnMeta:
-    description: ""
-    displayName: ""
-  conditions:
-  - lastTransitionTime: "2020-10-22T14:10:55Z"
-    message: Metrics collector deployed and functional
-    reason: Deployed
-    status: "True"
-    type: Available
-  - lastTransitionTime: "2020-10-22T14:10:55Z"
-    message: enableMetrics is set to False
-    reason: Disabled
-    status: "False"
-    type: Disabled
-  - lastTransitionTime: "2020-10-22T14:10:55Z"
-    message: Metrics collector deployment not successful
-    reason: Degraded
-    status: "False"
-    type: Degraded
-----
+*Note*: If you want to exclude specific managed clusters from collecting the observability data, add the following cluster label to your clusters: `vendor: OpenShift`.
 
 [#disable-observability-resource]
 == Disable observability
@@ -161,7 +127,7 @@ kubectl mco observability
 +
 When you delete the resource, the pods in the `open-cluster-management-observability` namespace on {product-title-short} hub cluster, and the pods in `open-cluster-management-addon-observability` namespace on all managed clusters are removed. 
 
-*Important*: Your object storage is not effected after you remove the observability service.
+*Important*: Your object storage is not affected after you remove the observability service.
 
 To learn more about how to customizing the observability service, see xref:../observability/manage_observe.adoc#customizing-observability[Customizing observability].
 
