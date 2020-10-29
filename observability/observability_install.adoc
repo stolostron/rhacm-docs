@@ -1,5 +1,5 @@
-[#install-observability]
-= Install observability service
+[#enable-observability]
+= Enable observability service
 
 Monitor the health of your managed clusters with the observability service (`multicluster-observability-operator`).
 
@@ -9,48 +9,16 @@ Monitor the health of your managed clusters with the observability service (`mul
 
 - You must install {ocp}. For more information, see https://docs.openshift.com/container-platform/4.5/architecture/architecture-installation.html[{ocp-short} installation overview]. 
 - You must install {product-title}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.  
-- You must have data storage for the time series data. Configure an object store to create a storage solution. For instance, {product-title-short} only supports cloud providers with stable object stores, such as Amazon S3 (or S3 compatible) and Ceph. For a complete list of the supported object stores, see link:https://thanos.io/tip/thanos/storage.md/[Thanos documentation]. If your storage is Amazon S3 (or S3 compatible), then you need the following information to create a secret, as explained in the <<enablement-for-observability,Enablement for observability>> section:
-
-+
-----
-type: s3
-config:
-  bucket: YOUR-BUCKET
-  endpoint: S3-ENDPOINT
-  insecure: true
-  access_key: ACCESS_KEY
-  secret_key: SECRET_KEY
-----
+- You must configure an object store to create a storage solution. {product-title-short} only supports cloud providers with stable object stores, such as Amazon S3 (or other S3 compatible object stores like Ceph), Google Cloud Storage, and Azure storage. For a complete list of the supported object stores, see link:https://thanos.io/tip/thanos/storage.md/[Thanos documentation]. If your storage is Amazon S3 (or S3 compatible), then you need values for the following parameter in your secret: `access_key` and `secret_key`. 
 +
 For more information, see link:https://docs.aws.amazon.com/whitepapers/latest/aws-overview/storage-services.html[Amazon S3].
-+
-*Note*: If there is no object storage defined, the component installation might be stuck with the `Installing` status displayed. See link:../troubleshooting/trouble_observability.adoc#troubleshooting-observability[Troubleshooting observability] for more information.
 
-[#enablement-for-observability]
-== Enablement for observability
+[#enabling-observability]
+== Enabling observability
 
 Enable the observability service by creating a MultiClusterObservability CustomResource (CR) instance. Complete the following steps to enable the observability service: 
 
 . Log in to your {product-title-short} hub cluster. 
-. Verify that the observaility components are installed:
-.. To verify that the `multicluster-observability-operator`, run the following command:
-+
-----
-kubectl get pods -n open-cluster-management|grep observability
-----
-.. To verify that the appropriate CRDs are present, run the following command: 
-+
-----
-kubectl get crd|grep observ
-----
-+
-The following CRDs must be displayed before you enable the component:
-+
-----
-multiclusterobservabilities.observability.open-cluster-management.io   
-observabilityaddons.observability.open-cluster-management.io          
-observatoria.core.observatorium.io
-----
 . Create a namespace for the observability service with the following commad:
 +
 ----
@@ -95,7 +63,7 @@ stringData:
 +
 .. Create the `MultiClusterObservability` custom resource YAML file named `multiclusterobservability_cr.yaml`. 
 +
-For most cases, the resource might resemble the following file:
+View the following default YAML file for observability:
 +
 ----
 apiVersion: observability.open-cluster-management.io/v1beta1
@@ -120,7 +88,7 @@ spec:
     statefulSetStorageClass:gp2
 ----
 +
-For more details about the API, see link:../apis/observability.json.adoc#observability-api[Observability API].
+For more information to optimize the `retentionResolution` or `statefulSetSize`, see link:../apis/observability.json.adoc#observability-api[Observability API].
 
 .. Apply the observability YAML to your cluster by running the following command:
 +
@@ -129,7 +97,7 @@ oc apply -f multiclusterobservability_cr.yaml
 ----
 +
 All the pods in `open-cluster-management-observability` namespace for Thanos, Grafana and AlertManager are created. All the managed clusters connected to the {product-title-short} hub cluster are able to send metrics back to the {product-title-short} Observability. Data is populated in the Grafana dashboards.
-
+// consider adding substep to explain how to apply the service to specific managed clusters with clusterLabels.
 . Verify that the data is populated in the Grafana dashboards by completing the following steps:
 .. Log in to the {product-title-short} console.
 .. From the navigation menu, select *Observe environments* > *Overview* page.
@@ -182,10 +150,10 @@ status:
 [#disable-observability-resource]
 == Disable observability
 
-Disable the observability service by completing the following steps:
+Disable the observability service by removing the `observability` resource that you created. Complete the following steps:
 
 . Log in to your hub cluster.
-. Delete the `observability` resource that you created with the following command:
+. Delete the `observability` resource with the following command:
 +
 ----
 kubectl mco observability
@@ -193,8 +161,8 @@ kubectl mco observability
 +
 When you delete the resource, the pods in the `open-cluster-management-observability` namespace on {product-title-short} hub cluster, and the pods in `open-cluster-management-addon-observability` namespace on all managed clusters are removed. 
 
-*Important*: Your object storage is not effected after you uninstall the observability service.
+*Important*: Your object storage is not effected after you remove the observability service.
 
-To learn more about how to customizing the observability service, see xref:../observability/manage_observe.adoc#managing-observability[Managing observability].
+To learn more about how to customizing the observability service, see xref:../observability/manage_observe.adoc#customizing-observability[Customizing observability].
 
 
