@@ -1,15 +1,18 @@
 [#troubleshooting-observability]
 = Troubleshooting observability
 
+[#title-observability-missing-default-storageClass]
+== Observability cannot get default storageClass
+
 After you install the observability component, the component might be stuck and an `Installing` status is displayed. 
 
 [#symptom-observability-missing-default-storageClass]
-== Symptom: Observability cannot get default storageClass
+=== Symptom: Observability cannot get default storageClass
 
 If the observability status is stuck in an `Installing` status after you install and create the Observability CustomResosurceDefinition (CRD), it is possible that there is no value defined for the `spec:storageConfigObject:statefulSetStorageClass` parameter. Alternatively, the observability component automatically finds the default `storageClass`, but if there is no value for the storage, the component remains stuck with the `Installing` status. 
 
 [#resolving-observability-missing-default-storageClass]
-== Resolving the problem: Observability cannot get default storageClass
+=== Resolving the problem: Observability cannot get default storageClass
 
 If you have this problem, complete the following steps:
 
@@ -22,3 +25,72 @@ storageclass.kubernetes.io/is-default-class: "true"
 
 The observability component status is updated to a _Ready_ status when the installation is complete. If the installation fails to complete, the _Fail_ status is displayed.
 
+
+[#title-observability-undesired-label-in-managedcluster]
+== Undesired label value in managedcluster resource
+
+For an imported managed cluster, it will has observability components installed by default. The cluster should be included in the placementrule `observability` like below:
+---
+status:
+  decisions:
+  - clusterName: sample-managed-cluster
+    clusterNamespace: sample-managed-cluster
+---
+If the managed cluster is not included in the placementrule, which will lead to observability not installed in this cluster.
+
+[#symptom-observability-undesired-label-in-managedcluster]
+=== Symptom: Undesired label value in managedcluster resource
+If you find the imported cluster sample-managed-cluster not included in the placementrule `observability`, it is possible that managedcluster resource of that cluster has some labels with undesired value. In this managedcluster resource, if you have add a label `observability` with value `disabled`, this cluster will be filtered out by placement `observability`. Also, system will automatically add a label `vendor` for the managedcluster resource to reflect the vendor type of the cluster. Currently it is only possible to install observability in managed clusters on OpenShift, and for those clusters, their managedcluster resources will have `vendor` label with value `OpenShift`. If the `vendor` label has other value, this cluster will be filtered out by placement `observability`.
+
+
+[#resolving-observability-undesired-label-in-managedcluster]
+=== Resolving the problem: Undesired label value in managedcluster resource
+If you have this problem the managedcluster resource has label `observability` wih value `disabled` in , complete the following steps:
+. Change the value of label `observability` to `enabled`, or delete this label
+If you have this problem the managedcluster resource does not have label "vendor" with value "OpenShift", complete the following steps:
+. Make sure the  target managed cluster is OpenShift platform. If not, that's desired behavior.
+
+[#title-observability-ocp-monitoring-not-ready]
+== OpenShift monitoring service is not ready
+
+Observability component in a managed cluster needs to scrape metrics from the OpenShift monitoring stack. Metrics collector will not be installed if Openshift monitoring stack not ready.
+
+[#symptom-observability-ocp-monitoring-not-ready]
+=== Symptom: OpenShift monitoring service is not ready
+In logs of metrics-collector-deployment-* pod in namespace open-cluster-management-addon-observability of managed cluster, you can find error message `Failed to get prometheus resource`. Endpoint Operator will check whether `prometheus-k8s` service is available in `openshift-monitoring` namespace, and will not create metrics-collector-deployment Deployment if that service does not exist.
+
+[#resolving-observability-ocp-monitoring-not-ready]
+=== Resolving the problem: OpenShift monitoring service is not ready
+If you have this problem, complete the following steps:
+. Check Openshift monitoring stack, to fix possible problems and verify it works correctly
+. Restart endpoint-observability-operator-* pod in namespace open-cluster-management-addon-observability of managed cluster
+
+[#title-observability-invalid-certification]
+== Certification is invalid
+
+Metrics collector might be failied to push metrics to hub cluster due to invalid certfication.
+
+[#symptom-observability-invalid-certification]
+=== Symptom: Certification is invalid
+In logs of metrics-collector-deployment-* pod in namespace open-cluster-management-addon-observability of managed cluster, you can find error message `x509: certificate signed by unknown authority`. The certificates used by managed cluster are stored in the secret `observability-managed-cluster-certs` in the cluster's namespace of hub cluster. It is possible that the secret is deleted and recreated after the managed cluster imported and metrics-collector-deployment-* pod already started. In that case, this pod will not pick up the latest certificates in the updated secret.
+
+[#resolving-observability-invalid-certification]
+=== Resolving the problem: Certification is invalid
+If you have this problem, complete the following steps:
+. Restart multicluster-observability-operator-* pod in namespace open-cluster-management of hub cluster
+. Restart metrics-collector-deployment-* pod in namespace open-cluster-management-addon-observability of managed cluster
+
+[#title-observability-storage-used-up]
+== Storage in mounted persistent volume is used up
+
+Metrics will stored in observability-observatorium-thanos-receive-default-* pod and retention period is 4 days. If the storage of the mounted persistent volume on that pod is used up. Metrics collector will be failied to push metrics to hub cluster.
+
+[#symptom-observability-storage-used-up]
+=== Symptom: Storage in mounted persistent volume is used up
+In logs of metrics-collector-deployment-* pod in namespace open-cluster-management-addon-observability of managed cluster, you can find error message `no space left on device`.
+
+[#resolving-observability-storage-used-up]
+=== Resolving the problem: Storage in mounted persistent volume is used up
+If you have this problem, complete the following steps:
+. Expand the persistent volume claim used by observability-observatorium-thanos-receive-default-* pod
+. Restart observability-observatorium-thanos-receive-default-* pod in namespace open-cluster-management-observability of hub cluster
