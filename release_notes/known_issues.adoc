@@ -19,7 +19,7 @@ Known issue with workaround if:
 Or consider a troubleshooting topic.
 ////
 
-Review the known issues for {product-title}. The following list contains known issues for this release, or known issues that continued from the previous release.
+Review the known issues for {product-title}. The following list contains known issues for this release, or known issues that continued from the previous release. For your {ocp} cluster, see link:https://docs.openshift.com/container-platform/4.3/release_notes/ocp-4-3-release-notes.html#ocp-4-3-known-issues[{ocp-short} known issues].
 
 * <<installation-known-issues,Installation known issues>>
 * <<web-console-known-issues,Web console known issues>>
@@ -86,6 +86,17 @@ From the console and Visual Web Terminal, users are unable to search for values 
 When you are logged in as `kubeadmin` and you click the *Log out* option in the drop-down menu, the console returns to the login screen, but a browser tab opens with a `/logout` URL.
 The page is blank and you can close the tab without impact to your console.
 
+[#secret-content-is-no-longer-displayed]
+=== Secret content is no longer displayed
+
+// 2.1.0:6108
+
+For security reasons, search does not display the contents of secrets found on managed clusters. When you search for a secret from the console, you might receive the following error message:
+
+----
+Unable to load resource data - Check to make sure the cluster hosting this resource is online
+----
+
 [#cluster-management-issues]
 == Cluster management known issues
 
@@ -135,11 +146,11 @@ You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters
 Later versions of IBM OpenShift Kubernetes Service are supported.
 
 [#detaching-openshift-container-platform-3.11-does-not-remove-the-open-cluster-manangement-agent]
-=== Detaching {ocp-short} 3.11 does not remove the _open-cluster-manangement-agent_
+=== Detaching {ocp-short} 3.11 does not remove the _open-cluster-management-agent_
 
 // 2.0.0:3847
 
-When you detach managed clusters on {ocp-short} 3.11, the `open-cluster-management-agent` namesapce is not automatically deleted. Manually remove the namespace by running the following command:
+When you detach managed clusters on {ocp-short} 3.11, the `open-cluster-management-agent` namespace is not automatically deleted. Manually remove the namespace by running the following command:
 
 ----
 oc delete ns open-cluster-management-agent
@@ -171,6 +182,13 @@ oc set data secret/{CLUSTER-NAME}-gcp-creds -n {CLUSTER-NAME} --from-file=osServ
 +
 ----
 oc set data secret/{CLUSTER-NAME}-azure-creds -n {CLUSTER-NAME} --from-file=osServiceAccount.json=$HOME/.azure/osServiceAccount.json
+----
+
+* VMWare vSphere
+
++
+----
+oc patch secret {CLUSTER-NAME}-vsphere-creds -n {CLUSTER-NAME} --type json -p='[{"op": "add", "path": "/stringData", "value":{"username": "{YOUR-NEW-VMWARE-username}","password":"{YOUR-NEW-VMWARE-password}"} }]'
 ----
 
 [#clean-offline-cluster-when-detach]
@@ -214,20 +232,38 @@ You must be logged in as `root` to run the `management-ingress` service.
 
 Search maps RBAC for resources in the hub cluster. Depending on user RBAC settings for {product-title-short}, users might not see node data from the managed cluster. Results from search might be different from what is displayed on the _Nodes_ page for a cluster.
 
+[#cluster-might-not-be-destroyed]
+=== Process to destroy a cluster does not complete
+
+// 2.1.0:4748
+
+When you destroy a managed cluster, the status continues to display `Destroying` after one hour, and the cluster is not destroyed. To resolve this issue complete the following steps:
+
+. Manually ensure that there are no orphaned resources on your cloud, and that all of the provider resources that are associated with the managed cluster are cleaned up.
+
+. Open the `ClusterDeployment` information for the managed cluster that is being removed by entering the following command:
++
+----
+oc edit clusterdeployment/<mycluster> -n <namespace>
+----
++
+Replace _mycluster_ with the name of the managed cluster that you are destroying.
+Replace _namespace_ with the namespace of the managed cluster.
+
+. Remove the `hive.openshift.io/deprovision` finalizer to forcefully stop the process that is trying to clean up the cluster resources in the cloud.
+
+. Save your changes and verify that `ClusterDeployment` is gone.
+
+. Manually remove the namespace of the managed cluster by running the following command:
++
+----
+oc delete ns <namespace>
+----
++
+Replace _namespace_ with the namespace of the managed cluster.
+
 [#application-management-known-issues]
 == Application management known issues
-
-[#access-app-without-permission]
-=== Accessing applications without permission 
-// 2.0.0:4602
-
-If you do not have the correct permissions assigned, you cannot view an application in the console. If you can click on the search link to view the application, you might receive an infinite loop or error. Check to see if you have the correct permissions to view the application.
-
-[#yaml-manifest-cannot-create-multiple-resources]
-=== YAML manifest cannot create multiple resoures
-// 2.0.0:3583
-
-The `managedclusteraction` doesn't support multiple resources. You cannot apply the YAML manifest with multiple resource from console create resources features.
 
 [#console-pipeline-card-different-data]
 === Console pipeline cards might display different data
@@ -405,9 +441,38 @@ customCAConfigmap: custom-ca
 
 After you complete the steps, wait a few minutes for the changes to propagate to the charts and log in again. The {ocp-short} certificate is added.
 
-[#empty-status-in-policies]
-=== Empty status in policies
+[#recovering-cert-manager-remove-helm]
+=== Recovering _cert-manager_ after removing the helm release
 
-// 2.0.2:3032
+// 2.0.4:5635
 
-The policies that are applied to the cluster are considered `NonCompliant` when clusters are not running. When you view violation details, the `status` parameter is empty.
+If you remove the `cert-manager` and the `cert-manager-webhook-helmreleases`, the Helm releases are triggered to automatically redeploy the charts and generate a new certificate. The new certificate must be synced to the other helm charts that create other {product-title-short} components. To recover the certificate components from the hub cluster, complete the following steps:
+
+. Remove the helm release for `cert-manager` by running the following commands: 
++
+----
+oc delete helmrelease cert-manager-5ffd5
+oc delete helmrelease cert-manager-webhook-5ca82
+----
+
+. Verify that the helm release is recreated and the pods are running. 
+
+. Make sure the certificate is generated by running the following command:
+
++
+----
+oc get certificates.certmanager.k8s.io
+----
++
+You might receive the following respoonse:
+
++
+----
+(base) ➜  cert-manager git:(master) ✗ oc get certificates.certmanager.k8s.io
+NAME                                            READY   SECRET                                          AGE   EXPIRATION
+multicloud-ca-cert                              True    multicloud-ca-cert                              61m   2025-09-27T17:10:47Z
+----
+
+. Update the other components with this certificate, by downloading and running https://gist.github.com/cdoan1/79451b3d75a2f3f1b74b3622029d6989[`generate-update-issuer-cert-manifest.sh` script].
+
+. Verify that all of the secrets from `oc get certificates.certmanager.k8s.io` have the ready state `True`.  
