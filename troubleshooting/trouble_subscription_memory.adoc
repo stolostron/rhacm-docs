@@ -1,0 +1,94 @@
+[#troubleshooting-standalone-subscription-memory]
+= Troubleshooting standalone subscription memory 
+
+The `multicluster-operators-standalone-subscription` pod restarts regularly because of a memory issue.
+
+[#symptom-cluster-offline]
+== Symptom: Standalone subscription memory
+
+When OLM deploys all operators, not only the multicluster-subscription-operator, the `multicluster-operators-standalone-subscription` pod restarts because not enough memory is allocated to the standalone subscription container.
+
+The memory limit of the `multicluster-operators-standalone-subscription` pod was increased to 2G in the multicluster subscription community operator CSV, but this resource limit setting is ignored by OLM. 
+
+[#resolving-cluster-offline]
+== Resolving the problem: Standalone subscription memory
+
+. After installation, find the operator subscription CR that subscribes the multicluster subscription community operator.
+
++
+Use the following command for an upstream build:
+
++
+----
+% oc get sub -n open-cluster-management  multicluster-operators-subscription-alpha-community-operators-openshift-marketplace
+----
+
++
+Use the following command for an downstream build:
+
++
+----
+% oc get sub -n open-cluster-management   acm-operator-subscription
+----
+
+. Edit the operator subscription CR by appending the `spec.config.resources` `.yaml` file to define resource limits. 
+
++
+**Note:** Do not create a new operator subscription CR that subscribes the same multicluster subscription community operator. 
+
++
+Because two operator subscriptions are linked to one operator, the operator pods are "killed" and restarted by the two operator subscription CRs.
+
+See the following updated `.yaml` file example:
+
++
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: multicluster-operators-subscription-alpha-community-operators-openshift-marketplace
+  namespace: open-cluster-management
+spec:
+  channel: release-2.1
+  config:
+    resources: 
+      limits:
+        cpu: 750m
+        memory: 2Gi
+      requests:
+        cpu: 150m
+        memory: 128Mi
+  installPlanApproval: Automatic
+  name: multicluster-operators-subscription
+  source: community-operators
+  sourceNamespace: openshift-marketplace 
+----
+
+. After the CR is saved, ensure that the standalone subscription pod is restarted with 2G memory limit. Run the following command:
+
++
+----
+% oc get pods -n open-cluster-management multicluster-operators-standalone-subscription-7c8cbf885f-c94kz -o yaml
+----
+
++
+----
+apiVersion: v1
+kind: Pod
+...
+spec:
+  containers:
+  - image: quay.io/open-cluster-management/multicluster-operators-subscription:community-2.1
+...
+    resources:
+      limits:
+        cpu: 750m
+        memory: 2Gi
+      requests:
+        cpu: 150m
+        memory: 128Mi
+...
+status:
+  qosClass: Burstable
+----
+
