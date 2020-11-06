@@ -52,6 +52,72 @@ To resolve this issue, verify if the certificate manager is present in your clus
 kubectl get crd | grep certificates.certmanager
 ----
 
+[#upgrade-leaves-clusterserviceversion-pending]
+=== Upgrade from version 2.0.4 to version 2.1 leaves the ClusterServiceVersion in a pending state.
+
+// 2.1.0:6747
+
+After you upgrade from {product-title-short} version 2.0.4 to version 2.1 and run the `oc get csv` command, the _PHASE_ of your {product-title-short} ClusterServiceVersion (CSV) is `Pending`. The output resembles the following content:
+
+----  
+NAME                                 DISPLAY                                      VERSION   REPLACES                             PHASE
+advanced-cluster-management.v2.1.0   Advanced Cluster Management for Kubernetes   2.1.0     advanced-cluster-management.v2.0.4   Pending
+----
+
+To workaround this issue, complete the following steps to find and create the missing `clusterRole` custom resource:
+
+. Find all `clusterrolebinding` resources that were deployed by the {product-title-short} 2.1 CSV by entering the following command: 
++
+----
+oc get clusterrolebinding |grep advanced-cluster-management
+---- 
++ 
+Your output should resemble the following content:
++
+----
+advanced-cluster-management.v2.1.0-86dfdf7c5d                               ClusterRole/advanced-cluster-management.v2.1.0-86dfdf7c5d                                     9h
+advanced-cluster-management.v2.1.0-cd8d57f64                                ClusterRole/advanced-cluster-management.v2.1.0-cd8d57f64                                      9h
+----
+
+. Open each `clusterrolebinding` to find the `clusterRole` name that is associated to the `open-cluster-management` service account by entering a command that resembles the following command:
++
+----
+oc get clusterrolebinding advanced-cluster-management.v2.1.0-cd8d57f64 -o yaml 
+----
++
+Your output should resemble the following content:
++
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: advanced-cluster-management.v2.1.0-cd8d57f64
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: advanced-cluster-management.v2.1.0-cd8d57f64
+subjects:
+- kind: ServiceAccount
+  name: multicluster-operators
+  namespace: open-cluster-management
+----
+
+. Manually create any missing `clusterRole` entries by adding content that resembles the following content to your `.yaml` file:
++
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: advanced-cluster-management.v2.1.0-cd8d57f64
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'
+----
+
 [#web-console-known-issues]
 == Web console known issues
 
