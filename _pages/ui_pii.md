@@ -3,15 +3,15 @@ permalink: /ui_pii
 title: "Pii"
 ---
 
-## What is PII? 
+## What is considered user-facing content (IBM term) PII? 
 
-[PII](http://w3-03.ibm.com/globalization/page/4161) (Program Integrated Information) is user-visible text that is contained within a software program and is integral to the execution of that program. This applies to all software, whether it is operating system, middleware, or application software.
+User-facing content (IBM term: Program Integrated Information) is user-visible text that is contained within a software program and is integral to the execution of that program. This applies to all software, whether it is operating system, middleware, or application software.
 
 In this context, "contained within" means accessible only by running the software, and "integral to execution" means essential to the execution of the software. Traditionally, this has meant messages, contextual help, and extended help information. The introduction of new human-computer interaction technologies broadens this to include concepts such as intelligent agents, coaches, and wizards. The primary goal of such concepts is to guide users through complex tasks rather than to educate or inform.
 
-## Where is PII used?
+## Where?
 
-PII is used throughout our User Interface (UI) and products for embedded assistance and progressive disclosure, such as 
+Used throughout our User Interface (UI) and products for embedded assistance and progressive disclosure, such as 
 
 - Labels and alt text for UI controls
 - Tooltips
@@ -36,10 +36,10 @@ PII is used throughout our User Interface (UI) and products for embedded assista
 - Terms of Use
 - Service Delivery contracts (SD)
 
-## Reason for ID input on PII
+## Reason for doc input on 
 
-- ID reviews all new PII, such labels, tooltips, error messages, and other UI text
-- ID reviews with IBM style, IBM terminology, existing docs, and progressive disclosure in mind
+- Doc reviews all new PII, such labels, tooltips, error messages, and other UI text
+- Doc reviews with IBM/Pattern Fly style, terminology, existing docs, and progressive disclosure in mind
 - Focus on consistency across all product documentation and other IBM products including the following documentation sources:
   - UI text 
   - Knowledge Center
@@ -50,15 +50,15 @@ PII is used throughout our User Interface (UI) and products for embedded assista
 - Provide assistance to design and development with writing UI text
 - Provide feedback on related user flows to improve and simplify UI and text
 
-## Process to get PII reviewed
+## Process to get user-facing content reviewed
 
-For general clean-up, a GitHub issue needed (if using a dev issue for PII files, add ID label `squad:doc` and your squad's assigned writer):
-- Add the label `PII`
+For general clean-up, a GitHub issue needed (if using a dev issue for PII files, add doc label `squad:doc` and your squad's assigned writer):
+
 - Create your PR and assign writer as reviewer
 - Additionally, you can provide the link to your properties files and request that the writer edit the file for you in his or her own branch/PR
 ____________________________________________________________________________________
 
-Hill Process: (this is only for new work assigned per hill): 
+Story Process: (this is only for new work assigned per story): 
 - Issue (squad: design and squad: doc) 
 - InVision prototype for Design/ID (Doc writer/Design focal/Design content focal) to get feedback on content. (Relies on the latest build)
 - Mid-fi for feedback and initial review
@@ -73,12 +73,12 @@ IBM provides guidelines for messages within the Information Development Knowledg
 
 Ensure that you follow these guidelines to avoid poor error messages: 
 
-- Poorly written and incomplete messages are costly to IBM:
+- Poorly written and incomplete messages are costly:
 
-- Poor messages cause customers to call IBM Support, which can cost thousands, if not tens of thousands, of dollars.
+- Poor messages cause customers to call Support, which can cost thousands, if not tens of thousands, of dollars.
 For many products, the top searches on information centers or other search engines are for messages: Customers are looking for more information to help them resolve the problem. In many cases, the message that was shown in the interface was not helpful.
 Regularly review information center search statistics to determine whether users are looking for specific messages. There could be problems with those messages.
 
-- Poor messages reflect badly on IBM products. Consumable software and hardware products require that all parts of the product, including user interface (UI) text, embedded assistance, information center and help topics, and messages are clear, accurate, complete, and helpful.
+- Poor messages reflect badly on products. Consumable software and hardware products require that all parts of the product, including user interface (UI) text, embedded assistance, information center and help topics, and messages are clear, accurate, complete, and helpful.
 
 
