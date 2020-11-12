@@ -18,10 +18,10 @@ Monitor the health of your managed clusters with the observability service (`mul
 Enable the observability service by creating a MultiClusterObservability CustomResource (CR) instance. Complete the following steps to enable the observability service: 
 
 . Log in to your {product-title-short} hub cluster. 
-. Create a namespace for the observability service with the following commad:
+. Create a namespace for the observability service with the following command:
 +
 ----
-oc create-namespace open-cluster-management-observability
+oc create namespace open-cluster-management-observability
 ----
 
 . Copy the `multiclusterhub-operator-pull-secret` from the `open-cluster-management` namespace to the `open-cluster-management-observability` namespace by running the following command:
@@ -30,12 +30,19 @@ oc create-namespace open-cluster-management-observability
 ----
 oc get secret multiclusterhub-operator-pull-secret -n open-cluster-management --export -o yaml |  kubectl apply --namespace=open-cluster-management-observability -f -
 ----
++
+If the `multiclusterhub-operator-pull-secret` is not defined in the namespace, copy the pull-secret from the `openshift-config` namespace into the `open-cluster-management-observability` namespace. Run the following command:
++
+----
+oc get secret pull-secret -n openshift-config --export -o yaml | sed 's/name:\ pull-secret/name: multiclusterhub-operator-pull-secret/' | kubectl apply --namespace=open-cluster-management-observability -f -
+----
+
 
 . Create a secret for your object storage. Your secret must contain the credentials to your storage solution. For example, run the following command:
 
 +
 ----
-kubectl create -f thanos-object-storage.yaml
+oc create -f thanos-object-storage.yaml -n open-cluster-management-observability
 ----
 +
 .. View the following examples of secrets for the supported object stores:
@@ -101,10 +108,10 @@ spec:
   retentionResolutionRaw: 5d
   storageConfigObject: # Specifies the storage to be used by Observability
     metricObjectStorage:
-      name: aws-object-storage
-      key: aws.yaml
+      name: thanos-object-storage
+      key: thanos.yaml
     statefulSetSize: 10Gi # The amount of storage applied to the Observability stateful sets, i.e. Amazon S3 store, Rule, compact and receiver.
-    statefulSetStorageClass:gp2
+    statefulSetStorageClass: gp2
 ----
 +
 You might want to modify the value for the `retentionResolution` parameter. For more information, see link:https://thanos.io/v0.8/components/compact/#downsampling-resolution-and-retention[Thanos Downsampling resolution and retention]. Depending on the number of managed clusters, you might want to update `statefulSetSize`, see link:../apis/observability.json.adoc#observability-api[Observability API] for more information.
@@ -119,8 +126,8 @@ All the pods in `open-cluster-management-observability` namespace for Thanos, Gr
 
 . To validate that the observabilty service is enabled, launch the Grafana dashboards to make sure the data is populated. Complete the following steps:
 .. Log in to the {product-title-short} console.
-.. From the navigation menu, select *Observe environments* > *Overview* page.
-.. Click the Grafana link that is near the console header, to view the metrics from your managed clusters.
+.. From the navigation menu, select *Observe environments* > *Overview*.
+.. Click the Grafana link that is near the console header to view the metrics from your managed clusters.
 +
 *Note*: If you want to exclude specific managed clusters from collecting the observability data, add the following cluster label to your clusters: `vendor: OpenShift`.
 
@@ -133,7 +140,7 @@ Disable the observability service by removing the `observability` resource that 
 . Delete the `observability` resource with the following command:
 +
 ----
-kubectl mco observability
+oc delete mco observability
 ----
 +
 When you delete the resource, the pods in the `open-cluster-management-observability` namespace on {product-title-short} hub cluster, and the pods in `open-cluster-management-addon-observability` namespace on all managed clusters are removed. 
