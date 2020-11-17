@@ -102,45 +102,57 @@ In the following example, there is a folder for each hub cluster. You can also c
 
 A single subscription defined on the hub cluster pulls in all the other configuration resources, such as hub cluster config, policies, and common applications that will configure and deploy to the hub and managed clusters.
 
-A Git repository to store this type of information can resemble the following repositoty list:
-
+A Git repository to store this type of information can resemble the following file and directory structure
+## Root path
+These files in the root path of the repository, create a subscription that references this Git repository and applies all the YAML except what is specified in the .kubernetesignore (includes these four subscription files and the ./managed-cluster-common directory)
 ----
-(MAIN branch) rhacm-hub-cluster/
-  /                          # Repository root directoy
-    ## The subscription that delivers all the previous content to the hub cluster:
-    hub-application.yaml     # This represents the hub cluster configuration in the console
-    hub-channels.yaml        # This points to `rhacm-hub-cluster` Git repository
-    hub-subscriptions.yaml   # This defines the time window, branch to be used, and defines which directories containing appropriate configs, such as `hub-policies`, should be used (can be all)
-    hub-placement.yaml       # Points back to the `local-cluster` (hub cluster that is managed)
-    .kubernetesignore        # Tells the subscription to ignore hub-application.yaml, hub-channels.yaml, hub-subscription.yaml & hub-placement.yaml
-  common-managed/
+/                          # Repository root directoy
+  ## The subscription that delivers all the previous content to the hub cluster:
+  hub-application.yaml     # This represents the hub cluster configuration in the console
+  hub-channels.yaml        # This points to `rhacm-hub-cluster` Git repository
+  hub-subscriptions.yaml   # This defines the time window, branch to be used, and defines which directories containing appropriate configs, such as `hub-policies`, should be used (can be all)
+  hub-placement.yaml       # Points back to the `local-cluster` (hub cluster that is managed)
+  .kubernetesignore        # Tells the subscription to ignore hub-application.yaml, hub-channels.yaml, hub-subscription.yaml & hub-placement.yaml
+----
+### The following directories contain subscriptions that will apply applications to the managed clusters. These subscriptions are applied to the ACM Hub via the subscription in the root directory (this is an example of one subscription, subscribing another).
+----
+common-managed/
     apps/
       app-name-0/
         application.yaml
         subscription.yaml
-        channel.yaml        # This points to `app-name-0` manifest repo, such as `deployment.yaml` or Helm chart
+        channel.yaml        # This points to a repository named `app-name-0`, of type Git, Helm, or Object Storage
         placementrule.yaml
       app-name-1/
         application.yaml
         subscription.yaml
-        channel.yaml        # This points to `app-name-1` manifest repo, such as `deployment.yaml` or Helm chart
+        channel.yaml        # This points to a repository named `app-name-0`, of type Git, Helm, or Object Storage
         placementrule.yaml
     config/
       application.yaml      # named: `day2-config`
       subscription.yaml     # Points to the `managed-cluster-common/configs` parent directory
       channel.yaml          # Can point to this Git repository or a different repository with the day-two configuration
       placementrule.yaml    # Defines the clusters to target
+managed-cluster-common/
+  configs/                  # These configurations are referenced via the `config` subscription
+    certmanagement.yaml
+    auth-oidc.yaml
+    autoscaler.yaml
+    descheduler.yaml
+----
+### The following policies are applied to the ACM Hub and offer both configuration for the Hub as well as policies for remote clusters. These are delivered via the root subscription.
+----
+managed-cluster-common/
   policies/
     policy-0.yaml
     policy-1.yaml
   hub-policies/
     policy-0.yaml
-managed-cluster-common/
-  configs/
-    certmanagement.yaml
-    auth-oidc.yaml
-    autoscaler.yaml
-    descheduler.yaml
     vault.yaml
     operators.yaml
 ----
+This combination allows you to specify the following:
+1. A root subscription that can be applied with a CLI command, that will subscribe back to this repository to apply all the YAML to the ACM Hub.
+2. The subscription from step 1, applies application and configuration subscriptions from `common-managed/`
+3. The configuration subscription in step 2, applies the resources defined in `managed-cluster-common/`
+4. The policies defined in `managed-cluster-common/` are also applied to the ACM hub by the subscription in step 1. These policies include those targetd toward the ACM Hub as well as those that target Managed-Clusters
