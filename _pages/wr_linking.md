@@ -40,6 +40,11 @@ There are several ways reference links in the ASCII source file (`.adoc`). View 
   <<<section-anchor,section-title>>>
 
   // book cross reference
+  link:../console/web_console.adoc#random-web-console[Web console link example]
+
+  //same book cross reference
+
+  ```
   xref:../console/web_console.adoc#random-web-console[Web console link example]
   ```
 
