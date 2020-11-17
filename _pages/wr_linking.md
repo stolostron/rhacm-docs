@@ -9,7 +9,7 @@ Links in the documentation are important to the reader. Broken links create an i
 
 When writers advise readers to select a link, it can be disruptive and divert the reader away from the task. To keep the customer in mind, consider providing a link at the end of your page to direct the user to the topic they previously read. This is beneficial in case the user wants to return and view more topics.
 
-**Important**: Link only to related topics. Avoid using more than 10 links in your topic. See your corporate manual for more information.
+**Important**: Link only to related topics, and avoid using more than 10 links in your topic. See your corporate manual for more information.
 
 ## Types of link referencing
 
