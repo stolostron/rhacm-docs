@@ -93,18 +93,22 @@ data:
 
 Using a `local-cluster` placement rule, you can use a subscription to deliver configuration-related resources to the hub cluster.  
 
-These resources can be the subscriptions that configure applications, policies, run Ansible jobs, and configure your clusters after you provision or after you import.
+These resources can be the subscriptions that configure applications and policies, run Ansible jobs, and configure your clusters after you provision, or after you import.
 
 [#sample-yaml-git-ops]
 === Sample YAML for Git Ops
 
-In the following example, there is a folder for each hub cluster. You can also create a repository for each hub cluster or a branch for each hub cluster. 
+In the following example repository, you see a folder for each hub cluster. You can also create a repository for each hub cluster, or a branch for each hub cluster. 
 
-A single subscription defined on the hub cluster pulls in all the other configuration resources, such as hub cluster config, policies, and common applications that will configure and deploy to the hub and managed clusters.
+A single subscription that is defined on the hub cluster pulls in all the other configuration resources, such as hub cluster config, policies, and common applications that will configure and deploy to the hub and managed clusters.
 
-A Git repository to store this type of information can resemble the following file and directory structure
-## Root path
-These files in the root path of the repository, create a subscription that references this Git repository and applies all the YAML except what is specified in the .kubernetesignore (includes these four subscription files and the ./managed-cluster-common directory)
+A Git repository to store this type of information can resemble the following sample file and directory structure. See the sections for root path, managed cluster, and hub cluster:
+
+[#git-ops-root-path]
+=== GitOps root path
+
+These files in the root path of the repository create a subscription that references this Git repository, and applies all the YAML, except what is specified in the `.kubernetesignore`. It includes these four subscription files and the `./managed-cluster-common` directory.
+
 ----
 /                          # Repository root directoy
   ## The subscription that delivers all the previous content to the hub cluster:
@@ -114,7 +118,14 @@ These files in the root path of the repository, create a subscription that refer
   hub-placement.yaml       # Points back to the `local-cluster` (hub cluster that is managed)
   .kubernetesignore        # Tells the subscription to ignore hub-application.yaml, hub-channels.yaml, hub-subscription.yaml & hub-placement.yaml
 ----
-### The following directories contain subscriptions that will apply applications to the managed clusters. These subscriptions are applied to the ACM Hub via the subscription in the root directory (this is an example of one subscription, subscribing another).
+
+[#git-ops-managed-clusters]
+=== GitOps application to managed clusters
+
+The following directories contain subscriptions that will apply applications to the _managed_ clusters. These subscriptions are applied to the hub cluster through the subscription in the root directory. 
+
+In the following sample, you see one subscription that is subscribing another:
+
 ----
 common-managed/
     apps/
@@ -130,17 +141,23 @@ common-managed/
         placementrule.yaml
     config/
       application.yaml      # named: `day2-config`
-      subscription.yaml     # Points to the `managed-cluster-common/configs` parent directory
+      subscription.yaml     # Points to the `managed-cluster-common/config` parent directory
       channel.yaml          # Can point to this Git repository or a different repository with the day-two configuration
       placementrule.yaml    # Defines the clusters to target
 managed-cluster-common/
-  configs/                  # These configurations are referenced via the `config` subscription
+  configs/                  # These configurations are referenced through the `config` subscription
     certmanagement.yaml
     auth-oidc.yaml
     autoscaler.yaml
     descheduler.yaml
 ----
-### The following policies are applied to the ACM Hub and offer both configuration for the Hub as well as policies for remote clusters. These are delivered via the root subscription.
+
+[#git-ops-hub-clusters]
+=== GitOps application to hub clusters
+
+The following policies are applied to the hub cluster and offer both configuration for the hub cluster, as well as policies for remote clusters. 
+
+These are delivered through the root subscription, as seen in the following sample:
 ----
 managed-cluster-common/
   policies/
@@ -151,8 +168,13 @@ managed-cluster-common/
     vault.yaml
     operators.yaml
 ----
-This combination allows you to specify the following:
-1. A root subscription that can be applied with a CLI command, that will subscribe back to this repository to apply all the YAML to the ACM Hub.
-2. The subscription from step 1, applies application and configuration subscriptions from `common-managed/`
-3. The configuration subscription in step 2, applies the resources defined in `managed-cluster-common/`
-4. The policies defined in `managed-cluster-common/` are also applied to the ACM hub by the subscription in step 1. These policies include those targetd toward the ACM Hub as well as those that target Managed-Clusters
+
+[#apply-gitops]
+=== Apply GitOps
+
+With the previous sample combination, you can specify the following:
+
+. A root subscription that can be applied with a CLI command. The root subscription will subscribe back to this repository to apply all the YAML to the hub cluster.
+. The subscription from step 1, which applies application and configuration subscriptions from `common-managed/`.
+. The configuration subscription in step 2, which applies the resources defined in `managed-cluster-common/`.
+. The policies that are defined in `managed-cluster-common/` are also applied to the hub cluster by the subscription in step 1. These policies include those targeted toward the hub cluster, as well as those that target managed clusters.
