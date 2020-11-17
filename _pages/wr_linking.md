@@ -5,13 +5,15 @@ title: "Linking"
 
 # Links in the documentation
 
-Links in the documentation are important to the reader. Broken links create an inconvenient experience, and interupts the review during documentation tests. As you create customer-facing documentation, it is important to consider the placement and accurancy of links. 
+Links in the documentation are important to the reader. Broken links create an inconvenient experience, and interrupts the review during documentation tests. As you create customer-facing documentation, it is important to consider the placement and accuracy of links. 
 
 When writers advise readers to select a link, it can be disruptive and divert the reader away from the task. To keep the customer in mind, consider providing a link at the end of your page to direct the user to the topic they previously read. This is beneficial in case the user wants to return and view more topics.
 
+**Important**: Link only to related topics. Avoid using more than 10 links in your topic. See your corporate manual for more information.
+
 ## Types of link referencing
 
-There are several ways referrence links in the ASCII source file (`.adoc`). View a list of examples for link referencing:
+There are several ways reference links in the ASCII source file (`.adoc`). View a list of examples for link referencing:
 
 * Document/section header:
 
@@ -23,7 +25,7 @@ There are several ways referrence links in the ASCII source file (`.adoc`). View
   == Section header
   ```
 
-**Note:** It is not required for the anchor to match the entire name of the document or title. Ensure that the link reference includes the correct anchor for a specific document.
+**Note:** It is not required for the anchor to match the entire name of the document or title. Ensure that the link reference includes the correct anchor for a specific document. Avoid using spaces and special characters in the brackets
 
 * External links:
 
