@@ -25,7 +25,7 @@ There are several ways reference links in the ASCII source file (`.adoc`). View 
   == Section header
   ```
 
-**Note:** It is not required for the anchor to match the entire name of the document or title. Ensure that the link reference includes the correct anchor for a specific document. Avoid using spaces and special characters in the brackets
+  **Note:** It is not required for the anchor to match the entire name of the document or title. Ensure that the link reference includes the correct anchor for a specific document. Avoid using spaces and special characters in the brackets
 
 * External links:
 
@@ -43,8 +43,6 @@ There are several ways reference links in the ASCII source file (`.adoc`). View 
   link:../console/web_console.adoc#random-web-console[Web console link example]
 
   //same book cross reference
-
-  ```
   xref:../console/web_console.adoc#random-web-console[Web console link example]
   ```
 
