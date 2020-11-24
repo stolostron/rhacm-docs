@@ -6,36 +6,38 @@ Logs from the `open-cluster-management` namespace display failure to clone the G
 [#symptom-git-server]
 == Symptom: Git server connection 
 
-The logs from the subscription controller pod `multicluster-operators-hub-subscription-<your-cluster>` in the `open-cluster-management` namespace indicates that it fails to clone the Git repository. You receive a `x509: certificate signed by unknown authority` error, or `BadGateway` error.
+The logs from the subscription controller pod `multicluster-operators-hub-subscription-<random-characters>` in the `open-cluster-management` namespace indicates that it fails to clone the Git repository. You receive a `x509: certificate signed by unknown authority` error, or `BadGateway` error.
  
 [#resolving-git-server]
 == Resolving the problem: Git server connection 
 
 *Important:* Upgrade to product version 2.1 if you are on a previous version.
 
-. On the hub cluster, update the channel CRD with the link:(channels_crd.yaml)[https://github.com/open-cluster-management/multicloud-operators-channel/blob/master/deploy/crds/apps.open-cluster-management.io_channels_crd.yaml].
+. Save link:(apps.open-cluster-management.io_channels_crd.yaml)[https://github.com/open-cluster-management/multicloud-operators-channel/blob/master/deploy/crds/apps.open-cluster-management.io_channels_crd.yaml] as file named `apps.open-cluster-management.io_channels_crd.yaml`.
 
-. Run the following command to apply the file: 
+. On the RHACM cluster, run the following command to apply the file: 
 
 +
 ----
 oc apply -f apps.open-cluster-management.io_channels_crd.yaml`
 ----
 
-. In the `open-cluster-management` namespace, edit the `advanced-cluster-management.v2.1.0` .csv file. Run the following command to edit:
+. In the `open-cluster-management` namespace, edit the `advanced-cluster-management.v2.1.0` CSV. Run the following command to edit:
 
 +
 ----
 oc edit csv advanced-cluster-management.v2.1.0 -n open-cluster-management
 ----
 
-. Find the following containers:
++
+Find the following containers:
 
 +
 - `multicluster-operators-standalone-subscription` 
 - `multicluster-operators-hub-subscription` 
 
-. Update the container images. Your update should resemble the following:
++
+Replace the container images with the following:
 
 +
 ----
@@ -43,17 +45,18 @@ quay.io/open-cluster-management/multicluster-operators-subscription:2.2-PR337-91
 ---- 
 
 +
-The update recreates the following images in the `open-cluster-management` namespace: 
+The update recreates the following pods in the `open-cluster-management` namespace: 
 
 
-- `multicluster-operators-standalone-subscription-<your-cluster>`
+- `multicluster-operators-standalone-subscription-<random-characters>`
 
-- `multicluster-operators-hub-subscription-<your-cluster>` 
+- `multicluster-operators-hub-subscription-<random-characters>` 
 
-. Check that the new pods are running with the new docker image. Run the following command, then find your image:
+. Check that the new pods are running with the new docker image. Run the following command, then look for the new docker image:
 
 ----
-oc get pod multicluster-operators-hub-subscription-<your-cluster> -n open-cluster-management -o yaml
+oc get pod multicluster-operators-standalone-subscription-<random-characters> -n open-cluster-management -o yaml
+oc get pod multicluster-operators-hub-subscription-<random-characters> -n open-cluster-management -o yaml
 ----
 
 . Update the images on managed clusters. 
@@ -73,14 +76,8 @@ oc annotate klusterletaddonconfig -n CLUSTER_NAME CLUSTER_NAME klusterletaddonco
 oc edit manifestwork -n CLUSTER_NAME  CLUSTER_NAME-klusterlet-addon-appmgr
 ----
   
-. Find the following image:
+. Find `spec.global.imageOverrides.multicluster_operators_subscription` and set the value to:
 
-+
-----
-spec.global.imageOverrides.multicluster_operators_subscription
-----
-
-. Set the value as it is displayed in the following example:
 
 +
 ----
@@ -88,7 +85,7 @@ quay.io/open-cluster-management/multicluster-operators-subscription:2.2-PR337-91
 ---- 
 
 +
- This recreates the `klusterlet-addon-appmgr-<your-cluster>` pod in `open-cluster-management-agent-addon` namespace on the managed cluster. 
+This recreates the `klusterlet-addon-appmgr-<random-characters>` pod in `open-cluster-management-agent-addon` namespace on the managed cluster. 
 
 . Check that the new pod is running with the new docker image.
 
