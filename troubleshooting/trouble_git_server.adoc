@@ -1,0 +1,106 @@
+[#troubleshooting-application-git-server]
+= Troubleshooting application Git server connection 
+
+Logs from the `open-cluster-management` namespace display failure to clone the Git repository.
+
+[#symptom-git-server]
+== Symptom: Git server connection 
+
+The logs from the subscription controller pod `multicluster-operators-hub-subscription-<random-characters>` in the `open-cluster-management` namespace indicates that it fails to clone the Git repository. You receive a `x509: certificate signed by unknown authority` error, or `BadGateway` error.
+ 
+[#resolving-git-server]
+== Resolving the problem: Git server connection 
+
+*Important:* Upgrade to product version 2.1 if you are on a previous version.
+
+. Save link:(apps.open-cluster-management.io_channels_crd.yaml)[https://github.com/open-cluster-management/multicloud-operators-channel/blob/master/deploy/crds/apps.open-cluster-management.io_channels_crd.yaml] as file named `apps.open-cluster-management.io_channels_crd.yaml`.
+
+. On the Advanced Cluster Management cluster, run the following command to apply the file: 
+
++
+----
+oc apply -f apps.open-cluster-management.io_channels_crd.yaml
+----
+
+. In the `open-cluster-management` namespace, edit the `advanced-cluster-management.v2.1.0` CSV, run the following command and edit:
+
++
+----
+oc edit csv advanced-cluster-management.v2.1.0 -n open-cluster-management
+----
+
++
+Find the following containers:
+
++
+- `multicluster-operators-standalone-subscription` 
+- `multicluster-operators-hub-subscription` 
+
++
+Replace the container images with the following:
+
++
+----
+quay.io/open-cluster-management/multicluster-operators-subscription:2.2-PR337-91af6cb37d427d22160b2c055589a4418dada4eb
+---- 
+
++
+The update recreates the following pods in the `open-cluster-management` namespace: 
+
+
+- `multicluster-operators-standalone-subscription-<random-characters>`
+
+- `multicluster-operators-hub-subscription-<random-characters>` 
+
+. Check that the new pods are running with the new docker image. Run the following command, then find the new docker image:
+
+----
+oc get pod multicluster-operators-standalone-subscription-<random-characters> -n open-cluster-management -o yaml
+oc get pod multicluster-operators-hub-subscription-<random-characters> -n open-cluster-management -o yaml
+----
+
+. Update the images on managed clusters. 
+
++
+On the hub cluster, run the following command by replacing `CLUSTER_NAME` with the actual managed cluster name:
+
++
+----
+oc annotate klusterletaddonconfig -n CLUSTER_NAME CLUSTER_NAME klusterletaddonconfig-pause=true --overwrite=true
+----
+
+. Run the following command, replacing `CLUSTER_NAME` with the actual managed cluster name:
+
++
+----
+oc edit manifestwork -n CLUSTER_NAME  CLUSTER_NAME-klusterlet-addon-appmgr
+----
+  
+. Find `spec.global.imageOverrides.multicluster_operators_subscription` and set the value to:
+
+
++
+----
+quay.io/open-cluster-management/multicluster-operators-subscription:2.2-PR337-91af6cb37d427d22160b2c055589a4418dada4eb
+---- 
+
++
+This recreates the `klusterlet-addon-appmgr-<random-characters>` pod in `open-cluster-management-agent-addon` namespace on the managed cluster. 
+
+. Check that the new pod is running with the new docker image.
+
+. When you create an application through the console or the CLI, add `insecureSkipVerify: true' in the channel spec manually. See the following example:
+
++
+----
+apiVersion: apps.open-cluster-management.io/v1
+ind: Channel
+metadata:
+labels:
+  name: sample-channel
+  namespace: sample
+spec:
+  type: GitHub
+  pathname: <Git URL>
+  insecureSkipVerify: true
+----
