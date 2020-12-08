@@ -75,6 +75,83 @@ This occurs when one or more ClusterImageSets on the existing version have the s
 
 . Restart the upgrade.
 
+[#upgrade-disables-klusterletaddonconfig]
+=== Upgrade to 2.1.1 disables klusterletaddonconfig CRDs
+
+// 2.1.1:7582
+
+When your {product-title-short} upgrades from version 2.1.0 to version 2.1.1, the klusterletaddonconfig custom resource definitions (CRDs) might be reinstalled during the upgrade. If this happens, all of the add ons show a `Disabled` status on the _Cluster settings_ pages. Complete the following steps to diagnose the problem and restore the klusterletaddonconfig CRDs:
+
+. Log on to the hub cluster by using the `oc login` command:
+
+. Run the following command to confirm that the deleted klusterletaddonconfig CRDs occurred because of the reinstalled CRDs:
++
+----
+% oc get klusterletaddonconfig --all-namespaces 
+----
++
+If the returned content is `No resources found`, the reinstallation is likely the issue. Continue with step 3.
+
+. Save the following script to a file. For this example, the filename is `restore-addons.sh`:
++
+----
+KUBECTL=oc
+ACM_NAMESPACE=open-cluster-management
+
+ACM_VERSION=$(${KUBECTL} get -n ${ACM_NAMESPACE} `${KUBECTL} get mch -oname -n ${ACM_NAMESPACE} | head -n1` -ojsonpath='{.status.desiredVersion}')
+if [ "${ACM_VERSION}" = ""  ]; then
+ACM_VERSION=2.1.1
+fi
+
+echo "ACM version: ${ACM_VERSION}"
+
+for clusterName in `${KUBECTL} get managedcluster --ignore-not-found | grep -v "NAME" | awk '{ print $1 }'`; do
+    echo "Checking klusterletaddonconfig in ${clusterName} namespace."
+    ${KUBECTL} get klusterletaddonconfig ${clusterName} -n ${clusterName} >/dev/null 2>&1
+    if [ "$?" != "0"  ]; then
+        echo "  klusterletaddonconfig in ${clusterName} is missing."
+        echo "  Crerating..."
+        printf "  "
+        cat <<EOF | ${KUBECTL}  apply -f - 
+apiVersion: agent.open-cluster-management.io/v1
+kind: KlusterletAddonConfig
+metadata:
+  name: ${clusterName}
+  namespace: ${clusterName}
+spec:
+  clusterLabels:
+    cloud: auto-detect
+    vendor: auto-detect
+  clusterName: ${clusterName}
+  clusterNamespace: ${clusterName}
+  applicationManager:
+    enabled: true
+  certPolicyController:
+    enabled: true
+  iamPolicyController:
+    enabled: true
+  policyController:
+    enabled: true
+  searchCollector:
+    enabled: true
+  version: ${ACM_VERSION}
+EOF
+
+    fi
+    echo "  Done."
+done
+----
++
+Replace the value for `ACM_NAMESPACE` with the name of your namespace, if you did not install {product-title-short} in the `open-cluster-management` namespace.
+
+. Run the script from command line. Your command should resemble the following command:
++
+----
+chmod +x restore-addons.sh && ./restore-addons.sh
+----
++
+Running the script recreates the missing klusterletaddonconfig CRDs in each managed cluster namespace.
+
 [#openshift-container-platform-cluster-upgrade-failed-status]
 === OpenShift Container Platform cluster upgrade failed status
 
