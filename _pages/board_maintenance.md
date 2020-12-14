@@ -22,6 +22,7 @@ title: "Documentation board hygiene and maintance"
 # Milestones and columns
 
   - Future milestone can go into product
+  - Doc issues must be placed a minimum of 2 sprints ahead of the related dev issue. For example, if the dev issue is placed in _Sprint 1_, then the doc issue is to be placed in the _Sprint 3_ milestone. 
 
 
 # Board review in scrums:
