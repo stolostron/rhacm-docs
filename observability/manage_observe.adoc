@@ -45,7 +45,7 @@ data:
             severity: critical
 ----
 +
-*Note*: If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, you must restart the observability pods with the following command: `kubectl get pods -n open-cluster-management-observability|grep thanos-rule`.
+*Note*: If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, you must restart the observability pods with the following command: `kubectl rollout restart statefulset observability-observatorium-thanos-rule -n open-cluster-management-observability`.
 
 . If you want to verify that the alert rules is functioning appropriately, complete the following steps:
 .. Access your Grafana dashboard and select the *Explore* icon.
@@ -109,10 +109,17 @@ You can also  access Grafana dashboards from the _Clusters_ page. From the navig
 [#disable-metrics-collector]
 == Disable _metrics-collector_
 
-Disable the `metrics-collector` pod to stop data from being collected and sent to the observability service on the {product-title-short} hub cluster. When you disable the `metrics-collector` deployment is scaled to zero, and all managed clusters with the `vendor:OpenShift` label are disabled. View the following options to disable the `metrics-collector`:
+You can disable the `metrics-collector`, which stops it from collecting the data and sending the collection data to the observability service. 
 
-* Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
-+
+[#disable-metrics-collector-on-all-clusters]
+=== Disable _metrics-collector_ on all clusters
+
+Disable the `metrics-collector` pod to stop data from being collected and sent to the observability service on the {product-title-short} hub cluster. 
+
+When you disable the `metrics-collector` deployment is scaled to zero, and all managed clusters with the `vendor:OpenShift` label are disabled. View the following options to disable the `metrics-collector`:
+
+Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
+
 ----
 spec:
   availabilityConfig: High # Available values are High or Basic
@@ -122,9 +129,24 @@ spec:
     enableMetrics: false #indicates the observability addon push metrics to hub server
 ----
 
-* You can disable specific managed clusters. View the following options:
-** Add the `observability: disabled` label to the custom resource, `managedclusters.cluster.open-cluster-management.io`.
-** From the {product-title-short} console, access a cluster YAML file from the _Clusters_ page to add the `observability: disabled` label.
+[#disable-metrics-collector-on-a-single-cluster]
+=== Disable _metrics-collector_ on a single cluster
+
+You can disable the `metrics-collector` on specific managed clusters by completing one of the following procedures:
+
+* Add the `observability: disabled` label to the custom resource, `managedclusters.cluster.open-cluster-management.io`.
+* From the {product-title-short} console _Clusters_ page, add the `observability: disabled` label by completing the following steps:
++
+. In the {product-title-short} console navigation, select *Automate infrastructure* > *Clusters*.
+. Select the name of the cluster for which you want to disable data collection that is sent to observability. 
+. Select *Labels*.
+. Create the label that disables the observability collection by adding the following label:
++
+----
+observability=disable
+----
+. Select *Add* to add the label.
+. Select *Done* to close the list of labels. 
 
 *Note*: When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
 
