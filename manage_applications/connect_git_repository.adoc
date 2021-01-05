@@ -9,7 +9,7 @@ Git channels and subscriptions connect to the specified Git repository through H
 
 You can connect to a Git server using channel and subscription. See the following procedures for connecting to a private repository using user and access token:
 
-. Create a secret in the same namespace as the channel. Set the `user` field to a Git user ID and the `accessToken` field to a Git personal access token. The values should be base64 encoded. See the following example:
+. Create a secret in the same namespace as the channel. Set the `user` field to a Git user ID and the `accessToken` field to a Git personal access token. The values should be base64 encoded. See the following sample with user and accessToken populated:
 
 +
 [source,yaml]
@@ -24,7 +24,7 @@ data:
   accessToken: cGFzc3dvcmQK
 ----
 
-. Configure the channel with a secret. See the following sample:
+. Configure the channel with a secret. See the following sample with the `secretRef` populated:
 
 +
 [source,yaml]
@@ -44,15 +44,17 @@ spec:
 [#insecure-http-server]
 == Making an insecure HTTPS connection to a Git server
 
-You can use the following connection method in development environment to connect to a privately hosted Git server with SSL certificates signed by custom or self-signed certificate authority. However, this procedure is not recommended for production:
+You can use the following connection method in a development environment to connect to a privately-hosted Git server with SSL certificates that are signed by custom or self-signed certificate authority. However, this procedure is not recommended for production:
 
-. Specify `insecureSkipVerify: true` in the channel spec. Otherwise, the connection to the Git server fails with an error similar to the following:
+Specify `insecureSkipVerify: true` in the channel spec. Otherwise, the connection to the Git server fails with an error similar to the following:
 
 ----
 x509: certificate is valid for localhost.com, not localhost
 ----
 
-+
+See the following sample with the channel spec addition for this method:
+
+
 [source,yaml]
 ----
 apiVersion: apps.open-cluster-management.io/v1
@@ -70,10 +72,11 @@ spec:
 [#using custom CA certificates for secure HTTPS connection]
 == Using custom CA certificates for a secure HTTPS connection
 
-You can use this connection method to securely connect to a privately hosted Git server with SSL certificates signed by custom or self-signed certificate authority. 
+You can use this connection method to securely connect to a privately-hosted Git server with SSL certificates that are signed by custom or self-signed certificate authority. 
 
-. Create a config map to contain the Git server root and intermediate CA certificates in PEM format. The config map must be in the same namespace as the channel CR. The field name must be `caCerts` and use `|`. `caCerts` can contain multiple certificates. See the following example:
+. Create a ConfigMap to contain the Git server root and intermediate CA certificates in PEM format. The ConfigMap must be in the same namespace as the channel CR. The field name must be `caCerts` and use `|`. As you can see from the following sample, `caCerts` can contain multiple certificates, such as root and intermediate CAs:
 
++
 ----
 apiVersion: v1
 kind: ConfigMap
@@ -194,7 +197,7 @@ data:
     -----END CERTIFICATE-----
 ----
 
-. Configure the channel with this config map. See the following example:
+. Configure the channel with this ConfigMap. See the following sample with the `git-ca` name from the previous step:
 
 +
 [source,yaml]
@@ -214,7 +217,7 @@ spec:
 [#git-SSH-connection]
 == Making an SSH connection to a Git server
 
-. Create a secret to contain your private SSH key in `sshKey` field under `data`. If the key is passphrase-protected, specify the password in `passphrase` field. This secret must be in the same namespace as the channel CR. Create this secret using a `kubectl` command to create a secret generic `git-ssh-key --from-file=sshKey=./.ssh/id_rsa`, then add base64 encoded `passphrase`. See the following example:
+. Create a secret to contain your private SSH key in `sshKey` field in `data`. If the key is passphrase-protected, specify the password in `passphrase` field. This secret must be in the same namespace as the channel CR. Create this secret using a `kubectl` command to create a secret generic `git-ssh-key --from-file=sshKey=./.ssh/id_rsa`, then add base64 encoded `passphrase`. See the following sample:
 
 +
 [source,yaml]
@@ -249,7 +252,8 @@ spec:
   type: Git
 ----
 
-*Note:* The subscription controller does `ssh-keyscan` with the provided Git hostname to build the known_hosts list to prevent MITM attack in SSH connection. If you want to skip this and make insecure connection, use `insecureSkipVerify: true` in the channel configuration. This is not recommended in general and especially in production environment.
++
+The subscription controller does an `ssh-keyscan` with the provided Git hostname to build the `known_hosts` list to prevent an MITM attack in the SSH connection. If you want to skip this and make insecure connection, use `insecureSkipVerify: true` in the channel configuration. This is not best practice, especially in production environments.
 
 +
 [source,yaml]
@@ -270,4 +274,4 @@ spec:
 [#update-channel-secret-config]
 == Updating certificates and SSH keys
 
-If a Git channel connection configuration, such as CA certificates, credentials, or SSH key, requires an update, you need to create a new secret and config map in the same namespace and update the channel to reference that new secret and configmap.
+If a Git channel connection configuration, such as CA certificates, credentials, or SSH key, requires an update, you need to create a new secret and ConfigMap in the same namespace and update the channel to reference that new secret and ConfigMap.
