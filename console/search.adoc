@@ -1,33 +1,28 @@
 [#search-in-the-console]
 = Search in the console
 
-For {product-title}, Search provides visibility into your resources across all of your clusters. Search uses Redisgraph (`redisgraph-tls`), to store the Kubernetes resources and the resource relationships. Create a `searchCustomization` custom resource (CR) to define the storage settings for search persistence. 
+For {product-title}, search provides visibility into your resources across all of your clusters. Search uses Redisgraph (`redisgraph-tls`), an in-memory database to store the Kubernetes resources and the resource relationships. Create a `searchCustomization` custom resource (CR) to define the storage settings for search persistence. 
 
 *Note:* If the `redisgraph-tls` pod crashes, data is resent from the `search-collector` pod to rebuild the cache.
 
 [#search-customization]
 == Search customization
 
-
+Update the storage settings for search by updating the `searchCustomization` CR. Search customization is namespace-scoped and located where search is installed in the hub cluster. By default, `searchCustomization` CRD is created.
 
 Your cluster must have a default storage class defined. If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10G on the storage class. Verify if there is a default storage class in your cluster by running the following command: `kubectl get storageclass`. 
 
-If a default storage class is absent or search fails to create a PVC, search uses the `emptyDir` volume. A status for persistence can be retrieved from the search operator (`searchoperator`) and search. For more information, see link:https://kubernetes.io/docs/concepts/storage/volumes/#emptydir[Volumes] in the Kubernetes documentation. 
+If a default storage class is absent or search fails to create a PVC, search uses the `emptyDir` as a volume. You can disable use of the `emptyDir` by updating the `fallbackToEmptyDir` flag. Review the following scenarios when you update the `fallbackToEmptyDir` flag and there is a failure to create the PVC:
 
-If a default storage class is absent, a user must create the storage class. 
-If the user wants to update the storage class. then the user would create the search customization CR 
+* When the persistence flag is set to `True`:
+** If the `fallbackToEmptyDir` is set to `True`, search uses the empty directory volume.
+** If the `fallbackToEmptyDir` is set to `False`, search reattempts the use of the empty directory.
 
-Update the storage settings for search by updating the `searchCustomization` CR. Search customization is namespace-scoped and located where search is installed in the hub cluster. By default, `searchCustomization` CRD is created.
+* When the persistence flag is set to `False`:
+** The `fallbackToEmptyDir` has no effect
+** Search uses the node level persistence on the empty directory volume.
 
-// to update the persistence 
-//If search fails to create a PVC, based on the `fallbackToEmptyDir` flag:
-
-//* True, search uses empty directory
-//* False, then search reattempts PVC creation
-
-//Add info about fallBack Flags
-// do users need to run a command to access the CR?
-View the following table to view status messages for the `searchCustomization` CR:
+A status for persistence can be retrieved from the search operator (`searchoperator`). For more information, see link:https://kubernetes.io/docs/concepts/storage/volumes/#emptydir[Volumes] in the Kubernetes documentation. View the following table to view status messages for the `searchCustomization` CR:
 
 .Status table
 |===
@@ -40,6 +35,7 @@ View the following table to view status messages for the `searchCustomization` C
 | statusFailedNoPersistence | "Unable to create Redisgraph Deployment"
 |===
 
+
 See link:../apis/search.json.adoc#search-api[Search customization API] for more information.
 
 [#queries-in-the-console]
@@ -47,7 +43,9 @@ See link:../apis/search.json.adoc#search-api[Search customization API] for more 
 
 You can type any text value in the _Search box_ and results include anything with that value from any property, such as a name or namespace. Users are unable to search for values that contain an empty space.
 
-For more specific search results, include the property selector in your search. You can combine related values for the property, for a more precise scope of your search. For example, search for `cluster:dev red` to receive results that match the string "red" in the `dev` cluster.
+For more specific search results, include the property selector in your search. You can combine related values for the property, for a more precise scope of your search. For example, search for `cluster:dev red` to receive results that match the string "red" in the `dev` cluster. 
+
+View the following steps to make queries with search:
 
 . Click *Search* in the navigation menu.
 . Type a word in the _Search box_, then Search finds your resources that contain that value.
