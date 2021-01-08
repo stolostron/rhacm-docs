@@ -1,25 +1,30 @@
 [#search-in-the-console]
 = Search in the console
 
-For {product-title}, search provides visibility into your resources across all of your clusters. Search uses Redisgraph (`redisgraph-tls`), an in-memory database, to store the Kubernetes resources and the resource relationships. Create a `searchcustomization` custom resource (CR) to define the storage settings for search persistence. 
+For {product-title}, search provides visibility into your resources across all of your clusters. Search uses Redisgraph (`redisgraph-tls`), an in-memory database, to store the Kubernetes resources and the resource relationships. You can create a `searchcustomization` custom resource (CR) to define the storage settings for search persistence if you want to change the storage class and storage size. 
 
 [#search-customization]
 == Search customization
 
-When you install {product-title-short}, the product is configured to persist search index. The volume is used in the `search-redisgraph` `statefulset` definition with the volume name `persist`. Update the storage settings for search by updating the `searchcustomization` CR. Search customization is namespace-scoped and located where search is installed in the hub cluster. 
+When you install {product-title-short}, the product is configured to persist search index in a file system mounted on a persistent volume. The statefulset `search-redisgraph` deploy the Redisgraph pod, which mounts the persistent volume named `persist`. If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10G on the default storage class. If a default storage class does not exist in your cluster, search saves the index in an empty directory (`emptyDir`).
 
-If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10G on the storage class. Verify if there is a default storage class in your cluster by running the following command: `kubectl get storageclass`. 
+You can customize the storage settings for search by creating the `searchcustomization` CR. Search customization is namespace-scoped and located where search is installed in the hub cluster. View the following example of the search CR:
 
-If a default storage class is absent or search fails to create a PVC, search uses the `emptyDir` as a volume. You can disable persistence by updating the `persistence` flag to `false` in the customization CR, which turns off saving search index. Review the following scenarios when you update the `storageClass` flag and there is a failure to create the PVC:
+----
+apiVersion: search.open-cluster-management.io/v1
+kind: SearchCustomization
+metadata:
+  name: searchcustomization
+  namespace: open-cluster-management
+spec:
+  persistence: true
+  storageClass: gp2
+  storageSize: 12Gi
+----
 
-* When the persistence flag is set to `True`:
-** If the `storageClass` is set, search uses the provided storage class.
-** If the `storageClass` is not set, search attempts to use the default storage class.
-* When the persistence flag is set to `False`:
-** The `storageClass` or `storageSize` has no effect.
-** Search disables persistence.
+Run the following command to view search customization CRD: `oc get crd searchcustomizations.search.open-cluster-management.io -o yaml`.
 
-A status for persistence can be retrieved from the search operator (`searchoperator`). See link:../apis/search.json.adoc#search-api[Search customization API] for more information.
+You can disable persistence by updating the `persistence` flag to `false` in the customization CR, which turns off saving search index. A status for persistence can be retrieved from the search operator (`searchoperator`) CR. Run the following command to view search operator CR: `oc get searchoperator searchoperator -o yaml`.
 
 [#queries-in-the-console]
 == Queries in the console
