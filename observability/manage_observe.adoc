@@ -7,7 +7,7 @@ Collect logs about new information that is created for observability resources w
 
 * <<creating-custom-rules,Creating custom rules>>
 * <<configuring-rules-for-alertmanager,Configuring rules for AlertManager>>
-* <<restricting-configuration-observability,Restricting configuration changes>>
+* <<adding-custom-metrics, Adding custom metrics>>
 * <<viewing-and-exploring-data,Viewing and exploring data>>
 * <<disable-metrics-collector,Disable _metrics-collector_>>
 
@@ -16,7 +16,9 @@ Collect logs about new information that is created for observability resources w
 
 You can create custom rules for the observability installation by adding Prometheus link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see link:https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
 
-Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. Complete the following steps to create a custom rule: 
+Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. *Note*: When you update your custom rules, `observability-observatorium-thanos-rule` pods are restarted automatically.
+
+Complete the following steps to create a custom rule: 
 
 . Log in to your {product-title-short} hub cluster.
 . Create a ConfigMap named `thanos-rule-custom-rules` in the `open-cluster-management-observability` namespace. The key must be named, `thanos-ruler-custom-rules.yaml`, as shown in the following example. You can create multiple rules in the configuration:
@@ -53,50 +55,8 @@ data:
 
 A custom rule is created.
 
-[#adding-custom-metrics]
-=== Adding custom metrics
-
-Add metrics to the `metrics_list.yaml` file, in order to view collected metrics that are from managed clusters. *Note*: When you update your custom rules, `observability-observatorium-thanos-rule` pods are restarted automatically.
-
-Complete the following steps to add custom metrics:
-
-. Log in to your cluster.
-. Verify that `mco observability` is enabled. Check for the following message in the `status.conditions.message` reads: `Observability components are deployed and running`. Run the following command:
-+
-----
-oc get mco observability -o yaml
-----
-
-. Access the `observability-metrics-custom-whitelist.yaml` file in the 
-`open-cluster-management-observability` namespace by running the following command:
-+
-----
-cat observability-metrics-custom-whitelist.yaml
-----
-
-. Add the name of the name of the custom metric to the `metrics_list.yaml`. For example, add `node_memory_MemTotal_bytes` to the metric list. Your file might resemble the following content:
-+
-----
-data:
-  metrics_list.yaml: |
-    names:
-      - node_memory_MemTotal_bytes
-----
-
-. Save and apply the `observability-metrics-custom-whitelist.yaml`. Run the following command:
-+
-----
-oc apply -f observability-metrics-custom-whitelist.yaml
-----
-
-. Verify that your custom metric is being collected from your managed clusters by viewing the metric on the Grafana dashboard. From your hub cluster, select the Grafana dashboard link.
-
-. From the Grafana search bar, enter the metric that you want to view.
-
-Data from your custom metric is collected.
-
 [#configuring-rules-for-alertmanager]
-=== Configuring rules for AlertManager
+== Configuring rules for AlertManager
 
 Integrate external messaging tools such as email, Slack, and PagerDuty to receive notifications from AlertManager. You must override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for AlertManager. Complete the following steps to update the custom receiver rules:
 
@@ -136,11 +96,47 @@ route:
 
 Your changes are applied immediately after it is modified. For an example of AlertManager, see link:https://github.com/prometheus/alertmanager/blob/master/doc/examples/simple.yml[prometheus/alertmanager].
 
+[#adding-custom-metrics]
+== Adding custom metrics
 
-[#restricting-configuration-observability]
-== Restricting configuration changes
+Add metrics to the `metrics_list.yaml` file, to be collected from managed clusters.
 
-Complete the following steps to restrict configuration changes for the observability service:
+Complete the following steps to add custom metrics:
+
+. Log in to your cluster.
+. Verify that `mco observability` is enabled. Check for the following message in the `status.conditions.message` reads: `Observability components are deployed and running`. Run the following command:
++
+----
+oc get mco observability -o yaml
+----
+
+. Create the `observability-metrics-custom-whitelist.yaml` file in the 
+`open-cluster-management-observability` namespace by running the following command:
++
+----
+cat observability-metrics-custom-whitelist.yaml
+----
+
+. Add the name of the name of the custom metric to the `metrics_list.yaml`. For example, add `node_memory_MemTotal_bytes` to the metric list. Your file might resemble the following content:
++
+----
+data:
+  metrics_list.yaml: |
+    names:
+      - node_memory_MemTotal_bytes
+----
+
+. Save and apply the `observability-metrics-custom-whitelist.yaml`. Run the following command:
++
+----
+oc apply -f observability-metrics-custom-whitelist.yaml
+----
+
+. Verify that your custom metric is being collected from your managed clusters by viewing the metric on the Grafana dashboard. From your hub cluster, select the Grafana dashboard link.
+
+. From the Grafana search bar, enter the metric that you want to view.
+
+Data from your custom metric is collected.
 
 [#viewing-and-exploring-data]
 == Viewing and exploring data
