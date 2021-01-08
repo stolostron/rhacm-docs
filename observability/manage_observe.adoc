@@ -7,6 +7,7 @@ Collect logs about new information that is created for observability resources w
 
 * <<creating-custom-rules,Creating custom rules>>
 * <<configuring-rules-for-alertmanager,Configuring rules for AlertManager>>
+* <<adding-custom-metrics, Adding custom metrics>>
 * <<viewing-and-exploring-data,Viewing and exploring data>>
 * <<disable-metrics-collector,Disable _metrics-collector_>>
 
@@ -15,9 +16,9 @@ Collect logs about new information that is created for observability resources w
 
 You can create custom rules for the observability installation by adding Prometheus link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see link:https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
 
-*Note*: You can only create custom rules on the metrics that are collected from all managed clusters. View a list of of the metrics that are collected by running the following command: `kubectl describe cm observability-metrics-whitelist`.
+Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. *Note*: When you update your custom rules, `observability-observatorium-thanos-rule` pods are restarted automatically.
 
-Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. Complete the following steps to create a custom rule: 
+Complete the following steps to create a custom rule: 
 
 . Log in to your {product-title-short} hub cluster.
 . Create a ConfigMap named `thanos-rule-custom-rules` in the `open-cluster-management-observability` namespace. The key must be named, `thanos-ruler-custom-rules.yaml`, as shown in the following example. You can create multiple rules in the configuration:
@@ -55,7 +56,7 @@ data:
 A custom rule is created.
 
 [#configuring-rules-for-alertmanager]
-=== Configuring rules for AlertManager
+== Configuring rules for AlertManager
 
 Integrate external messaging tools such as email, Slack, and PagerDuty to receive notifications from AlertManager. You must override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for AlertManager. Complete the following steps to update the custom receiver rules:
 
@@ -95,6 +96,48 @@ route:
 
 Your changes are applied immediately after it is modified. For an example of AlertManager, see link:https://github.com/prometheus/alertmanager/blob/master/doc/examples/simple.yml[prometheus/alertmanager].
 
+[#adding-custom-metrics]
+== Adding custom metrics
+
+Add metrics to the `metrics_list.yaml` file, to be collected from managed clusters.
+
+Complete the following steps to add custom metrics:
+
+. Log in to your cluster.
+. Verify that `mco observability` is enabled. Check for the following message in the `status.conditions.message` reads: `Observability components are deployed and running`. Run the following command:
++
+----
+oc get mco observability -o yaml
+----
+
+. Create the `observability-metrics-custom-whitelist.yaml` file in the 
+`open-cluster-management-observability` namespace by running the following command:
++
+----
+cat observability-metrics-custom-whitelist.yaml
+----
+
+. Add the name of the name of the custom metric to the `metrics_list.yaml`. For example, add `node_memory_MemTotal_bytes` to the metric list. Your file might resemble the following content:
++
+----
+data:
+  metrics_list.yaml: |
+    names:
+      - node_memory_MemTotal_bytes
+----
+
+. Save and apply the `observability-metrics-custom-whitelist.yaml`. Run the following command:
++
+----
+oc apply -f observability-metrics-custom-whitelist.yaml
+----
+
+. Verify that your custom metric is being collected from your managed clusters by viewing the metric on the Grafana dashboard. From your hub cluster, select the Grafana dashboard link.
+
+. From the Grafana search bar, enter the metric that you want to view.
+
+Data from your custom metric is collected.
+
 [#viewing-and-exploring-data]
 == Viewing and exploring data
 
@@ -109,10 +152,17 @@ You can also  access Grafana dashboards from the _Clusters_ page. From the navig
 [#disable-metrics-collector]
 == Disable _metrics-collector_
 
-Disable the `metrics-collector` pod to stop data from being collected and sent to the observability service on the {product-title-short} hub cluster. When you disable the `metrics-collector` deployment is scaled to zero, and all managed clusters with the `vendor:OpenShift` label are disabled. View the following options to disable the `metrics-collector`:
+You can disable the `metrics-collector`, which stops it from collecting the data and sending the collection data to the observability service. 
 
-* Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
-+
+[#disable-metrics-collector-on-all-clusters]
+=== Disable _metrics-collector_ on all clusters
+
+Disable the `metrics-collector` pod to stop data from being collected and sent to the observability service on the {product-title-short} hub cluster. 
+
+When you disable the `metrics-collector` deployment is scaled to zero, and all managed clusters with the `vendor:OpenShift` label are disabled. View the following options to disable the `metrics-collector`:
+
+Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
+
 ----
 spec:
   availabilityConfig: High # Available values are High or Basic
@@ -122,11 +172,25 @@ spec:
     enableMetrics: false #indicates the observability addon push metrics to hub server
 ----
 
-* You can disable specific managed clusters. View the following options:
-** Add the `observability: disabled` label to the custom resource, `managedclusters.cluster.open-cluster-management.io`.
-** From the {product-title-short} console, access a cluster YAML file from the _Clusters_ page to add the `observability: disabled` label.
+[#disable-metrics-collector-on-a-single-cluster]
+=== Disable _metrics-collector_ on a single cluster
+
+You can disable the `metrics-collector` on specific managed clusters by completing one of the following procedures:
+
+* Add the `observability: disabled` label to the custom resource, `managedclusters.cluster.open-cluster-management.io`.
+* From the {product-title-short} console _Clusters_ page, add the `observability: disabled` label by completing the following steps:
++
+. In the {product-title-short} console navigation, select *Automate infrastructure* > *Clusters*.
+. Select the name of the cluster for which you want to disable data collection that is sent to observability. 
+. Select *Labels*.
+. Create the label that disables the observability collection by adding the following label:
++
+----
+observability=disable
+----
+. Select *Add* to add the label.
+. Select *Done* to close the list of labels. 
 
 *Note*: When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
 
 For more information on monitoring data from the console with the observability service, see xref:../observability/observe_intro.adoc#observing-environments[Observing environments].
-
