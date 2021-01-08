@@ -15,7 +15,7 @@ When writers advise readers to select a link, it can be disruptive and divert th
 
 There are several ways reference links in the ASCII source file (`.adoc`). View a list of examples for link referencing:
 
-* Document/section header:
+* Document/section header, otherwise known as anchors. Use these anchors for longer topics or topics with lots of headers (three or more). Add them after the short description:
 
   ```
   [#your-anchor-for-the-doc]
