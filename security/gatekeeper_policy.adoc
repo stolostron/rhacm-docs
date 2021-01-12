@@ -16,59 +16,52 @@ There are optional parameters that can be used in your gatekeeper policy. See th
 
 [source,yaml]
 ----
-apiVersion: operator.gatekeeper.sh/v1alpha1
-kind: Gatekeeper
-metadata:
-  name: gatekeeper
-spec:
-  # Add fields here
-  image:
-    image: docker.io/openpolicyagent/gatekeeper:v3.2.2
-    imagePullPolicy: Always
-  audit:
-    replicas: 1
-    logLevel: DEBUG
-    auditInterval: 10s
-    constraintViolationLimit: 55
-    auditFromCache: Enabled
-    auditChunkSize: 66
-    emitAuditEvents: Enabled
-    resources:
-      limits:
-        cpu: 500m
-        memory: 150Mi
-      requests:
-        cpu: 500m
-        memory: 130Mi
-  validatingWebhook: Enabled
-  webhook:
-    replicas: 2
-    logLevel: ERROR
-    emitAdmissionEvents: Enabled
-    failurePolicy: Fail
-    resources:
-      limits:
-        cpu: 480m
-        memory: 140Mi
-      requests:
-        cpu: 400m
-        memory: 120Mi
-  nodeSelector:
-    region: "EMEA"
-  affinity:
-    podAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchLabels:
-              auditKey: "auditValue"
-          topologyKey: topology.kubernetes.io/zone
-  tolerations:
-    - key: "Example"
-      operator: "Exists"
-      effect: "NoSchedule"
-  podAnnotations:
-    some-annotation: "this is a test"
-    other-annotation: "another test"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: templates.gatekeeper.sh/v1beta1
+                kind: ConstraintTemplate
+                metadata:
+                  name: k8srequiredlabels
+                spec:
+                  crd:
+                    spec:
+                      names:
+                        kind: K8sRequiredLabels
+                      validation:
+                        # Schema for the `parameters` field
+                        openAPIV3Schema:
+                          properties:
+                            labels:
+                              type: array
+                              items: string
+                  targets:
+                    - target: admission.k8s.gatekeeper.sh
+                      rego: |
+                        package k8srequiredlabels
+                        violation[{"msg": msg, "details": {"missing_labels": missing}}] {
+                          provided := {label | input.review.object.metadata.labels[label]}
+                          required := {label | label := input.parameters.labels[_]}
+                          missing := required - provided
+                          count(missing) > 0
+                          msg := sprintf("you must provide labels: %v", [missing])
+                        }
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: constraints.gatekeeper.sh/v1beta1
+                kind: K8sRequiredLabels
+                metadata:
+                  name: ns-must-have-gk
+                spec:
+                  match:
+                    kinds:
+                      - apiGroups: [""]
+                        kinds: ["Namespace"]
+                    namespaces:
+                      - e2etestsuccess
+                      - e2etestfail
+                  parameters:
+                    labels: ["gatekeeper"]
 ----
 
 .Gatekeeper parameter descriptions
