@@ -1,0 +1,82 @@
+
+[#configuring-argo]
+= Configuring managed clusters for Argo CD
+
+Git channels and subscriptions connect to the specified Git repository through HTTPS or SSH. The following application channel configurations can be used for secure Git connections:
+
+[#prerequisites-argo]
+== Prerequisites 
+
+* You need a managed cluster imported.
+
+* You need to install Argo CD on your managed cluster.
+
+[#configure-argo]
+== Configuring Argo CD 
+
+. Ensure the secret is added. The managed cluster secret is auto-created into the hub cluster namespace by the managed cluster token cluster. See the following example, where the cluster secret is in the `local-cluster` name:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: local-cluster-cluster-secret
+  namespace: local-cluster
+  labels:
+    apps.open-cluster-management.io/secret-type: acm-cluster
+type: Opaque
+stringData:
+  name: local-cluster
+  server: https://<url-name-here>
+  config: |
+    {
+      "bearerToken": "<the bear token>",
+      "tlsClientConfig": {
+        "insecure": true
+      }
+    }
+----
+
+When the managed cluster secret is synced up to the Argo CD namespace, the cluster secret resembles the following sample:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    argocd.argoproj.io/secret-type: cluster
+    apps.open-cluster-management.io/acm-cluster: "true"
+  name: old-cluster1-cluster-secret
+  namespace: argocd
+type: Opaque
+stringData:
+  name: cluster1
+  server: https://<url-name-here>
+  config: |
+    {
+      "bearerToken": "<bearer token>",
+      "tlsClientConfig": {
+        "insecure": true
+      }
+    }
+----
+
+. You can enable or disable the ArgoCD cluster collection for one managed cluster. See the following sample with the setting in `KlusterletAddonConfig` resource for each managed cluster:
+
++
+[source,yaml]
+----
+apiVersion: agent.open-cluster-management.io/v1
+kind: KlusterletAddonConfig
+metadata:
+  name: cluster1
+  namespace: cluster1
+spec:
+  applicationManager:
+    argocdCluster: true or false (the setting is located here to enable/disable the Argo CD cluster collection for managed cluster cluster1)
+    enabled: true
+----
