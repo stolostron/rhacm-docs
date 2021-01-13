@@ -11,110 +11,109 @@ The gatekeeper policy is created as a Kubernetes configuration policy in {produc
 +
 ----
 apiVersion: policy.open-cluster-management.io/v1
-        kind: ConfigurationPolicy
+kind: ConfigurationPolicy
+metadata:
+  name: policy-gatekeeper-k8srequiredlabels
+spec:
+  remediationAction: enforce # will be overridden by remediationAction in parent policy
+  severity: low
+  object-templates:
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: templates.gatekeeper.sh/v1beta1
+        kind: ConstraintTemplate
         metadata:
-          name: policy-gatekeeper-k8srequiredlabels
+          name: k8srequiredlabels
         spec:
-          remediationAction: enforce # will be overridden by remediationAction in parent policy
-          severity: low
-          object-templates:
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: templates.gatekeeper.sh/v1beta1
-                kind: ConstraintTemplate
-                metadata:
-                  name: k8srequiredlabels
-                spec:
-                  crd:
-                    spec:
-                      names:
-                        kind: K8sRequiredLabels
-                      validation:
-                        # Schema for the `parameters` field
-                        openAPIV3Schema:
-                          properties:
-                            labels:
-                              type: array
-                              items: string
-                  targets:
-                    - target: admission.k8s.gatekeeper.sh
-                      rego: |
-                        package k8srequiredlabels
-                        violation[{"msg": msg, "details": {"missing_labels": missing}}] {
-                          provided := {label | input.review.object.metadata.labels[label]}
-                          required := {label | label := input.parameters.labels[_]}
-                          missing := required - provided
-                          count(missing) > 0
-                          msg := sprintf("you must provide labels: %v", [missing])
-                        }
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: constraints.gatekeeper.sh/v1beta1
+          crd:
+            spec:
+              names:
                 kind: K8sRequiredLabels
-                metadata:
-                  name: ns-must-have-gk
-                spec:
-                  match:
-                    kinds:
-                      - apiGroups: [""]
-                        kinds: ["Namespace"]
-                    namespaces:
-                      - e2etestsuccess
-                      - e2etestfail
-                  parameters:
-                    labels: ["gatekeeper"]
-  ----
-
-
-* admission template: Use the `policy-gatekeeper-admission` to check for misconfigurations that are created by the gatekeeper admission webhook:
-// fix code snippet below
-+
-[source,yaml]
-----
-    - objectDefinition:
-        apiVersion: policy.open-cluster-management.io/v1
-        kind: ConfigurationPolicy
+              validation:
+                # Schema for the `parameters` field
+                openAPIV3Schema:
+                  properties:
+                    labels:
+                      type: array
+                      items: string
+          targets:
+            - target: admission.k8s.gatekeeper.sh
+              rego: |
+                package k8srequiredlabels
+                violation[{"msg": msg, "details": {"missing_labels": missing}}] {
+                  provided := {label | input.review.object.metadata.labels[label]}
+                  required := {label | label := input.parameters.labels[_]}
+                  missing := required - provided
+                  count(missing) > 0
+                  msg := sprintf("you must provide labels: %v", [missing])
+                }
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: constraints.gatekeeper.sh/v1beta1
+        kind: K8sRequiredLabels
         metadata:
-          name: policy-gatekeeper-admission
+          name: ns-must-have-gk
         spec:
-          remediationAction: inform # will be overridden by remediationAction in parent policy
-          severity: low
-          object-templates:
-            - complianceType: mustnothave
-              objectDefinition:
-                apiVersion: v1
-                kind: Event
-                metadata:
-                  namespace: openshift-gatekeeper-system # set it to the actual namespace where gatekeeper is running if different
-                  annotations:
-                    constraint_action: deny
-                    constraint_kind: K8sRequiredLabels
-                    constraint_name: ns-must-have-gk
-                    event_type: violation
+          match:
+            kinds:
+              - apiGroups: [""]
+                kinds: ["Namespace"]
+            namespaces:
+              - e2etestsuccess
+              - e2etestfail
+          parameters:
+            labels: ["gatekeeper"]
 ----
-// fix code snippet below
+
 * audit template: Use the `policy-gatekeeper-audit` to periodically check and evaluate existing resources against the gatekeeper policies that are enforced to detect exisiting miscongfigurations. 
 +
 [source,yaml]
 ----
-    - objectDefinition:
-        apiVersion: policy.open-cluster-management.io/v1
-        kind: ConfigurationPolicy
-        metadata:
-          name: policy-gatekeeper-audit
-        spec:
-          remediationAction: inform # will be overridden by remediationAction in parent policy
-          severity: low
-          object-templates:
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: constraints.gatekeeper.sh/v1beta1
-                kind: K8sRequiredLabels
-                metadata:
-                  name: ns-must-have-gk
-                status:
-                  totalViolations: 0
+- objectDefinition:
+    apiVersion: policy.open-cluster-management.io/v1
+    kind: ConfigurationPolicy
+    metadata:
+      name: policy-gatekeeper-audit
+    spec:
+      remediationAction: inform # will be overridden by remediationAction in parent policy
+      severity: low
+      object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: constraints.gatekeeper.sh/v1beta1
+            kind: K8sRequiredLabels
+            metadata:
+              name: ns-must-have-gk
+            status:
+              totalViolations: 0
 ----
 
+* admission template: Use the `policy-gatekeeper-admission` to check for misconfigurations that are created by the gatekeeper admission webhook:
++
+[source,yaml]
+----
+- objectDefinition:
+    apiVersion: policy.open-cluster-management.io/v1
+    kind: ConfigurationPolicy
+    metadata:
+      name: policy-gatekeeper-admission
+    spec:
+      remediationAction: inform # will be overridden by remediationAction in parent policy
+      severity: low
+      object-templates:
+        - complianceType: mustnothave
+          objectDefinition:
+            apiVersion: v1
+            kind: Event
+            metadata:
+              namespace: openshift-gatekeeper-system # set it to the actual namespace where gatekeeper is running if different
+              annotations:
+                constraint_action: deny
+                constraint_kind: K8sRequiredLabels
+                constraint_name: ns-must-have-gk
+                event_type: violation
+----
 
-Learn how to use RHACM gatekeeper operator policy to install gatekeeper and create a {product-title-short} gatekeeper operator policy, see xref:../security/create_gatekeeper.adoc#gatekeeper-policy-operator-integration[Gatekeeper operator policy] for more details. Refer to xref:../security/grc_intro.adoc#governance-and-risk[Governance and risk] for more topics on the security framework.
+See link:https://github.com/open-cluster-management/policy-collection/blob/master/community/CM-Configuration-Management/policy-gatekeeper-sample.yaml[`policy-gatekeeper-sample.yaml`] for more details.
+
+Learn how to use {product-title-short} gatekeeper operator policy to install gatekeeper and create a {product-title-short} gatekeeper operator policy, see xref:../security/create_gatekeeper.adoc#gatekeeper-policy-operator-integration[Gatekeeper operator policy] for more details. Refer to xref:../security/grc_intro.adoc#governance-and-risk[Governance and risk] for more topics on the security framework.
