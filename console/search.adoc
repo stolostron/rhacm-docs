@@ -6,7 +6,7 @@ For {product-title}, search provides visibility into your resources across all o
 [#search-customization]
 == Search customization
 
-When you install {product-title-short}, the product is configured to persist the data in-memory to a file system. The statefulset `search-redisgraph` deploys the Redisgraph pod, which mounts the persistent volume named `persist`. If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10Gi on the default storage class. If a default storage class does not exist in your cluster, search saves the index in an empty directory (`emptyDir`).
+When you install {product-title-short}, the product is configured to persist the data in-memory to a file system. The StatefulSet `search-redisgraph` deploys the Redisgraph pod, which mounts the persistent volume named `persist`. If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10Gi on the default storage class. If a default storage class does not exist in your cluster, search saves the index in an empty directory (`emptyDir`).
 
 You can customize the storage settings for search by creating the `searchcustomization` CR. Search customization is namespace-scoped and located where search is installed in the hub cluster. View the following example of the search customization CR:
 
@@ -30,32 +30,6 @@ oc get crd searchcustomizations.search.open-cluster-management.io -o yaml
 
 You can disable persistence by updating the `persistence` flag to `false` in the customization CR, which turns off saving search index to the file system. A status for persistence can be retrieved from the search operator (`searchoperator`) CR. Run the following command to view search operator CR: `oc get searchoperator searchoperator -o yaml`.
 
-Troubleshooting :
-1)  Search-Aggregator Pods cannot run :
-Symptom : 
-   The search aggregator pods in not Ready state with the following error in the logs :
-   ```
-   
-E0113 15:04:42.427931       1 pool.go:93] Error authenticating Redis client. Original error: ERR invalid password
-W0113 15:04:42.428100       1 healthProbes.go:36] Unable to reach Redis.
-E0113 15:04:44.265777       1 pool.go:93] Error authenticating Redis client. Original error: ERR invalid password
-W0113 15:04:44.266003       1 healthProbes.go:36] Unable to reach Redis.
-E0113 15:04:46.316869       1 pool.go:93] Error authenticating Redis client. Original error: ERR invalid password
-W0113 15:04:46.317029       1 healthProbes.go:36] Unable to reach Redis.
-```
-
-Resolving the problem : This can happen if the redisgraph-user-secret is updated . Delete the search-aggregator and search-api pods to restart the pods . 
-
-2) Search-redisgraph pod is in pending state .
-  Symptom : The Search-redisgraph pod cannot run and in pending state.
-  
-  Resolving the problem :  Check the pod events by running `oc describe pod search-redisgraph-0` on the hub-cluster namespace .If you have created a searchcustomization CR , check if the storageclass and storagesize is valid and a pvc can be created. List the pvc by running `oc get pvc  <storageclassname>-search-redisgraph-0` . Make sure this pvc can be bound to the search-redigraph-0 pod. If the problem is still not resolved , delete the statefulset search-redisgraph, the search operator will recreate the statefulset.
-
-3) Updating storagesize in Searchcustomization CR does not take effect:
-     Symptom : Updating storagesize in Searchcustomization CR does not change the PVC configuration.
-     Resolving the problem : Search Customization does not honor storagesize changes after the creation of PVC. IF you need to update the storage size , update the PVC (<storageclassname>-search-redisgraph-0) by running the command `oc edit pvc <storageclassname>-search-redisgraph-0`.
-    
-  
 
 [#queries-in-the-console]
 == Queries in the console
