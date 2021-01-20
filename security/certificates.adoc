@@ -20,10 +20,10 @@ See the following topics to replace certificates:
 * xref:../security/cert_root_ca.adoc#replacing-the-root-ca-certificate[Replacing the root CA certificate]
 * xref:../security/cert_mgmt_ingress.adoc#replacing-the-management-ingress-certificates[Replacing the management ingress certificates]
 
-[#list-certificates]
-== List certificates
+[#list-managed-certificates]
+== List managed certificates
 
-You can view a list of certificates that use `cert-manager` internally by running the following command:
+You can view a list of managed certificates that use `cert-manager` internally by running the following command:
 
 ----
 oc get certificates.certmanager.k8s.io -n open-cluster-management
@@ -32,24 +32,111 @@ oc get certificates.certmanager.k8s.io -n open-cluster-management
 *Note*: If observability is enabled, there are additional namespaces where certificates are created.
 
 
-[#refresh-a-certificate]
-== Refresh a certificate 
+[#refresh-a-managed-certificate]
+== Refresh a managed certificate 
 
-You can refresh a certificate by running the command in the <<list-certificates>> section. When you identify the certificate that you need to refresh, delete the secret that is associated with the certificate. For example, you can delete a secret by running the following command:
+You can refresh a managed certificate by running the command in the <<list-certificates>> section. When you identify the certificate that you need to refresh, delete the secret that is associated with the certificate. For example, you can delete a secret by running the following command:
 
 ----
 oc delete secret grc-0c925-grc-secrets -n open-cluster-management
 ----
 
-[#refresh-certificates-ca]
-== Refresh certificates for {product-title}
+[#refresh-managed-certificates-ca]
+== Refresh managed certificates for {product-title}
 
-You can refresh all certificates that are issued by the {product-title-short} CA. During the refresh, the Kubernetes secret that is associated with each `cert-manager` certificate is deleted. The service restarts automatically to use the certificate. Run the following command:
+You can refresh all managed certificates that are issued by the {product-title-short} CA. During the refresh, the Kubernetes secret that is associated with each `cert-manager` certificate is deleted. The service restarts automatically to use the certificate. Run the following command:
 
 ----
 oc delete secret -n open-cluster-management $(oc get certificates.certmanager.k8s.io -n open-cluster-management -o wide | grep multicloud-ca-issuer | awk '{print $3}')
 ----
 
+The {ocp} certificate is not included in the {product-title} management ingress. For more information, see the link:../release_notes/known_issues.adoc#security-known-issues[Security known issues].
 
-The {ocp} certificate is not included in the {product-title} management ingress. For more information, see the link:../release_notes/known_issues.adoc#security-known-issues[Security known issues]. Use the certificate policy controller to create and manage certificate policies on managed clusters. See xref:../security/policy_controllers.adoc#policy-controllers[Policy controllers] to learn more about controllers.
-Return to the xref:../security/security_intro.adoc#security[Security] page for more information.
+[#refresh-internal-certificates]
+== Refresh internal certificates
+
+You can refresh internal certificates, which are certificates that are used by {product-short} webhooks and the proxy server. 
+
+Complete the following steps to refresh internal certificates:
+
+. Delete the secret that is associated with the internal certificate by running the following command:
++
+----
+oc delete secret -n open-cluster-management ocm-webhook-secret
+----
++
+*Note:* Some services might not have a secret that needs to be deleted.
+
+. Restart the services that are associated with the internal certificate(s) by running the following command:
++
+----
+oc delete po -n open-cluster-management ocm-webhook-679444669c-5cg76
+----
++
+*Remember:* There are replicas of many services; each service must be restarted.
+
+View the following table for a list of the pods that contain certificates and whether a secret needs to be deleted prior to restarting the pod:
+
+.Pods that contain internal certificates
+|===
+| Service name | Namespace | Sample pod name | Secret name (if applicable)
+
+|  channels-apps-open-cluster-management-webhook-svc
+| open-cluster-management
+| multicluster-operators-application-8c446664c-5lbfk
+|-
+
+| multicluster-operators-application-svc
+| open-cluster-management
+| multicluster-operators-application-8c446664c-5lbfk
+| -
+
+| multiclusterhub-operator-webhook
+| open-cluster-management
+| multiclusterhub-operator-bfd948595-mnhjc
+| -
+
+| ocm-webhook
+| open-cluster-management
+| ocm-webhook-679444669c-5cg76
+| ocm-webhook-secret
+
+| cluster-manager-registration-webhook
+| open-cluster-management-hub
+| cluster-manager-registration-webhook-fb7b99c-d8wfc
+| registration-webhook-serving-cert
+
+| cluster-manager-work-webhook
+| open-cluster-management-hub
+| cluster-manager-work-webhook-89b8d7fc-f4pv8
+| work-webhook-serving-cert
+|===
+
+[#observability-certificates]
+=== Observability certificates
+
+When {product-short} is installed there are additional namespaces where certificates are managed. The `open-cluster-management-observability` namespace and the managed cluster namespaces contain certificates managed by `cert-manager` for the observability service.
+
+Observability certificates are automatically refreshed upon expiration. View the following list to understand the effects when certificates are automatically renewed:
+
+* Components on your hub cluster automatically restart to retrieve the refreshed certificate.
+
+* {product-title-short} sends the refreshed certificates to managed clusters.
+
+* The `metrics-collector` restarts to mount the renewed certificates.
++
+*Note:* `metrics-collector` can push metrics to the hub cluster before and after certificates are removed. For more information about refreshing certificates across your clusters, see the <<refresh-a-certificate,Refresh a certificate>> section.
+
+[#channel-certificates]
+=== Channel certificates
+
+
+
+
+
+
+
+[#managed-cluster-certificates]
+=== Managed cluster certificates
+
+Use the certificate policy controller to create and manage certificate policies on managed clusters. See xref:../security/policy_controllers.adoc#policy-controllers[Policy controllers] to learn more about controllers. Return to the xref:../security/security_intro.adoc#security[Security] page for more information.
