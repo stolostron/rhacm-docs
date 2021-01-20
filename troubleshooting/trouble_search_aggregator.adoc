@@ -1,0 +1,61 @@
+[#troubleshooting-search-aggregator-pods]
+= Troubleshooting search aggregator pod status
+
+The `search-aggregator` fail to run. 
+
+[#symptom-1-search-aggregator-pods]
+== Symptom 1: Search aggregator pod in Not Ready state 
+
+Search aggregator pods are in a `Not Ready` state if the `redisgraph-user-secret` is updated. You might receive the following error:
+
+----
+E0113 15:04:42.427931       1 pool.go:93] Error authenticating Redis client. Original error: ERR invalid password
+W0113 15:04:42.428100       1 healthProbes.go:36] Unable to reach Redis.
+E0113 15:04:44.265777       1 pool.go:93] Error authenticating Redis client. Original error: ERR invalid password
+W0113 15:04:44.266003       1 healthProbes.go:36] Unable to reach Redis.
+E0113 15:04:46.316869       1 pool.go:93] Error authenticating Redis client. Original error: ERR invalid password
+W0113 15:04:46.317029       1 healthProbes.go:36] Unable to reach Redis.
+----
+
+[#resolving-search-aggregator-pods]
+== Resolving the problem: Search aggregator pod in Not Ready state 
+
+If you have this problem, delete the `search-aggregator` and `search-api` pods to restart the pods. Run the following commands to delete the previously mentioned pods. 
+
+----
+oc delete pod -n open-cluster-management <search-aggregator>
+
+oc delete pod -n open-cluster-management <search-api>
+----
+
+[#symptom-2-search-redisgraph-pods]
+== Symptom 2: Search redisgraph pod in Pending state
+
+The `search-redisgraph` pod fail to run when it is in `Pending` state.
+
+
+[#resolving-2-search-redisgraph-pods]
+== Resolving the problem: Search redisgraph pod in Pending state
+
+If you have this problem complete the following steps:
+
+. Check the pod events on the hub cluster namespace with the following command:
++
+----
+oc describe pod search-redisgraph-0
+----
+
+. If you have created a `searchcustomization` CR, check if the storage class and storage size is valid, and check if a PVC can be created. List the PVC by running the following command:
++
+----
+oc get pvc  <storageclassname>-search-redisgraph-0
+----
+
+. Make sure the PVC can be bound to the `search-redisgraph-0` pod. If the problem is still not resolved , delete the StatefulSet `search-redisgraph`. The search operator recreates the StatefulSet. Run the following command:
++
+----
+oc delete statefulset -n open-cluster-management search-redisgraph
+----
+
+    
+  
