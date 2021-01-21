@@ -1,0 +1,407 @@
+[#submariner]
+= Submariner
+
+The `submariner-addon` component is a *tech preview* feature. 
+
+Submariner is an open source tool that can be used with {product-title} to provide direct networking between two or more Kubernetes clusters in your environment, either on-premises or in the cloud. For more information about Submariner, see link:https://submariner.io/[Submariner].
+
+You can enable Submariner on the {ocp-short} clusters that are hosted in the following environmnents:
+
+* Amazon Web Services
+* Google Cloud Platform
+* Microsoft Azure
+* IBM Cloud
+* VMware vSphere
+* Bare metal
+* Red Hat OpenShift Dedicated
+
+{product-title} provides a `submariner-addon` component that you can deploy in your environment by using your hub cluster. 
+
+[#submariner-prereq]
+== Prerequisites
+
+Ensure that you have the following prerequisites before deploying the `submariner-addon`:
+
+* A {product-title-short} hub cluster that is running on {ocp} version 4.4, or later, with Kubernetes version 1.17, or later.
+* A credential for accessing the hub cluster with `cluster administrator` permissions.
+* Two or more {ocp-short} managed clusters that are running on {ocp-short} version 4.4, or later, with Kubernetes version 1.17, or later, and are managed by the {product-title-short} hub cluster.
+* Pod and Service Classless Inter-Domain Routing (CIDR) between the clusters that do not overlap.
+* IP connectivity must be configured between the Gateway nodes. When connecting two clusters, at least one of the clusters must have a publicly routable IP address designated to the Gateway node.
+* Firewall configuration across all nodes in each of the managed clusters must allow 4800/UDP in both directions.
+* Firewall configuration on the Gateway nodes allows ingress 8080/TCP so the other nodes in the cluster can access it. 
+
+See link:https://submariner.io/getting-started/#prerequisites[Submariner prerequisites] for more detailed information about the prerequisites.
+
+[#preparing-the-hosts-to-deploy-submariner]
+== Preparing the hosts to deploy Submariner
+
+Before deploying Submariner with {product-title}, you must prepare the clusters on the hosting environment for the connection. The requirements vary by the hosting environment, so follow the instructions for your hosting environment.
+
+[#preparing-aws]
+=== Preparing Amazon Web Services to deploy Submariner
+
+There are 2 ways that you can configure the {ocp-short} cluster that is hosted on Amazon Web Services to integrate with a Submariner deployment. Select one of these options to prepare for the 
+
+* Method 1 
++
+You can use the `SubmarinerConfig` API to build the cluster environment. With this method, the `submariner-addon` configures the environment, so you use your configurations and cloud provider credentials in your `SubmarinerConfig` definition. *Note:* This method is only supported when the cluster is on Amazon Web Services, and not on other environments. 
++
+. Create a yaml file that contains the following content:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+    name: <cloud-provider-credential-secret-name>
+    namespace: <managed-cluster-namespace>
+type: Opaque
+data:
+    aws_access_key_id: <aws-access-key-id>
+    aws_secret_access_key: <aws-secret-access-key>
+----
++
+The format of `name` is the same as the credential secret name that you used to provision the cluster with {product-title-short}.
++
+If you have already configured your Submariner cluster environment manually, include the configurations in the your `SubmarinerConfig` addition. In this example, the `IPSecIKEPort` is set to 501, and the `IPSecNATTPort` is set to 4501.
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: <config-name>
+    namespace: <managed-cluster-namespace>
+spec:
+    IPSecIKEPort: 501
+    IPSecNATTPort: 4501
+    ...
+----
+
+* Method 2    
++
+You can use the script file, `prep_for_subm.sh`, that is provided on the Submariner web site to update your {ocp-short} installer-provisioned Amazon Web Services infrastructure for Submariner deployments.
+See link:https://submariner.io/getting-started/quickstart/openshift/aws/#prepare-aws-clusters-for-submariner[Prepare AWS Clusters for Submariner] for the script and instructions for running it.
+
+[#preparing-gcp]
+=== Preparing Google Cloud Platform to deploy Submariner
+
+To prepare the clusters on your Google Cloud Platform for deploying the `Submariner-Addon` component, complete the following steps:
+
+. Create the inbound and outbound firewall rules on your Google Cloud Platform to open the IPsec IKE (by default 500/UDP) and NAT traversal ports (by default 4500/UDP) to enable Submariner communication.
++
+----
+$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=udp:<ipsec-port> --direction=IN
+$ gcloud compute firewall-rules create <rule-name> --network=<network-name> --allow=udp:<ipsec-port>  --direction=OUT
+----
+Replace _rule-name_ with your rule name.
+Replace _network-name_ with your Google Cloud Platform cluster network name.
+Replace_ipsec-port_ with your IPsec port.
+
+. Create the inbound and outbound firewall rules on your Google Cloud Platform to open the 4800/UDP port to encapsulate Pod traffic from the worker and master nodes to the Submariner Gateway nodes.
++
+----
+$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=udp:4800 --direction=IN
+$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=udp:4800 --direction=OUT
+----
+Replace _name_ with your rule name.
+Replace _network-name_ with your Google Cloud Platform cluster network name.
+
+. Create the inbound and outbound firewall rules on your Google Cloud Platform to open the 8080/TCP port to export metrics service from the Submariner Gateway nodes.
++
+----
+$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=tcp:8080 --direction=IN
+$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=tcp:8080 --direction=OUT
+----
+Replace _name_ with your rule name.
+Replace _network-name_ with your GCP cluster network name.
+
+[#preparing-azure]
+=== Preparing Microsoft Azure to deploy Submariner
+
+To prepare the clusters on your Microsoft Azure for deploying the `Submariner-Addon` component, complete the following steps:
+
+. Create the inbound and outbound firewall rules on your Microsoft Azure environment to open the IPsec IKE (by default 500/UDP) and NAT traversal ports (by default 4500/UDP) to enable Submariner communication.
++
+----
+# create inbound nat rule
+$ az network lb inbound-nat-rule create --lb-name <lb-name> \
+--resource-group <res-group> \
+--name <name> \
+--protocol Udp --frontend-port <ipsec-port> \
+--backend-port <ipsec-port> \
+--frontend-ip-name <frontend-ip-name>
+
+# add your vm network interface to the created inbound nat rule
+$ az network nic ip-config inbound-nat-rule add \
+--lb-name <lb-name> --resource-group <res-group> \
+--inbound-nat-rule <nat-name> \
+--nic-name <nic-name> --ip-config-name <pipConfig>
+----
+Replace _lb-name_ with your load balancer name.
+Replace _res-group_ with your resource group name.
+Replace _nat-name_ with your load balancing inbound NAT rule name.
+Replace _ipsec-port_with your IPsec port.
+Replace _pipConfig_ with your cluster frontend IP configuration name.
+Replace _nic-name_ with your network interface card (NIC) name.
+
+. Create one load balancing inbound NAT rules to forward Submariner gateway metrics service request.
++
+----
+# create inbound nat rule
+$ az network lb inbound-nat-rule create --lb-name <lb-name> \
+--resource-group <res-group> \
+--name <name> \
+--protocol Tcp --frontend-port 8080 --backend-port 8080 \
+--frontend-ip-name <frontend-ip-name>
+
+# add your vm network interface to the created inbound nat rule
+$ az network nic ip-config inbound-nat-rule add \
+--lb-name <lb-name> --resource-group <res-group> \
+--inbound-nat-rule <nat-name> \
+--nic-name <nic-name> --ip-config-name <pipConfig>
+----
+Replace _lb-name_ with your load balancer name.
+Replace _res-group_ with your resource group name.
+Replace _nat-name_ with your load balancing inbound NAT rule name.
+Replace _pipConfig_ with your cluster frontend IP configuration name.
+Replace _nic-name_ with your network interface card (NIC) name.
+
+. Create NSG (network security groups) security rules on your Azure to open IPsec IKE (by default 500/UDP) and NAT traversal ports (by default 4500/UDP) for Submariner.
++
+----
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Inbound --access Allow \
+--protocol Udp --destination-port-ranges <ipsec-port>
+
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Outbound --access Allow \
+--protocol Udp --destination-port-ranges <ipsec-port>
+Replace _res-group_ with your resource group name.
+Replace _nsg-name_ with your NSG name.
+Replace _priority_ with your rule priority.
+Replace _name_ with your rule name.
+Replace _ipsec-port_ with your IPsec port.
+----
+
+. Create the NSG rules to open 4800/UDP port to encapsulate Pod traffic from the worker and master nodes to the Submariner Gateway nodes.
++
+----
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Inbound --access Allow \
+--protocol Udp --destination-port-ranges 4800 \
+
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Outbound --access Allow \
+--protocol Udp --destination-port-ranges 4800
+----
+Replace _res-group_ with your resource group name.
+Replace _nsg-name_ with your NSG name.
+Replace _priority_ with your rule priority.
+Replace _name_ with your rule name.
+
+. Create the NSG rules to open 8080/TCP port to export metrics service from the Submariner Gateway nodes.
++
+----
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Inbound --access Allow \
+--protocol Tcp --destination-port-ranges 8080 \
+
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Outbound --access Allow \
+--protocol Udp --destination-port-ranges 8080
+----
+Replace _res-group_ with your resource group name.
+Replace _nsg-name_ with your NSG name.
+Replace _priority_ with your rule priority.
+Replace _name_ with your rule name.
+
+[#preparing-ibm]
+=== Preparing IBM Cloud to deploy Submariner
+
+There are 2 kinds of Red Hat OpenShift Kubernetes Service (ROKS) on IBM Cloud: the classic cluster and the second generation of compute infrastructure in a virtual private cloud (VPC). Submariner cannot run on the classic ROKS cluster since cannot configure the IPSec ports for the classic cluster.
+
+To configure the ROKS clusters on VPC, complete the steps in the following links:
+
+. Before creating a cluster, specify subnets for pods and services, which avoids overlapping CIDRs with other clusters. Make sure there are no overlapping pods and services CIDRs between clusters if you are using an existing cluster.See link:https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics[VPC Subnets] for the procedure. 
+. Attach a public gateway to subnets used in the cluster. See link:https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics_pgw[Public Gateway] for the procedure. 
+3. Please refer to [Security Group](https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-network-policy#security_groups_ui) to create inbound rules for the default security group of the cluster. Ensure that firewall allows inbound/outbound UDP/4500 and UDP/500 ports for Gateway nodes, and allows inbound/outbound 4800/UDP for all the other nodes.
+4. Label a node which has the public gateway with “submariner.io/gateway=true” in the cluster.
+5. Please refer to [Calico](https://submariner.io/operations/deployment/calico/) to configure Calico CNI by creating IPPools in the cluster.
+
+
+
+[#deploying-submariner]
+= Deploying Submariner
+
+Complete the following steps to deploy `submariner-addon`:
+
+. Log on to your hub cluster with cluster administrator permissions. 
+
+. Create a `ManagedClusterSet` on the hub cluster by using the instructions provided in xref:../manage_cluster/custom_resource.adoc#managedclustersets[ManagedClusterSets]. The `submariner-addon` creates a namespace called `submariner-clusterset-<clusterset-name>-broker` and deploys the submariner broker to it. The name of the ManagedClusterSet replaces <clusterset-name> in the namespace name.
+
+. Label  a certain managed cluster with `cluster.open-cluster-management.io/clusterset:<cluster-set-name>` to add it to a cluster set on hub cluster
+
+. Label a managed cluster of a cluster set with `cluster.open-cluster-management.io/submariner-agent` on hub cluster, after the managed cluster was labeled, the `submariner-addon` will create the related `ManifestWork`s to its namespace to deploy the submariner components
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[#creating-a-managedclusterset]
+== Creating a ManagedClusterSet
+
+You can group managed clusters together in a ManagedClusterSet to limit the user access on managed clusters.  
+
+*Required access*: Cluster administrator
+
+A `ManagedClusterSet` is a cluster-scoped resource, so you must have cluster administration permissions for the cluster where you are creating the `ManagedClusterSet`. A managed cluster cannot be included in more than one `ManagedClusterSet`. Complete the following steps to create a `ManagedClusterSet`:
+
+. Add the following definition of the `ManagedClusterSet` to your `yaml` file:
++
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: ManagedClusterSet
+metadata:
+  name: <clusterset1>
+----
++
+Replace _clusterset1_ with the name of your `ManagedClusterSet`. 
+
+[#adding-clusters-to-a-managedclusterset]
+== Adding clusters to a ManagedClusterSet
+
+After your `ManagedClusterSet` is created, you must add one or more managed clusters. Complete the following steps to add managed clusters:
+
+. Ensure that there is an RBAC `ClusterRole` entry that allows you to `Create` on a virtual subresource of `managedclustersets/join`. Without this permission, you cannot assign a managed cluster to a `ManagedClusterSet`. 
++
+If this entry does not exist, add it to your `yaml` file. A sample entry resembles the following content:
++
+----
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: clusterrole1
+rules:
+  - apiGroups: ["cluster.open-cluster-management.io"]
+    resources: ["managedclustersets/join"]
+    resourceNames: ["clusterset1"]
+    verbs: ["create"]
+----
++
+Replace _clusterset1_ with the name of your `ManagedClusterSet`.
++
+*Note:* If you are moving a managed cluster from one `ManagedClusterSet` to another, you must have that permission available on both `ManagedClusterSets`. 
+
+. Find the definition of the managed cluster in the `yaml` file. The section of the managed cluster definition where you add a label resembles the following content:
++
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true 
+----
++
+In this example, _cluster1_ is the name of the managed cluster.
+
+. Add a label that specifies the name of the `ManagedClusterSet` in the format: `cluster.open-cluster-management.io/clusterset: clusterset1`.
++
+Your code resembles the following example:
++
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+  labels:
+    cluster.open-cluster-management.io/clusterset: clusterset1
+spec:
+  hubAcceptsClient: true
+----
++
+In this example, _cluster1_ is the cluster that is added to the _clusterset1_ `ManagedClusterSet`.
++
+*Note:* If the managed cluster was previously assigned to a `ManagedClusterSet` that was deleted, the managed cluster might have a `ManagedClusterSet` already specified to a cluster set that does not exist. If so, replace the name with the new one.
+
+[#removing-a-managed-cluster-from-a-managedclusterset]
+== Removing a managed cluster from a ManagedClusterSet
+
+You might want to remove a managed cluster from a `ManagedClusterSet` to move it to a different `ManagedClusterSet`, or remove it from the management settings of the set.
+
+To remove a managed cluster from a `ManagedClusterSet`, complete the following steps:
+
+. Run the following command to display a list of managed clusters in the `ManagedClusterSet`:
++
+----
+kubectl get managedclusters -l cluster.open-cluster-management.io/clusterset=<clusterset1>
+----
++
+Replace _clusterset1_ with the name of the `ManagedClusterSet`.
+
+. Locate the entry for the cluster that you want to remove.
+
+. Remove the label from the the `yaml` entry for the cluster that you want to remove. See the following code for an example of the label:
++
+----
+labels:
+   cluster.open-cluster-management.io/clusterset: clusterset1
+----
++
+*Note:* If you are moving a managed cluster from one `ManagedClusterSet` to another, you must have the RBAC permission available on both `ManagedClusterSets`.
+
+[#managedclustersetbinding]
+== ManagedClusterSetBinding resource
+
+Create a ManagedClusterSetBinding resource to bind a ManagedClusterSet resource to a namespace. Application and policies that are created in the same namespace can only access managed clusters that are included in the bound ManagedClusterSet resource.
+
+When you create a ManagedClusterSetBinding, the name of the ManagedClusterSetBinding must match the name of the ManagedClusterSet to bind.
+
+Your ManagedClusterSetBinding resource might resemble the following information:
+
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: ManagedClusterSetBinding
+metadata:
+  namespace: project1
+  name: clusterset1
+spec:
+  clusterSet: clusterset1
+----
+
+You must have the bind permission on the target ManagedClusterSet. View the following example of a ClusterRole resource, which contain rules that allow the user to bind to `clusterset1`:
+
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: clusterrole1
+rules:
+  - apiGroups: ["cluster.open-cluster-management.io"]
+    resources: ["managedclustersets/bind"]
+    resourceNames: ["clusterset1"]
+    verbs: ["create"]
+----
+
+For more information about role actions, see link:../security/rbac.adoc#role-based-access-control[Role-based access control].
