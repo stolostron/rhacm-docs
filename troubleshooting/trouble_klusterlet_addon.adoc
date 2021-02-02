@@ -1,0 +1,65 @@
+[#troubleshooting-klusterlet-addon]
+= Troubleshooting Klusterlet application manager on managed clusters
+
+When you upgrade from {product-title}, the `klusterlet-addon-appmgr` pod on {ocp} managed clusters version 4.5 and 4.6 are `OOMKilled`. 
+
+[#symptom-klusterlet-application-manager]
+== Symptom: Klusterlet application manager on managed cluster
+
+You receive an error for the `klusterlet-addon-appmgr` pod on {ocp} managed clusters version 4.5 and 4.6: `OOMKilled`. 
+
+[#resolving-klusterlet-application-manager]
+== Resolving the problem: Klusterlet application manager on managed cluster
+
+For {product-title} 2.1.x and 2.2, you need to manually increase the memory limit of the pod to `8Gb`. See the following steps.
+
+. On your hub cluster, annotate the `klusterletaddonconfig` to pause replication. See the following command:
+
++
+----
+oc annotate klusterletaddonconfig -n ${CLUSTER_NAME} ${CLUSTER_NAME} klusterletaddonconfig-pause=true --  overwrite=true
+----
+
+. On your hub cluster, scale down the `klusterlet-addon-operator`. See the following command:
+
++
+----
+oc edit manifestwork ${CLUSTER_NAME}-klusterlet-addon-operator -n ${CLUSTER_NAME}
+----
+
+. Find the `klusterlet-addon-operator` Deployment and add `replicas: 0` to the spec to scale down.
+
++
+[source,yaml]
+----
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: cluster1
+    name: klusterlet-addon-operator
+    namespace: open-cluster-management-agent-addon
+    spec:
+      replicas: 0
+----
+
+On the managed cluster, the `open-cluster-management-agent-addon/klusterlet-addon-operator` pod will be terminated.
+
+. Log in to the managed cluster to manually increase the memory limit in the `appmgr` pod. 
+
+Run the following command:
+
+----
+% oc edit deployments -n open-cluster-management-agent-addon klusterlet-addon-appmgr
+----
+
+For example, if the limit is 5G, increase the limit to 8G.
+
+[source,yaml]
+----
+resources:
+  limits:
+    memory: 2Gi  -> 8Gi 
+  requests:
+    memory: 128Mi -> 256Mi
+----
