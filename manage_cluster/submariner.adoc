@@ -15,19 +15,19 @@ You can enable Submariner on the {ocp-short} clusters that are hosted in the fol
 * Bare metal
 * Red Hat OpenShift Dedicated
 
-{product-title} provides a `submariner-addon` component that you can deploy in your environment by using your hub cluster. 
+{product-title} provides a Submariner component that you can deploy in your environment by using your hub cluster. 
 
 [#submariner-prereq]
 == Prerequisites
 
-Ensure that you have the following prerequisites before deploying the `submariner-addon`:
+Ensure that you have the following prerequisites before using Submariner:
 
 * A {product-title-short} hub cluster that is running on {ocp} version 4.4, or later, with Kubernetes version 1.17, or later.
 * A credential for accessing the hub cluster with `cluster administrator` permissions.
 * Two or more {ocp-short} managed clusters that are running on {ocp-short} version 4.4, or later, with Kubernetes version 1.17, or later, and are managed by the {product-title-short} hub cluster.
 * Pod and Service Classless Inter-Domain Routing (CIDR) between the clusters that do not overlap.
 * IP connectivity must be configured between the Gateway nodes. When connecting two clusters, at least one of the clusters must have a publicly routable IP address designated to the Gateway node.
-* Firewall configuration across all nodes in each of the managed clusters must allow 4800/UDP in both directions.
+* Firewall configuration across all nodes in each of the managed clusters must allow 4800/UDP in both directions. *Note:* This is configured automatically when your clusters are deployed in an Amazon Web Services environment, but must be configured manually for clusters on other environments and for the firewalls that protect private clouds like bare metal and VMware vSphere. 
 * Firewall configuration on the Gateway nodes allows ingress 8080/TCP so the other nodes in the cluster can access it. 
 
 See link:https://submariner.io/getting-started/#prerequisites[Submariner prerequisites] for more detailed information about the prerequisites.
@@ -86,7 +86,7 @@ See link:https://submariner.io/getting-started/quickstart/openshift/aws/#prepare
 [#preparing-gcp]
 === Preparing Google Cloud Platform to deploy Submariner
 
-To prepare the clusters on your Google Cloud Platform for deploying the `Submariner-Addon` component, complete the following steps:
+To prepare the clusters on your Google Cloud Platform for deploying the Submariner component, complete the following steps:
 
 . Create the inbound and outbound firewall rules on your Google Cloud Platform to open the IPsec IKE (by default 500/UDP) and NAT traversal ports (by default 4500/UDP) to enable Submariner communication.
 +
@@ -119,9 +119,9 @@ Replace _network-name_ with your GCP cluster network name.
 [#preparing-azure]
 === Preparing Microsoft Azure to deploy Submariner
 
-To prepare the clusters on your Microsoft Azure for deploying the `Submariner-Addon` component, complete the following steps:
+To prepare the clusters on your Microsoft Azure for deploying the Submariner component, complete the following steps:
 
-. Create the inbound and outbound firewall rules on your Microsoft Azure environment to open the IPsec IKE (by default 500/UDP) and NAT traversal ports (by default 4500/UDP) to enable Submariner communication.
+. Create the inbound and outbound firewall rules on your Microsoft Azure environment to open the IP security IKE (by default 500/UDP) and NAT traversal ports (by default 4500/UDP) to enable Submariner communication.
 +
 ----
 # create inbound nat rule
@@ -227,13 +227,17 @@ Replace _name_ with your rule name.
 
 There are 2 kinds of Red Hat OpenShift Kubernetes Service (ROKS) on IBM Cloud: the classic cluster and the second generation of compute infrastructure in a virtual private cloud (VPC). Submariner cannot run on the classic ROKS cluster since cannot configure the IPSec ports for the classic cluster.
 
-To configure the ROKS clusters on a VPC, complete the steps in the following links:
+To configure the ROKS clusters on a VPC to use Submariner, complete the steps in the following links:
 
 . Before creating a cluster, specify subnets for pods and services, which avoids overlapping CIDRs with other clusters. Make sure there are no overlapping pods and services CIDRs between clusters if you are using an existing cluster.See link:https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics[VPC Subnets] for the procedure. 
+
 . Attach a public gateway to subnets used in the cluster. See link:https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics_pgw[Public Gateway] for the procedure. 
-3. Please refer to [Security Group](https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-network-policy#security_groups_ui) to create inbound rules for the default security group of the cluster. Ensure that firewall allows inbound/outbound UDP/4500 and UDP/500 ports for Gateway nodes, and allows inbound/outbound 4800/UDP for all the other nodes.
-4. Label a node which has the public gateway with “submariner.io/gateway=true” in the cluster.
-5. Please refer to [Calico](https://submariner.io/operations/deployment/calico/) to configure Calico CNI by creating IPPools in the cluster.
+
+. Create inbound rules for the default security group of the cluster by completing the steps in link:https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-network-policy#security_groups_ui[Security Group]. Ensure that the firewall allows inbound and outbound traffic on UDP/4500 and UDP/500 ports for Gateway nodes, and allows inbound and outbound UDP/4800 for all the other nodes.
+
+. Label a node that has the public gateway as `submariner.io/gateway=true` in the cluster.
+
+. Refer to link:https://submariner.io/operations/deployment/calico/[Calico] to configure Calico CNI by creating IPPools in the cluster.
 
 [#preparing-osd]
 === Preparing Red Hat OpenShift Dedicated to deploy Submariner
@@ -274,11 +278,11 @@ To prepare the VMware vSphere and bare metal clusters for deploying Submariner, 
 [#deploying-submariner]
 = Deploying Submariner
 
-Complete the following steps to deploy `submariner-addon`:
+Complete the following steps to deploy Submariner:
 
 . Log on to your hub cluster with cluster administrator permissions. 
 
-. Create a `ManagedClusterSet` on the hub cluster by using the instructions provided in xref:../manage_cluster/custom_resource.adoc#managedclustersets[ManagedClusterSets]. The `submariner-addon` creates a namespace called `submariner-clusterset-<clusterset-name>-broker` and deploys the submariner broker to it. The name of the ManagedClusterSet replaces <clusterset-name> in the namespace name. Your entry for the `ManagedClusterSet` should resemble the following content:
+. Create a `ManagedClusterSet` on the hub cluster by using the instructions provided in xref:../manage_cluster/custom_resource.adoc#managedclustersets[ManagedClusterSets]. The `submariner-addon` creates a namespace called `submariner-clusterset-<clusterset-name>-broker` and deploys the Submariner broker to it. The name of the ManagedClusterSet replaces <clusterset-name> in the namespace name. Your entry for the `ManagedClusterSet` should resemble the following content:
 + 
 [source,yaml]
 ----
@@ -310,7 +314,7 @@ Replace _ManagedClusterSet-name_ with the name of the `ManagedClusterSet` to whi
 [#discovering-submariner-service]
 = Discovering a managed cluster service with Submariner
 
-After the Submariner tool is deployed into the same environment as your managed clusters, you must discover the managed cluster service so the clusters can communicate. This example uses the `nginx` service in the `default` namespace, but you can discover any service. 
+After the Submariner tool is deployed into the same environment as your managed clusters, you must discover the managed cluster service so the clusters can communicate. This example uses the `nginx` service in the `default` namespace, but you can discover any Kubernetes `ClusterIP` service or headless service. 
  
 . Apply an instance of the `nginx` service on a managed cluster that is in the `ManagedClusterSet` by entering the following commands:
 +
