@@ -376,6 +376,73 @@ Check the role permissions and update appropriately. See link:../security/rbac.a
 [#application-management-known-issues]
 == Application management known issues
 
+[#application-ansible-standalone]
+=== Application Ansible hook stand-alone mode
+// 2.2:8036
+
+Ansible hook stand-alone mode is not supported. To deploy Ansible hook on the hub cluster with a subscription, you might use the following subscription YAML:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-rhacm-gitops-demo
+  namespace: hello-openshift
+annotations:
+  apps.open-cluster-management.io/github-path: myapp
+  apps.open-cluster-management.io/github-branch: master
+spec:
+  hooksecretref:
+      name: toweraccess
+  channel: rhacm-gitops-demo/ch-rhacm-gitops-demo
+  placement:
+     local: true
+----
+
+However, this configuration might never create the Ansible instance, since the `spec.placmenet.local:true` has the subscription running on `standalone` mode. You need to create the subscription in hub mode. 
+
+. Create a placement rule that deploys to `local-cluster`. See the following sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata: 
+  name: <towhichcluster>
+  namespace: hello-openshift
+spec:
+  clusterSelector:
+    matchLabels:
+      local-cluster: "true" #this points to your hub cluster
+----
+
+. Reference that placement rule in your subscription. See the following:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-rhacm-gitops-demo
+  namespace: hello-openshift
+annotations:
+  apps.open-cluster-management.io/github-path: myapp
+  apps.open-cluster-management.io/github-branch: master
+spec:
+  hooksecretref:
+      name: toweraccess
+  channel: rhacm-gitops-demo/ch-rhacm-gitops-demo
+  placement:
+     placementRef:
+        name: <towhichcluster>
+        kind: PlacementRule
+----
+
+After applying both, you should see the Ansible instance created in your hub cluster.
+
 [#application-local-cluster-limitation]
 === Application Deploy on local cluster limitation
 // 2.1.0:6418
