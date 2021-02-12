@@ -1,0 +1,68 @@
+[#current-data-on-the-grafana-dashboard-disappears]
+= Current data on the Grafana dashboard disappears
+
+Current data from the Grafana dashboards in the {product-title-short} console disappears.
+
+[#symptom-1-current-data-on-the-grafana-dashboard-disappears]
+== Symptom 1: Current data on the Grafana dashboard disappears
+
+Data from the {product-title-short} cluster overview dashboard is empty, however historical data is still available.
+
+
+[#symptom-2-pvc-does-not-change-after-editing-statefulSetSize]
+== Symptom 2: PVC does not change after editing statefulSetSize
+
+Additionally, on your managed clusters you might receive a message in the logs for any `metrics-collector-deployment-x` pods that are running in the `open-cluster-management-addon-observability` namespace. You might receive the following error message, along with text that references that the disk is full:
+
+----
+HTTP 500
+----
+
+[#resolving-expand-the-pvc]
+== Resolving the problem: Expand the PVC size
+
+If you have this problem, complete the following steps:
+
+. Confirm if the disk space is full by running a query. 
+
+.. Log in to the {ocp} console. 
+
+.. From the navigation menu, click *Monitoring* > *Metrics*. 
+
+.. Enter the following query in the _Expression_ window and sort the query to ascend by the _Volume_ column:
++
+----
+kubelet_volume_stats_available_bytes{namespace="open-cluster-management-observability"}/kubelet_volume_stats_capacity_bytes{namespace="open-cluster-management-observability"}
+----
++
+*Note:* If the value is 0, then the disk is full. If the disk is full continue with the following tasks.
+
+. Expand the `data-observability-observatorium-thanos-receive-default-x` PVC to update the `_storage_` parameter to a greater value than the `_statefulSetSize_` value  from the MultiClusterObservability (mco) CR. Run the following command for each `data-observability-observatorium-thanos-receive-default-x` PVC:
++
+----
+kubectl get pvc data-observability-observatorium-thanos-receive-default-0 -o yaml
+----
++
+Your `data-observability-observatorium-thanos-receive-default-x` PVC might resemble the following content:
++
+----
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 
+----
++
+This might take some time to work. Your changes go into effect when the value of `_storage_` and `_status_` match. Run the previous command to check.
+
+. Verify the fix by completing the following steps:
+.. Log in to your {product-title-short} console.
+.. From the navigation menu, select *Observe environments* > *Overview*.
+.. Click the Grafana link that is near the console header to view the metrics from your managed clusters.
+.. Check the `metrics-collector-deployment-x` pod logs. When the error is fixed in the logs, the following message appears: `Metrics pushed successfully`.
+.. Confirm if the disk space is no longer full by running a query from your {ocp} console. Enter the following query in the _Expression_ window and sort the query to ascend by the _Volume_ column:
++
+----
+kubelet_volume_stats_available_bytes{namespace="open-cluster-management-observability"}/kubelet_volume_stats_capacity_bytes{namespace="open-cluster-management-observability"}
+---- 
