@@ -29,6 +29,7 @@ Ensure that you have the following prerequisites before using Submariner:
 * IP connectivity must be configured between the Gateway nodes. When connecting two clusters, at least one of the clusters must have a publicly routable IP address designated to the Gateway node.
 * Firewall configuration across all nodes in each of the managed clusters must allow 4800/UDP in both directions. *Note:* This is configured automatically when your clusters are deployed in an Amazon Web Services environment, but must be configured manually for clusters on other environments and for the firewalls that protect private clouds like bare metal and VMware vSphere. 
 * Firewall configuration on the Gateway nodes allows ingress 8080/TCP so the other nodes in the cluster can access it. 
+* Firewall configuration open for UDP/4500, UDP/500, and any other ports that are used for IPSec traffic on the gateway nodes.
 
 See link:https://submariner.io/getting-started/#prerequisites[Submariner prerequisites] for more detailed information about the prerequisites.
 
@@ -282,7 +283,7 @@ Complete the following steps to deploy Submariner:
 
 . Log on to your hub cluster with cluster administrator permissions. 
 
-. Create a `ManagedClusterSet` on the hub cluster by using the instructions provided in xref:../manage_cluster/custom_resource.adoc#managedclustersets[ManagedClusterSets]. The `submariner-addon` creates a namespace called `submariner-clusterset-<clusterset-name>-broker` and deploys the Submariner broker to it. The name of the ManagedClusterSet replaces <clusterset-name> in the namespace name. Your entry for the `ManagedClusterSet` should resemble the following content:
+. Create a `ManagedClusterSet` on the hub cluster by using the instructions provided in xref:../manage_cluster/custom_resource.adoc#managedclustersets[ManagedClusterSets]. The `submariner-addon` creates a namespace called `submariner-clusterset-<clusterset-name>-broker` and deploys the Submariner Broker to it. The name of the ManagedClusterSet replaces <clusterset-name> in the namespace name. Your entry for the `ManagedClusterSet` should resemble the following content:
 + 
 [source,yaml]
 ----
@@ -311,11 +312,13 @@ Replace _ManagedClusterSet-name_ with the name of the `ManagedClusterSet` to whi
 
 . Repeat those steps for all of the managed clusters that you want to add to the `ManagedClusterSet`.
 
-[#discovering-submariner-service]
-= Discovering a managed cluster service with Submariner
+[#enable-service-discovery-submariner]
+= Enabling service discovery for Submariner
 
-After the Submariner tool is deployed into the same environment as your managed clusters, you must discover the managed cluster service so the clusters can communicate. This example uses the `nginx` service in the `default` namespace, but you can discover any Kubernetes `ClusterIP` service or headless service. 
- 
+After Submariner is deployed into the same environment as your managed clusters, the routes are configured for secure IP routing between the Pod and services across the clusters in the `ManagedClusterSet`. To make a service from a cluster visible and discoverable to other clusters in the `ManagedClusterSet`, you must create a `ServiceExport` object. After a service is exported with a `ServiceExport` object, you can access the the service by the following format: `<service>.<namespace>.svc.clusterset.local`. If multiple clusters export a service with the same name, and from the same namespace, they are recognized by other clusters as a single logical service. 
+
+This example uses the `nginx` service in the `default` namespace, but you can discover any Kubernetes `ClusterIP` service or headless service. 
+
 . Apply an instance of the `nginx` service on a managed cluster that is in the `ManagedClusterSet` by entering the following commands:
 +
 ----
