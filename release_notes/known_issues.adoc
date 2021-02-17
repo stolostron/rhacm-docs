@@ -25,55 +25,10 @@ Review the known issues for {product-title}. The following list contains known i
 * <<web-console-known-issues,Web console known issues>>
 * <<cluster-management-issues,Cluster management known issues>>
 * <<application-management-known-issues,Application management known issues>>
-* <<security-known-issues,Security known issues>>
+//* <<security-known-issues,Security known issues>>
 
 [#installation-known-issues]
 == Installation known issues
-
-[#upgrade-cluster-drops-certificates]
-=== Upgrade to 2.1.1 results in loss of certificates
-
-// 2.1.1:7533
-
-When your cluster upgrades to {product-title-short} version 2.1.1, you lose some or all of the certificates on your cluster. You can confirm this situation by entering one of the following commands:
-
----- 
-oc get certificates -n open-cluster-management
-----
-
-or
-
-----
-oc get pods -n open-cluster-management | grep -vE "Completed|Running"
-----
-
-If there are fewer certificates returned than expected when you run the first command, or more than one pod is returned after running the second command, run the link:https://gist.github.com/cdoan1/79451b3d75a2f3f1b74b3622029d6989[
- `generate-update-issue-cert-manifest.sh` script] to update the certificates. 
-
-[#upgrade-does-not-complete-clusterset-error]
-=== Upgrade to version 2.1.1 does not complete with ClusterImageSet error
-
-// 2.1.1:7527
-
-In some cases, your upgrade of {product-title} version 2.1.0 to {product-title-short} version 2.1.1 does not complete and displays an error that is similar to the following error:
-
-----
-failed to get candidate release: rendered manifests contain a resource
-that already exists. Unable to continue with update: ClusterImageSet "img4.6.1-x86-64"
-in namespace "" exists and cannot be imported into the current release: invalid
-ownership metadata; label validation error: missing key "app.kubernetes.io/managed-by":
-must be set to "Helm"; annotation validation error: missing key "meta.helm.sh/release-name":
-must be set to "console-chart-c4cb5"; annotation validation error: missing key
-"meta.helm.sh/release-namespace": must be set to "open-cluster-management"
-----
-
-This occurs when one or more ClusterImageSets on the existing version have the same names as the versions that are added with the upgrade, which causes a collision. To work around this issue, complete the following steps: 
-
-. Stop the running upgrade.
-
-. Change the name of each of your existing ClusterImageSets by adding a character to make it a unique name.
-
-. Restart the upgrade.
 
 [#openshift-container-platform-cluster-upgrade-failed-status]
 === OpenShift Container Platform cluster upgrade failed status
@@ -85,7 +40,7 @@ When an {ocp-short} cluster is in the upgrade stage, the cluster pods are restar
 [#certificate-manager-must-not-exist-during-an-installation]
 === Certificate manager must not exist during an installation
 
-// 1.0.0:678
+// 1.0.0:678 be sure this is an install doc prereq
 
 Certificate manager must not exist on a cluster when you install {product-title}.
 
@@ -95,69 +50,6 @@ To resolve this issue, verify if the certificate manager is present in your clus
 
 ----
 kubectl get crd | grep certificates.certmanager
-----
-
-[#upgrade-leaves-clusterserviceversion-pending]
-=== Upgrade from version 2.0.4 to version 2.1 leaves the ClusterServiceVersion in a pending state
-
-// 2.1.0:6747
-
-After you upgrade from {product-title-short} version 2.0.4 to version 2.1 and run the `oc get csv` command. In the output, the `PHASE` of your {product-title-short} ClusterServiceVersion (CSV) is `Pending`, but the `NAME` is updated to `advanced-cluster-management.v2.1.0`.
-
-To work around this issue, complete the following steps to find and create the missing `clusterRole` custom resource:
-
-. Find all `clusterrolebinding` resources that were deployed by the {product-title-short} 2.1 CSV by entering the following command: 
-
-+
-----
-oc get clusterrolebinding |grep advanced-cluster-management
-----
-
-+ 
-Your output should resemble the following content:
-+
-----
-advanced-cluster-management.v2.1.0-86dfdf7c5d          ClusterRole/advanced-cluster-management.v2.1.0-86dfdf7c5d       9h
-advanced-cluster-management.v2.1.0-cd8d57f64           ClusterRole/advanced-cluster-management.v2.1.0-cd8d57f64        9h
-----
-
-. Open each `clusterrolebinding` to find the `clusterRole` name that is associated to the `open-cluster-management` service account by entering a command that resembles the following command:
-+
-----
-oc get clusterrolebinding advanced-cluster-management.v2.1.0-cd8d57f64 -o yaml 
-----
-+
-Your output should resemble the following content:
-+
-----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: advanced-cluster-management.v2.1.0-cd8d57f64
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: advanced-cluster-management.v2.1.0-cd8d57f64
-subjects:
-- kind: ServiceAccount
-  name: multicluster-operators
-  namespace: open-cluster-management
-----
-
-. Manually create any missing `clusterRole` entries by adding content that resembles the following content to your `.yaml` file:
-+
-----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: advanced-cluster-management.v2.1.0-cd8d57f64
-rules:
-- apiGroups:
-  - '*'
-  resources:
-  - '*'
-  verbs:
-  - '*'
 ----
 
 [#web-console-known-issues]
@@ -214,6 +106,14 @@ When you update the storage size in the `searchcustomization` CR, the PVC config
 oc edit pvc <storageclassname>-search-redisgraph-0
 ----
 
+[#observability-endpoint-operator-fails-to-pull-image]
+=== Observability endpoint operator fails to pull image
+//2.2:9259
+
+The observability endpoint operator fails if you create a pull-secret to deploy to the MultiClusterObservability CustomResource (CR) and there is no pull-secret in the `open-cluster-management-observability` namespace. When you import a new cluster, or import a Hive cluster that is created with {product-title-short}, you need to manually create a pull-image secret on the managed cluster.
+
+For more information, see link:../observability/observability_install.adoc#enabling-observability[Enabling observability].
+
 [#cluster-management-issues]
 == Cluster management known issues
 
@@ -264,7 +164,7 @@ When you import a cluster that was previously managed and detached by a {product
 You cannot import IBM Red Hat OpenShift Kubernetes Service version 3.11 clusters.
 Later versions of IBM OpenShift Kubernetes Service are supported.
 
-[#detaching-openshift-container-platform-3.11-does-not-remove-the-open-cluster-manangement-agent]
+[#detaching-openshift-container-platform-3.11-does-not-remove-the-open-cluster-management-agent]
 === Detaching {ocp-short} 3.11 does not remove the _open-cluster-management-agent_
 
 // 2.0.0:3847
@@ -310,7 +210,7 @@ oc set data secret/{CLUSTER-NAME}-azure-creds -n {CLUSTER-NAME} --from-file=osSe
 oc patch secret {CLUSTER-NAME}-vsphere-creds -n {CLUSTER-NAME} --type json -p='[{"op": "add", "path": "/stringData", "value":{"username": "{YOUR-NEW-VMware-username}","password":"{YOUR-NEW-VMware-password}"} }]'
 ----
 
-[#no-run-mgt-ingress-nonroot]
+[#no-run-mgt-ingress-non-root]
 === Cannot run management ingress as non-root user
 //2.0:35532
 
@@ -400,7 +300,7 @@ spec:
      local: true
 ----
 
-However, this configuration might never create the Ansible instance, since the `spec.placmenet.local:true` has the subscription running on `standalone` mode. You need to create the subscription in hub mode. 
+However, this configuration might never create the Ansible instance, since the `spec.placement.local:true` has the subscription running on `standalone` mode. You need to create the subscription in hub mode. 
 
 . Create a placement rule that deploys to `local-cluster`. See the following sample:
 
@@ -451,7 +351,7 @@ If you select *Deploy on local cluster* when you create or edit an application, 
 
 To resolve the issue, see the following procedure:
 
-. Uncheck the *Deploy on local cluster* option in the console.
+. Deselect the *Deploy on local cluster* option in the console.
 . Select the *Deploy application resources only on clusters matching specified labels* option.
 . Create the following label: `local-cluster : 'true'`.
 
@@ -575,39 +475,5 @@ See the following limitations to various _Application_ tables in the console:
 
 - From the _Advanced configuration_ table for _Channels_, the _Subscriptions_ column displays the total number of subscriptions on the local cluster that use that channel, but this does not include subscriptions that are deployed by other subscriptions, which are included in the search result.
 
-[#security-known-issues]
-== Security known issues
-
-[#internal-error-500-during-login-to-the-console]
-=== Internal error 500 during login to the console
-
-// 1.0.1:2414
-
-When {product-title} is installed and the {ocp-short} is customized with a custom ingress certificate, a `500 Internal Error` message appears.
-You are unable to access the console because the {ocp-short} certificate is not included in the {product-title} management ingress.
-Add the {ocp-short} certificate by completing the following steps:
-
-. Create a ConfigMap that includes the certificate authority used to sign the new certificate. Your ConfigMap must be identical to the one you created in the `openshift-config` namespace. Run the following command:
-
-+
-----
-oc create configmap custom-ca \
-     --from-file=ca-bundle.crt=</path/to/example-ca.crt> \
-     -n open-cluster-management
-----
-
-. Edit your `multiclusterhub` YAML file by running the following command:
-
-+
-----
-oc edit multiclusterhub multiclusterhub
-----
-
-.. Update the `spec` section by editing the parameter value for `customCAConfigmap`. The parameter might resemble the following content:
-
-+
-----
-customCAConfigmap: custom-ca
-----
-
-After you complete the steps, wait a few minutes for the changes to propagate to the charts and log in again. The {ocp-short} certificate is added.
+//[#security-known-issues]
+//== Security known issues
