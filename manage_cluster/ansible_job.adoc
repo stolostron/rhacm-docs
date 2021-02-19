@@ -1,0 +1,61 @@
+[#creating-an-ansible-job-for-a-managed-cluster]
+= Creating an AnsibleJob for a managed cluster
+
+You can create an AnsibleJob that is bound to a cluster when the cluster is created by {product-title} or imported to be managed by {product-title-short}.
+
+Complete the following procedure to create an AnsibleJob and configure it with a cluster that is not yet managed by {product-title-short}:
+
+. Create the definition file for the AnsibleJob in one of the channels that are supported by the application function. The supported channels include Git, Helm, Object Storage, and a Deployable from a template.
++
+Use `AnsibleJob` as the value of `kind` in the definition.
++
+Your definition file contents might resemble the following example:
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: AnsibleJob
+metadata:
+  name: hive-cluster-gitrepo
+  namespace: gitops-cluster-lifecycle
+spec:
+  type: Git
+  pathname: https://github.com/open-cluster-management/gitops-clusters.git
+  secretRef:
+    name: github-gitops-clusters
+----
+
+. Log on to your {product-title-short} hub cluster.
+
+. Using the {product-title-short} console, create an application with a with a subscription that references the channel where you stored the definition file that you just created. See link:../manage_applications/app_resources.adoc#managing-application-resources[Managing application resources] for more information about creating an application and subscription.
++
+When you create the subscription, specify a label that you can add to the cluster that you create or import later to connect this subscription with the cluster. This can be an existing label, like `vendor=OpenShift`, or a unique lable that you create and define. 
+
+. Create or import your cluster by following the instructions in xref:../manage_cluster/create.adoc#creating-a-cluster[Creating a cluster] or xref:../manage_cluster/import.adoc#importing-a-target-managed-cluster-to-the-hub-cluster[Importing a target managed cluster to the hub cluster], respectively.
++
+When you create or import the cluster, use the same label that you used when you created the subscription, and the AnsibleJob is automatically configured to run on the cluster. 
+ 
+If you are using the Git Channel as your method of storing the AnsibleJob definition, you can dynamically inject the cluster name into the definition. Complete the following procedure to create an AnsibleJob and configure it with a cluster that is already managed by {product-title-short}:
+
+. Create the definition file for the AnsibleJob in the pre hook or post hook directory of your Git Channel.
++
+Use `AnsibleJob` as the value of `kind` in the definition.
++
+Your definition file contents might resemble the following example:
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: AnsibleJob
+metadata:
+  name: hive-cluster-gitrepo
+  namespace: gitops-cluster-lifecycle
+spec:
+  type: Git
+  pathname: https://github.com/open-cluster-management/gitops-clusters.git
+  secretRef:
+    name: github-gitops-clusters
+----
++
+By storing the file in the pre hook or post hook directory, it creates a list of cluster names that match the placement rule. The list of cluster names can be passed as a value of `extra_vars` to the AnsibleJob `kind` resource. When this value is passed tot he AnsibleJob resource, the AnsibleJob can determine the new cluster name and use it in the automation.  
+
