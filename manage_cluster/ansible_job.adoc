@@ -13,11 +13,10 @@ Your definition file contents might resemble the following example:
 +
 [source,yaml]
 ----
-apiVersion: apps.open-cluster-management.io/v1
+apiVersion: apiVersion: tower.ansible.com/v1alpha1
 kind: AnsibleJob
 metadata:
   name: hive-cluster-gitrepo
-  namespace: my-cluster
 spec:
   tower_auth_secret: my-toweraccess
   job_template_name: my-tower-template-name
@@ -25,6 +24,8 @@ spec:
     variable1: value1
     variable2: value2
 ----
++
+By storing the file in the pre hook or post hook directory, it creates a list of cluster names that match the placement rule. The list of cluster names can be passed as a value of `extra_vars` to the AnsibleJob `kind` resource. When this value is passed to the AnsibleJob resource, the AnsibleJob can determine the new cluster name and use it in the automation.
 
 . Log on to your {product-title-short} hub cluster.
 
@@ -33,12 +34,23 @@ spec:
 When you create the subscription, specify a label that you can add to the cluster that you create or import later to connect this subscription with the cluster. This can be an existing label, like `vendor=OpenShift`, or a unique lable that you create and define. 
 +
 *Note:* If you select any label that is already in use, the Ansible job automatically runs. It is recommended that you include a resource in your application that is not part of the pre or post hooks.  
++
+The default placement rule runs the job when it detects the cluster with the label that matches the label of the AnsibleJob. If you want the automation to run on all of your running clusters that are managed by the hub cluster, add the following content to the placement rule:
++
+[source,yaml]
+----
+clusterConditions:
+  - type: ManagedClusterConditionAvailable
+    status: "True"
+----
++
+You can either paste this into the YAML content of the placement rule or you can select the option to _Deploy to all online clusters and local cluster_ on the _Application create_ page of the {product-title-short} console. 
 
 . Create or import your cluster by following the instructions in xref:../manage_cluster/create.adoc#creating-a-cluster[Creating a cluster] or xref:../manage_cluster/import.adoc#importing-a-target-managed-cluster-to-the-hub-cluster[Importing a target managed cluster to the hub cluster], respectively.
 +
 When you create or import the cluster, use the same label that you used when you created the subscription, and the AnsibleJob is automatically configured to run on the cluster. 
  
-You can dynamically inject the cluster name into the definition. Complete the following procedure to create an AnsibleJob and configure it with a cluster that is already managed by {product-title-short}:
+{product-title-short} automatically injects the cluster name into the `AnsibleJob.extra_vars.target_clusters` path. You can dynamically inject the cluster name into the definition. Complete the following procedure to create an AnsibleJob and configure it with a cluster that is already managed by {product-title-short}:
 
 . Create the definition file for the AnsibleJob in the pre hook or post hook directory of your Git Channel.
 +
@@ -52,14 +64,15 @@ apiVersion: tower.ansible.com/v1alpha1
 kind: AnsibleJob
 metadata:
   name: hive-cluster-gitrepo
-  namespace: <my-cluster>
 spec:
-  type: Git
-  pathname: https://github.com/open-cluster-management/gitops-clusters.git
-  secretRef:
-    name: github-gitops-clusters
+  tower_auth_secret: my-toweraccess
+  job_template_name: my-tower-template-name
+  extra_vars:
+    variable1: value1
+    variable2: value2
 ----
-Replace `_my-cluster_` with the name of the cluster, which is the same name as the namespace.
-+
-By storing the file in the pre hook or post hook directory, it creates a list of cluster names that match the placement rule. The list of cluster names can be passed as a value of `extra_vars` to the AnsibleJob `kind` resource. When this value is passed to the AnsibleJob resource, the AnsibleJob can determine the new cluster name and use it in the automation.  
+Replace `_my-toweraccess_` with the authentication secret to access your Ansible Tower.
+Replace `_my-tower-template-name_` with the template name from your Ansible Tower.
+
+Each time a cluster that is controlled by the AnsibleJob is removed or added, the AnsibleJob automatically runs and updates the `extra_vars.target_clusters` variable. This updating provides the ability to specify cluster names with a specific automation, or apply the automation to a group of clusters. 
 
