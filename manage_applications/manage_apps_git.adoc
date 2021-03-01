@@ -60,126 +60,39 @@ If you enter a new Ansible Tower secret name to create a new secret, you need to
 
 . You are redirected to the _Overiew_ page where you can view the details and topology.
 
-[#sample-yaml-git]
-== Sample YAML
-
-The following example channel definition shows an example of a channel for the Git Repository. In the following example, `secretRef` refers to the user identity used to access the Git repo that is specified in the `pathname`. If you have a public repo, you do not need the `secretRef`:
-
-[source,yaml]
-----
-apiVersion: apps.open-cluster-management.io/v1
-kind: Channel
-metadata:
-  name: hive-cluster-gitrepo
-  namespace: gitops-cluster-lifecycle
-spec:
-  type: Git
-  pathname: https://github.com/open-cluster-management/gitops-clusters.git
-  secretRef:
-    name: github-gitops-clusters
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: github-gitops-clusters
-  namespace: gitops-cluster-lifecycle
-data:
-  user: dXNlcgo=            # Value of user and accessToken is Base 64 coded.
-  accessToken: cGFzc3dvcmQ
-----
-
-*Note:* To see REST API, use the link:../apis/api.adoc#apis[APIs].
- 
-[#infrastrucuture-git-ops]
-== Infrastructure GitOps guide
-
-Using a `local-cluster` placement rule, you can use a subscription to deliver configuration-related resources to the hub cluster.  
-
-These resources can be the subscriptions that configure applications and policies, run Ansible jobs, and configure your clusters after you provision, or after you import.
-
 [#gitops-pattern]
 == GitOps pattern
 
-With the sample combination, you can specify the following:
-
-. A root subscription that can be applied with a CLI command. The root subscription will subscribe back to this repository to apply all the YAML to the hub cluster.
-. The subscription from step 1, which applies application and configuration subscriptions from `common-managed/`.
-. The configuration subscription in step 2, which applies the resources defined in `managed-cluster-common/`.
-. The policies that are defined in `managed-cluster-common/` are also applied to the hub cluster by the subscription in step 1. These policies include those targeted toward the hub cluster, as well as those that target managed clusters.
+The following are recommendations for organizing a Git repository for the purpose of managing clusters.
 
 [#sample-repo-git-ops]
-=== Sample Repo for GitOps
-
-In the following example repository, you see a folder for each hub cluster. You can also create a repository for each hub cluster, or a branch for each hub cluster. 
-
-A single subscription that is defined on the hub cluster pulls in all the other configuration resources, such as hub cluster config, policies, and common applications that will configure and deploy to the hub and managed clusters.
-
-A Git repository to store this type of information can resemble the following sample file and directory structure. See the sections for root path, managed cluster, and hub cluster:
-
-[#git-ops-root-path]
-=== GitOps root path
-
-These files in the root path of the repository create a subscription that references this Git repository, and applies all the YAML, except what is specified in the `.kubernetesignore`. It includes these four subscription files and the `./managed-cluster-common` directory.
-
+=== Sample Repo for GitOps folder structure
 ----
- /   # Repository root directory
-
-  # The subscription that delivers all the previous content to the hub cluster:
-  
-  hub-application.yaml   # This represents the hub cluster configuration in the console
-  hub-channels.yaml      # This points to `rhacm-hub-cluster` Git repository
-  hub-subscriptions.yaml # This defines the time window, branch to be used, and defines which directories containing appropriate configs, such as `hub-policies`, should be used (can be all)
-  hub-placement.yaml     # Points back to the `local-cluster` (hub cluster that is managed)
-  .kubernetesignore      # Tells the subscription to ignore hub-application.yaml, hub-channels.yaml, hub-subscription.yaml & hub-placement.yaml
-----
-
-[#git-ops-managed-clusters]
-=== GitOps application to managed clusters
-
-The following directories contain subscriptions that will apply applications to the _managed_ clusters. These subscriptions are applied to the hub cluster through the subscription in the root directory. 
-
-In the following sample, you see one subscription that is subscribing another:
-
-----
-common-managed/
+common-managed/             # Each folder holds apps or configurations that will be run on managed clusters
     apps/
       app-name-0/
-        application.yaml
-        subscription.yaml
-        channel.yaml        # This points to a repository named `app-name-0`, of type Git, Helm, or Object Storage
-        placementrule.yaml
       app-name-1/
-        application.yaml
-        subscription.yaml
-        channel.yaml        # This points to a repository named `app-name-0`, of type Git, Helm, or Object Storage
-        placementrule.yaml
     config/
-      application.yaml      # named: `day2-config`
-      subscription.yaml     # Points to the `managed-cluster-common/config` parent directory
-      channel.yaml          # Can point to this Git repository or a different repository with the day-two configuration
-      placementrule.yaml    # Defines the clusters to target
-managed-cluster-common/
-  configs/                  # These configurations are referenced through the `config` subscription
-    certmanagement.yaml
-    auth-oidc.yaml
-    autoscaler.yaml
-    descheduler.yaml
+      config001/
+      config002/
+
+managed-subscriptions      # Subscriptions that target the "common-managed" folder
+    apps/                  # Used to subscribe applications in "common-managed" with placement to managed-clusters
+    config/                # Used to subscribe configurations in "common-managed" with placement to managed-clusters
+    policies/              # Used to apply Policies with placement to managed-clusters
+
+root-subscription/         # The initial subscription for the hub that subscribes the "managed-subscriptions" folder
 ----
 
-[#git-ops-hub-clusters]
-=== GitOps application to hub clusters
+=== The Flow
+1. root-subscription => 2. managed-subscriptions => 3. common-managed
 
-The following policies are applied to the hub cluster and offer both configuration for the hub cluster, as well as policies for remote clusters. 
+1. A single subscription in "root-subscription/" is applied via the cli to the hub cluster. downloads and applies subscriptions and policies to the hub from the "managed-subscription/" folder
+2. The subscriptions and policies in the "managed-subscription/" folder then perform work on the managed clusters based on their placement. Placement determines which managed-clusters each subscription or policy will affect.  The subscription or policy themselves define what should be done on the clusters that match their placement.
+3. Subscriptions will apply content from the "common-managed/" folder to managed-clusters that match their placement rules. This apply common applications and confugirations to all managed-clusters matching the placement rules.
 
-These are delivered through the root subscription, as seen in the following sample:
-----
-managed-cluster-common/
-  policies/
-    policy-0.yaml
-    policy-1.yaml
-  hub-policies/
-    policy-0.yaml
-    vault.yaml
-    operators.yaml
-----
 
+* An example of the root-subscripition can be found here: https://github.com/open-cluster-management/application-samples/tree/main/subscriptions/subscribe-all
+* An examples of subscriptions that point to other folders in the same repository can be found here: https://github.com/open-cluster-management/application-samples/tree/main/subscriptions
+* An example of the common-managed folder with application artifacts can be found here: https://github.com/open-cluster-management/application-samples/tree/main/subscriptions/nginx
+* Policy examples can be found here: https://github.com/open-cluster-management/policy-collection
