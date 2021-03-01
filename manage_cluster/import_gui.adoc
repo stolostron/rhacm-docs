@@ -14,7 +14,7 @@ You need your terminal for authentication during this procedure.
 == Prerequisites
 
 * You need a {product-title} hub cluster that is deployed.
-If you are importing bare metal clusters, you must have the hub cluster installed on {ocp} version 4.4, or later.
+If you are importing bare metal clusters, you must have the hub cluster installed on {ocp} version 4.5, or later.
 * You need a cluster that you want to manage and Internet connectivity.
 * Install `kubectl`.
 To install `kubectl`, see _Install and Set Up kubectl_ in the https://kubernetes.io/docs/tasks/tools/install-kubectl/[Kubernetes documentation].
@@ -33,125 +33,58 @@ You can import existing clusters from the {product-title} console for each of th
 *Note:* A hub cluster cannot manage a different hub cluster. A hub cluster is set up to automatically import and manage itself, so you do not have to manually import a hub cluster to manage itself.
 
 . From the navigation menu, hover over *Automate infrastructure* and click *Clusters*.
-. Click *Add cluster*.
+. Click *Add a cluster*.
 . Click *Import an existing cluster*.
-. Provide a cluster name.
-By default, the namespace is set to the same value as your cluster name.
-*Best practice:* Leave the namespace value and do not edit.
-. *Optional:* Click to expand *Edit cluster import YAML file* and modify the endpoint configuration.
-+
-See <<yaml-parameters-and-descriptions,Table 1.
-YAML file parameters and descriptions>> for details about each parameter.
+. Provide a name for the cluster.
+By default, the namespace is used for the cluster name and namespace.
+. *Optional:* Add any _Additional labels_.
+. Click *Save import and generate code* to generate the command that you use to deploy the `open-cluster-management-agent-addon`. A confirmation message is displayed.
 
-. *Optional*: After you import, you can add labels by clicking *Configure advanced parameters* and use these labels to search.
-. *Optional*: Configure the `MANAGED CLUSTER URLS`. By configuring the `MANAGED CLUSTER URLS`, the URLs display in the table when you run the `oc get managedcluster` command.
-.. If it is not already on, turn on the `YAML` content using the switch in the web console so you can view the content.
-.. Add the `manageClusterClientConfigs` section to the `ManagedCluster` spec in the `import.yaml` file, as shown in the following example:
-+ 
+. *Optional:* Configure the *Cluster API address* that is on the cluster details page by configuring the URL that is displayed in the table when you run the `oc get managedcluster` command.
+
+.. Log in to your hub cluster with an ID that has `cluster-admin` permissions.
+
+.. Configure your `kubectl` for your targeted managed cluster.
++
+See xref:../manage_cluster/supported_clouds.adoc#supported-clouds[Supported clouds] to learn how to configure your `kubectl`.
+
+.. Edit the managed cluster entry for the cluster that you are importing by entering the following command:
++
 ----
-apiVersion: cluster.open-cluster-management.io/v1
-kind: ManagedCluster
-metadata:
-  labels:
-    cloud: auto-detect
-	vendor: auto-detect
-	name: cluster-test
-  name: cluster-test
+oc edit managedcluster <cluster-name>
+----
+Replace `_cluster-name_` with the name of the managed cluster.
+
+.. Add the `ManagedClusterClientConfigs` section to the `ManagedCluster` spec in the YAML file, as shown in the following example:
++
+[source,yaml]
+----
 spec:
   hubAcceptsClient: true
   managedClusterClientConfigs:
   - url: https://multicloud-console.apps.new-managed.dev.redhat.com
----
-apiVersion: agent.open-cluster-management.io/v1
-...
 ----
 +
-Replace the URL value is the external access URL address of the managed cluster. 
-. Click *Generate Command* to retrieve the command to deploy the `open-cluster-management-agent-addon`.
-. From the _Import an existing cluster_ window, hover and click the *Copy command* icon to copy the import command and the token that you are provided.
-You must click the *Copy* icon to receive the accurate copy.
-*Important:* The command contains pull secret information that is copied to each of the imported clusters.
-Anyone who can access the imported clusters can also view the pull secret information.
-Consider creating a secondary pull secret at https://cloud.redhat.com/ or by creating a service account so your personal credentials are not compromised.
-See https://docs.openshift.com/container-platform/4.4/openshift_images/managing_images/using-image-pull-secrets.html[Using image pull secrets] or https://docs.openshift.com/container-platform/4.4/authentication/understanding-and-creating-service-accounts.html[Understanding and creating service accounts] for more information.
-. From your terminal, authenticate to your managed cluster.
-Configure your `kubectl` for your targeted managed cluster.
+Replace the value of the URL with the URL that provides external access to the managed cluster that you are importing.
+
+. In the _Import an existing cluster_ window, select *Copy command* to copy the generated command and token to the clipboard.
 +
-See xref:../manage_cluster/supported_clouds.adoc#supported-clouds[Supported clouds] to learn how to configure your `kubectl`.
+*Important:* The command contains pull secret information that is copied to each of the imported clusters. Anyone who can access the imported clusters can also view the pull secret information.
+Consider creating a secondary pull secret at link:https://cloud.redhat.com/ or create a service account to protect your personal credentials.
+See link:https://docs.openshift.com/container-platform/4.4/openshift_images/managing_images/using-image-pull-secrets.html[Using image pull secrets] or link:https://docs.openshift.com/container-platform/4.4/authentication/understanding-and-creating-service-accounts.html[Understanding and creating service accounts] for more information about pull secrets.
 
-. To deploy the `open-cluster-management-agent-addon` to the managed cluster, run the command that you generated and copied from _step 8_.
-. Click *View cluster* to view the _Overview_ page and a summary of your cluster.
+. Log in to the managed cluster that you want to import.
 
-*Note:* You can continue to import more clusters.
-Click *Import another* to repeat the process.
+. If necessary, configure your `kubectl` commands for your managed cluster.
++
+See xref:../manage_cluster/supported_clouds.adoc#supported-clouds[Supported clouds] to learn how to configure your `kubectl` command line interface. 
 
-[#yaml-parameters-and-descriptions]
-=== YAML parameters and descriptions
+. To deploy the `open-cluster-management-agen-addon` to the managed cluster, run the command and token that you copied.
+  
+. Select *View cluster* to view a summary of your cluster in the _Overview_ page.
 
-Table 1: The following table lists the parameters and descriptions that are available in the YAML file:
-
-|===
-| Parameter | Description | Default value
-
-| clusterLabels
-| Provide cluster labels;
-you can add labels to your file
-| none
-
-| clusterLabels.cloud
-| The provider label for your cluster
-| auto-detect
-
-| clusterLabels.vendor
-| The Kubernetes vendor label for your cluster
-| auto-detect
-
-| clusterLabels.environment
-| The environment label for your cluster
-| none
-
-| clusterLabels.region
-| The region where your cluster is set up
-| none
-
-| applicationManager.enabled
-| Enables multicluster manager application deployment, deploys subscription controller and deployable controller
-| true
-
-| searchCollector.enabled
-| Enables search collection and indexing
-| true
-
-| policyController.enabled
-| Enable the Governance and risk dashboard policy feature
-| true, updateInterval: 15
-
-| certPolicyController.enabled
-| Monitors certificate expiration based on distributed policies
-| true
-
-| iamPolicyController
-| Monitors identity controls based on distributed policies
-| true
-
-| serviceRegistry.enabled
-| Service registry that is used to discover services that are deployed by Application Deployable among managed clusters.
-| false
-
-| serviceRegistry.dnsSuffix
-| The suffix of the registry DNS name, which is added to the end of the target clusters dns domain name.
-| mcm.svc
-
-| serviceRegistry.plugins
-| Comma-separated list of enabled plugins.
-Supported plugins: `kube-service`, `kube-ingress`, and `istio`.
-| kube-service
-
-| version
-| Version of `open-cluster-management-agent-addon`
-| 2.1.0
-|===
-
+Your cluster is imported. You can import another by selecting *Import another*.
+  
 [#removing-an-imported-cluster]
 == Removing an imported cluster
 
