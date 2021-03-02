@@ -1,0 +1,91 @@
+[#clusterclaims]
+= ClusterClaims
+
+A `_ClusterClaim_` is a cluster-scoped custom resource definition (CRD) on a managed cluster. A ClusterClaim represents a piece of information that a managed cluster claims. The following example shows a claim that is identified in the YAML file:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: ClusterClaim
+metadata:
+  name: id.openshift.io
+spec:
+  value: 95f91f25-d7a2-4fc3-9237-2ef633d8451c
+----
+
+The following table shows the defined ClusterClaims that might be on a cluster that {product-title} manages:
+
+[cols="4"]
+|===
+| Claim name | Reserved | Mutable | Description 
+
+| `id.k8s.io` | true | false | ClusterID defined in upstream proposal
+| `kubeversion.open-cluster-management.io` | true | true | Kubernetes version
+| `platform.open-cluster-management.io` | true | false | Platform the managed cluster is running on, like AWS, GCE, and Equinix Metal
+| `product.open-cluster-management.io` | true | false |  Product name, like OpenShift, Anthos, EKS and GKE
+| `id.openshift.io` | false | false | {ocp-short} external ID, which is only available for an {ocp-short} cluster 
+| `consoleurl.openshift.io` | false | true | URL of the management console, which is only available for an {ocp-short} cluster
+| `version.openshift.io` | false | true | {ocp-short} version, which is only available for an {ocp-short} cluster
+|===
+
+If any of the previous claims are deleted or updated on managed cluster, they are restored or rolled back to a previous version automatically.
+
+After the managed cluster joins the hub, the ClusterClaims that are created on a managed cluster are synchronized with the status of the `ManagedCluster` resource on the hub. A managed cluster with ClusterClaims might look similar to the following example:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  labels:
+    cloud: Amazon
+    clusterID: 95f91f25-d7a2-4fc3-9237-2ef633d8451c
+    installer.name: multiclusterhub
+    installer.namespace: open-cluster-management
+    name: cluster1
+    vendor: OpenShift
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+status:
+  allocatable:
+    cpu: '15'
+    memory: 65257Mi
+  capacity:
+    cpu: '18'
+    memory: 72001Mi
+  clusterClaims:
+    - name: id.k8s.io
+      value: cluster1
+    - name: kubeversion.open-cluster-management.io
+      value: v1.18.3+6c42de8
+    - name: platform.open-cluster-management.io
+      value: AWS
+    - name: product.open-cluster-management.io
+      value: OpenShift
+    - name: id.openshift.io
+      value: 95f91f25-d7a2-4fc3-9237-2ef633d8451c
+    - name: consoleurl.openshift.io
+      value: 'https://console-openshift-console.apps.xxxx.dev04.red-chesterfield.com'
+    - name: version.openshift.io
+      value: '4.5'
+  conditions:
+    - lastTransitionTime: '2020-10-26T07:08:49Z'
+      message: Accepted by hub cluster admin
+      reason: HubClusterAdminAccepted
+      status: 'True'
+      type: HubAcceptedManagedCluster
+    - lastTransitionTime: '2020-10-26T07:09:18Z'
+      message: Managed cluster joined
+      reason: ManagedClusterJoined
+      status: 'True'
+      type: ManagedClusterJoined
+    - lastTransitionTime: '2020-10-30T07:20:20Z'
+      message: Managed cluster is available
+      reason: ManagedClusterAvailable
+      status: 'True'
+      type: ManagedClusterConditionAvailable
+  version:
+    kubernetes: v1.18.3+6c42de8
+----
