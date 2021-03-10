@@ -1,0 +1,79 @@
+[#configuring-a-specific-cluster-management-role]
+= Configuring a specific cluster management role
+
+When you install {product-title}, the default configuration provides the `cluster-admin` role on the {product-title-short} hub cluster. This permission enables you to create, manage, and import managed clusters on the hub cluster. In some situations, you might want to limit the access to certain managed clusters that are managed by the hub cluster, rather than providing access to all of the managed clusters on the hub cluster. 
+
+You can limit access to certain managed clusters by defining a cluster role and applying it to a user or group. Complete the following steps to configure and apply a role:
+
+. Define the cluster role by creating a YAML file with the following content:
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: <clusterrole-name>
+rules:
+- apiGroups:
+  - cluster.open-cluster-management.io
+  resources:
+  - managedclusters
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - delete
+  - deletecollection
+  - patch
+- apiGroups:
+  - cluster.open-cluster-management.io
+  resources:
+  - managedclusters
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  resourceNames:
+  - <managed-cluster-name>
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - delete
+  - deletecollection
+  - patch
+- apiGroups:
+  - register.open-cluster-management.io
+  resources:
+  - managedclusters/accept
+  resourceNames:
+  - <managed-cluster-name>
+  verbs:
+  - update
+----
++
+Replace `_clusterrole-name_` with the name of the cluster role that you are creating.
++
+Replace `_managed-cluster-name_` with the name of the managed cluster that you want the user to have access to. 
+  
+. Apply the `clusterrole` definition by entering the following command:
++
+----
+oc apply <filename>
+----
++
+Replace `_filename_` with the name of the YAML file that you created in the previous step.
+  
+. Enter the following command to bind the `clusterrole` to a specified user or group:
++
+----
+oc adm policy add-cluster-role-to-user <clusterrole-name> <username>
+----
++
+Replace `_clusterrole-name_` with the name of the cluster role that you applied in the previous step.
+Replace `_username_` with the username to which you want to bind the cluster role.
