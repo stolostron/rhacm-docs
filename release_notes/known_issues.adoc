@@ -55,9 +55,14 @@ kubectl get crd | grep certificates.certmanager
 [#web-console-known-issues]
 == Web console known issues
 
+[#search-result-node]
+=== Node discrepancy between Cluster page and search results
+// 2.0, 2.1, 2.2:9987
+
+You might see a discrepancy between the nodes dispalyed on the _Cluster_ page and the _Search_ results.
+
 [#ldap-user-names-are-case-sensitive]
 === LDAP user names are case-sensitive
-
 // 1.0.0:before 1.0.0.1
 
 LDAP user names are case-sensitive.
@@ -112,7 +117,23 @@ oc edit pvc <storageclassname>-search-redisgraph-0
 
 The observability endpoint operator fails if you create a pull-secret to deploy to the MultiClusterObservability CustomResource (CR) and there is no pull-secret in the `open-cluster-management-observability` namespace. When you import a new cluster, or import a Hive cluster that is created with {product-title-short}, you need to manually create a pull-image secret on the managed cluster.
 
-For more information, see link:../observe_environments/observability_enable.adoc#enabling-observability[Enabling observability].
+For more information, see link:../observing_environments/observability_enable.adoc#enabling-observability[Enabling observability].
+
+[#observability-add-on-stuck-in-terminating]
+=== Observability add-on stuck in terminating
+//2.2:9928
+
+When the managed cluster is detached forcefully, the `ObservabilityAddon` resource (`_observability-addon_`) in the cluster namespace is stuck in the _Terminating_ status and cannot be removed. Also, the cluster namespace cannot be deleted.
+
+To fix this problem, you can update the `ObervabilityAddon` resource in the cluster namespace. Update the resource by deleting the `_finalizers_` parameter in the metadata. Run the following command:
+
+----
+kubectl edit observabilityaddon observability-addon -n <CLUSTER_NAMESPACE>
+----
+
+`_CLUSTER_NAMESPACE_` is the cluster namespace for the detached cluster.
+
+After the `_finalizers_` parameter is removed, the `ObervabilityAddon` resource is removed.
 
 [#cluster-management-issues]
 == Cluster management known issues
@@ -237,8 +258,9 @@ When you destroy a managed cluster, the status continues to display `Destroying`
 oc edit clusterdeployment/<mycluster> -n <namespace>
 ----
 +
-Replace _mycluster_ with the name of the managed cluster that you are destroying.
-Replace _namespace_ with the namespace of the managed cluster.
+Replace `_mycluster_` with the name of the managed cluster that you are destroying.
++
+Replace `_namespace_` with the namespace of the managed cluster.
 
 . Remove the `hive.openshift.io/deprovision` finalizer to forcefully stop the process that is trying to clean up the cluster resources in the cloud.
 
@@ -250,7 +272,7 @@ Replace _namespace_ with the namespace of the managed cluster.
 oc delete ns <namespace>
 ----
 +
-Replace _namespace_ with the namespace of the managed cluster.
+Replace `_namespace_` with the namespace of the managed cluster.
 
 [#no-upgrade-os-on-osd]
 === Cannot upgrade {ocp-short} managed clusters on Red Hat OpenShift Dedicated with the console
@@ -278,6 +300,28 @@ Due to unauthorized access to the `managedcluster` resource, you might receive t
 `no project or cluster found`
 +
 Check the role permissions and update appropriately. See link:../security/rbac.adoc#role-based-access-control[Role-based access control] for more information. 
+
+[#bm-assets-remain-after-destroy]
+=== Related bare metal assets not destroyed after bare metal cluster is destroyed
+
+// 2.2.0:9943
+
+Your bare metal asset might remain as an orphaned asset after you destroy the cluster that was associated with it. This happens when you have the required permissions to destroy a cluster, but not to destroy the bare metal asset. To ensure that you do not experience this issue, add a finalizer to the `ClusterDeployment` resource when you create a bare metal asset with {product-title-short} that references a cluster deployment:
+
+----
+kubectl patch clusterdeployments <name> -n <namespace> -p '{"metadata":{"finalizers":["baremetalasset.inventory.open-cluster-management.io"]}}'
+----
+Replace `_name_` with the name of your cluster deployment. 
+
+Replace `_namespace_` with the namespace of your cluster resource.
+
+If you delete the cluster deployment, you must remove the finalizer manually by entering the following command:
+----
+kubectl patch clusterdeployments <name> -n <namespace> -p '{"metadata":{"finalizers":[]}}'
+----
+Replace `_name_` with the name of your cluster deployment. 
+
+Replace `_namespace_` with the namespace of your cluster resource.
 
 [#application-management-known-issues]
 == Application management known issues
