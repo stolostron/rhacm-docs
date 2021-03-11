@@ -31,6 +31,10 @@ There are several ways reference links in the ASCII source file (`.adoc`). View 
 
   ```
   link:https://your-url-here.com[Your URL]
+  
+  OR
+  
+  https://your-url-here.com[Your URL]
   ```
 
 * Internal cross reference links:
