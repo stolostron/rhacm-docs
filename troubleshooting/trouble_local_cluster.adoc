@@ -1,17 +1,81 @@
 [#troubleshooting-local-cluster-not-selected]
 = Troubleshooting local cluster not selected
 
-The managed clusters are selected with a placement rule, but the local-cluster (hub cluster that is also managed) is not selected. The placementrule user is not granted to permission to create deployable resources in the local-cluster namespace.
+The managed clusters are selected with a placement rule, but the `local-cluster` (hub cluster that is also managed) is not selected. The placement rule user is not granted to permission to create deployable resources in the local-cluster namespace.
 
 [#symptom-local-cluster-not-selected]
 == Symptom: Troubleshooting local cluster not selected
 
-All managed clusters are selected with a placement rule, but the local-cluster is not.
+All managed clusters are selected with a placement rule, but the `local-cluster` is not. The placement rule user is not granted permission to create resources in the `local-cluster` namespace, while it is granted in other manged cluster namespaces.
 
 [#resolving-the-problem-klusterlet-is-in-the-degraded-condition]
 == Resolving the problem: Troubleshooting local cluster not selected
 
-To resolve this issue, you need to grant administrative permission in the local-cluster namespace. Then, create a `RoleBinding` to grant the placement rule user to the role.
+To resolve this issue, you need to grant administrative permission in the `local-cluster` namespace. Then, create a `RoleBinding` to grant the placement rule user to the role.
 
 
+. Confirm that managed clusters do not include `local-cluster`. Run the following command and see the results:
+
+----
+% oc get managedclusters 
+----
+
+----
+NAME            HUB ACCEPTED   MANAGED CLUSTER URLS   JOINED   AVAILABLE   AGE
+local-cluster   true                                  True     True        56d
+cluster1        true                                  True     True        16h
+----
+
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: all-ready-clusters
+  namespace: default
+spec:
+  clusterSelector: {}
+status:
+  decisions:
+  - clusterName: cluster1
+    clusterNamespace: cluster1
+----
+
+. Create a role for granting the deployable administrative permission in the `local-cluster` namespace. 
+
+See the following example:
+
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deployables-admin-user-zisis
+  namespace: local-cluster
+rules:
+- apiGroups:
+  - apps.open-cluster-management.io
+  resources:
+  - deployables
+  verbs:
+  - '*'
+
+. Create a `RoleBinding` to grant the placement rule user to the role.
+
+See the following example:
+
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: deployables-admin-user-zisis
+  namespace: local-cluster
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: deployables-admin-user-zisis
+  namespace: local-cluster
+subjects:
+- kind: User
+  name: zisis
+  apiGroup: rbac.authorization.k8s.io
+----
 
