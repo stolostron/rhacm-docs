@@ -54,7 +54,8 @@ Consider a small list of differences and similarities if you are coming from DIT
 |Element|Similarities|Differences|
 --------|------------|-------------|
 |Bold|Use for UI, clickable components|Use .md bold tag where you would have used `ui-control`. Do not use bold for emphasis, see Style Guide
-|Variable|Still build as italicized just like DITA|Use .md italics tag. No `varname` tag, so use <these> to identify a variable
+|Variable inside of a command or script sample|Still want to identify the variable.|No `varname` tag, so use angle brackets (<these>) to identify a variable. Surround the variable with the angle brackets (<>) to identify it within the existing monospace style. Ex: `oc get <namespace>`. 
+|Variable ouside of a command or script sample (in normal text).|Still want to identify the variable.|No `varname` tag, so use monospace and italic style to identify a variable. Surround the variable with monospace (`) and italic (_) styles to identify it as a variable. Ex: Replace `_namespace_` with the name of your project namespace. 
 |Menu cascade|Bold, same as DITA|No `menu cascade` tag, build as **Multi-cluster** > **Pods**|
 |A window or UI page|Usually italicized|No `wintitle` tag, simply _use this_ for those types of indicators.
 |Quotation marks|Death to " " not in codeblocks, see IBM Style guide for when to use (citations only and rarely in doc)|no diff--they are not good for accessibility
