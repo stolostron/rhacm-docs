@@ -24,19 +24,18 @@ See the following content to learn about how the overall branching strategy work
 - Follows dev/test/prod principles used in DevOps
 
 
-## Branching: stage, prod, and NLV 
+## Branching: stage and prod
 
 There can be multiple main branches for some releases: 
 
-  * A **staging** branch where daily drafting and updates are completed: Example: 2.0_stage
-  * A **production** branch, which always contains the live content: Example: 2.0_prod
+  * A **staging** branch where daily drafting and updates are completed. The format is <major_release_number>\_stage. Example: 2.0_stage
+  * A **production** branch, which always contains the live content. The format is <major_release_number>\_prod.: Example: 2.0_prod
 
 ### Stage branch
 
-  * Complete all work in this branch. 
+  * Complete all work in this branch. If you create a branch to prepare a PR, create your branch from this one.  
   * A snapshot of this branch is taken on Thursdays (mostly) and published on the corresponding branch with our regular refreshes
-  * This branch cannot be directly pushed to production
-  * This branch will not be pushed to production
+  * This branch cannot and will not be directly pushed to production
   * Development would submit PRs to this branch for small updates or during PR reviews
   * This is also the branch to use for peer reviews (new topics, significant changes)
 
@@ -45,10 +44,11 @@ There can be multiple main branches for some releases:
   * This is the production branch, so no one works directly in this branch
   * The stage branch should always have everything that is in this branch
   * This branch will be overwritten on Thursdays with the contents of the stage branch
-  * In rare cases, minor critical changes can be made to both this branch and the stage branch (both required if a random refresh is needed), and this can be pushed to production between releases. This is only for quick, high-visibility emergency changes.  
-  * Set the highest branch rules here so that draft content is not accidentally published and so that refreshes take place with team discussion. See the following rule examples (found in GitHub branch settings):
+  * In extremely rare cases, minor critical changes can be made to both this branch and the stage branch (both required if a random refresh is needed), and this can be pushed to production between releases. This is only for quick, high-visibility emergency changes.  
+  * Set the highest branch rules here so that draft content is not accidentally published, and so that refreshes take place with team discussion. See the following rule examples (found in GitHub branch settings):
     - Require pull request reviews before merging 
     - Enforce all configured restrictions for administrators (this prevents the ability to bypass a merge without one other approval, but this option is not enforced on stage because writers continuously submit to stage and use PRs on new topics or when working in other's component area).
+  * A release that is not yet live will not have a prod branch.  
   
 Examples (rare): a sev1 security issue, or something that blocks the customer from using the product, opened by support team. 
 
