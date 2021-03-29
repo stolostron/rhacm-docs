@@ -11,9 +11,8 @@ If needed, you can generate a TLS certificate by using OpenSSL.
 Set the common name parameter,`CN`, on the certificate to `manangement-ingress`.
 If you are generating the certificate, include the following settings:
 
-* Include the following IP addresses and domain names in your certificate Subject Alternative Name (SAN) list:
- ** The service name for the management ingress: `management-ingress`.
- ** Include the route name for {product-title}.
+* Include the route name for {product-title} as the domain name in your certificate Subject Alternative Name (SAN) list.
++
 Recieve the route name by running the following command:
 +
 ----
@@ -25,9 +24,6 @@ You might receieve the following response:
 ----
 multicloud-console.apps.grchub2.dev08.red-chesterfield.com
 ----
-
- ** Add the localhost IP address: `127.0.0.1`.
- ** Add the localhost entry: `localhost`.
 
 [#example-configuration-file-for-generating-a-certificate]
 === Example configuration file for generating a certificate
@@ -55,10 +51,7 @@ CN = management-ingress  # Common name.
 subjectAltName = @alt_names # Subject alternative names
 
 [ alt_names ]        # Subject alternative names
-DNS.1 = management-ingress
-DNS.2 = multicloud-console.apps.grchub2.dev08.red-chesterfield.com
-DNS.3 = localhost
-DNS.4 = 127.0.0.1
+DNS.1 = multicloud-console.apps.grchub2.dev08.red-chesterfield.com
 
 [ v3_ext ]          # x509v3 extensions
 authorityKeyIdentifier=keyid,issuer:always  # Specifies the public key that corresponds to the private key that is used to sign a certificate.
@@ -68,7 +61,7 @@ extendedKeyUsage=serverAuth                 # Defines the purposes for which the
 subjectAltName=@alt_names                   # Identifies the subject alternative names for the identify that is bound to the public key by the CA.
 ----
 
-*Note:* Be sure to update the SAN labeled, `DNS.2` with the correct hostname for your management ingress.
+*Note:* Be sure to update the SAN labeled, `DNS.1` with the correct hostname for your management ingress.
 
 [#openssl-commands-for-generating-a-certificate]
 === OpenSSL commands for generating a certificate
@@ -116,17 +109,10 @@ openssl x509  -noout -text -in ./ingress.crt
 
 Complete the following steps to replace your BYO ingress certificate:
 
-. Create the `byo-ingress-tls` secret by using your certificate and private key.
-Run the following command:
+. Create the `byo-ingress-tls` secret by using your certificate and private key. Run the following command:
 +
 ----
 kubectl -n open-cluster-management create secret tls byo-ingress-tls-secret --cert ./ingress.crt --key ./ingress.key
-----
-
-. Verify that the secret is created in the correct namespace.
-+
-----
-kubectl get secret -n open-cluster-management | grep byo-ingress | grep tls
 ----
 
 . Create a secret containing the CA certificate by running the following command:
@@ -135,44 +121,36 @@ kubectl get secret -n open-cluster-management | grep byo-ingress | grep tls
 kubectl -n open-cluster-management create secret tls byo-ca-cert --cert ./ca.crt --key ./ca.key
 ----
 
-. Edit the management ingress deployment.
-Get the name of the deployment.
-Run the following commands:
+. Verify that the secret is created in the correct namespace with the following command:
 +
 ----
-export MANAGEMENT_INGRESS=`oc get deployment -o custom-columns=:.metadata.name | grep management-ingress`
-
-oc edit deployment $MANAGEMENT_INGRESS -n open-cluster-management
+kubectl get secret -n open-cluster-management | grep -e byo-ingress-tls-secret -e byo-ca-cert
 ----
 
- ** Replace the `multicloud-ca-cert` string with `byo-ca-cert`.
- ** Replace the `$MANAGEMENT_INGRESS-tls-secret` string with `byo-ingress-tls-secret`.
- ** Save your deployment and close the editor.
-The management ingress automatically restarts.
+. Patch the management ingress route with the following commands:
++
+----
+CERT="$(awk '{printf "%s\\n", $0}' ./ingress.crt)"
+KEY="$(awk '{printf "%s\\n", $0}' ./ingress.key)"
+CACERT=$(awk '{printf "%s\\n", $0}' ./ca.crt)
+ROUTE="multicloud-console"
 
-. After the management ingress pod has restarted, navigate to the {product-title} console from your browser.
+oc patch -n open-cluster-management "route/${ROUTE}" -p '{"spec":{"tls":{"certificate":"'"${CERT}"'","key":"'"${KEY}"'","caCertificate":"'"${CACERT}"'"}}}'
+----
+
+. After the management ingress route is patched, navigate to the {product-title} console from your browser.
 Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
 
 [#restore-the-default-self-signed-certificate-for-management-ingress]
 == Restore the default self-signed certificate for management ingress
 
-. Edit the management ingress deployment.
-Replace the string `multicloud-ca-cert` with `byo-ca-cert`.
-Get the name of the deployment.
-Run the following commands:
+. Revert the management ingress route. Run the following command:
 +
 ----
-export MANAGEMENT_INGRESS=`oc get deployment -o custom-columns=:.metadata.name | grep management-ingress`
-
-oc edit deployment $MANAGEMENT_INGRESS -n open-cluster-management
+oc patch -n open-cluster-management "route/${ROUTE}" -p '{"spec":{"tls":{"certificate":"","key":"","caCertificate":""}}}'
 ----
 
- .. Replace the `byo-ca-cert` string  with `multicloud-ca-cert`.
- .. Replace the `byo-ingress-tls-secret` string with the `$MANAGEMENT_INGRESS-tls-secret`.
- .. Save your deployment and close the editor.
-The management ingress automatically restarts.
-
-. After all pods are restarted, navigate to the {product-title} console from your browser.
+. After the management ingress route is reverted, navigate to the {product-title} console from your browser.
 Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
 . Delete the Bring Your Own (BYO) ingress secret and ingress CA certificate by running the following commands:
 +
