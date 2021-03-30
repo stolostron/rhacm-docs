@@ -52,6 +52,9 @@ subjectAltName = @alt_names # Subject alternative names
 
 [ alt_names ]        # Subject alternative names
 DNS.1 = multicloud-console.apps.grchub2.dev08.red-chesterfield.com
+DNS.2 = multicloud-console.apps.grchub2.dev08.red-chesterfield.com
+DNS.3 = localhost
+DNS.4 = 127.0.0.1
 
 [ v3_ext ]          # x509v3 extensions
 authorityKeyIdentifier=keyid,issuer:always  # Specifies the public key that corresponds to the private key that is used to sign a certificate.
@@ -61,7 +64,7 @@ extendedKeyUsage=serverAuth                 # Defines the purposes for which the
 subjectAltName=@alt_names                   # Identifies the subject alternative names for the identify that is bound to the public key by the CA.
 ----
 
-*Note:* Be sure to update the SAN labeled, `DNS.1` with the correct hostname for your management ingress.
+*Note:* Be sure to update the SAN labeled, `DNS.2` with the correct hostname for your management ingress.
 
 [#openssl-commands-for-generating-a-certificate]
 === OpenSSL commands for generating a certificate
@@ -115,43 +118,54 @@ Complete the following steps to replace your BYO ingress certificate:
 kubectl -n open-cluster-management create secret tls byo-ingress-tls-secret --cert ./ingress.crt --key ./ingress.key
 ----
 
-. Create a secret containing the CA certificate by running the following command:
-+
-----
-kubectl -n open-cluster-management create secret tls byo-ca-cert --cert ./ca.crt --key ./ca.key
-----
-
 . Verify that the secret is created in the correct namespace with the following command:
 +
 ----
 kubectl get secret -n open-cluster-management | grep -e byo-ingress-tls-secret -e byo-ca-cert
 ----
 
-. Patch the management ingress route with the following commands:
+. Create a secret containing the CA certificate by running the following command:
 +
 ----
-CERT="$(awk '{printf "%s\\n", $0}' ./ingress.crt)"
-KEY="$(awk '{printf "%s\\n", $0}' ./ingress.key)"
-CACERT=$(awk '{printf "%s\\n", $0}' ./ca.crt)
-ROUTE="multicloud-console"
-
-oc patch -n open-cluster-management "route/${ROUTE}" -p '{"spec":{"tls":{"certificate":"'"${CERT}"'","key":"'"${KEY}"'","caCertificate":"'"${CACERT}"'"}}}'
+kubectl -n open-cluster-management create secret tls byo-ca-cert --cert ./ca.crt --key ./ca.key
 ----
 
-. After the management ingress route is patched, navigate to the {product-title} console from your browser.
-Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
+. Edit the management ingress deployment and get the name of the deployment with the following commands:
++
+----
+export MANAGEMENT_INGRESS=`oc get deployment -o custom-columns=:.metadata.name | grep management-ingress`
+
+oc edit deployment $MANAGEMENT_INGRESS -n open-cluster-management
+----
+
+ ** Replace the `multicloud-ca-cert` string with `byo-ca-cert`.
+ ** Replace the `$MANAGEMENT_INGRESS-tls-secret` string with `byo-ingress-tls-secret`.
+ ** Save your deployment and close the editor.
+ +
+ The management ingress automatically restarts.
+
+. Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
 
 [#restore-the-default-self-signed-certificate-for-management-ingress]
 == Restore the default self-signed certificate for management ingress
 
-. Revert the management ingress route. Run the following command:
+. Edit the management ingress deployment. Replace the string `multicloud-ca-cert` with `byo-ca-cert` and get the name of the deployment with the following commands:
 +
 ----
-oc patch -n open-cluster-management "route/${ROUTE}" -p '{"spec":{"tls":{"certificate":"","key":"","caCertificate":""}}}'
+export MANAGEMENT_INGRESS=`oc get deployment -o custom-columns=:.metadata.name | grep management-ingress`
+
+oc edit deployment $MANAGEMENT_INGRESS -n open-cluster-management
 ----
 
-. After the management ingress route is reverted, navigate to the {product-title} console from your browser.
-Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
+.. Replace the `byo-ca-cert` string  with `multicloud-ca-cert`.
+ .. Replace the `byo-ingress-tls-secret` string with the `$MANAGEMENT_INGRESS-tls-secret`.
+ .. Save your deployment and close the editor.
+The management ingress automatically restarts.
+
+. After all pods are restarted, navigate to the {product-title} console from your browser.
+
+.Verify that the current certificate is your certificate, and that all console access and login functionality remain the same.
+ensur
 . Delete the Bring Your Own (BYO) ingress secret and ingress CA certificate by running the following commands:
 +
 ----
