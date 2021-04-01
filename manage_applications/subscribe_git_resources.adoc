@@ -35,6 +35,8 @@ oc edit clusterrolebinding open-cluster-management:subscription-admin
 +
 Your subjects might display as the following example:
 +
+
+[source,yaml]
 ----
 subjects:
 - apiGroup: rbac.authorization.k8s.io
@@ -50,7 +52,8 @@ subjects:
 
 You need to specify the full group and version for `apiVersion` in resource YAML when you subscribe. For example, if you subscribe to `apiVersion: v1`, the subscription controller fails to validate the subscription and you receive an error: `Resource /v1, Kind=ImageStream is not supported`. 
 
-If the `apiVersion` is changed to `image.openshift.io/v1`, as in the following sample, it passes the validation in the subscription controller and the resource is applied successfully. 
+If the `apiVersion` is changed to `image.openshift.io/v1`, as in the following sample, it passes the validation in the subscription controller and the resource is applied successfully.
+ 
 
 [source,yaml]
 ----
@@ -84,6 +87,8 @@ In this example, you are logged in as a subscription administrator. Create a sub
 
 * ConfigMap `test-configmap-3` gets created in the `subscription` namespace.
 +
+
+[source,yaml]
 ----
 ---
 apiVersion: v1
@@ -124,6 +129,8 @@ If the subscription was created by other users, all the ConfigMaps get created i
 
 In this example, the following ConfigMap already exists in the target cluster. 
 
+
+[source,yaml]
 ----
 apiVersion: v1
 kind: ConfigMap
@@ -137,6 +144,8 @@ data:
 
 Subscribe the following sample resource YAML file from a Git repository and replace the existing ConfigMap. See the change in the `data` specification:
 
+
+[source,yaml]
 ----
 apiVersion: v1
 kind: ConfigMap
@@ -152,6 +161,8 @@ data:
 
 See the following sample resource YAML file from a Git repository with the default `apps.open-cluster-management.io/reconcile-option: merge` annotation. See the following example:
 
+
+[source,yaml]
 ----
 apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
@@ -170,6 +181,8 @@ spec:
 
 When this subscription is created by a subscription administrator and subscribes the ConfigMap resource, the existing ConfigMap is merged, as you can see in the following example:
 
+
+[source,yaml]
 ----
 apiVersion: v1
 kind: ConfigMap
@@ -190,6 +203,8 @@ When the `merge` option is used, entries from subscribed resource are either cre
 
 You log in as a subscription administrator and create a subscription with `apps.open-cluster-management.io/reconcile-option: replace` annotation. See the following example:
 
+
+[source,yaml]
 ----
 apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
@@ -208,6 +223,8 @@ spec:
 
 When this subscription is created by a subscription administrator and subscribes the ConfigMap resource, the existing ConfigMap is replaced by the following:
 
+
+[source,yaml]
 ----
 apiVersion: v1
 kind: ConfigMap
@@ -224,3 +241,82 @@ data:
 You can also use `apps.open-cluster-management.io/reconcile-option` annotation in individual resources to override the subscription-level reconcile option. 
 
 For example, if you add `apps.open-cluster-management.io/reconcile-option: replace` annotation in the subscription and add `apps.open-cluster-management.io/reconcile-option: merge` annotation in a resource YAML in the subscribed Git repository, the resource will be merged on the target cluster while other resources replaced.
+
+[#reconcile-frequency]
+==== Reconcile frequency
+
+You can now select reconcile frequency options: `high`, `medium`, `low`, and `off` in channel configuration to avoid unnecessary resource reconciliations and therefore prevent overload on subscription operator.
+
+*Required access:* Administrator and cluster administrator
+
+See the following definitions of the `settings:attribute:<value>`:
+
+- `Off`: The deployed resources are not automatically reconciled. A change in the subscription custom resource triggers a reconciliation. You can add or update a label or annotation.
+- `Low`: The deployed resources are automatically reconciled every hour, even if there is no change in the source Git repository.
+- `Medium`: This is the default setting. The subscription operator compares the currently deployed commit ID to the latest commit ID of the source repository every 3 minutes and apply changes to target clusters when there is change. Every 15 minutes, all resources are re-applied from the source Git repository to the target clusters, even if there is no change in the repository.
+- `High`: The deployed resources are automatically reconciled every two minutes, even if there is no change in the source Git repository.
+
+You can set this using `apps.open-cluster-management.io/reconcile-rate` annotation in the channel custom resource that is referenced by subscription. 
+
+See the following example:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: git-channel
+  namespace: sample
+  annotations:
+    apps.open-cluster-management.io/reconcile-rate: <value from the list>
+spec:
+  type: GitHub
+  pathname: <Git URL>
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: git-subscription
+  annotations:
+    apps.open-cluster-management.io/git-path: <application1>
+    apps.open-cluster-management.io/git-branch: <branch1>
+spec:
+  channel: sample/git-channel
+  placement:
+    local: true
+----
+
+In the previous example, all subscriptions that use `sample/git-channel` get `low` reconciliation frequency. 
+
+Regardless of the `reconcile-rate` setting in the channel, a subscription can turn the auto-reconciliation `off` by specifying `apps.open-cluster-management.io/reconcile-rate: off` annotation in the subscription CR. 
+
+See the following sample: 
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: git-channel
+  namespace: sample
+  annotations:
+    apps.open-cluster-management.io/reconcile-rate: high
+spec:
+  type: GitHub
+  pathname: <Git URL>
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: git-subscription
+  annotations:
+    apps.open-cluster-management.io/git-path: application1
+    apps.open-cluster-management.io/git-branch: branch1
+    apps.open-cluster-management.io/reconcile-rate: "off"
+spec:
+  channel: sample/git-channel
+  placement:
+    local: true
+----
+
+See that the resources deployed by `git-subscription` are never automatically reconciled even if the `reconcile-rate` is set to `high` in the channel.
