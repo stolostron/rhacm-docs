@@ -3,9 +3,9 @@ permalink: /new_documentation
 title: "Planning new documentation"
 ---
 
-# Setting up a new book
+# Setting up a new book or renaming books
 
-Follow these instructions if you have to set up a new book/guide.
+Follow these instructions if you have to set up a new book/guide or need to rename guides.
 
 **Prerequisites**: You must have access to the following tools and directories:
 
@@ -13,10 +13,11 @@ Follow these instructions if you have to set up a new book/guide.
 * The `open-cluster-management` repository
 * Red Hat VPN
 * Pantheon
+* GitLab
 
-**Important**: Do you really need a new guide? See the doucmentation architect to discuss this.
+**Important**: Do you really need a new guide? See the documentation architect to discuss placement of new content.
 
-To create a new guide in the product documentation, you must create a new folder in your repository, and a new book in Pantheon. When you create a new folder, you must also create a `master.adoc` and `docinfo.xml` file for your new folder.  
+To create a new guide in the product documentation, you must create a new folder in your repository, and a new book in Pantheon. When you create a new folder, you must also create a `master.adoc` and `docinfo.xml` file for your new folder. See the repo for examples. 
 
 ## Creating a new folder 
 
@@ -53,6 +54,7 @@ To create a new guide in the product documentation, you must create a new folder
    ```
 
 **Create a new folder from your text editor**
+(VS Code or Atom is recommended to preview, prevent errors, work in collaboration with dev.)
 
 1. Verify that you are in the `rhacm-docs` repository by running the following command from your terminal:
    
@@ -70,9 +72,9 @@ To create a new guide in the product documentation, you must create a new folder
 
 ### Add a _symlink_ to the _modules_ folder 
 
-You must add a `symlink` to the `modules` folder in your new folder, to resolve the conrefs. See the following steps:
+You must add a `symlink` to the `modules` folder in your new folder to resolve the conrefs. See the following steps:
 
-1. Open a terminal, and navigate to the new GitHub folder.
+1. Open a terminal and navigate to the new GitHub folder.
 
 2. Enter the following command:
    ```
@@ -83,7 +85,9 @@ You must add a `symlink` to the `modules` folder in your new folder, to resolve 
 
 ## Set up a new book in Pantheon
 
-You must complete the _Set up new title_ form to create a new book. Log in to Pantheon and select the **Set up a new title** button. Complete the following steps to complete the _New title_ form:
+You must complete the _Set up new title_ form to create a new book. Log in to [Pantheon](https://pantheon.int.us-west.aws.prod.paas.redhat.com/#/titles/red_hat_advanced_cluster_management_for_kubernetes) and select the **Set up a new title** button. 
+
+Complete the following steps to complete the _New title_ form:
    
    1. Verify if you are setting up a new folder from an existing repository in Gitlab, by selecting one of the options that is provided. If you are creating a new book in a set of books that is already building correctly, select the option for an already set up environment. 
    2. If the repository exists in GitLab, values for the product title and version number are complete.
