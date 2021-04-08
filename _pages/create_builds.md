@@ -20,15 +20,15 @@ You must have the following
 
 Complete the following steps:
 
-1. Create a new branch in the [rhacm-docs GitHub repository](https://github.com/open-cluster-management/rhacm-docs) for the new version. For example, 2.3_stage.
+1. Create a new branch in the [rhacm-docs GitHub repository](https://github.com/open-cluster-management/rhacm-docs) for the new version. For example, 2.3_stage. For more information, see [Creating a branch](https://github.com/open-cluster-management/rhacm-docs/blob/gh-pages/_pages/arch_branching.md).
 
-2. Navigate to the [`modules/common-attributes.adoc`](https://github.com/open-cluster-management/rhacm-docs/blob/2.3_stage/modules/common-attributes.adoc) that is in your new branch to change the version for the `:product-version:` field. This value is used during the build process, and much be updated to your new version before the build will work. 
+2. Navigate to the [`modules/common-attributes.adoc`](https://github.com/open-cluster-management/rhacm-docs/blob/2.3_stage/modules/common-attributes.adoc) that is in your new branch to change the version for the `:product-version:` field. This value is used during the build process, and must be updated to your new version for the build to work. 
 
 3. Create a new branch for the new version in [GitLab](https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/tree/2.3), if it is not already there. Ex. `2.3`. You can create it from the branch from the previous version. 
 
    1. Open the branch for the previous version.
    2. Select **+** > **New branch**. 
-   3. Name it the new version number. For example, name the branch _2.3_. Note: Do not include the `_stage`in this branch name, as you did with the GitHub branch.  
+   3. Name it the new version number. For example, name the branch _2.3_. **Note**: Do not include the `_stage`in this branch name, as you did with the GitHub branch.  
    
    **Alternatively**: You can run the build script with the new version number to create a branch in GitLab. For more information about running the build, see [Build and publish](https://github.com/open-cluster-management/rhacm-docs/blob/gh-pages/_pages/arch_builds.md).
 
@@ -45,7 +45,7 @@ Complete the following steps:
         - GitLab Group: `Documentation: Red Hat OpenShift Enterprise`
         - GitLab Project: `Red Hat Advanced Cluster Management for Kubernetes`
         - Select your new version branch from the drop-down menu for the stage version. 
-        - Select any other version branch from the drop-down menu for the preview version. We do not use this version, and you will get an error if you select the same version for both fields. 
+        - Select any other version branch from the drop-down menu for the preview version. We do not use this version, and an error occurs if you select the same version for both fields. 
 
 6. After the books are cloned, update the version in each book:
     
