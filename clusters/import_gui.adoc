@@ -1,0 +1,146 @@
+[#importing-an-existing-cluster-with-the-console]
+= Importing an existing cluster with the console
+
+After you install {product-title}, you are ready to import a cluster to manage.
+You can import from both the console and the CLI.
+Follow this procedure to import from the console.
+You need your terminal for authentication during this procedure.
+
+* <<gui_prerequisites,Prerequisites>>
+* <<importing-a-cluster,Importing a cluster>>
+* <<removing-an-imported-cluster,Removing a cluster>>
+
+[#gui_prerequisites]
+== Prerequisites
+
+* You need a {product-title} hub cluster that is deployed.
+If you are importing bare metal clusters, you must have the hub cluster installed on {ocp} version 4.5, or later.
+* You need a cluster that you want to manage and Internet connectivity.
+* Install `kubectl`.
+To install `kubectl`, see _Install and Set Up kubectl_ in the https://kubernetes.io/docs/tasks/tools/install-kubectl/[Kubernetes documentation].
+
+// Optionally, the Visual Web Terminal supports both `kubectl` and `oc` commands and can target alternative `contexts` to work with remote clusters. (wait for testing, elder sending RFE, see Brandi or elder for history here)
+
+* You need the `base64` command line tool.
+
+* _For importing in a Red Hat OpenShift Dedicated enviroment:_ 
+** You must have the hub cluster deployed in a Red Hat OpenShift Dedicated environment.
+** The default permission in Red Hat OpenShift Dedicated is dedicated-admin, but that does not contain all of the permissions to create a namespace. You must have `cluster-admin` permissions to import and manage a cluster with {product-title}.
+
+*Required user type or access level*: Cluster administrator
+
+[#importing-a-cluster]
+== Importing a cluster
+
+You can import existing clusters from the {product-title} console for each of the available cloud providers.
+
+*Note:* A hub cluster cannot manage a different hub cluster. A hub cluster is set up to automatically import and manage itself, so you do not have to manually import a hub cluster to manage itself.
+
+. From the navigation menu, hover over *Automate infrastructure* and click *Clusters*.
+. Click *Add a cluster*.
+. Click *Import an existing cluster*.
+. Provide a name for the cluster.
+By default, the namespace is used for the cluster name and namespace.
+. *Optional:* Add any _Additional labels_.
+. Click *Save import and generate code* to generate the command that you use to deploy the `open-cluster-management-agent-addon`. A confirmation message is displayed.
+
+. *Optional:* Configure the *Cluster API address* that is on the cluster details page by configuring the URL that is displayed in the table when you run the `oc get managedcluster` command.
+
+.. Log in to your hub cluster with an ID that has `cluster-admin` permissions.
+
+.. Configure your `kubectl` for your targeted managed cluster.
++
+See xref:../clusters/supported_clouds.adoc#supported-clouds[Supported clouds] to learn how to configure your `kubectl`.
+
+.. Edit the managed cluster entry for the cluster that you are importing by entering the following command:
++
+----
+oc edit managedcluster <cluster-name>
+----
+Replace `_cluster-name_` with the name of the managed cluster.
+
+.. Add the `ManagedClusterClientConfigs` section to the `ManagedCluster` spec in the YAML file, as shown in the following example:
++
+[source,yaml]
+----
+spec:
+  hubAcceptsClient: true
+  managedClusterClientConfigs:
+  - url: https://multicloud-console.apps.new-managed.dev.redhat.com
+----
++
+Replace the value of the URL with the URL that provides external access to the managed cluster that you are importing.
+
+. In the _Import an existing cluster_ window, select *Copy command* to copy the generated command and token to the clipboard.
++
+*Important:* The command contains pull secret information that is copied to each of the imported clusters. Anyone who can access the imported clusters can also view the pull secret information.
+Consider creating a secondary pull secret at https://cloud.redhat.com/ or create a service account to protect your personal credentials.
+See https://docs.openshift.com/container-platform/4.7/openshift_images/managing_images/using-image-pull-secrets.html[Using image pull secrets] or https://docs.openshift.com/container-platform/4.7/authentication/understanding-and-creating-service-accounts.html[Understanding and creating service accounts] for more information about pull secrets.
+
+. Log in to the managed cluster that you want to import.
+
+. *For the Red Hat OpenShift Dedicated environment only* Complete the following steps:
+
+.. Create the `open-cluster-management-agent` and `open-cluster-management` namespaces or projects on the managed cluster.
+
+.. Find the klusterlet operator in the {ocp-short} catalog.
+
+.. Install it in the `open-cluster-management` namespace or project that you created. 
++
+*Important:* Do not install the operator in the `open-cluster-management-agent` namespace.
+
+.. Extract the bootstrap secret from the import command by completing the following steps:
+
+... Generate the import command:
+
+.... Select *Automate infrastructure* > *Clusters* from the {product-title-short} console main navigation.
+
+.... Select *Add a cluster* > *Import an existing cluster*.
+
+.... Add the cluster information, and select *Save import and generate code*.
+
+... Copy the import command.
+
+... Paste the import command into a file that you create named `import-command`.
+
+... Run the following command to insert the content into the new file:
++
+----
+cat import-command | awk '{split($0,a,"&&"); print a[3]}' | awk '{split($0,a,"|"); print a[1]}' | sed -e "s/^ echo //" | base64 -d
+----
+
+... Find and copy the secret with the name `bootstrap-hub-kubeconfig` in the output.
+
+... Apply the secret to the `open-cluster-management-agent` namespace on the managed cluster.
+
+... Create the klusterlet resource using the example in the installed operator, the clusterName should be changed the same name as cluster name that was set during the import.
++
+*Note:* When the `managedcluster` resource is successfully registered to the hub, there are two klusterlet operators installed. One klusterlet operator is in the `open-cluster-management` namespace, and the other is in the `open-cluster-management-agent` namespace. Multiple operators  does not affect the function of the klusterlet.
+
+. *For cluster imports that are not in the Red OpenShift Dedicated environment* Complete the following steps: 
+
+.. If necessary, configure your `kubectl` commands for your managed cluster.
++
+See xref:../clusters/supported_clouds.adoc#supported-clouds[Supported clouds] to learn how to configure your `kubectl` command line interface. 
+
+.. To deploy the `open-cluster-management-agent-addon` to the managed cluster, run the command and token that you copied.
+  
+. Select *View cluster* to view a summary of your cluster in the _Overview_ page.
+
+Your cluster is imported. You can import another by selecting *Import another*.
+  
+[#removing-an-imported-cluster]
+== Removing an imported cluster
+
+Complete the following procedure to remove an imported cluster and the `open-cluster-management-agent-addon` that was created on the managed cluster.
+
+. From the _Clusters_ page, find your imported cluster in the table.
+. Click *Actions* > *Detach cluster* to remove your cluster from management.
+
+*Note:* If you attempt to detach the hub cluster, which is named `local-cluster`, be aware that the default setting of `disableHubSelfManagement` is `false`. This setting causes the hub cluster to reimport itself and manage itself when it is detached and it reconciles the `MultiClusterHub` controller. It might take hours for the hub cluster to complete the detachment process and reimport. If you want to reimport the hub cluster without waiting for the processes to finish, you can enter the following command to restart the `multiclusterhub-operator` pod and reimport faster:
+
+----
+oc delete po -n open-cluster-management `oc get pod -n open-cluster-management | grep multiclusterhub-operator| cut -d' ' -f1`
+----
+
+You can change the value of the hub cluster to not import automatically by changing the `disableHubSelfManagement` value to `true`, as described in link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online].

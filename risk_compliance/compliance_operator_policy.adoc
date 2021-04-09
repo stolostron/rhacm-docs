@@ -1,0 +1,88 @@
+[#compliance-operator-policy]
+= Compliance operator policy
+
+Compliance operator is an operator that runs OpenSCAP and allows you to keep your {ocp} cluster compliant with the security benchmark that you need. You can install the compliance operator on your managed cluster by using the compliance operator policy. 
+
+The compliance operator policy is created as a Kubernetes configuration policy in {product-title-short}. {ocp-short} 4.7 and 4.6, support the compliance operator policy. For more information, see _Understanding the Compliance Operator_ in the https://docs.openshift.com/container-platform/4.7/risk_compliance/compliance_operator/compliance-operator-understanding.html#compliance-operator-understanding[{ocp-short} documentation] for more details.
+
+[#compliance-operator-resources]
+== Compliance operator resources
+
+When you create a compliance operator policy, the following resources are created:
+
+- A compliance operator namespace (`openshift-compliance`) for the operator installation:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: comp-operator-ns
+spec:
+  remediationAction: inform # will be overridden by remediationAction in parent policy
+  severity: high
+  object-templates:
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: openshift-compliance
+----
+
+- An operator group (`compliance-operator`) to specify the target namespace:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: comp-operator-operator-group
+spec:
+  remediationAction: inform # will be overridden by remediationAction in parent policy
+  severity: high
+  object-templates:
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: operators.coreos.com/v1
+        kind: OperatorGroup
+        metadata:
+          name: compliance-operator
+          namespace: openshift-compliance
+        spec:
+          targetNamespaces:
+            - openshift-compliance
+----
+
+- A subscription (`comp-operator-subscription`) to reference the name and channel. The subscription pulls the profile, as a container, that it supports:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: comp-operator-subscription
+spec:
+  remediationAction: inform  # will be overridden by remediationAction in parent policy
+  severity: high
+  object-templates:
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: operators.coreos.com/v1alpha1
+        kind: Subscription
+        metadata:
+          name: compliance-operator
+          namespace: openshift-compliance
+        spec:
+          channel: "4.7"
+          installPlanApproval: Automatic
+          name: compliance-operator
+          source: redhat-operators
+          sourceNamespace: openshift-marketplace
+----
+
+After you install the compliance operator policy, the following pods are created: `compliance-operator`, `ocp4`, and `rhcos4`. See a sample of the https://github.com/open-cluster-management/policy-collection/blob/master/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[`policy-compliance-operator-install.yaml`].
+
+You can also create and apply the E8 scan policy after you have installed the compliance operator. For more information, see xref:../risk_compliance/e8_scan_policy.adoc#e8-scan-policy[E8 scan policy].
+
+To learn about managing compliance operator policies, see xref:../risk_compliance/create_compliance_operator.adoc#managing-compliance-operator-policies[Managing compliance operator policies] for more details. Refer to xref:../risk_compliance/config_policy_ctrl.adoc#kubernetes-configuration-policy-controller[Kubernetes configuration policy controller] for more topics about configuration policies.
