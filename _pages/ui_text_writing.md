@@ -5,9 +5,9 @@ title: "Writing about user interfaces"
 
 ## Prerequisites
 
-Always start with the [IBM Style Guide](https://source.redhat.com/groups/public/ccs/ccs_folder/ibm_style_guide/ibm_stylepdf). You can see from the navigation that the style guide covers not only product documentation, but a variety of other topics.
+Always start with the [IBM Style Guide](https://source.redhat.com/groups/public/ccs/ccs_folder/ibm_style_guide/ibm_stylepdf). From the navigation, notice that the style guide covers not only product documentation, but a variety of other topics.
 
-Keep an eye on the What's new section in the guide, as it is regularly updated. 
+Keep an eye on the _What's new_ section in the guide, as it is regularly updated. 
 
 To build content that references the UI, follow the guidance in the GUI elements topic.
 
