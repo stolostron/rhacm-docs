@@ -5,11 +5,11 @@ title: "Writing about user interfaces"
 
 ## Prerequisites
 
-Always start with the IBM Style Guide. You can see from the navigation that the style guide covers not only product documentation, but a variety of other topics.
+Always start with the [IBM Style Guide](https://source.redhat.com/groups/public/ccs/ccs_folder/ibm_style_guide/ibm_stylepdf). From the navigation, notice that the style guide covers not only product documentation, but a variety of other topics.
 
-Keep an eye on [What's new](https://apps.na.collabserv.com/wikis/home?lang=en-us#!/wiki/W580a84a67242_4da6_81cf_69e3db4bdbfa/page/What's%20new), as it is regularly updated. 
+Keep an eye on the _What's new_ section in the guide, as it is regularly updated. 
 
-To build content that references the UI, follow [GUI elements](https://apps.na.collabserv.com/wikis/home?lang=en-us#!/wiki/W580a84a67242_4da6_81cf_69e3db4bdbfa/page/GUI%20elements).
+To build content that references the UI, follow the guidance in the GUI elements topic.
 
 For example, you will see the following guidance for clickable items and icon images:
 
@@ -19,12 +19,11 @@ _If the graphical item does not have a label or name, provide a generic descript
 
 **Example:** On the toolbar, click the **Permanent Pen** icon [image-here].
 
-Please always start with the IBM Style Manual since it helps all teams at IBM have one voice. See the following section to see how the product is standardized on top of the IBM standards:
+Always start with the IBM Style Manual since it helps all teams have one voice. See the following section to see how the product is standardized on top of the IBM standards:
 
 ## Guidance for console content
 
-- The user interface is named the **console**. (Lowercase unless for some strange reason you start your sentence with console.)
-There is a conref for this element. If changed, open a git issue for stakeholders (ID team) and agree on the name, then change the conref.
+- The user interface is named the **console** (lowercase unless for some strange reason you start your sentence with console).
 
 - While you do not have to document the console, the doc will have console tasks, so it is important for the team to agree on elements outside of the GUI style guide.
 
@@ -43,19 +42,14 @@ When you decide what to name an element (if it is not named in the IBM Style Man
 
 **Note:** If the UI developers do not have hover-help for a GUI element, always check with them and maybe encourage them to name their element in hover help.
 
-## But I wrote using DITA!
+## Selected guidance
 
-Yes, DITA is widely known here at IBM. It is easier to write accessible doc with tags like `ui control` and `varname`. With Markdown, it is important to write as if the tags cannot "speak" for you with a screen reader.
-
-
-Consider a small list of differences and similarities if you are coming from DITA to Markdown:
-
-
-|Element|Similarities|Differences|
+|Element|Reason|Guidance|
 --------|------------|-------------|
-|Bold|Use for UI, clickable components|Use .md bold tag where you would have used `ui-control`. Do not use bold for emphasis, see Style Guide
-|Variable|Still build as italicized just like DITA|Use .md italics tag. No `varname` tag, so use <these> to identify a variable
-|Menu cascade|Bold, same as DITA|No `menu cascade` tag, build as **Multi-cluster** > **Pods**|
-|A window or UI page|Usually italicized|No `wintitle` tag, simply _use this_ for those types of indicators.
-|Quotation marks|Death to " " not in codeblocks, see IBM Style guide for when to use (citations only and rarely in doc)|no diff--they are not good for accessibility
+|Bold|Use for UI, clickable components|Use bold for UI buttons and clickable elements. Do not use bold for emphasis, see Style Guide.
+|Variable inside of a command or script sample|Identify as a variable.|Use angle brackets (<these>) to identify a variable. Surround the variable with the angle brackets (<>) to identify it within the existing monospace style. Ex: `oc get <namespace>`. 
+|Variable ouside of a command or script sample (in normal text).|Identify as a variable.|Use monospace style to identify a variable. Surround the variable with monospace (`) style to identify it as a variable. Ex: Replace `namespace` with the name of your project namespace. 
+|Menu cascade|Identify it as successive selections in a menu|Use bold for the selections, and separate them by the character >. The > should not be bold. For example: *Multi-cluster* > *Pods*|
+|A window or UI page|Identifies a title|Use italic for this content. Example: In the _windowname_ window, select *Save*.
+|Quotation marks|Not really used much in docs outside of within codeblocks (citations only and rarely in doc)|Try to avoid
 
