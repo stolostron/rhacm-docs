@@ -1,0 +1,174 @@
+[#enable-observability]
+= Enable observability service
+
+Monitor the health of your managed clusters with the observability service (`multicluster-observability-operator`).
+
+*Required access:* Cluster administrator or the `open-cluster-management:cluster-manager-admin` role.
+
+*Prerequisites*:
+ 
+- You must install {product-title}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.  
+- You must configure an object store to create a storage solution. {product-title-short} only supports cloud providers with stable object stores, such as Amazon S3 (or other S3 compatible object stores like Ceph), Google Cloud Storage, Azure storage, and OpenShift Container Storage.
++
+*Important*: When you configure your object store, ensure that you meet the encryption requirements necessary when sensitive data is persisted. For a complete list of the supported object stores, see https://thanos.io/tip/thanos/storage.md/#object-storage[Thanos documentation]. 
+
+[#enabling-observability]
+== Enabling observability
+
+Enable the observability service by creating a MultiClusterObservability CustomResource (CR) instance. Complete the following steps to enable the observability service: 
+
+. Log in to your {product-title-short} hub cluster. 
+. Create a namespace for the observability service with the following command:
++
+----
+oc create namespace open-cluster-management-observability
+----
+
+. Generate your pull-secret. If {product-title-short} is installed in the `open-cluster-management` namespace, run the following command:
+ 
++
+----
+DOCKER_CONFIG_JSON=`oc extract secret/multiclusterhub-operator-pull-secret -n open-cluster-management --to=-`
+----
++
+If the `multiclusterhub-operator-pull-secret` is not defined in the namespace, copy the `pull-secret` from the `openshift-config` namespace into the `open-cluster-management-observability` namespace. Run the following command:
++
+----
+DOCKER_CONFIG_JSON=`oc extract secret/pull-secret -n openshift-config --to=-`
+oc create secret generic multiclusterhub-operator-pull-secret \
+    -n open-cluster-management-observability \
+    --from-literal=.dockerconfigjson="$DOCKER_CONFIG_JSON" \
+    --type=kubernetes.io/dockerconfigjson
+----
+
+. Create a secret for your object storage. Your secret must contain the credentials to your storage solution. For example, run the following command:
+
++
+----
+oc create -f thanos-object-storage.yaml -n open-cluster-management-observability
+----
++
+.. View the following examples of secrets for the supported object stores:
+... For Amazon S3 or S3 compatible, your secret might resemble the following file:
++
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: thanos-object-storage
+type: Opaque
+stringData:
+  thanos.yaml: |
+    type: s3
+    config:
+      bucket: YOUR_S3_BUCKET
+      endpoint: YOUR_S3_ENDPOINT
+      insecure: false
+      access_key: YOUR_ACCESS_KEY
+      secret_key: YOUR_SECRET_KEY
+
+----
++
+For more details, see https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html[Amazon Simple Storage Service user guide].
+
+... For Google, your secret might resemble the following file: 
++
+----
+type: GCS
+config:
+  bucket: YOUR_GCS_BUCKET
+  service_account: YOUR_SERVICE_ACCOUNT
+----
++
+For more details, see https://cloud.google.com/storage/docs/introduction[Google Cloud Storage].
+
+... For Azure your secret might resemble the following file:
++
+----
+type: AZURE
+config:
+  storage_account: YOUR_STORAGE_ACCT
+  storage_account_key: YOUR_STORAGE_KEY
+  container: YOUR_CONTAINER
+  endpoint: YOUR_ENDPOINT
+  max_retries: 0
+----
++
+For more details, see https://docs.microsoft.com/en-us/azure/storage/[Azure Storage documentation].
+
+... For OpenShift Container Storage, your secret might resemble the following file:
++
+----
+type: s3
+config:
+  bucket: YOUR_S3_BUCKET
+  endpoint: YOUR_OCS_ENDPOINT
+  insecure: true
+  access_key: YOUR_OCS_ACCESS_KEY
+  secret_key: YOUR_OCS_SECRET_KEY
+----
++
+For more details, see https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.4/html/deploying_openshift_container_storage/deploying-openshift-container-storage-on-openshift-container-platform_rhocs#installing-openshift-container-storage-operator-using-the-operator-hub_aws-vmware[Installing Red Hat OpenShift Container Storage].
+. Create the `MultiClusterObservability` custom resource (mco CR) for your managed cluster by completing the following steps:
++
+.. Create the `MultiClusterObservability` custom resource YAML file named `_multiclusterobservability_cr.yaml_`. 
++
+View the following default YAML file for observability:
++
+----
+apiVersion: observability.open-cluster-management.io/v1beta1
+kind: MultiClusterObservability
+metadata:
+  name: observability #Your customized name of MulticlusterObservability CR
+spec:
+  availabilityConfig: High # Available values are High or Basic
+  imagePullPolicy: Always
+  imagePullSecret: multiclusterhub-operator-pull-secret
+  observabilityAddonSpec: # The ObservabilityAddonSpec defines the global settings for all managed clusters which have observability add-on enabled
+    enableMetrics: true # EnableMetrics indicates the observability addon push metrics to hub server
+    interval: 60 # Interval for the observability addon push metrics to hub server
+  retentionResolution1h: 30d # How long to retain samples of 1 hour in bucket
+  retentionResolution5m: 14d
+  retentionResolutionRaw: 5d
+  storageConfigObject: # Specifies the storage to be used by Observability
+    metricObjectStorage:
+      name: thanos-object-storage
+      key: thanos.yaml
+    statefulSetSize: 10Gi # The amount of storage applied to the Observability StatefulSets, i.e. Amazon S3 store, Rule, compact and receiver.
+    statefulSetStorageClass: gp2
+----
++
+You might want to modify the value for the `retentionResolution` parameter. For more information, see https://thanos.io/v0.8/components/compact/#downsampling-resolution-and-retention[Thanos Downsampling resolution and retention]. Depending on the number of managed clusters, you might want to update `statefulSetSize`, see link:../apis/observability.json.adoc#observability-api[Observability API] for more information.
++
+.. To deploy on infrastructure machine sets, you must set a label for your set by updating the `_nodeSelector_` in the MultiClusterObservability YAML. Your YAML might resemble the following content:
++
+----
+nodeSelector:
+    node-role.kubernetes.io/infra: 
+----
++
+For more information, see https://docs.openshift.com/container-platform/4.7/machine_management/creating-infrastructure-machinesets.html[Creating infrastructure machine sets].
+
+.. Apply the observability YAML to your cluster by running the following command:
++
+----
+oc apply -f multiclusterobservability_cr.yaml
+----
++
+All the pods in `open-cluster-management-observability` namespace for Thanos, Grafana and AlertManager are created. All the managed clusters connected to the {product-title-short} hub cluster are enabled to send metrics back to the {product-title-short} Observability service.
+
+. To validate that the observability service is enabled, launch the Grafana dashboards to make sure the data is populated. Complete the following steps:
+.. Log in to the {product-title-short} console.
+.. From the navigation menu, select *Observe environments* > *Overview*.
+.. Click the Grafana link that is near the console header to view the metrics from your managed clusters.
++
+*Note*: If you want to exclude specific managed clusters from collecting the observability data, add the following cluster label to your clusters: `vendor: OpenShift`.
+
+[#disabling-observability-resource]
+== Disabling observability
+
+To disable the observability service, uninstall the `observability` resource. See step 1 of link:../install/#removing-a-multiclusterhub-instance-by-using-commands[Removing a MultiClusterHub instance by using commands] for the procedure.
+
+To learn more about customizing the observability service, see xref:../observability/customize_observability.adoc#customizing-observability[Customizing observability].
+
+

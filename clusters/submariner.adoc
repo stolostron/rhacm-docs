@@ -1,0 +1,290 @@
+[#submariner]
+= Submariner
+
+The `submariner-addon` component is a *technology preview* feature. 
+
+Submariner is an open source tool that can be used with {product-title} to provide direct networking between two or more Kubernetes clusters in your environment, either on-premises or in the cloud. For more information about Submariner, see https://submariner.io/[Submariner].
+
+You can enable Submariner on the {ocp-short} clusters that are hosted in the following environments:
+
+* Amazon Web Services
+* Google Cloud Platform
+* Microsoft Azure
+* IBM Cloud
+* VMware vSphere
+* Bare metal
+* Red Hat OpenShift Dedicated
+
+{product-title} provides a Submariner component that you can deploy in your environment by using your hub cluster. 
+
+* <<submariner-prereq,Prerequisites>>
+* <<preparing-the-hosts-to-deploy-submariner,Preparing the hosts to deploy Submariner>>
+** <<preparing-aws,Preparing Amazon Web Services to deploy Submariner>>
+** <<preparing-gcp,Preparing Google Cloud Platform to deploy Submariner>>
+** <<preparing-azure,Preparing Microsoft Azure to deploy Submariner>>
+** <<preparing-ibm,Preparing IBM Cloud to deploy Submariner>>
+** <<preparing-osd,Preparing Red Hat OpenShift Dedicated to deploy Submariner>>
+** <<preparing-vm-bare,Preparing to deploy Submariner on VMware vSphere or bare metal>>
+
+[#submariner-prereq]
+== Prerequisites
+
+Ensure that you have the following prerequisites before using Submariner:
+
+* A {product-title-short} hub cluster that is running on {ocp} version 4.5, or later, with Kubernetes version 1.17, or later.
+* A credential for accessing the hub cluster with `cluster administrator` permissions.
+* Two or more {ocp-short} managed clusters that are running on {ocp-short} version 4.4, or later, with Kubernetes version 1.17, or later, and are managed by the {product-title-short} hub cluster.
+* Pod and Service Classless Inter-Domain Routing (CIDR) between the clusters that do not overlap.
+* IP connectivity must be configured between the Gateway nodes. When connecting two clusters, at least one of the clusters must have a publicly routable IP address designated to the Gateway node.
+* Firewall configuration across all nodes in each of the managed clusters must allow 4800/UDP in both directions. 
++
+*Note:* This is configured automatically when your clusters are deployed in an Amazon Web Services environment, but must be configured manually for clusters on other environments and for the firewalls that protect private clouds like bare metal and VMware vSphere. 
+* Firewall configuration on the Gateway nodes allows ingress 8080/TCP so the other nodes in the cluster can access it. 
+* Firewall configuration open for UDP/4500, UDP/500, and any other ports that are used for IPSec traffic on the gateway nodes.
+
+See https://submariner.io/getting-started/#prerequisites[Submariner prerequisites] for more detailed information about the prerequisites.
+
+[#preparing-the-hosts-to-deploy-submariner]
+== Preparing the hosts to deploy Submariner
+
+Before deploying Submariner with {product-title}, you must prepare the clusters on the hosting environment for the connection. The requirements vary by the hosting environment, so follow the instructions for your hosting environment.
+
+[#preparing-aws]
+=== Preparing Amazon Web Services to deploy Submariner
+
+There are two ways that you can configure the {ocp-short} cluster that is hosted on Amazon Web Services to integrate with a Submariner deployment. Select one of these options to prepare for the connection:
+
+* Method 1 
++
+You can use the `SubmarinerConfig` API to build the cluster environment. With this method, the `submariner-addon` configures the environment, so you use your configurations and cloud provider credentials in your `SubmarinerConfig` definition. 
++
+*Note:* This method is only supported when the cluster is on Amazon Web Services, and not on other environments. 
++
+Create a YAML file that contains the following content:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+    name: <cloud-provider-credential-secret-name>
+    namespace: <managed-cluster-namespace>
+type: Opaque
+data:
+    aws_access_key_id: <aws-access-key-id>
+    aws_secret_access_key: <aws-secret-access-key>
+----
++
+The format of `_name_` is the same as the credential secret name that you used to provision the cluster with {product-title-short}.
++
+If you have already configured your Submariner cluster environment manually, include the configurations in the your `SubmarinerConfig` addition. In this example, the `IPSecIKEPort` is set to `501`, and the `IPSecNATTPort` is set to `4501`:
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: <config-name>
+    namespace: <managed-cluster-namespace>
+spec:
+    IPSecIKEPort: 501
+    IPSecNATTPort: 4501
+    ...
+----
+
+* Method 2    
++
+You can use the script file, `prep_for_subm.sh`, that is provided on the Submariner website to update your {ocp-short} installer-provisioned Amazon Web Services infrastructure for Submariner deployments.
+See https://submariner.io/getting-started/quickstart/openshift/aws/#prepare-aws-clusters-for-submariner[Prepare AWS Clusters for Submariner] for the script and instructions for running it.
+
+[#preparing-gcp]
+=== Preparing Google Cloud Platform to deploy Submariner
+
+To prepare the clusters on your Google Cloud Platform for deploying the Submariner component, complete the following steps:
+
+. Create the inbound and outbound firewall rules on your Google Cloud Platform to open the IPsec IKE (by default 500/UDP) and NAT traversal ports (by default 4500/UDP) to enable Submariner communication:
++
+----
+$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=udp:<ipsec-port> --direction=IN
+$ gcloud compute firewall-rules create <rule-name> --network=<network-name> --allow=udp:<ipsec-port>  --direction=OUT
+----
+Replace `_rule-name_` with your rule name.
+Replace `_network-name_` with your Google Cloud Platform cluster network name.
+Replace `_ipsec-port_` with your IPsec port.
+
+. Create the inbound and outbound firewall rules on your Google Cloud Platform to open the 4800/UDP port to encapsulate Pod traffic from the worker and master nodes to the Submariner Gateway nodes:
++
+----
+$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=udp:4800 --direction=IN
+$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=udp:4800 --direction=OUT
+----
+Replace `_name_` with your rule name.
+Replace `_network-name_` with your Google Cloud Platform cluster network name.
+
+. Create the inbound and outbound firewall rules on your Google Cloud Platform to open the 8080/TCP port to export metrics service from the Submariner Gateway nodes:
++
+----
+$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=tcp:8080 --direction=IN
+$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=tcp:8080 --direction=OUT
+----
+Replace `_name_` with your rule name.
+Replace `_network-name_` with your Google Cloud Platform cluster network name.
+
+[#preparing-azure]
+=== Preparing Microsoft Azure to deploy Submariner
+
+To prepare the clusters on your Microsoft Azure for deploying the Submariner component, complete the following steps:
+
+. Create the inbound and outbound firewall rules on your Microsoft Azure environment to open the IP security IKE (by default 500/UDP) and NAT traversal ports (by default 4500/UDP) to enable Submariner communication:
++
+----
+# create inbound nat rule
+$ az network lb inbound-nat-rule create --lb-name <lb-name> \
+--resource-group <res-group> \
+--name <name> \
+--protocol Udp --frontend-port <ipsec-port> \
+--backend-port <ipsec-port> \
+--frontend-ip-name <frontend-ip-name>
+
+# add your vm network interface to the created inbound nat rule
+$ az network nic ip-config inbound-nat-rule add \
+--lb-name <lb-name> --resource-group <res-group> \
+--inbound-nat-rule <nat-name> \
+--nic-name <nic-name> --ip-config-name <pipConfig>
+----
+Replace `_lb-name_` with your load balancer name.
+Replace `_res-group_` with your resource group name.
+Replace `_nat-name_` with your load balancing inbound NAT rule name.
+Replace `_ipsec-port_` with your IPsec port.
+Replace `_pipConfig_` with your cluster frontend IP configuration name.
+Replace `_nic-name_` with your network interface card (NIC) name.
+
+. Create one load balancing inbound NAT rules to forward Submariner gateway metrics service request:
++
+----
+# create inbound nat rule
+$ az network lb inbound-nat-rule create --lb-name <lb-name> \
+--resource-group <res-group> \
+--name <name> \
+--protocol Tcp --frontend-port 8080 --backend-port 8080 \
+--frontend-ip-name <frontend-ip-name>
+
+# add your vm network interface to the created inbound nat rule
+$ az network nic ip-config inbound-nat-rule add \
+--lb-name <lb-name> --resource-group <res-group> \
+--inbound-nat-rule <nat-name> \
+--nic-name <nic-name> --ip-config-name <pipConfig>
+----
+Replace `_lb-name_` with your load balancer name.
+Replace `_res-group_` with your resource group name.
+Replace `_nat-name_` with your load balancing inbound NAT rule name.
+Replace `_pipConfig_` with your cluster frontend IP configuration name.
+Replace `_nic-name_` with your network interface card (NIC) name.
+
+. Create network security groups {NSG) security rules on your Azure to open IPsec IKE (by default 500/UDP) and NAT traversal ports (by default 4500/UDP) for Submariner:
++
+----
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Inbound --access Allow \
+--protocol Udp --destination-port-ranges <ipsec-port>
+
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Outbound --access Allow \
+--protocol Udp --destination-port-ranges <ipsec-port>
+Replace `_res-group_` with your resource group name.
+Replace `_nsg-name_` with your NSG name.
+Replace `_priority_` with your rule priority.
+Replace `_name_` with your rule name.
+Replace `_ipsec-port_` with your IPsec port.
+----
+
+. Create the NSG rules to open 4800/UDP port to encapsulate pod traffic from the worker and master nodes to the Submariner Gateway nodes:
++
+----
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Inbound --access Allow \
+--protocol Udp --destination-port-ranges 4800 \
+
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Outbound --access Allow \
+--protocol Udp --destination-port-ranges 4800
+----
+Replace `_res-group_` with your resource group name.
+Replace `_nsg-name_` with your NSG name.
+Replace `_priority_` with your rule priority.
+Replace `_name_` with your rule name.
+
+. Create the NSG rules to open 8080/TCP port to export metrics service from the Submariner Gateway nodes:
++
+----
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Inbound --access Allow \
+--protocol Tcp --destination-port-ranges 8080 \
+
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Outbound --access Allow \
+--protocol Udp --destination-port-ranges 8080
+----
+Replace `_res-group_` with your resource group name.
+Replace `_nsg-name_` with your NSG name.
+Replace `_priority_` with your rule priority.
+Replace `_name_` with your rule name.
+
+[#preparing-ibm]
+=== Preparing IBM Cloud to deploy Submariner
+
+There are two kinds of Red Hat OpenShift Kubernetes Service (ROKS) on IBM Cloud: the classic cluster and the second generation of compute infrastructure in a virtual private cloud (VPC). Submariner cannot run on the classic ROKS cluster since cannot configure the IPSec ports for the classic cluster.
+
+To configure the ROKS clusters on a VPC to use Submariner, complete the steps in the following links:
+
+. Before creating a cluster, specify subnets for pods and services, which avoids overlapping CIDRs with other clusters. Make sure there are no overlapping pods and services CIDRs between clusters if you are using an existing cluster.See https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics[VPC Subnets] for the procedure. 
+
+. Attach a public gateway to subnets used in the cluster. See https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics_pgw[Public Gateway] for the procedure. 
+
+. Create inbound rules for the default security group of the cluster by completing the steps in https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-network-policy#security_groups_ui[Security Group]. Ensure that the firewall allows inbound and outbound traffic on UDP/4500 and UDP/500 ports for Gateway nodes, and allows inbound and outbound UDP/4800 for all the other nodes.
+
+. Label a node that has the public gateway as `submariner.io/gateway=true` in the cluster.
+
+. Refer to https://submariner.io/operations/deployment/calico/[Calico] to configure Calico CNI by creating IPPools in the cluster.
+
+[#preparing-osd]
+=== Preparing Red Hat OpenShift Dedicated to deploy Submariner
+
+Red Hat OpenShift Dedicated supports clusters that were provisioned by AWS and Google Cloud Platform.
+
+[#preparing-osd-aws]
+==== Preparing Red Hat OpenShift Dedicated to deploy Submariner on AWS
+
+To configure the AWS clusters on Red Hat OpenShift Dedicated, complete the following steps:
+
+. Submit a https://issues.redhat.com/secure/CreateIssue!default.jspa[support ticket] to the Red Hat OpenShift Hosted SRE Support team to grant `cluster-admin` group access to the Red Hat OpenShift Dedicated cluster. The default access of `dedicated-admin` does not have the permission that is required the create a `MachineSet`.
+
+. After the group is created, add the user name to the `cluster-admin` group that you created by completing the steps in https://docs.openshift.com/dedicated/4/administering_a_cluster/cluster-admin-role.html[Granting the cluster-admin role to users] in the Red Hat OpenShift Dedicated documentation.
+
+. Complete the prerequisites that are listed in the xref:../clusters/submariner.adoc#preparing-aws[Preparing Amazon Web Services to deploy Submariner].
+
+. Configure the credentials of the user `osdCcsAdmin`, so you can use that as a service account.  
+
+[#preparing-osd-gcp]
+==== Preparing Red Hat OpenShift Dedicated to deploy Submariner on Google Cloud Platform
+
+To configure the Google Cloud Platform clusters on Red Hat OpenShift Dedicated, complete the following steps:
+
+. Complete the prerequisites in xref:../clusters/submariner.adoc#preparing-gcp[Preparing Google Cloud Platform to deploy Submariner].
+
+. Configure a service account named `osd-ccs-admin` that you can use to manage the deployment.
+
+[#preparing-vm-bare]
+=== Preparing to deploy Submariner on VMware vSphere or bare metal
+
+To prepare the VMware vSphere and bare metal clusters for deploying Submariner, complete the following steps:
+
+. Configure a publicly routable IP address that is designated to the gateway node on at least one of the clusters. 
+
+. Ensure that ports for IP security are open. The default ports are 4500/UDP and 500/UDP. If the default ports are blocked by a firewall, configure a pair of custom ports that are available, like 4501/UDP and 501/UDP.
