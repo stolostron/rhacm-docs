@@ -54,7 +54,7 @@ To create a new guide in the product documentation, you must create a new folder
    ```
 
 **Create a new folder from your text editor**
-(VS Code or Atom is recommended to preview, prevent errors, work in collaboration with dev.)
+(VS Code or Atom is recommended to preview, prevent errors, and work in collaboration with dev.)
 
 1. Verify that you are in the `rhacm-docs` repository by running the following command from your terminal:
    
@@ -72,7 +72,7 @@ To create a new guide in the product documentation, you must create a new folder
 
 ### Add a _symlink_ to the _modules_ folder 
 
-You must add a `symlink` to the `modules` folder in your new folder to resolve the conrefs. You can copy a file from another folder in the editor, or see the following steps:
+You must add a `symlink` to the `modules` folder in your new folder to resolve the conrefs. You can copy a file from another folder in the editor, or see the following steps (Mac only):
 
 1. Open a terminal and navigate to the new GitHub folder.
 
@@ -89,7 +89,7 @@ You must complete the _Set up new title_ form to create a new book. Log in to [P
 
 Complete the following steps to complete the _New title_ form:
    
-   1. Verify if you are setting up a new folder from an existing repository in Gitlab, by selecting one of the options that is provided. If you are creating a new book in a set of books that is already building correctly, select the option for an already set up environment. 
+   1. Verify if you are setting up a new folder from an existing repository in GitLab by selecting one of the options that is provided. If you are creating a new book in a set of books that is already building correctly, select the option for an already set up environment. 
    2. If the repository exists in GitLab, values for the product title and version number are complete.
    3. From the _GitLab Group_ section click the drop-down button and select **Documentation - Red Hat OpenShift Enterprise**.
    4. For _GitLab Project_, select **Red Hat Advanced Cluster Management for Kubernetes**.
@@ -111,7 +111,7 @@ Only rename a folder/guide when absolutely needed as a result of product change.
    4. Using find/replace, change all links that are impacted.
    5. Log in to Pantheon.
    6. Click **Edit title**.
-   7. Change the name and the URL fragment. Keep URL fragment 
+   7. Change the name and the URL fragment. Keep URL fragment. 
    8. Click **Rename** to save.
    9. When links and files/folders are all changed, as well as titles, run a build.
    
