@@ -17,7 +17,7 @@ Follow these instructions if you have to set up a new book/guide or need to rena
 
 **Important**: Do you really need a new guide? See the documentation architect to discuss placement of new content.
 
-To create a new guide in the product documentation, you must create a new folder in your repository, and a new book in Pantheon. When you create a new folder, you must also create a `master.adoc` and `docinfo.xml` file for your new folder. See the repo for examples. 
+To create a new guide in the product documentation, you must create a new folder in your repository, and a new book in Pantheon. When you create a new folder, you must also create a `master.adoc` and `docinfo.xml` file for your new folder. See the repository for examples. 
 
 ## Creating a new folder 
 
@@ -105,13 +105,13 @@ Complete the following steps to complete the _New title_ form:
 
 Only rename a folder/guide when absolutely needed as a result of product change.
 
-   1. Rename the folder in the source, as Git should match the URL. (Git remains the source of truth.)
+   1. Rename the folder in the source, as Git directory must match the URL. (Git remains the source of truth.)
    2. Rename the guide in the `docinfo.xml` file.
    3. Rename the title of the `master.adoc`.
    4. Using find/replace, change all links that are impacted.
    5. Log in to Pantheon.
    6. Click **Edit title**.
-   7. Change the name and the URL fragment. Keep URL fragment. 
+   7. Change the name and the URL fragment. Keep URL fragment in lowercase.
    8. Click **Rename** to save.
    9. When links and files/folders are all changed, as well as titles, run a build.
    
