@@ -72,7 +72,7 @@ To create a new guide in the product documentation, you must create a new folder
 
 ### Add a _symlink_ to the _modules_ folder 
 
-You must add a `symlink` to the `modules` folder in your new folder to resolve the conrefs. See the following steps:
+You must add a `symlink` to the `modules` folder in your new folder to resolve the conrefs. You can copy a file from another folder in the editor, or see the following steps:
 
 1. Open a terminal and navigate to the new GitHub folder.
 
@@ -101,6 +101,18 @@ Complete the following steps to complete the _New title_ form:
    8. You can add multiple new titles by selecting the **Add additional title** button. Otherwise, select **Submit** when the form is complete. 
    9. Run a manual build to pick up the new book. For more information, see [Build and publish](arch_builds.md#build-and-publish).
 
-## Renaming (need this because we have to do this)
+## Renaming 
+
+Only rename a folder/guide when absolutely needed as a result of product change.
+
+   1. Rename the folder in the source, as Git should match the URL. (Git remains the source of truth.)
+   2. Rename the guide in the `docinfo.xml` file.
+   3. Rename the title of the `master.adoc`.
+   4. Using find/replace, change all links that are impacted.
+   5. Log in to Pantheon.
+   6. Click **Edit title**.
+   7. Change the name and the URL fragment. Keep URL fragment 
+   8. Click **Rename** to save.
+   9. When links and files/folders are all changed, as well as titles, run a build.
    
 
