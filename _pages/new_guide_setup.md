@@ -3,9 +3,9 @@ permalink: /new_documentation
 title: "Planning new documentation"
 ---
 
-# Setting up a new book
+# Setting up a new book or renaming books
 
-Follow these instructions if you have to set up a new book/guide.
+Follow these instructions if you have to set up a new book/guide or need to rename guides.
 
 **Prerequisites**: You must have access to the following tools and directories:
 
@@ -13,10 +13,11 @@ Follow these instructions if you have to set up a new book/guide.
 * The `open-cluster-management` repository
 * Red Hat VPN
 * Pantheon
+* GitLab
 
-**Important**: Do you really need a new guide? See the doucmentation architect to discuss this.
+**Important**: Do you really need a new guide? See the documentation architect to discuss placement of new content.
 
-To create a new guide in the product documentation, you must create a new folder in your repository, and a new book in Pantheon. When you create a new folder, you must also create a `master.adoc` and `docinfo.xml` file for your new folder.  
+To create a new guide in the product documentation, you must create a new folder in your repository, and a new book in Pantheon. When you create a new folder, you must also create a `master.adoc` and `docinfo.xml` file for your new folder. See the repository for examples. 
 
 ## Creating a new folder 
 
@@ -53,6 +54,7 @@ To create a new guide in the product documentation, you must create a new folder
    ```
 
 **Create a new folder from your text editor**
+(VS Code or Atom is recommended to preview, prevent errors, and work in collaboration with dev.)
 
 1. Verify that you are in the `rhacm-docs` repository by running the following command from your terminal:
    
@@ -70,9 +72,9 @@ To create a new guide in the product documentation, you must create a new folder
 
 ### Add a _symlink_ to the _modules_ folder 
 
-You must add a `symlink` to the `modules` folder in your new folder, to resolve the conrefs. See the following steps:
+You must add a `symlink` to the `modules` folder in your new folder to resolve the conrefs. You can copy a file from another folder in the editor, or see the following steps (Mac only):
 
-1. Open a terminal, and navigate to the new GitHub folder.
+1. Open a terminal and navigate to the new GitHub folder.
 
 2. Enter the following command:
    ```
@@ -83,9 +85,11 @@ You must add a `symlink` to the `modules` folder in your new folder, to resolve 
 
 ## Set up a new book in Pantheon
 
-You must complete the _Set up new title_ form to create a new book. Log in to Pantheon and select the **Set up a new title** button. Complete the following steps to complete the _New title_ form:
+You must complete the _Set up new title_ form to create a new book. Log in to [Pantheon](https://pantheon.int.us-west.aws.prod.paas.redhat.com/#/titles/red_hat_advanced_cluster_management_for_kubernetes) and select the **Set up a new title** button. 
+
+Complete the following steps to complete the _New title_ form:
    
-   1. Verify if you are setting up a new folder from an existing repository in Gitlab, by selecting one of the options that is provided. If you are creating a new book in a set of books that is already building correctly, select the option for an already set up environment. 
+   1. Verify if you are setting up a new folder from an existing repository in GitLab by selecting one of the options that is provided. If you are creating a new book in a set of books that is already building correctly, select the option for an already set up environment. 
    2. If the repository exists in GitLab, values for the product title and version number are complete.
    3. From the _GitLab Group_ section click the drop-down button and select **Documentation - Red Hat OpenShift Enterprise**.
    4. For _GitLab Project_, select **Red Hat Advanced Cluster Management for Kubernetes**.
@@ -97,6 +101,18 @@ You must complete the _Set up new title_ form to create a new book. Log in to Pa
    8. You can add multiple new titles by selecting the **Add additional title** button. Otherwise, select **Submit** when the form is complete. 
    9. Run a manual build to pick up the new book. For more information, see [Build and publish](arch_builds.md#build-and-publish).
 
-## Renaming (need this because we have to do this)
+## Renaming 
+
+Only rename a folder/guide when absolutely needed as a result of product change.
+
+   1. Rename the folder in the source, as Git directory must match the URL. (Git remains the source of truth.)
+   2. Rename the guide in the `docinfo.xml` file.
+   3. Rename the title of the `master.adoc`.
+   4. Using find/replace, change all links that are impacted.
+   5. Log in to Pantheon.
+   6. Click **Edit title**.
+   7. Change the name and the URL fragment. Keep URL fragment in lowercase.
+   8. Click **Rename** to save.
+   9. When links and files/folders are all changed, as well as titles, run a build.
    
 
