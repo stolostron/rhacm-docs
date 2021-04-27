@@ -14,33 +14,72 @@ View the following sections for details of supported RBAC by component:
 * <<governance-lifecycle-RBAC,Governance lifecycle RBAC>>
 * <<observability-api-RBAC,Observability API RBAC>>
 
-
+// for server foundation meeting, will managed cluster roles that are generate will automatically include the Kubernetes ns (admin and view)? is the managed cluster set in the build? will the provision role be ready for 2.3?
 [#overview-of-roles]
 == Overview of roles
 
 Some product resources are cluster-wide and some are namespace-scoped. You must apply cluster role bindings and namespace role bindings to your users for consistent access controls. View the table list of the following role definitions that are supported in {product-title}:
 
+//should we replace "-x" within the roles with "<managed_cluster_name>", "<managed_clusterset_name>" YES
+
+
+// suggestion from James: consider replacing table with just a list since the length of the role names are long 
+
 .Role definition table
 |===
 | Role | Definition
-
+//possibly call out if its a kubernetes role vs acm role
 | *cluster-admin*
-| A user with cluster-wide binding to the `cluster-admin` role is an {ocp-short} super user, who has all access.
+| This is an {ocp-short} default role. A user with cluster-wide binding to the `cluster-admin` role is an {ocp-short} super user, who has all access. 
 
 | *open-cluster-management:cluster-manager-admin*
 | A user with cluster-wide binding to the `cluster-manager-admin` role is a {product-title} super user, who has all access. This role allows the user to create a `ManagedCluster` resource.
 
+//add provision cluster role
+//| *open-cluster-management:cluster-provisoner*
+//| A user with cluster 
+
+//add roles for machine clusterpools
+
+//I'm unsure of the get/update/delete comment in the google doc, I think we should add a reference to the API RBAC table for cluster lifecycle table? Are there any changes that should be made to that table? 
+
+//clarify why a cluster and namespace binding is needed, think that a role binding is only required
 | *open-cluster-management:admmin:managed-cluster-x*
 | A user with cluster binding to the `managed-cluster-x` role has administrator access to `managedcluster “X”` resource. This cluster role is created by the `server-foundation-controller` when a `managed-cluster` is created.
 
+//likewise here, should the role name be changed to open-cluster-management:view:managed-cluster-<managed_cluster_name>?
 | *open-cluster-management:view:managed-cluster-x*
 | A user with cluster-wide binding to the `managed-cluster-x` role has view access to `managedcluster “X”` resource. This cluster role is created by the `server-foundation-controller` when a `managed-cluster` is created.
 
-| *open-cluster-management:managedclusterset:admin:managed-clusterset-x*
-| A user with cluster binding to the `managed-clusterset-x` role has administrator access to `managedclusterset “X”` resource. This role also gives the user administrator access to all resources that are in the `managedclusterset “X”` resource.
+// | *open-cluster-management:admin-aggregate*
+// | A user with namespace-wide binding to the `managed-cluster-x` role has
+//   administrator aggregated access to the `managedcluster "X"` resource. 
+// IS THIS ROLE ALSO CREATED BY THE `server-foundation-controller`?
+
+// | *open-cluster-management:view-aggregate*
+// | A user with namespace-wide binding to the `managed-cluster-x` has viewer aggregated access to the `managedcluster "X"` resource.
+
+// update based on PR 2026 where Dang Peng made the change; I reviewed the PR, but 
+// I am waiting on confirmation from him to merge since he has Jian listed as a 
+// reviewer
+| *open-cluster-management:managedclusterset:admin:managed-clusterset-<managed_clusterset_name>*
+| A user with a cluster binding to the `managed-clusterset-<managed_clusterset_name>` role has administrator access to `managedclusterset “X”` resource. This role also gives a user administrator access to all resources that are in the `managedclusterset “X”` resource.
 
 | *open-cluster-management:managedclusterset:view:managed-clusterset-x*
-| A user with cluster-wide binding to the `managed-clusterset-x` role has view access to `managedclusterset “X”` resource. This role also gives the user view access to all resources that are in the `managedclusterset “X”` resources.
+| A user with cluster-wide binding to the `managed-clusterset-x` role has view access to `managedclusterset “X”` resource. This role also gives the user view access to all resources that are in the `managedclusterset “X”` resources. 
+//if we agree with adding the managed cluster lifecycle, be sure to add reference to the section
+
+//add a section on WHO can create clusters, show oc commands to complete the tasks presented. Similar format to the cluster lifecycle section
+
+| *open-cluster-management:clusterset-admin:<managed_clusterset_name>*
+| A user with cluster-wide biinding to the `clusterset-admin` role has administrator access to the `clusterset` resources. 
+
+// | *open-cluster-management:clusterset-view:<managed_clusterset_name>*
+// | A user with cluster-wide biinding to the `clusterset-admin` role has
+//   viewer access to the `clusterset` resources. This cluster role is
+//   created by the `server-foundation-controller` when a managed cluster set
+//   created.
+
 
 | *open-cluster-management:subscription-admin*
 | A user with the `subscription-admin` role can create Git subscriptions that deploy resources to multiple namespaces. The resources are specified in Kubernetes resource YAML files in the subscribed Git repository. *Note*: When a non-subscription-admin user creates a subscription, all resources are deployed into the subscription namespace regardless of specified namespaces in the resources. For more information, see the <<application-lifecycle-RBAC,Application lifecycle RBAC>> section.
@@ -81,6 +120,7 @@ To administer a managed cluster named `cluster-name`:
 oc create clusterrolebinding (role-binding-name) --clusterrole=open-cluster-management:admin:<cluster-name>
 ----
 
+//this step and to 2nd role binding in view might be removed- check with server foundation
 * Create a namespace role binding to the cluster role `admin`. This role allows read/write access to the resources in the namespace of the managed cluster.
 +
 ----
@@ -102,7 +142,12 @@ oc create rolebinding <role-binding-name> -n <cluster-name> --clusterrole=view
 ----
 
 View the following console and API RBAC tables for cluster lifecycle:
+//clarify how these actions relate to our product
+// which roles can access secrets (credentials and provider connections), which roles can create clusters, so that the user can create a namespace, which roles can delete and manage a cluster [provide access for other users to manage a cluster] Can you see secrets within a ns w/Kubernetes
 
+//provide examples of how to set a group and how to use a clusterpool and clusterset, pain point is managing new clusters, clusterpools help this pain point
+
+// what are the roles are needed to accomplish a certain functionality in the product would be more useful than listing the permissions
 .Console RBAC table for cluster lifecycle
 |===
 | Action | Admin | Edit | View
@@ -111,6 +156,19 @@ View the following console and API RBAC tables for cluster lifecycle:
 | read, update, delete
 | read, update
 | read
+
+// | Cluster sets
+// | get, update, bind, join
+// | edit role not mentioned
+// | get
+
+
+// | Managed clusters
+// | read, update, delete
+// | no edit role mentioned
+// | get, update
+
+// can read be used in place of get? NO: Get is the technical term in the role, can get the object (get, list, watch, update, etc.)
 
 | Provider connections
 | create, read, update, and delete
@@ -164,7 +222,15 @@ View the following console and API RBAC tables for cluster lifecycle:
 | read
 |===
 
+// Should a new section be created for managed cluster or can this info be added to
+// the Console RBAC table for cluster lifecycle table?
 
+// [#manged-cluster-lifecycle-RBAC]
+// ==== Managed cluster lifecycle RBAC
+
+// View the following managed cluster lifecycle RBAC operations:
+
+// I recommend adding the scenarios here possibly; 
 [#application-lifecycle-RBAC]
 === Application lifecycle RBAC
 
