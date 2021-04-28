@@ -119,7 +119,7 @@ View the following default YAML file for observability:
 apiVersion: observability.open-cluster-management.io/v1beta1
 kind: MultiClusterObservability
 metadata:
-  name: observability #Your customized name of MulticlusterObservability CR
+  name: observability # Your customized name of MulticlusterObservability CR
 spec:
   availabilityConfig: High # Available values are High or Basic
   enableDownSampling: true # The default value is true. This is recommended as querying long-time ranges downsampled data is efficient and useful.
@@ -128,18 +128,27 @@ spec:
   observabilityAddonSpec: # The ObservabilityAddonSpec defines the global settings for all managed clusters which have observability add-on enabled
     enableMetrics: true # EnableMetrics indicates the observability addon push metrics to hub server
     interval: 60 # Interval for the observability addon push metrics to hub server
-  retentionResolution1h: 30d # How long to retain samples of 1 hour in bucket
-  retentionResolution5m: 14d
-  retentionResolutionRaw: 5d
-  storageConfigObject: # Specifies the storage to be used by Observability
-    metricObjectStorage:
-      name: thanos-object-storage
+  retentionConfig:
+    blockDuration: 2h # Block duration for TSDB block
+    cleanupInterval: 5m # How often we should clean up partially uploaded blocks and blocks with deletion mark in the background when --wait has been enabled
+    deleteDelay: 48h # Time before a block marked for deletion is deleted from bucket
+    retentionInLocal: 4d # How long to retain raw samples on local storage
+    retentionResolution1h: 30d # How long to retain samples of 1 hour in bucket
+    retentionResolution5m: 14d # How long to retain samples of 5 minutes in bucket
+    retentionResolutionRaw: 5d # How long to retain raw samples in bucket
+  storageConfig: # Specifies the storage to be used by Observability
+    alertmanagerStorageSize: 1Gi # The amount of storage applied to alertmanager stateful sets
+    compactStorageSize: 4Gi # The amount of storage applied to thanos compact stateful sets
+    metricObjectStorage: # Configuring access to object storage
       key: thanos.yaml
-    statefulSetSize: 10Gi # The amount of storage applied to the Observability StatefulSets, i.e. Amazon S3 store, Rule, compact and receiver.
-    statefulSetStorageClass: gp2
+      name: thanos-object-storage
+    receiveStorageSize: 4Gi # The amount of storage applied to thanos receive stateful sets
+    ruleStorageSize: 1Gi # The amount of storage applied to thanos rule stateful sets
+    storageClass: gp2 # Specify the storage class for stateful sets
+    storeStorageSize: 1Gi # The amount of storage applied to thanos store stateful sets,
 ----
 +
-You might want to modify the value for the `retentionResolution` parameter. For more information, see https://thanos.io/v0.8/components/compact/#downsampling-resolution-and-retention[Thanos Downsampling resolution and retention]. Depending on the number of managed clusters, you might want to update `statefulSetSize`, see link:../apis/observability.json.adoc#observability-api[Observability API] for more information.
+You might want to modify the value for the `retentionConfig` parameter. For more information, see https://thanos.io/v0.8/components/compact/#downsampling-resolution-and-retention[Thanos Downsampling resolution and retention]. Depending on the number of managed clusters, you might want to update the amount of storage for stateful sets, see link:../apis/observability.json.adoc#observability-api[Observability API] for more information.
 +
 .. To deploy on infrastructure machine sets, you must set a label for your set by updating the `_nodeSelector_` in the MultiClusterObservability YAML. Your YAML might resemble the following content:
 +
