@@ -3,7 +3,7 @@
 
 Enable discovery using the CLI to find clusters that are available from Red Hat OpenShift Cluster Manager (link).
 
-**Required access**: Cluster administrator
+**Required access**: Administrator
 
 [#enable-prerequisites]
 == Prerequisites
@@ -13,7 +13,7 @@ Enable discovery using the CLI to find clusters that are available from Red Hat 
 [#setup-discovery]
 == Discovery set up and process
 
-*Note:* The `DiscoveryConfig` must be named `discoveryconfig`. See the following simple `DiscoveryConfig` sample:
+*Note:* The `DiscoveryConfig` must be named `discoveryconfig` and must be created in the same namespace as the selected `credential`. See the following `DiscoveryConfig` sample:
 
 [source,yaml]
 ----
@@ -21,71 +21,50 @@ apiVersion: discovery.open-cluster-management.io/v1
 kind: DiscoveryConfig
 metadata:
   name: discoveryconfig
+  namespace: <NAMESPACE_NAME>
 spec:
-  providerConnections:
-    - <SECRET_NAME>
+  credential: <SECRET_NAME>
   filters:
-    age: 7
+    lastActive: 7
+    openshiftVersions:
+    - "4.8"
+    - "4.7"
+    - "4.6"
+    - "4.5"
 ----
 
-. Replace `SECRET_NAME` with the provider connection that you previously set up
-. Enter the maximum age of your cluster (in days) to discover. For example, `age: 7` means only clusters created in the last 7 days are discovered.
-
-[#refresh-discovery]
-=== DiscoveredClusterRefresh
-
-The `DiscoveredClusterRefresh` object initiates the controller reconcile. After the reconcile completes, the controller deletes the `DiscoveredClusterRefresh` object with the `discoveredclusterrefreshes.discovery.open-cluster-management.io` API.
-
-See the following sample of `DiscoveredClusterRefresh` in Operator Lifecycle Manager:
-
-[source,yaml]
-----
-apiVersion: discovery.open-cluster-management.io/v1
-kind: DiscoveredClusterRefresh
-metadata:
-  name: discoveredclusterrefresh-sample
-spec: {}
-----
+. Replace `SECRET_NAME` with the credential that you previously set up
+. Replace `NAMESPACE_NAME` with the namespace of `SECRET_NAME`
+. Enter the maximum time since last activity of your clusters (in days) to discover. For example, `lastActive: 7` means only clusters active in the last 7 days are discovered.
+. Enter the versions of OpenShift clusters to discover as a list of strings. *Note:* Every entry in the `openshiftVersions` list specifies an OpenShift major and minor version. For example, specifying `"4.7"`` will include all patch releases for the OpenShift version `4.7` (`4.7.1`, `4.7.2`, etc.).
 
 [#discovered-clusters]
 === DiscoveredClusters
 
 These objects are created by the Discovery controller. These `DiscoveredClusters` represent the clusters that are found in OCM by using the filters and credentials that are specified in the `DiscoveryConfig` `discoveredclusters.discovery.open-cluster-management.io` API.
 
-The majority of the data in the DiscoveredCluster object comes from the Operator Lifecycle Manager. See the following sample:
+*Note:* `name` is the cluster's External ID.
 
 [source,yaml]
 ----
 apiVersion: discovery.open-cluster-management.io/v1
 kind: DiscoveredCluster
 metadata:
-  creationTimestamp: "2020-11-17T15:37:30Z"
-  generation: 1
-  name: 1grosagqroo9annieibm0p53bs5vk5gq
-  namespace: open-cluster-management
-  resourceVersion: "70225271"
-  selfLink: /apis/discovery.open-cluster-management.io/v1/namespaces/open-cluster-management/discoveredclusters/1grosagqroo9annieibm0p53bs5vk5gq
-  uid: 27315859-62a8-4ef1-b8d5-110cdd5978cd
+  name: fd51aafa-95a8-41f7-a992-6fb95eed3c8e
+  namespace: <NAMESPACE_NAME>
 spec:
-  activity_timestamp: "2020-11-10T02:04:51Z"
-  cloudProvider: azure
-  console: https://console-openshift-console.apps.console-ui-test-cluster-azure-199490211.az.red-chesterfield.com
-  creation_timestamp: "2020-11-10T00:17:46Z"
-  healthState: healthy
-  name: 9e7d6585-8470-4ea6-9ce0-584f661506a1
-  openshiftVersion: 4.3.40
-  product: ocp
-  providerConnections:
-  - apiVersion: v1
+  activity_timestamp: "2021-04-19T21:06:14Z"
+  cloudProvider: vsphere
+  console: https://console-openshift-console.apps.qe1-vmware-pkt.dev02.red-chesterfield.com
+  creation_timestamp: "2021-04-19T16:29:53Z"
+  credential:
+    apiVersion: v1
     kind: Secret
-    name: ocm-api-token
-    namespace: open-cluster-management
-    resourceVersion: "56338771"
-    uid: 9f73592e-39f1-4f4e-bc89-44f4a3fd3053
-  state: ready
-  subscription:
-    creator_id: abc123
-    managed: false
-    status: Active
-    support_level: None
+    name: <SECRET_NAME>
+    namespace: <NAMESPACE_NAME>
+  display_name: qe1-vmware-pkt.dev02.red-chesterfield.com
+  name: fd51aafa-95a8-41f7-a992-6fb95eed3c8e
+  openshiftVersion: 4.6.22
+  status: Stale
+
     ----
