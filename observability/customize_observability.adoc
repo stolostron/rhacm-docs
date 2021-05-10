@@ -110,20 +110,24 @@ Complete the following steps to add custom metrics:
 oc get mco observability -o yaml
 ----
 
-. Create the `observability-metrics-custom-allowlist` ConfigMap in the 
-`open-cluster-management-observability` namespace by running the following command:
+. Create a file named `observability-metrics-custom-allowlist.yaml` with the following content. Add the name of the custom metric to the `metrics_list.yaml` parameter. For example, add `node_memory_MemTotal_bytes` to the metric list. Your YAML for the ConfigMap might resemble the following content:
 +
 ----
-cat observability-metrics-custom-allowlist
-----
-
-. Add the name of the name of the custom metric to the `metrics_list.yaml` parameter. For example, add `node_memory_MemTotal_bytes` to the metric list. Your ConfigMap might resemble the following content:
-+
-----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: observability-metrics-custom-allowlist
 data:
   metrics_list.yaml: |
     names:
       - node_memory_MemTotal_bytes
+----
+
+. Create the `observability-metrics-custom-allowlist` ConfigMap in the 
+`open-cluster-management-observability` namespace by running the following command:
++
+----
+oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml
 ----
 
 . Verify that your custom metric is being collected from your managed clusters by viewing the metric on the Grafana dashboard. From your hub cluster, select the **Grafana dashboard** link.
@@ -131,6 +135,47 @@ data:
 . From the Grafana search bar, enter the metric that you want to view.
 
 Data from your custom metric is collected.
+
+[#deleting-default-metrics]
+== Deleting default metrics
+
+If you want to delete some metrics from the default metrics. You can add the metric name to the `metrics_list.yaml` file and end it with the hyphen `-`.
+
+Complete the following steps to delete default metrics:
+
+. Log in to your cluster.
+. Verify that `mco observability` is enabled. Check for the following message in the `status.conditions.message` reads: `Observability components are deployed and running`. Run the following command:
++
+----
+oc get mco observability -o yaml
+----
+
+. In the `observability-metrics-custom-allowlist.yaml` file, add the name of the default metric to the `metrics_list.yaml` parameter with a hyphen `-` at the end. For example, add `rest_client_requests_total-` to the metric list. Your YAML for the ConfigMap might resemble the following content:
++
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: observability-metrics-custom-allowlist
+data:
+  metrics_list.yaml: |
+    names:
+      - node_memory_MemTotal_bytes
+      - rest_client_requests_total-
+----
+
+. Create the `observability-metrics-custom-allowlist` ConfigMap in the 
+`open-cluster-management-observability` namespace by running the following command:
++
+----
+oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml
+----
+
+. Verify that your default metric is not being collected from your managed clusters by viewing the metric on the Grafana dashboard. From your hub cluster, select the **Grafana dashboard** link.
+
+. From the Grafana search bar, enter the metric that you want to check.
+
+Data from your default metric is deleted.
 
 [#viewing-and-exploring-data]
 == Viewing and exploring data
@@ -153,13 +198,12 @@ You can disable the `metrics-collector`, which stops it from collecting the data
 
 Disable the `metrics-collector` pod to stop data from being collected and sent to the observability service on the {product-title-short} hub cluster. 
 
-When you disable the `metrics-collector` deployment is scaled to zero, and all managed clusters with the `vendor:OpenShift` label are disabled. View the following options to disable the `metrics-collector`:
+When you disable the `metrics-collector`, the deployment is scaled to zero and all managed clusters are disabled. View the following options to disable the `metrics-collector`:
 
 Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
 
 ----
 spec:
-  availabilityConfig: High # Available values are High or Basic
   imagePullPolicy: Always
   imagePullSecret: multiclusterhub-operator-pull-secret
   observabilityAddonSpec: # The ObservabilityAddonSpec defines the global settings for all managed clusters which have observability add-on enabled
@@ -180,7 +224,7 @@ You can disable the `metrics-collector` on specific managed clusters by completi
 . Create the label that disables the observability collection by adding the following label:
 +
 ----
-observability=disable
+observability=disabled
 ----
 . Select *Add* to add the label.
 . Select *Done* to close the list of labels. 
