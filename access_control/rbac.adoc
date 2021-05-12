@@ -16,8 +16,6 @@ View the following sections for details of supported RBAC by component:
 
 // for server foundation meeting, will managed cluster roles that are generate will automatically include the Kubernetes ns (admin and view)? is the managed cluster set in the build? will the provision role be ready for 2.3?
 
-// generate managed cluster view per managed cluster, mcset per mcset not aggregated to admin and view role (only cluster role bindings used ) 2 clusterroles generated for both
-
 [#overview-of-roles]
 == Overview of roles
 
@@ -90,7 +88,7 @@ To create and administer all managed clusters:
 oc create clusterrolebinding <role-binding-name> --clusterrole=open-cluster-management:cluster-manager-admin
 ----
 +
-This role is a super user, which has access to all resources and actions. This role allows you to create cluster-scoped `managedcluster` resources, the namespace for the resources that manage the managed cluster, and the resources in the namespace. This role also allows access to provider connections and to bare metal assets that are used to create managed clusters.
+This role is a super user, which has access to all resources and actions. You can create cluster-scoped `managedcluster` resources, the namespace for the resources that manage the managed cluster, and the resources in the namespace with this role. You can also access provider connections and bare metal assets that are used to create managed clusters with this role.
 
 
 To administer a managed cluster named `cluster-name`:
@@ -102,7 +100,7 @@ To administer a managed cluster named `cluster-name`:
 oc create clusterrolebinding (role-binding-name) --clusterrole=open-cluster-management:admin:<cluster-name>
 ----
 +
-This role allows read and write access to the cluster-scoped `managedcluster` resource. This is needed because the `managedcluster` is a cluster-scoped resource and not a namespace-scoped resource.
+This role has read and write access to the cluster-scoped `managedcluster` resource. This is needed because the `managedcluster` is a cluster-scoped resource and not a namespace-scoped resource.
 
 
 //this step and to 2nd role binding in view might be removed- check with server foundation, if user doesn't use clusterset, they will need to complete the steps "beta feature", might be disabled by default
@@ -113,7 +111,7 @@ This role allows read and write access to the cluster-scoped `managedcluster` re
 oc create rolebinding <role-binding-name> -n <cluster-name> --clusterrole=admin
 ----
 +
-This role allows read/write access to the resources in the namespace of the managed cluster.
+This role has read and write access to the resources in the namespace of the managed cluster.
 
 
 To view a managed cluster named `cluster-name`:
@@ -124,7 +122,7 @@ To view a managed cluster named `cluster-name`:
 oc create clusterrolebinding <role-binding-name> --clusterrole=open-cluster-management:view:<cluster-name>
 ----
 +
-This role allows read access to the cluster-scoped `managedcluster` resource. This is needed because the `managedcluster` is a cluster-scoped resource and not a namespace-scoped resource.
+This role has read access to the cluster-scoped `managedcluster` resource. This is needed because the `managedcluster` is a cluster-scoped resource and not a namespace-scoped resource.
 
 
 * Create a namespace role binding to the cluster role `view` by entering the following command:
@@ -133,35 +131,33 @@ This role allows read access to the cluster-scoped `managedcluster` resource. Th
 oc create rolebinding <role-binding-name> -n <cluster-name> --clusterrole=view
 ----
 +
-This role allows read-only access to the resources in the namespace of the managed cluster.
+This role has read-only access to the resources in the namespace of the managed cluster.
 
 
 View the following console and API RBAC tables for cluster lifecycle:
-//clarify how these actions relate to our product
+//clarify how these actions relate to our product; recently changed Actions to Resource for accuracy
 
 //provide examples of how to set a group and how to use a clusterpool and clusterset, pain point is managing new clusters, clusterpools help this pain point
 
 .Console RBAC table for cluster lifecycle
 |===
-| Action | Admin | Edit | View
+| Resource | Admin | Edit | View
 
 | Clusters
 | read, update, delete
 | read, update
 | read
 
-// | Cluster sets
-// | get, update, bind, join
-// | edit role not mentioned
-// | get
+| Cluster sets
+| get, update, bind, join
+| edit role not mentioned
+| get
 
 
-// | Managed clusters
-// | read, update, delete
-// | no edit role mentioned
-// | get, update
-
-// can read be used in place of get? NO: Get is the technical term in the role, can get the object (get, list, watch, update, etc.)
+| Managed clusters
+| read, update, delete
+| no edit role mentioned
+| get, update
 
 | Provider connections
 | create, read, update, and delete
@@ -220,19 +216,76 @@ View the following console and API RBAC tables for cluster lifecycle:
 
 When you create an application, the `_subscription_` namespace is created and the configuration map is created in the `_subscription_` namespace. You must also have access to the `_channel_` namespace. When you want to apply a subscription, you must be a subscription administrator. For more information on managing applications, see link:../applications/managing_subscriptions.adoc#creating-and-managing-subscriptions[Creating and managing subscriptions]. 
 
-//View the following application lifecycle RBAC operations.
+View the following application lifecycle RBAC operations.
 
-//To create and administer all applications:
-//* Create a namespace role binding to the cluster role open-cluster-management:app-manager-admin by entering the following command: oc create clusterrolebinding <role-binding-name> --clusterrole=open-cluster-management:app-manager-admin
-// This role is a super user, which has access to all application resources and actions
+To create and administer application on all managed clusters with a user named `username`:
 
-To perform application lifecycle tasks, users with the `admin` role must have access to the `_application_` namespace where the application is created, and to the `_managed cluster_` namespace. For example, the required access to create applications in namespace "N" is a namespace-scoped binding to the `admin` role for namespace "N".
+* Create a cluster role binding to the `open-cluster-management:cluster-manager-admin` cluster role and bind it to `username`, run the following command:
++
+----
+oc create clusterrolebinding <role-binding-name> --clusterrole=open-cluster-management:cluster-manager-admin --user=<username>
+----
++
+This role is a super user, which has access to all resources and actions. You can create the namespace for the application and all application resources in the namespace with this role.
+
+Optionally, you can create applications that deploy resources to multiple namespaces:
+
+* Create a cluster role binding to the `open-cluster-management:subscription-admin` cluster role, and bind it to a user named `username`. Run the following command:
++
+----
+oc create clusterrolebinding <role-binding-name> --clusterrole=open-cluster-management:subscription-admin --user=<username>
+----
+
+To create and administer an application named `application-name` in the `cluster-name` managed cluster, with `username` user:
+
+* Create a cluster role binding to the `open-cluster-management:admin:` cluster role and bind it to `username` by entering the following command:
++
+----
+oc create clusterrolebinding <role-binding-name> --clusterrole=open-cluster-management:admin:<cluster-name> --user=<username>
+----
++
+This role has read and write access to all `application` resources on the managed cluster, `cluster-name`. Repeat this if access for other managed clusters is required.
+
+* Create a namespace role binding to the `application` namespace using the `admin` role and bind it to `username` by entering the following command:
++
+----
+oc create rolebinding <role-binding-name> -n <application-namespace> --clusterrole=admin --user=<username>
+----
++
+This role has read and write access to all `application` resources in the `application` namspace. Repeat this if access for other applications is required or if the application deploys to multiple namespaces.
+
+Optionally, you can create applications that deploy resources to multiple namespaces:
+
+* Create a cluster role binding to the open-cluster-management:subscription-admin cluster role and bind it to `username` by entering the following command:
++
+----
+oc create clusterrolebinding <role-binding-name> --clusterrole=open-cluster-management:subscription-admin --user=<username>
+----
+
+To view an application on a managed cluster named `cluster-name` with the user named `username`:
+
+* Create a cluster role binding to the `open-cluster-management:view:` cluster role  and bind it to `username` by entering the following command:
++
+----
+oc create clusterrolebinding <role-binding-name> --clusterrole=open-cluster-management:view:<cluster-name> --user=<username>
+----
++
+This role has read access to all `application` resources on the managed cluster, `cluster-name`. Repeat this if access for other managed clusters is required.
+
+* Create a namespace role binding to the `application` namespace using the `view` role and bind it to `username`. Enter the following command:
++
+----
+oc create rolebinding <role-binding-name> -n <application-namespace> --clusterrole=view --user=<username>
+----
++
+This role has read access to all `application` resources in the `application` namspace. Repeat this if access for other applications is required.
+
 
 View the following console and API RBAC tables for Application lifecycle:
 
 .Console RBAC table for Application lifecycle
 |===
-| Action | Admin | Edit | View
+| Resource | Admin | Edit | View
 
 | Application
 | create, read, update, delete
@@ -309,24 +362,34 @@ View the following console and API RBAC tables for Application lifecycle:
 [#governance-lifecycle-RBAC]
 === Governance lifecycle RBAC
 
+When a policy is created, the policy is created in a namespace. Roles for the governance lifecycle are namespace-scoped. A user must also have access to the `managedcluster` namespace. 
+
 To perform governance lifecycle operations, users must have access to the namespace where the policy is created, along with access to the `managedcluster` namespace where the policy is applied.
 
 View the following examples:
-//To view policies in a specific namespace run the following command:
-* To view policies in namespace "N" the following role is required:
 
-  ** A namespace-scoped binding to the `view` role for namespace "N".
+To create a policy in the `policy` namespace and apply it in a managed cluster named `cluster-name`:
 
-* To create a policy in namespace "N" and apply it on `managedcluster` "X", the following roles are required:
+* Create a namespace role binding to the `policy` namespace using the `open-cluster-management:admin:` role. Run the following command:
++
+----
+oc create rolebinding <role-binding-name> -n <policy-namespace> --clusterrole=admin --user=<username>
+----
 
-  ** A namespace-scoped binding to the `admin` role for namespace "N".
-  ** A namespace-scoped binding to the `admin` role for namespace "X".
+To view a policy in a managed cluster:
 
-View the following console and API RBAC tables for Governance lifecycle:
+* Create a cluster role binding to `open-cluster-management:admin:` cluster role and bind it to the `view` role with the following command:
++
+----
+oc create clusterrolebinding <role-binding-name> --clusterrole=open-cluster-management:view:<cluster-name> --user=<username>
+----
+
+
+View the following console and API RBAC tables for governance lifecycle:
 
 .Console RBAC table for governance lifecycle
 |===
-| Action | Admin | Edit | View
+| Resource | Admin | Edit | View
 
 | Policies
 | create, read, update, delete
