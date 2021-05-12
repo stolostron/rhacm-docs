@@ -1,16 +1,22 @@
 [#creating-and-modifying-bare-metal-assets]
 = Creating and modifying bare metal assets
 
-Bare metal assets are virtual or physical servers that are configured to run your cloud operations.
-{product-title} connects to a bare metal asset that your administrator creates, and can create clusters on it.
+Bare metal assets are virtual or physical servers that are configured to run your {ocp-short} clusters.
+{product-title} connects to a bare metal asset that your administrator creates. The bare metal asset can then be deployed in managed clusters.
 
-You must create a bare metal asset in {product-title} to create a cluster on it.
-Use the following procedure to create a bare metal asset that can host a cluster that is managed by {product-title}.
+The hub cluster inventory controller defines a custom resource definition (CRD) called `BareMetalAsset`, which is used to hold a bare metal asset inventory record. When provisioning a managed cluster, the inventory controller reconciles `BareMetalAsset` inventory records with corresponding `BareMetalHost` resources in the managed cluster.
+
+`BareMetalAsset` CRs are intended to be used to provision cluster hardware based on records entered in a configuration management database (CMDB) or similar system. An external tool or automation polls the CMDB and uses the {product-title-short} API to create corresponding `BareMetalAsset` and corresponding `Secret` resources in a hub cluster for subsequent deployment in a managed cluster.
+
+Use the following procedures to create and manage bare metal assets for clusters managed by {product-title}.
 
 * <<bma-prerequisites,Prerequisites>>
 * <<creating-a-bare-metal-asset-with-the-console,Creating a bare metal asset with the console>>
+* <<creating-a-bare-metal-asset-with-oc,Creating a bare metal asset using the oc CLI>>
+* <<bulk-importing-bare-metal-assets-with-the-console,Bulk importing bare metal assets with the console>>
 * <<modifying-a-bare-metal-asset,Modifying a bare metal asset>>
 * <<removing-a-bare-metal-asset,Removing a bare metal asset>>
+* <<using-the-rest-api-to-create-a-bare-metal-asset,Using the REST API to create a bare metal asset>>
 
 [#bma-prerequisites]
 == Prerequisites
@@ -18,9 +24,9 @@ Use the following procedure to create a bare metal asset that can host a cluster
 You need the following prerequisites before creating a bare metal asset:
 
 * A deployed {product-title} hub cluster on {ocp-short} version 4.5, or later.
-* Access for your {product-title} hub cluster to connect to the bare metal asset.
+* Access for your {product-title-short} hub cluster to connect to the bare metal asset.
 * A configured bare metal asset, and log in credentials with the required permissions to log in and manage it.
-*Note:* Login credentials for your bare metal asset include the following items for the asset that are provided by your administrator:
+*Note:* Credentials for your bare metal asset include the following items for the asset that are provided by your administrator:
  ** user name
  ** password
  ** Baseboard Management Controller Address
@@ -36,7 +42,7 @@ To create a bare metal asset using the {product-title} console, complete the fol
 . Enter a name for your asset that identifies it when you create a cluster.
 . Enter the namespace where you want to create the bare metal asset.
 +
-*Note:* The bare metal asset, managed bare metal cluster, and its related secret must be in the same namespace. 
+*Note:* The bare metal asset, managed bare metal cluster, and its related secret must be in the same namespace.
 +
 Users who have access to this namespace can associate this asset to the cluster when creating a cluster.
 . Enter the Baseboard Management Controller address.
@@ -51,6 +57,97 @@ The following protocols are supported:
 This is the MAC address of the host's network-connected NIC that is used to provision the host on the bare metal asset.
 
 You can continue with xref:../clusters/create_bare.adoc#creating-a-cluster-on-bare-metal[Creating a cluster on bare metal].
+
+[#creating-a-bare-metal-asset-with-oc]
+== Creating a bare metal asset using the oc CLI
+
+Use a `BareMetalAsset` CR to create a bare metal asset for a particular namespace in the cluster. Each `BareMetalAsset` also has a corresponding `Secret` that contains the Baseboard Management Controller (BMC) credentials and the secret name.
+
+.Prerequisites
+
+* Install {product-title} on a hub cluster.
+* Install the OpenShift CLI (oc).
+* Log in as a user with `cluster-admin` privileges.
+
+.Procedure
+
+. Install and provision a bare metal asset in your environment.
+. Power on the BMC, and get the IPMI or Redfish BMC address and MAC address for the hardware.
+. Create the following `BareMetalAsset` and `Secret` CR, and save the file as `baremetalasset-cr.yaml`:
++
+[source,yaml]
+----
+apiVersion: inventory.open-cluster-management.io/v1alpha1
+kind: BareMetalAsset
+metadata:
+  name: baremetalasset-machine  <1>
+  namespace: <baremetalasset-namespace> <2>
+spec:
+  bmc:
+    address: ipmi://<out_of_band_ip>:<port>  <3>
+    credentialsName: baremetalasset-machine-secret
+  bootMACAddress: "00:1B:44:11:3A:B7"
+  hardwareProfile: "hardwareProfile"
+  role: "<role>"  <4>
+  clusterName: "<cluster name>"  <5>
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: baremetalasset-machine-secret
+type: Opaque
+data:
+  username: <username>
+  password: <password>
+----
++
+<1> When created, the `BareMetalHost` on the managed cluster gets the same name as the corresponding `BareMetalAsset` on the hub cluster. `BareMetalHost` name should always match the corresponding `BareMetalAsset` name.
+<2> Cluster namespace where the bare metal asset is created.
+<3> For redfish addressing, use the following address format: `redfish://<out-of-band-ip>/redfish/v1/Systems/1`
+<4> Can be either "worker", "master", or "". Role is used to match a bare metal asset to specific machine roles types in the cluster. `BareMetalAsset` resources with a specified role should not be used to fill another role. Role is used as the value for a label with key `inventory.open-cluster-management.io/role`. This enables a cluster management application or user to query for inventory that is intended for a particular role.
+<5> Used by a cluster management application or user to query for inventory that is associated with a particular cluster. Leave empty to create the bare metal asset without adding it to a cluster deployment.
+
+. Run the following command to create the `BareMetalAsset` CR:
++
+[source,terminal]
+----
+$ oc create -f baremetalasset-cr.yaml
+----
+. Check that the `BareMetalAsset` is created successfully:
++
+[source,terminal]
+----
+$ oc get baremetalassets -A
+----
++
+.Example output
+[source,terminal]
+----
+NAMESPACE   		    NAME                                AGE
+ocp-example-bm      baremetalasset-machine              2m
+ocp-example-bm      csv-f24-h27-000-r630-master-1-1     4d21h
+----
+
+[#bulk-importing-bare-metal-assets-with-the-console]
+== Bulk importing bare metal assets with the console
+
+You can import bare metal assets in bulk using the {product-title} console using a CSV formatted list.
+
+.Prerequisites
+
+* Install {product-title} on a hub cluster that manages one or more spoke clusters.
+* Install the {ocp-short} CLI (oc).
+* Log in as a user with `cluster-admin` privileges.
+
+To import a set of bare metal assets, do the following:
+
+. From the {product-title} console, click on the navigation menu, and select *Cluster management* > *Bare metal assets*.
+. Select *Import assets*, and import the CSV file that contains the bare metal assets data. The CSV file must have the following header columns:
++
+[source,csv]
+----
+hostName, hostNamespace, bmcAddress, macAddress, role (optional), username, password
+----
 
 [#modifying-a-bare-metal-asset]
 == Modifying a bare metal asset
@@ -67,8 +164,68 @@ If you need to modify the settings for a bare metal asset, complete the followin
 When a bare metal asset is no longer used for any of the clusters, you can remove it from the list of available bare metal assets.
 Removing unused assets both simplifies your list of available assets, and prevents the accidental selection of that asset.
 
-To remove a bare metal asset, complete the following steps:
+To remove a bare metal asset in the console, complete the following steps:
 
 . In the {product-title} console navigation, select: *Automate infrastructure* > *Bare metal assets*.
 . Select the options menu for the asset that you want to remove in the table.
 . Select *Delete asset*.
+
+[#using-the-rest-api-to-create-a-bare-metal-asset]
+== Using the REST API to create a bare metal asset
+
+You can use the {ocp-short} REST API to manage bare metal assets for use in your {product-title-short} cluster. This is useful when you have a separate CMDB application or database to manage the bare metal assets in your environment.
+
+.Prerequisites
+
+* Install {product-title} on a hub cluster.
+* Install the {ocp-short} CLI (oc).
+* Log in as a user with `cluster-admin` privileges.
+
+To use the REST API to create a bare metal asset, do the following:
+
+. Obtain a login token for your hub cluster, and login to the cluster at the command line. For example:
++
+[source,terminal]
+----
+$ oc login --token=<login_token> --server=https://<hub_cluster_api_url>:6443
+----
+
+. Modify the following curl command with the details of the bare metal asset that you want to add to the cluster, and run the command.
++
+[source,terminal]
+----
+$ curl --location --request POST '<hub_cluster_api_url>:6443/apis/inventory.open-cluster-management.io/v1alpha1/namespaces/<bare_metal_asset_namespace>/baremetalassets?fieldManager=kubectl-create' \
+--header 'Authorization: Bearer <login_token>' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "apiVersion": "inventory.open-cluster-management.io/v1alpha1",
+    "kind": "BareMetalAsset",
+    "metadata": {
+        "name": "<baremetalasset_name>",
+        "namespace": "<bare_metal_asset_namespace>"
+    },
+    "spec": {
+        "bmc": {
+            "address": "ipmi://<ipmi_address>",
+            "credentialsName": "<credentials-secret>"
+        },
+        "bootMACAddress": "<boot_mac_address>",
+        "clusterName": "<cluster_name>",
+        "hardwareProfile": "hardwareProfile",
+        "role": "worker"
+    }
+}'
+----
++
+[NOTE]
+====
+For the above curl command, it is assumed that the API is securely over HTTPS. In a development or test environment, you can pass the `--insecure` parameter.
+====
+
+[TIP]
+====
+You can append `--v=9` to an `oc` command to see the raw output of the resulting action. This can be useful for ascertaining the REST API route for an `oc` command.
+====
+
+
+
