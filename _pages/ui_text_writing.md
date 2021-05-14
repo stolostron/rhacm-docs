@@ -47,8 +47,8 @@ When you decide what to name an element (if it is not named in the IBM Style Man
 |Element|Reason|Guidance|
 --------|------------|-------------|
 |Bold|Use for UI, clickable components|Use bold for UI buttons and clickable elements. Do not use bold for emphasis, see Style Guide.
-|Variable inside of a command or script sample|Identify as a variable.|Use angle brackets (<these>) to identify a variable. Surround the variable with the angle brackets (<>) to identify it within the existing monospace style. Ex: `oc get <namespace>`. 
-|Variable ouside of a command or script sample (in normal text).|Identify as a variable.|Use monospace style to identify a variable. Surround the variable with monospace (`) style to identify it as a variable. Ex: Replace `namespace` with the name of your project namespace. 
+|Variable inside of a command or script sample|Identify as a variable.|Use angle brackets (<>) to identify a variable. Surround the variable with the angle brackets (<>) to identify it within the existing monospace style. Ex: `oc get <namespace>`. 
+|Variable ouside of a command or script sample (in normal text).|Identify as a variable.|Use monospace style to identify a variable. Surround the variable with backticks to add the monospace style to identify it as a variable. Ex: Replace `namespace` with the name of your project namespace. 
 |Menu cascade|Identify it as successive selections in a menu|Use bold for the selections, and separate them by the character >. The > should not be bold. For example: *Multi-cluster* > *Pods*|
 |A window or UI page|Identifies a title|Use italic for this content. Example: In the _windowname_ window, select *Save*.
 |Quotation marks|Not really used much in docs outside of within codeblocks (citations only and rarely in doc)|Try to avoid
