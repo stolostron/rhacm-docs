@@ -1,6 +1,6 @@
 ---
-permalink: /ui_pii
-title: "Pii"
+permalink: /ui_content
+title: "User-interface content"
 ---
 
 ## What is considered user-facing content? 
