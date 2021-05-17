@@ -7,7 +7,7 @@ Submariner is an open source tool that can be used with {product-title} to provi
 
 You can enable Submariner on the {ocp-short} clusters that are hosted in the following environments:
 
-* Amazon Web Services
+* Amazon Web Services (AWS)
 * Google Cloud Platform
 * Microsoft Azure
 * IBM Cloud
@@ -38,97 +38,338 @@ Ensure that you have the following prerequisites before using Submariner:
 * IP connectivity must be configured between the Gateway nodes. When connecting two clusters, at least one of the clusters must have a publicly routable IP address designated to the Gateway node.
 * Firewall configuration across all nodes in each of the managed clusters must allow 4800/UDP in both directions. 
 +
-*Note:* This is configured automatically when your clusters are deployed in an Amazon Web Services environment, but must be configured manually for clusters on other environments and for the firewalls that protect private clouds like bare metal and VMware vSphere. 
+*Note:* This is configured automatically when your clusters are deployed in an AWS, Google Cloud Platform, VMware vSphere, or bare metal environment, but must be configured manually for clusters on other environments and for the firewalls that protect private clouds. 
 * Firewall configuration on the Gateway nodes allows ingress 8080/TCP so the other nodes in the cluster can access it. 
-* Firewall configuration open for UDP/4500, UDP/500, and any other ports that are used for IPSec traffic on the gateway nodes.
+* Firewall configuration open for UDP/4500, UDP/500, and any other ports that are used for IPSec traffic on the gateway nodes (configured automatically for AWS, Google Cloud Platform, VMware vSphere, and bare metal).
 
 See https://submariner.io/getting-started/#prerequisites[Submariner prerequisites] for more detailed information about the prerequisites.
 
 [#preparing-the-hosts-to-deploy-submariner]
 == Preparing the hosts to deploy Submariner
 
-Before deploying Submariner with {product-title}, you must prepare the clusters on the hosting environment for the connection. The requirements vary by the hosting environment, so follow the instructions for your hosting environment.
+Before deploying Submariner with {product-title}, you must prepare the clusters on the hosting environment for the connection. The requirements vary for different hosting environments, so follow the instructions for your hosting environment.
 
 [#preparing-aws]
 === Preparing Amazon Web Services to deploy Submariner
 
-There are two ways that you can configure the {ocp-short} cluster that is hosted on Amazon Web Services to integrate with a Submariner deployment. Select one of these options to prepare for the connection:
+You can use the `SubmarinerConfig` API to configure the Amazon Web Services (AWS) cluster to integrate with a Submariner deployment. There are two ways that you configure the {ocp-short} cluster that is hosted on AWS to integrate it with a Submariner deployment, depending on how the cluster was created. The first procedure applies if you created the cluster by using {product-title-short}. The second procedure applies if your cluster was not created by using {product-title-short}. Complete the procedure that applies to your situation to prepare for the connection:
 
-* Method 1 
+* Method 1 - Managed cluster was created using {product-title-short}
 +
-You can use the `SubmarinerConfig` API to build the cluster environment. With this method, the `submariner-addon` configures the environment, so you use your configurations and cloud provider credentials in your `SubmarinerConfig` definition. 
+Using this method, you apply the `SubmarinerConfig` API to the {product-title-short} hub cluster. When you run this procedure and do not specify an IPSec IKE port or IPSec NATT port, the default ports are automatically opened for the communication. The default ports are (500) and (4500), respectively. 
 +
-*Note:* This method is only supported when the cluster is on Amazon Web Services, and not on other environments. 
+** If you want to use the default ports for `IPSecIKEPort` (port 500) and `IPSecNATTPort` (port 4500), create a file that contains information that is similar to the following example:
 +
-Create a YAML file that contains the following content:
-+
-[source,yaml]
 ----
+cat << EOF | oc apply -f -
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    credentialsSecret:
+      name: <managed-cluster-name>-aws-creds
+EOF
+----
++
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `<managed-cluster-name>-aws-creds` with your AWS credential secret, which you can find in the cluster namespace of your hub cluster. 
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
++
+** If you want to customize your Internet Key Exchange (IKE) port or network address translation - traversal (NATT) port, create a file that contains information that is similar to the following example:
++  
+----
+cat << EOF | oc apply -f -
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    IPSecIKEPort: <IKEPort>
+    IPSecNATTPort: <NATTPort>
+    credentialsSecret:
+      name: <managed-cluster-name>-aws-creds
+EOF
+----
++
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `<managed-cluster-name>-aws-creds` with your AWS credential secret, which you can find in the cluster namespace of your hub cluster. 
++
+Replace `IKEPort` with the port that you want to use for your Internet Key Exchange port.
++
+Replace `NATTPort` with the port that you want to use for your network address translation - traversal port.
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
+
+* Method 2 - Managed cluster was not created with {product-title-short}   
++
+If your managed cluster was not created using {product-title-short}, you must create a secret on your hub cluster in the namespace of your managed cluster that contains your AWS credential secret.
++
+** If you want to use the default ports for `IPSecIKEPort` (port 500) and `IPSecNATTPort` (port 4500), complete the following steps:
++
+. Create a file that contains information that is similar to the following example:
++
+----
+cat << EOF | oc apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
-    name: <cloud-provider-credential-secret-name>
+    name: <aws-credential-secret-name>
     namespace: <managed-cluster-namespace>
 type: Opaque
 data:
     aws_access_key_id: <aws-access-key-id>
     aws_secret_access_key: <aws-secret-access-key>
+EOF
 ----
 +
-The format of `_name_` is the same as the credential secret name that you used to provision the cluster with {product-title-short}.
+Replace `<aws-credential-secret-name>`` with the name of your credential secret file.
 +
-If you have already configured your Submariner cluster environment manually, include the configurations in the your `SubmarinerConfig` addition. In this example, the `IPSecIKEPort` is set to `501`, and the `IPSecNATTPort` is set to `4501`:
+Replace `<managed-cluster-namespace>`` with the namespace of your managed cluster.
 +
-[source,yaml]
+Replace `<aws-access-key-id>` with your AWS access key ID.
++
+Replace `<aws-secret-access-key>` with your AWS access key.
+
+. Apply the `SubmarinerConfig` on your {product-title-short} hub cluster by creating a file that is similar to the following file:
++
 ----
+cat << EOF | oc apply -f -
 apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
 kind: SubmarinerConfig
 metadata:
-    name: <config-name>
+    name: submariner
     namespace: <managed-cluster-namespace>
 spec:
-    IPSecIKEPort: 501
-    IPSecNATTPort: 4501
-    ...
+    credentialsSecret:
+      name: <aws-credential-secret-name>
+EOF
 ----
-
-* Method 2    
++ 
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
 +
-You can use the script file, `prep_for_subm.sh`, that is provided on the Submariner website to update your {ocp-short} installer-provisioned Amazon Web Services infrastructure for Submariner deployments.
-See https://submariner.io/getting-started/quickstart/openshift/aws/#prepare-aws-clusters-for-submariner[Prepare AWS Clusters for Submariner] for the script and instructions for running it.
+Replace `<aws-credential-secret-name>` with the name of your credential secret that you created in the previous step.
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
++
+** If you want to customize your IKE port or NATT port, complete the following steps:
++
+. Create a file that contains information that is similar to the following example:
++
+----
+cat << EOF | oc apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+    name: <aws-credential-secret-name>
+    namespace: <managed-cluster-namespace>
+type: Opaque
+data:
+    aws_access_key_id: <aws-access-key-id>
+    aws_secret_access_key: <aws-secret-access-key>
+EOF
+----
++
+Replace `<aws-credential-secret-name>` with the name of your credential secret file.
++
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `<aws-access-key-id>` with your AWS access key ID.
++
+Replace `<aws-secret-access-key>` with your AWS access key.
+
+. Apply the `SubmarinerConfig` on your {product-title-short} hub cluster by creating a file that is similar to the following file:
++
+----
+cat << EOF | oc apply -f -
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    IPSecIKEPort: <IKEPort>
+    IPSecNATTPort: <NATTPort>
+    credentialsSecret:
+      name: <aws-credential-secret-name>
+EOF
+----
++ 
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `IKEPort` with the port that you want to use for your IKE port.
++
+Replace `NATTPort` with the port that you want to use for your NATT port.
++
+Replace `<aws-credential-secret-name>` with the name of your credential secret that you created in the previous step.
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
 
 [#preparing-gcp]
 === Preparing Google Cloud Platform to deploy Submariner
 
 To prepare the clusters on your Google Cloud Platform for deploying the Submariner component, complete the following steps:
 
-. Create the inbound and outbound firewall rules on your Google Cloud Platform to open the IPsec IKE (by default 500/UDP) and NAT traversal ports (by default 4500/UDP) to enable Submariner communication:
-+
-----
-$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=udp:<ipsec-port> --direction=IN
-$ gcloud compute firewall-rules create <rule-name> --network=<network-name> --allow=udp:<ipsec-port>  --direction=OUT
-----
-Replace `_rule-name_` with your rule name.
-Replace `_network-name_` with your Google Cloud Platform cluster network name.
-Replace `_ipsec-port_` with your IPsec port.
+You can use the `SubmarinerConfig` API to configure the Google Cloud Platform cluster to integrate with a Submariner deployment. There are two ways that you configure the {ocp-short} cluster that is hosted on Google Cloud Platform to integrate with a Submariner deployment, depending on how the cluster was created. The first procedure applies if you created the cluster by using {product-title-short}. The second procedure applies if your cluster was not created by using {product-title-short}. Select one of these options to prepare for the connection:
 
-. Create the inbound and outbound firewall rules on your Google Cloud Platform to open the 4800/UDP port to encapsulate Pod traffic from the worker and master nodes to the Submariner Gateway nodes:
+* Method 1 - Managed cluster was created using {product-title-short}
++
+Using this method, you apply the `SubmarinerConfig` API to the {product-title-short} hub cluster. When you run this procedure and do not specify an IPSec IKE port or IPSec NATT port, the default ports are automatically opened for the communication. The default ports are (500) and (4500), respectively.
++
+** If you want to use the default ports for `IPSecIKEPort` (port 500) and `IPSecNATTPort` (port 4500), complete the following steps:
++
+. Label at least one worker node on your managed cluster with the label: `submariner.io/gateway=true`.
++
+. Create a file that contains information that is similar to the following example:
 +
 ----
-$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=udp:4800 --direction=IN
-$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=udp:4800 --direction=OUT
+cat << EOF | oc apply -f -
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    credentialsSecret:
+      name: <managed-cluster-name>-gcp-creds
+EOF
 ----
-Replace `_name_` with your rule name.
-Replace `_network-name_` with your Google Cloud Platform cluster network name.
++
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `<managed-cluster-name>-gcp-creds` with your Google Cloud Platform credential secret, which you can find in the cluster namespace of your hub cluster. 
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
 
-. Create the inbound and outbound firewall rules on your Google Cloud Platform to open the 8080/TCP port to export metrics service from the Submariner Gateway nodes:
+** If you want to customize your Internet Key Exchange (IKE) port or network address translation - traversal (NATT) port, create a file that contains information that is similar to the following example:
++  
+----
+cat << EOF | oc apply -f -
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    IPSecIKEPort: <IKEPort>
+    IPSecNATTPort: <NATTPort>
+    credentialsSecret:
+      name: <managed-cluster-name>-gcp-creds
+EOF
+----
++
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `IKEPort` with the port that you want to use for your Internet Key Exchange port.
++
+Replace `NATTPort` with the port that you want to use for your network address translation - traversal port.
++
+Replace `<managed-cluster-name>-gcp-creds` with your AWS credential secret, which you can find in the cluster namespace of your hub cluster. 
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
+
+* Method 2 - Managed cluster was not created with {product-title-short}   
++
+If your managed cluster was not created using {product-title-short}, you must create a secret on your hub cluster in the namespace of your managed cluster that contains your Google Cloud Platform credential secret.
++
+** If you want to use the default ports for `IPSecIKEPort` (port 500) and `IPSecNATTPort` (port 4500), complete the following steps:
++
+. Create a file that contains information that is similar to the following example:
 +
 ----
-$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=tcp:8080 --direction=IN
-$ gcloud compute firewall-rules create <name> --network=<network-name> --allow=tcp:8080 --direction=OUT
+cat << EOF | oc apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+    name: <gcp-credential-secret-name>
+    namespace: <managed-cluster-namespace>
+type: Opaque
+data:
+    osServiceAccount.json: <gcp-os-service-account-json-file-content>
+EOF
 ----
-Replace `_name_` with your rule name.
-Replace `_network-name_` with your Google Cloud Platform cluster network name.
++
+Replace `<gcp-credential-secret-name>`` with the name of your credential secret file.
++
+Replace `<managed-cluster-namespace>`` with the namespace of your managed cluster.
++
+Replace `<gcp-os-service-account-json-file-content>` with the contents of your Google Cloud Platform `osServiceAccount.json` file.
+
+. Apply the `SubmarinerConfig` on your {product-title-short} hub cluster by creating a file that is similar to the following file:
++
+----
+cat << EOF | oc apply -f -
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    credentialsSecret:
+      name: <gcp-credential-secret-name>
+EOF
+----
++ 
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `<gcp-credential-secret-name>` with the name of your credential secret that you created in the previous step.
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
++
+** If you want to customize your IKE port or NATT port, complete the following steps:
++
+. Create a file that contains information that is similar to the following example:
++
+----
+cat << EOF | oc apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+    name: <gcp-credential-secret-name>
+    namespace: <managed-cluster-namespace>
+type: Opaque
+data:
+    osServiceAccount.json: <gcp-os-service-account-json-file-content>
+EOF
+----
++
+Replace `<gcp-credential-secret-name>` with the name of your credential secret file.
++
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `<gcp-os-service-account-json-file-content>` with the contents of your Google Cloud Platform `osServiceAccount.json` file.
+
+. Apply the `SubmarinerConfig` on your {product-title-short} hub cluster by creating a file that is similar to the following file:
++
+----
+cat << EOF | oc apply -f -
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    IPSecIKEPort: <IKEPort>
+    IPSecNATTPort: <NATTPort>
+    credentialsSecret:
+      name: <gcp-credential-secret-name>
+EOF
+----
++ 
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `IKEPort` with the port that you want to use for your IKE port.
++
+Replace `NATTPort` with the port that you want to use for your NATT port.
++
+Replace `<aws-credential-secret-name>` with the name of your credential secret that you created in the previous step.
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
 
 [#preparing-azure]
 === Preparing Microsoft Azure to deploy Submariner
@@ -283,8 +524,83 @@ To configure the Google Cloud Platform clusters on Red Hat OpenShift Dedicated, 
 [#preparing-vm-bare]
 === Preparing to deploy Submariner on VMware vSphere or bare metal
 
+Submariner uses IP security (IPSec) to establish the secure tunnels between the clusters on the gateway nodes. It uses virtual extensible LAN (VXLAN) to encapsulate traffic when it moves from the worker and master nodes to the gateway nodes. When you run this procedure and do not specify an IPSec IKE port or IPSec VXLAN port, the default ports are automatically opened for the communication. The default ports are (500) and (4800), respectively.
+
 To prepare the VMware vSphere and bare metal clusters for deploying Submariner, complete the following steps:
 
-. Configure a publicly routable IP address that is designated to the gateway node on at least one of the clusters. 
+* If you want to use the default ports for `IPSecIKEPort` (port 500) and `VXLANPort` (port 4800), complete the following steps:
++
+. Label at least one worker node on your managed cluster with the label: `submariner.io/gateway=true`.
++
+. Create a file that contains information that is similar to the following example:
++
+----
+cat << EOF | oc apply -f -
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    credentialsSecret:
+      name: <managed-cluster-name>-vmware-creds
+EOF
+----
++
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `<managed-cluster-name>-vmware-creds` with your VMware vSphere or bare metal credential secret, which you can find in the cluster namespace of your hub cluster. 
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
 
-. Ensure that ports for IP security are open. The default ports are 4500/UDP and 500/UDP. If the default ports are blocked by a firewall, configure a pair of custom ports that are available, like 4501/UDP and 501/UDP.
+* If you want to customize your IKE port or VXLAN port, complete the following steps:
+
+. Create and run a file that contains information that is similar to the following example:
++  
+----
+cat << EOF | oc apply -f -
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    IPSecIKEPort: <IKEPort>
+    IPSecVXLANPort: <VXLANPort>
+    credentialsSecret:
+      name: <managed-cluster-name>-vmware-creds
+EOF
+----
++
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `IKEPort` with the port that you want to use for your Internet Key Exchange port.
++
+Replace `VXLANPort` with the port that you want to use for your VXLAN port.
++
+Replace `<managed-cluster-name>-vmware-creds` with your VMware credential secret, which you can find in the cluster namespace of your hub cluster. 
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
+
+. Label at least one worker node on your managed cluster with the label: `submariner.io/gateway=true`.
+
+. Create a file that contains information that is similar to the following example:
++
+----
+cat << EOF | oc apply -f -
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    credentialsSecret:
+      name: <managed-cluster-name>-vmware-creds
+EOF
+----
++
+Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
++
+Replace `<managed-cluster-name>-vmware-creds` with your VMware vSphere or bare metal credential secret, which you can find in the cluster namespace of your hub cluster. 
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
