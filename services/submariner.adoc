@@ -1,5 +1,5 @@
 [#submariner]
-= Submariner
+= Submariner (Technology preview)
 
 The `submariner-addon` component is a *technology preview* feature. 
 
@@ -11,9 +11,9 @@ You can enable Submariner on the {ocp-short} clusters that are hosted in the fol
 * Google Cloud Platform
 * Microsoft Azure
 * IBM Cloud
-* VMware vSphere
-* Bare metal
 * Red Hat OpenShift Dedicated
+* VMware vSphere
+
 
 {product-title} provides a Submariner component that you can deploy in your environment by using your hub cluster. 
 
@@ -24,7 +24,7 @@ You can enable Submariner on the {ocp-short} clusters that are hosted in the fol
 ** <<preparing-azure,Preparing Microsoft Azure to deploy Submariner>>
 ** <<preparing-ibm,Preparing IBM Cloud to deploy Submariner>>
 ** <<preparing-osd,Preparing Red Hat OpenShift Dedicated to deploy Submariner>>
-** <<preparing-vm-bare,Preparing to deploy Submariner on VMware vSphere or bare metal>>
+** <<preparing-vm,Preparing to deploy Submariner on VMware vSphere>>
 
 [#submariner-prereq]
 == Prerequisites
@@ -40,7 +40,24 @@ Ensure that you have the following prerequisites before using Submariner:
 +
 *Note:* This is configured automatically when your clusters are deployed in an AWS, Google Cloud Platform, VMware vSphere, or bare metal environment, but must be configured manually for clusters on other environments and for the firewalls that protect private clouds. 
 * Firewall configuration on the Gateway nodes allows ingress 8080/TCP so the other nodes in the cluster can access it. 
-* Firewall configuration open for 4500/UDP, 500/UDP, and any other ports that are used for IPSec traffic on the gateway nodes (configured automatically for AWS, Google Cloud Platform, VMware vSphere, and bare metal).
+* Firewall configuration open for 4500/UDP, 500/UDP, and any other ports that are used for IPSec traffic on the gateway nodes (configured automatically for AWS and Google Cloud Platform).
++
+.Submariner required ports
+|===
+| Name | Default value | Customizable 
+
+| IPSec IKE
+| 500/UDP
+| Yes
+
+| IPSec NATT
+| 4500/UDP
+| Yes
+
+| VXLAN (VMware vSphere only)
+| 4800/UDP
+| No
+|===
 
 See https://submariner.io/getting-started/#prerequisites[Submariner prerequisites] for more detailed information about the prerequisites.
 
@@ -521,17 +538,42 @@ To configure the Google Cloud Platform clusters on Red Hat OpenShift Dedicated, 
 
 . Configure a service account named `osd-ccs-admin` that you can use to manage the deployment.
 
-[#preparing-vm-bare]
-=== Preparing to deploy Submariner on VMware vSphere or bare metal
+[#preparing-vm]
+=== Preparing to deploy Submariner on VMware vSphere
 
-Submariner uses IP security (IPSec) to establish the secure tunnels between the clusters on the gateway nodes. It uses virtual extensible LAN (VXLAN) to encapsulate traffic when it moves from the worker and master nodes to the gateway nodes. When you run this procedure and do not specify an IPSec IKE port or IPSec VXLAN port, the default ports are automatically opened for the communication. The default ports are (500/UDP) and (4800/UDP), respectively.
+Submariner uses IP security (IPSec) to establish the secure tunnels between the clusters on the gateway nodes. You can either use the default IPSec ports, or you can specify other IPSec ports that you configured. When you run this procedure without specifying an IPSec IKE port or an IPSec NATT port, the default ports are automatically used for the communication. The default ports are (500/UDP) and (4500/UDP), respectively. 
 
-To prepare the VMware vSphere and bare metal clusters for deploying Submariner, complete the following steps:
+Submariner uses virtual extensible LAN (VXLAN) to encapsulate traffic when it moves from the worker and master nodes to the gateway nodes on the .The VXLAN port cannot be customized, and is always port 4800/UDP.
 
-* If you want to use the default ports for `IPSecIKEPort` and `VXLANPort`, complete the following steps:
+The following ports must be opened by your VMWare vSphere administrator before you can enable Submariner:
+
+.VMware vSphere and Submariner ports
+|===
+| Name | Default value | Customizable 
+
+| IPSec IKE
+| 500/UDP
+| Yes
+
+| IPSec NATT
+| 4500/UDP
+| Yes
+
+| VXLAN
+| 4800/UDP
+| No
+|===
+
+
+
+To prepare VMware vSphere clusters for deploying Submariner, complete the following steps:
+
+* If you want to use the default ports for `IPSecIKEPort` and `NATTPort`, complete the following steps:
 +
 . Label at least one worker node on your managed cluster with the label: `submariner.io/gateway=true`.
 +
+. Ensure that the IPSec IKE, IPSec NATT, and VXLAN ports are open.
+
 . Enter a command that contains information that is similar to the following example:
 +
 ----
@@ -542,8 +584,7 @@ metadata:
     name: submariner
     namespace: <managed-cluster-namespace>
 spec:
-    credentialsSecret:
-      name: <managed-cluster-name>-vmware-creds
+
 EOF
 ----
 +
@@ -553,7 +594,9 @@ Replace `managed-cluster-name` with your VMware vSphere or bare metal credential
 +
 *Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
 
-* If you want to customize your IKE port or VXLAN port, complete the following steps:
+* If you want to customize your IKE port or NATT port, complete the following steps:
+
+. Ensure that the IPSec IKE, IPSec NATT, and VXLAN ports are open.
 
 . Enter a command that contains information that is similar to the following example:
 +  
