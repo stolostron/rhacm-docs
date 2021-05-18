@@ -17,10 +17,11 @@ Please limit special tagging. Look around the documentation to see how and when 
 
 **Best practice:** In place of recommendation. Something you should do for better performance or experience
 
-**Optional:** For any step not required but user may want to take or need to take in certain cases. Example: **Optional:** If you plan to manage more clusters, click such and such for later user.
+**Optional:** For any step not required, but user may want to take or needs to take in certain cases. 
 
+  - Example: **Optional:** If you plan to manage more clusters, click such and such for later use.
 
-### Technology preview
+#### Technology preview
 
 Place **Technology preview** at the highest level of the component that is tech preview on the title (to get this in the navigation). Include a special tag on the What's new entry.
 
