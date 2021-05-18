@@ -1,11 +1,11 @@
 ---
-permalink: /ui_pii
-title: "Pii"
+permalink: /ui_content
+title: "User-interface content"
 ---
 
-## What is considered user-facing content (IBM term) PII? 
+## What is considered user-facing content? 
 
-User-facing content (IBM term: Program Integrated Information) is user-visible text that is contained within a software program and is integral to the execution of that program. This applies to all software, whether it is operating system, middleware, or application software.
+User-facing content is user-visible text that is contained within a software program and is integral to the execution of that program. This applies to all software, whether it is operating system, middleware, or application software.
 
 In this context, "contained within" means accessible only by running the software, and "integral to execution" means essential to the execution of the software. Traditionally, this has meant messages, contextual help, and extended help information. The introduction of new human-computer interaction technologies broadens this to include concepts such as intelligent agents, coaches, and wizards. The primary goal of such concepts is to guide users through complex tasks rather than to educate or inform.
 
@@ -38,11 +38,11 @@ Used throughout our User Interface (UI) and products for embedded assistance and
 
 ## Reason for doc input on 
 
-- Doc reviews all new PII, such labels, tooltips, error messages, and other UI text
-- Doc reviews with IBM/Pattern Fly style, terminology, existing docs, and progressive disclosure in mind
-- Focus on consistency across all product documentation and other IBM products including the following documentation sources:
+- Doc reviews all new UI content, such labels, tooltips, error messages, and other UI text (writers please make sure this is consistent across pillars)
+- Doc reviews with IBM/Pattern Fly/RH style, terminology, existing docs, and progressive disclosure in mind
+- Focus on consistency across all product documentation and other products including the following documentation sources:
   - UI text 
-  - Knowledge Center
+  - Portal
   - Blogs 
   - Other (presentations, readmes, release notes)
 - Structure text for translation and accessibility
@@ -52,24 +52,12 @@ Used throughout our User Interface (UI) and products for embedded assistance and
 
 ## Process to get user-facing content reviewed
 
-For general clean-up, a GitHub issue needed (if using a dev issue for PII files, add doc label `squad:doc` and your squad's assigned writer):
+For general clean-up, a GitHub issue is needed for the doc team.
 
-- Create your PR and assign writer as reviewer
+- Dev can create your PR and assign writer as reviewer, confident writer can also make a change to dev source if devs agree
 - Additionally, you can provide the link to your properties files and request that the writer edit the file for you in his or her own branch/PR
-____________________________________________________________________________________
-
-Story Process: (this is only for new work assigned per story): 
-- Issue (squad: design and squad: doc) 
-- InVision prototype for Design/ID (Doc writer/Design focal/Design content focal) to get feedback on content. (Relies on the latest build)
-- Mid-fi for feedback and initial review
-- Hi-fi/Redline for final design reference for implementation
-- ID initiates PR and gets all reviewers needed
-- Developers handle implementation and final review
-- For Hill work, Content Designer will likely have an issue opened and have Dev/ID assigned if there is a content designer
 
 ## Error Messages
-
-IBM provides guidelines for messages within the Information Development Knowledge Center. For more information, see [Message quality and process](https://rtpdoc01.rtp.raleigh.ibm.com:9445/kc/idibm/com.ibm.utic.authoring_messages.doc/doc/messages_summary.html)
 
 Ensure that you follow these guidelines to avoid poor error messages: 
 
