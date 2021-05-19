@@ -5,17 +5,23 @@ Monitor the health of your managed clusters with the observability service (`mul
 
 *Required access:* Cluster administrator or the `open-cluster-management:cluster-manager-admin` role.
 
-*Prerequisites*:
+* <<prerequisites-observability,Prerequisites>>
+* <<enabling-observability,Enabling observability>>
+* <<creating-mco-cr,Creating the _MultiClusterObservability_ CR>>
+* <<disabling-observability-resource,Disabling observability>>
+
+[#prerequisites-observability]
+== Prerequisites
  
 - You must install {product-title}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.  
 - You must configure an object store to create a storage solution. {product-title-short} only supports cloud providers with stable object stores, such as Amazon S3 (or other S3 compatible object stores like Ceph), Google Cloud Storage, Azure storage, and OpenShift Container Storage.
 +
-*Important*: When you configure your object store, ensure that you meet the encryption requirements necessary when sensitive data is persisted. For a complete list of the supported object stores, see https://thanos.io/tip/thanos/storage.md/#object-storage[Thanos documentation]. 
+*Important*: When you configure your object store, ensure that you meet the encryption requirements necessary when sensitive data is persisted. For a complete list of the supported object stores, see https://thanos.io/tip/thanos/storage.md/#object-storage[Thanos documentation].
 
 [#enabling-observability]
 == Enabling observability
 
-Enable the observability service by creating a MultiClusterObservability CustomResource (CR) instance. Complete the following steps to enable the observability service: 
+Enable the observability service by creating a `MultiClusterObservability` custom resource (CR) instance. Complete the following steps to enable the observability service: 
 
 . Log in to your {product-title-short} hub cluster. 
 . Create a namespace for the observability service with the following command:
@@ -46,7 +52,7 @@ oc create secret generic multiclusterhub-operator-pull-secret \
     --type=kubernetes.io/dockerconfigjson
 ----
 
-. Create a secret for your object storage. Your secret must contain the credentials to your storage solution. For example, run the following command:
+. Create a secret for your object storage for your cloud provider. Your secret must contain the credentials to your storage solution. For example, run the following command:
 
 +
 ----
@@ -54,6 +60,22 @@ oc create -f thanos-object-storage.yaml -n open-cluster-management-observability
 ----
 +
 .. View the following examples of secrets for the supported object stores:
+... For {product-title-short}, your secret might resemble the following file:
++
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: thanos-object-storage
+type: s3
+config:
+  bucket: YOUR_S3_BUCKET
+  endpoint: YOUR_S3_ENDPOINT
+  insecure: true
+  access_key: YOUR_ACCESS_KEY
+  secret_key: YOUR_SECRET_KEY
+----
+
 ... For Amazon S3 or S3 compatible, your secret might resemble the following file:
 +
 ----
@@ -79,6 +101,10 @@ For more details, see https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welc
 ... For Google, your secret might resemble the following file: 
 +
 ----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: thanos-object-storage
 type: GCS
 config:
   bucket: YOUR_GCS_BUCKET
@@ -90,6 +116,10 @@ For more details, see https://cloud.google.com/storage/docs/introduction[Google 
 ... For Azure your secret might resemble the following file:
 +
 ----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: thanos-object-storage
 type: AZURE
 config:
   storage_account: YOUR_STORAGE_ACCT
@@ -113,7 +143,29 @@ config:
   secret_key: YOUR_OCS_SECRET_KEY
 ----
 +
-For more details, see https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.4/html/deploying_openshift_container_storage/deploying-openshift-container-storage-on-openshift-container-platform_rhocs#installing-openshift-container-storage-operator-using-the-operator-hub_aws-vmware[Installing Red Hat OpenShift Container Storage].
+For more details, see https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.7/html/deploying_openshift_container_storage/deploying-openshift-container-storage-on-openshift-container-platform_rhocs#installing-openshift-container-storage-operator-using-the-operator-hub_aws-vmware[Installing OpenShift Container Storage].
+
+... You can retrieve the S3 access key for your cloud providers with the following commands:
++
+----
+ACCESS_KEY=$(oc -n <your-object-storage> get secret <object-storage-secret> -o yaml | grep AccessKey | awk '{print $2}' | base64 --decode)
+
+echo $ACCESS_KEY
+----
+
+... You can retrieve the S3 secret key for your cloud providers with the following commands:
++
+----
+SECRET_KEY=$(oc -n <your-object-storage> get secret <object-storage-secret> -o yaml | grep SecretKey | awk '{print $2}' | base64 --decode)
+
+echo $SECRET_KEY
+----
+
+[#creating-mco-cr]
+=== Creating the _MultiClusterObservability_ CR
+
+Complete the following steps to create the `MultiClusterObservability` custom resource (CR):
+
 . Create the `MultiClusterObservability` custom resource (mco CR) for your managed cluster by completing the following steps:
 +
 .. Create the `MultiClusterObservability` custom resource YAML file named `_multiclusterobservability_cr.yaml_`. 
@@ -154,7 +206,7 @@ spec:
 +
 You might want to modify the value for the `retentionConfig` parameter. For more information, see https://thanos.io/v0.8/components/compact/#downsampling-resolution-and-retention[Thanos Downsampling resolution and retention]. Depending on the number of managed clusters, you might want to update the amount of storage for stateful sets, see link:../apis/observability.json.adoc#observability-api[Observability API] for more information.
 +
-.. To deploy on infrastructure machine sets, you must set a label for your set by updating the `_nodeSelector_` in the MultiClusterObservability YAML. Your YAML might resemble the following content:
+.. To deploy on infrastructure machine sets, you must set a label for your set by updating the `_nodeSelector_` in the `MultiClusterObservability` YAML. Your YAML might resemble the following content:
 +
 ----
 nodeSelector:
@@ -177,6 +229,8 @@ All the pods in `open-cluster-management-observability` namespace for Thanos, Gr
 .. Click the Grafana link that is near the console header to view the metrics from your managed clusters.
 +
 *Note*: If you want to exclude specific managed clusters from collecting the observability data, add the following cluster label to your clusters: `observability: disabled`.
+
+The observability service is enabled. 
 
 [#disabling-observability-resource]
 == Disabling observability
