@@ -7,9 +7,9 @@ Complete the following steps to deploy Submariner:
 
 . Log on to your hub cluster with cluster administrator permissions.
 
-. Ensure that you have completed the applicable preparations. See xref:../services/submariner.adoc#submariner[Submariner] for the requirements.
+. Ensure that you have completed the required preparations. See xref:../services/submariner.adoc#submariner[Submariner] for the requirements.
 
-. Create a `ManagedClusterSet` on the hub cluster by using the instructions provided in link:../clusters/custom_resource.adoc#managedclustersets[ManagedClusterSets]. The `submariner-addon` creates a namespace called `submariner-clusterset-<clusterset-name>-broker` and deploys the Submariner Broker to it. The name of the ManagedClusterSet replaces <clusterset-name> in the namespace name. Your entry for the `ManagedClusterSet` should resemble the following content:
+. Create a `ManagedClusterSet` on the hub cluster by using the instructions provided in link:../clusters/custom_resource.adoc#managedclustersets[ManagedClusterSets]. Your entry for the `ManagedClusterSet` should resemble the following content:
 + 
 [source,yaml]
 ----
@@ -18,22 +18,51 @@ kind: ManagedClusterSet
 metadata:
   name: <ManagedClusterSet-name>
 ----
-Replace _ManagedClusterSet-name_ with a name for the `ManagedClusterSet` that you are creating.
-
-. Enable Submariner to provide communication between managed clusters by entering the following command:
+Replace `ManagedClusterSet-name` with a name for the `ManagedClusterSet` that you are creating.
 +
----- 
-oc label managedclusters <managedcluster-name> "cluster.open-cluster-management.io/submariner-agent=true" --overwrite
-----
+After the managed cluster set is created, the `submariner-addon` creates a namespace called `<ManagedClusterSet-name>-broker`, and deploys the Submariner broker to it. 
 +
-Replace `_managedcluster-name_` with the name of the managed cluster that you want to use with Submariner. 
+*Note:* The maximum length of the Kubernetes namespace is 63 characters, so the maximum length of the `ManagedClusterSet-name` variable must be 56 characters or less. If the length of the `ManagedClusterSet-name` variable exceeds 56, the `ManagedClusterSet-name` variable is truncated from the head.
 
-. Add the managed clusters to the `ManagedClusterSet` by entering the following command:
+. Add one managed cluster to the managed cluster set by entering the following command:
 +
 ----
 oc label managedclusters <managedcluster-name> "cluster.open-cluster-management.io/clusterset=<ManagedClusterSet-name>" --overwrite
 ----
-Replace `_managedcluster-name_` with the name of the managed cluster that you want to add to the `ManagedClusterSet`.
-Replace `_ManagedClusterSet-name_` with the name of the `ManagedClusterSet` to which you want to add the managed cluster. 
+Replace `_managedcluster-name_` with the name of the managed cluster that you want to add to the managed cluster set.
+Replace `_ManagedClusterSet-name_` with the name of the `ManagedClusterSet` where you want to add the managed cluster.
 
-. Repeat those steps for all of the managed clusters that you want to add to the `ManagedClusterSet`.
+. Deploy Submariner on the managed cluster by entering the following command:
++
+----
+cat << EOF | oc apply -f -
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+     name: submariner
+     namespace: <managedcluster-name>
+spec:
+    installNamespace: submariner-operator
+----
+Replace `managedcluster-name` with the name of the managed cluster that you want to use with Submariner.
++
+The name of the `ManagedClusterAddOn` must be `submariner`. 
++
+After the `ManagedClusterAddOn` is created, the `submariner-addon` deploys Submariner to the `submariner-operator` namespace on the managed cluster. You can view the deployment status of Submariner by viewing the status of this `ManagedClusterAddOn`.
++
+*Note:* The `installNamespace` field in the spec of `ManagedClusterAddOn` is the namespace on the managed cluster where you want to install the Submariner. Submariner only supports `submariner-operator` as the name of the installation namespace. 
+
+. Repeat steps 4 and 5 for each of the managed clusters that you want to enable to communicate by using Submariner.
+
+After Submariner is deployed on the managed cluster, you can verify the Submariner deployment status by checking the status of submariner `ManagedClusterAddOn` by entering the following command:
+----
+oc -n <managedclsuter-name> get managedclusteraddons submariner -o yaml
+----
+Replace `managedclsuter-name` with the name of the managed cluster.
+
+The status of the Submariner `ManagedClusterAddOn`, reports one of the following three status conditions that indicate the deployment status of Submariner:
+
+* The `SubmarinerGatewayNodesLabeled` condition indicates whether there are labeled Submariner gateway nodes on the managed cluster.
+* The `SubmarinerAgentDegraded` condition indicates whether Submariner is successfully deployed on the managed cluster.
+* The `SubmarinerConnectionDegraded` condition indicates how many connections are established on the managed cluster with Submariner.
+
