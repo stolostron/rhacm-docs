@@ -1,0 +1,242 @@
+[#customizing-templates-for-config-policies]
+= Customizing tempplates for configuration policies
+
+Configuration policies now support inclusion of Golang templates in the object definitions. These templates are resolved at runtime on the target managed cluster using configuration policies related to that cluster. This gives you the ability to define configuration policies with dynamic content, and inform or enforce Kubernetes resources that are customized to the target cluster.
+
+//we should reference golang doc along with provide tasks to create a custom template function
+//would this be a good link to use: https://golang.org/pkg/text/template/#hdr-Pipelines
+//or this link: https://golang.org/pkg/text/template/#hdr-Functions
+The template syntax must be conformed to the Golang template language specification, and the resource definition generated from the resolved template must be a valid YAML. Any errors in template validation are recognized as policy violations. When you use a custom template function, the values are replaced at runtime.
+
+*Required access:* Not sure
+
+//[#prerequisites-templatized]
+// are there any prereqs?
+
+[#template-functions]
+== Template functions
+
+//what are generic template functions? Would it be accurate to say default template functions>
+Custom template functions, both resource-specific and generic template functions, are available for referencing Kubernetes resources on the cluster. 
+
+Customize the template for your configuration policies. 
+//should it be "`base64` encode" OR "`base64encode`"; throughout the doc i've seen "`base64` encode" 
+The resource-specific functions offered for this release make the references to the resources more accessible. The generic function, `lookup`, require you to input the reference to the resource. In addition to these functions, utility functions like `base64encode`, `base64decode`, `indent`, etc. are also available. 
+
+Continue reading to view descriptions and examples for some of the template functions that are available.
+
+[#fromsecret-func]
+=== _fromSecret_ function
+
+The `fromSecret` function returns the value of the given data key in the secret. View the following syntax for the function:
+
+----
+func fromSecret (ns string, secretName string, datakey string) (dataValue string, err error)
+----
+//instead of template can we call PASSWORD a parameter? 
+You receive a policy violation if the secret or the data key does not exist on the target cluster. View the following configuration policy that enforces a `Secret` resource on the target cluster. The value for the `PASSWORD` data key is a template that references the secret on the target cluster:
+
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: demo-fromsecret
+  namespace: test
+spec:
+  namespaceSelector:
+    exclude:
+    - kube-*
+    include:
+    - default
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+      apiVersion: v1
+      data:
+        USER_NAME: YWRtaW4=
+        PASSWORD: '{{ fromSecret "default" "localsecret" "PASSWORD" }}'
+      kind: Secret
+      metadata:
+        name: demosecret
+        namespace: test
+      type: Opaque
+  remediationAction: enforce
+  severity: low
+----
+
+[#fromConfigmap-func]
+=== _fromConfigmap_ function
+
+The `fromConfigmap` function returns the value of the given data key in the ConfigMap. View the following syntax for the function:
+
+----
+func fromConfigMap (ns string, configmapName string, datakey string) (dataValue string, err Error)
+----
+
+You receive a policy violation if the ConfigMap or the data key does not exist on the target cluster. View the following configuration policy that enforces a ConfigMap Kubernetes resource on the target managed cluster. The value for the `log-file` data key is a template that retrieves the value of the `log-file` from the ConfigMap, `logs-config` from the `default` namespace, and the `log-level` from the `default` namespace. The default value for `log-level` is `ERROR`:
+
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: demo-fromcm-lookup
+  namespace: test-templates
+spec:
+  namespaceSelector:
+    exclude:
+    - kube-*
+    include:
+    - default
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+      kind: ConfigMap
+      apiVersion: v1
+      metadata:
+        name: demo-app-config
+        namespace: test
+      data:
+        app-name: sampleApp
+        app-description: "this is a sample app"
+        log-file: '{{ fromConfigMap "default" "logs-config" "log-file" }}'
+        log-level: |
+          {{with (fromConfigMap "default" "logs-config" "log-level") }} {{ . }} {{else}} ERROR {{end}}
+  remediationAction: enforce
+  severity: low
+----
+
+
+[#fromclusterclaim-func]
+=== _fromClusterClaim_ function
+
+The `fromClusterClaim` function returns the value of the `SpecValue` in the `ClusterClaim` resource. View the following syntax for the function:
+
+----
+func fromClusterClaim (clusterclaimName string) (value string, err Error)
+----
+
+You receive a policy violation if the `ClusterClaim` resource does not exist. View the following example of the configuration policy that enforces a ConfigMap Kubernetes resource on the target managed cluster. The value for the `platform` data key is a template that retrieves the value of the `platform.open-cluster-management.io` cluster claim. Similarily, it retrieves values for `product` and `version` from the `ClusterClaim`:
+
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: demo-clusterclaims
+  namespace: default
+spec:
+  namespaceSelector:
+    exclude:
+    - kube-*
+    include:
+    - default
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+      kind: ConfigMap
+      apiVersion: v1
+      metadata:
+        name: sample-app-config
+        namespace: default
+      data:
+        # Configuration values can be set as key-value properties
+        platform: '{{ fromClusterClaim "platform.open-cluster-management.io" }}'
+        product: '{{ fromClusterClaim "product.open-cluster-management.io" }}'
+        version: '{{ fromClusterClaim "version.openshift.io" }}'
+  remediationAction: enforce
+  severity: low
+----
+
+[#lookup-func]
+=== _lookup_ function
+//can you please clarify what "Unstructured struct" is? Is Unstrunctured the name of a resource? Is struct short for
+//structure? 
+The `lookup` function returns the configuration resource as Unstructured struct. View the following syntax for the function:
+
+----
+func lookup (apiversion string, kind string, namespace string, name string) (value string, err Error)
+----
+//will the user receive a policy violation if a certain data key or resource is not existing?
+View the following example of the configuration policy that enforces a ConfigMap Kubernetes resource on the target managed cluster. The value for the `metrics-url` data key is a template that retrieves the `v1/Service` Kubernetes resource `metrics` from the `default` namespace, and is set to the value of the `Spec.ClusterIP` in the queried resource:
+
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: demo-lookup
+  namespace: test-templates
+spec:
+  namespaceSelector:
+    exclude:
+    - kube-*
+    include:
+    - default
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+      kind: ConfigMap
+      apiVersion: v1
+      metadata:
+        name: demo-app-config
+        namespace: test
+      data:
+        # Configuration values can be set as key-value properties
+        app-name: sampleApp
+        app-description: "this is a sample app"
+        metrics-url: |
+          http://{{ (lookup "v1" "Service" "default" "metrics").spec.clusterIP }}:8080
+  remediationAction: enforce
+  severity: low
+----
+
+[#base64enc-func]
+=== _base64enc_ function
+
+The `base64enc` function returns a `base64` encoded value of the input `data string`. View the following syntax for the function:
+
+----
+func base64enc ( data string) (enc-data string)
+----
+
+View the following example of the configuration policy that uses the `base64enc` function:
+//should we show more of the policy example? Is there more content that we can add that benefit the user?
+----
+USER_NAME: '{{ fromConfigMap "default" "myconfigmap" "admin-user" | base64enc }}'
+----
+
+[#base64dec-func]
+=== _base64dec_ function
+
+The `base64dec` function returns a `base64` decoded value of the input `enc-data string`. View the following syntax for the function:
+
+----
+func base64dec ( enc-data string) (data string)
+----
+
+View the following example of the configuration policy that uses the `base64dec` function:
+
+----
+app-name: |
+      "{{ ( lookup "v1"  "Secret" "testns" "mytestsecret") .data.appname ) | base64dec }}"
+----
+
+[#indent-function]
+=== _indent_ function
+
+The `indent` function returns the padded `data string`. View the following syntax for the function:
+
+----
+func indent ( spaces  int,  data string) (padded-data string)
+----
+
+View the following example of the configuration policy that uses the `indent` function:
+
+----
+Ca-cert:  |
+          {{ ( index ( lookup "v1" "Secret" "default" "mycert-tls"  ).data  "ca.pem"  ) |  base64dec | indent 4  }}
+----
+
+//is the user
+//See xref:../risk_compliance/create_template_func.adoc#creating-custom-template-function
+
+
+
