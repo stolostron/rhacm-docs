@@ -1,16 +1,26 @@
 # GitHub pages content
 
-Repo for the Playbook.
+You need to familiarize yourself with Jekyll, Ruby, gem files, static sites, etc...
 
-## Installing Jekyll
+## Installing Jekyll and using for the first time
 
 Windows: https://jekyllrb.com/docs/installation/windows/
 
 Mac: https://jekyllrb.com/docs/installation/macos/
 
-Once installed:
-1. Open/fetch the gh-pages branch so that all files are on your local machine.
-2. Go to the directory of the git content and then run the following commands: 
+1. Check install of all things by running -v behind it. Example: `ruby -v` `jekyll -v`
+2. Create and `cd` into your directory where you want the files: `cd documents`.
+3. Run `jekyll new <how-to-docs>`, where `how-to-docs` is what you want to name your project.
+4. Go into the project folder that you created: `cd how-to-docs`
+5. Open with your editor. Do a search to find the command for your editor and configure. I have configured VS Code with `code` to simple open on command.
+6. Initialize git: `git init`.
+7. Check in the files you need from install and commit with a message. Pause here. You now want to preview what you have thus far in a local host.
+8. Preview by running the command: `bundle exec jekyll serve` and going to the local host in the browser: Example using the server address that I was given: http://localhost:4000/about/.
+
+## Updating and building content
+
+8. Open/fetch the gh-pages branch so that all files are on your local machine.
+9. Go to the directory of the git content and then run the following commands: 
 
     1. Run: `bundle`
     2. Run: 
