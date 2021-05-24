@@ -16,19 +16,14 @@ Mac: https://jekyllrb.com/docs/installation/macos/
 6. Initialize git: `git init`.
 7. Check in the files you need from install and commit with a message. Pause here. You now want to preview what you have thus far in a local host.
 8. Preview by running the command: `bundle exec jekyll serve` and going to the local host in the browser: Example using the server address that I was given: http://localhost:4000/about/.
-
-## Updating and building content
-
-8. Open/fetch the gh-pages branch so that all files are on your local machine.
-9. Go to the directory of the git content and then run the following commands: 
+9. Change theme, contact info, etc... in the config YAML file. 
+10. Go to the directory of the git content and then run the following commands: 
 
     1. Run: `bundle`
     2. Run: 
        * Mac: `export PAGES_REPO_NWO=open-cluster-management/rhacm-docs`
        * Windows: `set PAGES_REPO_NWO=cluster-management/rhacm-docs` 
     3. To serve content: `bundle exec jekyll serve`
-
-Any change you make appear in the URL provided in the command. You can check your work before you do a PR. 
 
 ## Adding content
 
