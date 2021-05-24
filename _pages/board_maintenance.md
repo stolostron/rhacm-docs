@@ -32,6 +32,17 @@ title: "Documentation board hygiene and maintance"
   - Prioritize issues if needed
   - Assign any unassigned issues
   - Check for issues sitting in verificication (what is needed to close them?)
+
+# Milestones
+
+  - To avoid all doc work going into 2.3 and not spread out across sprints, use sprint milestones for release work that is tied to a dev issue.
+  - Use refresh labels for valid refresh changes.
+  - Blogs can go into a release milestone, for example, `2.3`. Please also label `blog`.
+  - DDF items are often requests from Red Hatters for enhancements to the product. These are treated as RFEs via the Jira process. 
+  - DDF items are also often requests for doc enhancements. Label them enhancements, not bugs. Get with developers to see what changes make sense, if any.
+  - DDF items are also not opened in the proper milestone. Please change before you move from `untriage`.
+  -
+
   
 
   
