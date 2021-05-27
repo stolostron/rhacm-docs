@@ -1,5 +1,5 @@
-[#support-templates-in-config-policies]
-= Support for text templates in configuration policies
+[#support-custom-templates-in-config-policies]
+= Support for custom templates in configuration policies
 
 Configuration policies now support inclusion of Golang text templates in the object definitions. These templates are resolved at runtime on the target managed cluster using configurations related to that cluster. This gives you the ability to define configuration policies with dynamic content, and inform or enforce Kubernetes resources that are customized to the target cluster.
 
@@ -10,12 +10,12 @@ Configuration policies now support inclusion of Golang text templates in the obj
 
 * The template syntax must be conformed to the Golang template language specification, and the resource definition generated from the resolved template must be a valid YAML. See the Golang documentation about https://golang.org/pkg/text/template/[Package templates] for more information. Any errors in template validation are recognized as policy violations. When you use a custom template function, the values are replaced at runtime.
 
-[#template-functions]
-== Text template functions
+[#custom-template-functions]
+== Custom template functions
 
-Text template functions are available for referencing Kubernetes resources on the cluster. The resource-specific functions are for covenience and make content of the resources more accessible. If you use the generic function, `lookup`, it is best to be familiar with the YAML structure of the resource that is being looked up. In addition to these functions, utility functions like `base64encode`, `base64decode`, `indent`, etc. are also available.
+Custom template functions are available for referencing Kubernetes resources on the cluster. The resource-specific functions are for covenience and make content of the resources more accessible. If you use the generic function, `lookup`, it is best to be familiar with the YAML structure of the resource that is being looked up. In addition to these functions, utility functions like `base64encode`, `base64decode`, `indent`, etc. are also available.
 
-Continue reading to view descriptions and examples for some of the text template functions that are supported.
+Continue reading to view descriptions and examples for some of the custom template functions that are supported.
 
 [#fromsecret-func]
 === _fromSecret_ function
@@ -26,7 +26,7 @@ The `fromSecret` function returns the value of the given data key in the secret.
 func fromSecret (ns string, secretName string, datakey string) (dataValue string, err error)
 ----
 
-When you use this function, enter the namespace, name, and data key of a Kubernetes `Secret` resource. You receive a policy violation if the secret or the data key does not exist on the target cluster. View the following configuration policy that enforces a `Secret` resource on the target cluster. The value for the `PASSWORD` data key is a text template that references the secret on the target cluster:
+When you use this function, enter the namespace, name, and data key of a Kubernetes `Secret` resource. You receive a policy violation if the secret or the data key does not exist on the target cluster. View the following configuration policy that enforces a `Secret` resource on the target cluster. The value for the `PASSWORD` data key is a template that references the secret on the target cluster:
 
 ----
 apiVersion: policy.open-cluster-management.io/v1
@@ -65,7 +65,7 @@ The `fromConfigmap` function returns the value of the given data key in the Conf
 func fromConfigMap (ns string, configmapName string, datakey string) (dataValue string, err Error)
 ----
 
-When you use this function, enter the namespace, name, and data key of a Kubernetes `ConfigMap` resource. You receive a policy violation if the ConfigMap or the data key does not exist on the target cluster. View the following configuration policy that enforces a Kubernetes `ConfigMap` resource on the target managed cluster. The value for the `log-file` data key is a template that retrieves the value of the `log-file` from the ConfigMap, `logs-config` from the `default` namespace, and the `log-level` from the `default` namespace. The default value for `log-level` is `ERROR`:
+When you use this function, enter the namespace, name, and data key of a Kubernetes resource. You receive a policy violation if the resource or the data key does not exist on the target cluster. View the following configuration policy that enforces a Kubernetes resource on the target managed cluster. The value for the `log-file` data key is a template that retrieves the value of the `log-file` from the ConfigMap, `logs-config` from the `default` namespace, and the `log-level` is set to the data key `log-level`. If the data key does not exist in the ConfigMap or if the value is empty, then the value defaults to `ERROR`:
 
 ----
 apiVersion: policy.open-cluster-management.io/v1
@@ -101,13 +101,13 @@ spec:
 [#fromclusterclaim-func]
 === _fromClusterClaim_ function
 
-The `fromClusterClaim` function returns the value of the `SpecValue` in the `ClusterClaim` resource. View the following syntax for the function:
+The `fromClusterClaim` function returns the value of the `Spec.Value` in the `ClusterClaim` resource. View the following syntax for the function:
 
 ----
 func fromClusterClaim (clusterclaimName string) (value string, err Error)
 ----
 
-When you use the function, enter the name of a Kubernetes `ClusterClaim` resource. You receive a policy violation if the `ClusterClaim` resource does not exist. View the following example of the configuration policy that enforces a Kubernetes `ConfigMap` resource on the target managed cluster. The value for the `platform` data key is a template that retrieves the value of the `platform.open-cluster-management.io` cluster claim. Similarily, it retrieves values for `product` and `version` from the `ClusterClaim`:
+When you use the function, enter the name of a Kubernetes `ClusterClaim` resource. You receive a policy violation if the `ClusterClaim` resource does not exist. View the following example of the configuration policy that enforces a Kubernetes resource on the target managed cluster. The value for the `platform` data key is a template that retrieves the value of the `platform.open-cluster-management.io` cluster claim. Similarily, it retrieves values for `product` and `version` from the `ClusterClaim`:
 
 ----
 apiVersion: policy.open-cluster-management.io/v1
@@ -141,13 +141,13 @@ spec:
 [#lookup-func]
 === _lookup_ function
 
-The `lookup` function returns the configuration resource as a JSON compatible map. View the following syntax for the function:
+The `lookup` function returns the Kubernetes resource as a JSON compatible map. View the following syntax for the function:
 
 ----
 func lookup (apiversion string, kind string, namespace string, name string) (value string, err Error)
 ----
-//will the user receive a policy violation if a certain data key or resource is not existing?
-When you use the function, enter the API version, kind, namespace, and name of the Kubernetes `ConfigMap` resource. View the following example of the configuration policy that enforces a Kubernetes `ConfigMap` resource on the target managed cluster. The value for the `metrics-url` data key is a template that retrieves the `v1/Service` Kubernetes resource `metrics` from the `default` namespace, and is set to the value of the `Spec.ClusterIP` in the queried resource:
+
+When you use the function, enter the API version, kind, namespace, and name of the Kubernetes resource. View the following example of the configuration policy that enforces a Kubernetes resource on the target managed cluster. The value for the `metrics-url` data key is a template that retrieves the `v1/Service` Kubernetes resource `metrics` from the `default` namespace, and is set to the value of the `Spec.ClusterIP` in the queried resource:
 
 ----
 apiVersion: policy.open-cluster-management.io/v1
@@ -226,8 +226,6 @@ Ca-cert:  |
           {{ ( index ( lookup "v1" "Secret" "default" "mycert-tls"  ).data  "ca.pem"  ) |  base64dec | indent 4  }}
 ----
 
-//are there other task like creating a text template possible for the user??
-//See xref:../risk_compliance/create_template_func.adoc#creating-custom-template-function
 
 
 
