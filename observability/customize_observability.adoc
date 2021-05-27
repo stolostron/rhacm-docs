@@ -8,8 +8,9 @@ Collect logs about new information that is created for observability resources w
 * <<creating-custom-rules,Creating custom rules>>
 * <<configuring-rules-for-alertmanager,Configuring rules for AlertManager>>
 * <<adding-custom-metrics, Adding custom metrics>>
+* <<removing-default-metrics,Removing default metrics>>
 * <<viewing-and-exploring-data,Viewing and exploring data>>
-* <<disable-metrics-collector,Disable _metrics-collector_>>
+* <<disable-metrics-collector,Disabling _metrics-collector_>>
 
 [#creating-custom-rules]
 == Creating custom rules
@@ -110,13 +111,7 @@ Complete the following steps to add custom metrics:
 oc get mco observability -o yaml
 ----
 
-. Create a YAML file for the `observability-metrics-custom-allowlist` ConfigMap by running the following command:
-+
-----
-cat observability-metrics-custom-allowlist.yaml
-----
-
-. Add the name of the name of the custom metric to the `metrics_list.yaml` parameter. For example, add `node_memory_MemTotal_bytes` to the metric list. Your YAML for the ConfigMap might resemble the following content:
+. Create a file named `observability-metrics-custom-allowlist.yaml` with the following content. Add the name and recording rule of the custom metric to the `metrics_list.yaml` parameter. For example, collect `node_memory_MemTotal_bytes` and `apiserver_request_duration_seconds:histogram_quantile_99` from your managed cluster. Your YAML for the ConfigMap might resemble the following content:
 +
 ----
 kind: ConfigMap
@@ -127,7 +122,14 @@ data:
   metrics_list.yaml: |
     names:
       - node_memory_MemTotal_bytes
+    rules:
+    - record: apiserver_request_duration_seconds:histogram_quantile_99
+      expr: histogram_quantile(0.99,sum(rate(apiserver_request_duration_seconds_bucket{job=\"apiserver\",
+        verb!=\"WATCH\"}[5m])) by (verb,le))
 ----
++
+** In the `names` section, add the name of the custom metrics which is to be collected from the managed cluster.
+** In the `rules` section, enter a value for the `expr` parameter to define the query expression. The metrics are collected as the name that is defined in the `record` parameter from your managed cluster. For more information, see the documentation for https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/#recording-rules[recording rules]. 
 
 . Create the `observability-metrics-custom-allowlist` ConfigMap in the 
 `open-cluster-management-observability` namespace by running the following command:
@@ -142,6 +144,47 @@ oc apply -n open-cluster-management-observability -f observability-metrics-custo
 
 Data from your custom metric is collected.
 
+[#removing-default-metrics]
+== Removing default metrics
+
+If you want data to not be collected for a specific metric, you can remove the metric from the `observability-metrics-custom-allowlist.yaml` file. When you remove a metric, you are also deleting the metric. You can add the metric name to the `metrics_list.yaml` file and end it with the hyphen `-`.
+
+Complete the following steps to delete default metrics:
+
+. Log in to your cluster.
+. Verify that `mco observability` is enabled. Check for the following message in the `status.conditions.message` reads: `Observability components are deployed and running`. Run the following command:
++
+----
+oc get mco observability -o yaml
+----
+
+. In the `observability-metrics-custom-allowlist.yaml` file, add the name of the default metric to the `metrics_list.yaml` parameter with a hyphen `-` at the start of the metric name. For example, add `-rest_client_requests_total` to the metric list. Your YAML for the ConfigMap might resemble the following content:
++
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: observability-metrics-custom-allowlist
+data:
+  metrics_list.yaml: |
+    names:
+      - node_memory_MemTotal_bytes
+      - -rest_client_requests_total
+----
+
+. Create the `observability-metrics-custom-allowlist` ConfigMap in the 
+`open-cluster-management-observability` namespace by running the following command:
++
+----
+oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml
+----
+
+. Verify that your default metric is not being collected from your managed clusters by viewing the metric on the Grafana dashboard. From your hub cluster, select the **Grafana dashboard** link.
+
+. From the Grafana search bar, enter the metric that you want to check.
+
+Data from your default metric is no longer being collected.
+
 [#viewing-and-exploring-data]
 == Viewing and exploring data
 
@@ -154,12 +197,12 @@ You can also  access Grafana dashboards from the _Clusters_ page. From the navig
 . Access the Prometheus metric explorer by selecting the *Explore* icon from the Grafana navigation menu.
 
 [#disable-metrics-collector]
-== Disable _metrics-collector_
+== Disabling _metrics-collector_
 
 You can disable the `metrics-collector`, which stops it from collecting the data and sending the collection data to the observability service. 
 
 [#disable-metrics-collector-on-all-clusters]
-=== Disable _metrics-collector_ on all clusters
+=== Disabling _metrics-collector_ on all clusters
 
 Disable the `metrics-collector` pod to stop data from being collected and sent to the observability service on the {product-title-short} hub cluster. 
 
@@ -169,7 +212,6 @@ Update the `multicluster-observability-operator` resource by setting `enableMetr
 
 ----
 spec:
-  availabilityConfig: High # Available values are High or Basic
   imagePullPolicy: Always
   imagePullSecret: multiclusterhub-operator-pull-secret
   observabilityAddonSpec: # The ObservabilityAddonSpec defines the global settings for all managed clusters which have observability add-on enabled
@@ -177,7 +219,7 @@ spec:
 ----
 
 [#disable-metrics-collector-on-a-single-cluster]
-=== Disable _metrics-collector_ on a single cluster
+=== Disabling _metrics-collector_ on a single cluster
 
 You can disable the `metrics-collector` on specific managed clusters by completing one of the following procedures:
 
