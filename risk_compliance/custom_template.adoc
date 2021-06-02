@@ -3,7 +3,7 @@
 
 Configuration policies now support inclusion of Golang text templates in the object definitions. These templates are resolved at runtime on the target managed cluster using configurations related to that cluster. This gives you the ability to define configuration policies with dynamic content, and inform or enforce Kubernetes resources that are customized to the target cluster.
 
-*Required access:* Not sure
+*Required access:* Cluster administrator
 
 [#prerequisites-templatized]
 == Prerequisites
@@ -189,9 +189,25 @@ func base64enc (data string) (enc-data string)
 ----
 
 When you use the function, enter a string value. View the following example of the configuration policy that uses the `base64enc` function:
-//should we show more of the policy example? Is there more content that we can add that benefit the user?
+
 ----
-USER_NAME: '{{ fromConfigMap "default" "myconfigmap" "admin-user" | base64enc }}'
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: demo-fromsecret
+  namespace: test
+spec:
+  namespaceSelector:
+    exclude:
+    - kube-*
+    include:
+    - default
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+    ...
+    data:
+      USER_NAME: '{{ fromConfigMap "default" "myconfigmap" "admin-user" | base64enc }}'
 ----
 
 [#base64dec-func]
@@ -206,8 +222,24 @@ func base64dec (enc-data string) (data string)
 When you use this function, enter a string value. View the following example of the configuration policy that uses the `base64dec` function:
 
 ----
-app-name: |
-      "{{ ( lookup "v1"  "Secret" "testns" "mytestsecret") .data.appname ) | base64dec }}"
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: demo-fromsecret
+  namespace: test
+spec:
+  namespaceSelector:
+    exclude:
+    - kube-*
+    include:
+    - default
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+    ...
+    data:
+      app-name: |
+         "{{ ( lookup "v1"  "Secret" "testns" "mytestsecret") .data.appname ) | base64dec }}"
 ----
 
 [#indent-function]
@@ -216,14 +248,30 @@ app-name: |
 The `indent` function returns the padded `data string`. View the following syntax for the function:
 
 ----
-func indent ( spaces  int,  data string) (padded-data string)
+func indent (spaces  int,  data string) (padded-data string)
 ----
 
 When you use the function, enter a data string with the specific number of spaces. View the following example of the configuration policy that uses the `indent` function:
 
 ----
-Ca-cert:  |
-          {{ ( index ( lookup "v1" "Secret" "default" "mycert-tls"  ).data  "ca.pem"  ) |  base64dec | indent 4  }}
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: demo-fromsecret
+  namespace: test
+spec:
+  namespaceSelector:
+    exclude:
+    - kube-*
+    include:
+    - default
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+    ...
+    data:
+      Ca-cert:  |
+        {{ ( index ( lookup "v1" "Secret" "default" "mycert-tls"  ).data  "ca.pem"  ) |  base64dec | indent 4  }}
 ----
 
 
