@@ -166,32 +166,60 @@ Observability certificates on managed clusters are automatically refreshed upon 
 
 * https://docs.openshift.com/container-platform/4.7/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates] manages certificates for processes that run on your hub cluster.
 
-You can replace alertmanager certificates by updating the alertmanager route if you do not want to use the OpenShift default ingress certificate. The steps to use your own certificates for alertmanager route are similar to xref:../risk_compliance/cert_mgmt_ingress.adoc#replacing-the-management-ingress-certificates[Replacing the management ingress certificates] except the following three things:
-
-* Be sure to change the common name (CN) on the certificate to `alertmanager`.
-* You also need to change the SAN labeled, `DNS.1` in the `csr.cnf` configuration file with the correct hostname for your alertmanager route.
-* Create the following two secrets in the `open-cluster-management-observability` namespace, the observability service operator (`multicluster-observability-operator`) will take care of everything:
-+
-----
-oc -n open-cluster-management-observability create secret tls alertmanager-byo-ca --cert ./ca.crt --key ./ca.key
-oc -n open-cluster-management-observability create secret tls alertmanager-byo-cert --cert ./ingress.crt --key ./ingress.key
-----
-
-If you want to restore the default self-signed certificate for alertmanager route, please follow the similar steps as specified in ref:../risk_compliance/cert_mgmt_ingress.adoc#restore-the-default-self-signed-certificate-for-management-ingress[Restore the default self-signed certificate for management ingress] to delete two secrets in the `open-cluster-management-observability` namespace:
-
-+
-----
-oc -n open-cluster-management-observability delete secret alertmanager-byo-ca
-oc -n open-cluster-management-observability delete secret alertmanager-byo-cert
-----
-
-then the observability service operator will take care of everything.
-
 * {product-title-short} supports the management of certificates for managed clusters.
 
 * The `metrics-collector` restarts to mount the renewed certificates.
 +
 *Note:* `metrics-collector` can push metrics to the hub cluster before and after certificates are removed. For more information about refreshing certificates across your clusters, see the <<refresh-internal-certificates,Refresh internal certificates>> section. Be sure to specify the appropriate namespace when you refresh a certificate.
+
+[#replacing-cert-alertmanager]
+==== Replacing certificates for alertmanager route
+
+You can replace alertmanager certificates by updating the alertmanager route, if you do not want to use the OpenShift default ingress certificate. Complete the following steps:
+
+. Examine the observability certificate with the following command:
++
+----
+openssl x509  -noout -text -in ./observaility.crt
+----
+//is there a command for this step?
+. Change the common name (`CN`) on the certificate to `alertmanager`.
+//is there a command for this?
+. Change the SAN in the `csr.cnf` configuration file with the hostname for your alertmanager route.
+
+. Create the two following secrets in the `open-cluster-management-observability` namespace. `multicluster-observability-operator` creates the secret. Run the following command:
++
+----
+oc -n open-cluster-management-observability create secret tls alertmanager-byo-ca --cert ./ca.crt --key ./ca.key
+
+oc -n open-cluster-management-observability create secret tls alertmanager-byo-cert --cert ./ingress.crt --key ./ingress.key
+----
+
+For more information, see xref:../risk_compliance/cert_mgmt_ingress.adoc#openssl-commands-for-generating-a-certificate[OpenSSL commands for generating a certificate]. If you want to restore the default self-signed certificate for alertmanager route, see xref:../risk_compliance/cert_mgmt_ingress.adoc#restore-the-default-self-signed-certificate-for-management-ingress[Restore the default self-signed certificate for management ingress] to delete the two secrets in the `open-cluster-management-observability` namespace.
+
+
+//The steps to use your own certificates for alertmanager route are similar to xref:../risk_compliance/cert_mgmt_ingress.adoc#replacing-the-management-ingress-certificates[Replacing the management ingress certificates] except the following three things:
+
+//* Be sure to change the common name (CN) on the certificate to `alertmanager`.
+//* You also need to change the SAN labeled, `DNS.1` in the `csr.cnf` configuration file with the correct hostname for your alertmanager route.
+//* Create the following two secrets in the `open-cluster-management-observability` namespace, the observability service operator (`multicluster-observability-operator`) will take care of everything:
+//+
+//----
+//oc -n open-cluster-management-observability create secret tls alertmanager-byo-ca --cert ./ca.crt --key ./ca.key
+//oc -n open-cluster-management-observability create secret tls alertmanager-byo-cert --cert ./ingress.crt --key ./ingress.key
+//----
+
+//If you want to restore the default self-signed certificate for alertmanager route, please follow the similar steps as specified in //ref:../risk_compliance/cert_mgmt_ingress.adoc#restore-the-default-self-signed-certificate-for-management-ingress[Restore the default self-signed certificate for //management ingress] to delete two secrets in the `open-cluster-management-observability` namespace:
+
+//+
+//----
+//oc -n open-cluster-management-observability delete secret alertmanager-byo-ca
+//oc -n open-cluster-management-observability delete secret alertmanager-byo-cert
+//----
+
+//then the observability service operator will take care of everything.
+
+
 
 [#channel-certificates]
 === Channel certificates
