@@ -97,9 +97,15 @@ Complete the following steps to complete the _New title_ form:
    6. For the _Stage Branch_, select the release number for your book. For example, select **2.1**.
    7. Enter information for the *Content Title*, which is your book title. Example: Install.
    8. Select **Book** for the _Content Type_.
-   7. Ensure that the checkbox for _Use default content directory_ is selected, also select `AsciiDoc` as the _Content Markup_.
-   8. You can add multiple new titles by selecting the **Add additional title** button. Otherwise, select **Submit** when the form is complete. 
-   9. Run a manual build to pick up the new book. For more information, see [Build and publish](arch_builds.md#build-and-publish).
+   9. Ensure that the checkbox for _Use default content directory_ is selected, also select `AsciiDoc` as the _Content Markup_.
+   10. You can add multiple new titles by selecting the **Add additional title** button. Otherwise, select **Submit** when the form is complete. 
+   11. Run a manual build to pick up the new book. For more information, see [Build and publish](arch_builds.md#build-and-publish).
+
+*Possible troubleshooting steps for the `no main file` error message after building the new book:*
+    1. In the Pantheon interface, select the edit (pencil) icon beside your new book. It appears when you hover over the book title. 
+    2. Verify that there is also a **Title URL fragment** listed in the field. It is generally an all lowercase version of the **Title name** that is listed.
+    3. If it is not there, add it.
+    4. If that doesn't resolve the error with your next build, try deleting and recreating the symlink in the folder of the new book. 
 
 ## Renaming 
 
