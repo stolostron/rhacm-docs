@@ -104,37 +104,13 @@ __required__|Parameters describing the MultiClusterObservability resource to be 
     "name": "example"
   },
   "spec": {
-    "enableDownsampling":
-    "imagePullPolicy":
-    "imagePullSecret":
-    "observabilityAddonSpec":{
-      "enableMetrics":
-      "interval":
-      }
-    "advanced":{
-      "retentionConfig":{
-        "blockDuration":
-        "cleanupInterval":
-        "deleteDelay":
-        "retentionInLocal":
-        "retentionResolution1h":
-        "retentionResolution5m":
-        "retentionResolutionRaw":
-        }
-      }
-      "storageConfig": {
-        "alertmanagerStorageSize":
-        "compactStorageSize":
-        "metricObjectStorage": {
+    "observabilityAddonSpec": {}
+    "storageConfig": {
+      "metricObjectStorage": {
         "name": "thanos-object-storage",
         "key": "thanos.yaml"
-      }
-      "receiveStorageSize":
-      "ruleStorageSize":
-      "storageClass":
-      "storeStorageSize":
-    }
-  }
+       }
+   }
 }
 ----
 
@@ -291,43 +267,24 @@ __required__|<<_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobserv
 |**enableDownsampling** +
 __optional__| Enable or disable the downsample. Default value is `true`. If there is no downsample data, the query is unavailable.| boolean
 |**imagePullPolicy** +
-__optional__| Pull policy for the Observability images.|string
+__optional__| Pull policy for the MultiClusterObservability images. The default value is `Always`.|corev1.PullPolicy
 |**imagePullSecret** +
-__optional__| Pull secret for the Observability images.|string
+__optional__| Pull secret for the MultiClusterObservability images. The default value is `multiclusterhub-operator-pull-secret`|string
 |**nodeSelector** +
-__optional__|Supports node selection constraints|object
+__optional__|Specification of the node selector.|map[string]string
 |**observabilityAddonSpec** +
-__optional__|The global settings for all managed clusters, which have the add-on enabled. |<<_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_observabilityaddonspec,observabilityAddonSpec>>
-|**blockDuration** + 
-_optional_|The amount of time to block the duration for Time Series Database (TSDB) block. Default value is `2h`.|string
-|**cleanupInterval** +
-_optional_|The frequency of how often partially uploaded blocks are cleaned, and how often blocks with the deletion mark that have `--wait` enabled are cleaned. Default value is `5m`.|string
-|**deleteDelay** +
-_optional_|The amount of time until a block marked for deletion is deleted from a bucket. Default value is `48h`.|string
-|**retentionInLocal** +
-_optional_|The amount of time to retain raw samples from the local storage. Default value is `4d`.|string
-|**retentionResolution1h** +
-__optional__|The amount of time to retain samples of resolution 2 (1 hour) in a bucket. Default value is 30 days (`30d`).|string
-|**retentionResolution5m** +
-__optional__|The amount of time to retain samples of resolution 1 (5 minutes) in a bucket. Default value is 14 days (`14d`).|string
-|**retentionResolutionRaw** +
-__optional__|The amount of time to retain raw samples of resolution in a bucket.|string
+__required__|The global settings for all managed clusters, which have the observability add-on installed. |<<_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_observabilityaddonspec,observabilityAddonSpec>>
 |**storageConfig** +
-__required__|Specifies the storage to be used by Observability. |<<_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_storageconfig,storageConfig>>
+__required__|Specifies the storage configuration to be used by observability.|StorageConfig
+|**tolerations** +
+__optional__|Provided the ability for all components to tolerate any taints.|[]corev1.Toleration
+|**advanced** +
+__optional__|The advanced configuration settings for observability. |<<_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_observabilityadvanced,advanced>>
+|**resources** +
+__optional__|Compute resources required by MultiClusterObservability.|corev1.ResourceRequirements
+|**replicas** +
+__optional__|Replicas for MultiClusterObservability.|integer
 |===
-
-[[_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_observabilityaddonspec]]
-**observabilityAddonSpec**
-
-[options="header", cols=".^2a,.^3a,.^4a"]
-|===
-|Name|Description|Schema
-|**enableMetrics** +
-__optional__|Indicates if the observability add-on sends metrics to the hub cluster. Default value is `true`.| boolean
-|**interval** +
-__optional__|Interval for when the observability add-on sends metrics to the hub cluster. Default value is 30 seconds (`30s`). |integer
-|===
-
 
 [[_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_storageconfig]]
 **storageConfig**
@@ -359,9 +316,116 @@ __optional__|The amount of storage applied to thanos store stateful sets. Defaul
 |===
 |Name|Description|Schema
 |**key** +
-__required__|The key of the secret to select from. Must be a valid secret key.|string
+__required__|The key of the secret to select from. Must be a valid secret key. See https://thanos.io/tip/thanos/storage.md/[Thanos documentation].|string
 |**name** +
-__required__|Name of the `metricObjectStorage`.|string
+__required__|Name of the `metricObjectStorage`. See https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names[Kubernetes Names] for more information.|string
 |===
 
+[[_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_observabilityaddonspec]]
+**observabilityAddonSpec**
+
+[options="header", cols=".^2a,.^3a,.^4a"]
+|===
+|Name|Description|Schema
+|**enableMetrics** +
+__optional__|Indicates if the observability add-on sends metrics to the hub cluster. Default value is `true`.| boolean
+|**interval** +
+__optional__|Interval for when the observability add-on sends metrics to the hub cluster. Default value is 30 seconds (`30s`). |integer
+|**resources** +
+__optional__|Resource for the metrics collector resource requirement.
+The default CPU request is `100m`, memory request is `100Mi`. The default CPU limit is `100m`, memory limit is `600Mi`.
+|===
+
+[[_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_observabilityadvanced,advanced]]
+**advanced**
+
+[options="header", cols=".^2a,.^3a,.^4a"]
+|===
+|Name|Description|Schema
+|**retentionConfig** +
+__required__|Specifies the data retention configuration to be used by observability.|`RetentionConfig`
+|**rbacQueryProxy** +
+__optional__|Specifies the replicas and resources for the rbac-query-proxy deployment.|CommonSpec
+|**grafana** +
+__optional__|Specifies the replicas and resources for the grafana deployment|CommonSpec
+|**alertmanager** +
+__optional__|Specifies the replicas and resources for alertmanager statefulset.|CommonSpec
+|**observatoriumAPI** +
+__optional__|Specifies the replicas and resources for the `observatorium-api` deployment.|CommonSpec
+|**queryFrontend** +
+__optional__|Specifies the replicas and resources for the query-frontend deployment.|CommonSpec
+|**query** +
+__optional__|Specifies the replicas and resources for the query deployment.|CommonSpec
+|**receive** +
+__optional__|Specifies the replicas and resources for the receive statefulset.|CommonSpec
+|**rule** +
+__optional__|Specifies the replicas and resources for rule statefulset.|CommonSpec
+|**store** +
+__optional__|Specifies the replicas and resources for the store statefulset.|CommonSpec
+|**compact** +
+__optional__|Specifies the resources for compact statefulset.|<<_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_compact,compact>>
+|**storeMemcached** +
+__optional__|Specifies the replicas, resources, etc. for store-memcached.|<<_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_cacheconfig,storeMemcached>>
+|**queryFrontendMemcached** +
+__optional__|Specifies the replicas, resources, etc for query-frontend-memcached.|CacheConfig
+|===
+
+[[_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_observabilityretention,retentionConfig]]
+**retentionConfig**
+
+[options="header", cols=".^2a,.^3a,.^4a"]
+|===
+|Name|Description|Schema
+|**blockDuration** + 
+_optional_|The amount of time to block the duration for Time Series Database (TSDB) block. Default value is `2h`.|string
+|**cleanupInterval** +
+_optional_|The frequency of how often partially uploaded blocks are cleaned, and how often blocks with the deletion mark that have `--wait` enabled are cleaned. Default value is `5m`.|string
+|**deleteDelay** +
+_optional_|The amount of time until a block marked for deletion is deleted from a bucket. Default value is `48h`.|string
+|**retentionInLocal** +
+_optional_|The amount of time to retain raw samples from the local storage. Default value is `24h`.|string
+|**retentionResolutionRaw** +
+__optional__|The amount of time to retain raw samples of resolution in a bucket. Default value is 30 days (`30d`)|string
+|**retentionResolution5m** +
+__optional__|The amount of time to retain samples of resolution 1 (5 minutes) in a bucket. Default value is 180 days (`180d`).|string
+|**retentionResolution1h** +
+__optional__|The amount of time to retain samples of resolution 2 (1 hour) in a bucket. Default value is 0 days (`0d`).|string
+|===
+
+[[_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_compact,compact]]
+**compact**
+
+[options="header", cols=".^2a,.^3a,.^4a"]
+|===
+|Name|Description|Schema
+|**resources** + 
+_optional_|Compute resources required by MultiCLusterObservability.|corev1.ResourceRequirements
+|===
+
+[[_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_cacheconfig,storeMemcached]]
+**storeMemcached**
+
+[options="header", cols=".^2a,.^3a,.^4a"]
+|===
+|Name|Description|Schema
+|**resources** + 
+_optional_|Compute resources required by MultiCLusterObservability.|corev1.ResourceRequirements
+|**replicas** +
+__optional__|Replicas for MultiClusterObservability.|integer
+|**memoryLimitMb** +
+__optional__|Memory limit of Memcached in megabytes.|integer
+|**maxItemSize** +
+__optional__|Max item size of Memcached. The default value is `1m, min:1k, max:1024m`.|string
+|**connectionLimit** +
+__optional__|Max simultaneous connections of Memcached. The default value is |integer
+|===
+
+[[_rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability_status,status]]
+**status**
+
+[options="header", cols=".^2a,.^3a,.^4a"]
+|===
+|Name|Description|Schema
+|**status** + 
+__optional__|Status contains the different condition statuses for MultiClusterObservability.|metav1.Condition
 
