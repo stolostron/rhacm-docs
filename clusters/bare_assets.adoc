@@ -6,9 +6,9 @@ Bare metal assets are virtual or physical servers that you configure to run your
 
 The hub cluster inventory controller defines a custom resource definition (CRD) called `BareMetalAsset`, that holds the bare metal asset inventory record. When provisioning a managed cluster, the inventory controller reconciles `BareMetalAsset` inventory records with corresponding `BareMetalHost` resources in the managed cluster.
 
-{product-title-short} uses `BareMetalAsset` CR's to provision cluster hardware based on records entered in a configuration management database (CMDB) or similar system. An external tool or automation polls the CMDB and uses the {product-title-short} API to create corresponding `BareMetalAsset` and corresponding `Secret` resources in a hub cluster for subsequent deployment in a managed cluster.
+{product-title-short} uses `BareMetalAsset` CRs to provision cluster hardware based on records entered in a configuration management database (CMDB), or similar system. An external tool or automation polls the CMDB and uses the {product-title-short} API to create corresponding `BareMetalAsset` and corresponding `Secret` resources in a hub cluster for subsequent deployment in a managed cluster.
 
-Use the following procedures to create and manage bare metal assets for clusters managed by {product-title}.
+Use the following procedures to create and manage bare metal assets for clusters managed by {product-title-short}.
 
 * <<bma-prerequisites,Prerequisites>>
 * <<creating-a-bare-metal-asset-with-the-console,Creating a bare metal asset with the console>>
@@ -23,9 +23,10 @@ Use the following procedures to create and manage bare metal assets for clusters
 
 You need the following prerequisites before creating a bare metal asset:
 
-* A deployed {product-title} hub cluster on {ocp-short} version 4.5, or later.
+* A deployed {product-title-short} hub cluster on {ocp-short} version 4.6, or later.
 * Access for your {product-title-short} hub cluster to connect to the bare metal asset.
 * A configured bare metal asset, and log in credentials with the required permissions to log in and manage it.
++
 *Note:* Credentials for your bare metal asset include the following items for the asset that are provided by your administrator:
  ** user name
  ** password
@@ -38,7 +39,7 @@ You need the following prerequisites before creating a bare metal asset:
 To create a bare metal asset using the {product-title} console, complete the following steps:
 
 . From the navigation menu, navigate to *Automate infrastructure* > *Bare metal assets*.
-. On the _Bare metal assets_ page, Click *Create bare metal asset*.
+. On the _Bare metal assets_ page, click *Create bare metal asset*.
 . Enter a name for your asset that identifies it when you create a cluster.
 . Enter the namespace where you want to create the bare metal asset.
 +
@@ -53,26 +54,27 @@ The following protocols are supported:
  ** iRMC, see https://sp.ts.fujitsu.com/dmsp/Publications/public/ds-irmc-s5-en.pdf[Data Sheet: FUJITSU Software ServerView Suite integrated Remote Management Controller - iRMC S5] for more information.
  ** Redfish, see https://www.dmtf.org/sites/default/files/standards/documents/DSP0266_1.8.0.pdf[Redfish specification] for more information.
 . Enter the username and password for the bare metal asset.
-. Add the boot NIC MAC address for the bare metal asset.
-This is the MAC address of the host's network-connected NIC that is used to provision the host on the bare metal asset.
+. Add the boot NIC MAC address for the bare metal asset. This is the MAC address of the host's network-connected NIC that is used to provision the host on the bare metal asset.
 
 You can continue with xref:../clusters/create_bare.adoc#creating-a-cluster-on-bare-metal[Creating a cluster on bare metal].
 
 [#creating-a-bare-metal-asset-with-oc]
 == Creating a bare metal asset using the CLI
 
-Use a `BareMetalAsset` CR to create a bare metal asset for a particular namespace in the cluster. Each `BareMetalAsset` also has a corresponding `Secret` that contains the Baseboard Management Controller (BMC) credentials and the secret name.
+Use a `BareMetalAsset` CR to create a bare metal asset for a particular namespace in the cluster. Each `BareMetalAsset` also has a corresponding `Secret` that contains the Baseboard Management Controller (BMC) credentials and the secret name in the same namespace.
 
-.Prerequisites
+[#bma-cli-prereq]
+=== Prerequisites
 
 * Install {product-title} on a hub cluster.
-* Install the OpenShift CLI (oc).
+* Install the Red Hat OpenShift CLI (oc).
 * Log in as a user with `cluster-admin` privileges.
 
-.Procedure
+[#bma-cli-proced]
+=== Create the bare metal asset
 
 . Install and provision a bare metal asset in your environment.
-. Power on the BMC, and get the IPMI or Redfish BMC address and MAC address for the hardware.
+. Power on the BMC, and note the IPMI or Redfish BMC address and MAC address for the hardware.
 . Create the following `BareMetalAsset` and `Secret` CR, and save the file as `baremetalasset-cr.yaml`:
 +
 [source,yaml]
@@ -80,15 +82,15 @@ Use a `BareMetalAsset` CR to create a bare metal asset for a particular namespac
 apiVersion: inventory.open-cluster-management.io/v1alpha1
 kind: BareMetalAsset
 metadata:
-  name: baremetalasset-machine  <1>
-  namespace: <baremetalasset-namespace> <2>
+  name: <baremetalasset-machine>
+  namespace: <baremetalasset-namespace>
 spec:
   bmc:
-    address: ipmi://<out_of_band_ip>:<port>  <3>
+    address: ipmi://<out_of_band_ip>:<port> 
     credentialsName: baremetalasset-machine-secret
   bootMACAddress: "00:1B:44:11:3A:B7"
   hardwareProfile: "hardwareProfile"
-  role: "<role>"  <4>
+  role: "<role>"
   clusterName: "<cluster name>"  <5>
 ---
 apiVersion: v1
@@ -101,11 +103,13 @@ data:
   password: <password>
 ----
 +
-<1> When created, the `BareMetalHost` on the managed cluster gets the same name as the corresponding `BareMetalAsset` on the hub cluster. The `BareMetalHost` name should always match the corresponding `BareMetalAsset` name.
-<2> Cluster namespace where the bare metal asset is created.
-<3> For redfish addressing, use the following address format: `redfish://<out-of-band-ip>/redfish/v1/Systems/1`
-<4> Can be either "worker", "master", or "". The `role` setting is used to match a bare metal asset to specific machine roles types in the cluster. `BareMetalAsset` resources with a specified machine role type should not be used to fill another role. The `role` value is used as the value for a label with key `inventory.open-cluster-management.io/role`. This enables a cluster management application or user to query for inventory that is intended for a particular role.
-<5> Used by a cluster management application or user to query for inventory that is associated with a particular cluster. Leave empty to create the bare metal asset without adding it to a cluster deployment.
+* Replace <baremetalasset-machine> with the name of the machine where the bare metal asset is located. When created, the `BareMetalHost` on the managed cluster gets the same name as the corresponding `BareMetalAsset` on the hub cluster. The `BareMetalHost` name should always match the corresponding `BareMetalAsset` name.
+* Replace `baremetalasset-namespace` with the cluster namespace where the bare metal asset is created.
+* Replace `out_of_band_ip` and `port` with the address and port for your bare metal asset. For Redfish addressing, use the following address format: `redfish://<out-of-band-ip>/redfish/v1/Systems/1`.
+* Replace `role` with `worker`, `master`, or ` `, depending on the machine role type. The `role` setting is used to match a bare metal asset to specific machine role types in the cluster. `BareMetalAsset` resources with a specified machine role type should not be used to fill another role. The `role` value is used as the value for a label with key `inventory.open-cluster-management.io/role`. This enables a cluster management application or user to query for inventory that is intended for a particular role.
+* Replace `cluster_name` with the name of your cluster, which is used by the cluster management application or user to query for inventory that is associated with a particular cluster. Leave this value empty to create the bare metal asset without adding it to a cluster deployment.
+* Replace `username` with the username for your secret.
+* Replace `password` with the password for your secret.
 
 . Run the following command to create the `BareMetalAsset` CR:
 +
@@ -133,15 +137,19 @@ ocp-example-bm      csv-f24-h27-000-r630-master-1-1   4d21h
 
 You can import bare metal assets in bulk using the {product-title} console using a CSV formatted list.
 
-.Prerequisites
+[#bma-bulk-prereq]
+=== Prerequisites
 
-* Install {product-title} on a hub cluster that manages one or more spoke clusters.
+* Install {product-title-short} on a hub cluster that manages one or more spoke clusters.
 * Install the {ocp-short} CLI (oc).
 * Log in as a user with `cluster-admin` privileges.
 
-To import a set of bare metal assets, do the following:
+[#bma-bulk-import]
+=== Import the assets
 
-. From the {product-title} console, click on the navigation menu, and select *Cluster management* > *Bare metal assets*.
+To import a set of bare metal assets, complete the following steps:
+
+. From the {product-title-short} console, select *Cluster management* > *Bare metal assets* in the navigation menu.
 . Select *Import assets*, and import the CSV file that contains the bare metal assets data. The CSV file must have the following header columns:
 +
 [source,csv]
@@ -175,7 +183,8 @@ To remove a bare metal asset in the console, complete the following steps:
 
 You can use the {ocp-short} REST API to manage bare metal assets for use in your {product-title-short} cluster. This is useful when you have a separate CMDB application or database to manage the bare metal assets in your environment.
 
-.Prerequisites
+[#bma-create-rest-prereq]
+=== Prerequisites
 
 * Install {product-title} on a hub cluster.
 * Install the {ocp-short} CLI (oc).
@@ -217,15 +226,12 @@ $ curl --location --request POST '<hub_cluster_api_url>:6443/apis/inventory.open
 }'
 ----
 +
-[NOTE]
-====
-For the above curl command, it is assumed that the API server is served over HTTPS and is accessed securely. In a development or test environment, you can pass the `--insecure` parameter.
-====
+* Replace <baremetalasset-name> with the name of the bare metal asset. When created, the `BareMetalHost` on the managed cluster gets the same name as the corresponding `BareMetalAsset` on the hub cluster. The `BareMetalHost` name should always match the corresponding `BareMetalAsset` name.
+* Replace `baremetalasset-namespace` with the cluster namespace where the bare metal asset is created.
+* Replace `out_of_band_ip` and `port` with the address and port for your bare metal asset. For Redfish addressing, use the following address format: `redfish://<out-of-band-ip>/redfish/v1/Systems/1`.
+* Replace `role` with `worker`, `master`, or ` `, depending on the machine role type. The `role` setting is used to match a bare metal asset to specific machine role types in the cluster. `BareMetalAsset` resources with a specified machine role type should not be used to fill another role. The `role` value is used as the value for a label with key `inventory.open-cluster-management.io/role`. This enables a cluster management application or user to query for inventory that is intended for a particular role.
+* Replace `cluster_name` with the name of your cluster, which is used by the cluster management application or user to query for inventory that is associated with a particular cluster. Leave this value empty to create the bare metal asset without adding it to a cluster deployment.
++
+*Note:* For the previous curl command, it is assumed that the API server is served over HTTPS and is accessed securely. In a development or test environment, you can pass the `--insecure` parameter.
 
-[TIP]
-====
-You can append `--v=9` to an `oc` command to see the raw output of the resulting action. This can be useful for ascertaining the REST API route for an `oc` command.
-====
-
-
-
+*Tip:* You can append `--v=9` to an `oc` command to see the raw output of the resulting action. This can be useful for ascertaining the REST API route for an `oc` command.
