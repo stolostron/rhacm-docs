@@ -27,13 +27,17 @@ Continue reading to learn more about certificate management:
 ** <<rotating-the-gatekeeper-webhook-certificate,Rotating the gatekeeper webhook certificate>>
 ** <<rotating-the-integrity-shield-webhook-certificate,Rotating the integrity shield webhook certificate (Technology preview)>>
 ** <<observability-certificates,Observability certificates>>
+*** <<observability-byo-certificates,Bring Your Own (BYO) observability certificate authority (CA) certificates>>
+*** <<openssl-commands-ca,OpenSSL commands to generate CA certificate>>
+*** <<create-secrets-byo-certs,Create the secrets associated with the BYO observability CA certificates>>
+*** <<replacing-cert-alertmanager,Replacing certificates for alertmanager route>>
 ** <<channel-certificates,Channel certificates>>
 ** <<managed-cluster-certificates,Managed cluster certificates>>
 
 [#list-managed-certificates]
 == List managed certificates
 
-You can view a list of managed certificates that use https://docs.openshift.com/container-platform/4.7/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates] service internally.
+You can view a list of managed certificates that use https://docs.openshift.com/container-platform/4.7/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates] service internally. Run the following command to list the certificates: `oc get secret -n open-cluster-management -o custom-columns=Name:.metadata.name,Expiration:.metadata.annotations.service\\.beta\\.openshift\\.io/expiry | grep -v '<none>'`
 
 *Note*: If observability is enabled, there are additional namespaces where certificates are created.
 
@@ -45,6 +49,8 @@ You can refresh a managed certificate by running the command in the <<list-manag
 ----
 oc delete secret grc-0c925-grc-secrets -n open-cluster-management
 ----
+
+*Note*: After you delete the secret a new one is created, but you must restart pods that use the secret manually so they can begin to use the new certificate.
 
 [#refresh-internal-certificates]
 == Refresh internal certificates
@@ -160,17 +166,74 @@ oc delete po -n integrity-shield-operator-system integrity-shield-server-5fbdfbb
 [#observability-certificates]
 === Observability certificates
 
-When {product-title-short} is installed there are additional namespaces where certificates are managed. The `open-cluster-management-observability` namespace and the `managedcluster` namespaces contain certificates managed by https://docs.openshift.com/container-platform/4.7/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates] for the observability service.
+After {product-title-short} is installed, observability certificates are created and used by the observability components, to provide mutual TLS on the traffic between the hub cluster and managed cluster. The Kubernetes secrets that are associated with the observability certificates. 
 
-Observability certificates on managed clusters are automatically refreshed upon expiration. View the following list to understand the effects when certificates are automatically renewed:
+The `open-cluster-management-observability` namespace contain the following certificates:
 
-* https://docs.openshift.com/container-platform/4.7/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates] manages certificates for processes that run on your hub cluster.
+* `observability-server-ca-certs`: Has the CA certificate to sign server-side certificates
+* `observability-client-ca-certs`: Has the CA certificate to sign client-side certificates
+* `observability-server-certs`: Has the server certificate used by the `observability-observatorium-api` deployment
+* `observability-grafana-certs`: Has the client certificate used by the `observability-rbac-query-proxy` deployment 
 
-* {product-title-short} supports the management of certificates for managed clusters.
 
-* The `metrics-collector` restarts to mount the renewed certificates.
+The `open-cluster-management-addon-observability` namespace contain the following certificates on managed clusters:
+
+* `observability-managed-cluster-certs`: Has the same server CA certificate as `observability-server-ca-certs` in the hub server
+* `observability-controller-open-cluster-management.io-observability-signer-client-cert`: Has the client certificate used by the `metrics-collector-deployment` 
+
+
+The CA certificates are valid for five years and other certificates are valid for one year. All observability certificates are automatically refreshed upon expiration.
+
+View the following list to understand the effects when certificates are automatically renewed:
+
+* Non-CA certificates are renewed automatically when the remaining valid time is no more than 73 days. After the certificate is renewed, the pods in the related deployments restart automatically to use the renewed certificates.
+
+* CA certificates are renewed automatically wehn the remainging valid time is no more than one year. After the certificate is renewed, the old CA is not deleted bu co-exist with the renewed ones. Both old and renewed certificates are used by related deployments, and continue to work. The old CA certificates are deleted when they expire.
+
+* When a certificate is renewed, the traffic between the hub cluster and managed cluster is not interrupted.
+
+[#observability-byo-certificates]
+==== Bring Your Own (BYO) observability certificate authority (CA) certificates
+
+If you do not want to use the default observability CA certificates generated by {product-title-short}, you can choose to use the BYO observability CA certificates before you enable observability.
+
+[#openssl-commands-ca]
+==== OpenSSL commands to generate CA certificate
+
+Observability requires two CA certificates; one is for the server-side and the other is for the client-side.
+
+* Generate your CA RSA private keys with the following commands:
 +
-*Note:* `metrics-collector` can push metrics to the hub cluster before and after certificates are removed. For more information about refreshing certificates across your clusters, see the <<refresh-internal-certificates,Refresh internal certificates>> section. Be sure to specify the appropriate namespace when you refresh a certificate.
+----
+openssl genrsa -out serverCAKey.pem 2048
+
+openssl genrsa -out clientCAKey.pem 2048
+----
+
+* Generate the self-signed CA certificates using the private keys. Run the following commands:
++
+----
+openssl req -x509 -sha256 -new -nodes -key serverCAKey.pem -days 1825 -out serverCACert.pem
+
+openssl req -x509 -sha256 -new -nodes -key clientCAKey.pem -days 1825 -out clientCACert.pem
+----
+
+[#create-secrets-byo-certs]
+==== Create the secrets associated with the BYO observability CA certificates
+
+Complete the following steps to create the secrets:
+
+. Create the `observability-server-ca-certs` secret by using your certificate and private key. Run the following command:
++
+----
+oc -n open-cluster-management-observability create secret tls observability-server-ca-certs --cert ./serverCACert.pem --key ./serverCAKey.pem
+----
+
+. Create the `observability-client-ca-certs` secret by using your certiicate and private key. Run the following command:
++
+----
+oc -n open-cluster-management-observability create secret tls observability-client-ca-certs --cert ./clientCACert.pem --key ./clientCAKey.pem
+----
 
 [#replacing-cert-alertmanager]
 ==== Replacing certificates for alertmanager route
