@@ -1,19 +1,19 @@
 [#submariner]
-= Submariner
+== Submariner networking service (Technology preview)
 
-The `submariner-addon` component is a *technology preview* feature. 
+The `submariner-addon` component is a *technology preview* feature.
 
-Submariner is an open source tool that can be used with {product-title} to provide direct networking between two or more Kubernetes clusters in your environment, either on-premises or in the cloud. For more information about Submariner, see https://submariner.io/[Submariner].
+The _Submariner_ service is an open source tool that can be used with {product-title} to provide direct networking between pods across two or more Kubernetes clusters in your environment, either on-premises or in the cloud. For more information about Submariner, see https://submariner.io/[Submariner].
 
 You can enable Submariner on the {ocp-short} clusters that are hosted in the following environments:
 
-* Amazon Web Services
+* Amazon Web Services (AWS)
 * Google Cloud Platform
 * Microsoft Azure
 * IBM Cloud
-* VMware vSphere
-* Bare metal
 * Red Hat OpenShift Dedicated
+* VMware vSphere
+
 
 {product-title} provides a Submariner component that you can deploy in your environment by using your hub cluster. 
 
@@ -28,16 +28,33 @@ You can enable Submariner on the {ocp-short} clusters that are hosted in the fol
 
 Ensure that you have the following prerequisites before using Submariner:
 
-* A {product-title-short} hub cluster that is running on {ocp} version 4.5, or later, with Kubernetes version 1.17, or later.
-* A credential for accessing the hub cluster with `cluster administrator` permissions.
+* A {product-title-short} hub cluster that is running on {ocp} version 4.6, or later, with Kubernetes version 1.19, or later.
+* A credential to access the hub cluster with `cluster-admin` permissions.
 * Two or more {ocp-short} managed clusters that are running on {ocp-short} version 4.4, or later, with Kubernetes version 1.17, or later, and are managed by the {product-title-short} hub cluster.
 * Pod and Service Classless Inter-Domain Routing (CIDR) between the clusters that do not overlap.
 * IP connectivity must be configured between the Gateway nodes. When connecting two clusters, at least one of the clusters must have a publicly routable IP address designated to the Gateway node.
 * Firewall configuration across all nodes in each of the managed clusters must allow 4800/UDP in both directions. 
+* Firewall configuration on the Gateway nodes must allow ingress 8080/TCP so the other nodes in the cluster can access it. 
+* Firewall configuration open for 4500/UDP, 500/UDP, and any other ports that are used for IPSec traffic on the gateway nodes.
 +
-*Note:* This is configured automatically when your clusters are deployed in an Amazon Web Services environment, but must be configured manually for clusters on other environments and for the firewalls that protect private clouds like bare metal and VMware vSphere. 
-* Firewall configuration on the Gateway nodes allows ingress 8080/TCP so the other nodes in the cluster can access it. 
-* Firewall configuration open for UDP/4500, UDP/500, and any other ports that are used for IPSec traffic on the gateway nodes.
+*Note:* This is configured automatically when your clusters are deployed in an AWS or Google Cloud Platform environment, but must be configured manually for clusters on other environments and for the firewalls that protect private clouds. 
++
+.Submariner required ports
+|===
+| Name | Default value | Customizable 
+
+| IPSec IKE
+| 500/UDP
+| Yes
+
+| IPSec NATT
+| 4500/UDP
+| Yes
+
+| VXLAN (VMware vSphere only)
+| 4800/UDP
+| No
+|===
 
 See https://submariner.io/getting-started/#prerequisites[Submariner prerequisites] for more detailed information about the prerequisites.
 
@@ -172,7 +189,6 @@ Replace `nsg-name` with your NSG name.
 Replace `priority` with your rule priority.
 +
 Replace `name` with your rule name.
-+
 
 [#preparing-ibm]
 === Preparing IBM Cloud to deploy Submariner
@@ -181,11 +197,11 @@ There are two kinds of Red Hat OpenShift Kubernetes Service (ROKS) on IBM Cloud:
 
 To configure the ROKS clusters on a VPC to use Submariner, complete the steps in the following links:
 
-. Before creating a cluster, specify subnets for pods and services, which avoids overlapping CIDRs with other clusters. Make sure there are no overlapping pods and services CIDRs between clusters if you are using an existing cluster.See https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics[VPC Subnets] for the procedure. 
+. Before you create a cluster, specify subnets for pods and services, which avoids overlapping CIDRs with other clusters. Make sure there are no overlapping pods and services CIDRs between clusters if you are using an existing cluster. See https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics[VPC Subnets] for the procedure. 
 
 . Attach a public gateway to subnets used in the cluster. See https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics_pgw[Public Gateway] for the procedure. 
 
-. Create inbound rules for the default security group of the cluster by completing the steps in https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-network-policy#security_groups_ui[Security Group]. Ensure that the firewall allows inbound and outbound traffic on UDP/4500 and UDP/500 ports for Gateway nodes, and allows inbound and outbound UDP/4800 for all the other nodes.
+. Create inbound rules for the default security group of the cluster by completing the steps in https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-network-policy#security_groups_ui[Security Group]. Ensure that the firewall allows inbound and outbound traffic on 4500/UDP and 500/UDP ports for Gateway nodes, and allows inbound and outbound UDP/4800 for all the other nodes.
 
 . Label a node that has the public gateway as `submariner.io/gateway=true` in the cluster.
 

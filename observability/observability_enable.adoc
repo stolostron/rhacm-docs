@@ -67,13 +67,17 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: thanos-object-storage
-type: s3
-config:
-  bucket: YOUR_S3_BUCKET
-  endpoint: YOUR_S3_ENDPOINT
-  insecure: true
-  access_key: YOUR_ACCESS_KEY
-  secret_key: YOUR_SECRET_KEY
+  namespace: open-cluster-management-observability
+type: Opaque
+stringData:
+  thanos.yaml: |
+    type: s3
+    config:
+      bucket: YOUR_S3_BUCKET
+      endpoint: YOUR_S3_ENDPOINT
+      insecure: true
+      access_key: YOUR_ACCESS_KEY
+      secret_key: YOUR_SECRET_KEY
 ----
 
 ... For Amazon S3 or S3 compatible, your secret might resemble the following file:
@@ -83,6 +87,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: thanos-object-storage
+  namespace: open-cluster-management-observability
 type: Opaque
 stringData:
   thanos.yaml: |
@@ -90,10 +95,9 @@ stringData:
     config:
       bucket: YOUR_S3_BUCKET
       endpoint: YOUR_S3_ENDPOINT
-      insecure: false
+      insecure: true
       access_key: YOUR_ACCESS_KEY
       secret_key: YOUR_SECRET_KEY
-
 ----
 +
 For more details, see https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html[Amazon Simple Storage Service user guide].
@@ -105,10 +109,14 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: thanos-object-storage
-type: GCS
-config:
-  bucket: YOUR_GCS_BUCKET
-  service_account: YOUR_SERVICE_ACCOUNT
+  namespace: open-cluster-management-observability
+type: Opaque
+stringData:
+  thanos.yaml: |
+    type: GCS
+      config:
+        bucket: YOUR_GCS_BUCKET
+        service_account: YOUR_SERVICE_ACCOUNT
 ----
 +
 For more details, see https://cloud.google.com/storage/docs/introduction[Google Cloud Storage].
@@ -120,13 +128,17 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: thanos-object-storage
-type: AZURE
-config:
-  storage_account: YOUR_STORAGE_ACCT
-  storage_account_key: YOUR_STORAGE_KEY
-  container: YOUR_CONTAINER
-  endpoint: YOUR_ENDPOINT
-  max_retries: 0
+  namespace: open-cluster-management-observability
+type: Opaque
+stringData:
+  thanos.yaml: |
+    type: AZURE
+      config:
+        storage_account: YOUR_STORAGE_ACCT
+        storage_account_key: YOUR_STORAGE_KEY
+        container: YOUR_CONTAINER
+        endpoint: YOUR_ENDPOINT
+        max_retries: 0
 ----
 +
 For more details, see https://docs.microsoft.com/en-us/azure/storage/[Azure Storage documentation].
@@ -134,13 +146,21 @@ For more details, see https://docs.microsoft.com/en-us/azure/storage/[Azure Stor
 ... For OpenShift Container Storage, your secret might resemble the following file:
 +
 ----
-type: s3
-config:
-  bucket: YOUR_OCS_BUCKET
-  endpoint: YOUR_OCS_ENDPOINT
-  insecure: true
-  access_key: YOUR_OCS_ACCESS_KEY
-  secret_key: YOUR_OCS_SECRET_KEY
+apiVersion: v1
+kind: Secret
+metadata:
+  name: thanos-object-storage
+  namespace: open-cluster-management-observability
+type: Opaque
+stringData:
+  thanos.yaml: |
+    type: s3
+    config:
+      bucket: YOUR_OCS_BUCKET
+      endpoint: YOUR_OCS_ENDPOINT
+      insecure: true
+      access_key: YOUR_OCS_ACCESS_KEY
+      secret_key: YOUR_OCS_SECRET_KEY
 ----
 +
 For more details, see https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.7/html/deploying_openshift_container_storage/deploying-openshift-container-storage-on-openshift-container-platform_rhocs#installing-openshift-container-storage-operator-using-the-operator-hub_aws-vmware[Installing OpenShift Container Storage].
@@ -176,32 +196,13 @@ View the following default YAML file for observability:
 apiVersion: observability.open-cluster-management.io/v1beta2
 kind: MultiClusterObservability
 metadata:
-  name: observability # Your customized name of MultiClusterObservability CR
+  name: observability
 spec:
-  enableDownsampling: true # The default value is true. This is recommended as querying long-time ranges downsampled data is efficient and useful
-  imagePullPolicy: Always
-  imagePullSecret: multiclusterhub-operator-pull-secret
-  observabilityAddonSpec: # The ObservabilityAddonSpec defines the global settings for all managed clusters which have observability add-on enabled
-    enableMetrics: true # EnableMetrics indicates the observability addon push metrics to hub server
-    interval: 30 # Interval for the observability addon push metrics to hub server
-  retentionConfig:
-    blockDuration: 2h # Block duration for TSDB block
-    cleanupInterval: 5m # How often we should clean up partially uploaded blocks and blocks with deletion mark in the background when --wait has been enabled
-    deleteDelay: 48h # Time before a block marked for deletion is deleted from bucket
-    retentionInLocal: 4d # How long to retain raw samples on local storage
-    retentionResolution1h: 30d # How long to retain samples of 1 hour in bucket
-    retentionResolution5m: 14d # How long to retain samples of 5 minutes in bucket
-    retentionResolutionRaw: 5d # How long to retain raw samples in bucket
-  storageConfig: # Specifies the storage to be used by Observability
-    alertmanagerStorageSize: 1Gi # The amount of storage applied to alertmanager stateful sets
-    compactStorageSize: 100Gi # The amount of storage applied to thanos compact stateful sets
-    metricObjectStorage: # Configuring access to object storage
-      key: thanos.yaml
+  observabilityAddonSpec: {}
+  storageConfig:
+    metricObjectStorage:
       name: thanos-object-storage
-    receiveStorageSize: 100Gi # The amount of storage applied to thanos receive stateful sets
-    ruleStorageSize: 1Gi # The amount of storage applied to thanos rule stateful sets
-    storageClass: gp2 # Specify the storage class for stateful sets
-    storeStorageSize: 10Gi # The amount of storage applied to thanos store stateful sets
+      key: thanos.yaml
 ----
 +
 You might want to modify the value for the `retentionConfig` parameter. For more information, see https://thanos.io/v0.8/components/compact/#downsampling-resolution-and-retention[Thanos Downsampling resolution and retention]. Depending on the number of managed clusters, you might want to update the amount of storage for stateful sets, see link:../apis/observability.json.adoc#observability-api[Observability API] for more information.
@@ -235,7 +236,7 @@ The observability service is enabled.
 [#disabling-observability-resource]
 == Disabling observability
 
-To disable the observability service, uninstall the `observability` resource. See step 1 of link:../install/#removing-a-multiclusterhub-instance-by-using-commands[Removing a MultiClusterHub instance by using commands] for the procedure.
+To disable the observability service, uninstall the `observability` resource. See step 1 of link:../install/installing#removing-a-multiclusterhub-instance-by-using-commands[Removing a MultiClusterHub instance by using commands] for the procedure.
 
 To learn more about customizing the observability service, see xref:../observability/customize_observability.adoc#customizing-observability[Customizing observability].
 
