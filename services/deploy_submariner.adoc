@@ -5,64 +5,53 @@ The `submariner-addon` component is a *technology preview* feature.
 
 Complete the following steps to deploy Submariner:
 
-. Log on to your hub cluster with cluster administrator permissions.
+. From the console navigation menu, click *Clusters*.
 
-. Ensure that you have completed the required preparations. See xref:../services/submariner.adoc#submariner[Submariner] for the requirements.
+. On the Clusters page, select the *Cluster sets* tab. The clusters that you want enable with Submariner must be in the same cluster set. 
 
-. Create a `ManagedClusterSet` on the hub cluster by using the instructions provided in link:../clusters/custom_resource.adoc#managedclustersets[ManagedClusterSets]. Your entry for the `ManagedClusterSet` should resemble the following content:
-+ 
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1alpha1
-kind: ManagedClusterSet
-metadata:
-  name: <ManagedClusterSet-name>
-----
-Replace `ManagedClusterSet-name` with a name for the `ManagedClusterSet` that you are creating.
+. If the clusters where you want to deploy Submariner are already in the same cluster set, skip to step 5 to deploy Submariner.
+
+. If the clusters where you want to deploy Submariner are not in the same cluster set, create a cluster set for them by completing the following steps: 
+
+.. Select *Create cluster set*.
+
+.. Name the cluster set. 
+
+.. Add the managed clusters that you want to connect with Submariner to the cluster set.
+
+.. Save the cluster set.
+
+. On the cluster set page, select the clusters in the cluster set that you want to deploy Submariner on. 
+
+. Select the *Submariner add-ons* tab.
+
+. Select *Install Submariner add-ons*.
+
+. Select the clusters on which you want to deploy Submariner. 
+
+. Enter the following information in the *Install Submariner add-ons* wizard:
 +
-After the managed cluster set is created, the `submariner-addon` creates a namespace called `<ManagedClusterSet-name>-broker`, and deploys the Submariner broker to it. 
+* `AWS Access Key ID` - This field is only visible when you import an AWS cluster.
+* `AWS Secret Access Key` - This field is only visible when you import an AWS cluster.
+* `Google Cloud Platform service account JSON key` - This field is only visible when you import a Google Cloud Platform cluster.
+* `Instance type` - The Amazon Web Services EC2 instance type of the gateway node that is created on the managed cluster. The default value is `m5n.large`. This field is only visible when your managed cluster environment is AWS.
+* `IPsec IKE port` - The Submariner creates the IPsec tunnel between the clusters. This port allows Internet Key Exchange (IKE) protocol traffic on the Submariner gateway node to set up the IPsec tunnel. The default value is port `500`. If your managed cluster environment is VMware vSphere, ensure that this port is opened on your firewalls.
+* `IPsec NAT-T port` - The Submariner creates the IPsec tunnel between the clusters.  This port is used for IPsec NAT traversal. The default value is port `4500`. If your managed cluster environment is VMware vSphere, ensure that this port is opened on your firewalls.
+* `Gateway count` - The number of worker nodes that are used to deploy the Submariner gateway component on your managed cluster. The default value is `1`. If the value is greater than 1, the Submariner gateway HA is automatically enabled.
+* `Cable driver` - The Submariner gateway cable driver.
+
+. Select *Next* at the end of the wizard to move to the wizard for the next cluster.
+
+. Complete the wizard for each of the clusters that you selected. 
+
+. Verify your configuration for each managed cluster.
+
+. Click *Install* to deploy Submariner on the selected managed clusters. 
 +
-*Note:* The maximum length of the Kubernetes namespace is 63 characters, so the maximum length of the `ManagedClusterSet-name` variable must be 56 characters or less. If the length of the `ManagedClusterSet-name` variable exceeds 56, the `ManagedClusterSet-name` variable is truncated from the head.
-
-. Add one managed cluster to the managed cluster set by entering the following command:
+After Submariner is installed, you can check the Submariner status in the list on the *Submariner add-ons* tab.
 +
-----
-oc label managedclusters <managedcluster-name> "cluster.open-cluster-management.io/clusterset=<ManagedClusterSet-name>" --overwrite
-----
-Replace `_managedcluster-name_` with the name of the managed cluster that you want to add to the managed cluster set.
-Replace `_ManagedClusterSet-name_` with the name of the `ManagedClusterSet` where you want to add the managed cluster.
-
-. Deploy Submariner on the managed cluster by entering the following command:
+* `Connection status` indicates how many Submariner connections are established on the managed cluster. 
 +
-----
-cat << EOF | oc apply -f -
-apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: ManagedClusterAddOn
-metadata:
-     name: submariner
-     namespace: <managedcluster-name>
-spec:
-    installNamespace: submariner-operator
-----
-Replace `managedcluster-name` with the name of the managed cluster that you want to use with Submariner.
+* `Agent status` indicates whether Submariner is successfully deployed on the managed cluster. 
 +
-The name of the `ManagedClusterAddOn` must be `submariner`. 
-+
-After the `ManagedClusterAddOn` is created, the `submariner-addon` deploys Submariner to the `submariner-operator` namespace on the managed cluster. You can view the deployment status of Submariner by viewing the status of this `ManagedClusterAddOn`.
-+
-*Note:* The `installNamespace` field in the spec of `ManagedClusterAddOn` is the namespace on the managed cluster where you want to install the Submariner. Submariner only supports `submariner-operator` as the name of the installation namespace. 
-
-. Repeat steps 4 and 5 for each of the managed clusters that you want to enable to communicate by using Submariner.
-
-After Submariner is deployed on the managed cluster, you can verify the Submariner deployment status by checking the status of submariner `ManagedClusterAddOn` by entering the following command:
-----
-oc -n <managedclsuter-name> get managedclusteraddons submariner -o yaml
-----
-Replace `managedclsuter-name` with the name of the managed cluster.
-
-The status of the Submariner `ManagedClusterAddOn`, reports one of the following three status conditions that indicate the deployment status of Submariner:
-
-* The `SubmarinerGatewayNodesLabeled` condition indicates whether there are labeled Submariner gateway nodes on the managed cluster.
-* The `SubmarinerAgentDegraded` condition indicates whether Submariner is successfully deployed on the managed cluster.
-* The `SubmarinerConnectionDegraded` condition indicates how many connections are established on the managed cluster with Submariner.
-
+* `Gateway nodes labeled` indicates how many worker nodes are labeled with the Submariner gateway label: `submariner.io/gateway=true` on the managed cluster.
