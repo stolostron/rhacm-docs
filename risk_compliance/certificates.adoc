@@ -14,164 +14,39 @@ After you create your certificates, you can replace certain certificates that ar
 All certificates required by services that run on {product-title-short} are created during the installation of {product-title-short}.
 Certificates are created and managed by the https://docs.openshift.com/container-platform/4.7/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates] service.  
 
-See the following topics to customize the management ingress certificate for {product-title-short}:
-//ACM external certs
-// Add a section called BYO certificates to list the sections that are related: Replacing management ingress and Observability certificates
-//new title or chapter name for Managing BYO certs or Hub cluster management certificates or Managing hub cluster certs 
-
+Continue reading to learn more about certificate management:
+ 
+*<<acm-certs,{product-title-short} hub cluster certificates>>*
 
 * xref:../risk_compliance/cert_mgmt_ingress.adoc#replacing-the-management-ingress-certificates[Replacing the management ingress certificates]
 * https://docs.openshift.com/container-platform/4.7/security/certificates/replacing-default-ingress-certificate.html[Replacing the OpenShift default ingress certificate]
-** <<observability-certificates,Observability certificates>>
-*** <<observability-byo-certificates,Bring Your Own (BYO) observability certificate authority (CA) certificates>>
-*** <<openssl-commands-ca,OpenSSL commands to generate CA certificate>>
-*** <<create-secrets-byo-certs,Create the secrets associated with the BYO observability CA certificates>>
-*** <<replacing-cert-alertmanager,Replacing certificates for alertmanager route>>
+* <<observability-certificates,Observability certificates>>
+** <<observability-byo-certificates,Bring Your Own (BYO) observability certificate authority (CA) certificates>>
+** <<openssl-commands-ca,OpenSSL commands to generate CA certificate>>
+** <<create-secrets-byo-certs,Create the secrets associated with the BYO observability CA certificates>>
+** <<replacing-cert-alertmanager,Replacing certificates for alertmanager route>>
+* <<refresh-acm-managed-certificate,Refresh hub cluster managed certificate>>
 
-Continue reading to learn more about certificate management: 
-// ACM component certs
-//list and refresh managed certs is related to OCP managed certs; created by OCP Operator 
+ 
+*<<acm-component-cert,{product-title-short} component certificates>>*
 
 * <<list-ocp-managed-certificates,List {ocp-short} managed certificates>>
 * <<refresh-ocp-a-managed-certificate,Refresh a {ocp-short} managed certificate>>
-//ACM managed certificates, ACM operators are creating the certs
-* <<refresh-internal-certificates,Refresh internal certificates>>
+
+
+*<<acm-managed-cert,{product-title-short} managed certificates>>*
+
 ** <<channel-certificates,Channel certificates>>
 ** <<managed-cluster-certificates,Managed cluster certificates>>
 
-//Third-party certs
+
+*<<third-party-cert,Third-party certificates>>*
+
 ** <<rotating-the-gatekeeper-webhook-certificate,Rotating the gatekeeper webhook certificate>>
 ** <<rotating-the-integrity-shield-webhook-certificate,Rotating the integrity shield webhook certificate (Technology preview)>>
 
-
-
-[#list-managed-certificates]
-== List managed certificates
-
-You can view a list of managed certificates that use https://docs.openshift.com/container-platform/4.7/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates] service internally. Run the following command to list the certificates: `oc get secret -n open-cluster-management -o custom-columns=Name:.metadata.name,Expiration:.metadata.annotations.service\\.beta\\.openshift\\.io/expiry | grep -v '<none>'`
-
-*Note*: If observability is enabled, there are additional namespaces where certificates are created.
-
-[#refresh-a-managed-certificate]
-== Refresh a managed certificate 
-
-You can refresh a managed certificate by running the command in the <<list-managed-certificates,List managed certificates>> section. When you identify the certificate that you need to refresh, delete the secret that is associated with the certificate. For example, you can delete a secret by running the following command:
-
-----
-oc delete secret grc-0c925-grc-secrets -n open-cluster-management
-----
-
-*Note*: After you delete the secret a new one is created, but you must restart pods that use the secret manually so they can begin to use the new certificate.
-
-[#refresh-internal-certificates]
-== Refresh internal certificates
-
-You can refresh internal certificates, which are certificates that are used by {product-title-short} webhooks and the proxy server. 
-
-Complete the following steps to refresh internal certificates:
-
-. Delete the secret that is associated with the internal certificate by running the following command:
-+
-----
-oc delete secret -n open-cluster-management ocm-webhook-secret
-----
-+
-*Note:* Some services might not have a secret that needs to be deleted.
-
-. Restart the services that are associated with the internal certificate(s) by running the following command:
-+
-----
-oc delete po -n open-cluster-management ocm-webhook-679444669c-5cg76
-----
-+
-*Remember:* There are replicas of many services; each service must be restarted.
-
-View the following table for a summarized list of the pods that contain certificates and whether a secret needs to be deleted prior to restarting the pod:
-
-.Pods that contain internal certificates
-|===
-| Service name | Namespace | Sample pod name | Secret name (if applicable)
-
-|  channels-apps-open-cluster-management-webhook-svc
-| open-cluster-management
-| multicluster-operators-application-8c446664c-5lbfk
-|-
-
-| multicluster-operators-application-svc
-| open-cluster-management
-| multicluster-operators-application-8c446664c-5lbfk
-| -
-
-| multiclusterhub-operator-webhook
-| open-cluster-management
-| multiclusterhub-operator-bfd948595-mnhjc
-| -
-
-| ocm-webhook
-| open-cluster-management
-| ocm-webhook-679444669c-5cg76
-| ocm-webhook-secret
-
-| cluster-manager-registration-webhook
-| open-cluster-management-hub
-| cluster-manager-registration-webhook-fb7b99c-d8wfc
-| registration-webhook-serving-cert
-
-| cluster-manager-work-webhook
-| open-cluster-management-hub
-| cluster-manager-work-webhook-89b8d7fc-f4pv8
-| work-webhook-serving-cert
-|===
-
-[#rotating-the-gatekeeper-webhook-certificate]
-=== Rotating the gatekeeper webhook certificate
-
-Complete the following steps to rotate the gatekeeper webhook certificate:
-
-. Edit the secret that contains the certificate with the following command: 
-+
-----
-oc edit secret -n openshift-gatekeeper-system gatekeeper-webhook-server-cert
-----
-
-. Delete the following content in the `data` section: `ca.crt`, `ca.key`, tls.crt`, and `tls.key`.
-
-. Restart the gatekeeper webhook service by deleting the `gatekeeper-controller-manager` pods with the following command:
-+
-----
-oc delete po -n openshift-gatekeeper-system -l control-plane=controller-manager
-----
-
-The gatekeeper webhook certificate is rotated. 
-
-[#rotating-the-integrity-shield-webhook-certificate]
-=== Rotating the integrity shield webhook certificate (Technology preview)
-
-Complete the following steps to rotate the integrity shield webhook certificate:
-
-. Edit the IntegrityShield custom resource and add the `integrity-shield-operator-system` namespace to the excluded list of namespaces in the `inScopeNamespaceSelector` setting. Run the following command to edit the resource:
-+
-----
-oc edit integrityshield integrity-shield-server -n integrity-shield-operator-system
-----
-
-. Delete the secret that contains the integrity shield certificate by running the following command:
-+
-----
-oc delete secret -n integrity-shield-operator-system ishield-server-tls
-----
-
-. Delete the operator so that the secret is recreated. Be sure that the operator pod name matches the pod name on your system. Run the following command:
-+
-----
-oc delete po -n integrity-shield-operator-system integrity-shield-operator-controller-manager-64549569f8-v4pz6
-----
-
-. Delete the integrity shield server pod to begin using the new certificate with the following command:
-+
-----
-oc delete po -n integrity-shield-operator-system integrity-shield-server-5fbdfbbbd4-bbfbz
-----
+[#acm-certs]
+== {product-title-short} hub cluster certificates
 
 [#observability-certificates]
 === Observability certificates
@@ -203,7 +78,7 @@ View the following list to understand the effects when certificates are automati
 * When a certificate is renewed, the traffic between the hub cluster and managed cluster is not interrupted.
 
 [#observability-byo-certificates]
-==== Bring Your Own (BYO) observability certificate authority (CA) certificates
+=== Bring Your Own (BYO) observability certificate authority (CA) certificates
 
 If you do not want to use the default observability CA certificates generated by {product-title-short}, you can choose to use the BYO observability CA certificates before you enable observability.
 
@@ -270,6 +145,96 @@ oc -n open-cluster-management-observability create secret tls alertmanager-byo-c
 
 For more information, see xref:../risk_compliance/cert_mgmt_ingress.adoc#openssl-commands-for-generating-a-certificate[OpenSSL commands for generating a certificate]. If you want to restore the default self-signed certificate for alertmanager route, see xref:../risk_compliance/cert_mgmt_ingress.adoc#restore-the-default-self-signed-certificate-for-management-ingress[Restore the default self-signed certificate for management ingress] to delete the two secrets in the `open-cluster-management-observability` namespace.
 
+
+[#refresh-acm-managed-certificate]
+=== Refresh hub cluster managed certificate 
+
+You can refresh a hub cluster managed certificate by running the command in the <<list-ocp-managed-certificates,List {ocp-short} managed certificates>> section. When you identify the certificate that you need to refresh, delete the secret that is associated with the certificate. For example, you can delete a secret by running the following command:
+
+----
+oc delete secret grc-0c925-grc-secrets -n open-cluster-management
+----
+
+*Note*: After you delete the secret a new one is created, but you must restart pods that use the secret manually so they can begin to use the new certificate.
+
+
+[#acm-component-cert]
+== {product-title-short} component certificates
+
+[#list-ocp-managed-certificates]
+=== List {ocp-short} managed certificates
+
+You can view a list of managed certificates that use https://docs.openshift.com/container-platform/4.7/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates] service internally. Run the following command to list the certificates: 
+
+----
+oc get secret -n open-cluster-management -o custom-columns=Name:.metadata.name,Expiration:.metadata.annotations.service\\.beta\\.openshift\\.io/expiry | grep -v '<none>'
+----
+
+*Note*: If observability is enabled, there are additional namespaces where certificates are created.
+
+[#refresh-ocp-a-managed-certificate]
+=== Refresh a {ocp-short} managed certificate
+
+You can refresh {ocp-short} managed certificates, which are certificates that are used by {product-title-short} webhooks and the proxy server. 
+
+Complete the following steps to refresh {ocp-short} managed certificates:
+
+. Delete the secret that is associated with the {ocp-short} managed certificate by running the following command:
++
+----
+oc delete secret -n open-cluster-management ocm-webhook-secret
+----
++
+*Note*: Some services might not have a secret that needs to be deleted.
+
+. Restart the services that are associated with the {ocp-short} managed certificate(s) by running the following command:
++
+----
+oc delete po -n open-cluster-management ocm-webhook-679444669c-5cg76
+----
++
+*Important*: There are replicas of many services; each service must be restarted.
+
+View the following table for a summarized list of the pods that contain certificates and whether a secret needs to be deleted prior to restarting the pod:
+
+.Pods that contain {ocp-short} managed certificates
+|===
+| Service name | Namespace | Sample pod name | Secret name (if applicable)
+
+|  channels-apps-open-cluster-management-webhook-svc
+| open-cluster-management
+| multicluster-operators-application-8c446664c-5lbfk
+|-
+
+| multicluster-operators-application-svc
+| open-cluster-management
+| multicluster-operators-application-8c446664c-5lbfk
+| -
+
+| multiclusterhub-operator-webhook
+| open-cluster-management
+| multiclusterhub-operator-bfd948595-mnhjc
+| -
+
+| ocm-webhook
+| open-cluster-management
+| ocm-webhook-679444669c-5cg76
+| ocm-webhook-secret
+
+| cluster-manager-registration-webhook
+| open-cluster-management-hub
+| cluster-manager-registration-webhook-fb7b99c-d8wfc
+| registration-webhook-serving-cert
+
+| cluster-manager-work-webhook
+| open-cluster-management-hub
+| cluster-manager-work-webhook-89b8d7fc-f4pv8
+| work-webhook-serving-cert
+|===
+
+[#acm-managed-cert]
+== {product-title-short} managed certificates
+
 [#channel-certificates]
 === Channel certificates
 
@@ -283,5 +248,58 @@ Helm channels allow you to disable certificate validation. Helm channels where c
 Certificates are used to authenticate managed clusters with the hub. Therefore, it is important to be aware of troubleshooting scenarios associated with these certificates. View link:../troubleshooting/trouble_cluster_offline_cert.adoc#troubleshooting-imported-clusters-offline-after-certificate-change[Troubleshooting imported clusters offline after certificate change] for more details.  
 
 The managed cluster certificates are refreshed automatically.
+
+[#third-party-cert]
+== Third-party certificates
+
+[#rotating-the-gatekeeper-webhook-certificate]
+=== Rotating the gatekeeper webhook certificate
+
+Complete the following steps to rotate the gatekeeper webhook certificate:
+
+. Edit the secret that contains the certificate with the following command: 
++
+----
+oc edit secret -n openshift-gatekeeper-system gatekeeper-webhook-server-cert
+----
+
+. Delete the following content in the `data` section: `ca.crt`, `ca.key`, tls.crt`, and `tls.key`.
+
+. Restart the gatekeeper webhook service by deleting the `gatekeeper-controller-manager` pods with the following command:
++
+----
+oc delete po -n openshift-gatekeeper-system -l control-plane=controller-manager
+----
+
+The gatekeeper webhook certificate is rotated. 
+
+[#rotating-the-integrity-shield-webhook-certificate]
+=== Rotating the integrity shield webhook certificate (Technology preview)
+
+Complete the following steps to rotate the integrity shield webhook certificate:
+
+. Edit the IntegrityShield custom resource and add the `integrity-shield-operator-system` namespace to the excluded list of namespaces in the `inScopeNamespaceSelector` setting. Run the following command to edit the resource:
++
+----
+oc edit integrityshield integrity-shield-server -n integrity-shield-operator-system
+----
+
+. Delete the secret that contains the integrity shield certificate by running the following command:
++
+----
+oc delete secret -n integrity-shield-operator-system ishield-server-tls
+----
+
+. Delete the operator so that the secret is recreated. Be sure that the operator pod name matches the pod name on your system. Run the following command:
++
+----
+oc delete po -n integrity-shield-operator-system integrity-shield-operator-controller-manager-64549569f8-v4pz6
+----
+
+. Delete the integrity shield server pod to begin using the new certificate with the following command:
++
+----
+oc delete po -n integrity-shield-operator-system integrity-shield-server-5fbdfbbbd4-bbfbz
+----
 
 Use the certificate policy controller to create and manage certificate policies on managed clusters. See xref:../risk_compliance/policy_controllers.adoc#policy-controllers[Policy controllers] to learn more about controllers. Return to the xref:../risk_compliance/security_intro.adoc#security[Security] page for more information.
