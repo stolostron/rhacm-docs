@@ -18,14 +18,17 @@ Collect logs about new information that is created for observability resources w
 
 You can create custom rules for the observability installation by adding Prometheus https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
 
-Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. *Note*: When you update your custom rules, `observability-observatorium-thanos-rule` pods are restarted automatically.
+** Recording rules allow you to pre-calculate frequently needed or computationally expensive expressions and save their result as a new set of time series.
+** Alerting rules allow you to specify the alert conditions, based on that an alert should be fired to an external service.
+
+Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. *Note*: When you update your custom rules, `observability-thanos-rule` pods are restarted automatically.
 
 Complete the following steps to create a custom rule: 
 
 . Log in to your {product-title-short} hub cluster.
 . Create a ConfigMap named `thanos-ruler-custom-rules` in the `open-cluster-management-observability` namespace. The key must be named, `custom_rules.yaml`, as shown in the following example. You can create multiple rules in the configuration:
 +
-By default, the out-of-the-box alert rules are defined in the ConfigMap in the `open-cluster-management-observability` namespace. 
+By default, the out-of-the-box alert rules are defined in the ConfigMap named `thanos-ruler-default-rules` in the `open-cluster-management-observability` namespace. 
 +
 For example, you can create a custom alert rule that notifies you when your CPU usage passes your defined value: 
 +
@@ -48,7 +51,23 @@ data:
             severity: critical
 ----
 +
-*Note*: If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, you must restart the observability pods with the following command: `kubectl rollout restart statefulset observability-observatorium-thanos-rule -n open-cluster-management-observability`.
+
+You can also create a custom recording rule within the `thanos-ruler-custom-rules` ConfigMap.
++
+For example, you can create a recording rule that will allow you to get the sum of the container memory cache of a pod:
++
+----
+data:
+  custom_rules.yaml: |
+    groups:
+      - name: container-memory
+        rules:
+        - record: pod:container_memory_cache:sum
+          expr: sum(container_memory_cache{pod!=""}) BY (pod, container)
+----
++
+
+*Note*: If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, the configuration will automatically be reloaded. The configuration is reloaded due to the `config-reload` within the `observability-thanos-ruler` sidecar.
 
 . If you want to verify that the alert rules is functioning appropriately, complete the following steps:
 .. Access your Grafana dashboard and select the *Explore* icon.
