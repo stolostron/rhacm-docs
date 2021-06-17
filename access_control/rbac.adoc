@@ -150,6 +150,51 @@ oc get managedclustersets.clusterview.open-cluster-management.io
 +
 This command is used by administrators and users without cluster adminstrator privileges.
 
+[#cluster-pools-rbac]
+==== Cluster pools RBAC
+
+View the following cluster pool RBAC operations.
+
+* To use cluster pool provision clusters:
+
+** As a cluster administrator, create a managed cluster set and grant administrator permission to roles by adding the role to the group.
+*** Grant `admin` permission to the `server-foundation-clusterset` managed cluster set with the following command:
++
+----
+oc adm policy add-cluster-role-to-group open-cluster-management:clusterset-admin:server-foundation-clusterset 
+server-foundation-team-admin
+----
+
+*** Grant `view` permission to the `server-foundation-clusterset` managed cluster set with the following command:
++
+----
+oc adm policy add-cluster-role-to-group open-cluster-management:clusterset-view:server-foundation-clusterset server-foundation-team-user
+----
+
+** Create a namespace for the cluster pool, `server-foundation-clusterpool`.
+
+*** Grant `admin` permission to `server-foundation-clusterpool` for the `server-foundation-team-admin` by running the following commands:
++
+----
+oc adm new-project server-foundation-clusterpool
+
+oc adm policy add-role-to-group admin server-foundation-team-admin --namespace  server-foundation-clusterpool
+----
+
+** As a team administrator, create a cluster pool named `ocp46-aws-clusterpool` with a cluster set label, `cluster.open-cluster-management.io/clusterset=server-foundation-clusterset` in the cluster pool namespace. 
+
+*** The `server-foundation-webhook` checks if the cluster pool has the cluster set label, and if the user has permission to create cluster pools in the cluster set.
+
+*** The `server-foundation-controller` grants `view` permission to the `server-foundation-clusterpool` namespace for `server-foundation-team-user`.
+
+** When a cluster pool is created, the cluster pool creates a `clusterdeployment`.
+
+*** The `server-foundation-controller` grants `admin` permission to the `clusterdeployment` namespace for `server-foundation-team-admin`.
+
+*** The `server-foundation-controller` grants `view` permission `clusterdeployment` namespace for `server-foundation-team-user`.
++
+*Note*: As a `team-admin` and `team-user`, you have `admin` permission to the `clusterpool`, `clusterdeplyment`, and `clusterclaim`.
+
 //clarify how these actions relate to our product; recently changed Actions to Resource for accuracy
 View the following console and API RBAC tables for cluster lifecycle:
 
@@ -171,7 +216,7 @@ View the following console and API RBAC tables for cluster lifecycle:
 | Managed clusters
 | read, update, delete
 | no edit role mentioned
-| get, update
+| get
 
 | Provider connections
 | create, read, update, and delete
@@ -259,7 +304,7 @@ oc create clusterrolebinding <role-binding-name> --clusterrole=open-cluster-mana
 +
 This role is a super user, which has access to all resources and actions. You can create the namespace for the application and all application resources in the namespace with this role.
 
-* Optionally, you can create applications that deploy resources to multiple namespaces:
+* Option: You can create applications that deploy resources to multiple namespaces:
 
 ** Create a cluster role binding to the `open-cluster-management:subscription-admin` cluster role, and bind it to a user named `username`. Run the following command:
 +
@@ -463,7 +508,7 @@ To use the observability features, you must be assigned the `cluster-admin` or t
 * Search for resources.
 * Use the Visual Web Terminal if you have access to the managed cluster.
 
-To create, update, and delete the `MultiClusterObservability` custom resource. View the following RBAC table:
+To manage components of observability, view the following API RBAC table:
 
 .API RBAC table for observability
 
@@ -471,8 +516,18 @@ To create, update, and delete the `MultiClusterObservability` custom resource. V
 | API | Admin | Edit | View
 | multiclusterobservabilities.observability.open-cluster-management.io
 | create, read, update, and delete
+| read, update
+| read
+
+| searchcustomizations.search.open-cluster-management.io
+| create, get, list, watch, update, delete, patch
 | -
 | -
+
+| policyreports.wgpolicyk8s.io
+| get, list, watch
+| get, list, watch
+| get, list, watch
 |===
 
 To continue to learn more about securing your cluster, see link:../risk_compliance/security_intro.adoc#security[Security].
