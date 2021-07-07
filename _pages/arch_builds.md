@@ -4,7 +4,7 @@ title: "Build and publish"
 ---
 
 
-# Build and publish
+# Build, publish, set up local build
 
 We refresh weekly. These directions walk you through a refresh, as well as an internal build to check drafts and error logs in between publish dates.
 
@@ -134,4 +134,30 @@ Use this process to refresh a public version or build internally.
 
 **Note:** If the publish button is grayed out, make sure that you are logged in to Pantheon. 
 
-2. Verify that the commits on the Pantheon UI all match for stage and prod. That means that you pushed all of the latest files that resulted from your last build. 
+2. Verify that the commits on the Pantheon UI all match for stage and prod. That means that you pushed all of the latest files that resulted from your last build.
+
+## Set up local build
+
+To build locally:
+
+1. Log on to the VPN.
+2. Install homebrew, if you don't already have it installed.
+3. Find and download the build script is located in the master branch at: https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management: acm_sync_asciidoc.sh. We are assuming it went to the `Downloads` folder.
+5. Change to the folder you chose, in this case, the `Downloads` folder: `cd ~/Downloads`
+6. Make the script executable by entering: `chmod +x acm_sync_asciidoc.sh`
+7. Check for `gsed` install, or install if needed.
+8. Edit the script in an editor to change the 3 instances of `sed` to `gsed`. (They are on lines 67, 70, and 73. This is required for running it on a Mac.) 
+9. Save the changes to the file.
+10. Run the file with the following command: `./acm_sync_asciidoc.sh 2.3 2.3_stage`. **Note:** The first number is the GitLab branch number (which corresponds to our release number). The second number is our github branch. Both prod and stage go to the same Gitlab branch.
+11. Enter your github password when prompted.
+12. Enter your gitlab password, if you have one. Since we use SAML, we probably don't. In that case, enter your SSH keys into GitLab. Find your SSH, for example:
+    `vi /Users/cdawson/.ssh/id_rsa.pub` 
+	B. Copy the key.
+	C. Open GitLab.
+	D. Open your profile.
+	E. Select SSH keys in the left nav.
+	F. Paste the key and select Add key. 
+	G. Try running the file again.
+  
+When the file runs successfully, it should look similar to what you saw on the server, with the commits. Pantheon should update automatically, and match the commit number here, as it does when you use the server. This may take a few minutes, so keep your commit number.
+
