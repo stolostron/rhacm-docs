@@ -151,13 +151,14 @@ To build locally:
 10. Run the file with the following command: `./acm_sync_asciidoc.sh 2.3 2.3_stage`. **Note:** The first number is the GitLab branch number (which corresponds to our release number). The second number is our github branch. Both prod and stage go to the same Gitlab branch.
 11. Enter your github password when prompted.
 12. Enter your gitlab password, if you have one. Since we use SAML, we probably don't. In that case, enter your SSH keys into GitLab. Find your SSH, for example:
-    `vi /Users/cdawson/.ssh/id_rsa.pub` 
-	B. Copy the key.
-	C. Open GitLab.
-	D. Open your profile.
-	E. Select SSH keys in the left nav.
-	F. Paste the key and select Add key. 
-	G. Try running the file again.
+    `vi /Users/cdawson/.ssh/id_rsa.pub`:
+    
+     - Copy the key.
+     - Open GitLab.
+     - Open your profile.
+     - Select SSH keys in the left nav.
+     - Paste the key and select Add key. 
+     - Try running the file again.
   
 When the file runs successfully, it should look similar to what you saw on the server, with the commits. Pantheon should update automatically, and match the commit number here, as it does when you use the server. This may take a few minutes, so keep your commit number.
 
