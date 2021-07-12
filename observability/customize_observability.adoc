@@ -10,6 +10,8 @@ Collect logs about new information that is created for observability resources w
 * <<adding-custom-metrics, Adding custom metrics>>
 * <<removing-default-metrics,Removing default metrics>>
 * <<adding-advanced-config,Adding _advanced_ configuration>>
+* <<updating-replicas,Updating the _multiclusterobservability_ CR replicas from the console>>
+* <<forward-alerts,Forwarding alerts>>
 * <<viewing-and-exploring-data,Viewing and exploring data>>
 ** * <<viewing-etcd-grafana,Viewing etcd chart>>
 * <<disable-metrics-collector,Disabling _metrics-collector_>>
@@ -19,16 +21,19 @@ Collect logs about new information that is created for observability resources w
 
 You can create custom rules for the observability installation by adding Prometheus https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
 
-Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. *Note*: When you update your custom rules, `observability-observatorium-thanos-rule` pods are restarted automatically.
+** Recording rules provide you the ability to precalculate, or computate expensive expressions as needed. The results are saved as a new set of time series.
+** Alerting rules provide you the ability to specify the alert conditions based on how an alert should be sent to an external service.
+
+Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. *Note*: When you update your custom rules, `observability-thanos-rule` pods are restarted automatically.
 
 Complete the following steps to create a custom rule: 
 
 . Log in to your {product-title-short} hub cluster.
 . Create a ConfigMap named `thanos-ruler-custom-rules` in the `open-cluster-management-observability` namespace. The key must be named, `custom_rules.yaml`, as shown in the following example. You can create multiple rules in the configuration:
 +
-By default, the out-of-the-box alert rules are defined in the ConfigMap in the `open-cluster-management-observability` namespace. 
+* By default, the out-of-the-box alert rules are defined in the `thanos-ruler-default-rules` ConfigMap in the `open-cluster-management-observability` namespace. 
 +
-For example, you can create a custom alert rule that notifies you when your CPU usage passes your defined value: 
+For example, you can create a custom alert rule that notifies you when your CPU usage passes your defined value. Your YAML might resemble the following content: 
 +
 ----
 data:
@@ -48,7 +53,22 @@ data:
             prometheus: "{{ $labels.prometheus }}"
             severity: critical
 ----
+
+* You can also create a custom recording rule within the `thanos-ruler-custom-rules` ConfigMap.
 +
+For example, you can create a recording rule that provides you the ability to get the sum of the container memory cache of a pod. Your YAML might resemble the following content:
++
+----
+data:
+  custom_rules.yaml: |
+    groups:
+      - name: container-memory
+        rules:
+        - record: pod:container_memory_cache:sum
+          expr: sum(container_memory_cache{pod!=""}) BY (pod, container)
+----
++
+// *Note*: If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, the configuration is automatically reloaded. The configuration is reloaded due to the `config-reload` within the `observability-thanos-ruler` sidecar.
 *Note*: If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, you must restart the observability pods with the following command: 
 +
 ----
@@ -209,7 +229,7 @@ oc edit mco observability -o yaml
 +
 ----
 spec:
-  advance:
+  advanced:
     retentionConfig:
       blockDuration: 2h
       deleteDelay: 48h
@@ -226,6 +246,61 @@ spec:
 
 For descriptions of all the parameters that can added into the `advanced` configuration, see the link:../apis/observability.json.adoc[Observability API].
 
+[#updating-replicas]
+== Updating the _multiclusterobservability_ CR replicas from the console
+
+If your workload increases, increase the number of replicas of your observability pods. Complete the following steps to update your replicas:
+
+. Log in to your {product-title-short} cluster.
+. From the console header, click the _Applications_ button > *{ocp-short}*.
+. From the {ocp-short} navigation menu, select *Administration* > *CustomerResourceDefinitions*.
+. Search for `multiclusterobservability`.
+. From the _Instances_ tab, select the `observability` instance.
+. Edit the YAML file in the _YAML_ tab. Your updated YAML might resemble the following content:
++
+----
+spec:
+   advanced:
+      receive:
+         replicas: 6
+----
++
+This means that there are six receivers in the environment. 
+
+For more information about the parameters within the `mco observability` CR, see the link:../apis/observability.json.adoc#observability-api[Observability API].
+
+[#forward-alerts]
+== Forwarding alerts
+
+After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to the hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system. Complete the following steps to access the `alertmanager-config` YAML file:
+
+. Log in to your {product-title-short} hub cluster as an administrator.
+. From the navigation menu, view your managed clusters by selecting *Infrastructure* > *Clusters*.
+. Select the managed cluster that you want to view. 
+. From the _Details_ tab, select the link for the {ocp-short} _Console URL_. 
+. From the {ocp-short} menu navigation, select *Secrets*. Select the `alertmanager-config` secret to view the YAML file.
++
+*Note*: If you make changes to the `alertmanager-config` secret, the evaluation interval is about one minute.
+
+. View the following example of the `alertmanager-config` YAML file:
++
+----
+global:
+  slack_api_url: '<slack_webhook_url>'
+
+route:
+  receiver: 'slack-notifications'
+  group_by: [alertname, datacenter, app]
+
+receivers:
+- name: 'slack-notifications'
+  slack_configs:
+  - channel: '#alerts'
+    text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
+----
+
+To learn more, see the https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation]. 
+
 [#viewing-and-exploring-data]
 == Viewing and exploring data
 
@@ -235,7 +310,9 @@ View the data from your managed clusters by accessing Grafana. Complete the foll
 . From the navigation menu, click *Infrastructure* > *Clusters*. 
 . Access your Grafana dashboards by clicking the *Grafana* link.
 . Access the Prometheus metric explorer by selecting the *Explore* icon from the Grafana navigation menu.
-. To query metrics that come from a SNO cluster, add the following label in the query expression: `{clusterType="SNO"}`. For example, to _cluster_infrastructure_provider_ from a SNO cluster, use the following query expression: `cluster_infrastructure_provider{clusterType="SNO"}`
+. To query metrics that come from a single node cluster, add the following label in the query expression: `{clusterType="SNO"}`. For example, to _cluster_infrastructure_provider_ from a single node cluster, use the following query expression: `cluster_infrastructure_provider{clusterType="SNO"}`
++
+*Note*: Do not set the `ObservabilitySpec.resources.CPU.limits` parameter if observability is enabled on single node managed clusters. When you set the CPU limits, it causes the observability pod to be counted against the capacity for your managed cluster. See https://github.com/openshift/enhancements/blob/master/enhancements/workload-partitioning/management-workload-partitioning.md#management-workload-partitioning[Management Workload Partioning] for more information.
 
 [#viewing-etcd-grafana]
 === Viewing the etcd table

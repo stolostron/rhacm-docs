@@ -8,17 +8,17 @@ image:../images/RHACM-ObservabilityArch.png[Multicluster observability architect
 *Note*: The _on-demand log_ provides access for engineers to get logs for a given pod in real-time. Logs from the hub cluster are not aggregated. These logs can be accessed with the search service and other parts of the console.
 
 * <<observability-service,Observability service>>
-* <<observability-certificates,Observability certificates>>
 * <<metric-types,Metric types>>
-* <<observability-pod-capacity-requests,Observability pod capacity requests>>
-* <<overview-page-observe,Observe environments Overview page>>    
+* <<observability-pod-capacity-requests,Observability pod capacity requests>>    
 
 [#observability-service]
 == Observability service
 
 By default, observability is included with the product installation, but not enabled. Due to the requirement for persistent storage, the observability service is not enabled by default. {product-title-short} supports the following S3 compatible, stable object stores:
 
-- Amazon S3 (or other S3 compatible object stores like Ceph)
+- Amazon S3 
++
+*Note*: The object store interface in Thanos support APIs that are AWS S3 restful API compatible, or other S3 compatible object stores like Minio and Ceph.
 - Google Cloud Storage
 - Azure storage
 - {ocp-short}
@@ -35,18 +35,7 @@ The observability service deploys an instance of Prometheus AlertManager, which 
 
 You can customize the observability service by creating custom https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] or https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules].
 
-For more information about enabling observability, see link:../observability/observability_enable.adoc#enable-observability[Enable observability service].
-
-[#observability-certificates]
-== Observability certificates
-
-Observability certificates are automatically renewed upon expiration. View the following list to understand the effects when certificates are automatically renewed:
-
-* Components on your hub cluster automatically restart to retrieve the renewed certificate.
-* Red Hat Advanced Cluster Management sends the renewed certificates to managed clusters.
-* The `metrics-collector` restarts to mount the renewed certificates.
-+
-*Note:* `metrics-collector` can push metrics to the hub cluster before and after certificates are removed. For more information about refreshing certificates across your clusters, see link:../risk_compliance/certificates.adoc#refresh-a-managed-certificate[Refresh a managed certificate].
+For more information about enabling observability, see xref:../observability/observability_enable.adoc#enable-observability[Enable observability service].
 
 [#metric-types]
 == Metric types
@@ -61,13 +50,15 @@ Learn from the {ocp-short} documentation what types of metrics are collected and
 [#observability-pod-capacity-requests]
 == Observability pod capacity requests
 
-Observability components require 2636mCPU and 11388Mi memory to install the observability service. View the following table of the pod capacity requests that is for five managed clusters with `observability-addons` enabled:
+Observability components require 2791mCPU and 12022Mi memory to install the observability service. View the following table of the pod capacity requests that is for five managed clusters with `observability-addons` enabled:
 
 .Observability pod capacity requests
 |===
-| Container name  | CPU (mCPU) | Memory (Mi) | Replicas | Pod total CPU | Pod total memory 
+| Deployment or StatefulSet | Container name | CPU (mCPU) | Memory (Mi) | Replicas | Pod total CPU | Pod total memory 
 
-| alertmanager
+.3+| observability-alertmanager 
+| alertmanager 
+
 | 4
 | 200
 | 3
@@ -80,6 +71,15 @@ Observability components require 2636mCPU and 11388Mi memory to install the obse
 | 3
 | 12
 | 75
+
+| alertmanager-proxy
+| 1
+| 20
+| 3
+| 3
+| 60
+
+.2+| observability-grafana
 
 | grafana
 | 4
@@ -95,6 +95,7 @@ Observability components require 2636mCPU and 11388Mi memory to install the obse
 | 8
 | 100
 
+| observability-observatorium-api
 | observatorium-api
 | 20
 | 128
@@ -102,6 +103,30 @@ Observability components require 2636mCPU and 11388Mi memory to install the obse
 | 40
 | 256
 
+| observability-observatorium-operator
+| observatorium-operator
+| 100
+| 100
+| 1
+| 100
+| 100
+
+.2+| observability-rbac-query-proxy
+| rbac-query-proxy
+| 20
+| 100
+| 2
+| 40
+| 200
+
+| oauth-proxy
+| 1
+| 20
+| 2
+| 2
+| 40
+
+| observability-thanos-compact
 | thanos-compact
 | 100
 | 512
@@ -109,6 +134,7 @@ Observability components require 2636mCPU and 11388Mi memory to install the obse
 | 100
 | 512
 
+| observability-thanos-query
 | thanos-query
 | 300
 | 1024
@@ -116,6 +142,7 @@ Observability components require 2636mCPU and 11388Mi memory to install the obse
 | 600
 | 2048
 
+| observability-thanos-query-frontend
 | thanos-query-frontend
 | 100
 | 256
@@ -123,34 +150,7 @@ Observability components require 2636mCPU and 11388Mi memory to install the obse
 | 200
 | 512
 
-| thanos-receive-controller
-| 4
-| 32
-| 1
-| 4
-| 32
-
-| thanos-receive
-| 300
-| 512
-| 3
-| 900
-| 1536
-
-| thanos-rule
-| 50
-| 512
-| 3
-| 150
-| 1536
-
-| configmap-reloader
-| 4
-| 25
-| 3
-| 12
-| 75
-
+.2+| observability-thanos-query-frontend-memcached
 | memcached
 | 45
 | 128
@@ -165,38 +165,60 @@ Observability components require 2636mCPU and 11388Mi memory to install the obse
 | 15
 | 150
 
+| observability-thanos-receive-controller
+| thanos-receive-controller
+| 4
+| 32
+| 1
+| 4
+| 32
+
+| observability-thanos-receive-default
+| thanos-receive
+| 300
+| 512
+| 3
+| 900
+| 1536
+
+.2+| observability-thanos-rule
+| thanos-rule
+| 50
+| 512
+| 3
+| 150
+| 1536
+
+| configmap-reloader
+| 4
+| 25
+| 3
+| 12
+| 75
+
+.2+| observability-thanos-store-memcached
+| memcached
+| 45
+| 128
+| 3
+| 135
+| 384
+
+| exporter
+| 5
+| 50
+| 3
+| 15
+| 150
+
+| observability-thanos-store-shard
 | thanos-store
 | 100
 | 1024
 | 3
 | 300
 | 3072
-
-| observatorium-operator
-| 100
-| 100
-| 1
-| 100
-| 100
-
-| rbac-query-proxy
-| 20
-| 100
-| 2
-| 40
-| 200
 |===
 
-[#overview-page-observe]
-== Observe environments Overview page
 
-You can view the following information about your clusters on the _Overview_ dashboard:
-
-* Metric data from your managed clusters by selecting the Grafana link 
-* Cluster, node, and pod counts across all clusters and for each provider
-* Cluster status
-* Cluster compliance
-* Pod status
-
-Many clickable elements on the dashboard open a search for related resources. Click on a provider card to view information for clusters from a single provider.
 
