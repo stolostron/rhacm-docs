@@ -1,5 +1,5 @@
 [#channel-samples]
-= Channel samples
+= Channel samples overview
 
 View samples and YAML definitions that you can use to build your files. Channels (`channel.apps.open-cluster-management.io`) provide you with improved continuous integration and continuous delivery capabilities for creating and managing your {product-title} applications.
 
@@ -18,8 +18,6 @@ oc apply -f filename.yaml
 oc get application.app
 ----
 
-*Note:* Kubernetes namespace (Namespace) channel is not available this release.
-
 * <<channel-yaml-structure,Channel YAML structure>>
 * <<channel-yaml-table,Channel YAML table>>
 * <<object-storage-bucket-object-storage-channel,Object storage bucket (ObjectBucket) channel>>
@@ -29,10 +27,11 @@ oc get application.app
 [#channel-yaml-structure]
 == Channel YAML structure
 
+For application samples that you can deploy, see the https://github.com/open-cluster-management/application-samples[`open-cluster-management`] repository.
+
 The following YAML structures show the required fields for a channel and some of the common optional fields.
-Your YAML structure needs to include some required fields and values.
-Depending on your application management requirements, you might need to include other optional fields and values.
-You can compose your own YAML content with any tool.
+Your YAML structure needs to include some required fields and values. Depending on your application management requirements, you might need to include other optional fields and values.
+You can compose your own YAML content with any tool and in the product console.
 
 [source,yaml]
 ----
@@ -68,7 +67,7 @@ spec:
 | Required. The name of the channel.
 
 | metadata.namespace
-| Required. The namespace for the channel; Each channel needs a unique namespace, except Git channel.
+| Required. The namespace for the channel; Each channel needs a unique namespace, except the Git channel.
 
 | spec.sourceNamespaces
 | Optional. Identifies the namespace that the channel controller monitors for new or updated deployables to retrieve and promote to the channel.
@@ -84,15 +83,17 @@ spec:
 You can use a secret for authentication with only `HelmRepo`, `ObjectBucket`, and `Git` type channels.
 
 | spec.gates
-| Optional. Defines requirements for promoting a deployable within the channel.
-If no requirements are set, any deployable that is added to the channel namespace or source is promoted to the channel.
-`gates` do not apply for `HelmRepo` and `Git` channel types, only for `ObjectBucket` channel types.
+| Optional. Defines requirements for promoting a deployable within the channel. If no requirements are set, any deployable that is added to the channel namespace or source is promoted to the channel. The `gates` value is only for `ObjectBucket` channel types and does not apply to `HelmRepo` and `Git` channel types, .
 
 | spec.gates.annotations
 | Optional. The annotations for the channel. Deployables must have matching annotations to be included in the channel.
 
 | metadata.labels
 | Optional. The labels for the channel.
+
+| spec.insecureSkipVerify 
+| Optional. Default value is `false`, if set `true`, the channel connection is built by skipping the authentication
+
 |===
 
 The definition structure for a channel can resemble the following YAML content:
@@ -111,76 +112,6 @@ spec:
   pathname: https://kubernetes-charts.storage.googleapis.com/
 ----
 
-////
-[#kubernetes-namespace-namespace-channel]
-== Kubernetes namespace (Namespace) channel
-
-To create resources correctly, add the following two labels that are required in the deployable to the subscription controller that identifies which deployable resources are added:
-
-----
-labels:
-    apps.open-cluster-management.io/channel: <channel name>
-    apps.open-cluster-management.io/channel-type: Namespace
-----
-
-Don't specify template namespace in each resource template `spec.template.metadata.namespace`. 
-
-For the namespace type channel and subscription, all the deployable templates are deployed to the subscription namespace on managed clusters. As a result, those deployable templates that are defined outside of the subscription namespace are skipped.
-
-The following example channel definitions abstracts a namespace as a channel that holds deployable resources.
-When this YAML is applied, a namespace `ch-qa` is created for the channel that is named `qa`.
-When created, this channel points to the source default namespace for identifying deployables.
-The channel controller maintains the resources at the actual namespace location and ensures that the resources are kept up-to-date.
-////
-////
-
-[source,yaml]
-----
-  apiVersion: apps.open-cluster-management.io/v1
-  kind: Channel
-  metadata:
-    name: qa
-    namespace: ch-qa
-  spec:
-    sourceNamespaces:
-    - default
-    type: Namespace
-    pathname: ch-qa
-    gates:
-      annotations:
-        dev-ready: approved
-----
-
-[source,yaml]
-----
-
-apiVersion: apps.open-cluster-management.io/v1
-kind: Deployable
-metadata:
-  labels:
-    app: gbchn
-    apps.open-cluster-management.io/channel: gbchn
-    apps.open-cluster-management.io/channel-type: Namespace
-    release: gbchn
-  name: gbchn-service
-  namespace: gbchn
-spec:
-  template:
-    apiVersion: v1
-    kind: Service
-    metadata:
-      labels:
-        app: gbchn
-        release: gbchn
-      name: gbchn
-    spec:
-      ports:
-      - port: 80
-      selector:
-        app: gbchn
-----       
-////
-
 [#object-storage-bucket-object-storage-channel]
 == Object storage bucket (ObjectBucket) channel
 
@@ -195,7 +126,7 @@ metadata:
  namespace: ch-obj
 spec:
  type: ObjectBucket
- pathname: [http://9.28.236.243:31311/dev] # URL is appended with the valid bucket name, which matches the channel name.
+ pathname: [http://9.28.236.243:xxxx/dev] # URL is appended with the valid bucket name, which matches the channel name.
  secretRef:
    name: miniosecret
  gates:
@@ -208,20 +139,7 @@ spec:
 
 The following example channel definition abstracts a Helm repository as a channel:
 
-*Deprecation notice:* For {product-version}, specifying `insecureSkipVerify: "true"` in channel `ConfigMap` reference to skip Helm repo SSL certificate is deprecated, as it is displayed in the following example:
-
-[source,yaml]
-----
-apiVersion: v1
-data:
-  insecureSkipVerify: "true" # deprecated
-kind: ConfigMap 
-metadata:
-  name: insecure-skip-verify
-  namespace: hub-repo
-----
-
-See the replacement in the following current sample, with `spec.insecureSkipVerify: true` that is used in the channel instead:
+*Deprecation notice:* For {product-version}, specifying `insecureSkipVerify: "true"` in channel `ConfigMap` reference to skip Helm repo SSL certificate is deprecated. See the replacement in the following current sample, with `spec.insecureSkipVerify: true` that is used in the channel instead:
 
 [source,yaml]
 ----
@@ -243,8 +161,7 @@ spec:
 
 The following channel definition shows another example of a Helm repository channel:
 
-*Note:* For Helm, all Kubernetes resources contained within the Helm chart must have the label release. `{{ .Release.Name }}`` for the application topology to be displayed properly.
-
+*Note:* For Helm, all Kubernetes resources contained within the Helm chart must have the label release `{{ .Release.Name }}` for the application topology to display properly.
 
 [source,YAML]
 ----
@@ -263,9 +180,8 @@ spec:
 [#github-repository-channel]
 == Git (`Git`) repository channel
 
-The following example channel definition shows an example of a channel for the Git Repository.
-In the following example, `secretRef` refers to the user identity used to access the Git repo that is specified in the `pathname`.
-If you have a public repo, you do not need the `secretRef`:
+The following example channel definition displays an example of a channel for the Git Repository.
+In the following example, `secretRef` refers to the user identity that is used to access the Git repo that is specified in the `pathname`. If you have a public repo, you do not need the `secretRef` label and value:
 
 [source,yaml]
 ----
