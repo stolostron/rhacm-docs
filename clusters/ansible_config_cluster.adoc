@@ -1,0 +1,333 @@
+[#ansible-config-cluster]
+= Setting up Ansible Tower tasks with cluster installation and upgrades (Technology Preview)
+
+{product-title-short} is integrated with Ansible Tower automation so that you can create prehook and posthook AnsibleJob instances that occur before or after creating or upgrading your clusters. Configuring prehook and posthook jobs for cluster destroy and cluster scale actions are not supported. With Ansible Tower jobs, you can automate tasks and integrate with external services, such as Slack and PagerDuty services. Your Git repository resource root path will contain `prehook` and `posthook` directories for Ansible Tower jobs that run as part of deploying the cluster and updating the cluster.
+
+*Required access:* Cluster administrator
+
+* <<prerequisites-for-ansible-integration,Prerequisites>>
+* <<install-ansible-cluster,Install Ansible Automation Platform Resource Operator>>
+* <<obtain-the-ansible-tower-token-cluster,Obtain the Ansible Tower URL and token>>
+* <<obtain-a-token,Obtaining a token>>
+* <<ansible-integration,Ansible integration>>
+* <<ansible-operator-components,Ansible operator components>>
+* <<ansible-configuration,Ansible configuration>>
+* <<ansible-secret-reconciliation,Set secret reconciliation>>
+* <<ansible-sample-yaml,Ansible sample YAML>>
+
+[#prerequisites-for-ansible-integration-cluster]
+== Prerequisites 
+
+* {ocp-short} 4.6 or later
+
+* You must have Ansible Tower version 3.7.3 or a later version installed. It is best practice to install the latest supported version of Ansible Tower. See https://docs.ansible.com/ansible-tower/[Red Hat Ansible Tower documentation] for more details.
+
+* Install the Ansible Automation Platform Resource Operator to connect Ansible jobs to the lifecycle of Git subscriptions. For best results when using the AnsibleJob to launch Ansible Tower jobs, the Ansible Tower job template should be idempotent when it is run. 
+
+Check `PROMPT ON LAUNCH` on the template for both INVENTORY and EXTRA VARIABLES. See https://docs.ansible.com/ansible-tower/latest/html/userguide/job_templates.html[Job templates] for more information.
+
+[#install-ansible-cluster]
+== Install Ansible Automation Platform Resource Operator
+
+. Log in to your {ocp-short} cluster console.
+. Click *OperatorHub* in the console navigation.
+. Search for and install the _Ansible Automation Platform Resource Operator_.
+
+[#obtain-the-ansible-tower-token-cluster]
+== Obtain the Ansible Tower URL and token
+
+The Ansible Tower URL is the same URL that is used to log in to Tower. This is required by the _Application console_ or the Tower access secret when configuring a cluster to run jobs with Ansible prehooks and posthooks. 
+
+See the following example URL: `https://ansible-tower-web-svc-tower.apps.my-openshift-cluster.com`. 
+
+[#obtain-a-token-cluster]
+== Obtaining a token
+
+See the procedure in link:../credentials/credential_ansible.adoc#credential_ansible[Obtaining an Ansible credential] for the steps describing how to find your token on the Ansible Tower.
+
+[#ansible-integration]
+== Ansible integration
+
+You can integrate Ansible Tower jobs so they can be run before or after a cluster is installed.
+
+The application subscription operator is enhanced to define two subfolders: `prehook` and `posthook`. Both folders are in the Git repository resource root path and contain all prehook and posthook Ansible jobs, respectively.
+
+When the Git subscription is created, all of the pre and post AnsibleJob resources are parsed and stored in memory as an object. The application subscription controller decides when to create the pre and post AnsibleJob instances.
+
+[#ansible-template-create]
+== Creating an AnsibleJob template
+
+To trigger an Ansible job with a cluster installation or upgrade, you must create an Ansible job template to specify when you want the jobs to run. They can be configured to run before or after the cluster installs or upgrades.
+
+Complete the following steps to create an Ansible template:
+
+. From the {product-title} navigation menu, select *Automation*. The existing Ansible templates are displayed.
+
+. Click  *Create Ansible template*.
+
+. Add a name for your template. It must be a unique name that contains lowercase, alphanumeric characters or `-`.
+
+. Click *Next* to configure when you want your jobs to run.
+
+. Select the prehook and posthook Ansible jobs to add to the installation or upgrade of the cluster. 
++
+*Note:* The _Ansible job template name_ must match the name of the Ansible job on the Ansible Tower.
+
+. Drag the jobs into the order that you want them to run. 
+
+. Add any required environment variables that you need in the _Extra Variable_ field.
+
+[#ansible-template-edit]
+== Modify an Ansible template
+
+You can change an Ansible template as your requirements change for your templates. To change an Ansible template, complete the following steps: 
+
+. From the {product-title-short} navigation, select *Automation*.
+
+. In the _Options_ menu for the template that you want to update, select *Edit template*.
+
+. Expand the _Install_ or _Upgrade_ sections for the templates that you want to change.
+
+. You can make the following changes to your Ansible template: 
++
+* Delete an Ansible job from the template by clicking the delete icon for the job template.
+
+* Reorder the Ansible jobs by dragging them into the new order. 
+
+* Add an Ansible job to your template by clicking *Add an Ansible job template*.
+
+* Access an Ansible job directly to modify it by selecting the *Edit Ansible job* icon.
+
+. Click *Save* to commit your changes.
+
+Your Ansible template is updated. 
+
+[#ansible-link-credential]
+== Linking a credential to an Ansible template
+
+You must link an Ansible template to an Ansible credential that is in the same namespace as the template to run the Ansible jobs. If you do not link a credential, the Ansible template cannot access the Ansible Tower to run the jobs.  
+
+To link an Ansible credential to an Ansible template, complete the following steps:
+ 
+. From the {product-title-short} navigation, select *Automation*. Any template in the list of templates that is not linked to a credential contains a *Link to credential* icon that you can use to link the template to an existing credential.
+
+. Select *Link to credential* to find and link to an existing credential.
+
+. Select an available credential from the menu in the _Ansible Automation Platform credential_ field. Only the credentials in the same namespace as the template are displayed.  
+
+. If there are no credentials that you can select, or if you do not want to use an existing credential, select *Edit template* from the _Options_ menu for the template that you want to link.
+
+. Click *Add credential* to create a credential for your template. 
+
+. Complete the procedure in link:../credentials/credential_ansible.adoc#creating-a-credential-for-ansible[Creating a credential for Ansible Automation Platform] to create your credential.
+
+. After you create your credential in the same namespace as the template, select the credential in the _Ansible Automation Platform credential_ field when you edit the template. 
+
+. Click *Save* to commit the link between the credential and the template.
+
+The credential is linked to the template. 
+
+[#ansible-select-job-cluster]
+== Specifying an Ansible template to run
+
+You can specify which Ansible template you want to run, and when you want to run it when you are creating the Ansible template or when you edit an existing template. 
+
+To specify the details about running the Ansible template while creating a template, complete the following steps:
+
+. Select *Automation* from the {product-title-short} navigation.
+
+. Select the appropriate path for your situation:  
++
+* If you want to create a new template, click *Create Ansible template* and continue with step 3.
+
+* If you want to modify an existing template, click *Edit template* from the _Options_ menu of the template that you want to modify and continue with step 5.
+
+. Enter a name for your template. 
+
+. Select the credential that you want to use for the new template. 
+
+. If you want to trigger any Ansible jobs before the cluster is installed, select *Add an Ansible job template* in the _Pre-install Ansible job templates_ section.
+
+. Add the names of any Ansible jobs from the Ansible Tower that you want to run before the cluster is installed.
+
+. Enter any *Extra variables* that are rquired by the Ansible Tower job, if there are any. 
+
+. Click *Save* to commit your information. 
+
+. Repeat steps 5 - 8 for any Ansible job templates that you want to trigger after the cluster is installed in the _Post-install Ansible job templates_ section.
+
+. Click *Save* to commit your information. 
+
+. Click *Next* to begin specifying the Ansible jobs for the _Upgrading_ triggers. 
+
+. Complete steps 5 - 8 for any Ansible job templates that you want to trigger before the cluster is upgraded in the _Pre-upgrade Ansible job templates_ section.
+
+. Click *Save* to commit your information. 
+ 
+. Complete steps 5 - 8 for any Ansible job templates that you want to trigger after the cluster is upgraded in the _Post-upgrade Ansible job templates_ section.
+ 
+. Click *Save* to commit your information. 
+
+. Click *Next* to review the Ansible jobs that you added.
+
+. Select *Add* to add the Ansible job configuration information to your template. 
+
+Your Ansible jobs are configured to run when the triggers occur. 
+
+[#ansible-status-job-cluster]
+== Viewing the status for an Ansible job
+
+You can view the status of a running Ansible job to ensure that it started, and is running successfully. To view the current status of a running Ansible job, complete the following steps: 
+
+. In the {product-title-short} menu, select *Infrastructure* > *Clusters* to access the _Cluster overview_ page.
+
+. View the status of the last run of the Ansible job on the cluster information. The entry shows one of the following statuses:
++
+** When an install prehook or posthook job fails, the cluster status shows `Failed`.
+** When an upgrade prehook or posthook job fails, a warning is displayed in the _Distribution_ field the the upgrade failed.
++
+*Tip:* You can retry an upgrade form the _Cluster overview_ page if the cluster prehook or posthook failed.  
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[#ansible-operator-components]
+== Ansible operator components
+
+When you create a subscription CR, the Git-branch and Git-path points to a Git repository root location. In the Git root location, the two subfolders `prehook` and `posthook` should contain at least one `Kind:AnsibleJob` resource.
+
+[#prehook]
+=== Prehook
+
+The application subscription controller searches all the `Kind:AnsibleJob` CRs in the prehook folder as the prehook AnsibleJob objects, then generates a new prehook AnsibleJob instance. The new instance name is the prehook AnsibleJob object name and a random suffix string. 
+
+See an example instance name: `database-sync-1-2913063`.
+
+The application subscription controller queues the reconcile request again in a 1 minute loop, where it checks the prehook AnsibleJob `status.ansibleJobResult`. When the prehook `status.ansibleJobResult.status` is `successful`, the application subscription continues to deploy the main subscription.
+
+[#posthook]
+=== Posthook
+
+When the app subscription status is updated, if the subscription status is subscribed or propagated to all target clusters in subscribed status, the app subscription controller searches all of the `AnsibleJob` `Kind` CRs in the posthook folder as the posthook AnsibleJob objects. Then, it generates new posthook `AnsibleJob` instances. The new instance name is the posthook `AnsibleJob` object name and a random suffix string. 
+
+See an example instance name: `service-ticket-1-2913849`.
+
+[#ansible-placement-rule]
+=== Ansible placement rules
+
+With a valid prehook AnsibleJob, the subscription launches the prehook AnsibleJob regardless of the decision from the placement rule. For example, you can have a prehook AnsibleJob that failed to propagate a placement rule subscription. When the placement rule decision changes, new prehook and posthook AnsibleJob instances are created.
+
+[#ansible-configuration]
+== Ansible configuration
+
+You can configure Ansible Tower configurations with the following tasks:
+
+[#ansible-secrets]
+=== Ansible secrets
+
+You must create an Ansible Tower secret CR in the same subscription namespace. The Ansible Tower secret is limited to the same subscription namespace.
+
+Create the secret from the console by filling in the `Ansible Tower secret name` section. To create the secret using terminal, edit and apply the following `yaml`:
+ 
+Run the following command to add your YAML file:
+
+----
+oc apply -f
+----
+
+See the following YAML sample:
+
+*Note:* The `namespace` is the same namespace as the subscription namespace. The `stringData:token` and `host` are from the Ansible Tower.
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: toweraccess
+  namespace: same-as-subscription
+type: Opaque
+stringData:
+  token: ansible-tower-api-token
+  host: https://ansible-tower-host-url
+----
+
+When the app subscription controller creates prehook and posthook AnsibleJobs, if the secret from subscription `spec.hooksecretref` is available, then it is sent to the AnsibleJob CR `spec.tower_auth_secret` and the AnsibleJob can access the Ansible Tower.
+
+[#ansible-secret-reconciliation]
+== Set secret reconciliation
+
+For a main-sub subscription with prehook and posthook AnsibleJobs, the main-sub subscription should be reconciled after all prehook and posthook AnsibleJobs or main subscription are updated in the Git repository. 
+
+Prehook AnsibleJobs and the main subscription continuously reconcile and relaunch a new pre-AnsibleJob instance.
+
+. After the pre-AnsibleJob is done, re-run the main subscription. 
+. If there is any specification change in the main subscription, re-deploy the subscription. The main subscription status should be updated to align with the redeployment procedure. 
+. Reset the hub subscription status to `nil`. The subscription is refreshed along with the subscription deployment on target clusters. 
+
++
+When the deployment is finished on the target cluster, the subscription status on the target cluster is updated to `"subscribed"` or `"failed"`, and is synced to the hub cluster subscription status.
+
+. After the main subscription is done, relaunch a new post-AnsibleJob instance.
+
+. Verify that the DONE subscription is updated. See the following output:
+
+- subscription.status == `"subscribed"`
+- subscription.status == `"propagated"` with all of the target clusters `"subscribed"`
+
+When an AnsibleJob CR is created, A Kubernetes job CR is created to launch an Ansible Tower job by communicating to the target Ansible Tower. When the job is complete, the final status for the job is returned to AnsibleJob `status.ansibleJobResult`. 
+
+*Notes:* 
+
+The AnsibleJob status.conditions is reserved by the Ansible Job operator for storing the creation of Kubernetes job result. The status.conditions does not reflect the actual Ansible Tower job status. 
+
+The subscription controller checks the Ansible Tower job status by the `AnsibleJob.status.ansibleJobResult` instead of `AnsibleJob.status.conditions`.
+
+As previously mentioned in the prehook and posthook AnsibleJob workflow, when the main subscription is updated in Git repository, a new prehook and posthook AnsibleJob instance is created. As a result, one main subscription can link to multiple AnsibleJob instances. 
+
+Four fields are defined in subscription.status.ansibleJobs:
+
+- lastPrehookJobs: The most recent prehook AnsibleJobs
+- prehookJobsHistory: All the prehook AnsibleJobs history
+- lastPosthookJobs: The most recent posthook AnsibleJobs
+- posthookJobsHistory: All the posthook AnsibleJobs history
+
+
+[#ansible-sample-yaml]
+== Ansible sample YAML 
+
+See the following sample of an AnsibleJob `.yaml` file in a Git prehook and posthook folder:
+
+[source,yaml]
+----
+apiVersion: tower.ansible.com/v1alpha1
+kind: AnsibleJob
+metadata:
+  generateName: demo-job-001
+  namespace: default
+spec:
+  tower_auth_secret: toweraccess
+  job_template_name: Demo Job Template
+  extra_vars:
+    cost: 6.88
+    ghosts: ["inky","pinky","clyde","sue"]
+    is_enable: false
+    other_variable: foo
+    pacman: mrs
+    size: 8
+    targets_list:
+    - aaa
+    - bbb
+    - ccc
+    version: 1.23.45
+----
