@@ -1,0 +1,100 @@
+
+[#gitops_config]
+= Configuring GitOps on managed clusters
+
+You can register a set of one or more {product-title} managed clusters to an instance of Argo CD or {ocp} GitOps operator to deploy applications to those clusters.
+
+[#prerequisites-argo]
+== Prerequisites 
+
+* You need to https://argoproj.github.io/argo-cd/getting_started/#1-install-argo-cd[install Argo CD] Red Hat OpenShift GitOps operator on your {product-title}.
+
+* You need one or more managed cluster.
+
+[#setting-up-managed]
+== Setting up managed clusters
+
+* You need to create a placement custom resource to select a set of managed clusters to register to an ArgoCD or {ocp-short} GitOps operator instance. 
+//Please refer to THIS DOC for creating a placement. -- we need to point to this when it is ready in issue https://github.com/open-cluster-management/backlog/issues/12767
++
+*Note:* If the referenced placement includes Kubernetes clusters other than {ocp-short}, only {ocp-short} clusters are registered to an ArgoCD or OpenShift GitOps operator instance.
+
+* You need to define a set of managed clusters for registration. Refer to the placement documentation. . 
+//Please refer to THIS DOC for creating a placement. -- we need to point to this when it is ready in issue https://github.com/open-cluster-management/backlog/issues/12767
+
+[#bind-argo]
+== Binding the set of managed clusters 
+
+Bind a _placement rule_ to the cluster with a `GitOpsCluster` custom resource, which registers the set of managed clusters from the placement decision to the specified instance of Argo CD or {ocp} GitOps operator. This enables the ArgoCD instance to deploy applications to any of those {product-title-short} managed clusters. 
+
+*Note:* The referenced Placement resource must be in the same namespace as the `GitOpsCluster` resource.
+
+See the following sample `placement:name` is `development-clusters` is specified as target clusters for the GitOps instance that is installed in `argoNamespace:openshift-gitops`. The `argoServer.cluster` specification requires the `local-cluster` value.
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1alpha1
+kind: GitOpsCluster
+metadata:
+  name: gitops-cluster-sample
+  namespace: dev
+spec:
+  argoServer:
+    cluster: local-cluster
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1alpha1
+    name: development-clusters
+----
+
+When you enable the Argo CD cluster collection, the managed cluster secret is auto-created in the hub managed cluster namespace. See the following sample where the cluster secret is in the `cluster1` namespace:
+
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cluster1-cluster-secret
+  namespace: cluster1
+  labels:
+    apps.open-cluster-management.io/secret-type: acm-cluster
+type: Opaque
+stringData:
+  name: cluster1
+  server: https://<url-name-here>
+  config: |
+    {
+      "bearerToken": "<the bear token>",
+      "tlsClientConfig": {
+        "insecure": true
+      }
+    }
+----
+
+When the managed cluster secret is synced up to the Argo CD namespace, the cluster secret resembles the following sample where the label is specific to Argo CD `secret-type`, and the namespace is changed to `argocd`:
+
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    argocd.argoproj.io/secret-type: cluster
+    apps.open-cluster-management.io/acm-cluster: "true"
+  name: cluster1-cluster-secret
+  namespace: argocd
+type: Opaque
+stringData:
+  name: cluster1
+  server: https://<url-name-here>
+  config: |
+    {
+      "bearerToken": "<bearer token>",
+      "tlsClientConfig": {
+        "insecure": true
+      }
+    }
+----
