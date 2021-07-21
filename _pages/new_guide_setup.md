@@ -101,7 +101,7 @@ Complete the following steps to complete the _New title_ form:
    10. You can add multiple new titles by selecting the **Add additional title** button. Otherwise, select **Submit** when the form is complete. 
    11. Run a manual build to pick up the new book. For more information, see [Build and publish](arch_builds.md#build-and-publish).
 
-*Possible troubleshooting steps for the `no main file` error message after building the new book:*
+### Possible troubleshooting steps for the `no main file` error message after building the new book:
     1. In the Pantheon interface, select the edit (pencil) icon beside your new book. It appears when you hover over the book title. 
     2. Verify that there is also a **Title URL fragment** listed in the field. It is generally an all lowercase version of the **Title name** that is listed.
     3. If it is not there, add it.
@@ -109,7 +109,7 @@ Complete the following steps to complete the _New title_ form:
 
 ## Renaming 
 
-Only rename a folder/guide when absolutely needed as a result of product change.
+Only rename a folder/guide when absolutely needed as a result of product change. Be sure to alert the team in a Slack message so they don't create links to the folder you are renaming.
 
    1. Rename the folder in the source, as Git directory must match the URL. (Git remains the source of truth.)
    2. Rename the guide in the `docinfo.xml` file.
@@ -119,7 +119,7 @@ Only rename a folder/guide when absolutely needed as a result of product change.
    6. Click **Edit title**.
    7. Change the name and the URL fragment. Keep URL fragment in lowercase.
    8. Click **Rename** to save.
-   9. Select the drop-downn error for the book and click **Edit Configuration**.
+   9. Select the drop-down error for the book and click **Edit Configuration**.
    10. Update the _Content Directory_ field with the new name of the folder.
    11. When links and files/folders are all changed, as well as titles, run a build.
    
