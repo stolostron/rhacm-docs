@@ -13,6 +13,11 @@ Configuration policies support the inclusion of Golang text templates in the obj
 
 Template functions, such as resource-specific and generic, `lookup` template functions, are available for referencing Kubernetes resources on the cluster. The resource-specific functions are used for convenience and makes content of the resources more accessible. If you use the generic function, `lookup`, which is more advance, it is best to be familiar with the YAML structure of the resource that is being looked up. In addition to these functions, utility functions like `base64encode`, `base64decode`, `indent`, `toInt`, `toBool` etc. are also available.
 
+To conform templates into YAML syntax, templates must be set in the policy resource as strings using quotes or a block chaacter ( `|` or `>`). This causes the resolved template value to also be a string. To override this, consider using `toInt` or `toBool` as the final function in the template to initiate further processing that forces the value to be interpreted as integer or boolean.
+
+*Note*: If the string value is more than 80 characters, this block character, `|` needs to be used to avoid YAML parsing errors.
+
+
 Continue reading to view descriptions and examples for some of the custom template functions that are supported:
 
 * <<fromsecret-func,_fromSecret_ function>>
@@ -101,8 +106,7 @@ spec:
         app-name: sampleApp
         app-description: "this is a sample app"
         log-file: '{{ fromConfigMap "default" "logs-config" "log-file" }}'
-        log-level: |
-          {{with (fromConfigMap "default" "logs-config" "log-level") }} {{ . }} {{else}} ERROR {{end}}
+        log-level: '{{ fromConfigMap "default" "logs-config" "log-level")}}'
   remediationAction: enforce
   severity: low
 ----
@@ -114,7 +118,7 @@ spec:
 The `fromClusterClaim` function returns the value of the `Spec.Value` in the `ClusterClaim` resource. View the following syntax for the function:
 
 ----
-func fromClusterClaim (clusterclaimName string) (value string, err Error)
+func fromClusterClaim (clusterclaimName string) (value map[string]interface{}, err Error)
 ----
 
 When you use the function, enter the name of a Kubernetes `ClusterClaim` resource. You receive a policy violation if the `ClusterClaim` resource does not exist. View the following example of the configuration policy that enforces a Kubernetes resource on the target managed cluster. The value for the `platform` data key is a template that retrieves the value of the `platform.open-cluster-management.io` cluster claim. Similarily, it retrieves values for `product` and `version` from the `ClusterClaim`:
