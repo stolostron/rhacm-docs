@@ -102,10 +102,11 @@ Complete the following steps to complete the _New title_ form:
    11. Run a manual build to pick up the new book. For more information, see [Build and publish](arch_builds.md#build-and-publish).
 
 ### Possible troubleshooting steps for the `no main file` error message after building the new book:
-    1. In the Pantheon interface, select the edit (pencil) icon beside your new book. It appears when you hover over the book title. 
-    2. Verify that there is also a **Title URL fragment** listed in the field. It is generally an all lowercase version of the **Title name** that is listed.
-    3. If it is not there, add it.
-    4. If that doesn't resolve the error with your next build, try deleting and recreating the symlink in the folder of the new book. 
+    
+   1. In the Pantheon interface, select the edit (pencil) icon beside your new book. It appears when you hover over the book title. 
+   2. Verify that there is also a **Title URL fragment** listed in the field. It is generally an all lowercase version of the **Title name** that is listed.
+   3. If it is not there, add it.
+   4. If that doesn't resolve the error with your next build, try deleting and recreating the symlink in the folder of the new book. 
 
 ## Renaming 
 
