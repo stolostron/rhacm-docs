@@ -3,6 +3,373 @@
 
 {product-title} is installed using an operator that deploys all of the required components.
 
+* <<connect-prerequisites,Prerequisites>>
+* <<confirm-ocp-installation,Confirm your installation>>
+* <<installing-on-infra-node,Preparing to install the hub cluster on an infrastructure node>>
+* <<installing-from-the-operatorhub,Installing from the OperatorHub>>
+* <<installing-from-the-cli,Installing from the CLI>>
+
+[#connect-prerequisites]
+== Prerequisites
+
+Before you install {product-title-short}, see the following requirements:
+
+* Your {ocp} must have access to the {product-title-short} operator in the OperatorHub catalog from the console.
+
+* {ocp-short} version 4.6, or later, must be deployed in your environment, and you must be logged into with the CLI. See the https://access.redhat.com/documentation/en-us/openshift_container_platform/4.7/html/installing/index[{ocp-short} version 4.7], https://docs.openshift.com/container-platform/4.6/welcome/index.html[{ocp-short} version 4.6] for information.
+
+* Your {ocp-short} command line interface (CLI) must be configured to run `oc` commands. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.7/html/cli_tools/openshift-cli-oc#cli-getting-started[Getting started with the CLI] for information about installing and configuring the {ocp-short} CLI.
+
+* Your {ocp-short} permissions must allow you to create a namespace.
+
+* You must have an Internet connection to access the dependencies for the operator.
+
+* To install in a Red Hat OpenShift Dedicated environment, see the following:
+
+** You must have the Red Hat OpenShift Dedicated environment configured and running.
+
+** You must have `cluster-admin` authority to the Red Hat OpenShift Dedicated environment where you are installing the hub cluster.
+
+[#confirm-ocp-installation]
+== Confirm your installation
+
+You must have a supported {ocp} version, including the registry and storage services, installed and working in your cluster. For more information about installing {ocp-short}, see the {ocp-short} documentation.
+
+. To ensure that the {ocp-short} cluster is set up correctly, access the {ocp-short} web console.
+
++
+Run the `kubectl -n openshift-console get route` command to access the {ocp-short} web console.
+
+See the following example output:
+
++
+----
+openshift-console        console  console-openshift-console.apps.new-coral.purple-chesterfield.com                       console                  https   reencrypt/Redirect     None
+----
+
++
+The console URL in this example is: `https://console-openshift-console.apps.new-coral.purple-chesterfield.com`.
+
+. Open the URL in your browser and check the result. If the console URL displays `console-openshift-console.router.default.svc.cluster.local`, set the value for `openshift_master_default_subdomain` when you install {ocp-short}.
+
+. See xref:../install/plan_capacity.adoc#sizing-your-cluster[Sizing your cluster] to learn about setting up capacity for your hub cluster.
+
+[#installing-on-infra-node]
+== Preparing to install the hub cluster on an infrastructure node
+
+By using `tolerations`, the {product-title} hub cluster allows hub cluster components to be installed on an infrastructure node. To install the hub cluster on an infrastructure node, complete the following steps to prepare:
+
+. Configure your infrastructure nodes as infrastructure machine sets according to the procedure in https://access.redhat.com/documentation/en-us/openshift_container_platform/4.7/html/machine_management/creating-infrastructure-machinesets[Creating infrastructure machine sets] in the {ocp} documentation.
+
++
+See the following example of the `toleration`:
+
++
+[source,yaml]
+----
+tolerations:
+  - effect: NoSchedule 
+    key: node-role.kubernetes.io/infra 
+    operator: Exists 
+----
+
+. Add the following `nodeSelector` entry to the `MultclusterHub` resource _object_ section:
+
++
+[source,yaml]
+----
+spec:
+  nodeSelector:
+    node-role.kubernetes.io/infra: ""
+----
+
+. Complete the steps to finish installing the hub cluster. 
+
+*Notes:* 
+
+- A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to {product-title-short} and to any user credentials with access to the namespace where you install {product-title-short}.
+
+- The installation also creates a namespace called `local-cluster` that is reserved for the hub cluster when it is managed by itself. There cannot be an existing namespace called `local-cluster`. For security reasons, do not release access to the `local-cluster` namespace to any user who does not already have `cluster-administrator` access.
+
+[#installing-from-the-operatorhub]
+== Installing from the OperatorHub
+
+**Best practice:** Install by using the OperatorHub that is provided with {ocp-short}. 
+
+**Note:** For Red Hat OpenShift Dedicated environment only, log in to your Red Hat OpenShift Dedicated environment with `cluster-admin` permissions.
+
+. From the _Administrator_ view in your {ocp-short} navigation, select *Operators* > *OperatorHub* to access the list of available operators.
+
+. Find and select the _Advanced Cluster Management for Kubernetes_ operator.
+
+. On the _Operator subscription_ page, select the options for your installation:
+
++
+* Namespace: 
+
+  - The hub cluster must be installed in its own namespace, or project. 
+
+  - By default, the OperatorHub console installation process creates a namespace titled `open-cluster-management`. *Best practice:* Continue to use the `open-cluster-management` namespace if it is available.  
+  
+  - If there is already a namespace named `open-cluster-management`, choose a different namespace.
+
++
+* Channel: The channel that you select corresponds to the release that you are installing. When you select the channel, it installs the identified release, and establishes that the future errata updates within that release are obtained.
+
++
+* Approval strategy: The approval strategy identifies the human interaction that is required for applying updates to the channel or release to which you subscribed. If you select *Automatic* updates, any updates within that release are automatically applied. If you have concerns about when the updates are applied, you can select *Manual*, and receive a notification when an update is available. 
+
++
+*Note:* To upgrade to the next minor release, you must return to the OperatorHub page and select a new channel for the more current release.
+
+. Select *Install* to apply your changes and create the operator. 
+
+. If you plan to import Kubernetes clusters that were not created by {ocp-short} or {product-title-short}, create a secret that contains your {ocp-short} pull secret to access the entitled content from the distribution registry. Secret requirements for {ocp-short} clusters are automatically resolved by {ocp-short} and {product-title-short}, so you do not have to create the secret if you are not importing other types of Kubernetes clusters to be managed.
+
++
+*Important:* These secrets are namespace-specific, so be sure to create a secret in the namespace where you installed {product-title-short}.
+
++
+ .. Copy your {ocp-short} pull secret from https://cloud.redhat.com/openshift/install/pull-secret[cloud.redhat.com/openshift/install/pull-secret] by selecting *Copy pull secret*. You need the content of this pull secret in a step later in this procedure. Your {ocp-short} pull secret is associated with your Red Hat Customer Portal ID and is the same across all Kubernetes providers.
+ .. In the {ocp-short} console navigation, select *Workloads* > *Secrets*.
+ .. Select *Create* > *Image Pull Secret*.
+ .. Enter a name for your secret.
+ .. Select *Upload Configuration File* as the authentication type.
+ .. In the _Configuration file_ field, paste the pull secret that you copied from `cloud.redhat.com`.
+ .. Select *Create* to create the secret.
+
+. Create the _MultiClusterHub_ custom resource.
+ .. In the {ocp-short} console navigation, select *Installed Operators* > *Advanced Cluster Management for Kubernetes*.
+ .. Select the *MultiClusterHub* tab.
+ .. Select *Create MultiClusterHub*.
+ .. Update the default values in the YAML file, according to your needs.
+ 
+* The following example shows the default template if you did not create an image pull secret. Confirm that `namespace` is your project namespace:
+
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+----
+
++
+* The following example is the default template if you created an image pull secret. Replace `secret` with the name of the pull secret that you created. Confirm that `namespace` is your project namespace.:
+
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  imagePullSecret: <secret>
+----
+
++
+. *Optional:* Disable hub self management, if necessary. By default, the hub cluster is automatically imported and managed by itself, like any other cluster. If you do not want the hub cluster to manage itself, then change the setting for `disableHubSelfManagement` from `false` to `true`. If the setting is not included in the YAML file that defines the custom resource, add it as shown in the example of the previous step. 
+
++
+The following example shows the default template to use if you want to disable the hub self-management feature. Replace `namespace` with the name of your project namespace:
+
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  disableHubSelfManagement: true
+----
++
+. Select *Create* to initialize the custom resource. It can take up to 10 minutes for the hub cluster to build and start.
+
++
+After the hub cluster is created, the status for the operator is _Running_ on the _Installed Operators_ page.
+
+. Access the console for the hub cluster.
+ .. In the {ocp-short} console navigation, select *Networking* > *Routes*.
+ .. View the URL for your hub cluster in the list, and navigate to it to access the console.
+
+[#installing-from-the-cli]
+== Installing from the CLI
+
+**Red Hat OpenShift Dedicated environment only required access:** Cluster administrator, as the default `dedicated-admin` role does not have the required permissions to create namespaces in the Red Hat OpenShift Dedicated environment. You must have `cluster-admin` permissions.
+
+. Create a hub cluster namespace where the operator requirements are contained. Run the following command, where `namespace` is the name for your hub cluster namespace. The value for `namespace` might be referred to as _Project_ in the {ocp-short} environment:
+
++
+----
+oc create namespace <namespace>
+----
+
+. Switch your project namespace to the one that you created. Replace `namespace` with the name of the hub cluster namespace that you created in step 1.
+
++
+----
+oc project <namespace>
+----
+
+. If you plan to import Kubernetes clusters that were not created by {ocp-short} or {product-title-short}, generate a secret that contains your {ocp-short} pull secret information to access the entitled content from the distribution registry.
+The secret requirements for {ocp-short} clusters are automatically resolved by {ocp-short} and {product-title-short}, so you do not have to create the secret if you are not importing other types of Kubernetes clusters to be managed.
+*Important:* These secrets are namespace-specific, so make sure that you are in the namespace that you created in step 1.
+ .. Download your {ocp-short} pull secret file from https://cloud.redhat.com/openshift/install/pull-secret[cloud.redhat.com/openshift/install/pull-secret] by selecting *Download pull secret*.
+Your {ocp-short} pull secret is associated with your Red Hat Customer Portal ID, and is the same across all Kubernetes providers.
+ .. Run the following command to create your secret:
++
+----
+oc create secret generic <secret> -n <namespace> --from-file=.dockerconfigjson=<path-to-pull-secret> --type=kubernetes.io/dockerconfigjson
+----
++
+Replace `secret` with the name of the secret that you want to create.
+Replace `namespace` with your project namespace, as the secrets are namespace-specific.
+Replace `path-to-pull-secret` with the path to your {ocp-short} pull secret that you downloaded.
+
+. Create an operator group. Each namespace can have only one operator group.
+ .. Create a YAML file that defines the operator group.
+Your file should look similar to the following example. Replace `default` with the name of your operator group. Replace `namespace` with the name of your project namespace:
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: <default>
+spec:
+  targetNamespaces:
+  - <namespace>
+----
+ .. Apply the file that you created to define the operator group:
++
+----
+oc apply -f local/<operator-group>.yaml
+----
++
+Replace `operator-group` with the name of the operator group YAML file that you created.
+
+. Apply the subscription.
+
+ .. Create a YAML file that defines the subscription.
+Your file should look similar to the following example:
+
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: acm-operator-subscription
+spec:
+  sourceNamespace: openshift-marketplace
+  source: redhat-operators
+  channel: release-2.3
+  installPlanApproval: Automatic
+  name: advanced-cluster-management
+----
+
++
+.. Include the following if you are installing on infra nodes:
+
++
+[source,yaml]
+----
+spec:
+  config:
+    nodeSelector:
+      node-role.kubernetes.io/infra: ""
+    tolerations:
+    - key: node-role.kubernetes.io/infra
+      effect: NoSchedule
+      operator: Exists
+----
++
+.. Run the following command. Replace `subscription` with the name of the subscription file that you created:
+
++
+----
+oc apply -f local/<subscription>.yaml
+----
+
+. Apply the MultiClusterHub custom resource.
+
+ .. Create a YAML file that defines the custom resource.
+ 
++
+* Your default template should look similar to the following example. Replace `namespace` with the name of your project namespace. If you did not create a pull secret, it will not appear. If you did, replace `secret` with the name of your pull secret for this example:
+
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  imagePullSecret: <secret>
+----
+
+.. *Optional:* If the installer-managed `acm-hive-openshift-releases` subscription is enabled, you can disable the subscription by setting the value of `disableUpdateClusterImage` to `true`.
+
+.. *Optional:* Disable hub self management, if necessary. By default, the hub cluster is automatically imported and managed by itself, like any other cluster. If you do not want the hub cluster to manage itself, then change the setting for `disableHubSelfManagement` from `false` to `true`. 
+
++
+Your default template should look similar to the following example, if you created a pull secret and are enabling the `disableHubSelfManagement` feature. Replace `namespace` with the name of your project namespace. Replace `secret` with the name of your pull secret:
+
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  imagePullSecret: <secret>
+  disableHubSelfManagement: true
+----
+
+.. Apply the custom resource with the following command. Replace `custom-resource` with the name of your custom resource file:
+ 
++
+----
+oc apply -f local/<custom-resource>.yaml
+----
+
++
+If this step fails with the following error, the resources are still being created and applied. Run the command again in a few minutes when the resources are created:
+
++
+----
+error: unable to recognize "./mch.yaml": no matches for kind "MultiClusterHub" in version "operator.open-cluster-management.io/v1"
+----
+
+. Run the following command to get the custom resource. It can take up to 10 minutes for the `MultiClusterHub` custom resource status to display as `Running` in the `status.phase` field after you run the following command:
+
++
+----
+oc get mch -o=jsonpath='{.items[0].status.phase}'
+----
+
+. After the status is `Running`, view the list of routes to find your route:
++
+----
+oc get routes
+----
+
+If you are reinstalling {product-title-short} and the pods do not start, see link:../troubleshooting/trouble_reinstall.adoc#troubleshooting-reinstallation-failure[Troubleshooting reinstallation failure] for steps to work around this problem. 
+[#installing-while-connected-online]
+= Installing while connected online
+
+{product-title} is installed using an operator that deploys all of the required components.
+
 [#connect_prerequisites]
 == Prerequisites
 
