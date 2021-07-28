@@ -9,6 +9,7 @@ Monitor the health of your managed clusters with the observability service (`mul
 * <<enabling-observability,Enabling observability>>
 * <<creating-mco-cr,Creating the _MultiClusterObservability_ CR>>
 * <<enabling-observability-ocp,Enabling observability from the {ocp} console>>
+* <<external-metric-query,Using the external metric query>>
 * <<disabling-observability-resource,Disabling observability>>
 
 [#prerequisites-observability]
@@ -261,6 +262,43 @@ See xref:../observability/customize_observability.adoc#forward-alerts[Forwarding
 .. Verify the status of the `MultiClusterObservability` instance by viewing the _Conditions_ section. When you receive the following message, the obseravbility service is enabled successfully: `Observability components are deployed and running`
 
 Observability is enabled from the {ocp-short} console.
+
+[#external-metric-query]
+=== Using the external metric query
+
+Observability provides an external API for metrics to be queried through the OpenShift route, `rbac-query-proxy`. View the following tasks to use `rbac-query-proxy` route:
+
+* You can get the details of the route with the following command:
++
+----
+oc get route rbac-query-proxy -n open-cluster-management-observability
+----
+
+* To access the `rbac-query-proxy` route, you must have an OpenShift OAuth access token. The token should be associated with a user or service account, which has permission to get namespaces. For more information, see https://docs.openshift.com/container-platform/4.8/authentication/managing-oauth-access-tokens.html[Managing user-owned OAuth access tokens].
+
+* Get the default CA certificate to store the content of the key, `tls.crt`, in a local file. Run the following command:
++
+----
+oc get secrets -n openshift-ingress router-certs-default -o yaml
+----
+
+* Run the following command to query metrics:
++
+----
+curl --cacert ./ca.crt -H "Authorization: bearer {TOKEN}" https://{PROXY_ROUTE_URL}/api/v1/query?query={QUERY_EXPRESSION}
+----
++
+*Note*: The `QUERY_EXPRESSION` is the standard Prometheus query expression. For example, query the metrics `cluster_infrastructure_provider` by replacing the URL in the previously mentioned command, with the following URL: `https://{PROXY_ROUTE_URL}/api/v1/query?query=cluster_infrastructure_provider`. For more details, see https://prometheus.io/docs/prometheus/latest/querying/basics/[Querying prometheus].
+
+* You can also replace certificates for the `rbac-query-proxy` route:
+** See link:../governance/cert_mgmt_ingress.adoc#openssl-commands-for-generating-a-certificate[OpenSSL commands for generating a certificate] to create certificates. When you customize the `csr.cnf`, update the `DNS.1` to the hostname for the `rbac-query-proxy` route.
+** Run the following command to create `proxy-byo-ca` and `proxy-byo-cert` secrets using the generated certificates:
++
+----
+oc -n open-cluster-management-observability create secret tls proxy-byo-ca --cert ./ca.crt --key ./ca.key
+
+oc -n open-cluster-management-observability create secret tls proxy-byo-cert --cert ./ingress.crt --key ./ingress.key
+----
 
 [#disabling-observability-resource]
 == Disabling observability
