@@ -5,7 +5,14 @@ When you deploy Kubernetes resources using an application, the resources are loc
 
 *User required access:* A user role that can create applications. You can only perform actions that your role is assigned. Learn about access requirements from the link:../access_control/rbac.adoc#role-based-access-control[Role-based access control] documentation. 
 
-When you deploy Kubernetes resources using an application, the resources are located in specific repositories. Learn how to deploy resources from Git repositories in the following procedure.
+<<creating-aws-object-bucket, Creating your Amazon Web Services (AWS) S3 object bucket>>
+<<deploy-resources-from-object-storage-git-repo, Deploy resources from object storage>>
+<<sample-yaml-object, Sample YAML>>
+
+[#deploy-resource-object-storage]
+== Deploy resources from object storage
+
+When you deploy Kubernetes resources using an application, the resources are located in specific repositories. Learn how to deploy resources from object storage Git repositories in the following procedure.
 
 . From the console navigation menu, click *Manage applications*.
 
@@ -74,3 +81,59 @@ spec:
 
 *Note:* To see REST API, use the link:../apis/api.adoc#apis[APIs].
  
+[#creating-aws-object-bucket]
+= Creating your Amazon Web Services (AWS) S3 object bucket.
+
+In ACM 2.3, user is able to create ACM subscriptions to subscribe resources defined in a AWS S3 object bucket. In order to do this
+
+###  Create your AWS S3 object bucket.
+
+1. log into the AWS console using your AWS account, user name, and password 
+https://s3.console.aws.amazon.com/
+
+2.  Navigate to `Amazon S3 -> buckets` in the upper left section  to go to the bucket home page, then click on  `Create Bucket` to create your bucket 
+
+Note the `AWS region` can be selected when the bucket is created, which is essential for connecting your AWS S3 object bucket.
+
+3.  Create the bucket access token
+- Navigate to your user name in the upper right section of the navigation bar. From the drop-down menu, select `My Security Credentials` 
+- Go to `Access keys for CLI, SDK, & API access` in the `AWS IAM credentials` tab,  click on`Create access key`
+- Save your `Access key ID` ,`Secret access key` 
+ 
+4. upload your object yaml files to the bucket
+
+###  Create the ACM subscription to subscribe object in the AWS bucket
+1.  Create a object bucket type channel with a secret to specify the `AccessKeyID`, `SecretAccessKey` and `Region` for connecting the AWS bucket. The three fields are created when the AWS bucket is created.
+
+Note the AWS S3 object bucket URL is not necessary for connecting the bucket via AWS S3 api.  But we are using the URL to identify the channel is a AWS S3 bucket if the URL contains `s3://` or `s3 and aws` keywords. e.g. All of the following bucket URLs will be regarded as a AWS s3 bucket.
+```
+https://s3.console.aws.amazon.com/s3/buckets/xili-bucket-1
+s3://xili-bucket-1/
+https://xili-bucket-1.s3.amazonaws.com/
+```
+
+Here is a complete AWS S3 object bucket channel sample yaml
+```
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: object-dev
+  namespace: ch-object-dev
+spec:
+  type: ObjectBucket
+  pathname: https://s3.console.aws.amazon.com/s3/buckets/xili-bucket-1
+  secretRef:
+    name: secret-dev
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-dev
+  namespace: ch-object-dev
+stringData:
+  AccessKeyID: <your AWS bucket access key id>
+  SecretAccessKey: <your AWS bucket secret access key>
+  Region: <your AWS  bucket region>
+type: Opaque
+```
+2. Create other ACM subscription, placementrule objects as usual
