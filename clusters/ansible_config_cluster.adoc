@@ -1,0 +1,195 @@
+[#ansible-config-cluster]
+= Configuring Ansible Tower tasks to run on managed clusters (Technology Preview)
+
+{product-title-short} is integrated with Ansible Tower automation so that you can create prehook and posthook AnsibleJob instances that occur before or after creating or upgrading your clusters. Configuring prehook and posthook jobs for cluster destroy, and cluster scale actions are not supported.
+
+*Required access:* Cluster administrator
+
+* <<prerequisites-for-ansible-integration-cluster,Prerequisites>>
+* <<ansible-template-run-cluster-console,Configuring an AnsibleJob template to run on a cluster by using the console>>
+* <<ansible-template-create,Creating an AnsibleJob template>>
+* <<configuring-an-ansible-job-for-a-managed-cluster-labels,Configuring an AnsibleJob template to run on a managed cluster by using labels>>
+* <<ansible-status-job-cluster,Viewing the status of an Ansible job>>
+
+[#prerequisites-for-ansible-integration-cluster]
+== Prerequisites
+
+You must meet the following prerequisites to run Ansible templates on your {product-title-short} clusters:
+
+* {ocp-short} 4.6 or later
+
+* You must have Ansible Tower version 3.7.3 or a later version installed. It is best practice to install the latest supported version of Ansible Tower. See https://docs.ansible.com/ansible-tower/[Red Hat Ansible Tower documentation] for more details.
+
+* Install the Ansible Automation Platform Resource Operator to connect Ansible jobs to the lifecycle of Git subscriptions. For best results when using the AnsibleJob to launch Ansible Tower jobs, the Ansible Tower job template should be idempotent when it is run. You can find the Ansible Automation Platform Resource Operator in the {ocp-short} _OperatorHub_. 
+
+For more information about installing and configuring Ansible Tower automation, see link:../applications/ansible_config.adoc#setting-up-ansible[Setting up Ansible tasks (Technology Preview)].
+
+[#ansible-template-run-cluster-console]
+== Configuring an _AnsibleJob_ template to run on a cluster by using the console
+
+You must specify the Ansible job template that you want to use for a cluster when you create the cluster. To specify the template when creating a cluster, select the Ansible template that you want to apply to the cluster in the _Automation_ step. If there are no Ansible templates, click *Add automation template* to create one.
+
+[#ansible-template-create]
+== Creating an _AnsibleJob_ template
+
+To initiate an Ansible job with a cluster installation or upgrade, you must create an Ansible job template to specify when you want the jobs to run. They can be configured to run before or after the cluster installs or upgrades.
+
+To specify the details about running the Ansible template while creating a template, complete the following steps:
+
+. Select *Infrastructure* > *Automation* from the {product-title-short} navigation. The existing Ansible templates are displayed.
+
+. Select the appropriate path for your situation:  
++
+* If you want to create a new template, click *Create Ansible template* and continue with step 3.
+
+* If you want to modify an existing template, click *Edit template* from the _Options_ menu of the template that you want to modify and continue with step 5.
+
+. Enter a name for your template. It must be a unique name that contains lowercase, alphanumeric characters or a hyphen (-).
+
+. Select the credential that you want to use for the new template. To link an Ansible credential to an Ansible template, complete the following steps:
+ 
+.. From the {product-title-short} navigation, select *Automation*. Any template in the list of templates that is not linked to a credential contains a *Link to credential* icon that you can use to link the template to an existing credential.
+
+.. Select *Link to credential* to find and link to an existing credential.
+
+.. Select an available credential from the menu in the _Ansible Automation Platform credential_ field. Only the credentials in the same namespace as the template are displayed.
+
+.. If there are no credentials that you can select, or if you do not want to use an existing credential, select *Edit template* from the _Options_ menu for the template that you want to link.
+
+.. Click *Add credential* to create a credential for your template. 
+
+.. Complete the procedure in link:../credentials/credential_ansible.adoc#creating-a-credential-for-ansible[Creating a credential for Ansible Automation Platform] if you have to create your credential.
+
+.. After you create your credential in the same namespace as the template, select the credential in the _Ansible Automation Platform credential_ field when you edit the template. 
+
+.. Click *Save* to commit the link between the credential and the template.
+
+. If you want to initiate any Ansible jobs before the cluster is installed, select *Add an Ansible job template* in the _Pre-install Ansible job templates_ section.
+
+. Select the prehook and posthook Ansible jobs to add to the installation or upgrade of the cluster. 
++
+*Note:* The _Ansible job template name_ must match the name of the Ansible job on the Ansible Tower.
+
+. Enter any *Extra variables* that are required by the Ansible Tower job, if there are any.
+
+. Drag the Ansible jobs to change the order, if necessary.  
+
+. Click *Save* to commit your information. 
+
+. Repeat steps 5 - 9 for any Ansible job templates that you want to initiate after the cluster is installed in the _Post-install Ansible job templates_ section.
+
+. Click *Save* to commit your information. 
+
+. Click *Next* to begin specifying the Ansible jobs for the _Upgrading_ initiations. 
+
+. Complete steps 5 - 9 for any Ansible job templates that you want to initiate before the cluster is upgraded in the _Pre-upgrade Ansible job templates_ section.
+
+. Click *Save* to commit your information. 
+ 
+. Complete steps 5 - 9 for any Ansible job templates that you want to initiate after the cluster is upgraded in the _Post-upgrade Ansible job templates_ section.
+ 
+. Click *Save* to commit your information. 
+
+. Click *Next* to review the Ansible jobs that you added.
+
+. Select *Add* to add the Ansible job configuration information to your template. 
+
+Your Ansible template is configured to run on clusters that specify this template when the designated actions occur. 
+
+[#configuring-an-ansible-job-for-a-managed-cluster-labels]
+= Configuring an AnsibleJob template to run on a managed cluster by using labels
+
+You can create an `AnsibleJob` that is bound to a cluster when the cluster is created by {product-title} or imported to be managed by {product-title-short} by using labels.
+
+Complete the following procedure to create an Ansible job and configure it with a cluster that is not yet managed by {product-title-short}:
+
+. Create the definition file for the Ansible job in one of the channels that are supported by the application function. Only Git channels are supported.
++
+Use `AnsibleJob` as the value of `kind` in the definition.
++
+Your definition file contents might resemble the following example:
++
+[source,yaml]
+----
+apiVersion: apiVersion: tower.ansible.com/v1alpha1
+kind: AnsibleJob
+metadata:
+  name: hive-cluster-gitrepo
+spec:
+  tower_auth_secret: my-toweraccess
+  job_template_name: my-tower-template-name
+  extra_vars:
+    variable1: value1
+    variable2: value2
+----
++
+By storing the file in the prehook or posthook directory, it creates a list of cluster names that match the placement rule. The list of cluster names can be passed as a value of `extra_vars` to the `AnsibleJob` `kind` resource. When this value is passed to the `AnsibleJob` resource, the Ansible job can determine the new cluster name and use it in the automation.
+
+. Log on to your {product-title-short} hub cluster.
+
+. Using the {product-title-short} console, create an application with a Git subscription that references the channel where you stored the definition file that you just created. See link:../applications/app_resources.adoc#managing-application-resources[Managing application resources] for more information about creating an application and subscription.
++
+When you create the subscription, specify a label that you can add to the cluster that you create or import later to connect this subscription with the cluster. This can be an existing label, like `vendor=OpenShift`, or a unique label that you create and define. 
++
+*Note:* If you select a label that is already in use, the Ansible job automatically runs. It is best practice to include a resource in your application that is not part of the prehooks or posthooks.  
++
+The default placement rule runs the job when it detects the cluster with the label that matches the label of the `AnsibleJob`. If you want the automation to run on all of your running clusters that are managed by the hub cluster, add the following content to the placement rule:
++
+[source,yaml]
+----
+clusterConditions:
+  - type: ManagedClusterConditionAvailable
+    status: "True"
+----
++
+You can either paste this into the YAML content of the placement rule or you can select the option to _Deploy to all online clusters and local cluster_ on the _Application create_ page of the {product-title-short} console. 
+
+. Create or import your cluster by following the instructions in xref:../clusters/create.adoc#creating-a-cluster[Creating a cluster] or xref:../clusters/import.adoc#importing-a-target-managed-cluster-to-the-hub-cluster[Importing a target managed cluster to the hub cluster], respectively.
++
+When you create or import the cluster, use the same label that you used when you created the subscription, and the `AnsibleJob` is automatically configured to run on the cluster. 
+ 
+{product-title-short} automatically injects the cluster name into the `AnsibleJob.extra_vars.target_clusters` path. You can dynamically inject the cluster name into the definition. Complete the following procedure to create an AnsibleJob and configure it with a cluster that is already managed by {product-title-short}:
+
+. Create the definition file for the AnsibleJob in the prehook or posthook directory of your Git Channel.
++
+Use `AnsibleJob` as the value of `kind` in the definition.
++
+Your definition file contents might resemble the following example:
++
+[source,yaml]
+----
+apiVersion: tower.ansible.com/v1alpha1
+kind: AnsibleJob
+metadata:
+  name: hive-cluster-gitrepo
+spec:
+  tower_auth_secret: my-toweraccess
+  job_template_name: my-tower-template-name
+  extra_vars:
+    variable1: value1
+    variable2: value2
+----
++
+Replace `_my-toweraccess_` with the authentication secret to access your Ansible Tower.
++
+Replace `_my-tower-template-name_` with the template name from your Ansible Tower.
+
+Each time a cluster that is controlled by the Ansible job is removed or added, the AnsibleJob automatically runs and updates the `extra_vars.target_clusters` variable. This updating provides the ability to specify cluster names with a specific automation, or apply the automation to a group of clusters. 
+
+[#ansible-status-job-cluster]
+== Viewing the status of an Ansible job
+
+You can view the status of a running Ansible job to ensure that it started, and is running successfully. To view the current status of a running Ansible job, complete the following steps: 
+
+. In the {product-title-short} menu, select *Infrastructure* > *Clusters* to access the _Clusters_ page.
+
+. Select the name of the cluster to view its details.
+
+. View the status of the last run of the Ansible job on the cluster information. The entry shows one of the following statuses:
++
+* When an install prehook or posthook job fails, the cluster status shows `Failed`.
+* When an upgrade prehook or posthook job fails, a warning is displayed in the _Distribution_ field that the upgrade failed.
++
+*Tip:* You can retry an upgrade from the _Clusters_ page if the cluster prehook or posthook failed.  
+
+
