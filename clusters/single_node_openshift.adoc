@@ -1,0 +1,65 @@
+[#single-node-openshift]
+= Creating a Single-Node OpenShift cluster (Development Preview)
+
+You can create a Single-Node OpenShift (SNO) cluster that contains only a single node. In a standard cluster, there are master nodes and separate worker nodes. This configuration can be helpful when you have many clusters that need to minimize their resource footprint. 
+
+*Important:* Creating a SNO cluster should not be used in production environments.
+
+*Required access*: Administrator
+
+[#sno_prerequisites]
+== Prerequisites
+
+* A {product-title} {version} 2.3, or later, hub cluster that is running on {ocp} version 4.8, or later.
+* Credentials to access the provider where you want to create your SNO cluster. The supported providers include: 
++
+** Amazon Web Services
+** Microsoft Azure
+** Google Cloud Platform
+** OpenStack
+** VMware vSphere
+
+[#sno_create]
+== Create a Single-Node OpenShift cluster
+
+To create a SNO cluster, complete the following steps:
+
+. Enable the SNO feature. Because the SNO feature is a Development Preview feature, it is not enabled when you install {product-title-short}. You must enable it by completing the following steps:
+
+.. Create a YAML file that contains the following content:
++
+[source, yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: FeatureGate
+metadata:
+    name: open-cluster-management-single-node-openshift
+    labels:
+        console.open-cluster-management.io: ""
+spec:
+    featureSet: open-cluster-management-single-node-openshift
+----
+
+.. Log in to your {product-title-short} hub cluster with `administrator` permissions. 
+
+.. Apply the feature gate by entering the following command:
++
+----
+oc apply -f <name-of-feature-gate-file>
+----
++
+Replace `name-of-feature-gate-file` with the name of the file that you created. 
++
+The SNO feature is now enabled on {product-title-short}.
+
+. Complete the steps for creating a cluster on one of the supported providers that are supported to run a SNO cluster in xref:../clusters/create.adoc#creating-a-cluster[Creating a cluster].
+
+. While you create your cluster, you must select {ocp-short} 4.8, or later In the _Release image_ field. If you enabled the feature gate, an option to select *Single node OpenShift* is displayed. 
++
+*Note:* If you select an {ocp-short} version that is older than 4.8, the option to select _Single node OpenShift_ is not displayed.
+
+. Select *Single node OpenShift*. The _Worker pools_ option is removed from the procedure because there are no worker nodes in a SNO cluster. 
+
+. Complete the remaining steps of the cluster creation to create your SNO cluster. There is a known issue when you create a cluster pool with a SNO cluster, the cluster pools with the SNO enabled clusters are provisioning worker nodes. SNO clusters should not have worker nodes. You can remove the worker nodes by deleting the `MachinePool` custom resource from the claimed managed SNO cluster.
++
+*Important:* When you create an {ocp-short} SNO cluster on GCP, you must configure more CPU and memory resources than for a standard GCP cluster. The minimum requirements for a SNO cluster on GCP is 8 CPUs and 32 GB of memory. The standard requirements of 4 CPUs and 16 GB of memory is not stable for this type of cluster. 
