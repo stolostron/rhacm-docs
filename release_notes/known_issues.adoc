@@ -23,9 +23,10 @@ Review the known issues for {product-title}. The following list contains known i
 
 * <<installation-known-issues,Installation known issues>>
 * <<web-console-known-issues,Web console known issues>>
+** <<observability-known-issues,Observability known issues>>
 * <<cluster-management-issues,Cluster management known issues>>
 * <<application-management-known-issues,Application management known issues>>
-//* <<security-known-issues,Security known issues>>
+* <<governance-known-issues,Governance known issues>>
 
 [#installation-known-issues]
 == Installation known issues
@@ -98,7 +99,7 @@ oc edit pvc <storageclassname>-search-redisgraph-0
 ----
 
 [#observability-known-issues]
-== Observability
+== Observability known issues
 
 [#observability-endpoint-operator-fails-to-pull-image]
 === Observability endpoint operator fails to pull image
@@ -114,14 +115,193 @@ For more information, see link:../observability/observability_enable.adoc#enabli
 
 {product-title-short} observability does not display data from an ROKS cluster on some panels within built-in dashboards. This is because ROKS does not expose any API Server metrics from servers they manage. The following Grafana dashboards contain panels that do not support ROKS clusters: `Kubernetes/API server`, `Kubernetes/Compute Resources/Workload`, `Kubernetes/Compute Resources/Namespace(Workload)`
 
+[#missing-etcd-data-roks]
+=== There is no etcd data from ROKS clusters
+//2.2.3:12114
+
+For ROKS clusters, {product-title-short} observability does not display data in the _etcd_ panel of the dashboard.
+
+
+[#search-high-cpu]
+=== High CPU usage by the search-collector pod
+//2.3.13897
+
+When search is disabled on a hub cluster that manages 1000 clusters, the `search-collector` pod CPU usage levels are higher than normal. For a four-day period, usage was approximately 2.148Mi of CPU. You can reduce memory usage by reducing the `search-collector` to `0` replicas.
+
+[#search-pods-fail-invalid-certs]
+=== Search pods fail to complete the TLS handshake due to invalid certificates
+//2.3:14859
+
+In some rare cases, the search pods are not automatically redeployed after certificates change. This causes a mismatch of certificates across the service pods, which causes the Transfer Layer Security (TLS) handshake to fail. To fix this problem, restart the search pods to reset the certificates.
+
+[#observability-annotation-query-failed]
+=== Metrics are unavailable in the Grafana console
+
+* Annotation query failed in the Grafana console: 
+// 2.1.0:5625
++
+When you search for a specific annotation in the Grafana console, you might receive the following error message due to an expired token: 
++
+`"Annotation Query Failed"`
++
+Refresh your browser and verify you are logged into your hub cluster.
+
+* Error in _rbac-query-proxy_ pod:
++
+Due to unauthorized access to the `managedcluster` resource, you might receive the following error when you query a cluster or project:
++
+`no project or cluster found`
++
+Check the role permissions and update appropriately. See link:../access_control/rbac.adoc#role-based-access-control[Role-based access control] for more information. 
+
+[#mco-error-during-upgrade]
+=== Deployment error with MultiClusterObservability CR after upgrade
+
+When you upgrade from {product-version-prev}.x to {product-version} and deploy observability, you might receive the following error statement in the MultiClusterObservability CR: `Failed to find expected deployment observability-grafana`. Complete the following steps to fix this issue:
+
+. Delete the MultiClusterObservability CR with the following command:
++
+----
+oc delete mco observability
+----
+
+. Restart the `multicluster-observability-operator` pod by running the following command:
++
+----
+oc delete po {POD_NAME} -n open-cluster-management
+----
++
+** `{POD_NAME}` is the name of your `multicluster-observability-operator` pod.
+
+. Recreate the MultiClusterObservability CR. For more information, see link:../observability/observability_enable.adoc#enabling-observability[Enabling observability].
+
+Observability is redeployed successfully.
+
 [#cluster-management-issues]
 == Cluster management known issues
 
+[#no-delete-cluster-namespace-before-remove-cluster]
+=== Cannot delete managed cluster namespace manually
+//2.3:13474
+
+You cannot delete the namespace of a managed cluster manually. The managed cluster namespace is automatically deleted after the managed cluster is detached. If you delete the managed cluster namespace manually before the managed cluster is detached, the managed cluster shows a continuous terminating  status after you delete the managed cluster. To delete this terminating managed cluster, manually remove the finalizers from the managed cluster that you detached.
+
+[#edit-ns-can-destroy-clusters-through-pools]
+=== Users with edit permission to namespace can destroy clusters by destroying a cluster pool
+//2.3:14531
+
+Users with {product-title-short} permissions of `Edit` to a namespace generally cannot destroy a managed cluster on that namespace. A user with `Edit` permissions can destroy a cluster by destroying a cluster pool that contains that cluster, which destroys all of the clusters in the cluster pool. 
+
+[#no-create-clusters-across-architectures]
+=== Cannot create clusters across architectures
+//2.2.3:14631
+
+You cannot create a managed cluster on a different architecture than the architecture of the hub cluster without creating a release image (`ClusterImageSet`) that contains files for both architectures. For example, you cannot create an `x86_64` cluster from a `ppc64le` hub cluster. The cluster creation fails because the {ocp-short} release registry does not provide a multi-architecture image manifest. 
+
+To work around this issue, complete the following steps:
+
+. From the https://quay.io/repository/openshift-release-dev/ocp-release[{ocp-short} release registry], create a https://docs.docker.com/registry/spec/manifest-v2-2/[manifest list] that includes both `x86_64` and `ppc64le` release images.
+
+.. Pull the manifest lists for both architectures from the Quay repository:
++
+----
+$ podman pull quay.io/openshift-release-dev/ocp-release:4.8.1-x86_64
+$ podman pull quay.io/openshift-release-dev/ocp-release:4.8.1-ppc64le
+----
+
+.. Log in to your private repository where you maintain your images:
++
+----
+$ podman login <private-repo>
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Add the release image manifest to your private repository by running the following commands:
++
+----
+$ podman push quay.io/openshift-release-dev/ocp-release:4.8.1-x86_64 <private-repo>/ocp-release:4.8.1-x86_64
+$ podman push quay.io/openshift-release-dev/ocp-release:4.8.1-ppc64le <private-repo>/ocp-release:4.8.1-ppc64le
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Create a manifest for the new information:
++
+---- 
+$ podman manifest create mymanifest
+----
+
+.. Add references to both release images to the manifest list:
++
+----
+$ podman manifest add mymanifest <private-repo>/ocp-release:4.8.1-x86_64
+$ podman manifest add mymanifest <private-repo>/ocp-release:4.8.1-ppc64le
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Merge the list in your manifest list with the existing manifest:
++
+----
+$ podman manifest push mymanifest docker://<private-repo>/ocp-release:4.8.1
+----
++
+Replace `private-repo` with the path to your repository.
+
+. On the hub cluster, create a release image that references the manifest in your repository.
+
+.. Create a `YAML` file that contains information that is similar to the following example:
++
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterImageSet
+metadata:
+  labels:
+    channel: fast
+    visible: "true"
+  name: img4.8.1-appsub
+spec:
+  releaseImage: <private-repo>/ocp-release:4.8.1
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Run the following command on your hub cluster to apply the changes:
++
+----
+oc apply -f <file-name>.yaml
+----
++
+Replace `file-name` with the name of the `YAML` file that you just created. 
+
+. Select the new release image when you create your {ocp-short} cluster. 
+
+The creation process uses the merged release images to create the cluster.  
+
+[#no-reassign-cluster-label]
+=== Cannot reassign a cluster to cluster set by changing label
+//2.2.3:14408
+
+You cannot reassign a cluster or cluster set from one cluster set to another by updating the label for the cluster to the new cluster set. To move a cluster or cluster set to another one, remove it from the cluster set by using the {product-title-short} console. After you remove it from the cluster set, add it to the new cluster set by using the console. 
+
+[#no-ansible-power-hub]
+=== Cannot use Ansible Tower integration with an IBM Power hub cluster
+// 2.3:13523
+
+You cannot use the Ansible Tower integration when the {product-title} hub cluster is running on IBM Power because the link:https://catalog.redhat.com/software/containers/ansible-automation-platform/platform-resource-rhel7-operator/5f6a0f22592d9a52663ccab6[Ansible Automation Platform Resource Operator] does not provide `ppc64le` images.
+
+[#no-change-upgrade-cred]
+=== Cannot change credentials on clusters after upgrading to version 2.3
+//2.3:14098
+
+After you upgrade {product-title-short} to version 2.3, you cannot change the credential secret for any of the managed clusters that were created and managed by {product-title-short} before the upgrade.  
+
 [#no-create-bm-47]
-=== Cannot create bare metal managed clusters on {ocp-short} version 4.7
+=== Cannot create bare metal managed clusters on {ocp-short} version 4.8
 // 2.2:10581
 
-You cannot create bare metal managed clusters by using the {product-title-short} hub cluster when the hub cluster is hosted on {ocp-short} version 4.7.
+You cannot create bare metal managed clusters by using the {product-title-short} hub cluster when the hub cluster is hosted on {ocp-short} version 4.8.
 
 [#create-resource-dropdown-error]
 === Create resource dropdown error
@@ -252,26 +432,6 @@ Replace `_namespace_` with the namespace of the managed cluster.
 // 2.2.0:8922
 
 You cannot use the {product-title-short} console to upgrade {ocp-short} managed clusters that are in the Red Hat OpenShift Dedicated environment.
-
-[#observability-annotation-query-failed]
-=== Metrics are unavailable in the Grafana console
-
-* Annotation query failed in the Grafana console: 
-// 2.1.0:5625
-+
-When you search for a specific annotation in the Grafana console, you might receive the following error message due to an expired token: 
-+
-`"Annotation Query Failed"`
-+
-Refresh your browser and verify you are logged into your hub cluster.
-
-* Error in _rbac-query-proxy_ pod:
-+
-Due to unauthorized access to the `managedcluster` resource, you might receive the following error when you query a cluster or project:
-+
-`no project or cluster found`
-+
-Check the role permissions and update appropriately. See link:../access_control/rbac.adoc#role-based-access-control[Role-based access control] for more information. 
 
 [#application-management-known-issues]
 == Application management known issues
@@ -429,7 +589,7 @@ If you cannot verify, attempt to import the cluster again and verify again.
 
 // 1.0.0:1764
 
-Learn about {ocp} SCC at https://docs.openshift.com/container-platform/4.7/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth[Managing Security Context Constraints (SCC)], which is an additional configuration required on the managed cluster.
+Learn about {ocp} SCC at https://docs.openshift.com/container-platform/4.8/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth[Managing Security Context Constraints (SCC)], which is an additional configuration required on the managed cluster.
 
 Different deployments have different security context and different service accounts.
 The subscription operator cannot create an SCC automatically.
@@ -482,6 +642,19 @@ For instance, namespace `charts-v1` is used by the installer as a Helm type chan
 [#application-management-limitation]
 == Application management limitations
 
+[#application-name]
+=== Application name requirements
+// 2.3:#14310
+
+An application name cannot exceed 37 characters. The application deployment displays the following error if the characters exceed this amount.
+
+[source,yaml]
+----
+status:
+  phase: PropagationFailed
+  reason: 'Deployable.apps.open-cluster-management.io "_long_lengthy_name_" is invalid: metadata.labels: Invalid value: "_long_lengthy_name_": must be no more than 63 characters/n'
+----
+
 [#application-tables]
 === Application console tables
 // 2.3:12410
@@ -494,5 +667,21 @@ See the following limitations to various _Application_ tables in the console:
 
 - From the _Advanced configuration_ table for _Channels_, the _Subscriptions_ column displays the total number of subscriptions on the local cluster that use that channel, but this does not include subscriptions that are deployed by other subscriptions, which are included in the search result.
 
-//[#security-known-issues]
-//== Security known issues
+[#governance-known-issues]
+== Governance known issues
+
+[#iam-controller-user-groups]
+=== IAM policy controller does not consider group users
+//2.3:14006
+
+When the number of users with permissions to a given `ClusterRole` is determined, the IAM policy controller only checks for Kubernetes `User` resources and does not consider users in Kubernetes `Group` resources.
+
+[#unable-to-log-out]
+=== Unable to log out from Red Hat Advanced Cluster Management
+
+When you use an external identity provider to log in to {product-title-short}, you might not be able to log out of {product-title-short}. This occurs when you use {product-title-short}, installed with IBM Cloud and Keycloak as the identity providers.
+
+You must log out of the external identity provider before you attempt to log out of {product-title-short}. 
+
+
+

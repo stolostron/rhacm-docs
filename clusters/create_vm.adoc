@@ -4,7 +4,7 @@
 You can use the {product-title} console to deploy a {ocp} cluster on VMware vSphere.
 
 * <<vsphere_prerequisites,Prerequisites>>
-* <<vsphere_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console,Creating your cluster with the {product-title} console>>
+* <<vsphere_creating-your-cluster-with-the-console,Creating your cluster with the console>>
 * <<vsphere_accessing-your-cluster,Accessing your cluster>>
 
 [#vsphere_prerequisites]
@@ -15,76 +15,78 @@ You must have the following prerequisites before creating a cluster on vSphere:
 * A {product-title-short} hub cluster that is deployed on {ocp-short} version 4.6 or later.
 * Internet access for your {product-title-short} hub cluster so it can create the Kubernetes cluster on vSphere.
 * vSphere credential. See link:../credentials/credential_vm.adoc#creating-a-credential-for-vmware-vsphere[Creating a credential for VMware vSphere] for more information.
-* A Red Hat OpenShift image pull secret. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.7/html/images/managing-images#using-image-pull-secrets[Using image pull secrets].
+* An {ocp-short} image pull secret. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/html/images/managing-images#using-image-pull-secrets[Using image pull secrets].
 * The following information for the VMware instance where you are deploying:
 ** Required static IP addresses for API and Ingress instances.
 ** DNS records for:
 *** `api.<cluster_name>.<base_domain>` which must point to the static API VIP.
 *** `*.apps.<cluster_name>.<base_domain>` which must point to the static IP address for Ingress VIP.
 
-[#vsphere_creating-your-cluster-with-the-red-hat-advanced-cluster-management-for-kubernetes-console]
-== Creating your cluster with the {product-title} console
+[#vsphere_creating-your-cluster-with-the-console]
+== Creating your cluster with the console
 
 To create clusters from the {product-title-short} console, complete the following steps:
 
-. From the navigation menu, navigate to *Clusters*.
-. On the _Clusters_ page, click *Add Cluster*.
-. Select *Create a cluster*.
+. From the navigation menu, navigate to *Infrastructure* > *Clusters*.
+. On the _Clusters_ page, Click *Create cluster*.
 +
 *Note:* This procedure is for creating a cluster.
 If you have an existing cluster that you want to import, see xref:../clusters/import.adoc#importing-a-target-managed-cluster-to-the-hub-cluster[Importing a target managed cluster to the hub cluster] for those steps.
-
-. Enter a name for your cluster.
+. Select your Kubernetes distribution and *VMware vSphere* for the infrastructure provider. The remaining steps are based on your selections.
+. Select your infrastructure provider credential from the available credentials on the list.
+If you do not have one configured, or if you want to configure a new one, select *Add credential*. See link:../credentials/credential_vm.adoc#creating-a-credential-for-vmware-vsphere[Creating a credential for VMware vSphere] for more information about creating a credential.
+. Add the details for your cluster:
+.. Enter a name for your cluster. This value must match the name that you used to create the DNS records listed in the credential prerequisites section.
 This name is used in the hostname of the cluster. 
 +
-*Note:* This value must match the name that you used to create the DNS records listed in the credential prerequisites section.
-+
 *Tip:* You can view the `yaml` content updates as you enter the information in the console by setting the _YAML_ switch to *ON*.
-
-. Select *VMware vSphere* for the infrastructure provider.
-. Specify a *Release image* that you want to use for the cluster.
-This identifies the version of the {ocp-short} image that is used to create the cluster.
-If the version that you want to use is available, you can select the image from the list of images.
-If the image that you want to use is not a standard image, you can enter the URL of the image that you want to use.
-See xref:../clusters/release_images.adoc#release-images[Release images] for more information. 
-*Note:* Only release images for {ocp-short} versions 4.5.x and higher are supported.
-. Select your credential from the available connections on the list.
-If you do not have one configured, or want to configure a new one, select *Add connection*. See link:../credentials/credential_vm.adoc#creating-a-credential-for-vmware-vsphere[Creating a credential for VMware vSphere] for more information about creating a credential.
-. Enter the base domain information that you configured for your vSphere account. If there is already a base domain associated with the selected credential, that value is populated in that field. You can change the value by overwriting it. Note: This value must match the name that you used to create the DNS records listed in the prerequisites section.
+.. Specify a _Cluster set_, if you want to add it to an existing cluster set. If you do not have `cluster-admin` privileges when you are creating the cluster, you must select a cluster set on which you have `clusterset-admin` permissions to create the cluster. If you do not select a cluster set, the cluster creation fails. Contact your cluster administrator to provide you with `clusterset-admin` permissions to a cluster set if you do not have cluster set options to select.
+.. Specify the _Base DNS domain_ information that you configured for your VMware vSphere account. This value must match the name that you used to create the DNS records listed in the prerequisites section.
+This name is used in the hostname of the cluster. If there is already a base domain associated with the selected credential, that value is populated in that field. You can change the value by overwriting it.
+See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/html/installing/installing-on-aws#installing-aws-account[Configuring an AWS account] for more information.
 This name is used in the hostname of the cluster.
-
-. Add the _Additional Labels_ that you want to associate with your cluster. These labels help to identify the cluster and limit search results.
-. Configure the _Node pools_ for your cluster.
+.. Specify a _Release image_ that you want to use for the cluster. This identifies the version of the {ocp-short} image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the url to the image that you want to use. See xref:../clusters/release_images.adoc#release-images[Release images] for more information about release images.
 +
-The node pools define the location and size of the nodes that are used for your cluster. 
+*Note:* Only release images for {ocp-short} versions 4.5.x and higher are supported.
+.. Add the _Additional Labels_ that you want to associate with your cluster. These labels help to identify the cluster and limit search results.
+. Enter details about the master pool. There are three master nodes that are created for your cluster in the master pool. The master nodes share the management of the cluster activity. The required information includes the following fields:
+.. Specify one or more _Cores per socket_ that you want to allocate for your cluster. 
+.. Specify a number of _CPUs_ to allocate for your master node. 
+.. Specify the amount of _Memory_, in MB, that you want to allocate.
+.. Add the _Disk size_ that you want to create for your master node. 
+. Enter details about your worker pools. You can create zero or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools. If zero worker nodes are specified, the master nodes also function as worker nodes. The information includes the following fields:
+.. Add a name for your worker pool.
+.. Specify one or more _Cores per socket_ that you want to allocate for your cluster. 
+.. Specify a number of _CPUs_ to allocate. 
+.. Specify the amount of _Memory_, in MB, that you want to allocate.
+.. Add the _Disk size_, in GiB, that you want to create.
+.. Add a _Node count_ to specify the number of worker nodes in your cluster.
 +
-You can create one or more worker nodes in a worker pool to run the container workloads for the cluster. They can be in a single worker pool, or distributed across multiple worker pools.
-
-. Configure the cluster networking options, which are shown in the following list:
+You can define additional worker pools by clicking *Add worker pool*.
+. Configure the cluster networking options. This information is required. Multiple networks are required for using IPv6.
 .. vSphere network name - The VMware vSphere network name.
-.. API VIP - The IP address to use for internal API communication. *Note:* This value must match the name that you used to create the DNS records listed in the prerequisites section. If not provided, the DNS must be pre-configured so that `api.` resolves correctly.
-.. Ingress VIP - The IP address to use for ingress traffic. *Note:* This value must match the name that you used to create the DNS records listed in the prerequisites section. If not provided, the DNS must be pre-configured so that `test.apps.` resolves correctly.
-
-. *Optional:* Configure a label for the cluster.
-. Click *Create*.
-You can view your cluster details after the create and import process is complete.
+.. API VIP - The IP address to use for internal API communication.
 +
-*Note:* When you create the cluster, it is automatically configured under the management of {product-title-short}. You do not have to run the `kubectl` command that is provided with the cluster details to import the cluster. 
+*Note:* This value must match the name that you used to create the DNS records listed in the prerequisites section. If not provided, the DNS must be pre-configured so that `api.` resolves correctly.
+.. Ingress VIP - The IP address to use for ingress traffic. 
++
+*Note:* This value must match the name that you used to create the DNS records listed in the prerequisites section. If not provided, the DNS must be pre-configured so that `test.apps.` resolves correctly.
++
+You can add an additional network by clicking *Add network*. You must have more than one network if you are using IPv6 addresses. 
+. Add an optional _Ansible Automation Template_ to run either before or after your cluster installs or upgrades.
++
+You can click *Add automation template* to create a template.  
+. Review your information and select *Create* to create the cluster. 
++
+*Note:* You do not have to run the `kubectl` command that is provided with the cluster details to import the cluster. When you create the cluster, it is automatically configured under the management of {product-title-short}.
 
 [#vsphere_accessing-your-cluster]
 == Accessing your cluster
 
 To access a cluster that is managed by {product-title-short}, complete the following steps:
 
-. If you already know the log in credentials, you can access the cluster by selecting the _Options_ menu for the cluster, and selecting *Launch to cluster*.
-. If you do not know the log in credentials
-.. From the {product-title-short} navigation menu, navigate to *Automate infrastructure* > *Clusters*.
-.. Select the name of the cluster that you created or want to access.
-The cluster details are displayed.
-.. Select *Reveal credentials* to view the user name and password for the cluster.
-Use these values when you log in to the cluster.
+. From the {product-title-short} navigation menu, navigate to *Infrastructure* > *Clusters*.
+. Select the name of the cluster that you created or want to access. The cluster details are displayed.
+. Select *Reveal credentials* to view the user name and password for the cluster. Use these values when you log in to the cluster.
 . Select *Console URL* to link to the cluster.
 . Log in to the cluster by using the user ID and password that you found in step 3.
-. Select *Actions* > *Launch to cluster* for the cluster that you want to access.
-+
-*Tip:* If you already know the login credentials, you can access the cluster by selecting *Actions* > *Launch to cluster* for the cluster that you want to access.

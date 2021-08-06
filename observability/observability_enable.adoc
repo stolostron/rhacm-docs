@@ -7,17 +7,27 @@ Monitor the health of your managed clusters with the observability service (`mul
 
 * <<prerequisites-observability,Prerequisites>>
 * <<enabling-observability,Enabling observability>>
-* <<creating-mco-cr,Creating the _MultiClusterObservability_ CR>>
+* <<creating-mco-cr,Creating the MultiClusterObservability CR>>
 * <<enabling-observability-ocp,Enabling observability from the {ocp} console>>
+* <<external-metric-query,Using the external metric query>>
 * <<disabling-observability-resource,Disabling observability>>
 
 [#prerequisites-observability]
 == Prerequisites
  
 - You must install {product-title}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.  
-- You must configure an object store to create a storage solution. {product-title-short} only supports cloud providers with stable object stores, such as Amazon S3 (or other S3 compatible object stores like Ceph), Google Cloud Storage, Azure storage, and Red Hat OpenShift Data Foundation.
+- You must configure an object store to create a storage solution. {product-title-short} only supports cloud providers with stable object stores, such as Amazon S3 (or other S3 compatible object stores like Ceph), Google Cloud Storage, Azure storage, Red Hat OpenShift Data Foundation, and Red Hat OpenShift on IBM (ROKS).
 +
 *Important*: When you configure your object store, ensure that you meet the encryption requirements necessary when sensitive data is persisted. For a complete list of the supported object stores, see https://thanos.io/tip/thanos/storage.md/#object-storage[Thanos documentation].
+
+// You must configure an object store to create a storage solution. {product-title-short} supports the following cloud providers with stable object stores:
+
+//* https://aws.amazon.com/getting-started/hands-on/lightsail-object-storage/[Amazon S3]
+//* https://www.redhat.com/en/technologies/storage/ceph[Red Hat Ceph]
+//* https://cloud.google.com/storage[Google Cloud Storage]
+//* https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction[Azure storage]
+//* https://www.redhat.com/en/technologies/storage/ceph[Red Hat OpenShift Data Foundation]
+//* https://www.ibm.com/docs/en/baw/20.x?topic=storage-preparing-cloud-public-roks[Red Hat OpenShift on IBM (ROKS)]
 
 [#enabling-observability]
 == Enabling observability
@@ -165,8 +175,8 @@ stringData:
       secret_key: YOUR_ODF_SECRET_KEY
 ----
 +
-For more details, see https://www.openshift.com/products/container-storage/[Red Hat OpenShift Data Foundation].
 You can retrieve the ODF s3 access key and secret key for your cloud providers with the following commands:
+
 +
 ----
 YOUR_ODF_ACCESS_KEY=$(oc get secret noobaa-admin -n openshift-storage -o json | jq -r '.data.AWS_ACCESS_KEY_ID|@base64d')
@@ -185,9 +195,33 @@ YOUR_ODF_BUCKET=$(AWS_ACCESS_KEY_ID=$YOUR_ODF_ACCESS_KEY AWS_SECRET_ACCESS_KEY=$
 
 echo $YOUR_ODF_BUCKET
 ----
++
+For more details, see https://www.openshift.com/products/container-storage/[Red Hat OpenShift Data Foundation].
+
+.. For Red Hat OpenShift on IBM (ROKS), your secret might resemble the following file:
++
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: thanos-object-storage
+  namespace: open-cluster-management-observability
+type: Opaque
+stringData:
+  thanos.yaml: |
+    type: s3
+    config:
+      bucket: YOUR_S3_BUCKET
+      endpoint: YOUR_S3_ENDPOINT
+      insecure: true
+      access_key: YOUR_ACCESS_KEY
+      secret_key: YOUR_SECRET_KEY
+----
++
+For more details, follow the IBM Cloud documentation, https://cloud.ibm.com/objectstorage/create[Cloud Object Storage]. Be sure to use the service credentials to connect with the object storage. For more details, follow the IBM Cloud documentation, https://cloud.ibm.com/objectstorage/create%5BCloud[Cloud Object Store] and https://cloud.ibm.com/docs/cloud-object-storage/iam?topic=cloud-object-storage-service-credentials%5BService[Service Credentials].
 
 [#creating-mco-cr]
-=== Creating the _MultiClusterObservability_ CR
+=== Creating the MultiClusterObservability CR
 
 Complete the following steps to create the `MultiClusterObservability` custom resource (CR) for your managed cluster:
 
@@ -217,7 +251,7 @@ You might want to modify the value for the `retentionConfig` parameter in the `a
     node-role.kubernetes.io/infra: 
 ----
 +
-For more information, see https://docs.openshift.com/container-platform/4.7/machine_management/creating-infrastructure-machinesets.html[Creating infrastructure machine sets].
+For more information, see https://docs.openshift.com/container-platform/4.8/machine_management/creating-infrastructure-machinesets.html[Creating infrastructure machine sets].
 
 . Apply the observability YAML to your cluster by running the following command:
 +
@@ -269,6 +303,43 @@ See xref:../observability/customize_observability.adoc#forward-alerts[Forwarding
 .. Verify the status of the `MultiClusterObservability` instance by viewing the _Conditions_ section. When you receive the following message, the obseravbility service is enabled successfully: `Observability components are deployed and running`
 
 Observability is enabled from the {ocp-short} console.
+
+[#external-metric-query]
+=== Using the external metric query
+
+Observability provides an external API for metrics to be queried through the OpenShift route, `rbac-query-proxy`. View the following tasks to use `rbac-query-proxy` route:
+
+* You can get the details of the route with the following command:
++
+----
+oc get route rbac-query-proxy -n open-cluster-management-observability
+----
+
+* To access the `rbac-query-proxy` route, you must have an OpenShift OAuth access token. The token should be associated with a user or service account, which has permission to get namespaces. For more information, see https://docs.openshift.com/container-platform/4.8/authentication/managing-oauth-access-tokens.html[Managing user-owned OAuth access tokens].
+
+* Get the default CA certificate and store the content of the key, `tls.crt`, in a local file. Run the following command:
++
+----
+oc get secrets -n openshift-ingress router-certs-default -o yaml
+----
+
+* Run the following command to query metrics:
++
+----
+curl --cacert ./ca.crt -H "Authorization: bearer {TOKEN}" https://{PROXY_ROUTE_URL}/api/v1/query?query={QUERY_EXPRESSION}
+----
++
+*Note*: The `QUERY_EXPRESSION` is the standard Prometheus query expression. For example, query the metrics `cluster_infrastructure_provider` by replacing the URL in the previously mentioned command, with the following URL: `https://{PROXY_ROUTE_URL}/api/v1/query?query=cluster_infrastructure_provider`. For more details, see https://prometheus.io/docs/prometheus/latest/querying/basics/[Querying prometheus].
+
+* You can also replace certificates for the `rbac-query-proxy` route:
+** See link:../governance/cert_mgmt_ingress.adoc#openssl-commands-for-generating-a-certificate[OpenSSL commands for generating a certificate] to create certificates. When you customize the `csr.cnf`, update the `DNS.1` to the hostname for the `rbac-query-proxy` route.
+** Run the following command to create `proxy-byo-ca` and `proxy-byo-cert` secrets using the generated certificates:
++
+----
+oc -n open-cluster-management-observability create secret tls proxy-byo-ca --cert ./ca.crt --key ./ca.key
+
+oc -n open-cluster-management-observability create secret tls proxy-byo-cert --cert ./ingress.crt --key ./ingress.key
+----
 
 [#disabling-observability-resource]
 == Disabling observability

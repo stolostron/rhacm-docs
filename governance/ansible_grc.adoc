@@ -1,0 +1,106 @@
+[#configuring-governance-ansible]
+= Configuring Ansible Tower for governance
+
+{product-title} governance can be integrated with Ansible Tower automation to create policy violation automations. You can configure the automation from the {product-title-short} console.
+
+* <<prerequisites-grc-ansible,Prerequisites>>
+* <<create-a-policy-violation-auto-console,Create a policy violation automation from the console>>
+* <<create-a-policy-violation-auto-cli,Create a policy violation automation from the CLI>>
+
+[#prerequisites-grc-ansible]
+== Prerequisites
+
+* {ocp} 4.5 or later
+
+* You must have Ansible Tower version 3.7.3 or a later version installed. It is best practice to install the latest supported version of Ansible Tower. See link:https://docs.ansible.com/ansible-tower/[Red Hat Ansible Tower documentation] for more details.
+
+* Install the Ansible Automation Platform Resource Operator on to your hub cluster to connect Ansible jobs to the governance framework. For best results when using the AnsibleJob to launch Ansible Tower jobs, the Ansible Tower job template should be idempotent when it is run. If you do not have Ansible Automation Platform Resource Operator, you can find it from the {ocp} _OperatorHub_ page. 
+
+For more information about installing and configuring Ansible Tower automation, see link:../applications/ansible_config.adoc#setting-up-ansible[Setting up Ansible tasks (Technology preview)]
+
+[#create-a-policy-violation-auto-console]
+== Create a policy violation automation from the console
+
+Complete the following steps to configure a policy violation automation:
+
+. Log in to your {product-title-short} hub cluster.
+. From the navigation menu, select *Governance*. 
+. Configure an automation for a specific policy by clicking *Configure* in the _Automation_ column. 
+. The _Create policy violation automation_ panel appears.
+. From the _Credential_ section, click the drop-down menu to select an Ansible credential. If you need to add a credential, see link:../credentials/credential_intro.adoc#managing-credentials-overview[Managing credentials overview].
++
+*Note*: This credential is copied to the same namespace as the policy. The credential is used by the `AnsibleJob` resource that is created to initiate the automation. Changes to the Ansible credential in the _Credentials_ section of the console is automatically updated. 
+. Click the drop-down list to select a job template.
+. In the _Extra variables_ section, add the parameter values from the `extra_vars` section of the `PolicyAutomation`.
+. Select the frequency of the automation. You can select _Manual run_, _Run once mode_, or _Disable automation_.
++
+** _Manual run_: Manually set this automation to run once. After the automation runs, it is set to `disabled`.
+** _Run once mode_: When a policy is violated, the automation runs one time. After the automation runs, it is set to `disabled`. After the automation is set to `disabled`, you must continue to run the automation manually. When you run _once mode_, the extra variable of `target_clusters` is automatically supplied with the list of clusters that violated the policy. The Ansible Tower Job template must have `PROMPT ON LAUNCH` enabled for the `EXTRA VARIABLES` section.
+** _Disable automation_: When the scheduled automation is set to `disabled`, the automation does not run until the setting is updated.
+. Click *Save*. 
+. When you select the _View Job_ link from the _History_ tab, the link directs you to the job template on the _Search_ page.
+. After you add the policy violation automation, the staus is updated to _Successful_.
+. The name of the policy violation automation is now displayed in the _Automation_ column.
+
+Your policy violation automation is created from the console.
+
+[#create-a-policy-violation-auto-cli]
+== Create a policy violation automation from the CLI
+
+Complete the following steps to configure a policy violation automation from the CLI:
+
+. From your terminal, log in to your {product-title-short} hub cluster using the `oc login` command.
+
+. Find or create a policy that you want to add an automation to. Note the policy name and namespace.
+
+. Create a `PolicyAutomation` resource using the following sample as a guide:
++
+----
+apiVersion: policy.open-cluster-management.io/v1beta1
+kind: PolicyAutomation
+metadata:
+  name: policyname-policy-automation
+spec:
+  automationDef:
+    extra_vars:
+      your_var: your_value
+    name: Policy Compliance Template
+    secret: ansible-tower
+    type: AnsibleJob
+  mode: disabled
+  policyRef: policyname
+----
+
+. The Ansible job template name in the previous sample is `Policy Compliance Template`. Change that value to match your job template name.
+
+. In the `extra_vars` section, add any parameters you need to pass to the Ansible job template.
+
+. Set the mode to either `once` or `disabled`.  The `once` mode runs the job one time and then the mode is set to `disabled`.
++
+** _once mode_: When a policy is violated, the automation runs one time. After the automation runs, it is set to `disabled`. After the automation is set to `disabled`, you must continue to run the automation manually. When you run _once mode_, the extra variable of `target_clusters` is automatically supplied with the list of clusters that violated the policy. The Ansible Tower Job template must have `PROMPT ON LAUNCH` enabled for the `EXTRA VARIABLES` section.
+** _Disable automation_: When the scheduled automation is set to `disabled`, the automation does not run until the setting is updated.
+
+. Set the `policyRef` to the name of your policy.
+
+.  Create a secret in the same namespace as this `PolicyAutomation` resource that contains the Ansible Tower credential. In the previous example, the secret name is `ansible-tower`. Use the link:../applications/ansible_config.adoc#ansible-secrets[sample from application lifecycle] to see how to create the secret.
+
+. Create the `PolicyAutomation` resource.
++
+*Notes*: 
+
+* An immediate run of the policy automation can be initiated by adding the following annotation to the `PolicyAutomation` resource:
++
+----
+metadata:
+  annotations:
+    policy.open-cluster-management.io/rerun: "true"
+----
+
+* When the policy is in `once` mode, the automation runs when the policy is non-compliant. The `extra_vars` variable, named `target_clusters` is added and the value is an array of each managed cluster name where the policy is non-compliant.
+
+// I was a bit confused w/the original statement. 
+
+// Original statement: When the policy is in once mode, the automation will run when the policy is NonCompliant and an extra_vars variable will be added named target_clusters and the value is an array of each managed cluster name where the policy is NonCompliant.
+
+//my attempt:
+// When the policy is in `once` mode, the automation runs when the policy is non-compliant. The `extra_vars` variable that you added is displayed, and the value is an array of each managed cluster name where the policy is non-compliant.
