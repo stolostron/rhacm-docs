@@ -1,12 +1,12 @@
 [#install-on-disconnected-networks]
 = Install on disconnected networks
 
-You might need to install {product-title} on Red Hat OpenShift Clusters that are not connected to the Internet. The procedure to install on a disconnected hub requires some of the same steps as the connected installation.
+You might need to install {product-title} on {ocp} clusters that are not connected to the Internet. The procedure to install on a disconnected hub requires some of the same steps as the connected installation.
 
 You must download copies of the packages to access them during the installation, rather than accessing them directly from the network during the installation.
 
 * <<disconnect-prerequisites,Prerequisites>>
-* <<confirm-ocp-installation-2,Confirm your Red Hat OpenShift Container Platform installation>>
+* <<confirm-ocp-installation-2,Confirm your {ocp-short} installation>>
 * <<installing-on-infra-node,Preparing to install the hub cluster on an infrastructure node>>
 
 [#disconnect-prerequisites]
@@ -25,19 +25,21 @@ See the https://access.redhat.com/documentation/en-us/openshift_container_platfo
 * You must have a workstation with Internet connection to download the dependencies for the operator.
 
 [#confirm-ocp-installation-2]
-== Confirm your Red Hat OpenShift Container Platform installation
+== Confirm your {ocp-short} installation
 
-* You must have a supported {ocp} version, including the registry and storage services, installed and working in your cluster.
-For more information about installing {ocp-short}, see the {ocp-short} documentation.
-* For {ocp-short} version 4.8, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/[{ocp-short} Documentation].
+* You must have a supported {ocp-short} version, including the registry and storage services, installed and working in your cluster. For information about {ocp-short} version 4.8, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/[{ocp-short} Documentation].
+
 * When and if you are connected, you can ensure that the {ocp-short} cluster is set up correctly. Access the {ocp-short} web console.
+
 +
 Run the `kubectl -n openshift-console get route` command to access the {ocp-short} web console.
 See the following example output:
+
 +
 ----
 openshift-console          console             console-openshift-console.apps.new-coral.purple-chesterfield.com                       console              https   reencrypt/Redirect     None
 ----
+
 +
 The console URL in this example is: `https:// console-openshift-console.apps.new-coral.purple-chesterfield.com`.
 Open the URL in your browser and check the result.
@@ -50,11 +52,12 @@ See xref:../install/plan_capacity.adoc#sizing-your-cluster[Sizing your cluster] 
 [#installing-in-a-disconnected-environment]
 == Installing in a disconnected environment
 
+*Important:* You need to download the required images to a mirroring registry to install the operators in a disconnected environment. Without the download, you might receive `ImagePullBackOff` errors during your deployment.
+
 Follow these steps to install {product-title-short} in a disconnected environment:
 
-. Create a mirror registry, if necessary.
-+
-If you do not already have a mirror registry, create one by completing the procedure in the https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/html/installing/installing-mirroring-installation-images[Mirroring images for a disconnected installation] topic of the {ocp} documentation.
+. Create a mirror registry. If you do not already have a mirror registry, create one by completing the procedure in the https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/html/installing/installing-mirroring-installation-images[Mirroring images for a disconnected installation] topic of the {ocp} documentation.
+
 +
 If you already have a mirror registry, you can configure and use your existing one.
 
@@ -63,14 +66,40 @@ If you already have a mirror registry, you can configure and use your existing o
 .. Open the `install-config.yaml` file in an editor.
 .. Find the entry for `additionalTrustBundle: |`.
 .. Add the certificate information after the `additionalTrustBundle` line. The resulting content should look similar to the following example:
+
 +
-....
+[source,yaml]
+----
 additionalTrustBundle: |
   -----BEGIN CERTIFICATE-----
   certificate_content
   -----END CERTIFICATE-----
 sshKey: >-
-....
+----
+
++ 
+Additional mirrors for disconnected image registries are needed if the following Governance policies need to be used:
+- Container Security Operator policy: The images are located in the source `registry.redhat.io/quay`
+- Compliance operator policy: The images are located in the source `registry.redhat.io/compliance`
+- Gatekeeper operator policy: The images are located in the source `registry.redhat.io/rhacm2`
+
++
+Example mirrors list for all three operators:
+
++
+[source,yaml]
+----
+    - mirrors:
+      - <your_registry>/rhacm2
+      source: registry.redhat.io/rhacm2
+    - mirrors:
+      - <your_registry>/quay
+      source: registry.redhat.io/quay
+    - mirrors:
+      - <your_registry>/compliance
+      source: registry.redhat.io/compliance
+----
+
 .. Save the `install-config.yaml` file.
 
 . Create a YAML file that contains the `ImageContentSourcePolicy` with the name `rhacm-policy.yaml`. *Note:* If you modify this on a running cluster, it causes a rolling restart of all nodes.
@@ -94,12 +123,12 @@ spec:
 oc apply -f rhacm-policy.yaml
 ----
 
-. Enable the disconnected Operator Lifecycle Manager (OLM) Red Hat Operators and Community Operators.
+. Enable the disconnected {olm} Red Hat Operators and Community Operators.
 +
-{product-title-short} is included in the OLM Red Hat Operator catalog.
+{product-title-short} is included in the {olm} Red Hat Operator catalog.
 
-. Configure the disconnected OLM for the Red Hat Operator catalog.
-Follow the steps in the https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/html/operators/administrator-tasks#olm-restricted-networks[Using Operator Lifecycle Manager on restricted networks] topic of the {ocp} documentation.
-. Now that you have the image in the disconnected OLM, continue to install {product-title-short} for Kubernetes from the OLM catalog.
+. Configure the disconnected {olm} for the Red Hat Operator catalog. Follow the steps in the https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/html/operators/administrator-tasks#{olm}-restricted-networks[Using Operator Lifecycle Manager on restricted networks] topic of the {ocp} documentation.
+
+. Now that you have the image in the disconnected {olm}, continue to install {product-title-short} for Kubernetes from the {olm} catalog.
 
 See xref:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for the required steps.
