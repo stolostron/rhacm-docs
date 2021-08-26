@@ -1,0 +1,114 @@
+[#creating-a-single-node-openshift-clusterpool]
+= Creating a Single Node OpenShift cluster pool (Developer Preview)
+
+Cluster pools provide rapid and cost-effective access to configured {ocp} clusters on-demand and at scale. Cluster pools maintain a configurable and scalable number of {ocp-short} clusters on Amazon Web Services, Google Cloud Platform, or Microsoft Azure in a hibernating state that can be claimed when they are needed. They are especially useful when providing or replacing cluster environments for development, continuous integration, and production scenarios.
+
+`ClusterClaim` resources are used to check out clusters from cluster pools. After a cluster is checked out from a cluster pool, the checked out cluster is resumed and brought to a ready state. The cluster pool automatically creates a hibernated cluster in the cluster pool, to replace the claimed one.
+
+*Note:* When a cluster that was claimed from the cluster pool is no longer needed and is destroyed, the resources are deleted. The cluster does not return to the cluster pool.
+
+The procedure for creating a Single Node OpenShift (SNO)cluster pool is similar to the procedure for creating a cluster. Clusters in a SNO cluster pool are not created for immediate use.
+
+*Required access*: Administrator
+
+[#single-node-openshift-pool-prerequisites]
+== Prerequisites
+
+You must have the following prerequisites before creating a SNO cluster pool:
+
+* A deployed {product-title} hub cluster.
+* Internet access for your {product-title} hub cluster so it can create the Kubernetes cluster on the provider environment.
+* An AWS, GCP, or Microsoft Azure provider credential.
+See link:../credentials/credential_intro.adoc#credentials[Managing credentials overview] for more information.
+* A configured domain in your provider environment.
+See your provider documentation for instructions about how to configure a domain.
+* Provider login credentials.
+* A {ocp-short} image pull secret.
+See https://docs.openshift.com/container-platform/4.8/openshift_images/managing_images/using-image-pull-secrets.html[Using image pull secrets].
+* Enable the SNO feature. Because the SNO feature is a Development Preview feature, it is not enabled when you install {product-title-short}. You must enable it by completing the following steps:
+
+. Create a YAML file that contains the following content:
++
+[source, yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: FeatureGate
+metadata:
+    name: open-cluster-management-single-node-openshift
+    labels:
+        console.open-cluster-management.io: ""
+spec:
+    featureSet: open-cluster-management-single-node-openshift
+----
+
+. Log in to your {product-title-short} hub cluster with `administrator` permissions. 
+
+. Apply the feature gate by entering the following command:
++
+----
+oc apply -f <name-of-feature-gate-file>
+----
++
+Replace `name-of-feature-gate-file` with the name of the file that you created. 
++
+The SNO feature is now enabled on {product-title-short}.
+
+[#sno_pool_create]
+== Create a SNO cluster pool
+
+To create a cluster pool, complete the following steps:
+
+. From the navigation menu, click *Infrastructure* > *Clusters*.
+
+. Select the _Cluster pools_ tab to view cluster pools that you can access.
+
+. Select *Create cluster pool*. 
+
+. Select the infrastructure provider for your cluster pool.
+
+. Select the infrastructure credential that you want to use for the cluster pool. You can create one by selecting *Add credential*, if it is not available in the list. 
+
+. Select *Next* to continue to the cluster pool details.
+
+. Enter a name for your cluster pool.
+
+. Enter the namespace where you want to create your cluster pool. You can select an existing namespace from the list, or type the name of a new one to create one. The cluster pool does not have to be in the same namespace as the clusters.
++
+When you create a cluster pool in a cluster set, the `namespace admin` permission is applied to all of the users with `clusterset admin` permissions for the namespace where you add the cluster pool. Similarly, the `namespace view` permission is applied to the users with `clusterset view` permissions. 
+
+. Optional: Select a cluster set name if you want the RBAC roles for your cluster pool to share the role assignments of an existing cluster set. 
++
+*Note:* If you do not have `cluster admin` permissions, you must select a cluster set. The request to create a cluster set is rejected with a forbidden error if you do not include the cluster set name in this situation. If no cluster sets are available for you to select, contact your cluster administrator to create a cluster set and give you `clusterset admin` permissions to it.
+
+. Enter the number of clusters that you want available in your cluster pool by adding the number to the cluster pool size.
+  
+. Select *Next*.
+
+. Enter the required information in the remaining steps to complete to provision your cluster pool. The procedure from this point on is the same as the procedure for creating clusters. 
+
+. While you create your cluster pool, you must select {ocp-short} 4.8, or later In the _Release image_ field. If you enabled the feature gate, an option to select *Single node OpenShift* is displayed. 
++
+*Note:* If you select an {ocp-short} version that is older than 4.8, the option to select _Single node OpenShift_ is not displayed.
+
+. Select *Single node OpenShift*. 
+
+. Add the `spec:skipMachinePools` parameter in the YAML content to `true` by completing the following steps:
+
+.. If you cannot see the YAML content window, set the switch to *YAML:On* to view the content.
+
+.. Find the `spec` section for your cluster and add the following flag to the `spec` section:
++
+----
+skipMachinePools: true
+----
++
+For specific information about the information that is required for your provider, see the following information:
++
+* xref:../clusters/create_ocp_aws.adoc#creating-a-cluster-on-amazon-web-services[Creating a cluster on Amazon Web Services]
+* xref:../clusters/create_google.adoc#creating-a-cluster-on-google-cloud-platform[Creating a cluster on Google Cloud Platform]
+* xref:../clusters/create_azure.adoc#creating-a-cluster-on-microsoft-azure[Creating a cluster on Microsoft Azure]
+
+. After all of the information is entered, select *Create* to create the cluster pool. After at least one cluster is available in the pool, a *Claim cluster* button appears.
+
+
+
