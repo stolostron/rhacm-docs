@@ -82,24 +82,6 @@ When an {ocp-short} cluster is in the upgrade stage, the cluster pods are restar
 [#web-console-known-issues]
 == Web console known issues
 
-[#credential-links-broken-from-console]
-=== Links to documentation when creating a credential in the console are broken
-// 2.3.1:14984 -- note from Brandi: these should simply go to the intro topic. I was not aware the cluster lifecycle had these links in the UI, please let's change to the higher topic.
-
-The links to additional cloud provider documentation from the _Add credentials_ pages in the console are broken. The following table shows the correct links:
-
-|=======
-| Credential type | Corrected link
-| Amazon Web Services | https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.3/html/credentials/credentials#creating-a-credential-for-amazon-web-services[How do I get Amazon Web Service credentials?]
-| Microsoft Azure | https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.3/html/credentials/credentials#creating-a-credential-for-microsoft-azure[How do I get Microsoft Azure credentials?]
-| Google Cloud Platform | https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.3/html/credentials/credentials#creating-a-credential-for-google-cloud-platform[How do I get Google Cloud Platform credentials?]
-| Red Hat OpenStack | https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.3/html/credentials/credentials#creating-a-credential-for-openstack[ How do I get OpenStack credentials?]
-| VMware | https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.3/html/credentials/credentials#creating-a-credential-for-vmware-vsphere[How do I get VMware credentials?]
-| Bare metal | https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.3/html/credentials/credentials#creating-a-credential-for-bare-metal[How do I get bare metal credentials?]
-| Ansible | https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.3/html/credentials/credentials#creating-a-credential-for-ansible[How do I get Ansible Automation Platform credentials?]
-| {ocp-short} Cluster Manager | https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.3/html/credentials/credentials#creating-a-credential-for-openshift-cluster-manager[How do I get the OpenShift Cluster Manager API Token?]
-|=======
-
 [#search-result-node]
 === Node discrepancy between Cluster page and search results
 // 2.0, 2.1, 2.2:9987
@@ -212,9 +194,9 @@ Check the role permissions and update appropriately. See link:../access_control/
 [#mco-error-during-upgrade]
 === Deployment error with MultiClusterObservability CR after upgrade
 
-When you upgrade from {product-version-prev}.x to {product-version} and deploy observability, you might receive the following error statement in the MultiClusterObservability CR: `Failed to find expected deployment observability-grafana`. Complete the following steps to fix this issue:
+When you upgrade from {product-version-prev}.x to {product-version} and deploy observability, you might receive the following error statement in the `MultiClusterObservability` CR: `Failed to find expected deployment observability-grafana`. Complete the following steps to fix this issue:
 
-. Delete the MultiClusterObservability CR with the following command:
+. Delete the `MultiClusterObservability` CR with the following command:
 +
 ----
 oc delete mco observability
@@ -228,12 +210,44 @@ oc delete po {POD_NAME} -n open-cluster-management
 +
 ** `{POD_NAME}` is the name of your `multicluster-observability-operator` pod.
 
-. Recreate the MultiClusterObservability CR. For more information, see link:../observability/observability_enable.adoc#enabling-observability[Enabling observability].
+. Recreate the `MultiClusterObservability` CR. For more information, see link:../observability/observability_enable.adoc#enabling-observability[Enabling observability].
 
 Observability is redeployed successfully.
 
+[#wrong-image-disconnected-env]
+=== Observability stateful set uses wrong images in disconnected environment
+//2.3.1:14817
+
+In rare cases with disconnected environments, some pods of the observability `StatefulSet` are stuck in the following status, `ErrPullImage` because the pods cannot pull the images. The images defined in those pods are different from the ones defined in the related `StatefulSets`. To fix this problem, you need to delete the pods that use the wrong images. The pods restart automatically and should use the correct images.
+
 [#cluster-management-issues]
 == Cluster management known issues
+
+[#local-cluster-not-reimported]
+=== The local-cluster might not be automatically reimported
+//2.3:15617
+
+Sometimes, after you detach a local-cluster, the local-cluster might not be automatically reimported. When this happens, the local-cluster shows a constant status of `Pending Import` in the {product-title-short} console.
+
+To reimport the local-cluster, complete the following steps:
+
+. Delete the klusterlet deployment by running the following command:
++
+----
+oc -n open-cluster-management-agent delete deployment klusterlet
+----
+
+. Restart the `managedcluster-import-controller` by running the following command:
++
+----
+oc -n open-cluster-management get pods -l app=managedcluster-import-controller-v2 | awk 'NR>1{print $1}' | xargs oc -n open-cluster-management delete pods
+----
+
+[#clusterdeployment-stuck-terminating]
+=== The clusterdeployment of the managed cluster is stuck in terminating state
+//2.3:15518
+
+When you delete a managed cluster that was created with the {product-title-short} console, the `clusterdeployment` of the managed cluster might get stuck in a terminating state. To bypass this issue and delete this `clusterdeployment`, manually delete the `agentclusterinstall.agent-install.openshift.io/ai-deprovision` finalizer by editing the `agentclusterinstall` resource for the cluster.
 
 [#no-delete-cluster-namespace-before-remove-cluster]
 === Cannot delete managed cluster namespace manually
