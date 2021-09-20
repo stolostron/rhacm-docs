@@ -3,20 +3,18 @@ permalink: /arch_content_guide
 title: "Content guide and standards"
 ---
 
-Most of the following content is addressed in the IBM Style Manual, so refer to that manual to stay informed about corporate standards.
+Most of the following content is addressed in the IBM Style Manual, so refer to that manual to stay informed about corporate standards. Red Hat also has a supplementary manual and you can look at PatternFly.
 
 ## Key tips for quality, translatable, accessible content
 
 * Use concise sentences, minimalistic writing, careful writing
-* Check broken links as you build content for preprod
+* Check broken links as you build content
 * Use Github to search for filenames if you change a filename
 * Run the link checker on your files 
-* Request peer reviews for all new topics (for ICP ID members) 
+* Request peer reviews for all new topics 
 * Run local builds and check spelling before you do a PR
 * Use proper grammar and follow IBM style (Style manuals are typical in most writing professions)
-* Avoid product names in PII
-* Run Acrolinx (Update on Acrolinx status at IBM--moved to individual teams instead of marketing)
-* **NOTE:** Avoid HTML in .md: causes translation errors and you can usually find a .md solution -Let's clean up our KC
+* **NOTE:** Avoid HTML, it causes translation errors and you can usually find a better solution.
 * All this helps translation, readability, usability, presentation, voiceInstructionsfor link & spell checker  and running local build
 
 ## Writing concisely and clearly
@@ -54,7 +52,7 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 ## Short descriptions
 
 * Use complete, but concise sentences. 
-* Avoid self-referential language: “This topic...” (Although this is present in much of KC)
+* Avoid self-referential language: “This topic...” 
 * Don't repeat the title
 * Give the user a little knowledge in just a couple sentences about what the topic is about
 

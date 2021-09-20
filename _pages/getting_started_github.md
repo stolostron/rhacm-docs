@@ -4,19 +4,12 @@ title: "Learn GitHub: Tips and resources"
 ---
 
 # Learn GitHub: Tips and resources
-
-Learn more about GitHub lingo and how we use it on the IBM Cloud Pak for Multicloud Management team. This is not designed to teach you GitHub. Learning GitHub and Git comes with time, practice, and curiosity, just like learning any other tool. 
-
-If you are coming from CMVC or RTC, some of the terms may be unfamiliar, so we listed a few. Learn more from [Git docs](https://git-scm.com/).
+This is not designed to teach you GitHub. Learning GitHub and Git comes with time, practice, and curiosity, just like learning any other tool. If you are coming from an old tool, some of the terms may be unfamiliar, so we listed a few. Learn more from [Git docs](https://git-scm.com/).
 
 ID teams and Dev teams alike have increased efficiency and collaboration with GitHub/Git and Markdown. Early ICP ID team members learned Git via CLI, as the instructions display, but there is also a desktop client with sufficient documentation for others who do not use the CLI.
 
 **Prerequisite: All onboarding members should review the DE's Playbook, which is required also for developers. Here you will find many resources and guidelines already published about learning GitHub, Agile practices, Slack, and more. Much of these processes, like linking issues to PRs, apply to the ID team, as well.
 
-[IBM Cloud Private onboarding playbook](https://pages.github.ibm.com/IBMPrivateCloud/github/00-getting-started/).
-
-Video recording of ICP ID Git presentation: https://ibm.webex.com/ibm/lsr.php?RCID=3fca183c36a54dd9bc6706a9216ccf4a
-Password: Ec45pxp6
 
  - [Things to remember](#remember)
  - [Terms](#terms)
@@ -29,15 +22,9 @@ Password: Ec45pxp6
 
 1. **Developer issues that need doc changes require a new doc issue.**
 
-  Doc issues are required because dev issues often close before doc issues are resolved, dev issues do not always have what ID needs, and the doc issue is tracked on our board--we can iterate across backlogs as needed. (All of the ID team benefits from this simple process and this is why we have an easy template for developers to use.)
+  Doc issues are required because dev issues often close before doc issues are resolved, dev issues do not always have what ID needs, and the doc issue is tracked on our board--we can iterate across backlogs as needed. 
 
 2. **Issues are used to track decisions,** such as removing a popular conref, changing a name, etc... See an example of how issues are used to track decisions. Examples:
-
-   - Decision/inquiries to leads from DE to change version name: 
-  [#18371](https://github.ibm.com/IBMPrivateCloud/roadmap/issues/18371)
-  
-   - Decision to format ID's branching strategy:
-  [#18474](https://github.ibm.com/IBMPrivateCloud/roadmap/issues/18474)
 
 ## Terms
 {: terms}
@@ -46,7 +33,7 @@ A few terms are listed here, but you can learn more from the GitHub documentatio
 
 **Issue:** This is a work item (RTC-lingo), or a ticket (support lingo). An issue is required for doc work or major decisions.
 
-**Branch:** Basically a copy of the doc where you apply the changes. Branches named **master** or **branch_prod** are set as the branches that are published at GA or for a refresh. (See the properties files to understand how branches are published. To understand the build, see the [internal documentation](https://rtpdoc01.rtp.raleigh.ibm.com:9445/kc/docs_kc_20/kccloud/gitsource.html).
+**Branch:** Basically a copy of the doc where you apply the changes. Branches named **master** or **branch_prod** are set as the branches that are published at GA or for a refresh. (See the properties files to understand how branches are published. 
   
 These are the final copies, and your branch off of those branches is your workspace. You never update the main production branches without a pull request. 
 
@@ -139,10 +126,10 @@ Git is actually the term related to the Git CLI. See [Here are all the Git comma
   ```
   {: codeblock}
       
-6. Commit your changes. Use this syntax to record the commits and link the PR to the Issue you are working. Example of command used to add this document to the playbook: `IBMPrivateCloud/CP4MCM#1338 write process playbook`. This helps track history and your own effort within an issue:
+6. Commit your changes. Use this syntax to record the commits and link the PR to the Issue you are working:
 
   ```
-  git commit -m <"#IBMPrivateCloud/roadmap#xxxx - description of change">
+  git commit -m <"#issue/roadmap#xxxx - description of change">
   ```
   {: codeblock}
     
