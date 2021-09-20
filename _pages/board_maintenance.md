@@ -43,7 +43,7 @@ title: "Documentation board hygiene and maintance"
   - DDF items are often requests from Red Hatters for enhancements to the product. These are treated as RFEs via the Jira process. 
   - DDF items are also often requests for doc enhancements. Label them enhancements, not bugs. Get with developers to see what changes make sense, if any.
   - DDF items are also not opened in the proper milestone. Please change before you move from `untriage`.
-  -
+  
 
   
 
