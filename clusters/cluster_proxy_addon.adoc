@@ -1,0 +1,99 @@
+[#cluster-proxy-addon]
+= Enabling cluster proxy add-ons
+
+In some environments, a managed cluster is behind a firewall and cannot be accessed directly by the hub cluster. When this is the case, you can set up a proxy add-on to access the `kube-api` server of the managed cluster to provide a more secure connection. 
+
+*Required access*: Cluster administrator
+
+To configure a cluster proxy add-on for a hub cluster and a managed cluster, complete the following steps:
+
+. Enable the cluster proxy add-on on {product-title} hub cluster by entering the following command to add an entry for `enableClusterProxyAddon` with a value of `true` to your `multiclusterhub.yaml` file:
++
+----
+oc patch -n open-cluster-management multiclusterhub multiclusterhub --merge -p '{"spec":{"enableClusterProxyAddon":true}}'
+----
++
+As indicated by the command, this file is in the `open-cluster-management` namespace. 
+
+. Deploy the cluster proxy add-on to the target managed cluster by applying it to your target managed cluster by entering the following command:
++
+----
+cat <<EOF | oc apply -f -
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: cluster-proxy
+  namespace: <target_managed_cluster>
+spec:
+  installNamespace: open-cluster-management-agent-addon
+EOF
+----
++
+Replace `target_managed_cluster` with the name of the managed cluster to which you are applying the cluster proxy add-on.
+
+. Configure the `kubeconfig` ??file?? to access the managed cluster `kube-apiserver` by completing the following steps:
+
+.. Provide a valid access token for the managed cluster. You can use the corresponding token of the service account, assuming the default service account is in the default namespace.
+
+... Run the following command to locate the secret of the service account token:
++
+----
+oc get secret -n default | grep default-token
+----
+
+... Run the following command to copy the token:
++
+----
+export MANAGED_CLUSTER_TOKEN=$(kubectl -n default get secret <default-token> -o jsonpath={.data.token} | base64 -d) 
+----
++
+Replace `default-token` with the name of your secret.
+
+... Add a role to your service account that allows it to access pods by running the following commands:
++
+----
+oc create role  -n default test-role --verb=list,get --resource=pods
+oc create rolebinding -n default test-rolebinding --serviceaccount=default:default --role=test-role
+----
+
+.. Configure the `kubeconfig` file on the {product-title-short} hub cluster.
+
+... Export the current `kubeconfig` file on the hub cluster by running the following command:
++
+----
+oc config view --minify --raw=true > cluster-proxy.kubeconfig
+----
+
+... Modify the `server` file with your YAML editor:
++
+----
+export TARGET_MANAGE_CLUSTER=<cluster1> 
+
+export NEW_SERVER=https://$(oc get route -n open-cluster-management cluster-proxy-addon-user -o=jsonpath='{.spec.host}')/$TARGET_MANAGE_CLUSTER
+
+yq e -i '.clusters[0].cluster.server=env(NEW_SERVER)' cluster-proxy.kubeconfig
+----
++
+Replace `cluster1` with a managed cluster name that you want to access. 
+
+... Delete the original user credentials by entering the following command: 
++
+----
+yq e "del(.users[0].user.client-certificate-data)" cluster-proxy.kubeconfig
+yq e "del(.users[0].user.client-key-data)" cluster-proxy.kubeconfig
+----
+... Add the token of the service account:
++
+----
+yq e -i ".users[0].user.token=env(MANAGED_CLUSTER_TOKEN)" cluster-proxy.kubeconfig
+----
+
+. List all of the pods on the target namespace of the target managed cluster by running the following command: 
++
+----
+oc get pods --kubeconfig=cluster-proxy.kubeconfig -n <default> 
+----
++
+Replace the `default` namespace with the namespace that you want to use.
+
+Your hub cluster is now communicating with the `kube-api` of your managed cluster. 
