@@ -1,4 +1,156 @@
 [#backup-restore-insall]
 = Installing the backup and restore operator
 
-Install 
+Install the Backup and Restore Operator to schedule back up and restore for your cluster resources. 
+
+[#prereq-backup-restore-install]
+== Prerequisites
+
+Before you begin, you must install the Operator SDK custom resource definition (CRD). Complete the following steps:
+
+. Run the following commands to install the Operator SDK CRD:
+
+----
+make build
+
+make install
+----
+
+. You can run the cluster backup and restore operator externally with the following command:
++
+----
+make run
+----
+
+. If you want to run the cluster backup and restore operator internally, you must build a container image. You can use a local private registry, or a public registry service:
++
+.. Build your image with the following command:
++
+----
+make docker-build IMG=<registry>/<imagename>:<tag>
+----
++
+.. Push the image with the following command:
++
+----
+make docker-push IMG=<registry>/<imagename>:<tag>
+----
++
+.. Deploy the backup and restore operator with the following command:
++
+----
+make deploy IMG=<registry>/<imagename>:<tag>
+----
+
+. Install the link:https://github.com/openshift/oadp-operator[OADP Operator], which installs link:https://velero.io/[Velero].
++
+*Note*: Be sure to follow the OADP Operator installation instructions to create the Velero resource, and to create a valid connection to a backup storage location, where the backups are stored. View the installation and setup steps from the link:https://github.com/openshift/oadp-operator#installing-operator[oadp-operator repository].
+
+[#using-backup-restore]
+== Using the backup and restore operator
+
+Complete the following steps to schedule and restore backups:
+
+. Create a `backupschedule.cluster.open-cluster-management.io` resource to schedule data backups. The resource is configured to create all of the necessary intermediary schedule backup resources. Run the following command. Be sure to replace the `<oadp-operator-ns>` with the namespace name used to install the OADP Operator (the default value for the OADP Operator install namespace is `oadp-operator`):
++
+----
+kubectl create -n <oadp-operator-ns> -f config/samples/cluster_v1beta1_backupschedule.yaml
+----
++
+Your resource might resemble the following file:
+//Need to add command for the user to create this resource
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: BackupSchedule
+metadata:
+  name: schedule-acm
+spec:
+  maxBackups: 10 # maximum number of backups after which old backups should be removed
+  veleroSchedule: 0 */6 * * * # Create a backup every 6 hours
+  veleroTtl: 72h # deletes scheduled backups after 72h; optional, backups never expires if option not set
+----
++
+View the following descriptions of the following properties:
++
+** `maxBackup` is a required property and represents the maximum number of backups after previous backups are removed.
+** `veleroSchedule` is a required property and defines a cron job for scheduling the backups.
+** `veleroTtl` is an optional property and defines the expiration time for a scheduled backup resource. A backup never expires if this property is not set.
+
+. Check the status of your scheduled cluster backups, which displays the definition for the three `schedule.velero.io` resources. Run the following command:
++
+----
+oc get bsch -n <oadp-operator-ns>
+----
+
+. Create a `restore.cluster.open-cluster-management.io` resource on a different hub cluster to restore a backup. The resource restores the backup and runs any other post to restore operations, such as registering restored remote clusters with the new hub cluster. Run the following command. Run the following command. Be sure to replace the `<oadp-operator-ns>` with the namespace name used to install the OADP Operator (the default value for the OADP Operator install namespace is `oadp-operator`):
++
+Your resource might resemble the following file:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+spec:
+  backupName: acm-managed-clusters-schedule-20210902205438
+----
++
+View the following description of the following property:
++
+** The `backupName` represents the name of the `backup.velero.io` resource to be restored on the hub cluster, where the `restore.cluster.open-cluster-management.io` resource is created.
+
+. Check the status of your restore operation, which defines the restore logic for the three types of backed up files. Run the following command:
++
+----
+oc get restore -n <oadp-operator-ns>
+----
++
+View the following YAML examples to restore different types of backed up files:
++
+** Restore all three types of backed up files:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+spec:
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+----
++
+** Restore a specific managed cluster:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+spec:
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: skip
+  veleroResourcesBackupName: skip
+----
++
+** Restore the managed clusters from the `acm-managed-clusters-schedule-20210902205438` backup:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+spec:
+  veleroManagedClustersBackupName: acm-managed-clusters-schedule-20210902205438
+  veleroCredentialsBackupName: skip
+  veleroResourcesBackupName: skip
+----
+
+See xref:../clusters/backup_and_restore.adoc#restore-backup[Restore a backup] for a description of the required specification properties and the valid options. *Note*: The `restore.cluster.open-cluster-management.io` resource is run once. After the restore operation is completed, you can optionally run another restore operation on the same hub cluster. You must create a new `restore.cluster.open-cluster-management.io` resource.
+
