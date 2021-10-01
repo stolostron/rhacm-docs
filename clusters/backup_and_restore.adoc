@@ -5,9 +5,7 @@
 
 // Are these two different operator (backup operator and restore operator) or is this one operator (backup and restore operator)
 
-The Cluster Backup and Restore Operator runs on the hub cluster, and depends on the link:https://github.com/openshift/oadp-operator[OADP Operator] to install link:https://velero.io/[Velero] on the {product-title} hub cluster; Velero is used to backup and restore {product-title-short} hub cluster resources. 
-
-**Required access**: Cluster administrator 
+The cluster backup and restore operator runs on the hub cluster, and depends on the link:https://github.com/openshift/oadp-operator[OADP Operator] to install link:https://velero.io/[Velero] on the {product-title} hub cluster; Velero is used to backup and restore {product-title-short} hub cluster resources. 
 
 [#prerequisites-backup-restore]
 == Prerequisites
@@ -17,19 +15,22 @@ You must install the OADP Operator. See link:https://github.com/openshift/oadp-o
 // I am currently using the link that was used in the README, is this the correct link? Should we point the user to the Velero repo
 //in GH? https://github.com/vmware-tanzu/velero
 
-**Note**: The Cluster Backup and Restore Operator resources must be created in the same namespace where the OADP Operator is installed.
+**Note**: The cluster backup and restore operator resources must be created in the same namespace where the OADP Operator is installed.
 
 [#backup-restore-architecture]
-== Backup and Restore Operator architecture
+== Backup and restore operator architecture
 
 The operator defines the `backupSchedule.cluster.open-cluster-management.io` resource, which is used to set up {product-title-short} backup schedules, and `restore.cluster.open-cluster-management.io` resource, which is used to process and restore these backups. The operator creates corresponding Velero resources, and defines the options needed to backup remote clusters and any other hub cluster resources that need to be restored. View the following diagram:
 
 //image:../images/cluster_backup_controller_dataflow.png[Backup and restore architecture diagram] 
 
-// submitted a diagram request form 09/28
+// submitted a diagram request form 09/29 
 
 [#schedule-backup]
 === Schedule a cluster backup
+
+//In a disaster scenario, the cluster where the backups are created becomes unavailable and data backed up needs to be moved to a new hub cluster. This is done by running the cluster restore operation on the hub where the backed up data needs to be moved to. In this case, the restore operation is executed on a different hub than the one where the backup was created.
+
 
 After you create a `backupschedule.cluster.open-cluster-management.io` resource you can run the following command to get the status of the scheduled cluster backups: `oc get bsch -n <oadp-operator-ns>`. The `<oadp-operator-ns>` is the namespace where `BackupSchedule` is created and must be in the same namespace where the OADP Operator is installed.
 
@@ -40,7 +41,7 @@ The `backupSchedule.cluster.open-cluster-management.io` resource creates the fol
 +
 **Notes**:
 +
-** Only managed clusters created using the `hive` API is automatically imported when the backup is restored on another hub cluster. All other managed clusters show up as _Pending Import_ and must be imported back on the new hub cluster.
+** Only managed clusters created using the `hive` API is automatically imported when the backup is restored on another hub cluster. All other managed clusters show up as _Pending Import_ and must be manually imported back on the new hub cluster.
 ** When you restore a backup on a new hub cluster, make sure that the previous hub cluster, where the backup was created, is shut down. Otherwise the previous hub cluster tries to reimport the managed clusters as soon as the managed cluster reconciliation finds that the managed clusters are no longer available.
 ** The following resources are being retrieved by this backup; they are required for restoring all managed clusters information on the new hub cluster:
 +
@@ -50,14 +51,14 @@ The `backupSchedule.cluster.open-cluster-management.io` resource creates the fol
 
 * `acm-credentials-schedule`: This resource is used to schedule backups for the user created credentials and any copy of those credentials. These credentials are identified by the `cluster.open-cluster-management.io/type` label selector; all secrets that define the label selector are included in the backup.
 +
-**Note**: If you have any user defined private channels, you can include the channel secrets in this credentials backup if you set the `cluster.open-cluster-management.io/type` label selector to this secret. Without this, channel secrets retrieved by the cluster backup and needs to be recreated on the restored cluster.
+**Note**: If you have any user defined private channels, you can include the channel secrets in this credentials backup if you set the `cluster.open-cluster-management.io/type` label selector to this secret. Without this, channel secrets are not identified by the cluster backup and needs to be manually recreated on the restored cluster.
 
 * `acm-resources-schedule`: This resource is used to schedule backups for the `Applications` and `Policy` resources, including any required resources, such as: `Channels`, `Subscriptions`, `Deployables` and `PlacementRules` for `Applications` and `PlacementBindings`, `Placement`, `PlacementDecisions` for `Policy`. There are no resources being collected from the `local-cluster` or `open-cluster-management` namespaces.
 
 [#restore-backup]
 === Restore a backup
 
-In a usual restore scenario, the hub cluster where the backups are ran becomes unavailable, and the backed up data needs to be moved to a new hub cluster. This is done by running the cluster restore operation on the new hub cluster. In this case, the restore operation runs on a different hub cluster than the one where the backup was created.
+In a usual restore scenario, the hub cluster where the backups are ran becomes unavailable, and the backed up data needs to be moved to a new hub cluster. This is done by running the cluster restore operation on the new hub cluster. In this case, the restore operation runs on a different hub cluster than the one where the backup is created.
 
 There are also cases where you want to restore the data on the same hub cluster where the backup was collected, so that the data from a previous snapshot can be recovered. In this case, both restore and backup operations are run on the same hub cluster.
 
@@ -79,7 +80,14 @@ The valid options for the previously mentioned properties are following values:
 ** `skip` - This property does not attempt to restore this type of backup with the current restore operation.
 ** `<backup_name>` - This property restores the specified backup pointing to it by name. 
 
-View the following YAML sample of the operator:
+
+The `restore.cluster.open-cluster-management.io` resource creates up to three `restore.velero.io` resources, one for each of the backup types that you requested to be restored. View the following descriptions of the `restore.velero.io` parameters:
+
+* `restore.cluster.open-cluster-management.io name` is the name of the current `Restore` resource.
+* `velero-backup-resource-name` is the name of the backup file this is used for restoring the data.
+
+
+View the following YAML sample of the cluster `Restore` resource. In this sample, all three types of backed up files are being restored, using the latest available backed up files:
 
 [source,yaml]
 ----
@@ -93,7 +101,7 @@ spec:
   veleroResourcesBackupName: latest
 ----
 
-Learn how to install and manage the cluster Backup and Restore Operator, see xref:../clusters/backup_restore_install.adoc#backup-restore-insall[Installing the backup and restore operator].
+Learn how to enable and manage the cluster backup and restore operator, see xref:../clusters/backup_restore_install.adoc#backup-restore-enable[Enable the backup and restore operator].
 
 
  

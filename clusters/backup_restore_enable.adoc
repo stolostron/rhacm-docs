@@ -1,50 +1,45 @@
-[#backup-restore-insall]
-= Installing the backup and restore operator
+[#backup-restore-enable]
+= Enable the backup and restore operator
 
-Install the Backup and Restore Operator to schedule back up and restore for your cluster resources. 
+Enable the the Backup and Restore Operator to schedule back up and restore for your cluster resources. {product-title} offers the cluster backup operator as a Technology preview that is disabled by default.
 
-[#prereq-backup-restore-install]
+**Required access**: Cluster administrator 
+
+[#prereq-backup-restore-enable]
 == Prerequisites
-
-Before you begin, you must install the Operator SDK custom resource definition (CRD). Complete the following steps:
-
-. Run the following commands to install the Operator SDK CRD:
-
-----
-make build
-
-make install
-----
-
-. You can run the cluster backup and restore operator externally with the following command:
-+
-----
-make run
-----
-
-. If you want to run the cluster backup and restore operator internally, you must build a container image. You can use a local private registry, or a public registry service:
-+
-.. Build your image with the following command:
-+
-----
-make docker-build IMG=<registry>/<imagename>:<tag>
-----
-+
-.. Push the image with the following command:
-+
-----
-make docker-push IMG=<registry>/<imagename>:<tag>
-----
-+
-.. Deploy the backup and restore operator with the following command:
-+
-----
-make deploy IMG=<registry>/<imagename>:<tag>
-----
 
 . Install the link:https://github.com/openshift/oadp-operator[OADP Operator], which installs link:https://velero.io/[Velero].
 +
 *Note*: Be sure to follow the OADP Operator installation instructions to create the Velero resource, and to create a valid connection to a backup storage location, where the backups are stored. View the installation and setup steps from the link:https://github.com/openshift/oadp-operator#installing-operator[oadp-operator repository].
+
+[#enabling-backup-restore]
+== Enabling the backup and restore operator
+
+Enable the cluster backup and restore operator by creating the `MultiClusterHub` resource and update the `enableClusterBackup` parameter to `true`.
+
+If the `MultiClusterHub` resource is already created, you can disable the cluster backup YAML by editing the `MultiClusterHub` resource. Set `enableClusterBackup` to `false`.
+
+When the backup and restore operator is enabled, your `MultiClusterHub` resource might resemble the following YAML file:
+
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+  kind: MultiClusterHub
+  metadata:
+    name: multiclusterhub
+    namespace: open-cluster-management
+  spec:
+    availabilityConfig: High
+    enableClusterBackup: true <-----
+    imagePullSecret: multiclusterhub-operator-pull-secret
+    ingress:
+      sslCiphers:
+      - ECDHE-ECDSA-AES256-GCM-SHA384
+      - ECDHE-RSA-AES256-GCM-SHA384
+      - ECDHE-ECDSA-AES128-GCM-SHA256
+      - ECDHE-RSA-AES128-GCM-SHA256
+    separateCertificateManagement: false
+----
 
 [#using-backup-restore]
 == Using the backup and restore operator
@@ -58,7 +53,6 @@ kubectl create -n <oadp-operator-ns> -f config/samples/cluster_v1beta1_backupsch
 ----
 +
 Your resource might resemble the following file:
-//Need to add command for the user to create this resource
 +
 [source,yaml]
 ----
@@ -69,14 +63,14 @@ metadata:
 spec:
   maxBackups: 10 # maximum number of backups after which old backups should be removed
   veleroSchedule: 0 */6 * * * # Create a backup every 6 hours
-  veleroTtl: 72h # deletes scheduled backups after 72h; optional, backups never expires if option not set
+  veleroTtl: 72h # deletes scheduled backups after 72h; optional, if not specified, the maximum default value set by velero is used - 720h
 ----
 +
 View the following descriptions of the following properties:
 +
 ** `maxBackup` is a required property and represents the maximum number of backups after previous backups are removed.
 ** `veleroSchedule` is a required property and defines a cron job for scheduling the backups.
-** `veleroTtl` is an optional property and defines the expiration time for a scheduled backup resource. A backup never expires if this property is not set.
+** `veleroTtl` is an optional property and defines the expiration time for a scheduled backup resource. If not specified, the maximum default value set by Velero is used, which is `720h`.
 
 . Check the status of your scheduled cluster backups, which displays the definition for the three `schedule.velero.io` resources. Run the following command:
 +
@@ -95,17 +89,19 @@ kind: Restore
 metadata:
   name: restore-acm
 spec:
-  backupName: acm-managed-clusters-schedule-20210902205438
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
 ----
 +
 View the following description of the following property:
 +
 ** The `backupName` represents the name of the `backup.velero.io` resource to be restored on the hub cluster, where the `restore.cluster.open-cluster-management.io` resource is created.
 
-. Check the status of your restore operation, which defines the restore logic for the three types of backed up files. Run the following command:
+. View the Velero `Restore` resource by running the following command:
 +
 ----
-oc get restore -n <oadp-operator-ns>
+oc get restore.velero.io -n <oadp-operator-ns>
 ----
 +
 View the following YAML examples to restore different types of backed up files:
@@ -124,7 +120,7 @@ spec:
   veleroResourcesBackupName: latest
 ----
 +
-** Restore a specific managed cluster:
+** Restore only managed cluster:
 +
 [source,yaml]
 ----
@@ -138,7 +134,7 @@ spec:
   veleroResourcesBackupName: skip
 ----
 +
-** Restore the managed clusters from the `acm-managed-clusters-schedule-20210902205438` backup:
+** Restore the resources for managed clusters only, using the `acm-managed-clusters-schedule-20210902205438` backup:
 +
 [source,yaml]
 ----
@@ -152,5 +148,5 @@ spec:
   veleroResourcesBackupName: skip
 ----
 
-See xref:../clusters/backup_and_restore.adoc#restore-backup[Restore a backup] for a description of the required specification properties and the valid options. *Note*: The `restore.cluster.open-cluster-management.io` resource is run once. After the restore operation is completed, you can optionally run another restore operation on the same hub cluster. You must create a new `restore.cluster.open-cluster-management.io` resource.
+See xref:../clusters/backup_and_restore.adoc#restore-backup[Restore a backup] for a description of the required specification properties and the valid options. *Note*: The `restore.cluster.open-cluster-management.io` resource is run once. After the restore operation is completed, you can optionally run another restore operation on the same hub cluster. You must create a new `restore.cluster.open-cluster-management.io` resource to run a new restore operation.
 
