@@ -1,13 +1,27 @@
 [#installing-while-connected-online]
 = Installing while connected online
 
-{product-title} is installed using an operator that deploys all of the required components.
+{product-title} is installed using an OLM operator that manages the
+install, upgrade or removal of the components that provide the
+{product-title-short} centeral management console, known as a
+multicluster hub (often referred to simply as a hub for short).
+
+By default, the hub components are installed so that they run on
+standard worker nodes of the hosting OCP cluster.
+You can install the hub onto worker nodes via a simplified flow
+using the OperatorHub web interface, or by using the {ocp-short} CLI.
+
+If you have configured the hosting {ocp-short} cluster to have infrastructure nodes,
+you can alternatively install the hub onto those infrastructure nodes using
+the {ocp-short} CLI and specifying addiitional resource parameters to direct
+the components to infrascture nodes.
 
 * <<connect-prerequisites,Prerequisites>>
-* <<confirm-ocp-installation,Confirm your installation>>
-* <<installing-on-infra-node,Preparing to install the hub cluster on an infrastructure node>>
-* <<installing-from-the-operatorhub,Installing from the OperatorHub>>
-* <<installing-from-the-cli,Installing from the CLI>>
+* <<confirm-ocp-installation,Confirm your OCP installation>>
+* <<installing-on-worker-node,Installing the Hub on worker nodes>>
+  * <<installing-from-the-operatorhub,Installing from the OperatorHub web interface>>
+  * <<installing-from-the-cli,Installing from the CLI>>
+* <<installing-on-infra-node,Installing the Hub on infrastructure nodes>>
 
 [#connect-prerequisites]
 == Prerequisites
@@ -37,7 +51,7 @@ Before you install {product-title-short}, see the following requirements:
 ** You must have `cluster-admin` authority to the {ocp-short} Dedicated environment where you are installing the hub cluster.
 
 [#confirm-ocp-installation]
-== Confirm your installation
+== Confirm your {ocp-short} installation
 
 You must have a supported {ocp-short} version, including the registry and storage services, installed and working in your cluster. For more information about installing {ocp-short}, see the {ocp-short} documentation.
 
@@ -60,65 +74,19 @@ See the following example of a URL: `https://console-openshift-console.apps.new-
 
 . See xref:../install/plan_capacity.adoc#sizing-your-cluster[Sizing your cluster] to learn about setting up capacity for your hub cluster.
 
-[#installing-on-infra-node]
-== Preparing to install the hub cluster on an infrastructure node
+[#installing-on-worker-node]
+== Installing the Hub on Worker Nodes
 
-*Note:* Because {ocp-short} cannot be installed exclusively on an infrastructure node, the {product-title} hub cluster also cannot be installed on exclusively on an infrastructure node. 
-
-By using `tolerations`, the {product-title} hub cluster allows most hub cluster components to be installed on an infrastructure node. To install the hub cluster on an infrastructure node, complete the following steps to prepare:
-
-. Configure your infrastructure nodes as infrastructure machine sets according to the procedure in https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/html/machine_management/creating-infrastructure-machinesets[Creating infrastructure machine sets] in the {ocp-short} documentation.
-
-+
-See the following example of the `toleration`:
-
-+
-[source,yaml]
-----
-tolerations:
-  - effect: NoSchedule 
-    key: node-role.kubernetes.io/infra 
-    operator: Exists 
-----
-
-
-. Follow the steps to link:./install_connected.adoc#installing-from-the-cli[Install {ocp-short} via CLI] with the following specifications.
-
-- When creating the `MulticlusterHub` subscription, include the following before applying the subscription:
-
-+
-[source,yaml]
-----
-spec:
-  config:
-    nodeSelector:
-      node-role.kubernetes.io/infra: ""
-    tolerations:
-    - key: node-role.kubernetes.io/infra
-      effect: NoSchedule
-      operator: Exists
-----
-
-- When creating the `MulticlusterHub` resource object, add the following `nodeSelector` entry:
-
-+
-[source,yaml]
-----
-spec:
-  nodeSelector:
-    node-role.kubernetes.io/infra: ""
-----
-
-*Notes:* 
-
-- A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to {product-title-short} and to any user credentials with access to the namespace where you install {product-title-short}.
-
-- The installation also creates a namespace called `local-cluster` that is reserved for the hub cluster when it is managed by itself. There cannot be an existing namespace called `local-cluster`. For security reasons, do not release access to the `local-cluster` namespace to any user who does not already have `cluster-administrator` access.
+The easiest way to install the Hub is to allow its components to run on {ocp-short} Worker nodes.
+INstalling on worker nodes requires no special setup of the {ocp-short} nodes and can be
+done using all default parameters in the MultiClusterHub resource.
+You can install the Hub onto worker nodes using either the OperatorHub web interface,
+or by using the {ocp-short} CLI.
 
 [#installing-from-the-operatorhub]
-== Installing from the OperatorHub
+=== Installing from the OperatorHub Web Interface
 
-**Best practice:** Install by using the OperatorHub that is provided with {ocp-short}. 
+**Best practice:** Install by using the OperatorHub web interface that is provided with {ocp-short}.
 
 **Note:** For {ocp-short} Dedicated environment only, log in to your {ocp-short} Dedicated environment with `cluster-admin` permissions.
 
@@ -227,7 +195,7 @@ After the hub cluster is created, the status for the operator is _Running_ on th
  .. View the URL for your hub cluster in the list, and navigate to it to access the console.
 
 [#installing-from-the-cli]
-== Installing from the CLI
+=== Installing from the CLI
 
 **{ocp-short} Dedicated environment only required access:** Cluster administrator, as the default `dedicated-admin` role does not have the required permissions to create namespaces in the {ocp-short} Dedicated environment. You must have `cluster-admin` permissions.
 
@@ -303,6 +271,21 @@ spec:
 ----
 
 +
+.. Include the following if you are installing on infra nodes:
+
++
+[source,yaml]
+----
+spec:
+  config:
+    nodeSelector:
+      node-role.kubernetes.io/infra: ""
+    tolerations:
+    - key: node-role.kubernetes.io/infra
+      effect: NoSchedule
+      operator: Exists
+----
++
 .. Run the following command. Replace `subscription` with the name of the subscription file that you created:
 
 +
@@ -377,4 +360,70 @@ oc get mch -o=jsonpath='{.items[0].status.phase}'
 oc get routes
 ----
 
-If you are reinstalling {product-title-short} and the pods do not start, see link:../troubleshooting/trouble_reinstall.adoc#troubleshooting-reinstallation-failure[Troubleshooting reinstallation failure] for steps to work around this problem. 
+If you are reinstalling {product-title-short} and the pods do not start, see link:../troubleshooting/trouble_reinstall.adoc#troubleshooting-reinstallation-failure[Troubleshooting reinstallation failure] for steps to work around this problem.
+
+*Notes:*
+
+- A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to {product-title-short} and to any user credentials with access to the namespace where you install {product-title-short}.
+
+- The installation also creates a namespace called `local-cluster` that is reserved for the hub cluster when it is managed by itself. There cannot be an existing namespace called `local-cluster`. For security reasons, do not release access to the `local-cluster` namespace to any user who does not already have `cluster-administrator` access.
+
+[#installing-on-infra-node]
+== Installing the Hub on infrastructure nodes
+
+An OpenShift cluster can be configured to contain a special type of node, known as an
+infrasctureu node.
+Infrastructure nodes are intnded to run certain approved management components in order
+to isoloate thos components from other workload and to avoid allocating
+OCP subscription quota for the nodes running those components.
+
+Once the {ocp-short} cluster has been configued to have infrascture nodes, the
+{product-title-short} hub can be installed onto those nodes by following the 
+CLI-based instalttion flow described earlier, while providing additional resource
+parameters in the OLM Subscription and MultiClusterHub resources as descrined
+in the following sections.
+
+=== Add Infrascture Nodes to the OCP Cluster
+
+Before installing the {product-title} OLM opeerator or creating the hub, add infrastructure nodes
+to your OCP cluster. Following the procedures described in
+https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/html/machine_management/creating-infrastructure-machinesets[Creating infrastructure machine sets]
+in the {ocp-short} documentation, keeping the following note in mind.
+
+As described in the OCP documentation, Openshift infrascuture nodes are configured
+with a Kubernetes taint defined that keeps non-management workload
+from running on them.
+To be compabile with the infra-node enablement provided by {product-title-short}, ensure that
+the taint applied to the infrascture nodes is the following:
+
++
+[source,yaml]
+----
+spec:
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/infra
+----
+
+. Add the following `nodeSelector` entry to the `MultclusterHub` resource _object_ section:
+
+
+=== Additional Parameters Needed on OLM SUbscription
+
+[source,yaml]
+----
+spec:
+  put olm sub stuff here
+----
+
+=== Additional Parameters Needed on MultiClusterHub
+
+
+[source,yaml]
+----
+spec:
+  nodeSelector:
+    node-role.kubernetes.io/infra: ""
+----
+
+STILL WIP
