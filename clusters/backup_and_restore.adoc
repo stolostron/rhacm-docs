@@ -1,6 +1,6 @@
 [#hub-backup-and-restore]
 = Cluster backup and restore operator (Technology preview)
-//it is one operator that defines two resources
+
 The cluster backup and restore operator runs on the hub cluster, and depends on the link:https://github.com/openshift/oadp-operator[OADP Operator] to install link:https://velero.io/[Velero] on the {product-title} hub cluster; Velero is used to backup and restore {product-title-short} hub cluster resources. 
 
 [#prerequisites-backup-restore]
@@ -38,11 +38,11 @@ The `backupSchedule.cluster.open-cluster-management.io` resource creates the fol
 +
 *** Secrets and ConfigMaps from the `hive` and `openshift-operator-lifecycle-manager` namespaces, and from all the `ManagedClusters resources` namespaces created on the hub cluster.
 *** Cluster-level `ManagedCluster` resource.
-*** Other namespace-scoped resources used to restore the managed cluster details: `ServiceAccount`, `ManagedClusterInfo`, `ManagedClusterSet`, `ManagedClusterSetBindings`, `KlusterletAddonConfig`, `ManagedClusterView`, `ClusterPool`, `ClusterProvision`, `ClusterDeployment`, `ClusterSyncLease`, `ClusterSync`, `ClusterCurator`.
+*** Other namespace-scoped resources used to restore the managed cluster details, such as `ServiceAccount`, `ManagedClusterInfo`, `ManagedClusterSet`, `ManagedClusterSetBindings`, `KlusterletAddonConfig`, `ManagedClusterView`, `ClusterPool`, `ClusterProvision`, `ClusterDeployment`, `ClusterSyncLease`, `ClusterSync`, `ClusterCurator`.
 
 * `acm-credentials-schedule`: This resource is used to schedule backups for the user created credentials and any copy of those credentials. These credentials are identified by the `cluster.open-cluster-management.io/type` label selector; all secrets that define the label selector are included in the backup.
 +
-**Note**: If you have any user defined private channels, you can include the channel secrets in this credentials backup if you set the `cluster.open-cluster-management.io/type` label selector to this secret. Without this, channel secrets are not identified by the cluster backup and needs to be manually recreated on the restored cluster.
+**Note**: If you have any user defined private channels, you can include the channel secrets in this credentials backup if you set the `cluster.open-cluster-management.io/type` label selector to this secret. Without this, channel secrets are not retrieved by the `acm-credentials-schedule` backup and needs to be manually recreated on the restored cluster.
 
 * `acm-resources-schedule`: This resource is used to schedule backups for the `Applications` and `Policy` resources, including any required resources, such as: `Channels`, `Subscriptions`, `Deployables` and `PlacementRules` for `Applications` and `PlacementBindings`, `Placement`, `PlacementDecisions` for `Policy`. There are no resources being collected from the `local-cluster` or `open-cluster-management` namespaces.
 
@@ -53,13 +53,13 @@ In a disaster scenario, the hub cluster where the backups are ran becomes unavai
 
 There are also cases where you want to restore the data on the same hub cluster where the backup was collected, so that the data from a previous snapshot can be recovered. In this case, both restore and backup operations are run on the same hub cluster.
 
-After you create a `restore.cluster.open-cluster-management.io` resource on the hub cluster, you can run the following command to get the status of the restore operation: `oc get restore -n <oadp-operator-ns>`. You should also be able to verify the status of your hub cluster that the backed up resources contained, with the backup file that was created.
+After you create a `restore.cluster.open-cluster-management.io` resource on the hub cluster, you can run the following command to get the status of the restore operation: `oc get restore -n <oadp-operator-ns>`. You should also be able to verify that the backed up resources that are contained by the backup file are created.
 
-**Note**: The `restore.cluster.open-cluster-management.io` resource is run once. When the restore operation is complete you have to create a new `restore.cluster.open-cluster-management.io` resource. Optionally, you can run another restore operation on the same hub cluster after the restore operation is completed. 
+**Note**: The `restore.cluster.open-cluster-management.io` resource is run once. If you want to run the same restore operation again after the restore operation is complete, you have to create a new `restore.cluster.open-cluster-management.io` resource with the same `spec` options.
 
 The restore operation is used to restore all three backup types that are created by the backup operation. However, you can choose to install only a certain type of backup (only managed clusters, only user credentials, or only hub cluster resources).
 
-The restore defines the followiing three required `spec` properties, where the restore logic is defined for the types of backed up files:
+The restore defines the following three required `spec` properties, where the restore logic is defined for the types of backed up files:
 
 * `veleroManagedClustersBackupName` is used to define the restore option for the managed clusters.
 * `veleroCredentialsBackupName` is used to define the restore option for the user credentials.
@@ -72,11 +72,16 @@ The valid options for the previously mentioned properties are following values:
 ** `<backup_name>` - This property restores the specified backup pointing to it by name. 
 
 
-The `restore.cluster.open-cluster-management.io` resource creates up to three `restore.velero.io` resources, one for each of the backup types that you requested to be restored. View the following descriptions of the `restore.velero.io` parameters:
+The name of the `restore.velero.io` resources that are created by the `restore.cluster.open-cluster-management.io` is generated using the following template rule, `<restore.cluster.open-cluster-management.io name>-<velero-backup-resource-name>`. View the following descriptions:
 
-* `restore.cluster.open-cluster-management.io name` is the name of the current `Restore` resource.
-* `velero-backup-resource-name` is the name of the backup file this is used for restoring the data.
-
+* `restore.cluster.open-cluster-management.io name` is the name of the current `restore.cluster.open-cluster-management.io` resource., which initiates the restore.
+* `velero-backup-resource-name` is the name of the velero backup file that is used for restoring the data. For example, the `restore.cluster.open-cluster-management.io` resource named `restore-acm` creates `restore.velero.io` restore resources. View the following examples for the format:
++
+** `restore-acm-acm-managed-clusters-schedule-20210902205438` is used for restoring managed cluster backups. In this sample, the `backup.velero.io` backup name used to restore the resource is `acm-managed-clusters-schedule-20210902205438`.
+** `restore-acm-acm-credentials-schedule-20210902206789` is used for restoring credential backups. In this sample, the `backup.velero.io` backup name used to restore the resource is `acm-managed-clusters-schedule-20210902206789`.
+** `restore-acm-acm-resources-schedule-20210902201234` is used for restoring application and policy backups. In this sample, the `backup.velero.io` backup name used to restore the resource is `acm-managed-clusters-schedule-20210902201234`.
++
+*Note*: If `skip` is used for a backup type, `restore.velero.io` is not created.
 
 View the following YAML sample of the cluster `Restore` resource. In this sample, all three types of backed up files are being restored, using the latest available backed up files:
 

@@ -1,7 +1,7 @@
 [#backup-restore-enable]
 = Enable the backup and restore operator
 
-Enable the the Backup and Restore Operator to schedule back up and restore for your cluster resources. {product-title} offers the cluster backup operator as a Technology preview that is disabled by default.
+Enable the cluster backup and restore operator to schedule back up and restore for your cluster resources. {product-title} offers the cluster backup operator as a Technology preview that is disabled by default.
 
 **Required access**: Cluster administrator 
 
@@ -15,9 +15,9 @@ Enable the the Backup and Restore Operator to schedule back up and restore for y
 [#enabling-backup-restore]
 == Enabling the backup and restore operator
 
-Enable the cluster backup and restore operator by creating the `MultiClusterHub` resource and update the `enableClusterBackup` parameter to `true`.
+The cluster backup and restore operator can be enabled when the `MultiClusterHub` resource is created for the first time. From the {ocp-short} console, select the *Enable Cluster Backup switch* to enable the operator. The `enableClusterBackup` parameter is set to `true`. When the operator is enabled, the operator resources are installed.
 
-If the `MultiClusterHub` resource is already created, you can disable the cluster backup YAML by editing the `MultiClusterHub` resource. Set `enableClusterBackup` to `false`.
+If the `MultiClusterHub` resource is already created, you can install or uninstall the cluster backup operator by editing the `MultiClusterHub` resource. Set `enableClusterBackup` to `false`, if you want to uninstall the cluster backup operator.
 
 When the backup and restore operator is enabled, your `MultiClusterHub` resource might resemble the following YAML file:
 
@@ -46,7 +46,7 @@ apiVersion: operator.open-cluster-management.io/v1
 
 Complete the following steps to schedule and restore backups:
 
-. Create a `backupschedule.cluster.open-cluster-management.io` resource to schedule data backups. The resource is configured to create all of the necessary intermediary schedule backup resources. Run the following command. Be sure to replace the `<oadp-operator-ns>` with the namespace name used to install the OADP Operator (the default value for the OADP Operator install namespace is `oadp-operator`):
+. Use the backup and restore operator, `backupschedule.cluster.open-cluster-management.io` and `restore.cluster.open-cluster-management.io` resources, to create a `backupschedule.cluster.open-cluster-management.io` resource using the `cluster_v1beta1_backupschedule.yaml` sample file. See the link:https://github.com/open-cluster-management/cluster-backup-operator/tree/main/config/samples[`cluster-backup-operator` samples]. Run the following command to create a `backupschedule.cluster.open-cluster-management.io` resource using the `cluster_v1beta1_backupschedule.yaml` sample file:
 +
 ----
 kubectl create -n <oadp-operator-ns> -f config/samples/cluster_v1beta1_backupschedule.yaml
@@ -66,19 +66,28 @@ spec:
   veleroTtl: 72h # deletes scheduled backups after 72h; optional, if not specified, the maximum default value set by velero is used - 720h
 ----
 +
-View the following descriptions of the following properties:
+View the following descriptions of the `backupschedule.cluster.open-cluster-management.io` `spec` properties:
 +
 ** `maxBackup` is a required property and represents the maximum number of backups after previous backups are removed.
 ** `veleroSchedule` is a required property and defines a cron job for scheduling the backups.
 ** `veleroTtl` is an optional property and defines the expiration time for a scheduled backup resource. If not specified, the maximum default value set by Velero is used, which is `720h`.
 
-. Check the status of your scheduled cluster backups, which displays the definition for the three `schedule.velero.io` resources. Run the following command:
+. Check the status of your `backupschedule.cluster.open-cluster-management.io` resource, which displays the definition for the three `schedule.velero.io` resources. Run the following command:
 +
 ----
 oc get bsch -n <oadp-operator-ns>
 ----
 
-. Create a `restore.cluster.open-cluster-management.io` resource on a different hub cluster to restore a backup. The resource restores the backup and runs any other post to restore operations, such as registering restored remote clusters with the new hub cluster. Run the following command. Run the following command. Be sure to replace the `<oadp-operator-ns>` with the namespace name used to install the OADP Operator (the default value for the OADP Operator install namespace is `oadp-operator`):
+. As a reminder, the restore operation is run on a different hub cluster for restore scenarios. To initiate a restore operation, create a `restore.cluster.open-cluster-management.io` resource on the hub cluster where you want to restore backups.
++
+You can use the cluster backup and restore operator, `backupschedule.cluster.open-cluster-management.io` and `restore.cluster.open-cluster-management.io` resources, to create a backup or restore resource. See the link:https://github.com/open-cluster-management/cluster-backup-operator/tree/main/config/samples[`cluster-backup-operator` samples].
+. Run the following command to create a `restore.cluster.open-cluster-management.io` resource using the `cluster_v1beta1_restore.yaml` sample file. Be sure to replace the `<oadp-operator-ns>` with the namespace name used to install the OADP Operator. The default value for the OADP Operator install namespace is `oadp-operator`:
++
+----
+kubectl create -n <oadp-operator-ns> -f config/samples/cluster_v1beta1_restore.yaml
+----
++
+The resource restores the backup and runs any other post to restore operations, such as registering restored remote clusters with the new hub cluster. Run the following command. Run the following command. Be sure to replace the `<oadp-operator-ns>` with the namespace name used to install the OADP Operator (the default value for the OADP Operator install namespace is `oadp-operator`):
 +
 Your resource might resemble the following file:
 +
@@ -94,7 +103,7 @@ spec:
   veleroResourcesBackupName: latest
 ----
 +
-View the following description of the following property:
+View the following description of the `restore.cluster.open-cluster-management.io` `spec` properties:
 +
 ** The `backupName` represents the name of the `backup.velero.io` resource to be restored on the hub cluster, where the `restore.cluster.open-cluster-management.io` resource is created.
 
@@ -115,9 +124,9 @@ kind: Restore
 metadata:
   name: restore-acm
 spec:
-  veleroManagedClustersBackupName: latest
-  veleroCredentialsBackupName: latest
-  veleroResourcesBackupName: latest
+  veleroManagedClustersBackupSchedule: latest
+  veleroCredentialsBackupSchedule: latest
+  veleroResourcesBackupSchedule: latest
 ----
 +
 ** Restore only managed cluster:
