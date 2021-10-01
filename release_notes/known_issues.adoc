@@ -223,6 +223,12 @@ In rare cases with disconnected environments, some pods of the observability `St
 [#cluster-management-issues]
 == Cluster management known issues
 
+[#failed-ansible-cluster-different-status]
+=== Cluster status is different in different views of the console after a failed Ansible cluster creation
+//2.3:15794
+
+When you specify an invalid Ansible job template name while attempting to create a cluster and it fails, the cluster shows a different status on different screens of the console. When you view the status by selecting: `Infrastructure` > `Clusters` > `Managed clusters`, it displays a `Failed` status. When you select: `Infrstructure` > `Clusters` > `Cluster sets` > `<your_cluster_set_name>` > `Managed clusters`, the status remains stuck in `Creating`. The correct status is `Failed` for this case. You can try creating the cluster again, and enter the correct Ansible template name. 
+
 [#local-cluster-not-reimported]
 === The local-cluster might not be automatically reimported
 //2.3:15617
@@ -813,7 +819,26 @@ When the number of users with permissions to a given `ClusterRole` is determined
 
 When you use an external identity provider to log in to {product-title-short}, you might not be able to log out of {product-title-short}. This occurs when you use {product-title-short}, installed with IBM Cloud and Keycloak as the identity providers.
 
-You must log out of the external identity provider before you attempt to log out of {product-title-short}. 
+You must log out of the external identity provider before you attempt to log out of {product-title-short}.
 
+[#rbac-automation-issue]
+=== Administrator cluster manager unable to create automation policy
+//2.3.2:15750
 
+A user with a cluster-wide role binding to `open-cluster-management:cluster-manager-admin` is unable to create automation policies. To fix this issue, you must manually add the role to the automation policy.
+
+Create or update a cluster role (`ClusterRole`) to add rules to the `cluster-manager-admin` role, for the `Ansible` resource. Your YAML might resemeble the following file: 
+
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: add-ansible-rules
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-ocm-cluster-manager-admin: "true"
+rules:
+- apiGroups: ["tower.ansible.com"]
+  resources: ["ansiblejobs"]
+  verbs: ["create","get", "list", "watch", "update", "delete", "deletecollection", "patch"]
+----
 
