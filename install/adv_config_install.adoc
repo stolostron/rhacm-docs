@@ -6,8 +6,56 @@
 [#custom-image-pull-secret]
 == Custom Image Pull Secret
 
+. If you plan to import Kubernetes clusters that were not created by {ocp-short} or {product-title-short}, generate a secret that contains your {ocp-short} pull secret information to access the entitled content from the distribution registry. 
+
++
+The secret requirements for {ocp-short} clusters are automatically resolved by {ocp-short} and {product-title-short}, so you do not have to create the secret if you are not importing other types of Kubernetes clusters to be managed.
+
++
+*Important:* These secrets are namespace-specific, so make sure that you are in the namespace that you use for your hub cluster.
+
+ .. Download your {ocp-short} pull secret file from https://cloud.redhat.com/openshift/install/pull-secret[cloud.redhat.com/openshift/install/pull-secret] by selecting *Download pull secret*.
+Your {ocp-short} pull secret is associated with your Red Hat Customer Portal ID, and is the same across all Kubernetes providers.
+ .. Run the following command to create your secret:
++
+----
+oc create secret generic <secret> -n <namespace> --from-file=.dockerconfigjson=<path-to-pull-secret> --type=kubernetes.io/dockerconfigjson
+----
++
+Replace `secret` with the name of the secret that you want to create.
+Replace `namespace` with your project namespace, as the secrets are namespace-specific.
+Replace `path-to-pull-secret` with the path to your {ocp-short} pull secret that you downloaded.
+
+The following examples shows the template to use if you want to use a custom pull secret. Replace `namespace` with the name of your project namespace. Replace `secret` with the name of your pull secret:
+
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  imagePullSecret: <secret>
+----
+
 [#availability-config]
 == availabilityConfig
+
+The {product-title-short} hub cluster has two availabilities: `High` and `Basic`. By default, the hub cluster has an availability of `High`, which gives hub cluster components a `replicaCount` of `2`. This provides better support in cases of failover but consumes more resources that the `Basic` availability, which gives components a `replicaCount` of `1`.
+
+The following examples shows the template to use if you want to set the hub cluster to `Basic` availability. Replace `namespace` with the name of your project namespace:
+
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  availabilityConfig: "Basic"
+----
 
 [#disable-hub-self-management]
 == disableHubSelfManagement
@@ -30,12 +78,74 @@ spec:
 [#disable-update-cluster-image-sets]
 == disableUpdateClusterImageSets
 
+If want to ensure that you use the same release image for all of your clusters, you can create your own custom list of release images that are available when creating a cluster. See the following instructions in link:../clusters/rel_img_conon.adoc#maintaining-a-custom-list-of-release-images-when-connected[Maintaining a custom list of release images when connected] for how to manage your available release images and when to set the `disableUpdateClusterImageSets` attribute, which stops the custom image list from being overwritten.
+
+The following example shows the default template to use if you want to disable updates to the cluster image set. Replace `namespace` with the name of your project namespace:
+
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  disableUpdateClusterImageSets: true
+----
+
 [#custom-ca-configmap]
 == customCAConfigmap
+
+By default OpenShift Container Platform uses the Ingress Operator to create an internal CA. See the following instructions 
+
+The following example shows the default template to use if you want to provide a customized OpenShift default ingress CA certificate to {product-title-short}. Replace `namespace` with the name of your project namespace. Replace `configmap` with the name of your `ConfigMap`
+
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  customCAConfigmap: <configmap>
+----
 
 [#enable-cluster-proxy-addon]
 == enableClusterProxyAddon
 
-[#ssl-ciphers]
-== `sslCiphers`
+ClusterProxyAddon is a Tech Preview component. 
 
+The following example shows the default template to use if you want to provide enable Cluster Proxy Addon. Replace `namespace` with the name of your project namespace:
+
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  enableClusterProxyAddon: true
+----
+
+[#ssl-ciphers]
+== sslCiphers
+
+By default, the {product-title-short} hub cluster includes the full list of supported SSL ciphers. 
+
+The following example shows the default template to use if you want to provide a limited list of SSL ciphers to enable for the management ingress. Replace `namespace` with the name of your project namespace:
+
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: <namespace>
+spec:
+  ingress:
+    sslCiphers:
+    - "ECDHE-ECDSA-AES128-GCM-SHA256"
+    - "ECDHE-RSA-AES128-GCM-SHA256"
+----
