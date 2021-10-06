@@ -1,7 +1,13 @@
 [#support-templates-in-config-policies]
 = Support for templates in configuration policies
 
-Configuration policies support the inclusion of Golang text templates in the object definitions. These templates are resolved at runtime on the target managed cluster using configurations related to that cluster. This gives you the ability to define configuration policies with dynamic content, and inform or enforce Kubernetes resources that are customized to the target cluster.
+Configuration policies support the inclusion of Golang text templates in the object definitions. These templates are resolved at runtime on the target managed cluster using configurations related to that cluster. This gives you the ability to define configuration policies with dynamic content, and inform or enforce Kubernetes resources that are customized to the target cluster. {product-title} supports both hub cluster and managed cluster templates.
+
+* <<prerequisites-templatized,Prerequisite>>
+* <<template-functions,Template functions>>
+* <<hub-templates,Support for hub cluster templates in configuration policies>>
+** <<template-processing,Template processing>>
+** <<special-annotation-processing,Special annotation for reprocessing>>
 
 [#prerequisites-templatized]
 == Prerequisite
@@ -16,7 +22,6 @@ Template functions, such as resource-specific and generic, `lookup` template fun
 To conform templates into YAML syntax, templates must be set in the policy resource as strings using quotes or a block chaacter (`|` or `>`). This causes the resolved template value to also be a string. To override this, consider using `toInt` or `toBool` as the final function in the template to initiate further processing that forces the value to be interpreted as an integer, or boolean.
 
 *Note*: If the string value is more than 80 characters, this block character, `|` needs to be used to avoid YAML parsing errors.
-
 
 Continue reading to view descriptions and examples for some of the custom template functions that are supported:
 
@@ -361,3 +366,58 @@ spec:
         {{ (fromConfigMap "site-config" "site1" "enabled")  | toBool }}
 ----
 
+[#hub-templates]
+== Support for hub cluster templates in configuration policies
+
+{product-title-short} also supports hub cluster templates to define configuration policies that are dynamically customized to the target cluster. This prevents the creation of separate policies for each target cluster or hardecodes configuration values in the policy definitions. 
+
+Hub cluster templates are based on Golang text template specifications, and uses the `{{hub … hub}}` delimiter for hub cluster templates.
+
+[#template-processing]
+=== Template processing
+
+A configuration policy definition can contain both hub cluster and managed cluster templates. Hub cluster templates are processed first on the hub cluster, then the policy definition with resolved hub cluster templates is propagated to the target clusters. On the managed cluster, the `ConfigPolicyController` processes any managed cluster templates in the policy definition and then enforces or verifies the fully resolved object definition.
+
+[#special-annotation-processing]
+=== Special annotation for reprocessing
+
+Policies are processed on the hub cluster only upon creation or after an update. Therefore, hub cluster templates are only resolved to the data in the referenced resources upon policy creation or update. Any changes to the referenced resources are not automatically synced to the policies. 
+
+A special annotation, `policy.open-cluster-management.io/trigger-update` can be used to indicate changes to the data referenced by the templates. Any change to the special annotation value initiates template processing, and the latest contents of the referenced resource are read and updated in the policy definition that is the propagator for processing on managed clusters. A typical way to use this annotation is to increment the value by one each time.
+
+See the following table for a comparison of hub cluster and managed cluster templates:
+
+.Comparison table of hub cluster and managed cluster
+|===
+| Templates | Hub cluster | Managed cluster 
+
+| Syntax
+| Golang text template specification
+| Golang text template specification
+
+| Delimiter
+| {{hub … hub}}
+| {{ … }}
+
+| Functions
+| Set of generic Kubernetes resource such as `lookup` resource, specific `lookup` resources that can be utilized. See <<template-functions,Template functions>> for more information.
+| Set of generic Kubernetes resource such as `lookup` resource, specific `lookup` resources that can be utilized. See <<template-functions,Template functions>> for more information.
+
+| Context
+| A `ManagedClusterName` variable is available, which at runtime, resolves to the name of the target cluster where the policy is propagated.
+| No context variables
+
+| Processing
+| Processing occurs at runtime on the hub cluster during propagation of replicated policies to clusters. Policies and the hub cluster templates within the policies are processed on the hub cluster only when templates are created or updated.
+| Processing occurs in the `ConfigPolicyController` on the managed cluster. Policies are processed periodically, which automatically updates the resolved object definition with data in the referenced resources.
+
+| Access control
+| You can only reference Kuberenetes resources that are in the same namespace as the `Policy` resource.
+| You can reference any resource on the cluster.
+
+| Processing errors
+| Errors from the hub cluster templates are displayed as violations on the specific target cluster that is propagated.
+| Errors from the managed cluster templates are displayed as violations on the specific target cluster where the violationoccurred.
+|===
+
+See link:[add a link for example template if available]
