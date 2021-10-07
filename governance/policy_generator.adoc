@@ -1,100 +1,119 @@
 [#policy-generator]
 = Policy generator
 
-Policy generator is a part of the {product-title} application lifecycle link:../applications/subscription_sample.adoc#applying-kustomize[`Subscription`] that generates {product-title} policies through GitOps using Kustomize. The policy generator builds {product-title} policies from Kubernetes manifest YAML files, which are provided through a `PolicyGenerator` manifest YAML file that is used to configure it. The policy generator is implemented as a Kustomize generator plugin. For more information on Kustomize, see the link:https://kustomize.io/[Kustomize documentation].
+The link:https://github.com/open-cluster-management/policy-generator-plugin[policy generator] is a part of the {product-title} application lifecycle link:../applications/subscription_sample.adoc#applying-kustomize[subscription] GitOps workflow that generates {product-title} policies using Kustomize. The policy generator builds {product-title} policies from Kubernetes manifest YAML files, which are provided through a `PolicyGenerator` manifest YAML file that is used to configure it. The policy generator is implemented as a Kustomize generator plugin. For more information on Kustomize, see the link:https://kustomize.io/[Kustomize documentation].
 
-[#policy-generator-components]
+[#policy-generator-capabilities]
 == Policy generator components
 
-The policy generator requires a Kustomize plugin, a `Placement` resource, and policy expanders. View the following descriptions of the policy generator components:
+The link:https://github.com/open-cluster-management/policy-generator-plugin[policy generator] and its integration with the {product-title} application lifecycle link:../applications/subscription_sample.adoc#applying-kustomize[subscription] GitOps workflow greatly simplifies the distribution of Kubernetes resource objects to managed OpenShift/Kubernetes clusters through {product-title} policies. In particular, it can:
 
-* *Kustomize plugin*: The policy generator plugin is a binary written in Go language. The binary accepts an input manifest of the `PolicyGenerator` kind in the `policy.open-cluster-management.io/v1` API. When Kustomize finds a `PolicyGenerator` resources in the `generators:` section of the `kustomization.yaml`, it looks in its directories for a binary of the same name (`PolicyGenerator`) in the `policy.open-cluster-management.io/vi/policygenerator` directory. Kustomize also calls the binary as `<path>/PolicyGenerator <cached-manifest>` to run the generator as its plugin. The `--enable-alpha-plugins` flag  must be specified in the Kustomize command for the external generator plugin to be enabled.
+- Convert any Kubernetes manifest files to {product-title} link:./config_policy_ctrl.adoc#kubernetes-configuration-policy-controller[configuration policies].
+- Patch the input Kubernetes manifests before they are inserted into a generated {product-title} policy.
+- Generate additional configuration policies to be able to report on link:https://open-policy-agent.github.io/gatekeeper/website/docs/[Gatekeeper] and link:https://kyverno.io/[Kyverno] policy violations through {product-title}.
 
-* *Placement*: By default, a `Placement` and `PlacementBinding` are created for each policy with the policy. If you want to consolidate policies that use the same `Placement` in a single `PlacementBinding`, either specify `placement.placementRulePath` to an existing `Placement` manifest or set `placement.name` along with `placement.clusterSelectors`. When the `PlacementBinding` is consolidated in this way, `placementBindingDefaults.name` must be specified so that the generator can create unique names for the bindings.
+[#policy-generator-configuration]
+== Policy generator configuration structure
 
-* *Policy expanders*: Policy expanders provide logic to create additional policies based on a given kind to the violations or status using {product-title-short} policies. Generally, the expanders point to kinds provided by third-party policy engines such as Kyverno and Gatekeeper. These expanders are enabled by default, but can be disabled individually by setting the flag associated with the expander in the `PolicyGenerator` manifest either in policyDefaults or for a particular manifest in the policies array. If you want to contribute a policy expander, see link:https://github.com/open-cluster-management/policy-generator-plugin/blob/main/docs/policygenerator.md#contributing-a-policy-expander[Contributing a policy expander].
-//in the doc, we refer to Gatekeeper as a third-party integration? Wonder of we should link Policy generator doc from the Integrate third-party doc
+The policy generator is a link:https://kustomize.io/[Kustomize] generator plugin that is configured via a manifest of the `PolicyGenerator` kind and `policy.open-cluster-management.io/v1` API version.
 
-[#policy-generator-structure]
-== Policy generator YAML structure
-
-View the following YAML structure for the explained parameter fields:
+To use the plugin, start by adding a `generators` section in a link:https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/[kustomization.yaml] file. View the example below.
 
 [source,yaml]
-----
+generators:
+  - policy-generator-config.yaml
+
+The `policy-generator-config.yaml` file referenced in the above example is a YAML file with the instructions of the policies to generate. A simple policy generator configuration file may look like the example below.
+
+[source,yaml]
 apiVersion: policy.open-cluster-management.io/v1
 kind: PolicyGenerator
 metadata:
-  name: ""
-placementBindingDefaults:
-  name: ""
+  name: config-data-policies
 policyDefaults:
-  categories:
-    - "CM Configuration Management"
-  controls:
-    - "CM-2 Baseline Configuration"
-  consolidateManifests: true
-  informKyvernoPolicies: true
-  namespace: ""
-  placement:
-    clusterSelectors: {}
-    name: ""
-    placementRulePath: ""
-  remediationAction: "inform"
-  severity: "low"
-  standards:
-    - "NIST SP 800-53"
+  namespace: policies
 policies:
-  - name: ""
+  - name: config-data
     manifests:
-      - path: ""
-        # Optional. A Kustomize patch to apply to the manifest(s) at the path. If there
-        # are multiple manifests, the patch requires the apiVersion, kind, metadata.name,
-        # and metadata.namespace (if applicable) fields to be set so Kustomize
-        # can identify the manifest the patch applies to.
-        patches:
-            # Optional: Only required when there are multiple manifests in the path.
-          - apiVersion: ""
-            # Optional: Only required when there are multiple manifests in the path.
-            kind: ""
+      - path: configmap.yaml
+
+The `configmap.yaml` represents a Kubernetes manifest YAML file to be included in the policy. An example is shown below.
+
+[source,yaml]
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+  namespace: default
+data:
+  key1: value1
+  key2: value2
+
+The generated `Policy`, along with the generated `PlacementRule` and `PlacementBinding`, would look like the example below.
+
+[source,yaml]
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-config-data
+  namespace: policies
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions: []
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-config-data
+  namespace: policies
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: placement-config-data
+subjects:
+- apiGroup: policy.open-cluster-management.io
+  kind: Policy
+  name: config-data
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  name: config-data
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: config-data
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: v1
+            data:
+              key1: value1
+              key2: value2
+            kind: ConfigMap
             metadata:
-              # Optional: Only required when there are multiple manifests in the path.
-              name: ""
-              # Optional: Only required when there are multiple manifests in the path and it's a
-              # manifest to a namespaced resource.
-              namespace: ""
-              # An example modification to the manifest
-              annotations:
-                friends-character: Chandler Bing
-    # Optional. (See policyDefaults.categories for description.)
-    categories:
-      - "CM Configuration Management"
-    complianceType: "musthave"
-    # Optional. (See policyDefaults.controls for description.)
-    controls:
-      - "CM-2 Baseline Configuration"
-    # Optional. (See policyDefaults.disabled for description.)
-    disabled: false
-    # Optional. (See policyDefaults.informKyvernoPolicies for description.)
-    informKyvernoPolicies: true
-    # Optional. (See policyDefaults.consolidateManifests for description.)
-    consolidateManifests: true
-    namespaceSelector:
-      include: []
-      exclude: []
-    # Optional. (See policyDefaults.placement for description.)
-    placement: {}
-    # Optional. (See policyDefaults.remediationAction for description.)
-    remediationAction: ""
-    # Optional. (See policyDefaults.severity for description.)
-    severity: "low"
-    # Optional. (See policyDefaults.standards for description.)
-    standards:
-      - "NIST SP 800-53"
-----
+              name: my-config
+              namespace: default
+        remediationAction: inform
+        severity: low
 
 [#policy-gen-yaml-table]
-== Policy generator YAML table
+== Policy generator configuration reference table
+
+Note that all the fields under `policyDefaults` except for `namespace` can be overridden on a per policy basis.
 
 |===
 | Field | Description
@@ -102,6 +121,10 @@ policies:
 | apiVersion
 | Required.
 Set the value to `policy.open-cluster-management.io/v1`.
+
+| complianceType
+| Optional.
+Determines the policy controller behavior when comparing the manifest to objects on the cluster. The parameter values are `musthave`, `mustonlyhave`, or `mustnothave`. The default value is `musthave`.
 
 | kind
 | Required.
@@ -139,6 +162,10 @@ Array of controls to be used in the `policy.open-cluster-management.io/controls`
 | Optional.
 This determines if a single configuration policy should be generated for all the manifests being wrapped in the policy. If set to `false`, a configuration policy per manifest is generated. The default value is `true`.
 
+| policyDefaults.informGatekeeperPolicies
+| Optional.
+When the policy references a Gatekeeper policy manifest, this determines if an additonal configuration policy should be generated in order to receive policy violations in {product-title-short} when the Gatekeeper policy has been violated. The default value is `true`.
+
 | policyDefaults.informKyvernoPolicies
 | Optional.
 When the policy references a Kyverno policy manifest, this determines if an additonal configuration policy should be generated to receive policy violations in {product-title-short}, when the Kyverno policy has been violated. The default value is `true`.
@@ -152,7 +179,7 @@ The namespace of all the policies.
 
 | placement.clusterSelectors
 | Optional. 
-Specify a placement by specifying a cluster selector in the following format, `key:value`. See `placementRulePath` ti specify an existing file.
+Specify a placement by specifying a cluster selector in the following format, `key:value`. See `placementRulePath` to specify an existing file.
 
 | placement.name
 | Optional. 
@@ -178,26 +205,19 @@ An array of standards to be used in the `policy.open-cluster-management.io/stand
 | Required.
 The list of policies to create along with overrides to either the default values, or the values that are set in `policyDefaults.`
 
-| policies.name
-| Required.
-The name of the policy to create.
-
-| policies.manifests
+| policies[ ].manifests
 | Required.
 The list of Kubernetes object manifests to include in the policy.
 
-| manifests.path
+| policies[ ].name
+| Required.
+The name of the policy to create.
+
+| policies[ ].manifests[ ].path
 | Optional.
 Path to a single file or a flat directory of files relative to the `kustomization.yaml` file.
 
-| manifests.patches
+| policies[ ].manifests[ ].patches
 | Optional.
 A Kustomize patch to apply to the manifest at the path. If there are multiple manifests, the patch requires the `apiVersion`, `kind`, `metadata.name`, and `metadata.namespace` (if applicable) fields to be set so Kustomize can identify the manifest that the patch applies to.
-
-| complianceType
-| Optional.
-Determines the policy controller behavior when comparing the manifest to objects on the cluster. The parameter values are `musthave`, `mustonlyhave`, or `mustnothave`. The defaultvalue is `musthave`.
 |===
-
-See link:https://github.com/open-cluster-management/policy-generator-plugin/blob/main/docs/policygenerator-reference.yaml[`policygenerator-reference.yaml`] for more details. Learn how to use the policy generator, see xref:../governance/using_policy_generator.adoc#config-policy-generator[Configuring the policy generator].
-
