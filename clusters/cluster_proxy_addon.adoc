@@ -64,28 +64,29 @@ oc create rolebinding -n default test-rolebinding --serviceaccount=default:defau
 oc config view --minify --raw=true > cluster-proxy.kubeconfig
 ----
 
-... Modify the `server` file with your YAML editor:
+... Modify the `server` file with your editor (these examples use `sed`):
 +
 ----
 export TARGET_MANAGE_CLUSTER=<cluster1> 
 
 export NEW_SERVER=https://$(oc get route -n open-cluster-management cluster-proxy-addon-user -o=jsonpath='{.spec.host}')/$TARGET_MANAGE_CLUSTER
 
-yq e -i '.clusters[0].cluster.server=env(NEW_SERVER)' cluster-proxy.kubeconfig
+sed -i'' -e '/server:/c\ server: '"$NEW_SERVER"'' cluster-proxy.kubeconfig
 ----
 +
 Replace `cluster1` with a managed cluster name that you want to access. 
 
-... Delete the original user credentials by entering the following command: 
+... Delete the original user credentials by entering the following commands: 
 +
 ----
-yq e "del(.users[0].user.client-certificate-data)" cluster-proxy.kubeconfig
-yq e "del(.users[0].user.client-key-data)" cluster-proxy.kubeconfig
+sed -i'' -e '/client-certificate-data/d' cluster-proxy.kubeconfig
+sed -i'' -e '/client-key-data/d' cluster-proxy.kubeconfig
 ----
+
 ... Add the token of the service account:
 +
 ----
-yq e -i ".users[0].user.token=env(MANAGED_CLUSTER_TOKEN)" cluster-proxy.kubeconfig
+sed -i'' -e '/user:/a\   token: '"$MANAGED_CLUSTER_TOKEN"'' cluster-proxy.kubeconfig
 ----
 
 . List all of the pods on the target namespace of the target managed cluster by running the following command: 
