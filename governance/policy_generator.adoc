@@ -110,6 +110,260 @@ spec:
         remediationAction: inform
         severity: low
 
+[#policy-gen-install-operator]
+== Generating a policy to install an Operator
+
+A common use for RHACM policies is to
+link:https://docs.openshift.com/container-platform/4.8/operators/admin/olm-adding-operators-to-cluster.html\#olm-installing-operator-from-operatorhub-using-cli_olm-adding-operators-to-a-cluster[install] an link:https://cloud.redhat.com/learn/topics/operators[Operator] on one or more managed OpenShift clusters. Two examples will be shown, each covering different link:https://docs.openshift.com/container-platform/4.8/operators/admin/olm-adding-operators-to-cluster.html\#olm-installing-operators-from-operatorhub_olm-adding-operators-to-a-cluster[installation modes].
+
+=== A policy to install OpenShift GitOps
+
+This example will show how to generate a policy that installs link:https://docs.openshift.com/container-platform/4.8/cicd/gitops/understanding-openshift-gitops.html[OpenShift GitOps] using the policy generator. The OpenShift GitOps operator has the "all namespaces" https://docs.openshift.com/container-platform/4.8/operators/admin/olm-adding-operators-to-cluster.html\#olm-installing-operators-from-operatorhub_olm-adding-operators-to-a-cluster[installation mode]. First, a `Subscription` manifest file called `openshift-gitops-subscription.yaml` needs to be created like the following example.
+
+[source,yaml]
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-operators
+spec:
+  channel: stable
+  name: openshift-gitops-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+ 
+To pin to a specific version of the operator, you can set the `spec.startingCSV` value to `openshift-gitops-operator.v1.2.1` (replacing `v1.2.1` with your preferred version).
+
+Next, a Policy Generator configuration file called `policy-generator-config.yaml` is required. The following example shows a single policy that installs OpenShift GitOps on all OpenShift managed clusters.
+
+[source,yaml]
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: install-openshift-gitops
+policyDefaults:
+  namespace: policies
+  placement:
+    clusterSelectors:
+      vendor: "OpenShift"
+  remediationAction: enforce
+policies:
+  - name: install-openshift-gitops
+    manifests:
+      - path: openshift-gitops-subscription.yaml
+
+The last file that is required is the `kustomization.yaml` file. It should look like the following example.
+
+[source,yaml]
+generators:
+  - policy-generator-config.yaml
+
+The generated policy should look like the following.
+
+[source,yaml]
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-install-openshift-gitops
+  namespace: policies
+spec:
+  clusterConditions:
+    - status: "True"
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-install-openshift-gitops
+  namespace: policies
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: placement-install-openshift-gitops
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: install-openshift-gitops
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  name: install-openshift-gitops
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: install-openshift-gitops
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: Subscription
+                metadata:
+                  name: openshift-gitops-operator
+                  namespace: openshift-operators
+                spec:
+                  channel: stable
+                  name: openshift-gitops-operator
+                  source: redhat-operators
+                  sourceNamespace: openshift-marketplace
+          remediationAction: enforce
+          severity: low
+
+=== A policy to install the Compliance Operator
+
+For an operator that has a "namespaced" link:https://docs.openshift.com/container-platform/4.8/operators/admin/olm-adding-operators-to-cluster.html\#olm-installing-operators-from-operatorhub_olm-adding-operators-to-a-cluster[installation mode], such as the link:https://docs.openshift.com/container-platform/4.8/security/compliance_operator/compliance-operator-understanding.html[Compliance Operator], an `OperatorGroup` manifest is also required. This example will show generating a policy to install the Compliance Operator.
+
+First, a YAML file with a `Namespace`, a `Subscription`, and an `OperatorGroup` manifest called `compliance-operator.yaml` must be created. The following example installs this in the `compliance-operator` namespace.
+
+[source,yaml]
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-compliance
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: compliance-operator
+  namespace: openshift-compliance
+spec:
+  channel: release-0.1
+  name: compliance-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: compliance-operator
+  namespace: openshift-compliance
+spec:
+  targetNamespaces:
+    - compliance-operator
+
+Next, a Policy Generator configuration file called `policy-generator-config.yaml` is required. The following example shows a single policy that installs the Compliance Operator on all OpenShift managed clusters.
+
+[source,yaml]
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: install-compliance-operator
+policyDefaults:
+  namespace: policies
+  placement:
+    clusterSelectors:
+      vendor: "OpenShift"
+  remediationAction: enforce
+policies:
+  - name: install-compliance-operator
+    manifests:
+      - path: compliance-operator.yaml
+
+The last file that is required is the `kustomization.yaml` file. It should look like the following example.
+
+[source,yaml]
+generators:
+  - policy-generator-config.yaml
+
+The resulting generated policy should look like the following.
+
+[source,yaml]
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-install-compliance-operator
+  namespace: policies
+spec:
+  clusterConditions:
+    - status: "True"
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-install-compliance-operator
+  namespace: policies
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: placement-install-compliance-operator
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: install-compliance-operator
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  name: install-compliance-operator
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: install-compliance-operator
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: openshift-compliance
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: Subscription
+                metadata:
+                  name: compliance-operator
+                  namespace: openshift-compliance
+                spec:
+                  channel: release-0.1
+                  name: compliance-operator
+                  source: redhat-operators
+                  sourceNamespace: openshift-marketplace
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1
+                kind: OperatorGroup
+                metadata:
+                  name: compliance-operator
+                  namespace: openshift-compliance
+                spec:
+                  targetNamespaces:
+                    - compliance-operator
+          remediationAction: enforce
+          severity: low
+
 [#policy-gen-yaml-table]
 == Policy generator configuration reference table
 
