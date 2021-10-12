@@ -3,14 +3,14 @@
 
 In some environments, a managed cluster is behind a firewall and cannot be accessed directly by the hub cluster. When this is the case, you can set up a proxy add-on to access the `kube-api` server of the managed cluster to provide a more secure connection. 
 
-*Required access*: Cluster administrator
+*Required access*: Editor
 
 To configure a cluster proxy add-on for a hub cluster and a managed cluster, complete the following steps:
 
 . Enable the cluster proxy add-on on {product-title} hub cluster by entering the following command to add an entry for `enableClusterProxyAddon` with a value of `true` to your `multiclusterhub.yaml` file:
 +
 ----
-oc patch -n open-cluster-management multiclusterhub multiclusterhub --merge -p '{"spec":{"enableClusterProxyAddon":true}}'
+oc patch -n open-cluster-management multiclusterhub multiclusterhub --type merge -p '{"spec":{"enableClusterProxyAddon":true}}'
 ----
 +
 As indicated by the command, this file is in the `open-cluster-management` namespace. 
@@ -31,30 +31,32 @@ EOF
 +
 Replace `target_managed_cluster` with the name of the managed cluster to which you are applying the cluster proxy add-on.
 
-. Configure the `kubeconfig` ??file?? to access the managed cluster `kube-apiserver` by completing the following steps:
+. Configure the `kubeconfig` file to access the managed cluster `kube-apiserver` by completing the following steps:
 
 .. Provide a valid access token for the managed cluster. You can use the corresponding token of the service account, assuming the default service account is in the default namespace.
+
+... Make sure that you are using the context of the managed cluster. Assume the file named `managed-cluster.kubeconfig` is the `kubeconfig` file of the managed cluster. *Tip:* Commands with `--kubeconfig=managed-cluster.kubeconfig` run on the managed cluster, and all of the commands in this procedure should run in the same console. Do not run commands in different consoles.
+
+... Add a role to your service account that allows it to access pods by running the following commands:
++
+----
+oc create role -n default test-role --verb=list,get --resource=pods --kubeconfig=managed-cluster.kubeconfig
+oc create rolebinding -n default test-rolebinding --serviceaccount=default:default --role=test-role --kubeconfig=managed-cluster.kubeconfig
+----
 
 ... Run the following command to locate the secret of the service account token:
 +
 ----
-oc get secret -n default | grep default-token
+oc get secret -n default --kubeconfig=managed-cluster.kubeconfig | grep default-token
 ----
 
 ... Run the following command to copy the token:
 +
 ----
-export MANAGED_CLUSTER_TOKEN=$(kubectl -n default get secret <default-token> -o jsonpath={.data.token} | base64 -d) 
+export MANAGED_CLUSTER_TOKEN=$(kubectl --kubeconfig=managed-cluster.kubeconfig -n default get secret <default-token> -o jsonpath={.data.token} | base64 -d) 
 ----
 +
 Replace `default-token` with the name of your secret.
-
-... Add a role to your service account that allows it to access pods by running the following commands:
-+
-----
-oc create role  -n default test-role --verb=list,get --resource=pods
-oc create rolebinding -n default test-rolebinding --serviceaccount=default:default --role=test-role
-----
 
 .. Configure the `kubeconfig` file on the {product-title-short} hub cluster.
 
@@ -64,7 +66,7 @@ oc create rolebinding -n default test-rolebinding --serviceaccount=default:defau
 oc config view --minify --raw=true > cluster-proxy.kubeconfig
 ----
 
-... Modify the `server` file with your editor (these examples use `sed`):
+... Modify the `server` file with your editor. This example uses commands when using `sed`. Run `alias sed=gsed`, if you are using OSX.
 +
 ----
 export TARGET_MANAGE_CLUSTER=<cluster1> 
@@ -86,7 +88,8 @@ sed -i'' -e '/client-key-data/d' cluster-proxy.kubeconfig
 ... Add the token of the service account:
 +
 ----
-sed -i'' -e '/user:/a\   token: '"$MANAGED_CLUSTER_TOKEN"'' cluster-proxy.kubeconfig
+sed -i'' -e '/token/d' cluster-proxy.kubeconfig
+sed -i'' -e '$a\    token: '"$MANAGED_CLUSTER_TOKEN"'' cluster-proxy.kubeconfig
 ----
 
 . List all of the pods on the target namespace of the target managed cluster by running the following command: 
