@@ -1,13 +1,13 @@
 [#volsync]
 = Replicating persistent volumes with VolSync (Technology Preview)
 
-VolSync is a Kubernetes operator that enables asynchronous replication of persistent volumes within a cluster, or across clusters with storage types that are not otherwise compatible for replication. It uses the Container Storage Interface (CSI) to overcome the compatibility limitation. After deploying the VolSync operator in your {ocp} environment where you have your {product-title} hub cluster, you can leverage it to create and maintain backup versions of your {product-title-short} managed clusters.
+VolSync is a Kubernetes operator that enables asynchronous replication of persistent volumes within a cluster, or across clusters with storage types that are not otherwise compatible for replication. It uses the Container Storage Interface (CSI) to overcome the compatibility limitation. After deploying the VolSync operator in your {ocp} environment, you can leverage it to create and maintain backup versions of your persistent data.
 
 **Note:** VolSync does not meet the requirements of the FIPS standard. 
 
 There are three methods that you can use to replicate when you use VolSync, which depend on the number of synchronization locations that you have. The Rsync method is used for this example. For information about the other methods and more information about Rsync, see https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation.  
 
-* Rsync replication is a one-to-one replication of persistent volumes, and is likely to be the most commonly used. This is used for typical backups at a remote site or mirroring an environment. 
+* Rsync replication is a one-to-one replication of persistent volumes, and is likely to be the most commonly used. This is used for replicating data to a remote site. 
 
 [#volsync-prereq]
 == Prerequisites
@@ -25,9 +25,9 @@ To enable VolSync on two clusters in your environment, you must install it on bo
 
 . Deploy the required VolSync resources to the clusters.
 
-.. In the {product-title-short} console navigation, select *Applications*. 
+.. In the {product-title-short} console navigation, select *Governance*. 
 
-.. Select *Create application* to start a new application. The application that you create uses an existing policy to install the VolSync resources.
+.. Select *Create policy* to start a new policy. The policy that you create uses an existing policy to install the VolSync resources.
 
 .. Complete the required information for your application.
 
@@ -49,19 +49,14 @@ To enable VolSync on two clusters in your environment, you must install it on bo
 +
 * Your steps might resemble the following procedure for an Amazon Web Services environment:
 
-... Stop the current service: 
+.. Change your default `StorageClass` by entering the following commands: 
 +
 ----
 kubectl annotate sc/gp2 storageclass.kubernetes.io/is-default-class="false" --overwrite
-----
-
-... Redirect the service to CSI and start the service: 
-+
-----
 kubectl annotate sc/gp2-csi storageclass.kubernetes.io/is-default-class="true" --overwrite
 ----
 
-... Install a `VolumeSnapshotClass` by running the following command:
+.. Install a `VolumeSnapshotClass` by running the following command:
 +
 ----
 kubectl create -f - << SNAPCLASS
@@ -75,7 +70,7 @@ deletionPolicy: Delete
 SNAPCLASS
 ----
 
-... Set `gp2-csi` as your default `VolumeSnapshotClass` by running the following command:
+.. Set `gp2-csi` as your default `VolumeSnapshotClass` by running the following command:
 +
 ----
 kubectl annotate volumesnapshotclass/gp2-csi snapshot.storage.kubernetes.io/is-default-class="true"
@@ -85,19 +80,14 @@ Your CSI is now configured on an Amazon Web Services environment.
 
 * The steps might resemble the following for an Google Cloud Platform environment:
 
-... Stop the current service: 
+.. Change your default `StorageClass` by entering the following commands: 
 +
 ----
 kubectl annotate sc/standard storageclass.kubernetes.io/is-default-class="false" --overwrite
-----
-
-... Redirect the service to CSI and start the service: 
-+
-----
 kubectl annotate sc/standard-csi storageclass.kubernetes.io/is-default-class="true" --overwrite
 ----
 
-... Install a `VolumeSnapshotClass` by running the following command:
+.. Install a `VolumeSnapshotClass` by running the following command:
 +
 ----
 kubectl create -f - << SNAPCLASS
@@ -111,7 +101,7 @@ deletionPolicy: Delete
 SNAPCLASS
 ----
 
-... Set `standard-csi` as your default `VolumeSnapshotClass` by running the following command:
+.. Set `standard-csi` as your default `VolumeSnapshotClass` by running the following command:
 +
 ----
 kubectl annotate volumesnapshotclass/standard-csi snapshot.storage.kubernetes.io/is-default-class="true"
@@ -120,34 +110,6 @@ kubectl annotate volumesnapshotclass/standard-csi snapshot.storage.kubernetes.io
 Your CSI is now configured on a Google Cloud Platform environment.
 
 . For Rsync-based replication, configure a custom resource on the source and target clusters.
-
-.. Add the following minimal custom resource information to the YAML file of your source cluster:
-+
-[source,yaml]
-----
----
-apiVersion: volsync.backube/v1alpha1
-kind: ReplicationSource
-metadata:
-  name: <source_name>
-  namespace: <source_namespace>
-spec:
-  sourcePVC: <persistent_volume_claim>
-  trigger:
-    schedule: "*/5 * * * *"
-  rsync:
-    sshKeys: <volsync-rsync-destination-src-database-destination>
-    address: <source.host.com>
-    copyMethod: Clone
-----
-+
-Replace `source_name` with the name of your source volume.
-+
-Replace `source_namespace` with the name of the namespace where your source is located.
-+
-Replace `persistent_volume_claim` with the name of your source claim.
-+
-Replace `source.host.com` with the host address of your source cluster. 
 
 .. Add the following minimal custom resource information to the YAML file of your target cluster:
 +
@@ -170,27 +132,48 @@ Replace `destination_name` with the name of your destination volume.
 +
 Replace `destination_namespace` with the name of the namespace where your destination is located.
 
-Your can now set up the synchronization method of the persistent volume.
-
-[#volsync-start]
-== Starting your synchronization
-
-You have a few options to select from when determining how you start your replications: always running, on a schedule, or manually. Implement the method from the following list that best meets your needs:  
-
-* *Always:* Runs a constant replication. When a change is detected on the source persistent volume, a replication is automatically started. Your setting for this replication option might resemble the following content:
+.. Add the following minimal custom resource information to the YAML file of your source cluster:
 +
 [source,yaml]
 ----
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: <name>
+  namespace: <source_namespace>
 spec:
-  trigger: {}
+  sourcePVC: <persistent_volume_claim>
+  trigger:
+    schedule: "*/5 * * * *"
+  rsync:
+    sshKeys: <volsync-rsync-destination-src-database-destination>
+    address: <source.host.com>
+    copyMethod: Clone
 ----
++
+Replace `name` with a unique name for your source volume.
++
+Replace `source_namespace` with the name of the namespace where your source is located.
++
+Replace `persistent_volume_claim` with the name of your source claim.
++
+Replace `volsync-rsync-destination-src-database-destination` with the keys that are generated in the `.status.rsync.address` field of the `ReplicationDestination` when it is created. 
++
+Replace `source.host.com` with the host address of your source cluster. 
 
-* *Schedule:* Runs replications at scheduled times. A schedule is defined by a `cronspec`, so the schedule can be configured as intervals of time or as specific times. 
-+
-The order of the schedule values are:
-+
+
+You can now set up the synchronization method of the persistent volume.
+
+[#volsync-start]
+== Scheduling your synchronization
+
+You have a few options to select from when determining how you start your replications: always running, on a schedule, or manually. Scheduling your replications is an option that is the option that is often selected. 
+
+The *Schedule* option runs replications at scheduled times. A schedule is defined by a `cronspec`, so the schedule can be configured as intervals of time or as specific times. The order of the schedule values are:
+
 `"minute (0-59) hour (0-23) day-of-month (1-31) month (1-12) day-of-week (0-6)"`
-+
+
 The replication starts when the scheduled time occurs. Your setting for this replication option might resemble the following content:
 +
 [source,yaml]
@@ -199,16 +182,5 @@ spec:
   trigger:
     schedule: "*/6 * * * *"
 ----
-
-* *Manual:* Runs only one replication when you manually request it. To configure for manual replications, your settings might resemble the following content:
-+
-[source,yaml]
-----
-spec:
-  trigger:
-    manual: <new_value>
-----
-+
-To run a replication, change `new_value` to a value other than its current value. A replication starts shortly after you change the value and save the file. After the manual replication runs, there are no other replications until the value is changed again. 
 
 After enabling one of these methods, your synchronization schedule runs according to the method that you configured. 
