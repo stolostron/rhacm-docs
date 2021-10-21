@@ -1,0 +1,514 @@
+[#policy-generator]
+= Policy generator
+
+//i noticed that we used a lot of inline links which can be disruptive to the reader, It might best to minimize the links in the intro of the topic. Having the Kustomize link is helpful bc it's a reference point 
+
+The policy generator is a part of the {product-title} application lifecycle subscription GitOps workflow that generates {product-title} policies using Kustomize. The policy generator builds {product-title} policies from Kubernetes manifest YAML files, which are provided through a `PolicyGenerator` manifest YAML file that is used to configure it. The policy generator is implemented as a Kustomize generator plugin. For more information on Kustomize, see the link:https://kustomize.io/[Kustomize documentation]. 
+
+[#policy-generator-capabilities]
+== Policy generator capabilities
+
+The policy generator and its integration with the {product-title-short} application lifecycle link:../applications/subscription_sample.adoc#applying-kustomize[subscription] GitOps workflow simplifies the distribution of Kubernetes resource objects to managed OpenShift clusters, and Kubernetes clusters through {product-title-short} policies. In particular, use the policy generator to complete the following actions:
+
+- Convert any Kubernetes manifest files to {product-title-short} link:./config_policy_ctrl.adoc#kubernetes-configuration-policy-controller[configuration policies].
+- Patch the input Kubernetes manifests before they are inserted into a generated {product-title-short} policy.
+- Generate additional configuration policies to be able to report on link:https://open-policy-agent.github.io/gatekeeper/website/docs/[Gatekeeper] and link:https://kyverno.io/[Kyverno] policy violations through {product-title}.
+
+[#policy-generator-configuration]
+== Policy generator configuration structure
+
+The policy generator is a Kustomize generator plugin that is configured with a manifest of the `PolicyGenerator` kind and `policy.open-cluster-management.io/v1` API version. 
+
+To use the plugin, start by adding a `generators` section in a link:https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/[`kustomization.yaml`] file. View the following example:
+
+[source,yaml]
+----
+generators:
+  - policy-generator-config.yaml
+----
+
+The `policy-generator-config.yaml` file referenced in the previous example is a YAML file with the instructions of the policies to generate. A simple policy generator configuration file might resemble the following example:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: config-data-policies
+policyDefaults:
+  namespace: policies
+policies:
+  - name: config-data
+    manifests:
+      - path: configmap.yaml
+----
+
+The `configmap.yaml` represents a Kubernetes manifest YAML file to be included in the policy. View the following example:
+
+----
+[source,yaml]
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+  namespace: default
+data:
+  key1: value1
+  key2: value2
+----
+
+The generated `Policy`, along with the generated `PlacementRule` and `PlacementBinding` might resemble the following example:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-config-data
+  namespace: policies
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions: []
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-config-data
+  namespace: policies
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: placement-config-data
+subjects:
+- apiGroup: policy.open-cluster-management.io
+  kind: Policy
+  name: config-data
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  name: config-data
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: config-data
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: v1
+            data:
+              key1: value1
+              key2: value2
+            kind: ConfigMap
+            metadata:
+              name: my-config
+              namespace: default
+        remediationAction: inform
+        severity: low
+----
+
+See the link:https://github.com/open-cluster-management/policy-generator-plugin[`policy-generator-plugin`] repository for more details.
+
+[#policy-gen-install-operator]
+== Generating a policy to install an Operator
+
+A common use of {product-title-short} policies is to link:https://docs.openshift.com/container-platform/4.8/operators/admin/olm-adding-operators-to-cluster.html\#olm-installing-operator-from-operatorhub-using-cli_olm-adding-operators-to-a-cluster[install an Operator] on one or more managed OpenShift clusters. View the following examples of the different installation modes and the required resources. 
+
+[#policy-install-ocp-gitops]
+=== A policy to install OpenShift GitOps
+
+This example shows how to generate a policy that installs OpenShift GitOps using the policy generator. The OpenShift GitOps operator offers the https://docs.openshift.com/container-platform/4.8/operators/admin/olm-adding-operators-to-cluster.html\#olm-installing-operators-from-operatorhub_olm-adding-operators-to-a-cluster[_all namespaces_ installation mode]. First, a `Subscription` manifest file called `openshift-gitops-subscription.yaml` needs to be created like the following example.
+
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-operators
+spec:
+  channel: stable
+  name: openshift-gitops-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+----
+
+To pin to a specific version of the operator, you can set the `spec.startingCSV` value to `openshift-gitops-operator.v1.2.1` (replace `v1.2.1` with your preferred version).
+
+Next, a policy generator configuration file called `policy-generator-config.yaml` is required. The following example shows a single policy that installs OpenShift GitOps on all OpenShift managed clusters:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: install-openshift-gitops
+policyDefaults:
+  namespace: policies
+  placement:
+    clusterSelectors:
+      vendor: "OpenShift"
+  remediationAction: enforce
+policies:
+  - name: install-openshift-gitops
+    manifests:
+      - path: openshift-gitops-subscription.yaml
+----
+
+The last file that is required is the `kustomization.yaml` file. The `kustomization.yaml` file requires the following configuration:
+
+[source,yaml]
+----
+generators:
+  - policy-generator-config.yaml
+----
+
+The generated policy might resemble the following file:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-install-openshift-gitops
+  namespace: policies
+spec:
+  clusterConditions:
+    - status: "True"
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-install-openshift-gitops
+  namespace: policies
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: placement-install-openshift-gitops
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: install-openshift-gitops
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  name: install-openshift-gitops
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: install-openshift-gitops
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: Subscription
+                metadata:
+                  name: openshift-gitops-operator
+                  namespace: openshift-operators
+                spec:
+                  channel: stable
+                  name: openshift-gitops-operator
+                  source: redhat-operators
+                  sourceNamespace: openshift-marketplace
+          remediationAction: enforce
+          severity: low
+----
+
+See link:https://docs.openshift.com/container-platform/4.8/cicd/gitops/understanding-openshift-gitops.html[Understanding OpenShift GitOps] and the link:https://cloud.redhat.com/learn/topics/operators[Operator] documentation for more details.
+
+[#policy-gen-install-compliance-operator]
+=== A policy to install the Compliance Operator
+
+For an operator that uses the link:https://docs.openshift.com/container-platform/4.8/operators/admin/olm-adding-operators-to-cluster.html\#olm-installing-operators-from-operatorhub_olm-adding-operators-to-a-cluster[_namespaced_ installation mode], such as the Compliance Operator, an `OperatorGroup` manifest is also required. This example shows a generated policy to install the Compliance Operator.
+
+First, a YAML file with a `Namespace`, a `Subscription`, and an `OperatorGroup` manifest called `compliance-operator.yaml` must be created. The following example installs these manifests in the `compliance-operator` namespace:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-compliance
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: compliance-operator
+  namespace: openshift-compliance
+spec:
+  channel: release-0.1
+  name: compliance-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: compliance-operator
+  namespace: openshift-compliance
+spec:
+  targetNamespaces:
+    - compliance-operator
+----
+
+Next, a policy generator configuration file called `policy-generator-config.yaml` is required. The following example shows a single policy that installs the Compliance Operator on all OpenShift managed clusters:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: install-compliance-operator
+policyDefaults:
+  namespace: policies
+  placement:
+    clusterSelectors:
+      vendor: "OpenShift"
+  remediationAction: enforce
+policies:
+  - name: install-compliance-operator
+    manifests:
+      - path: compliance-operator.yaml
+----
+
+The last file that is required is the `kustomization.yaml` file. The following configuration is required in the `kustomization.yaml` file:
+
+[source,yaml]
+----
+generators:
+  - policy-generator-config.yaml
+----
+
+As a result, the generated policy should resemble the following file:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-install-compliance-operator
+  namespace: policies
+spec:
+  clusterConditions:
+    - status: "True"
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-install-compliance-operator
+  namespace: policies
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: placement-install-compliance-operator
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: install-compliance-operator
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  name: install-compliance-operator
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: install-compliance-operator
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: openshift-compliance
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: Subscription
+                metadata:
+                  name: compliance-operator
+                  namespace: openshift-compliance
+                spec:
+                  channel: release-0.1
+                  name: compliance-operator
+                  source: redhat-operators
+                  sourceNamespace: openshift-marketplace
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1
+                kind: OperatorGroup
+                metadata:
+                  name: compliance-operator
+                  namespace: openshift-compliance
+                spec:
+                  targetNamespaces:
+                    - compliance-operator
+          remediationAction: enforce
+          severity: low
+----
+
+See the link:https://docs.openshift.com/container-platform/4.8/security/compliance_operator/compliance-operator-understanding.html[Compliance Operator documentation] for more details. 
+
+[#policy-gen-yaml-table]
+== Policy generator configuration reference table
+
+Note that all the fields in the `policyDefaults` section except for `namespace` can be overridden per policy.
+
+|===
+| Field | Description
+
+| apiVersion
+| Required.
+Set the value to `policy.open-cluster-management.io/v1`.
+
+| complianceType
+| Optional.
+Determines the policy controller behavior when comparing the manifest to objects on the cluster. The parameter values are `musthave`, `mustonlyhave`, or `mustnothave`. The default value is `musthave`.
+
+| kind
+| Required.
+Set the value to `PolicyGenerator` to indicate the type of policy.
+
+| metadata
+| Required.
+Used to uniquely identify the configuration file.
+
+| metadata.name
+| Required.
+The name for identifying the policy resource.
+
+| placementBindingDefaults
+| Required.
+Used to consolidate multiple policies in a `PlacementBinding`, so that the generator can create unique `PlacementBinding` names using the name that is defined.
+//what is the default value ? 
+| placementBindingDefaults.name
+| Optional.
+It is best practice to set an explicit placement binding name to use rather than use the default value.
+
+| policyDefaults
+| Required.
+Any default value listed here is overridden for an entry in the policies array except for `namespace`.
+
+| policyDefaults.categories
+| Optional.
+Array of categories to be used in the `policy.open-cluster-management.io/categories` annotation. The default value is `CM Configuration Management`.
+
+| policyDefaults.controls
+| Optional.
+Array of controls to be used in the `policy.open-cluster-management.io/controls` annotation. The default value is `CM-2 Baseline Configuration`.
+
+| policyDefaults.consolidateManifests
+| Optional.
+This determines if a single configuration policy should be generated for all the manifests being wrapped in the policy. If set to `false`, a configuration policy per manifest is generated. The default value is `true`.
+
+| policyDefaults.informGatekeeperPolicies
+| Optional.
+When the policy references a violated gatekeeper policy manifest, this determines if an additional configuration policy should be generated in order to receive policy violations in {product-title-short}. The default value is `true`.
+
+| policyDefaults.informKyvernoPolicies
+| Optional.
+When the policy references a Kyverno policy manifest, this determines if an additional configuration policy should be generated to receive policy violations in {product-title-short}, when the Kyverno policy has been violated. The default value is `true`.
+
+| policyDefaults.namespace
+| Required.
+The namespace of all the policies.
+
+| policyDefaults.placement
+| Optional. The placement configuration for the policies. This defaults to a placement configuration that matches all clusters.
+
+| placement.clusterSelectors
+| Optional. 
+Specify a placement by defining a cluster selector in the following format, `key:value`. See `placementRulePath` to specify an existing file.
+
+| placement.name
+| Optional. 
+Specify a name to consolidate placement rules that contain the same cluster selectors.
+
+| placement.placementRulePath
+| Optional. 
+To reuse an existing placement rule, specify the path here relative to the `kustomization.yaml` file. If provided, this placement rule is used by all policies by default. See `clusterSelectors` to generate a new `Placement`.
+
+| policyDefaults.remediationAction
+| Optional.
+The remediation mechanism of your policy. The parameter values are `enforce` and `inform`. The default value is `inform`.
+
+| policyDefaults.severity
+| Optional.
+The severity of the policy violation. The default value is `low`.
+
+| policyDefaults.standards
+| Optional.
+An array of standards to be used in the `policy.open-cluster-management.io/standards` annotation. The default value is `NIST SP 800-53`.
+
+| policies
+| Required.
+The list of policies to create along with overrides to either the default values, or the values that are set in `policyDefaults.`
+
+| policies[ ].manifests
+| Required.
+The list of Kubernetes object manifests to include in the policy.
+
+| policies[ ].name
+| Required.
+The name of the policy to create.
+
+| policies[ ].manifests[ ].complianceType
+| Optional.
+Determines the policy controller behavior when comparing the manifest to objects on the cluster. The parameter values are `musthave`, `mustonlyhave`, or `mustnothave`. The default value is `musthave`.
+
+| policies[ ].manifests[ ].path
+| Required.
+Path to a single file or a flat directory of files relative to the `kustomization.yaml` file.
+
+| policies[ ].manifests[ ].patches
+| Optional.
+A Kustomize patch to apply to the manifest at the path. If there are multiple manifests, the patch requires the `apiVersion`, `kind`, `metadata.name`, and `metadata.namespace` (if applicable) fields to be set so Kustomize can identify the manifest that the patch applies to. If there is a single manifest, the `metadata.name` and `metadata.namespace` fields can be patched.
+|===

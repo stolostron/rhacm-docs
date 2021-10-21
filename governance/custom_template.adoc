@@ -1,7 +1,13 @@
 [#support-templates-in-config-policies]
 = Support for templates in configuration policies
 
-Configuration policies support the inclusion of Golang text templates in the object definitions. These templates are resolved at runtime on the target managed cluster using configurations related to that cluster. This gives you the ability to define configuration policies with dynamic content, and inform or enforce Kubernetes resources that are customized to the target cluster.
+Configuration policies support the inclusion of Golang text templates in the object definitions. These templates are resolved at runtime either on the hub cluster or the target managed cluster using configurations related to that cluster. This gives you the ability to define configuration policies with dynamic content, and inform or enforce Kubernetes resources that are customized to the target cluster.
+
+* <<prerequisites-templatized,Prerequisite>>
+* <<template-functions,Template functions>>
+* <<hub-templates,Support for hub cluster templates in configuration policies>>
+** <<template-processing,Template processing>>
+** <<special-annotation-processing,Special annotation for reprocessing>>
 
 [#prerequisites-templatized]
 == Prerequisite
@@ -11,12 +17,11 @@ Configuration policies support the inclusion of Golang text templates in the obj
 [#template-functions]
 == Template functions
 
-Template functions, such as resource-specific and generic, `lookup` template functions, are available for referencing Kubernetes resources on the cluster. The resource-specific functions are used for convenience and makes content of the resources more accessible. If you use the generic function, `lookup`, which is more advance, it is best to be familiar with the YAML structure of the resource that is being looked up. In addition to these functions, utility functions like `base64encode`, `base64decode`, `indent`, `toInt`, `toBool` etc. are also available.
+Template functions, such as resource-specific and generic, `lookup` template functions, are available for referencing Kubernetes resources on the cluster. The resource-specific functions are used for convenience and makes content of the resources more accessible. If you use the generic function, `lookup`, which is more advance, it is best to be familiar with the YAML structure of the resource that is being looked up. In addition to these functions, utility functions like `base64encode`, `base64decode`, `indent`, `autoindent`, `toInt`, `toBool` etc. are also available.
 
 To conform templates into YAML syntax, templates must be set in the policy resource as strings using quotes or a block chaacter (`|` or `>`). This causes the resolved template value to also be a string. To override this, consider using `toInt` or `toBool` as the final function in the template to initiate further processing that forces the value to be interpreted as an integer, or boolean.
 
 *Note*: If the string value is more than 80 characters, this block character, `|` needs to be used to avoid YAML parsing errors.
-
 
 Continue reading to view descriptions and examples for some of the custom template functions that are supported:
 
@@ -27,6 +32,7 @@ Continue reading to view descriptions and examples for some of the custom templa
 * <<base64enc-func,base64enc function>>
 * <<base64dec-func,base64dec function>>
 * <<indent-function,indent function>>
+* <<autoindent-function,autoindent function>>
 * <<toInt-function,toInt function>>
 * <<toBool-function,toBool function>>
 
@@ -121,7 +127,7 @@ The `fromClusterClaim` function returns the value of the `Spec.Value` in the `Cl
 func fromClusterClaim (clusterclaimName string) (value map[string]interface{}, err Error)
 ----
 
-When you use the function, enter the name of a Kubernetes `ClusterClaim` resource. You receive a policy violation if the `ClusterClaim` resource does not exist. View the following example of the configuration policy that enforces a Kubernetes resource on the target managed cluster. The value for the `platform` data key is a template that retrieves the value of the `platform.open-cluster-management.io` cluster claim. Similarily, it retrieves values for `product` and `version` from the `ClusterClaim`:
+When you use the function, enter the name of a Kubernetes `ClusterClaim` resource. You receive a policy violation if the `ClusterClaim` resource does not exist. View the following example of the configuration policy that enforces a Kubernetes resource on the target managed cluster. The value for the `platform` data key is a template that retrieves the value of the `platform.open-cluster-management.io` cluster claim. Similarly, it retrieves values for `product` and `version` from the `ClusterClaim`:
 
 [source,yaml]
 ----
@@ -293,6 +299,33 @@ spec:
         {{ ( index ( lookup "v1" "Secret" "default" "mycert-tls"  ).data  "ca.pem"  ) |  base64dec | indent 4  }}
 ----
 
+[#autoindent-function]
+=== autoindent function
+
+The `autoindent` function acts like the `indent` function that automatically determines the number of leading spaces based on the number of spaces before the template. View the following example of the configuration policy that uses the `autoindent` function:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: demo-fromsecret
+  namespace: test
+spec:
+  namespaceSelector:
+    exclude:
+    - kube-*
+    include:
+    - default
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+    ...
+    data:
+      Ca-cert:  |
+        {{ ( index ( lookup "v1" "Secret" "default" "mycert-tls"  ).data  "ca.pem"  ) |  base64dec | autoindent }}
+----
+
 [#toInt-function]
 === toInt function
 
@@ -360,4 +393,63 @@ spec:
       enabled:  |
         {{ (fromConfigMap "site-config" "site1" "enabled")  | toBool }}
 ----
+
+[#hub-templates]
+== Support for hub cluster templates in configuration policies
+
+{product-title-short} also supports hub cluster templates to define configuration policies that are dynamically customized to the target cluster. This reduces the need to create separate policies for each target cluster or hardcode configuration values in the policy definitions. 
+
+Hub cluster templates are based on Golang text template specifications, and the `{{hub … hub}}` delimiter indicates a hub cluster template in a configuration policy.
+
+[#template-processing]
+=== Template processing
+
+A configuration policy definition can contain both hub cluster and managed cluster templates. Hub cluster templates are processed first on the hub cluster, then the policy definition with resolved hub cluster templates is propagated to the target clusters. On the managed cluster, the `ConfigPolicyController` processes any managed cluster templates in the policy definition and then enforces or verifies the fully resolved object definition.
+
+[#special-annotation-processing]
+=== Special annotation for reprocessing
+
+Policies are processed on the hub cluster only upon creation or after an update. Therefore, hub cluster templates are only resolved to the data in the referenced resources upon policy creation or update. Any changes to the referenced resources are not automatically synced to the policies. 
+
+A special annotation, `policy.open-cluster-management.io/trigger-update` can be used to indicate changes to the data referenced by the templates. Any change to the special annotation value initiates template processing, and the latest contents of the referenced resource are read and updated in the policy definition that is the propagator for processing on managed clusters. A typical way to use this annotation is to increment the value by one each time.
+
+See the following table for a comparison of hub cluster and managed cluster templates:
+
+.Comparison table of hub cluster and managed cluster
+|===
+| Templates | Hub cluster | Managed cluster 
+
+| Syntax
+| Golang text template specification
+| Golang text template specification
+
+| Delimiter
+| {{hub … hub}}
+| {{ … }}
+
+| Functions
+| A set of template functions that support dynamic access to Kubernetes resources and string manipulation. See <<template-functions,Template functions>> for more information. *Note*: The `fromSecret` template function is not available.
+| A set of template functions support dynamic access to Kubernetes resources and string manipulation. See <<template-functions,Template functions>> for more information.
+
+| Function output storage
+| The output of template functions are stored in `Policy` resource objects in each applicable managed cluster namespace on the hub cluster, before it is synced to the managed cluster. This means that any sensitive results from template functions are readable by anyone with read access to the `Policy` resource objects on the hub cluster, and read access with `ConfigurationPolicy` resource objects on the managed clusters. Additionally, if link:https://docs.openshift.com/container-platform/4.8/security/encrypting-etcd.html[etcd encryption] is enabled, the `Policy` and `ConfigurationPolicy` resource objects are not encrypted. It is best to carefully consider this when using template functions that return sensitive output (e.g. from a secret).
+| The output of template functions are not stored in policy related resource objects.
+
+| Context
+| A `.ManagedClusterName` variable is available, which at runtime, resolves to the name of the target cluster where the policy is propagated.
+| No context variables
+
+| Processing
+| Processing occurs at runtime on the hub cluster during propagation of replicated policies to clusters. Policies and the hub cluster templates within the policies are processed on the hub cluster only when templates are created or updated.
+| Processing occurs in the `ConfigPolicyController` on the managed cluster. Policies are processed periodically, which automatically updates the resolved object definition with data in the referenced resources.
+
+| Access control
+| You can only reference Kuberenetes resources that are in the same namespace as the `Policy` resource.
+| You can reference any resource on the cluster.
+
+| Processing errors
+| Errors from the hub cluster templates are displayed as violations on the managed clusters the policy applies to.
+| Errors from the managed cluster templates are displayed as violations on the specific target cluster where the violation occurred.
+|===
+
 
