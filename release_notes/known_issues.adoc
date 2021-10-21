@@ -154,99 +154,6 @@ Check the role permissions and update appropriately. See link:../access_control/
 
 You cannot delete the namespace of a managed cluster manually. The managed cluster namespace is automatically deleted after the managed cluster is detached. If you delete the managed cluster namespace manually before the managed cluster is detached, the managed cluster shows a continuous terminating  status after you delete the managed cluster. To delete this terminating managed cluster, manually remove the finalizers from the managed cluster that you detached.
 
-[#no-create-clusters-across-architectures]
-=== Cannot create clusters across architectures
-//2.2.3:14631
-
-You cannot create a managed cluster on a different architecture than the architecture of the hub cluster without creating a release image (`ClusterImageSet`) that contains files for both architectures. For example, you cannot create an `x86_64` cluster from a `ppc64le` hub cluster. The cluster creation fails because the {ocp-short} release registry does not provide a multi-architecture image manifest. 
-
-To work around this issue, complete the following steps:
-
-. From the https://quay.io/repository/openshift-release-dev/ocp-release[{ocp-short} release registry], create a https://docs.docker.com/registry/spec/manifest-v2-2/[manifest list] that includes both `x86_64` and `ppc64le` release images.
-
-.. Pull the manifest lists for both architectures from the Quay repository:
-+
-----
-$ podman pull quay.io/openshift-release-dev/ocp-release:4.8.1-x86_64
-$ podman pull quay.io/openshift-release-dev/ocp-release:4.8.1-ppc64le
-----
-
-.. Log in to your private repository where you maintain your images:
-+
-----
-$ podman login <private-repo>
-----
-+
-Replace `private-repo` with the path to your repository.
-
-.. Add the release image manifest to your private repository by running the following commands:
-+
-----
-$ podman push quay.io/openshift-release-dev/ocp-release:4.8.1-x86_64 <private-repo>/ocp-release:4.8.1-x86_64
-$ podman push quay.io/openshift-release-dev/ocp-release:4.8.1-ppc64le <private-repo>/ocp-release:4.8.1-ppc64le
-----
-+
-Replace `private-repo` with the path to your repository.
-
-.. Create a manifest for the new information:
-+
----- 
-$ podman manifest create mymanifest
-----
-
-.. Add references to both release images to the manifest list:
-+
-----
-$ podman manifest add mymanifest <private-repo>/ocp-release:4.8.1-x86_64
-$ podman manifest add mymanifest <private-repo>/ocp-release:4.8.1-ppc64le
-----
-+
-Replace `private-repo` with the path to your repository.
-
-.. Merge the list in your manifest list with the existing manifest:
-+
-----
-$ podman manifest push mymanifest docker://<private-repo>/ocp-release:4.8.1
-----
-+
-Replace `private-repo` with the path to your repository.
-
-. On the hub cluster, create a release image that references the manifest in your repository.
-
-.. Create a `YAML` file that contains information that is similar to the following example:
-+
-----
-apiVersion: hive.openshift.io/v1
-kind: ClusterImageSet
-metadata:
-  labels:
-    channel: fast
-    visible: "true"
-  name: img4.8.1-appsub
-spec:
-  releaseImage: <private-repo>/ocp-release:4.8.1
-----
-+
-Replace `private-repo` with the path to your repository.
-
-.. Run the following command on your hub cluster to apply the changes:
-+
-----
-oc apply -f <file-name>.yaml
-----
-+
-Replace `file-name` with the name of the `YAML` file that you just created. 
-
-. Select the new release image when you create your {ocp-short} cluster. 
-
-The creation process uses the merged release images to create the cluster.  
-
-[#no-ansible-power-hub]
-=== Cannot use Ansible Tower integration with an IBM Power hub cluster
-// 2.3:13523
-
-You cannot use the Ansible Tower integration when the {product-title} hub cluster is running on IBM Power because the link:https://catalog.redhat.com/software/containers/ansible-automation-platform/platform-resource-rhel7-operator/5f6a0f22592d9a52663ccab6[Ansible Automation Platform Resource Operator] does not provide `ppc64le` images.
-
 [#no-change-upgrade-cred]
 === Cannot change credentials on clusters after upgrading to version 2.3
 //2.3:14098
@@ -372,10 +279,106 @@ You cannot use the {product-title-short} console to upgrade {ocp-short} managed 
 
 The search details page for a certain resource on a certain managed cluster might fail. You must ensure that the work-manager add-on in the managed cluster is in `Available` status before you can search.
 
+[#no-create-clusters-across-architectures]
+=== Cannot create clusters across architectures
+//2.2.3:14631
+
+You cannot create a managed cluster on a different architecture than the architecture of the hub cluster without creating a release image (`ClusterImageSet`) that contains files for both architectures. For example, you cannot create an `x86_64` cluster from a `ppc64le` hub cluster. The cluster creation fails because the {ocp-short} release registry does not provide a multi-architecture image manifest. 
+
+To work around this issue, complete steps similar to the following example for your architecture type:
+
+. From the https://quay.io/repository/openshift-release-dev/ocp-release[{ocp-short} release registry], create a https://docs.docker.com/registry/spec/manifest-v2-2/[manifest list] that includes `x86_64`, `s390x` and `ppc64le` release images.
+
+.. Pull the manifest lists for both architectures in your environment from the Quay repository:
++
+----
+$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.1-x86_64
+$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.1-ppc64le
+$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.1-s390x
+----
+
+.. Log in to your private repository where you maintain your images:
++
+----
+$ podman login <private-repo>
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Add the release image manifest to your private repository by running the following commands that apply to your environment:
++
+----
+$ podman push quay.io/openshift-release-dev/ocp-release:4.9.1-x86_64 <private-repo>/ocp-release:4.9.1-x86_64
+$ podman push quay.io/openshift-release-dev/ocp-release:4.9.1-ppc64le <private-repo>/ocp-release:4.9.1-ppc64le
+$ podman push quay.io/openshift-release-dev/ocp-release:4.9.1-s390x <private-repo>/ocp-release:4.9.1-s390x
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Create a manifest for the new information:
++
+---- 
+$ podman manifest create mymanifest
+----
+
+.. Add references to both release images to the manifest list:
++
+----
+$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.1-x86_64
+$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.1-ppc64le
+$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.1-s390x
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Merge the list in your manifest list with the existing manifest:
++
+----
+$ podman manifest push mymanifest docker://<private-repo>/ocp-release:4.9.1
+----
++
+Replace `private-repo` with the path to your repository.
+
+. On the hub cluster, create a release image that references the manifest in your repository.
+
+.. Create a `YAML` file that contains information that is similar to the following example:
++
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterImageSet
+metadata:
+  labels:
+    channel: fast
+    visible: "true"
+  name: img4.9.1-appsub
+spec:
+  releaseImage: <private-repo>/ocp-release:4.9.1
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Run the following command on your hub cluster to apply the changes:
++
+----
+oc apply -f <file-name>.yaml
+----
++
+Replace `file-name` with the name of the `YAML` file that you just created. 
+
+. Select the new release image when you create your {ocp-short} cluster. 
+
+The creation process uses the merged release images to create the cluster.  
+
 [#argo-not-supported-power]
-=== Argo CD is not supported with IBM Power hub cluster
+=== Argo CD is not supported with IBM Power or IBM Z system hub cluster
 // 2.3:13524
-The link:https://argo-cd.readthedocs.io/en/stable/[Argo CD] integration with {product-title-short} does not work on a {product-title-short} hub cluster that is running on IBM Power because there are no available `ppc64le` images.
+The link:https://argo-cd.readthedocs.io/en/stable/[Argo CD] integration with {product-title-short} does not work on a {product-title-short} hub cluster that is running on IBM Power or IBM Z systems because there are no available `ppc64le` or `s390x` images.
+
+[#no-ansible-power-hub]
+=== Cannot use Ansible Tower integration with an IBM Power or IBM Z system hub cluster
+// 2.3:13523
+
+You cannot use the Ansible Tower integration when the {product-title} hub cluster is running on IBM Power or IBM Z systems because the link:https://catalog.redhat.com/software/containers/ansible-automation-platform/platform-resource-rhel7-operator/5f6a0f22592d9a52663ccab6[Ansible Automation Platform Resource Operator] does not provide `ppc64le` or `s390x` images.
 
 [#application-management-known-issues]
 == Application management known issues
