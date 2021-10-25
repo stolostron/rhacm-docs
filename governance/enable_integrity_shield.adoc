@@ -12,7 +12,7 @@ The following prerequisites are required to enable integrity shield protection o
 
 * Install integrity shield. Before you instal the integrity shield, you must install an Open Policy Agent or gatekeeper on your cluster. Complete the following steps to install the integrity shield operator:
 +
-.. Install the integrity shield operator in your namespace by running the following command:
+.. Install the integrity shield operator in a namespace for integrity shield by running the following command:
 +
 ----
 kubectl create -f https://raw.githubusercontent.com/open-cluster-management/integrity-shield/master/integrity-shield-operator/deploy/integrity-shield-operator-latest.yaml
@@ -25,3 +25,74 @@ kubectl create -f https://raw.githubusercontent.com/open-cluster-management/inte
 kubectl create -f https://raw.githubusercontent.com/open-cluster-management/integrity-shield/master/integrity-shield-operator/config/samples/apis_v1_integrityshield.yaml -n integrity-shield-operator-system
 ----
 
+.. Integrity shield requires a pair of keys for signing and verifying signatures of resources that need to be protected in a cluster. Set up signing and verification key pair:
++
+** Generate a new GPG key with the following command:
++
+----
+gpg --full-generate-key
+----
+** Export your new GPG public key to a file with the following command:
++
+----
+gpg --export signer@enterprise.com > /tmp/pubring.gpg
+----
+
+* Install link:https://github.com/mikefarah/yq[`yq`] to run the script for signing a {product-title-short} policy.
+
+* Enabling integrity shield protection and signing {product-title-short} include retrieving and committing sources from the `integrity-shield` repository. You must install link:https://github.com/git-guides/install-git[Git].
+
+[enabling-integrity-shield]
+== Enabling integrity shield protection
+
+Enable the integrity shield on your {product-title-short} managed cluster by completing the following steps:
+
+. Create a namespace on your hub cluster for the integrity shield. Run the following command:
++
+----
+oc create ns your-integrity-shield-ns
+----
+
+. Deploy a verification key to a {product-title-short} managed cluster. As a reminder, you must create signing and verification keys. Run the link:https://raw.githubusercontent.com/open-cluster-management/integrity-shield/master/scripts/ACM/acm-verification-key-setup.sh[`acm-verification-key-setup.sh`] on your hub cluster to setup a verification key. Run the following command:
++
+----
+curl -s  https://raw.githubusercontent.com/open-cluster-management/integrity-shield/master/scripts/ACM/acm-verification-key-setup.sh | bash -s \
+          --namespace integrity-shield-operator-system  \
+          --secret keyring-secret  \
+          --path /tmp/pubring.gpg \
+          --label environment=dev  |  oc apply -f -
+----
++
+To remove the verification key, run the following command:
++
+----
+curl -s  https://raw.githubusercontent.com/open-cluster-management/integrity-shield/master/scripts/ACM/acm-verification-key-setup.sh | bash -s - \
+          --namespace integrity-shield-operator-system  \
+          --secret keyring-secret  \
+          --path /tmp/pubring.gpg \
+          --label environment=dev  |  oc delete -f -
+----
+
+. Create a {product-title-short} policy named `policy-integrity-shield` on your hub cluster.
++
+.. Retrieve the link:https://github.com/open-cluster-management/policy-collection/blob/main/community/CM-Configuration-Management/policy-integrity-shield.yaml[`policy-integrity-shield`] policy from the `policy-collection` repository. Be sure to fork the repository.
+
+.. Configure the namespace to deploy the integrity shield on a {product-title-short} managed cluster by updating the `remediationAction` parameter value, from `inform` to `enforce`.
+
+.. Configure a email for the signer and verification key by updating the `signerConfig` section.
+
+.. Comfigure the `PlacementRule` which determines what {product-title-short} managed clusters that integrity shield should be deployed to.
+
+.. Sign `policy-integrity-shield.yaml` by running the following command:
++
+----
+curl -s  https://raw.githubusercontent.com/open-cluster-management/integrity-shield/master/scripts/gpg-annotation-sign.sh | bash -s \
+         signer@enterprise.com \
+         policy-integrity-shield.yaml
+----
++
+*Note*: You must create a new signature whenever you change the policy and apply to other clusters. Otherwise, the change is blocked and not applied.
+
+See link:https://github.com/open-cluster-management/policy-collection/blob/main/community/CM-Configuration-Management/policy-integrity-shield.yaml[`policy-integrity-shield`] policy for an example.
+
+// Do we need to document how to enable integrity shield with GitOps? 
