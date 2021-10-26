@@ -37,6 +37,19 @@ If not specified, all `ManagedClusters` that meet the placement requirements are
 
 - `Predicates` represents a slice of predicates to select `ManagedClusters` with label and claim selector. The predicates are ORed.
 
+- `prioritizerPolicy` represents the policy of prioritizers. 
+  - `mode` is either `Exact`, `Additive`, or `""` where `""` is Additive by default.
+    - In `Additive` mode, any prioritizer that is not specifically provided with configuration values is enabled with its default configurations. In the current default configuration, the _Steady_ and _Balance_ prioritizers have the weight of 1, while the other prioritizers have the weight of 0. The default configurations might change in the future, which might  change the prioritization. `Additive` mode does not require that you configure all of the prioritizers. 
+    - In `Exact` mode, any prioritizer that is not specifically provided with configuration values has the weight of zero. `Exact` mode requires that you input the full set of prioritizers that you want, but avoids behavior changes between releases.
+  - `configurations` represents the configuration of prioritizers.
+    - `name` is the name of a prioritizer. See the following list of valid names of the prioritizers:
+      - `Balance`: Balances the decisions among the clusters
+      - `Steady`: Ensures that the existing decision is stabilized
+      - `ResourceAllocatableCPU` & `ResourceAllocatableMemory`: sort clusters based on the allocatable.
+    - `weight` defines the weight of prioritizer. The value must be in the range of [0,10].
+      Each prioritizer calculates an integer score of a cluster in the range of [-100, 100]. The final score of a cluster is determined by the following formula `sum(weight * prioritizer_score)`.
+      A higher weight indicates that the prioritizer receives a higher weight in the cluster selection, while 0 weight indicate thats the prioritizer is disabled.
+
 [#placement-binding]
 == Placement examples
 
@@ -129,6 +142,65 @@ spec:
               operator: In
               values:
                 - us-west-1
+----
+
+- Select a cluster with the largest allocatable memory.
+
+*Note:* Similar to Kubernetes https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#node-allocatable[Node Allocatable], 'allocatable' here is defined as the amount of compute resources that are available for pods on each cluster.
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: Placement
+metadata:
+  name: placement6
+  namespace: ns1
+spec:
+  numberOfClusters: 1
+  prioritizerPolicy:
+    configurations:
+      - name: ResourceAllocatableMemory
+----
+
+- Select a cluster with the largest allocatable CPU and memory, and make placement sensitive to resource changes. 
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: Placement
+metadata:
+  name: placement7
+  namespace: ns1
+spec:
+  numberOfClusters: 2
+  prioritizerPolicy:
+    configurations:
+      - name: ResourceAllocatableCPU
+        weight: 2
+      - name: ResourceAllocatableMemory
+        weight: 2
+----
+
+- Select a cluster with the largest allocatable memory and pin the placementdecisions. 
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: Placement
+metadata:
+  name: placement8
+  namespace: ns1
+spec:
+  numberOfClusters: 4
+  prioritizerPolicy:
+    mode: Exact
+    configurations:
+      - name: ResourceAllocatableMemory
+      - name: Steady
+        weight: 3
 ----
 
 [#placement-decision]
