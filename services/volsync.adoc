@@ -109,9 +109,11 @@ kubectl annotate volumesnapshotclass/standard-csi snapshot.storage.kubernetes.io
 +
 Your CSI is now configured on a Google Cloud Platform environment.
 
-. For Rsync-based replication, configure a custom resource on the source and target clusters.
+. For Rsync-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and the `sshkeys` to ensure that the transferred data is secure. **Note:** You must copy the values for `address` and `sshkeys` from the destination, so configure the destination for you configure the source. 
 
-.. Add the following minimal custom resource information to the YAML file of your target cluster:
+.. Configure your destination.
+
+... Add the following minimal custom resource information to the YAML file of your destination cluster:
 +
 [source,yaml]
 ----
@@ -132,7 +134,20 @@ Replace `destination_name` with the name of your destination volume.
 +
 Replace `destination_namespace` with the name of the namespace where your destination is located.
 
-.. Add the following minimal custom resource information to the YAML file of your source cluster:
+... After the `ReplicationDestination` custom resource is created, copy the value of `.status.rsync.address`. This value is required when you configure the source. The following example shows the custom resource information that is added to the `ReplicationDestination` after it is created:
++
+[source,yaml]
+----
+...
+status:
+  rsync:
+    address: 10.01.101.001
+    sshKeys: volsync-rsync-dest-src-test
+----
+
+... Copy the name of the secret that is provided as the value of `.status.rsync.sshKeys`. This value is required when you configure the source.  
+
+.. Configure your source. Add the following minimal custom resource information to the YAML file of your source cluster:
 +
 [source,yaml]
 ----
@@ -147,21 +162,20 @@ spec:
   trigger:
     schedule: "*/5 * * * *"
   rsync:
-    sshKeys: <volsync-rsync-destination-src-database-destination>
+    sshKeys: <volsync-rsync-dest-src-test>
     address: <source.host.com>
     copyMethod: Clone
 ----
 +
-Replace `name` with a unique name for your source volume.
+Replace `name` with a unique name for your replication.
 +
 Replace `source_namespace` with the name of the namespace where your source is located.
 +
 Replace `persistent_volume_claim` with the name of your source claim.
 +
-Replace `volsync-rsync-destination-src-database-destination` with the keys that are generated in the `.status.rsync.address` field of the `ReplicationDestination` when it is created. 
+Replace `volsync-rsync-destination-src-database-destination` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it. 
 +
-Replace `source.host.com` with the host address of your source cluster. 
-
+Replace `source.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it. 
 
 You can now set up the synchronization method of the persistent volume.
 
