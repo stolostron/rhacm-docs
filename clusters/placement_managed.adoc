@@ -19,7 +19,6 @@ See the following information about how placement with managed clusters works:
 - The namespace-scoped `Placements` specify a portion of `ManagedClusterSets` that select a working set of the potential `ManagedClusters`.
 
 - `Placements` select from that working set by using label and claim selectors.
-
 +
 *Important:* `Placement` does not select a `ManagedCluster` if there is no `ManagedClusterSet` bound to the placement namespace.
 
@@ -56,7 +55,6 @@ If not specified, all `ManagedClusters` that meet the placement requirements are
 You need to bind at least one `ManagedClusterSet` to a namespace by creating a `ManagedClusterSetBinding` in that namespace. *Note:* You need role-based access to `CREATE` on the virtual sub-resource of `managedclustersets/bind`. See the following examples:
 
 - You can select `ManagedClusters` with the `labelSelector`. See the following sample where the `labelSelector` only matches clusters with label `vendor: OpenShift`:
-
 +
 [source,yaml]
 ----
@@ -75,7 +73,6 @@ spec:
 ----
 
 - You can select `ManagedClusters` with `claimSelector`. See the following sample where `claimSelector` only matches clusters with `region.open-cluster-management.io` with `us-west-1`:
-
 +
 [source,yaml]
 ----
@@ -96,7 +93,6 @@ spec:
 ----
 
 - You can select `ManagedClusters` from particular `clusterSets`. See the following sample where `claimSelector` only matches `clusterSets:` `clusterset1` `clusterset2`:
-
 +
 [source,yaml]
 ----
@@ -120,7 +116,6 @@ spec:
 ----
 
 - Select desired number of `ManagedClusters`. See the following sample where `numberOfClusters` is `3`:
-
 +
 [source,yaml]
 ----
@@ -145,9 +140,8 @@ spec:
 ----
 
 - Select a cluster with the largest allocatable memory.
-
++
 *Note:* Similar to Kubernetes https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#node-allocatable[Node Allocatable], 'allocatable' here is defined as the amount of compute resources that are available for pods on each cluster.
-
 +
 [source,yaml]
 ----
@@ -164,7 +158,6 @@ spec:
 ----
 
 - Select a cluster with the largest allocatable CPU and memory, and make placement sensitive to resource changes. 
-
 +
 [source,yaml]
 ----
@@ -184,7 +177,6 @@ spec:
 ----
 
 - Select a cluster with the largest allocatable memory and pin the placementdecisions. 
-
 +
 [source,yaml]
 ----
@@ -236,4 +228,82 @@ status:
       reason: ''
     - clusterName: cluster3
       reason: ''
+----
+
+[#addon-status]
+== Add-on status
+
+You might want to select managed clusters for your placements according to the status of the add-ons that are deployed on them. For example, you want to select a managed cluster for your placement only if there is a specific add-on that is enabled on the cluster. 
+
+You can do this by specifying the label for the add-on, as well as its status, if necessary, when you create the Placement. A label is automatically created on a `ManagedCluster` resource if an add-on is enabled on the cluster. The label is automatically removed if the add-on is disabled.
+
+Each add-on is represented by a label in the format of `feature.open-cluster-management.io/addon-<addon_name>=<status_of_addon>`. 
+
+Replace `addon_name` with the name of the add-on that should be enabled on the managed cluster that you want to select. 
+
+Replace `status_of_addon` with the status that the add-on should have if the cluster is selected. The possible values of `status_of_addon` are in the following list:
+
+* `available`: The add-on is enabled and available.
+* `unhealthy`: The add-on is enabled, but the lease is not updated continuously.
+* `unreachable`: The add-on is enabled, but there is no lease found for it. This can also be caused when the managed cluster is offline.
+
+For example, an available `application-manager` add-on is represented by a label on the managed cluster that reads:
+
+----
+feature.open-cluster-management.io/addon-application-manager: available
+----
+
+See the following examples of creating placements based on add-ons and their status:
+
+- You can create a placement that includes all managed clusters that have `application-manager` enabled on them by adding the following YAML content: 
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: Placement
+metadata:
+  name: placement1
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: feature.open-cluster-management.io/addon-application-manager
+              operator: Exists
+----
+
+- You can create a placement that includes all managed clusters that have `application-manager` enabled with an `available` status by adding the following YAML content: 
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: Placement
+metadata:
+  name: placement2
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchLabels:
+            "feature.open-cluster-management.io/addon-application-manager": "available"
+----
+
+- You can create a placement that includes all managed clusters that have `application-manager` disabled by adding the following YAML content: 
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: Placement
+metadata:
+  name: placement3
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: feature.open-cluster-management.io/addon-application-manager
+              operator: DoesNotExist
 ----
