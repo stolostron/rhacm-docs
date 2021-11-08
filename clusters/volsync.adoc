@@ -1,0 +1,204 @@
+[#volsync]
+= Replicating persistent volumes with VolSync (Technology Preview)
+
+VolSync is a Kubernetes operator that enables asynchronous replication of persistent volumes within a cluster, or across clusters with storage types that are not otherwise compatible for replication. It uses the Container Storage Interface (CSI) to overcome the compatibility limitation. After deploying the VolSync operator in your {ocp} environment, you can leverage it to create and maintain copies of your persistent data.
+
+**Note:** VolSync does not meet the requirements of the FIPS standard. 
+
+There are three methods that you can use to replicate when you use VolSync, which depend on the number of synchronization locations that you have. The Rsync method is used for this example. For information about the other methods and more information about Rsync, see https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation.  
+
+* Rsync replication is a one-to-one replication of persistent volumes, and is likely to be the most commonly used. This is used for replicating data to a remote site. 
+
+[#volsync-prereq]
+== Prerequisites
+
+Before installing VolSync on your clusters, you must have the following requirements:
+
+* A configured {ocp} environment running a {product-title-short} version 2.4, or later, hub cluster.
+
+* At least two configured clusters that are managed by the same {product-title-short} hub cluster.
+
+[#volsync-install-clusters]
+== Installing VolSync on the managed clusters
+
+To enable VolSync on two clusters in your environment, you must install it on both the source and the target managed clusters. Complete the following steps to leverage the policy template in {product-title-short} to install VolSync:
+
+. Deploy the required VolSync resources to the clusters.
+
+.. Download the https://github.com/open-cluster-management/policy-collection/blob/main/community/CM-Configuration-Management/policy-persistent-data-management.yaml[policy-persistent-data-management] policy template from the GitHub repository. In its current format, this policy starts an installation of VolSync on the hub cluster. After it is installed on the hub cluster, it automatically installs the required VolSync components on all of the managed clusters of the hub that were created by {ocp-short}.
++
+You can specify a different label to identify which clusters will have VolSync installed by modifying the following section of the policy file:
++
+[source,yaml]
+----
+spec:
+  clusterSelector:
+    matchLabels:
+      vendor: OpenShift
+----
+
+.. Apply the policy while you are logged in to your hub cluster by entering the following command:
++
+----
+oc -n <namespace> apply -f ./policy-persistent-data-management.yaml
+----
++
+Replace `namespace` with a namespace on your hub cluster.
+
+. If your default `StorageClass` on each of the clusters where you plan to configure VolSync does not refer to a CSI-based storage driver, change the default configuration to refer to a CSI-based storage driver. 
++
+* Your steps might resemble the following procedure for an Amazon Web Services environment:
+
+.. Change your default `StorageClass` by entering the following commands: 
++
+----
+kubectl annotate sc/gp2 storageclass.kubernetes.io/is-default-class="false" --overwrite
+kubectl annotate sc/gp2-csi storageclass.kubernetes.io/is-default-class="true" --overwrite
+----
+
+.. If a corresponding `VolumeSnapshotClass` does not exist, create one by running the following command:
++
+----
+kubectl create -f - << SNAPCLASS
+---
+apiVersion: snapshot.storage.k8s.io/v1beta1
+kind: VolumeSnapshotClass
+metadata:
+  name: gp2-csi
+driver: ebs.csi.aws.com
+deletionPolicy: Delete
+SNAPCLASS
+----
+
+.. Set `gp2-csi` as your default `VolumeSnapshotClass` by running the following command:
++
+----
+kubectl annotate volumesnapshotclass/gp2-csi snapshot.storage.kubernetes.io/is-default-class="true"
+----
++
+Your CSI is now configured on an Amazon Web Services environment.
+
+* The steps might resemble the following for an Google Cloud Platform environment:
+
+.. Change your default `StorageClass` by entering the following commands: 
++
+----
+kubectl annotate sc/standard storageclass.kubernetes.io/is-default-class="false" --overwrite
+kubectl annotate sc/standard-csi storageclass.kubernetes.io/is-default-class="true" --overwrite
+----
+
+.. Install a `VolumeSnapshotClass` by running the following command:
++
+----
+kubectl create -f - << SNAPCLASS
+---
+apiVersion: snapshot.storage.k8s.io/v1beta1
+kind: VolumeSnapshotClass
+metadata:
+  name: standard-csi
+driver: pd.csi.storage.gke.io
+deletionPolicy: Delete
+SNAPCLASS
+----
+
+.. Set `standard-csi` as your default `VolumeSnapshotClass` by running the following command:
++
+----
+kubectl annotate volumesnapshotclass/standard-csi snapshot.storage.kubernetes.io/is-default-class="true"
+----
++
+Your CSI is now configured on a Google Cloud Platform environment.
+
+. For Rsync-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and the `sshKeys` to ensure that the transferred data is secure. **Note:** You must copy the values for `address` and `sshKeys` from the destination to the source, so configure the destination before you configure the source. 
+
+.. Configure your destination.
+
+... Add the following minimal custom resource information to the YAML file of your destination cluster:
++
+[source,yaml]
+----
+---
+apiVersion: volsync/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: <destination_name>
+  namespace: <destination_namespace>
+spec:
+  rsync:
+    copyMethod: Snapshot
+    capacity: 10Gi
+    accessModes: ["ReadWriteOnce"]
+----
++
+*Note:* The `capacity` value should match the capacity of the persistent volume claim that is being replicated.
++
+Replace `destination_name` with the name of your destination volume.
++
+Replace `destination_namespace` with the name of the namespace where your destination is located.
+
+... After the `ReplicationDestination` custom resource is created, copy the value of `.status.rsync.address`. This value is automatically generated when the custom resource is created. You will have to enter it when you configure the source. The following example shows the custom resource information that is added to the `ReplicationDestination` after it is created:
++
+[source,yaml]
+----
+...
+status:
+  rsync:
+    address: 10.01.101.001
+    sshKeys: volsync-rsync-dest-src-test
+----
+
+... Copy the name of the secret and the contents of the secret that are provided as the value of `.status.rsync.sshKeys`. You will have to enter them on the source cluster when you configure the source.  
+
+.. Configure your source. Add the following minimal custom resource information to the YAML file of your source cluster:
++
+[source,yaml]
+----
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: <name>
+  namespace: <source_namespace>
+spec:
+  sourcePVC: <persistent_volume_claim>
+  trigger:
+    schedule: "*/5 * * * *"
+  rsync:
+    sshKeys: <volsync-rsync-destination-src-database-destination>
+    address: <source.host.com>
+    copyMethod: Clone
+----
++
+Replace `name` with a unique name for your replication.
++
+Replace `source_namespace` with the name of the namespace where your source is located.
++
+Replace `persistent_volume_claim` with the name of your source claim.
++
+Replace `volsync-rsync-destination-src-database-destination` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it. 
++
+Replace `source.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it. 
+
+You can now set up the synchronization method of the persistent volume.
+
+[#volsync-start]
+== Scheduling your synchronization
+
+You have a few options to select from when determining how you start your replications: always running, on a schedule, or manually. Scheduling your replications is an option that is the option that is often selected. 
+
+The *Schedule* option runs replications at scheduled times. A schedule is defined by a `cronspec`, so the schedule can be configured as intervals of time or as specific times. The order of the schedule values are:
+
+`"minute (0-59) hour (0-23) day-of-month (1-31) month (1-12) day-of-week (0-6)"`
+
+The replication starts when the scheduled time occurs. Your setting for this replication option might resemble the following content:
+
+[source,yaml]
+----
+spec:
+  trigger:
+    schedule: "*/6 * * * *"
+----
+
+After enabling one of these methods, your synchronization schedule runs according to the method that you configured.
+
+See the https://volsync.readthedocs.io/en/latest/index.html[VolSync] documentation for additional information and options.
