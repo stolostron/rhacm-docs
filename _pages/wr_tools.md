@@ -10,12 +10,7 @@ Quality of the Red Hat Advanced Cluster Management for Kubernetes (RHACM) docume
 
 ## Check my links tool
 
-Complete the following steps to run the link tool:
-
-1. Download the Google Chrome web extension, [Check My Links](https://chrome.google.com/webstore/detail/check-my-links/ojkcdipcgfaekbeaelaapakgnjflfglf). The icon for the extension appears in the browser tool bar.
-2. To run the tool, select the **Check my links** icon. 
-3. The tool provides a prompt with instructions to refresh the page before you rerun the tool.
-
+Download the Google Chrome web extension, [Check My Links](https://chrome.google.com/webstore/detail/check-my-links/ojkcdipcgfaekbeaelaapakgnjflfglf). 
 
 ## client9/misspell tool
 
