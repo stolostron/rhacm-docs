@@ -38,7 +38,7 @@ You can import existing clusters from the {product-title} console for each of th
 
 *Note:* A hub cluster cannot manage a different hub cluster. A hub cluster is set up to automatically import and manage itself, so you do not have to manually import a hub cluster to manage itself.
 
-. From the navigation menu, hover over *Infrastructure* and click *Clusters*.
+. From the navigation menu, select *Infrastructure* > *Clusters*.
 . Click *Add a cluster*.
 . Click *Import an existing cluster*.
 . Provide a name for the cluster.
@@ -46,8 +46,70 @@ By default, the namespace is used for the cluster name and namespace.
 . *Optional:* Add any _Additional labels_. 
 +
 **Note:** If you import a Red Hat OpenShift Dedicated cluster and do not specify a vendor by adding a label for `vendor=OpenShiftDedicated`, or if you add a label for `vendor=auto-detect`, a `managed-by=platform` label is automatically added to the cluster. You can use this added label to identify the cluster as a Red Hat OpenShift Dedicated cluster and retrieve the Red Hat OpenShift Dedicated clusters as a group.
-. Click *Save import and generate code* to generate the command that you use to deploy the `open-cluster-management-agent-addon`. A confirmation message is displayed.
+. Select the _import mode_ that you want to use to identify the cluster that you are importing from the following options:
++
+* *Run import commands manually*: Generate import commands that you can copy and run, based on the information that you provided. Click *Save import and generate code* to generate the command that you use to deploy the `open-cluster-management-agent-addon`. A confirmation message is displayed.
++
+.. In the _Import an existing cluster_ window, select *Copy command* to copy the generated command and token to the clipboard.
++
+*Important:* The command contains pull secret information that is copied to each of the imported clusters. Anyone who can access the imported clusters can also view the pull secret information.
+Consider creating a secondary pull secret at https://cloud.redhat.com/ or create a service account to protect your personal credentials.
+See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.9/html/images/managing-images#using-image-pull-secrets[Using image pull secrets] or https://docs.openshift.com/container-platform/4.9/authentication/understanding-and-creating-service-accounts.html[Understanding and creating service accounts] for more information about pull secrets.
 
+.. Log in to the managed cluster that you want to import.
+
+.. *For the Red Hat OpenShift Dedicated environment only* Complete the following steps:
+
+... Create the `open-cluster-management-agent` and `open-cluster-management` namespaces or projects on the managed cluster.
+
+... Find the klusterlet operator in the {ocp-short} catalog.
+
+... Install it in the `open-cluster-management` namespace or project that you created. 
++
+*Important:* Do not install the operator in the `open-cluster-management-agent` namespace.
+
+... Extract the bootstrap secret from the import command by completing the following steps:
+
+.... Generate the import command:
+
+..... Select *Infrastructure* > *Clusters* from the {product-title-short} console main navigation.
+
+..... Select *Add a cluster* > *Import an existing cluster*.
+
+..... Add the cluster information, and select *Save import and generate code*.
+
+.... Copy the import command.
+
+.... Paste the import command into a file that you create named `import-command`.
+
+.... Run the following command to insert the content into the new file:
++
+----
+cat import-command | awk '{split($0,a,"&&"); print a[3]}' | awk '{split($0,a,"|"); print a[1]}' | sed -e "s/^ echo //" | base64 -d
+----
+
+.... Find and copy the secret with the name `bootstrap-hub-kubeconfig` in the output.
+
+.... Apply the secret to the `open-cluster-management-agent` namespace on the managed cluster.
+
+.... Create the klusterlet resource using the example in the installed operator, the clusterName should be changed the same name as cluster name that was set during the import.
++
+*Note:* When the `managedcluster` resource is successfully registered to the hub, there are two klusterlet operators installed. One klusterlet operator is in the `open-cluster-management` namespace, and the other is in the `open-cluster-management-agent` namespace. Multiple operators  does not affect the function of the klusterlet.
+
+.. *For cluster imports that are not in the Red OpenShift Dedicated environment* Complete the following steps: 
+
+... If necessary, configure your `kubectl` commands for your managed cluster.
++
+See xref:../clusters/supported_clouds.adoc#supported-clouds[Supported clouds] to learn how to configure your `kubectl` command line interface. 
+
+... To deploy the `open-cluster-management-agent-addon` to the managed cluster, run the command and token that you copied.
+  
+.. Select *View cluster* to view a summary of your cluster in the _Overview_ page.
+
+* *Enter your server URL and API token for the existing cluster*: Provide the server URL and API token of the cluster that you are importing.
+
+* *Kubeconfig*: Copy and paste the content of the `kubeconfig` file of the cluster that you are importing. 
+  
 . *Optional:* Configure the *Cluster API address* that is on the cluster details page by configuring the URL that is displayed in the table when you run the `oc get managedcluster` command.
 
 .. Log in to your hub cluster with an ID that has `cluster-admin` permissions.
@@ -74,62 +136,6 @@ spec:
 ----
 +
 Replace the value of the URL with the URL that provides external access to the managed cluster that you are importing.
-
-. In the _Import an existing cluster_ window, select *Copy command* to copy the generated command and token to the clipboard.
-+
-*Important:* The command contains pull secret information that is copied to each of the imported clusters. Anyone who can access the imported clusters can also view the pull secret information.
-Consider creating a secondary pull secret at https://cloud.redhat.com/ or create a service account to protect your personal credentials.
-See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/html/images/managing-images#using-image-pull-secrets[Using image pull secrets] or https://docs.openshift.com/container-platform/4.8/authentication/understanding-and-creating-service-accounts.html[Understanding and creating service accounts] for more information about pull secrets.
-
-. Log in to the managed cluster that you want to import.
-
-. *For the Red Hat OpenShift Dedicated environment only* Complete the following steps:
-
-.. Create the `open-cluster-management-agent` and `open-cluster-management` namespaces or projects on the managed cluster.
-
-.. Find the klusterlet operator in the {ocp-short} catalog.
-
-.. Install it in the `open-cluster-management` namespace or project that you created. 
-+
-*Important:* Do not install the operator in the `open-cluster-management-agent` namespace.
-
-.. Extract the bootstrap secret from the import command by completing the following steps:
-
-... Generate the import command:
-
-.... Select *Infrastructure* > *Clusters* from the {product-title-short} console main navigation.
-
-.... Select *Add a cluster* > *Import an existing cluster*.
-
-.... Add the cluster information, and select *Save import and generate code*.
-
-... Copy the import command.
-
-... Paste the import command into a file that you create named `import-command`.
-
-... Run the following command to insert the content into the new file:
-+
-----
-cat import-command | awk '{split($0,a,"&&"); print a[3]}' | awk '{split($0,a,"|"); print a[1]}' | sed -e "s/^ echo //" | base64 -d
-----
-
-... Find and copy the secret with the name `bootstrap-hub-kubeconfig` in the output.
-
-... Apply the secret to the `open-cluster-management-agent` namespace on the managed cluster.
-
-... Create the klusterlet resource using the example in the installed operator, the clusterName should be changed the same name as cluster name that was set during the import.
-+
-*Note:* When the `managedcluster` resource is successfully registered to the hub, there are two klusterlet operators installed. One klusterlet operator is in the `open-cluster-management` namespace, and the other is in the `open-cluster-management-agent` namespace. Multiple operators  does not affect the function of the klusterlet.
-
-. *For cluster imports that are not in the Red OpenShift Dedicated environment* Complete the following steps: 
-
-.. If necessary, configure your `kubectl` commands for your managed cluster.
-+
-See xref:../clusters/supported_clouds.adoc#supported-clouds[Supported clouds] to learn how to configure your `kubectl` command line interface. 
-
-.. To deploy the `open-cluster-management-agent-addon` to the managed cluster, run the command and token that you copied.
-  
-. Select *View cluster* to view a summary of your cluster in the _Overview_ page.
 
 Your cluster is imported. You can import another by selecting *Import another*.
   
