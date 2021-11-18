@@ -1,0 +1,76 @@
+[#config-add-manifest-cluster-create]
+= Configuring additional manifests during cluster creation
+
+You can configure additional Kubernetes resource manifests during the installation process of creating your cluster. This can help if you need to configure additional manifests for scenarios such as configuring networking or setting up a load balancer. 
+
+Before you create your cluster, you need to add a reference to the `ClusterDeployment` resource that specifies a `ConfigMap` that contains the additional resource manifests. 
+
+*Note:* The `ClusterDeployment` resource and the `ConfigMap` must be in the same namespace. The following examples show how your content might look. 
+
+* ConfigMap with resource manifests
++
+`ConfigMap` that contains a manifest with another `ConfigMap` resource. The resource manifest `ConfigMap` can contain multiple keys with resource configurations added in a `data.<resource_name>\.yaml` pattern.
++
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: <my-baremetal-cluster-install-manifests>
+  namespace: <mynamespace>
+data:
+  99_metal3-config.yaml: |
+    kind: ConfigMap
+    apiVersion: v1
+    metadata:
+      name: metal3-config
+      namespace: openshift-machine-api
+    data:
+      http_port: "6180"
+      provisioning_interface: "enp1s0"
+      provisioning_ip: "172.00.0.3/24"
+      dhcp_range: "172.00.0.10,172.00.0.100"
+      deploy_kernel_url: "http://172.00.0.3:6180/images/ironic-python-agent.kernel"
+      deploy_ramdisk_url: "http://172.00.0.3:6180/images/ironic-python-agent.initramfs"
+      ironic_endpoint: "http://172.00.0.3:6385/v1/"
+      ironic_inspector_endpoint: "http://172.00.0.3:5150/v1/"
+      cache_url: "http://192.168.111.1/images"
+      rhcos_image_url: "https://releases-art-rhcos.svc.ci.openshift.org/art/storage/releases/rhcos-4.3/43.81.201911192044.0/x86_64/rhcos-43.81.201911192044.0-openstack.x86_64.qcow2.gz"
+----
+
+* ClusterDeployment with resource manifest `ConfigMap` referenced
++
+The resource manifest `ConfigMap` is referenced under `spec.provisioning.manifestsConfigMapRef`.
++
+[source,yaml]
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: <my-baremetal-cluster>
+  namespace: <mynamespace>
+  annotations:
+    hive.openshift.io/try-install-once: "true"
+spec:
+  baseDomain: test.example.com
+  clusterName: <my-baremetal-cluster>
+  controlPlaneConfig:
+    servingCertificates: {}
+  platform:
+    baremetal:
+      libvirtSSHPrivateKeySecretRef:
+        name: provisioning-host-ssh-private-key
+  provisioning:
+    installConfigSecretRef:
+      name: <my-baremetal-cluster-install-config>
+    sshPrivateKeySecretRef:
+      name: <my-baremetal-hosts-ssh-private-key>
+    manifestsConfigMapRef:
+      name: <my-baremetal-cluster-install-manifests>
+    imageSetRef:
+      name: <my-clusterimageset>
+    sshKnownHosts:
+    - "10.1.8.90 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXvVVVKUYVkuyvkuygkuyTCYTytfkufTYAAAAIbmlzdHAyNTYAAABBBKWjJRzeUVuZs4yxSy4eu45xiANFIIbwE3e1aPzGD58x/NX7Yf+S8eFKq4RrsfSaK2hVJyJjvVIhUsU9z2sBJP8="
+  pullSecretRef:
+    name: <my-baremetal-cluster-pull-secret>
+----

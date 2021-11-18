@@ -217,6 +217,68 @@ In rare cases with disconnected environments, some pods of the observability `St
 [#cluster-management-issues]
 == Cluster management known issues
 
+[#iso-image-name-too-long]
+=== Cluster provisioning with Infrastructure Operator fails
+//2.4:17411
+
+When creating {ocp-short} clusters using the Infrastructure Operator, the file name of the ISO image might be too long. The long image name causes the image provisioning and the cluster provisioning to fail. To determine if this is the problem, complete the following steps: 
+
+. View the bare metal host information for the cluster that you are provisioning by running the following command: 
++
+----
+oc get bmh -n <cluster_provisioning_namespace>
+----
+
+. Run the `describe` command to view the error information:
++
+----
+oc describe bmh -n <cluster_provisioning_namespace> <bmh_name>
+----
+
+. An error similar to the following example indicates that the length of the filename is the problem: 
++
+----
+Status:
+  Error Count:    1
+  Error Message:  Image provisioning failed: ... [Errno 36] File name too long ...
+----
+
+If this problem occurs, it is typically on the following versions of {ocp-short}, because the infrastructure operator was not using image service:
+
+* 4.8.17 and earlier
+
+To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later.
+
+[#cluster-local-offline-reimport]
+=== Local-cluster status offline after reimporting with a different name
+//2.4:16977
+
+When you accidentally try to reimport the cluster named `local-cluster` as a cluster with a different name, the status for `local-cluster` and for the reimported cluster display `offline.
+
+To recover from this case, complete the following steps:
+
+. Run the followiung command on the hub cluster to edit the setting for self-management of the hub cluster temporarily:
++
+----
+oc edit mch -n open-cluster-management multiclusterhub
+----
+
+. Add the setting `spec.disableSelfManagement=true`.
+
+. Run the following command on the hub cluster to delete and redeploy the local-cluster:
++
+----
+oc delete managedcluster local-cluster
+----
+
+. Enter the following command to remove the `local-cluster` management setting: 
++
+----
+oc edit mch -n open-cluster-management multiclusterhub
+----
+
+. Remove `spec.disableSelfManagement=true` that you previously added.
+
 [#failed-ansible-cluster-different-status]
 === Cluster status is different in different views of the console after a failed Ansible cluster creation
 //2.3:15794
