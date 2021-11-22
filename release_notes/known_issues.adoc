@@ -19,7 +19,7 @@ Known issue with workaround if:
 Or consider a troubleshooting topic.
 ////
 
-Review the known issues for {product-title}. The following list contains known issues for this release, or known issues that continued from the previous release. For your {ocp} cluster, see https://docs.openshift.com/container-platform/4.3/release_notes/ocp-4-3-release-notes.html#ocp-4-3-known-issues[{ocp-short} known issues].
+Review the known issues for {product-title}. The following list contains known issues for this release, or known issues that continued from the previous release. For your {ocp} cluster, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.9/html/release_notes/ocp-4-9-release-notes#ocp-4-9-known-issues[{ocp-short} known issues].
 
 * <<installation-known-issues,Installation known issues>>
 * <<web-console-known-issues,Web console known issues>>
@@ -91,7 +91,7 @@ oc edit pvc <storageclassname>-search-redisgraph-0
 === Duplicate local-clusters on Service-level Overview dashboard
 //2.4:16885
 
-When various hub clusters deploy {product-title-short} observability using the same S3 storage, _duplicate_ `local-clusters` can be detected and displayed within the _Kubernetes/Service-Level Overview/API Server_ dashboard. The duplicate clusters affect the results within the following panels: _Top Clusters_, _# of clusters that has exceeded the SLO_, and _# of clusters that are meeting the SLO_. The `local-clusters` are unique clusters associated with the shared S3 storage. To prevent multiple `local-clusters` from displaying within the dashboard, it is recommended for each unique hub cluster to deploy observability with a S3 bucket specifically for the hub cluster.
+When various hub clusters deploy {product-title-short} observability using the same S3 storage, _duplicate_ `local-clusters` can be detected and displayed within the _Kubernetes/Service-Level Overview/API Server_ dashboard. The duplicate clusters affect the results within the following panels: _Top Clusters_, _Number of clusters that has exceeded the SLO_, and _Number of clusters that are meeting the SLO_. The `local-clusters` are unique clusters associated with the shared S3 storage. To prevent multiple `local-clusters` from displaying within the dashboard, it is recommended for each unique hub cluster to deploy observability with a S3 bucket specifically for the hub cluster.
 
 [#observability-endpoint-operator-fails-to-pull-image]
 === Observability endpoint operator fails to pull image
@@ -117,7 +117,11 @@ For ROKS clusters, {product-title-short} observability does not display data in 
 === High CPU usage by the search-collector pod
 //2.3.13897
 
-When search is disabled on a hub cluster that manages 1000 clusters, the `search-collector` pod CPU usage levels are higher than normal. For a four-day period, usage was approximately 2.148Mi of CPU. You can reduce memory usage by reducing the `search-collector` to `0` replicas.
+When search is disabled on a hub cluster that manages 1000 clusters, the `search-collector` pod crashes due to the out-of-memory error (OOM). Complete the following steps:
+
+. If search is disabled on the hub cluster, which means the `search-redisgraph-pod` is not deployed, reduce memory usage by scaling down the `search-collector` deployment to `0` replicas.
+
+. If search is enabled on the hub cluster, which means the `search-redisgraph-pod` is deployed, increase the allocated memory by editing the `search-collector` deployment.
 
 [#search-pods-fail-invalid-certs]
 === Search pods fail to complete the TLS handshake due to invalid certificates
@@ -145,8 +149,125 @@ Due to unauthorized access to the `managedcluster` resource, you might receive t
 +
 Check the role permissions and update appropriately. See link:../access_control/rbac.adoc#role-based-access-control[Role-based access control] for more information. 
 
+[#prometheus-data-loss]
+=== Prometheus data loss on managed clusters
+//2.4:17137
+
+By default, Prometheus on OpenShift uses ephemeral storage. Prometheus loses all metrics data whenever it is restarted.
+
+When observability is enabled or disabled on {ocp-short} managed clusters that are managed by {product-title-short}, the observability endpoint operator updates the `cluster-monitoring-config` `ConfigMap` by adding additional alertmanager configuration that restarts the local Prometheus automatically. 
+
 [#cluster-management-issues]
 == Cluster management known issues
+
+[#create-fail-gcp]
+=== Cluster provisioning on Google Cloud Platform fails
+//2.4:17930
+
+When you try to provision a cluster on Google Cloud Platform (GCP), it might fail with the following error:
+
+----
+Cluster initialization failed because one or more operators are not functioning properly.
+The cluster should be accessible for troubleshooting as detailed in the documentation linked below,
+https://docs.openshift.com/container-platform/latest/support/troubleshooting/troubleshooting-installations.html
+The 'wait-for install-complete' subcommand can then be used to continue the installation
+----
+
+You can work around this error by enabling the https://console.cloud.google.com/apis/library/networksecurity.googleapis.com[Network Security API] on the GCP project, which allows your cluster installation to continue.  
+
+[#iso-image-name-too-long]
+=== Cluster provisioning with Infrastructure Operator fails
+//2.4:17411
+
+When creating {ocp-short} clusters using the Infrastructure Operator, the file name of the ISO image might be too long. The long image name causes the image provisioning and the cluster provisioning to fail. To determine if this is the problem, complete the following steps: 
+
+. View the bare metal host information for the cluster that you are provisioning by running the following command: 
++
+----
+oc get bmh -n <cluster_provisioning_namespace>
+----
+
+. Run the `describe` command to view the error information:
++
+----
+oc describe bmh -n <cluster_provisioning_namespace> <bmh_name>
+----
+
+. An error similar to the following example indicates that the length of the filename is the problem: 
++
+----
+Status:
+  Error Count:    1
+  Error Message:  Image provisioning failed: ... [Errno 36] File name too long ...
+----
+
+If this problem occurs, it is typically on the following versions of {ocp-short}, because the infrastructure operator was not using image service:
+
+* 4.8.17 and earlier
+* 4.9.6 and earlier
+
+To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9.7 or later.
+
+[#cannot-hibernate-azure-gov]
+=== Cannot hibernate an Azure Government cluster
+//2.4:17580
+
+When you try to hibernate an Azure Government cluster, the hibernation fails with the following error that is added to the provision pod log:
+
+----
+Confidential Client is not supported in Cross Cloud request
+----
+
+[#cluster-upgrade-fails-type-changes]
+=== Cluster upgrade issues cause cluster to stop displaying the {ocp-short} version
+//2.4:17741
+
+When upgrading the {ocp-short} version of your managed cluster using {product-title-short}, the {ocp-short} version that is displayed on the _Cluster details_ page might change to show the version of kube if there are problems with the upgrade. 
+
+[#cluster-local-offline-reimport]
+=== Local-cluster status offline after reimporting with a different name
+//2.4:16977
+
+When you accidentally try to reimport the cluster named `local-cluster` as a cluster with a different name, the status for `local-cluster` and for the reimported cluster display `offline`.
+
+To recover from this case, complete the following steps:
+
+. Run the followiung command on the hub cluster to edit the setting for self-management of the hub cluster temporarily:
++
+----
+oc edit mch -n open-cluster-management multiclusterhub
+----
+
+. Add the setting `spec.disableSelfManagement=true`.
+
+. Run the following command on the hub cluster to delete and redeploy the local-cluster:
++
+----
+oc delete managedcluster local-cluster
+----
+
+. Enter the following command to remove the `local-cluster` management setting: 
++
+----
+oc edit mch -n open-cluster-management multiclusterhub
+----
+
+. Remove `spec.disableSelfManagement=true` that you previously added.
+
+[#cluster-provision-fails-ansible-proxy]
+=== Cluster provision with Ansible automation fails in proxy environment
+//2.4:17659
+
+An AnsibleJob template that is configured to automatically provision a managed cluster might fail when both of the following conditions are met: 
+
+* The hub cluster has cluster-wide proxy enabled. 
+* The Ansible Tower can only be reached through the proxy.
+
+[#klusterlet-operator-version-same-as-cluster]
+=== Version of the klusterlet operator must be the same as the hub cluster
+//2.4:17219
+
+If you import a managed cluster by installing the klusterlet operator, the version of the klusterlet operator must be the same as the version of the hub cluster or the klusterlet operator will not work.
 
 [#no-delete-cluster-namespace-before-remove-cluster]
 === Cannot delete managed cluster namespace manually
@@ -380,6 +501,23 @@ The link:https://argo-cd.readthedocs.io/en/stable/[Argo CD] integration with {pr
 
 You cannot use the Ansible Tower integration when the {product-title} hub cluster is running on IBM Power or IBM Z systems because the link:https://catalog.redhat.com/software/containers/ansible-automation-platform/platform-resource-rhel7-operator/5f6a0f22592d9a52663ccab6[Ansible Automation Platform Resource Operator] does not provide `ppc64le` or `s390x` images.
 
+[#non-ocp-logs]
+=== Non-{ocp} managed clusters must have LoadBalancer enabled
+//2.4:15705
+
+Both {ocp} and non-{ocp-short} clusters support the pod log feature, however non-{ocp-short} clusters require `LoadBalancer` to be enabled to use the feature. Complete the following steps to enable `LoadBalancer`:
+
+. Cloud providers have different `LoadBalancer` configurations. Visit your cloud provider documentation for more information. 
+. Verify if `LoadBalancer` is enabled on your {product-title-short} by checking the `loggingEndpoint` in the status of `managedClusterInfo`. 
+. Run the following command to check if the `loggingEndpoint.IP` or `loggingEndpoint.Host` has a valid IP address or host name:
++
+----
+oc get managedclusterinfo <clusterName> -n <clusterNamespace> -o json | jq -r '.status.loggingEndpoint'
+----
+
+For more information about the `LoadBalancer` types, see the _Service_ page in the link:https://kubernetes.io/docs/concepts/services-networking/service[Kubernetes documentation.]
+
+
 [#application-management-known-issues]
 == Application management known issues
 
@@ -549,9 +687,14 @@ Creating more than one channel in the same namespace can cause errors with the h
 For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. All channels need an individual namespace, except GitHub channels, which can share a namespace with another GitHub channel.
 
 [#ansible-automation-platform-fail]
-=== Ansible Automation Platform (early access) 2.0.0 job fail
+=== Ansible Automation Platform (early access) job fail
 
-When the Ansible Automation Platform (early access) 2.0.0 is installed, `AnsibleJobs` fails to run. If you want to submit prehook and posthook `AnsibleJobs` through {product-title-short}, use the Ansible Automation Platform Resource Operator 0.1.1.
+When the Ansible Automation Platform (early access) is installed, `AnsibleJobs` fails to run. To submit prehook and posthook `AnsibleJobs` through {product-title-short}, use the `early-access-cluster-scoped` option. The option is available in Ansible Automation Platform (early access) version `2.0.1+0.1635279521` and later.
+
+[#ansible-automation-operator-access]
+=== Ansible Automation Platform operator access Ansible Tower outside of a proxy
+
+The Ansible Automation Platform (AAP) operator cannot access Ansible Tower outside of a proxy-enabled {ocp-short} cluster. To resolve, you can install the Ansible tower within the proxy. See install steps that are provided by Ansible Tower.
 
 [#application-name]
 === Application name requirements
@@ -619,6 +762,23 @@ oc edit kubecontrollermanager cluster
 When you use an external identity provider to log in to {product-title-short}, you might not be able to log out of {product-title-short}. This occurs when you use {product-title-short}, installed with IBM Cloud and Keycloak as the identity providers.
 
 You must log out of the external identity provider before you attempt to log out of {product-title-short}. 
+
+[#placement-console-support]
+=== Placement resource limitations
+
+As a reminder, a policy must use either a `PlacementRule` or a `Placement` resource to control the deployment of policies to specific managed clusters. If you create policies that use the `Placement` resource, you might encounter the following limitations:
+
+* The placement information is not shown when you view the details of the policy from the console.
+* The placement information is not removed when the policy is deleted from the console.
+* When you edit the policy from the console, the placement details are not updated. 
+
+Use the command line interface (CLI) to make updates to the policies when you use the `Placement` resource.
+
+[#gatekeeper-upgrade]
+=== Gatekeeper operator installation fails
+//2.4:16673
+
+When you install the gatekeeper operator on {ocp} version 4.9, the installation fails. Before you upgrade {ocp-short} to version 4.9.0., you must upgrade the gatekeeper operator to version 0.2.0. See link:../governance/create_gatekeeper.adoc#upgrading-gatekeeper-gatekeeper-operator[Upgrading gatekeeper and the gatekeeper operator] for more information.
 
 [#backup-known-issues]
 == Backup and restore known issues

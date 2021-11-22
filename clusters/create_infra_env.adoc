@@ -1,0 +1,127 @@
+[#creating-an-infrastructure-environment]
+= Creating an infrastructure environment
+
+You can use the {product-title} console to create an infrastructure environment to manage your hosts and create clusters on those hosts.
+
+* <<infra-env-prerequisites,Prerequisites>>
+* <<enable-cim,Enable Central Infrastructure Management service>>
+* <<creating-your-infra-env-with-the-console,Creating your infrastructure environment with the console>>
+* <<accessing-your-infra-env,Accessing your infrastructure environment>>
+
+[#infra-env-prerequisites]
+== Prerequisites
+
+You need the following prerequisites before creating an infrastructure environment:
+
+* A deployed {product-title-short} hub cluster on {ocp-short} version 4.9 or later.
+* Internet access for your {product-title-short} hub cluster (connected), or a connection to an internal or mirror registry that has a connection to the Internet (disconnected) to retrieve the required images for creating the environment.
+* A configured instance of the Central Infrastructure Management (CIM) feature on your hub cluster. See xref:../clusters/create_infra_env.adoc#enable-cim[Enabling the Central Infrastructure Management service] for the procedure.
+* Your {ocp-short} https://console.redhat.com/openshift/install/pull-secret[pull secret]. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.9/html/images/managing-images#using-image-pull-secrets[Using image pull secrets] for more information. 
+* Your SSH key that is in your `~/.ssh/id_rsa.pub` file, by default.
+
+[#enable-cim]
+== Enabling the Central Infrastructure Management service
+
+The CIM service is provided with {product-title-short} and deploys {ocp-short} clusters. CIM is deployed when you enable the MultiClusterHub Operator on the {product-title-short} hub cluster, but must be enabled.
+
+To enable the CIM service, complete the following steps: 
+
+. Modify the `HiveConfig` resource to enable the feature gate for the CIM service by running the following command:
++
+----
+oc patch hiveconfig hive --type merge -p '{"spec":{"targetNamespace":"hive","logLevel":"debug","featureGates":{"custom":{"enabled":["AlphaAgentInstallStrategy"]},"featureSet":"Custom"}}}'
+----
+
+. Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces by running the following command:
++
+----
+oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
+----
+
+. Create the `AgentServiceConfig` CR by completing the following steps:
+
+.. Save the following `YAML` content in the `agent_service_config.yaml` file:
++
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: AgentServiceConfig
+metadata:
+ name: agent
+spec:
+  databaseStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <db_volume_size> 
+  filesystemStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <fs_volume_size> 
+  osImages: 
+    - openshiftVersion: "<ocp_version>" 
+      version: "<ocp_release_version>" 
+      url: "<iso_url>" 
+      rootFSUrl: "<root_fs_url>" 
+      cpuArchitecture: "x86_64"
+----
++
+Replace `db_volume_size` with the volume size for the `databaseStorage` field, for example `10Gi`.
++
+Replace `fs_volume_size` with the volume size for the volume size for the `filesystemStorage` field, for example `20Gi`.
++
+Replace `ocp_version` with the {ocp-short} version to install, for example, `4.9`.
++
+Replace `ocp_release_version` with the specific install version, for example, `49.83.202103251640-0`.
++
+Replace `iso_url` with the ISO url, for example, `https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.9/4.9.0/rhcos-4.9.0-x86_64-live.x86_64.iso`.
++
+Replace `root_fs_url` with the root FS image URL, for example, `https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.9/4.9.0/rhcos-live-rootfs.x86_64.img`. 
+
+.. Create the AgentServiceConfig CR by running the following command:
++
+----
+oc create -f agent_service_config.yaml
+----
++
+The output might resemble the following example:
++
+----
+agentserviceconfig.agent-install.openshift.io/agent created
+----
+
+Your CIM service is configured. You can verify that it is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. Continue with xref:../clusters/create_infra_env.adoc#creating-your-infra-env-with-the-console[Creating your infrastructure environment with the console].
+
+[#creating-your-infra-env-with-the-console]
+== Creating your infrastructure environment with the console
+
+To create an infrastructure environment from the {product-title-short} console, complete the following steps:
+
+. From the navigation menu, navigate to *Infrastructure* > *Infrastructure environments*.
+. On the _Infrastructure environments_ page, Click *Create infrastructure environment*.
+. Add the following information to your infrastructure environment settings: 
++
+* Name: A unique name for your environment.
+* Network type: Specifies which types of hosts can be added to your environment. You can only use the static IP option when you are using bare metal hosts. 
+* Location: Specifies the geographic location of the host. The geographic location can be used to easily determine where your data on a cluster is stored when you are creating the cluster. 
+* Labels: Optional field where you can add labels to the infrastructure environment so you can more easily find and group the environment with other environments that share a characteristic. The selections that you made for the network type and location are automatically added to the list of labels.
+* Pull secret: Your {ocp-short} https://console.redhat.com/openshift/install/pull-secret[pull secret] that enables you to access the {ocp-short} resources. 
+* SSH public key: The SSH key that enables the secure communication with the hosts. This is generally in your `~/.ssh/id_rsa.pub` file, by default.
+* If you want to enable proxy settings across all of your clusters, select the setting to enable it. This requires that you enter the following information: 
++
+** HTTP Proxy URL: The URL that should be used when accessing the discovery service. 
+
+** HTTPS Proxy URL: The secure proxy URL that should be used when accessing the discovery service. Note that the format must be `http`, as `https` is not yet supported. 
+
+** No Proxy domains: A comma-separated list of domains that should bypass the proxy. Begin a domain name with a period (.) to include all of the subdomains that are in that domain. Add and asterisk (*) to bypass the proxy for all destinations. 
+
+You can now continue by adding hosts to your infrastructure environment. 
+
+[#accessing-your-infra-env]
+== Accessing an infrastructure environment
+
+To access an infrastructure environment, select *Infrastructure* > *Infrastructure environments* in the {product-title-short} console. Select your infrastructure environment from the list to view the details and hosts for that infrastructure environment.
+

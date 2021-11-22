@@ -1,0 +1,100 @@
+[#imp-clust-custom-image-override]
+= Importing a cluster with a custom ManagedClusterImageRegistry CRD
+
+There might be times when you need to override the registry images on the managed clusters that you are importing. You can do this by creating a `ManagedClusterImageRegistry` custom resource definition (CRD). 
+
+The `ManagedClusterImageRegistry` CRD is a namespace-scoped resource.
+
+The `ManagedClusterImageRegistry` CRD specifies a set of managed clusters for a Placement to select, but need different images from the custom image registry. After the managed clusters are updated with the new images, the following label is added to each managed cluster for identification: `open-cluster-management.io/image-registry=<namespace>.<managedClusterImageRegistryName>`.
+
+The following example shows a `ManagedClusterImageRegistry` CRD:
+
+[source,yaml]
+----
+apiVersion: imageregistry.open-cluster-management.io/v1alpha1
+kind: ManagedClusterImageRegistry
+metadata:
+  name: <imageRegistryName>
+  namespace: <namespace>
+spec:
+  placementRef:
+    group: cluster.open-cluster-management.io
+    resource: placements
+    name: <placementName> 
+  pullSecret:
+    name: <pullSecretName>
+  registry: <registryAddress>
+----
+
+In the `spec` section:
+
+* Replace `placementRef` with a Placement in the same namespace that selects a set of managed clusters.
+* Replace `pullSecret` with the name of the pull secret that is used to pull images from the custom image registry.
+* Replace `registry` with the custom registry address.
+
+[#imp-clust-managedclusterimageregistry]
+== Importing a cluster with a ManagedClusterImageRegistry CRD
+
+Complete the following steps to import a cluster with a ManagedClusterImageRegistry CRD: 
+
+. Create a pull secret in the namespace where you want your cluster to be imported. For these steps, it is `myNamespace`.
++
+----
+$ kubectl create secret docker-registry myPullSecret \
+  --docker-server=<your-registry-server> \
+  --docker-username=<my-name> \
+  --docker-password=<my-password>
+----
+
+. Create a Placement in the namespace that you created.
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: Placement
+metadata:
+  name: myPlacement
+  namespace: myNamespace
+----
+
+. Create a `ManagedClusterSet` resource and bind it to your namespace.
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: ManagedClusterSet
+metadata:
+  name: myClusterSet
+  
+---
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: ManagedClusterSetBinding
+metadata:
+  name: myClusterSet
+  namespace: myNamespace
+spec:
+  clusterSet: myClusterSet
+----
+
+. Create the `ManagedClusterImageRegistry` CRD in your namespace.
++
+[source,yaml]
+----
+apiVersion: imageregistry.open-cluster-management.io/v1alpha1
+kind: ManagedClusterImageRegistry
+metadata:
+  name: myImageRegistry
+  namespace: myNamespace
+spec:
+  placementRef:
+    group: cluster.open-cluster-management.io
+    resource: placements
+    name: myPlacement
+  pullSecret:
+    name: myPullSecret
+  registry: myRegistryAddress
+----
+
+. Import a managed cluster from the {product-title-short} console and add it to a managed cluster set.
+
+. Copy and run the import commands on the managed cluster after the label `open-cluster-management.io/image-registry=myNamespace.myImageRegistry` is added to the managed cluster.

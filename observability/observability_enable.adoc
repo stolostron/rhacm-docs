@@ -31,7 +31,11 @@ Monitor the health of your managed clusters with the observability service (`mul
 [#enabling-observability]
 == Enabling observability
 
-Enable the observability service by creating a `MultiClusterObservability` custom resource (CR) instance. Before you enable observability, see xref:../observability/observe_environments.adoc#observability-pod-capacity-requests[Observability pod capacity requests] for more information. Complete the following steps to enable the observability service: 
+Enable the observability service by creating a `MultiClusterObservability` custom resource (CR) instance. Before you enable observability, see xref:../observability/observe_environments.adoc#observability-pod-capacity-requests[Observability pod capacity requests] for more information. 
+
+*Note*: When observability is enabled or disabled on {ocp-short} managed clusters that are managed by {product-title-short}, the observability endpoint operator updates the `cluster-monitoring-config` `ConfigMap` by adding additional alertmanager configuration that restarts the local Prometheus automatically.
+
+Complete the following steps to enable the observability service: 
 
 . Log in to your {product-title-short} hub cluster. 
 . Create a namespace for the observability service with the following command:
@@ -152,6 +156,8 @@ stringData:
 ----
 +
 For more details, see https://docs.microsoft.com/en-us/azure/storage/[Azure Storage documentation].
++
+*Note*: If you use Azure as an object storage for a {ocp} cluster, the storage account associated with the cluster is not supported. You must create a new storage account.
 
 ** For Red Hat OpenShift Data Foundation, your secret might resemble the following file:
 +
@@ -240,7 +246,7 @@ You might want to modify the value for the `retentionConfig` parameter in the `a
     node-role.kubernetes.io/infra: 
 ----
 +
-For more information, see https://docs.openshift.com/container-platform/4.8/machine_management/creating-infrastructure-machinesets.html[Creating infrastructure machine sets].
+For more information, see https://docs.openshift.com/container-platform/4.9/machine_management/creating-infrastructure-machinesets.html[Creating infrastructure machine sets].
 
 . Apply the observability YAML to your cluster by running the following command:
 +
@@ -262,7 +268,7 @@ The observability service is enabled. After you enable the observability service
 * All the alert managers from the managed clusters are forwarded to the {product-title-short} hub cluster.
 * All the managed clusters that are connected to the {product-title-short} hub cluster are enabled to send alerts back to the {product-title-short} observability service. You can configure the {product-title-short} Alertmanager to take care of deduplicating, grouping, and routing the alerts to the correct receiver integration such as email, PagerDuty, or OpsGenie. You can also handle silencing and inhibition of the alerts.
 +
-*Note*: Alert forwarding to the {product-title-short} hub cluster feature is only supported by managed clusters with {ocp} version 4.8 or later. After you install {product-title-short} with observability enabled, alerts from {ocp-short} v4.8 and later are automatically forwarded to the hub cluster.
+*Note*: Alert forwarding to the {product-title-short} hub cluster feature is only supported by managed clusters with {ocp} version 4.9 or later. After you install {product-title-short} with observability enabled, alerts from {ocp-short} v4.9 and later are automatically forwarded to the hub cluster.
 
 See xref:../observability/customize_observability.adoc#forward-alerts[Forwarding alerts] to learn more.
 
@@ -304,18 +310,18 @@ Observability provides an external API for metrics to be queried through the Ope
 oc get route rbac-query-proxy -n open-cluster-management-observability
 ----
 
-* To access the `rbac-query-proxy` route, you must have an OpenShift OAuth access token. The token should be associated with a user or service account, which has permission to get namespaces. For more information, see https://docs.openshift.com/container-platform/4.8/authentication/managing-oauth-access-tokens.html[Managing user-owned OAuth access tokens].
+* To access the `rbac-query-proxy` route, you must have an OpenShift OAuth access token. The token should be associated with a user or service account, which has permission to get namespaces. For more information, see https://docs.openshift.com/container-platform/4.9/authentication/managing-oauth-access-tokens.html[Managing user-owned OAuth access tokens].
 
-* Get the default CA certificate and store the content of the key, `tls.crt`, in a local file. Run the following command:
+* Get the default CA certificate and store the content of the key `tls.crt` in a local file. Run the following command:
 +
 ----
-oc get secrets -n openshift-ingress router-certs-default -o yaml
+oc -n openshift-ingress get secret router-certs-default -o jsonpath="{.data.tls\.crt}" | base64 -d > ca.crt
 ----
 
 * Run the following command to query metrics:
 +
 ----
-curl --cacert ./ca.crt -H "Authorization: bearer {TOKEN}" https://{PROXY_ROUTE_URL}/api/v1/query?query={QUERY_EXPRESSION}
+curl --cacert ./ca.crt -H "Authorization: Bearer {TOKEN}" https://{PROXY_ROUTE_URL}/api/v1/query?query={QUERY_EXPRESSION}
 ----
 +
 *Note*: The `QUERY_EXPRESSION` is the standard Prometheus query expression. For example, query the metrics `cluster_infrastructure_provider` by replacing the URL in the previously mentioned command, with the following URL: `https://{PROXY_ROUTE_URL}/api/v1/query?query=cluster_infrastructure_provider`. For more details, see https://prometheus.io/docs/prometheus/latest/querying/basics/[Querying prometheus].
