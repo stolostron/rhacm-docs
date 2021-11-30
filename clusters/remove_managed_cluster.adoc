@@ -13,6 +13,7 @@ This is permanent, and the cluster cannot be imported and managed again.
 * <<remove-a-cluster-by-using-the-console,Remove a cluster by using the console>>
 * <<remove-a-cluster-by-using-the-cli,Remove a cluster by using the command line>>
 * <<removing-a-cluster-from-management-in-special-cases,Remove remaining resources after removing a cluster>>
+* <<defragmenting-the-hub-cluster-etcd-database,Defragmenting the etcd database after removing a cluster>>
 
 [#remove-a-cluster-by-using-the-console]
 == Remove a cluster by using the console
@@ -85,3 +86,45 @@ open-cluster-management-agent-addon   Active   10m
 ----
 oc get ns | grep open-cluster-management-agent 
 ----
+
+[#defragmenting-the-hub-cluster-etcd-database]
+== Defragmenting the etcd database after removing a cluster
+
+Having many managed clusters can affect the size of the `etcd` database in the hub cluster. In {ocp-short} 4.8, when you delete a managed cluster, the `etcd` database in the hub cluster is not automatically reduced in size. In some scenarios, the `etcd` database can run out of space. An error `etcdserver: mvcc: database space exceeded` is displayed. To correct this error, reduce the size of the `etcd` database by compacting the database history and defragmenting the `etcd` database.
+
+*Note:* For {ocp-short} version 4.9 and later, the etcd Operator automatically defragments disks and compacts the `etcd` history. No manual intervention is needed. The following procedure is for {ocp-short} version 4.8 and earlier.
+
+Compact the `etcd` history and defragment the `etcd` database in the hub cluster by completing the following procedure.
+
+[#prereq-defragmenting-the-hub-cluster-etcd-database]
+=== Prerequisites
+
+* Install the OpenShift CLI (`oc`).
+* Log in as a user with `cluster-admin` privileges.
+[#procedure-defragmenting-the-hub-cluster-etcd-database]
+=== Procedure
+
+. Compact the `etcd` history.
+
+.. Open a remote shell session to the `etcd` member, for example:
++
+[source,terminal]
+----
+$ oc rsh -n openshift-etcd etcd-control-plane-0.example.com etcdctl endpoint status --cluster -w table
+----
+
+.. Run the following command to compact the `etcd` history:
++
+[source,terminal]
+----
+sh-4.4#etcdctl compact $(etcdctl endpoint status --write-out="json" |  egrep -o '"revision":[0-9]*' | egrep -o '[0-9]*' -m1)
+----
++
+.Example output
++
+[source,terminal]
+----
+$ compacted revision 158774421
+----
+
+. Defragment the `etcd` database and clear any `NOSPACE` alarms as outlined in link:https://docs.openshift.com/container-platform/latest/scalability_and_performance/recommended-host-practices.html#etcd-defrag[Defragmenting `etcd` data].
