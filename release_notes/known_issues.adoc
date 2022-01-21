@@ -32,6 +32,64 @@ Review the known issues for {product-title}. The following list contains known i
 [#installation-known-issues]
 == Installation known issues
 
+[#upgrade-2.2.x-issue]
+=== Upgrade from 2.2.x to 2.3.4 might cause klusterlet deletion
+// 2.4, 18011
+
+After you upgrade from 2.2.x to 2.3.4, the Klusterlet might be deleted. See the following procedure to work around this issue:
+
+. Upgrade the work-agent to 2.3.3.
+
+.. Create a JSON file `work-image-override.json` with the following JSON content:
++
+[source,json]
+----
+[
+  {
+    "image-name": "work-rhel8",
+    "image-remote": "registry.redhat.io/rhacm2",
+    "image-digest": "sha256:b6606f6bb6504acfb48f13cd5296473c17088caf380097ff7ce316f781c4f196",
+    "image-key": "work"
+  }
+] 
+----
+
+.. Create a ConfigMap for image override on the hub cluster:
+
++  
+----
+kubectl -n open-cluster-management create configmap work-image-override --from-file=./work-image-override.json
+----
+
+.. Enable the image override by annotating `mch` on the hub cluster.
+
++
+----
+kubectl -n open-cluster-management annotate mch multiclusterhub --overwrite mch-imageOverridesCM=work-image-override
+----
+
+.. Restart `multiclusterhub-operator` to enforce the change.
+
++
+----
+kubectl -n open-cluster-management delete pod multiclusterhub-operator-xxxxx-xxxxx
+----
+
++
+Wait for about 30 minutes to make sure that work-agent running on all managed clusters have been restarted with the overridden image.
+
+. Upgrade from 2.2.x to 2.3.4.
+
+. Disable the image override for work-agent. 
+
+. After the upgrade is done, it's safe to remove the image override for work-agent.
+
++
+----
+kubectl -n open-cluster-management annotate mch multiclusterhub mch-imageOverridesCM- --overwrite
+kubectl -n open-cluster-management delete configmap work-image-override
+----
+
 [#upgrade-231-error-chart]
 === Upgrade from version 2.2.x to 2.3.1 upgrade fails to progress
 // 2.3.1: 15425
