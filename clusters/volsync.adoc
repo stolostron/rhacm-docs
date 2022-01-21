@@ -113,7 +113,178 @@ Your CSI is now configured on a Google Cloud Platform environment.
 
 . For Rsync-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and the `sshKeys` to ensure that the transferred data is secure. **Note:** You must copy the values for `address` and `sshKeys` from the destination to the source, so configure the destination before you configure the source. 
 
-.. Configure your destination.
+.. Configure your destination cluster named `destination`.
+
+... Run the following commands on the destination cluster to create and prepare the namespace:
++
+----
+$ kubectl create ns dest
+$ kubectl create -n dest -f examples/rsync/volsync_v1alpha1_replicationdestination_remotecluster.yaml
+----
++
+A Load Balancer Service is created, which will be used by the `ReplicationSource` to copy the data from the source cluster to the destination cluster. Note the address of the Load Balancer and the name of the secret to refer to when you configure the source cluster.
+
+... Run the following commands to gather the address and copy the secret key:
++
+----
+$ ADDRESS=`kubectl get replicationdestination database-destination -n dest --template={{.status.rsync.address}}`
+$ echo $ADDRESS
+a83126a5a50e64f81b3a46f9e4a02eb2-5592c0b3d94dd376.elb.us-east-1.amazonaws.com
+
+$ SSHKEYS=`kubectl get replicationdestination database-destination -n dest  --template={{.status.rsync.sshKeys}}`
+$ echo $SSHKEYS
+volsync-rsync-dst-src-database-destination
+----
+
+.. Deploy the database.
+
+... On the source cluster, `source-cluster`, enter the following commands to create and prepare the database: 
++
+----
+$ kubectl create ns source
+$ kubectl create -n source -f examples/source-database
+----
+
+... Run the following command the confirm that the database is running:
++
+----
+$ kubectl get pods -n source
+----
++
+The returned information should resemble the following example:
++
+----
+NAME                    READY   STATUS    RESTARTS   AGE
+mysql-8b9c5c8d8-24w6g   1/1     Running   0          17s
+----
+
+.. Create the `ReplicationSource` items.
+
+... Copy the ssh secret from the destination cluster by entering the following commands on the destination cluster:
++
+----
+$ kubectl get secret -n dest $SSHKEYS -o yaml > /tmp/secret.yaml
+----
+
+... Open the secret file in the `vi` editor by entering the following command:
++
+----
+$ vi /tmp/secret.yaml
+----
+
+... In the open secret file on the destination cluster, make the following changes:
++
+* Change the namespace to `source`.
+* Remove the owner reference (`.metadata.ownerReferences`).
+
+... On the source cluster, create the secret file by entering the following command on the source cluster:
++
+----
+$ kubectl create -f /tmp/secret.yaml
+----
+
+... On the source cluster, modify the `volsync_v1alpha1_replicationsource_remotecluster.yaml` by replacing the value of the `address` and `sshKeys` in the `ReplicationSource` object with the values that you noted from the destintation cluster by entering the following commands:
++
+----
+$ sed -i "s/my.host.com/$ADDRESS/g" examples/rsync/volsync_v1alpha1_replicationsource_remotecluster.yaml
+$ sed -i "s/mysshkeys/$SSHKEYS/g" examples/rsync/volsync_v1alpha1_replicationsource_remotecluster.yaml
+$ kubectl create -n source -f examples/rsync/volsync_v1alpha1_replicationsource_remotecluster.yaml
+----
+
+... Verify that the replication completed by running the following command on the `ReplicationSource` object:
++
+----
+$ kubectl describe ReplicationSource -n source database-source
+----
++
+If the replication was successful, the output should be similar to the following example:
++
+----
+Status:
+  Conditions:
+    Last Transition Time:  2021-10-14T20:48:00Z
+    Message:               Synchronization in-progress
+    Reason:                SyncInProgress
+    Status:                True
+    Type:                  Synchronizing
+    Last Transition Time:  2021-10-14T20:41:41Z
+    Message:               Reconcile complete
+    Reason:                ReconcileComplete
+    Status:                True
+    Type:                  Reconciled
+  Last Sync Duration:      5m20.764642395s
+  Last Sync Time:          2021-10-14T20:47:01Z
+  Next Sync Time:          2021-10-14T20:48:00Z
+----
++
+If the `Last Sync Time` has no time listed, then the replication is not complete. 
+
+... Create a database in the `mysql` pod that is running is running in the source namespace by entering the following commands on the destination cluster:
++
+----
+$ kubectl exec --stdin --tty -n source `kubectl get pods -n source | grep mysql | awk '{print $1}'` -- /bin/bash
+$ mysql -u root -p$MYSQL_ROOT_PASSWORD
+> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.00 sec)
+
+
+> create database synced;
+> exit
+$ exit
+----
++
+The mysql database is deployed to the `dest` namespace, which uses the replicated data. 
+
+... Identify the latest snapshot from the `ReplicationDestination` object by entering the following command:
++
+----
+$ kubectl get replicationdestination database-destination -n dest --template={{.status.latestImage.name}}
+----
+Note the value of the latest snapshot for when you create your PVC. 
+
+... Create the Deployment, Service, PVC, and Secret by entering the following commands on the destination cluster:
++
+----
+$ sed -i 's/snapshotToReplace/volsync-dest-database-destination-20201203174504/g' examples/destination-database/mysql-pvc.yaml
+$ kubectl create -n dest -f examples/destination-database/
+----
+
+... Validate that the mysql pod is running in the environment by entering the following command:
++
+----
+$ kubectl get pods -n dest
+----
+
+... Connect to the mysql pod and list the databases to verify that the synchronized database exists by entering the following command:
++
+----
+$ kubectl exec --stdin --tty -n dest `kubectl get pods -n dest | grep mysql | awk '{print $1}'` -- /bin/bash
+$ mysql -u root -p$MYSQL_ROOT_PASSWORD
+> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| synced             |
+| sys                |
++--------------------+
+5 rows in set (0.00 sec)
+----
+
+
+
+
+
 
 ... Add the following minimal custom resource information to the YAML file of your destination cluster:
 +
