@@ -51,31 +51,51 @@ Configure your network settings to allow the connections in the following sectio
 For the hub cluster networking requirements, see the following table:
 
 |===
-| Direction | Connection | Port (if specified)
+| Direction | Protocol | Connection | Port (if specified)
 
-| Outbound
-| API of the cloud provider
-| 
+| Outbound to managed cluster
+| HTTPS
+| Retrieval of logs dynamically from Search console for the pods of the managed cluster. This connection uses a service running on the managed cluster called - `klusterlet-addon-workmgr`
+| 443
 
-| Outbound
-| Kubernetes API server of the provisioned managed cluster
+| Outbound to managed cluster
+| HTTPS
+| Kubernetes API server of the managed cluster that is provisioned during installation to install the Klusterlet
 | 6443
 
 | Outbound
+| HTTPS
 | The channel source, including GitHub, Object Store, and Helm repository. This is only required when you are using Application lifecycle to connect to these sources.
 | 
 
-| Outbound and inbound
-| The `WorkManager` service route on the managed cluster
+| Inbound from the managed cluster
+| HTTPS
+| Managed cluster to push metrics and alerts (alerts are gathered only for managed clusters running {ocp-short} version 4.8, or later)
 | 443
 
-| Inbound
-| The kube API server of the hub cluster from the managed cluster
+| Inbound from the managed cluster
+| HTTPS
+| Kube API Server of Hub being watched for changes from Managed Cluster
 | 6443
+
+| Outbound to GitHub, GitLab, or similar
+| HTTPS
+| Download manifests from Git to configure GitOps
+| 443
 
 | Inbound
 | Post-commit hook from GitHub to the hub cluster. This setting is only required when you use certain application management functions.
 | 6443
+
+| Outbound to `ObjectStore`
+| HTTPS
+| Sends metric data of Observability for long term storage in the `ObjectStore`
+| 443
+
+| Outbound to image repository
+| HTTPS
+| Access images for {ocp-short} and {product-title-short} 
+| 443
 
 |===
 
@@ -87,19 +107,56 @@ For the hub cluster networking requirements, see the following table:
 For the managed cluster networking requirements, see the following table:
 
 |===
-| Direction | Connection | Port (if specified)
+| Direction | Protocol | Connection | Port (if specified)
 
-| Outbound and inbound
-| Kubernetes API server of the hub cluster
+| Outbound to the hub cluster
+| HTTPS
+| Watches the Kubernetes API server of the hub cluster for changes
 | 6443
 
 | Outbound
 | The managed cluster to the channel source, which includes GitHub, Object Store, and Helm repository. This is only required when you are using application lifecycle to connect to these sources.
 | 
 
-| Inbound
-| The `WorkManager` service endpoint from the hub cluster
+| Outbound to image repository
+| HTTPS
+| Access images for {ocp-short} and {product-title-short} 
 | 443
+
+| Outbound to GitHub, GitLab, or similar
+| HTTPS 
+| The managed cluster to the GitHub, GitLab, or similar to download manifests for GitOps
+| 443
+
+|===
+
+[#network-configuration-infra-operator]
+=== Additional networking requirements when using the infrastructure operator
+
+When you are using bare metal managed clusters that were created with the Infrastructure Operator, see the following table for the additional networking requirements:
+
+|===
+| Direction | Protocol | Connection | Port (if specified)
+
+| Hub cluster outbound to the ISO/rootfs image repository
+| HTTPS (HTTP in a disconnected environment
+| Used to create an ISO image on the {product-title-short} hub
+| 443 (80 in disconnected environments)
+
+| Hub cluster outbound to BMC interface at single node OpenShift managed cluster
+| HTTPS (HTTP in disconnected environment)
+| Boot the single node OpenShift cluster
+| 443
+
+| Outbound from the single node OpenShift managed cluster to the hub cluster
+| HTTPS
+| Reports hardware information using the `assistedService` route 
+| 443
+
+| Outbound from the single node OpenShift managed cluster to the ISO/rootfs image repository
+| HTTP
+| Downloads the rootfs image
+| 80
 
 |===
 
