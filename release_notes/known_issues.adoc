@@ -21,6 +21,7 @@ Or consider a troubleshooting topic.
 
 Review the known issues for {product-title}. The following list contains known issues for this release, or known issues that continued from the previous release. For your {ocp} cluster, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.9/html/release_notes/ocp-4-9-release-notes#ocp-4-9-known-issues[{ocp-short} known issues].
 
+* <<documentation-known-issues,Documentation known issues>>
 * <<installation-known-issues,Installation known issues>>
 * <<web-console-known-issues,Web console known issues>>
 ** <<observability-known-issues,Observability known issues>>
@@ -29,8 +30,83 @@ Review the known issues for {product-title}. The following list contains known i
 * <<governance-known-issues,Governance known issues>>
 * <<backup-known-issues,Backup and restore known issues>>
 
+[#documentation-known-issues]
+== Documentation known issues
+
+[#links-to-higher-level]
+=== Documentation links in the Customer Portal might link to a higher-level section
+// 2.4:19417
+
+In some cases, the internal links to other sections of the {product-title-short} documentation in the Customer Portal do not link directly to the named section. In some instances, the links resolve to the highest-level section. 
+
+If this happens, you can either find the specified section manually or complete the following steps to resolve:
+
+. Copy the link that is not resolving to the correct section and paste it in your browser address bar. For example, it might be: `https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.4/html/clusters/index#volsync`.
+
+. In the link, replace `html` with `html-single`. The new URL should read: `https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.4/html-single/clusters/index#volsync`
+
+. Link to the new URL to find the specified section in the documentation.
+
 [#installation-known-issues]
 == Installation known issues
+
+[#upgrade-2.2.x-issue]
+=== Upgrade from 2.2.x to 2.3.4 might cause klusterlet deletion
+// 2.4, 18011
+
+After you upgrade from 2.2.x to 2.3.4, the Klusterlet might be deleted. See the following procedure to work around this issue:
+
+. Upgrade the work-agent to 2.3.3.
+
+.. Create a JSON file `work-image-override.json` with the following JSON content:
++
+[source,json]
+----
+[
+  {
+    "image-name": "work-rhel8",
+    "image-remote": "registry.redhat.io/rhacm2",
+    "image-digest": "sha256:b6606f6bb6504acfb48f13cd5296473c17088caf380097ff7ce316f781c4f196",
+    "image-key": "work"
+  }
+] 
+----
+
+.. Create a ConfigMap for image override on the hub cluster:
+
++  
+----
+kubectl -n open-cluster-management create configmap work-image-override --from-file=./work-image-override.json
+----
+
+.. Enable the image override by annotating `mch` on the hub cluster.
+
++
+----
+kubectl -n open-cluster-management annotate mch multiclusterhub --overwrite mch-imageOverridesCM=work-image-override
+----
+
+.. Restart `multiclusterhub-operator` to enforce the change.
+
++
+----
+kubectl -n open-cluster-management delete pod multiclusterhub-operator-xxxxx-xxxxx
+----
+
++
+Wait for about 30 minutes to make sure that work-agent running on all managed clusters have been restarted with the overridden image.
+
+. Upgrade from 2.2.x to 2.3.4.
+
+. Disable the image override for work-agent. 
+
+. After the upgrade is done, it's safe to remove the image override for work-agent.
+
++
+----
+kubectl -n open-cluster-management annotate mch multiclusterhub mch-imageOverridesCM- --overwrite
+kubectl -n open-cluster-management delete configmap work-image-override
+----
 
 [#upgrade-231-error-chart]
 === Upgrade from version 2.2.x to 2.3.1 upgrade fails to progress
@@ -819,3 +895,15 @@ When you install the gatekeeper operator on {ocp} version 4.9, the installation 
 //2.4:17229
 
 The backup and restore feature for the hub cluster requires the OpenShift API for Data Protection (OADP) operator. The OADP operator is not available on the IBM Power or IBM Z architectures.
+
+[#no-resource-status-after-restore]
+=== Application and policy show no resource status on managed cluster after a restore operation
+//2.4:17342
+
+When a restore operation is run on a new hub cluster, using data backed up from another hub cluster, the application and policy shows no status for resources on managed clusters. This happens because the search and policy add-ons are not reset to point to the new hub cluster. 
+
+From the new hub cluster, you must restart the `addon-certpolicyctrl` and `addon-search` for all managed clusters. Run the following commands to restart the pods:
+
+----
+oc get pods -n open-cluster-management-agent-addon | grep search | awk '{print $1}' | xargs kubectl delete pod
+---- 
