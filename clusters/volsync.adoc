@@ -49,77 +49,6 @@ oc -n <namespace> apply -f ./policy-persistent-data-management.yaml
 +
 Replace `namespace` with a namespace on your hub cluster.
 
-. If your default `StorageClass` on each of the clusters where you plan to configure VolSync does not refer to a CSI-based storage driver, change the default configuration to refer to a CSI-based storage driver. 
-+
-* Your steps might resemble the following procedure for an Amazon Web Services environment:
-
-.. Change your default `StorageClass` by entering the following commands: 
-+
-----
-kubectl annotate sc/gp2 storageclass.kubernetes.io/is-default-class="false" --overwrite
-kubectl annotate sc/gp2-csi storageclass.kubernetes.io/is-default-class="true" --overwrite
-----
-
-.. If a corresponding `VolumeSnapshotClass` does not exist, create one by running the following command:
-
-----
-kubectl create -f - << SNAPCLASS
-----
-
-+
-[source,yaml]
-----
-apiVersion: snapshot.storage.k8s.io/v1beta1
-kind: VolumeSnapshotClass
-metadata:
-  name: gp2-csi
-driver: ebs.csi.aws.com
-deletionPolicy: Delete
-SNAPCLASS
-----
-
-.. Set `gp2-csi` as your default `VolumeSnapshotClass` by running the following command:
-+
-----
-kubectl annotate volumesnapshotclass/gp2-csi snapshot.storage.kubernetes.io/is-default-class="true"
-----
-+
-Your CSI is now configured on an Amazon Web Services environment.
-
-* The steps might resemble the following for a Google Cloud Platform environment:
-
-.. Change your default `StorageClass` by entering the following commands: 
-+
-----
-kubectl annotate sc/standard storageclass.kubernetes.io/is-default-class="false" --overwrite
-kubectl annotate sc/standard-csi storageclass.kubernetes.io/is-default-class="true" --overwrite
-----
-
-.. Install a `VolumeSnapshotClass` by running the following command:
-+
-----
-kubectl create -f - << SNAPCLASS
-----
-+
-[source,yaml]
-----
-apiVersion: snapshot.storage.k8s.io/v1beta1
-kind: VolumeSnapshotClass
-metadata:
-  name: gp2-csi
-driver: ebs.csi.aws.com
-deletionPolicy: Delete
-SNAPCLASS
-----
-
-.. Set `standard-csi` as your default `VolumeSnapshotClass` by running the following command:
-+
-----
-kubectl annotate volumesnapshotclass/standard-csi snapshot.storage.kubernetes.io/is-default-class="true"
-----
-+
-Your CSI is now configured on a Google Cloud Platform environment.
-
 . For Rsync-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and the `sshKeys` to ensure that the transferred data is secure. **Note:** You must copy the values for `address` and `sshKeys` from the destination to the source, so configure the destination before you configure the source. 
 
 .. Configure your destination cluster named `destination`.
@@ -132,6 +61,32 @@ $ kubectl create -n dest -f examples/rsync/volsync_v1alpha1_replicationdestinati
 ----
 +
 A Load Balancer Service is created, which will be used by the `ReplicationSource` to copy the data from the source cluster to the destination cluster. Note the address of the Load Balancer and the name of the secret to refer to when you configure the source cluster.
+
+... Add the following information to the destinattion cluster
++
+[source,yaml]
+----
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: <database-destination>
+  namespace: <dest>
+spec:
+  rsync:
+    serviceType: LoadBalancer
+    copyMethod: Snapshot
+    capacity: 2Gi
+    accessModes: [ReadWriteOnce]
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: gp2-csi
+----
++
+*Note:* The `capacity` value should match the capacity of the persistent volume claim that is being replicated.
++
+Replace `destination_name` with the name of your destination volume.
++
+Replace `dest` with the name of the namespace where your destination is located.
 
 ... Run the following commands to gather the address and copy the secret key:
 +
@@ -295,28 +250,7 @@ $ mysql -u root -p$MYSQL_ROOT_PASSWORD
 
 
 
-... Add the following minimal custom resource information to the YAML file of your destination cluster:
-+
-[source,yaml]
-----
----
-apiVersion: volsync.backube/v1alpha1
-kind: ReplicationDestination
-metadata:
-  name: <destination_name>
-  namespace: <destination_namespace>
-spec:
-  rsync:
-    copyMethod: Snapshot
-    capacity: 10Gi
-    accessModes: ["ReadWriteOnce"]
-----
-+
-*Note:* The `capacity` value should match the capacity of the persistent volume claim that is being replicated.
-+
-Replace `destination_name` with the name of your destination volume.
-+
-Replace `destination_namespace` with the name of the namespace where your destination is located.
+
 
 ... After the `ReplicationDestination` custom resource is created, copy the value of `.status.rsync.address`. This value is automatically generated when the custom resource is created. You will have to enter it when you configure the source. The following example shows the custom resource information that is added to the `ReplicationDestination` after it is created:
 +
@@ -335,19 +269,22 @@ status:
 +
 [source,yaml]
 ----
+---
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: <name>
-  namespace: <source_namespace>
+  name: database-source
+  namespace: source
 spec:
-  sourcePVC: <persistent_volume_claim>
+  sourcePVC: mysql-pv-claim
   trigger:
-    schedule: "*/5 * * * *"
+    schedule: "*/3 * * * *"
   rsync:
-    sshKeys: <volsync-rsync-destination-src-database-destination>
-    address: <source.host.com>
+    sshKeys: mysshkeys
+    address: my.host.com
     copyMethod: Snapshot
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: gp2-csi
 ----
 +
 Replace `name` with a unique name for your replication.
