@@ -71,7 +71,7 @@ data:
 +
 *Note*: If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, the configuration is automatically reloaded. The configuration is reloaded due to the `config-reload` within the `observability-thanos-ruler` sidecar.
 
-To verify that the alert rules are functioning appropriately, launch the Grafana dashboard, navigate to the *Explore* page, and query `ALERTS`.
+To verify that the alert rules are functioning appropriately, launch the Grafana dashboard, navigate to the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if the alert is initiated.
 
 [#configuring-alertmanager]
 == Configuring AlertManager
@@ -122,7 +122,7 @@ Add metrics to the `metrics_list.yaml` file, to be collected from managed cluste
 
 Before you add a custom metric, verify that `mco observability` is enabled with the following command: `oc get mco observability -o yaml`. Check for the following message in the `status.conditions.message` reads: `Observability components are deployed and running`.
 
-Create a file named `observability-metrics-custom-allowlist.yaml` and add the name and recording rule of the custom metric to the `metrics_list.yaml` parameter. Your YAML for the ConfigMap might resemble the following content:
+Create a file named `observability-metrics-custom-allowlist.yaml` and add the name of the custom metric to the `metrics_list.yaml` parameter. Your YAML for the ConfigMap might resemble the following content:
 
 [source,yaml]
 ----
@@ -146,12 +146,12 @@ data:
 
 Create the `observability-metrics-custom-allowlist` ConfigMap in the `open-cluster-management-observability` namespace with the following command: `oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml`.
 
-Verify that data from your custom metric is being collected by viewing the Grafana dashboard. For more information about viewing the dashboard, see xref:../observability/design_grafana.adoc#designing-your-grafana-dashboard[Designing your Grafana dashboard].
+Verify that data from your custom metric is being collected by querying the metric from the *Explore* page, from the Grafana dashboard. You can also use the custom metrics in your own dashboard. For more information about viewing the dashboard, see xref:../observability/design_grafana.adoc#designing-your-grafana-dashboard[Designing your Grafana dashboard].
 
 [#removing-default-metrics]
 == Removing default metrics
 
-If you want data to not be collected for a specific metric, remove the metric from the `observability-metrics-custom-allowlist.yaml` file. When you remove a metric, the stored data for the metric is deleted. As mentioned previously, first verify that `mco observability` is enabled.
+If you want data to not be collected in your managed cluster for a specific metric, remove the metric from the `observability-metrics-custom-allowlist.yaml` file. When you remove a metric, the metric data is not collected in your managed clusters. As mentioned previously, first verify that `mco observability` is enabled.
 
 Add the name of the default metric to the `metrics_list.yaml` parameter with a hyphen `-` at the start of the metric name. For example, `-cluster_infrastructure_provider`.
 
@@ -165,7 +165,7 @@ Verify that the specific metric is not being collected from your managed cluster
 
 Add the `advanced` configuration section to update the retention for each observability component, according to your needs. 
 
-Edit the `MultiClusterObservability` CRD and add the `advanced` section with the following command: `oc edit mco observability -o yaml`. Your YAML file might resemble the following contents:
+Edit the `MultiClusterObservability` CR and add the `advanced` section with the following command: `oc edit mco observability -o yaml`. Your YAML file might resemble the following contents:
 
 [source,yaml]
 ----
@@ -190,7 +190,7 @@ For descriptions of all the parameters that can added into the `advanced` config
 [#updating-replicas]
 == Updating the _multiclusterobservability_ CR replicas from the console
 
-If your workload increases, increase the number of replicas of your observability pods. Navigate to the {ocp} console from your hub cluster. Locate the `multiclusterobservability` custom resource definition and update the `replicas` parameter value. Your updated YAML might resemble the following content:
+If your workload increases, increase the number of replicas of your observability pods. Navigate to the {ocp} console from your hub cluster. Locate the `multiclusterobservability` custom resource (CR), and update the `replicas` parameter value for the component where you want to change the replicas. Your updated YAML might resemble the following content:
 
 [source,yaml]
 ----
@@ -271,7 +271,7 @@ You can disable the `metrics-collector`, which stops it from collecting the data
 
 Disable the `metrics-collector` pod to stop data from being collected and sent to the observability service on the {product-title-short} hub cluster. 
 
-When you disable the `metrics-collector`, the deployment is scaled to zero and all managed clusters are disabled. Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
+When you disable the `metrics-collector`, the replica of the deployment is scaled to zero and all managed clusters are disabled. Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
 
 [source,yaml]
 ----
@@ -285,7 +285,7 @@ spec:
 [#disable-metrics-collector-on-a-single-cluster]
 === Disabling _metrics-collector_ on a single cluster
 
-Disable the `metrics-collector` on specific managed clusters by adding the `observability: disabled` label to the `managedclusters.cluster.open-cluster-management.io` custom resource.
+Disable the `metrics-collector` by removing observability components on specific managed clusters. Add the `observability: disabled` label to the `managedclusters.cluster.open-cluster-management.io` custom resource.
 
 From the {product-title-short} console _Clusters_ page, add the `observability=disabled` label to the specified cluster.
 
