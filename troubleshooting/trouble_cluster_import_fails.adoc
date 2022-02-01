@@ -1,0 +1,87 @@
+[#troubleshooting-a-managed-cluster-import-failure]
+= Troubleshooting a managed cluster import failure
+
+If your cluster import fails, there are a few steps that you can take to determine why the cluster import failed.  
+
+[#symptom-cluster-import-failed]
+== Symptom: Imported cluster not available
+
+After you complete the procedure for importing a cluster, you cannot access it from the {product-title} console.
+
+[#resolving-cluster-import-failed]
+== Resolving the problem: Imported cluster not available
+
+There can be a few reasons that a cluster import fails. The following steps provide a path for determining the reason that it failed. Complete the steps in order to gather information from different sources about why the import failed: 
+
+. Restart the cluster.
+
+.. Determine if the managed cluster is available by checking the _Clusters_ area of the {product-title-short} console to see if the cluster is available. 
++
+
+.. If it is not available, try restarting the managed cluster by entering the following command: 
++
+----
+kubectl scale deploy <managed_cluster_name>
+----
+
+. If the cluster is still not available in the {product-title-short} console, check the status of the managed cluster resource on the hub cluster.
+
+.. Enter the following command:
++
+----
+kubectl get managedcluster <managed_cluster_name> -o yaml
+----
++
+Replace `managed_cluster_name` with the name of your cluster.
++
+The output should resemble the following content: 
++
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  ... ...
+status:
+  ... ...
+  conditions:
+  - lastTransitionTime: "2022-01-04T09:14:23Z"
+    message: Accepted by hub cluster admin
+    reason: HubClusterAdminAccepted
+    status: "True"
+    type: HubAcceptedManagedCluster
+  - lastTransitionTime: "2022-01-04T09:14:24Z"
+    message: Import succeeded
+    reason: ManagedClusterImported
+    status: "True"
+    type: ManagedClusterImportSucceeded
+...
+----
+
+.. Review the information in the `message` areas of the `status.conditions` and identify any that indicate that a process did not complete correctly. An example of a failed process includes, `HubDeniedManagedCluster`. That message alerts you that the hub cluster did not accept the connection of the managed cluster.
+
+.. Resolve any problems that are indicated in the messages.
+
+. If the managed cluster status is still offline, review the events in the `open-cluster-management` namespace that are created when a cluster is imported.
+
+.. Run the following command on the hub cluster: 
++
+----
+kubectl -n open-cluster-management get events | grep deployment/managedcluster-import-controller-v2
+----
++
+The output listed is the results of the import of your managed cluster. 
+
+.. Determine whether the import was completed by viewing the output. If there are issues that caused the process to stop, resolve those issues. 
+
+. View the logs of the `managedcluster-import-controller`.
+
+.. Enter the following command to locate the logs for the `managedcluster-import-controller`:
++
+----
+kubectl -n open-cluster-management get pods | grep managedcluster-import-controller
+----
+
+.. Search the logs for information that indicates why the import failed. *Tip:* You can use search keywords, like the managed cluster name, to find the relevant entries.
+
