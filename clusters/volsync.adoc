@@ -25,9 +25,7 @@ Before installing VolSync on your clusters, you must have the following requirem
 
 To enable VolSync on two clusters in your environment, you must install it on both the source and the target managed clusters. Complete the following steps to leverage the policy template in {product-title-short} to install VolSync:
 
-. Deploy the required VolSync resources to the clusters.
-
-.. Download the https://github.com/stolostron/policy-collection/blob/main/community/CM-Configuration-Management/policy-persistent-data-management.yaml[policy-persistent-data-management] policy template from the GitHub repository. In its current format, this policy starts an installation of VolSync on the hub cluster. After it is installed on the hub cluster, it automatically installs the required VolSync components on all of the managed clusters of the hub.
+. Download the https://github.com/stolostron/policy-collection/blob/main/community/CM-Configuration-Management/policy-persistent-data-management.yaml[policy-persistent-data-management] policy template from the GitHub repository. In its current format, this policy starts an installation of VolSync on the hub cluster. After it is installed on the hub cluster, it automatically installs the required VolSync components on all of the managed clusters of the hub.
 +
 *Note:* If you downloaded and used this policy before {product-title-short} version 2.4.2, download the file again. The path has changed for the file and some of its references.  
 +
@@ -43,7 +41,7 @@ spec:
 +
 *Note:* Do not modify the content for the `clusterSelector` later in the file that applies to the `local-cluster`.
  
-.. Apply the policy while you are logged in to your hub cluster by entering the following command:
+. Apply the policy while you are logged in to your hub cluster by entering the following command:
 +
 ----
 oc -n <namespace> apply -f ./policy-persistent-data-management.yaml
@@ -51,20 +49,24 @@ oc -n <namespace> apply -f ./policy-persistent-data-management.yaml
 +
 Replace `namespace` with a namespace on your hub cluster.
 
-. For Rsync-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and the `sshKeys` to ensure that the transferred data is secure.
+[#volsync-rsync-clusters]
+== Configiring Rsync replication across managed clusters
+
+For Rsync-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and the `sshKeys` to ensure that the transferred data is secure.
 +
-**Note:** You must copy the values for `address` and `sshKeys` from the destination to the source, so configure the destination before you configure the source. 
+**Note:** You must copy the values for `address` and `sshKeys` from the destination to the source, so configure the destination before you configure the source.
 
-.. Configure your destination cluster named `destination`.
+This example provides the steps to configure an Rsync replication from a PVC on the `source` cluster in the `source` namespace to a PVC on a `destination` cluster in the `dest` namespace.
 
-... Run the following commands on the destination cluster to create and prepare the namespace:
+. Configure your destination cluster named `destination`.
+
+.. Run the following command on the destination cluster to create the namespace:
 +
 ----
 $ kubectl create ns dest
-$ kubectl create -n dest -f examples/rsync/volsync_v1alpha1_replicationdestination_remotecluster.yaml
 ----
 
-... Add the following information to the destination cluster
+.. Copy the following YAML content to create a new file on the destination cluster:
 +
 [source,yaml]
 ----
@@ -94,7 +96,13 @@ For this example, the `ServiceType` value of `LoadBalancer` is used. The load ba
 + 
 The `storageClassName` and `volumeSnapshotClassName` are optional parameters. If you are using a storage class and volume snapshot class name that are different than the defaults for your environment, specify those values. 
 
-... Run the following command to copy the value of `.status.rsync.address`:
+.. Run the following command on the destination cluster to create the `replicationdestination` resource:
++
+----
+$ kubectl create -n dest -f examples/rsync/volsync_v1alpha1_replicationdestination_remotecluster.yaml
+----
+
+.. Run the following command to copy the value of `.status.rsync.address`:
 +
 ----
 $ ADDRESS=`kubectl get replicationdestination database-destination -n dest --template={{.status.rsync.address}}`
@@ -107,7 +115,7 @@ This value is automatically generated when the custom resource is created. You w
 a831264645yhrjrjyer6f9e4a02eb2-5592c0b3d94dd376.elb.us-east-1.amazonaws.com
 ----
 
-... Run the following command to copy the name of the secret and the contents of the secret that are provided as the value of `.status.rsync.sshKeys`.
+.. Run the following command to copy the name of the secret and the contents of the secret that are provided as the value of `.status.rsync.sshKeys`.
 +
 ----
 $ SSHKEYS=`kubectl get replicationdestination database-destination -n dest  --template={{.status.rsync.sshKeys}}`
@@ -120,7 +128,7 @@ You will have to enter it on the source cluster when you configure the source. T
 volsync-rsync-dst-src-database-destination
 ----
 
-.. Deploy the database. For this example, a database is copied. You might use an application. 
+. Deploy the database. For this example, a database is copied. You might use an application. 
 
 ... On the source cluster, `source-cluster`, enter the following commands to create and prepare the database: 
 +
@@ -129,7 +137,7 @@ $ kubectl create ns source
 $ kubectl create -n source -f examples/source-database
 ----
 
-... Run the following command to confirm that the database is running:
+.. Run the following command to confirm that the database is running:
 +
 ----
 $ kubectl get pods -n source
@@ -142,7 +150,7 @@ NAME                    READY   STATUS    RESTARTS   AGE
 mysql-8b9c5c8d8-24w6g   1/1     Running   0          17s
 ----
 
-.. Create the `ReplicationSource` items.
+. Create the `ReplicationSource` items.
 +
 Your replication source file should look similar to the following example, when you are complete: 
 +
@@ -182,24 +190,24 @@ The `storageClassName` and `volumeSnapshotClassName` are optional parameters. If
 
 You can now set up the synchronization method of the persistent volume.
 
-... Copy the SSH secret from the destination cluster by entering the following command on the destination cluster:
+.. Copy the SSH secret from the destination cluster by entering the following command on the destination cluster:
 +
 ----
 $ kubectl get secret -n dest $SSHKEYS -o yaml > /tmp/secret.yaml
 ----
 
-... Open the secret file in the `vi` editor by entering the following command:
+.. Open the secret file in the `vi` editor by entering the following command:
 +
 ----
 $ vi /tmp/secret.yaml
 ----
 
-... In the open secret file on the destination cluster, make the following changes:
+.. In the open secret file on the destination cluster, make the following changes:
 +
 * Change the namespace to the namespace of your source cluster. For this example, it is `source`.
 * Remove the owner references (`.metadata.ownerReferences`).
 
-... On the source cluster, create the secret file by entering the following command on the source cluster:
+.. On the source cluster, create the secret file by entering the following command on the source cluster:
 +
 ----
 $ kubectl create -f /tmp/secret.yaml
@@ -207,7 +215,7 @@ $ kubectl create -f /tmp/secret.yaml
 +
 *Note:* In this example, the source and the destination PVs are on the same server. If your PVs are not on the same server, then copy your secret file to the server of your source PV. 
 
-... On the source cluster, modify the `volsync_v1alpha1_replicationsource_remotecluster.yaml` file by replacing the value of the `address` and `sshKeys` in the `ReplicationSource` object with the values that you noted from the destintation cluster by entering the following commands:
+.. On the source cluster, modify the `volsync_v1alpha1_replicationsource_remotecluster.yaml` file by replacing the value of the `address` and `sshKeys` in the `ReplicationSource` object with the values that you noted from the destintation cluster by entering the following commands:
 +
 ----
 $ sed -i "s/my.host.com/$ADDRESS/g" examples/rsync/volsync_v1alpha1_replicationsource_remotecluster.yaml
@@ -215,7 +223,7 @@ $ sed -i "s/mysshkeys/$SSHKEYS/g" examples/rsync/volsync_v1alpha1_replicationsou
 $ kubectl create -n source -f examples/rsync/volsync_v1alpha1_replicationsource_remotecluster.yaml
 ----
 
-... Verify that the replication completed by running the following command on the `ReplicationSource` object:
+.. Verify that the replication completed by running the following command on the `ReplicationSource` object:
 +
 ----
 $ kubectl describe ReplicationSource -n source database-source
@@ -243,7 +251,7 @@ Status:
 +
 If the `Last Sync Time` has no time listed, then the replication is not complete. 
 
-... Create a database in the `mysql` pod that is running in the source namespace by entering the following commands on the destination cluster:
+.. Create a database in the `mysql` pod that is running in the source namespace by entering the following commands on the destination cluster:
 +
 ----
 $ kubectl exec --stdin --tty -n source `kubectl get pods -n source | grep mysql | awk '{print $1}'` -- /bin/bash
@@ -274,20 +282,20 @@ $ kubectl get replicationdestination database-destination -n dest --template={{.
 ----
 Note the value of the latest snapshot for when you create your PVC. 
 
-... Create the Deployment, Service, PVC, and Secret by entering the following commands on the destination cluster:
+.. Create the Deployment, Service, PVC, and Secret by entering the following commands on the destination cluster:
 +
 ----
 $ sed -i 's/snapshotToReplace/volsync-dest-database-destination-20201203174504/g' examples/destination-database/mysql-pvc.yaml
 $ kubectl create -n dest -f examples/destination-database/
 ----
 
-... Validate that the `mysql` pod is running in the environment by entering the following command:
+.. Validate that the `mysql` pod is running in the environment by entering the following command:
 +
 ----
 $ kubectl get pods -n dest
 ----
 
-... Connect to the `mysql` pod and list the databases to verify that the synchronized database exists by entering the following command:
+.. Connect to the `mysql` pod and list the databases to verify that the synchronized database exists by entering the following command:
 +
 ----
 $ kubectl exec --stdin --tty -n dest `kubectl get pods -n dest | grep mysql | awk '{print $1}'` -- /bin/bash
