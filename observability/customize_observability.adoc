@@ -21,18 +21,15 @@ Collect logs about new information that is created for observability resources w
 [#creating-custom-rules]
 == Creating custom rules
 
-You can create custom rules for the observability installation by adding Prometheus https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
+Create custom rules for the observability installation by adding Prometheus https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
 
 ** Recording rules provide you the ability to precalculate, or computate expensive expressions as needed. The results are saved as a new set of time series.
 ** Alerting rules provide you the ability to specify the alert conditions based on how an alert should be sent to an external service.
 
 Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. *Note*: When you update your custom rules, `observability-thanos-rule` pods are restarted automatically.
 
-Complete the following steps to create a custom rule: 
+Create a ConfigMap named `thanos-ruler-custom-rules` in the `open-cluster-management-observability` namespace. The key must be named, `custom_rules.yaml`, as shown in the following example. You can create multiple rules in the configuration.
 
-. Log in to your {product-title-short} hub cluster.
-. Create a ConfigMap named `thanos-ruler-custom-rules` in the `open-cluster-management-observability` namespace. The key must be named, `custom_rules.yaml`, as shown in the following example. You can create multiple rules in the configuration:
-+
 * By default, the out-of-the-box alert rules are defined in the `thanos-ruler-default-rules` ConfigMap in the `open-cluster-management-observability` namespace. 
 +
 For example, you can create a custom alert rule that notifies you when your CPU usage passes your defined value. Your YAML might resemble the following content: 
@@ -74,12 +71,7 @@ data:
 +
 *Note*: If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, the configuration is automatically reloaded. The configuration is reloaded due to the `config-reload` within the `observability-thanos-ruler` sidecar.
 
-. If you want to verify that the alert rules is functioning appropriately, complete the following steps:
-.. Access your Grafana dashboard and select the *Explore* icon.
-.. In the _Metrics_ exploration bar, type in `ALERTS` and run the query. All the `ALERTS` that are currently in pending or initiating state in the system are displayed.
-.. If your alert is not displayed, revisit the rule to see if the expression is accurate.
-
-A custom rule is created.
+To verify that the alert rules are functioning appropriately, launch the Grafana dashboard, navigate to the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if the alert is initiated.
 
 [#configuring-alertmanager]
 == Configuring AlertManager
@@ -128,17 +120,10 @@ Your changes are applied immediately after it is modified. For an example of Ale
 
 Add metrics to the `metrics_list.yaml` file, to be collected from managed clusters.
 
-Complete the following steps to add custom metrics:
+Before you add a custom metric, verify that `mco observability` is enabled with the following command: `oc get mco observability -o yaml`. Check for the following message in the `status.conditions.message` reads: `Observability components are deployed and running`.
 
-. Log in to your cluster.
-. Verify that `mco observability` is enabled. Check for the following message in the `status.conditions.message` reads: `Observability components are deployed and running`. Run the following command:
-+
-----
-oc get mco observability -o yaml
-----
+Create a file named `observability-metrics-custom-allowlist.yaml` and add the name of the custom metric to the `metrics_list.yaml` parameter. Your YAML for the ConfigMap might resemble the following content:
 
-. Create a file named `observability-metrics-custom-allowlist.yaml` with the following content. Add the name and recording rule of the custom metric to the `metrics_list.yaml` parameter. For example, collect `node_memory_MemTotal_bytes` and `apiserver_request_duration_seconds:histogram_quantile_90` from your managed cluster. Your YAML for the ConfigMap might resemble the following content:
-+
 [source,yaml]
 ----
 kind: ConfigMap
@@ -154,81 +139,34 @@ data:
       expr: histogram_quantile(0.90,sum(rate(apiserver_request_duration_seconds_bucket{job=\"apiserver\",
         verb!=\"WATCH\"}[5m])) by (verb,le))
 ----
-+
+
 ** In the `names` section, add the name of the custom metrics that is to be collected from the managed cluster.
 ** In the `rules` section, enter only one value for the `expr` and `record` parameter pair to define the query expression. The metrics are collected as the name that is defined in the `record` parameter from your managed cluster. The metric value returned are the results after you run the query expression.
 ** The `names` and `rules` sections are optional. You can use either one or both of the sections.
 
-. Create the `observability-metrics-custom-allowlist` ConfigMap in the 
-`open-cluster-management-observability` namespace by running the following command:
-+
-----
-oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml
-----
+Create the `observability-metrics-custom-allowlist` ConfigMap in the `open-cluster-management-observability` namespace with the following command: `oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml`.
 
-. Verify that your custom metric is being collected from your managed clusters by viewing the metric on the Grafana dashboard. From your hub cluster, select the **Grafana dashboard** link.
-
-. From the Grafana search bar, enter the metric that you want to view.
-Data from your custom metric is collected.
-
-. If the updated metrics is used in the Grafana dashboard, see xref:../observability/design_grafana.adoc#designing-your-grafana-dashboard[Designing your Grafana dashboard] to update your dashboard.
+Verify that data from your custom metric is being collected by querying the metric from the *Explore* page, from the Grafana dashboard. You can also use the custom metrics in your own dashboard. For more information about viewing the dashboard, see xref:../observability/design_grafana.adoc#designing-your-grafana-dashboard[Designing your Grafana dashboard].
 
 [#removing-default-metrics]
 == Removing default metrics
 
-If you want data to not be collected for a specific metric, you can remove the metric from the `observability-metrics-custom-allowlist.yaml` file. When you remove a metric, you are also deleting the metric. You can add the name of the default metric to the `metrics_list.yaml` parameter with a hyphen `-` at the start of the metric name.
+If you want data to not be collected in your managed cluster for a specific metric, remove the metric from the `observability-metrics-custom-allowlist.yaml` file. When you remove a metric, the metric data is not collected in your managed clusters. As mentioned previously, first verify that `mco observability` is enabled.
 
-Complete the following steps to delete default metrics:
+Add the name of the default metric to the `metrics_list.yaml` parameter with a hyphen `-` at the start of the metric name. For example, `-cluster_infrastructure_provider`.
 
-. Log in to your cluster.
-. Verify that `mco observability` is enabled. Check for the following message in the `status.conditions.message` reads: `Observability components are deployed and running`. Run the following command:
-+
-----
-oc get mco observability -o yaml
-----
+Create the `observability-metrics-custom-allowlist` ConfigMap in the 
+`open-cluster-management-observability` namespace with the following command: `oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml`.
 
-. In the `observability-metrics-custom-allowlist.yaml` file, add the name of the default metric to the `metrics_list.yaml` parameter with a hyphen `-` at the start of the metric name. For example, add `-cluster_infrastructure_provider` to the metric list. Your YAML for the ConfigMap might resemble the following content:
-+
-[source,yaml]
-----
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: observability-metrics-custom-allowlist
-data:
-  metrics_list.yaml: |
-    names:
-      - node_memory_MemTotal_bytes
-      - -cluster_infrastructure_provider
-----
-
-. Create the `observability-metrics-custom-allowlist` ConfigMap in the 
-`open-cluster-management-observability` namespace by running the following command:
-+
-----
-oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml
-----
-
-. Verify that your default metric is not being collected from your managed clusters by viewing the metric on the Grafana dashboard. From your hub cluster, select the **Grafana dashboard** link.
-
-. From the Grafana search bar, enter the metric that you want to check.
-Data from your default metric is no longer being collected.
-
-. If the updated metrics is used in the Grafana dashboard, you can remove the metric from the ConfigMap. See xref:../observability/design_grafana.adoc#design-your-grafana-dashboard-with-configmap[Design your Grafana dashboard with a ConfigMap] to update your dashboard.
+Verify that the specific metric is not being collected from your managed clusters. When you query the metric from the Grafana dashboard, the metric is not displayed.
 
 [#adding-advanced-config]
 == Adding _advanced_ configuration
 
-You can add the `advanced` configuration section to update the retention for each observability component. Complete the following steps:
+Add the `advanced` configuration section to update the retention for each observability component, according to your needs. 
 
-. Log in to your cluster.
-. Edit the `mco observability`. Run the following command:
-+
-----
-oc edit mco observability -o yaml
-----
-. Add the `advanced` configuration into the `mco observability` YAML. Your YAML file might resemble the following contents:
-+
+Edit the `MultiClusterObservability` CR and add the `advanced` section with the following command: `oc edit mco observability -o yaml`. Your YAML file might resemble the following contents:
+
 [source,yaml]
 ----
 spec:
@@ -252,15 +190,8 @@ For descriptions of all the parameters that can added into the `advanced` config
 [#updating-replicas]
 == Updating the _multiclusterobservability_ CR replicas from the console
 
-If your workload increases, increase the number of replicas of your observability pods. Complete the following steps to update your replicas:
+If your workload increases, increase the number of replicas of your observability pods. Navigate to the {ocp} console from your hub cluster. Locate the `multiclusterobservability` custom resource (CR), and update the `replicas` parameter value for the component where you want to change the replicas. Your updated YAML might resemble the following content:
 
-. Log in to your {product-title-short} cluster.
-. From the console header, click the _Applications_ button > *{ocp-short}*.
-. From the {ocp-short} navigation menu, select *Administration* > *CustomerResourceDefinitions*.
-. Search for `multiclusterobservability`.
-. From the _Instances_ tab, select the `observability` instance.
-. Edit the YAML file in the _YAML_ tab. Your updated YAML might resemble the following content:
-+
 [source,yaml]
 ----
 spec:
@@ -268,26 +199,16 @@ spec:
       receive:
          replicas: 6
 ----
-+
-This means that there are six receivers in the environment. 
 
 For more information about the parameters within the `mco observability` CR, see the link:../apis/observability.json.adoc#observability-api[Observability API].
 
 [#forward-alerts]
 == Forwarding alerts
 
-After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to the hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system. Complete the following steps to access the `alertmanager-config` YAML file:
+After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to the hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system. 
 
-. Log in to your {product-title-short} hub cluster as an administrator.
-. From the navigation menu, view your managed clusters by selecting *Infrastructure* > *Clusters*.
-. Select the managed cluster that you want to view. 
-. From the _Details_ tab, select the link for the {ocp-short} _Console URL_. 
-. From the {ocp-short} menu navigation, select *Secrets*. Select the `alertmanager-config` secret to view the YAML file.
-+
-*Note*: If you make changes to the `alertmanager-config` secret, the evaluation interval is about one minute.
+View the following example of the `alertmanager-config` YAML file:
 
-. View the following example of the `alertmanager-config` YAML file:
-+
 [source,yaml]
 ----
 global:
@@ -304,59 +225,41 @@ receivers:
     text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
 ----
 
-To learn more, see the https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation]. 
+To learn more, see the https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation].  
 
 [#viewing-and-exploring-data]
 == Viewing and exploring data
 
-View the data from your managed clusters by accessing Grafana. Complete the following steps to view the Grafana dashboards from the console:
+View the data from your managed clusters by accessing Grafana from the hub cluster. You can query specific alerts and add filters for the query. 
 
-. Log in to your {product-title-short} hub cluster. 
-. From the navigation menu, click *Infrastructure* > *Clusters*. 
-. Access your Grafana dashboards by clicking the *Grafana* link.
-. Access the Prometheus metric explorer by selecting the *Explore* icon from the Grafana navigation menu.
-. To query metrics that come from a single node cluster, add the following label in the query expression: `{clusterType="SNO"}`. For example, to _cluster_infrastructure_provider_ from a single node cluster, use the following query expression: `cluster_infrastructure_provider{clusterType="SNO"}`
-+
+For example, to _cluster_infrastructure_provider_ from a single node cluster, use the following query expression: `cluster_infrastructure_provider{clusterType="SNO"}`
+
 *Note*: Do not set the `ObservabilitySpec.resources.CPU.limits` parameter if observability is enabled on single node managed clusters. When you set the CPU limits, it causes the observability pod to be counted against the capacity for your managed cluster. See https://github.com/openshift/enhancements/blob/master/enhancements/workload-partitioning/management-workload-partitioning.md#management-workload-partitioning[Management Workload Partioning] for more information.
 
 [#viewing-etcd-grafana]
 === Viewing the etcd table
 
-You can view the etcd table from the hub cluster dashboard in Grafana by completing the following steps:
+View the etcd table from the hub cluster dashboard in Grafana to learn the stability of the etcd as a data store. 
 
-. Log in to your {product-title-short} hub cluster.
-. From the navigation menu, select *Overview*. Click the *Grafana* link.
-. View the _etcd_ table from the hub cluster dashboard to see the _Leader election changes_ across managed clusters.
-. Select a specific cluster to view more details.
+Select the Grafana link from your hub cluster to view the _etcd_ table data, which is collected from your hub cluster. The _Leader election changes_ across managed clusters are displayed.
 
 [#viewing-cluster-fleet-service-level-overview-on-k8s-api-server-grafana]
 === Viewing the cluster fleet service-level overview for the Kubernetes API server dashboard
 
-You can view the cluster fleet Kubernetes API service-level overview from the hub cluster dashboard in Grafana by completing the following steps:
+View the cluster fleet Kubernetes API service-level overview from the hub cluster dashboard in Grafana.
 
-. Log in to your {product-title-short} hub cluster.
-. From the navigation menu, select *Overview*. Click the *Grafana* link.
-. Access the managed dashboard menu by selecting *Kubernetes* > *Service-Level Overview* > *API Server*.
-. View the _Fleet Overview_ status panel to see the total number of clusters that are exceeding or meeting the targeted _service-level objective_ (SLO) value for the past seven or 30-day period.
-. View the _Top Cluster_ table to view the `topk` clusters service-level objective within the cluster fleet. The results are sorted in ascending order for clusters that are exceeding the defined SLO to meeting the SLO.
-. Select an _offending_ or _non-offending_ cluster from the `topk` cluster table to view individual cluster-view dashboards.
-. View the _API Server Request Duration_ graph from the hub cluster dashboard to see the _service level indicator_ across managed clusters.
-. Select all or a subset of cluster to view more details.
-. Select a window period to view more details for the past seven or 30-day.
-. Select all or top N number to view the topk cluster's _service-level overview_.
+After you navigate to the Grafana dashboard, access the managed dashboard menu by selecting *Kubernetes* > *Service-Level Overview* > *API Server*. The _Fleet Overview_ and _Top Cluster_ details are displayed. 
+
+View the total number of clusters that are exceeding or meeting the targeted _service-level objective_ (SLO) value for the past seven or 30-day period, offending and non-offending clusters, and API Server Request Duration.
 
 [#viewing-cluster-service-level-overview-on-k8s-api-server-grafana]
 === Viewing the cluster service-level overview for the Kubernetes API server dashboard
 
-You can view the Kubernetes API service-level overview table from the hub cluster dashboard in Grafana by completing the following steps:
+View the Kubernetes API service-level overview table from the hub cluster dashboard in Grafana. 
 
-. Log in to your {product-title-short} hub cluster.
-. From the navigation menu, select *Overview*. Click the *Grafana* link.
-. Access the managed dashboard menu by selecting *Kubernetes* > *Service-Level Overview* > *API Server* > *Cluster*.
-. View the _Service-Level Overview_ status panel to see the _service-level objective_ for the past seven and 30-day period.
-. View the error budget for the past seven or 30-day period from the _Error Budget for 7 Days_ or _Error Budget for 30 Days_ gauge panels to see more details. To see the downtime remaining within the period for the service-level objective, view the _Downtime status_ panels.
-. View the _Trend_ graph and table from the hub cluster dashboard to see the _service-level indicator_ for the selected cluster.
-. Select a specific cluster to view more details.
+After you navigate to the Grafana dashboard, access the managed dashboard menu by selecting *Kubernetes* > *Service-Level Overview* > *API Server*. The _Fleet Overview_ and _Top Cluster_ details are displayed.
+
+View the error budget for the past seven or 30-day period, the remaining downtime, and trend.
 
 [#disable-metrics-collector]
 == Disabling _metrics-collector_
@@ -368,9 +271,7 @@ You can disable the `metrics-collector`, which stops it from collecting the data
 
 Disable the `metrics-collector` pod to stop data from being collected and sent to the observability service on the {product-title-short} hub cluster. 
 
-When you disable the `metrics-collector`, the deployment is scaled to zero and all managed clusters are disabled. View the following options to disable the `metrics-collector`:
-
-Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
+When you disable the `metrics-collector`, the replica of the deployment is scaled to zero and all managed clusters are disabled. Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
 
 [source,yaml]
 ----
@@ -384,21 +285,9 @@ spec:
 [#disable-metrics-collector-on-a-single-cluster]
 === Disabling _metrics-collector_ on a single cluster
 
-You can disable the `metrics-collector` on specific managed clusters by completing one of the following procedures:
+Disable the `metrics-collector` by removing observability components on specific managed clusters. Add the `observability: disabled` label to the `managedclusters.cluster.open-cluster-management.io` custom resource.
 
-* Add the `observability: disabled` label to the custom resource, `managedclusters.cluster.open-cluster-management.io`.
-* From the {product-title-short} console _Clusters_ page, add the `observability: disabled` label by completing the following steps:
-+
-. In the {product-title-short} console navigation, select *Infrastructure* > *Clusters*.
-. Select the name of the cluster for which you want to disable data collection that is sent to observability. 
-. Select *Labels*.
-. Create the label that disables the observability collection by adding the following label:
-+
-----
-observability=disabled
-----
-. Select *Add* to add the label.
-. Select *Done* to close the list of labels. 
+From the {product-title-short} console _Clusters_ page, add the `observability=disabled` label to the specified cluster.
 
 *Note*: When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
 
