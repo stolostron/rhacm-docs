@@ -1,0 +1,26 @@
+---
+name: Linting
+
+on:
+  pull_request:
+
+jobs:
+  asciidoc:
+    name: 'Build AsciiDocs'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
+      - name: Build each .adoc with Asciidoctor, fail on WARN or above
+        run: |
+          FAILED=0
+          for doc in $(find $(pwd) -name '*.adoc' -printf "%P\n"); do
+            echo "Building $doc"
+            if ! docker run -v $(pwd):/rhacm-docs/ asciidoctor/docker-asciidoctor@sha256:59a7e165ed6375dd5dfb930cb90019f1ccaee39787dc97a3918d7022a7503543 asciidoctor --failure-level WARN --trace --verbose --warnings /rhacm-docs/$doc; then
+                FAILED=$((FAILED+1))
+            fi
+          done
+          if (( FAILED > 0 )); then
+            echo "Build errors were detected in $FAILED file(s), see per-file details above."
+            exit 1
+          fi
