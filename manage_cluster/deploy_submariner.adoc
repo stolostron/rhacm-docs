@@ -37,3 +37,102 @@ Replace `_managedcluster-name_` with the name of the managed cluster that you wa
 Replace `_ManagedClusterSet-name_` with the name of the `ManagedClusterSet` to which you want to add the managed cluster. 
 
 . Repeat those steps for all of the managed clusters that you want to add to the `ManagedClusterSet`.
+
+[#deploying-submariner-aws]
+== Deploying Submariner to an AWS {ocp-short} cluster
+
+{product-title} version 2.2 supports automatic deployment of Submariner to managed {ocp-short} cluster that are deployed on Amazon Web Services.
+
+Complete the following steps to deploy Submariner:
+
+. Log on to your hub cluster with cluster administrator permissions.
++
+* For a cluster that was created with {product-title-short}, continue with step 2.
+* For a cluster that was imported to {product-title-short}, skip to step 3.
+
+. For AWS clusters that were created by {product-title}, create a file called `submarinerconfig.yaml` with the following `SubmarinerConfig` content: 
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+  name: submariner
+  namespace: <your-cluster-namespace>
+spec:
+  credentialsSecret:
+    name: <your-cluster-name>-aws-creds 
+  subscriptionConfig:
+    channel: alpha
+    startingCSV: submariner.v0.8.1
+----
++
+* Replace `your-cluster-namespace` with your cluster's namespace.
++
+* Replace `your-cluster-name` with the name of your cluster. The file for `your-cluster-namespace` `aws-cloud-credentials` is stored in the Hive cluster namespace.
++
+Skip to step 4.
+
+. For AWS clusters that were created by {ocp-short} but imported into {product-title-short}, create the `aws-cloud-credentials`.
+
+.. Apply the following secret to the managed cluster namespace.
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aws-cloud-credentials
+  namespace: <your-cluster-namespace>
+type: Opaque
+data:
+  aws_access_key_id: <your-aws_access_key_id>
+  aws_secret_access_key: <your-aws_secret_access_key>
+----
+
+.. Create a file called `submarinerconfig.yaml` with the following `SubmarinerConfig` content:
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+  name: subconfig
+  namespace: <your-cluster-namespace>
+spec:
+  credentialsSecret:
+    name: <aws-cloud-credentials>
+  subscriptionConfig:
+    channel: alpha
+    startingCSV: submariner.v0.8.1
+----
++
+Replace `aws-cloud-credential` with the AWS credential that you created in the previous step. 
+
+. Apply the `SubmarinerConfig` resource to the managed cluster namespace on the hub cluster by entering the following command:
++
+----
+oc apply -f submarinerconfig.yaml
+----
+ 
+. Create a ManagedClusterSet on the hub cluster.
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: ManagedClusterSet
+metadata:
+  name: my-clusterset
+----
+
+. Add the managed clusters to the `ManagedClusterSet` by entering the following command:
++
+----
+oc label managedclusters <managedcluster-name> "cluster.open-cluster-management.io/clusterset=<ManagedClusterSet-name>" --overwrite
+----
+
+. Run the following command to allow {product-title-short} to automatically deploy Submariner:app-name: 
++
+----
+oc label managedclusters <managedcluster-name> "cluster.open-cluster-management.io/submariner-agent=true" --overwrite
+----
