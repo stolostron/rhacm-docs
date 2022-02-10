@@ -3,6 +3,13 @@
 
 Configuration policies support the inclusion of Golang text templates in the object definitions. These templates are resolved at runtime on the target managed cluster using configurations related to that cluster. This gives you the ability to define configuration policies with dynamic content, and inform or enforce Kubernetes resources that are customized to the target cluster.
 
+* <<prerequisites-templatized,Prerequisite>>
+* <<template-functions,Template functions>>
+* <<hub-templates,Support for hub cluster templates in configuration policies>>
+** <<template-processing,Template processing>>
+** <<special-annotation-processing,Special annotation for reprocessing>>
+** <<bypass-template-processing,Bypass template processing>>
+
 [#prerequisites-templatized]
 == Prerequisite
 
@@ -361,3 +368,72 @@ spec:
         {{ (fromConfigMap "site-config" "site1" "enabled")  | toBool }}
 ----
 
+[#hub-templates]
+== Support for hub cluster templates in configuration policies
+
+{product-title-short} also supports hub cluster templates to define configuration policies that are dynamically customized to the target cluster. This reduces the need to create separate policies for each target cluster or hardcode configuration values in the policy definitions. 
+
+Hub cluster templates are based on Golang text template specifications, and the `{{hub … hub}}` delimiter indicates a hub cluster template in a configuration policy.
+
+*Important:* If you use hub cluster templates to propagate secrets or other sensitive data, the sensitive data exists in the managed cluster namespace on the hub cluster and on the managed clusters where that policy is distributed. The template content is expanded in the policy, and policies are not encrypted by the {ocp-short} ETCD encryption support.
+
+[#template-processing]
+=== Template processing
+
+A configuration policy definition can contain both hub cluster and managed cluster templates. Hub cluster templates are processed first on the hub cluster, then the policy definition with resolved hub cluster templates is propagated to the target clusters. On the managed cluster, the `ConfigPolicyController` processes any managed cluster templates in the policy definition and then enforces or verifies the fully resolved object definition.
+
+[#special-annotation-processing]
+=== Special annotation for reprocessing
+
+Policies are processed on the hub cluster only upon creation or after an update. Therefore, hub cluster templates are only resolved to the data in the referenced resources upon policy creation or update. Any changes to the referenced resources are not automatically synced to the policies. 
+
+A special annotation, `policy.open-cluster-management.io/trigger-update` can be used to indicate changes to the data referenced by the templates. Any change to the special annotation value initiates template processing, and the latest contents of the referenced resource are read and updated in the policy definition that is the propagator for processing on managed clusters. A typical way to use this annotation is to increment the value by one each time.
+
+See the following table for a comparison of hub cluster and managed cluster templates:
+
+.Comparison table of hub cluster and managed cluster
+|===
+| Templates | Hub cluster | Managed cluster 
+
+| Syntax
+| Golang text template specification
+| Golang text template specification
+
+| Delimiter
+| {{hub … hub}}
+| {{ … }}
+
+| Functions
+| A set of template functions that support dynamic access to Kubernetes resources and string manipulation. See <<template-functions,Template functions>> for more information. *Note*: The `fromSecret` template function is not available.
+| A set of template functions support dynamic access to Kubernetes resources and string manipulation. See <<template-functions,Template functions>> for more information.
+
+| Function output storage
+| The output of template functions are stored in `Policy` resource objects in each applicable managed cluster namespace on the hub cluster, before it is synced to the managed cluster. This means that any sensitive results from template functions are readable by anyone with read access to the `Policy` resource objects on the hub cluster, and read access with `ConfigurationPolicy` resource objects on the managed clusters. Additionally, if link:https://docs.openshift.com/container-platform/4.9/security/encrypting-etcd.html[etcd encryption] is enabled, the `Policy` and `ConfigurationPolicy` resource objects are not encrypted. It is best to carefully consider this when using template functions that return sensitive output (e.g. from a secret).
+| The output of template functions are not stored in policy related resource objects.
+
+| Context
+| A `.ManagedClusterName` variable is available, which at runtime, resolves to the name of the target cluster where the policy is propagated.
+| No context variables
+
+| Processing
+| Processing occurs at runtime on the hub cluster during propagation of replicated policies to clusters. Policies and the hub cluster templates within the policies are processed on the hub cluster only when templates are created or updated.
+| Processing occurs in the `ConfigPolicyController` on the managed cluster. Policies are processed periodically, which automatically updates the resolved object definition with data in the referenced resources.
+
+| Access control
+| You can only reference Kuberenetes resources that are in the same namespace as the `Policy` resource.
+| You can reference any resource on the cluster.
+
+| Processing errors
+| Errors from the hub cluster templates are displayed as violations on the managed clusters the policy applies to.
+| Errors from the managed cluster templates are displayed as violations on the specific target cluster where the violation occurred.
+|===
+
+
+[#bypass-template-processing]
+=== Bypass template processing
+
+You might create a policy that contains a template that is not intended to be processed by {product-title-short}. By default, {product-title-short} processses all templates. 
+
+To bypass template processing for your hub cluster, you must change `{{ template content }}` to `{{ '{{ template content }}' }}`.
+
+Alternatively, you can add the following annotation in the `ConfigurationPolicy` section of your `Policy`: `policy.open-cluster-management.io/disable-templates: "true"`. When this annotation is included, the previous workaround is not necessary. Template processing is bypassed for the `ConfigurationPolicy`.
