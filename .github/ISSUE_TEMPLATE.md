@@ -7,14 +7,11 @@ title: ''
 
 ## Red Hat Advanced Cluster Management for Kubernetes documentation issue
 
-## Product release(s)
-- [ ] [ACM 2.0 GA] 
-- [ ] [ACM 1.0 tech preview]
+### **THIS IS FOR EXTERNAL CUSTOMERS ONLY!**
 
-**THIS IS FOR EXTERNAL USERS ONLY** 
+### **THIS IS FOR EXTERNAL CUSTOMERS ONLY!**
 
-
-Internal users please open issues in the [developer backlog](https://github.com/open-cluster-management/backlog/issues/new/choose), as normal.
+Red Hatters please open issues in the [developer backlog](https://github.com/open-cluster-management/backlog/issues/new/choose), or BugZilla if you are not an authorized user for the backlog.
 
 **Note:** Doc team will update the current version and the two previous versions (n-2). For earlier versions, we will address only Sev 1, customer-reported bugs for releases in support.
 
