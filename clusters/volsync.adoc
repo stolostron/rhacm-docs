@@ -50,7 +50,7 @@ oc -n <namespace> apply -f ./policy-persistent-data-management.yaml
 Replace `namespace` with a namespace on your hub cluster.
 
 [#volsync-rsync-clusters]
-== Configiring Rsync replication across managed clusters
+== Configuring Rsync replication across managed clusters
 
 For Rsync-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and the `sshKeys` to ensure that the transferred data is secure.
 +
@@ -58,7 +58,7 @@ For Rsync-based replication, configure custom resources on the source and destin
 
 This example provides the steps to configure an Rsync replication from a PVC on the `source` cluster in the `source` namespace to a PVC on a `destination` cluster in the `dest` namespace.
 
-. Configure your destination cluster named `destination`.
+. Configure your destination cluster.
 
 .. Run the following command on the destination cluster to create the namespace:
 +
@@ -66,7 +66,7 @@ This example provides the steps to configure an Rsync replication from a PVC on 
 $ kubectl create ns dest
 ----
 
-.. Copy the following YAML content to create a new file called `replication_destination.yaml` on the destination cluster:
+.. Copy the following YAML content to create a new file called `replication_destination.yaml`:
 +
 [source,yaml]
 ----
@@ -101,15 +101,23 @@ The `storageClassName` and `volumeSnapshotClassName` are optional parameters. If
 ----
 $ kubectl create -n dest -f replication_destination.yaml
 ----
++
+After the `replicationdestination` resource is created, following parameters and values are added to the resource: 
++
+|==========
+| Parameter | Value
 
-.. Run the following command to copy the value of `.status.rsync.address`:
+| `.status.rsync.address` | IP address of the destination cluster that is used to enable the source and destination clusters to communicate.
+| `.status.rsync.sshKeys` | Name of the SSH key file that enables secure data transfer from the source cluster to the destination cluster. 
+|==========
+
+.. Run the following command to copy the value of `.status.rsync.address` to use on the source cluster:
 +
 ----
 $ ADDRESS=`kubectl get replicationdestination database-destination -n dest --template={{.status.rsync.address}}`
 $ echo $ADDRESS
 ----
-+
-This value is automatically generated when the custom resource is created. You will have to enter it when you configure the source. The output should appear similar to the following output, which is for an Amazon Web Services environment:
+The output should appear similar to the following output, which is for an Amazon Web Services environment:
 +
 ----
 a831264645yhrjrjyer6f9e4a02eb2-5592c0b3d94dd376.elb.us-east-1.amazonaws.com
@@ -125,16 +133,16 @@ $ echo $SSHKEYS
 You will have to enter it on the source cluster when you configure the source. The output should be the name of your SSH keys secret file, which might resemble the following name:
 +
 ----
-volsync-rsync-dst-src-database-destination
+volsync-rsync-dst-src-destination-name
 ----
 
-. Deploy the database. For this example, a database is copied. You might use an application. 
+. Deploy your application. For this example, the application is: `application-destination`.
 
-... On the source cluster, `source-cluster`, enter the following commands to create and prepare the database: 
+.. On the source cluster, `source-cluster`, enter the following commands to create and prepare the application: 
 +
 ----
 $ kubectl create ns source
-$ kubectl create -n source -f examples/source-database
+$ kubectl create -n source -f examples/source-application
 ----
 
 .. Run the following command to confirm that the database is running:
@@ -160,34 +168,34 @@ mysql-8b9c5c8d8-24w6g   1/1     Running   0          17s
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: <database-source>
+  name: <source_name>
   namespace: <source>
 spec:
   sourcePVC: <persistent_volume_claim>
   trigger:
     schedule: "*/3 * * * *"
   rsync:
-    sshKeys: <volsync-rsync-destination-src-database-destination>
-    address: <source.host.com>
+    sshKeys: <mysshkeys>
+    address: <my.host.com>
     copyMethod: Snapshot
     storageClassName: gp2-csi
     volumeSnapshotClassName: gp2-csi
 ----
 +
-Replace `database_source` with a unique name for your replication.
+Replace `source_name` with a unique name for your replication. See step 3f for instructions on how to replace this automatically.
 +
-Replace `source` with the name of the namespace where your source is located.
+Replace `source` with the name of the namespace where your source is located. See step 3f for instructions on how to replace this automatically. 
 +
 Replace `persistent_volume_claim` with the name of your source claim.
 +
-Replace `volsync-rsync-destination-src-database-destination` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it. 
+Replace `mysshkeys` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it. 
 +
-Replace `source.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it. 
+Replace `my.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it. 
 +
 If your storage driver supports cloning, using `Clone` as the value for `copyMethod` might be a more streamlined process for the replication.
 + 
 The `storageClassName` and `volumeSnapshotClassName` are optional parameters. If you are using a storage class and volume snapshot class name that are different than the defaults for your environment, specify those values. 
-
++
 You can now set up the synchronization method of the persistent volume.
 
 .. Copy the SSH secret from the destination cluster by entering the following command against the destination cluster:
@@ -215,18 +223,22 @@ $ kubectl create -f /tmp/secret.yaml
 +
 *Note:* In this example, the source and the destination PVs are on the same server. If your PVs are not on the same server, then copy your secret file to the server of your source PV. 
 
-.. On the source cluster, modify the `volsync_v1alpha1_replicationsource_remotecluster.yaml` file by replacing the value of the `address` and `sshKeys` in the `ReplicationSource` object with the values that you noted from the destintation cluster by entering the following commands:
+.. On the source cluster, modify the `replication_source.yaml` file by replacing the value of the `address` and `sshKeys` in the `ReplicationSource` object with the values that you noted from the destintation cluster by entering the following commands:
 +
 ----
-$ sed -i "s/my.host.com/$ADDRESS/g" replication_source.yaml
-$ sed -i "s/mysshkeys/$SSHKEYS/g" replication_source.yaml
+$ sed -i "s/<my.host.com>/$ADDRESS/g" replication_source.yaml
+$ sed -i "s/<mysshkeys>/$SSHKEYS/g" replication_source.yaml
 $ kubectl create -n source -f replication_source.yaml
 ----
++
+Replace `mysshkeys` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it. 
++
+Replace `my.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it. 
 
 .. Verify that the replication completed by running the following command on the `ReplicationSource` object:
 +
 ----
-$ kubectl describe ReplicationSource -n source database-source
+$ kubectl describe ReplicationSource -n source application-source
 ----
 +
 If the replication was successful, the output should be similar to the following example:
