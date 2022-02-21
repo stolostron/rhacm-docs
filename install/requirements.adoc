@@ -51,31 +51,42 @@ Configure your network settings to allow the connections in the following sectio
 For the hub cluster networking requirements, see the following table:
 
 |===
-| Direction | Connection | Port (if specified)
+| Direction | Protocol | Connection | Port (if specified)
 
-| Outbound
-| API of the cloud provider
-| 
-
-| Outbound
-| Kubernetes API server of the provisioned managed cluster
-| 6443
-
-| Outbound
-| The channel source, including GitHub, Object Store, and Helm repository. This is only required when you are using Application lifecycle to connect to these sources.
-| 
-
-| Outbound and inbound
-| The `klusterlet-addon-workmgr` route object on the managed cluster
+| Outbound to managed cluster
+| HTTPS
+| Retrieval of logs dynamically from Search console for the pods of the managed cluster. This connection uses a service running on the managed cluster called - `klusterlet-addon-workmgr`
 | 443
 
-| Inbound
-| The kube API server of the hub cluster from the managed cluster
+| Outbound to managed cluster
+| HTTPS
+| Kubernetes API server of the managed cluster that is provisioned during installation to install the Klusterlet
 | 6443
 
-| Inbound
-| Post-commit hook from GitHub to the hub cluster. This setting is only required when you use certain application management functions.
+| Outbound to the channel source
+| HTTPS
+| The channel source, including GitHub, Object Store, and Helm repository. This is only required when you are using Application lifecycle, OpenShift GitOps or ArgoCD to connect to these sources.
+| 443
+
+| Inbound from the managed cluster
+| HTTPS
+| Managed cluster to push metrics and alerts (alerts are gathered only for managed clusters running {ocp-short} version 4.8, or later)
+| 443
+
+| Inbound from the managed cluster
+| HTTPS
+| Kube API Server of hub cluster being watched for changes from managed cluster
 | 6443
+
+| Outbound to `ObjectStore`
+| HTTPS
+| Sends metric data of Observability for long term storage in the ObjectStore **and/or** when the Cluster Backup Operator is running.
+| 443
+
+| Outbound to image repository
+| HTTPS
+| Access images for {ocp-short} and {product-title-short} 
+| 443
 
 |===
 
@@ -87,19 +98,67 @@ For the hub cluster networking requirements, see the following table:
 For the managed cluster networking requirements, see the following table:
 
 |===
-| Direction | Connection | Port (if specified)
+| Direction | Protocol | Connection | Port (if specified)
 
-| Outbound and inbound
-| Kubernetes API server of the hub cluster
+| Inbound from the hub cluster
+| HTTPS
+| Sending of logs dynamically for the pods of the managed cluster. This connection uses a service running on the managed cluster called - `klusterlet-addon-workmgr`
+| 443
+
+| Inbound from the hub cluster
+| HTTPS
+| Kubernetes API server of the managed cluster that is provisioned during installation to install the Klusterlet
 | 6443
 
-| Outbound
-| The managed cluster to the channel source, which includes GitHub, Object Store, and Helm repository. This is only required when you are using application lifecycle to connect to these sources.
-| 
-
-| Inbound
-| The `klusterlet-addon-workmgr` service endpoint from the hub cluster
+| Outbound to image repository
+| HTTPS
+| Access images for {ocp-short} and {product-title-short} 
 | 443
+
+| Outbound to the hub cluster
+| HTTPS
+| Managed cluster to push metrics and alerts (alerts are gathered only for managed clusters running {ocp-short} version 4.8, or later)
+| 443
+
+| Outbound to the hub cluster
+| HTTPS
+| Watches the Kubernetes API server of the hub cluster for changes
+| 6443
+
+| Outbound to the channel source
+| HTTPS
+| The managed cluster to the channel source, which includes GitHub, Object Store, and Helm repository. This is only required when you are using application lifecycle to connect to these sources.
+| 443
+
+|===
+
+[#network-configuration-infra-operator]
+=== Additional networking requirements when installing using the infrastructure operator
+
+When you are installing bare metal managed clusters with the Infrastructure Operator, see the following table for the additional networking requirements:
+
+|===
+| Direction | Protocol | Connection | Port (if specified)
+
+| Hub cluster outbound to the ISO/rootfs image repository
+| HTTPS (HTTP in a disconnected environment
+| Used to create an ISO image on the {product-title-short} hub
+| 443 (80 in disconnected environments)
+
+| Hub cluster outbound to BMC interface at single node {ocp-short} managed cluster
+| HTTPS (HTTP in disconnected environment)
+| Boot the {ocp-short} cluster
+| 443
+
+| Outbound from the {ocp-short} managed cluster to the hub cluster
+| HTTPS
+| Reports hardware information using the `assistedService` route 
+| 443
+
+| Outbound from the {ocp-short} managed cluster to the ISO/rootfs image repository
+| HTTP
+| Downloads the rootfs image
+| 80
 
 |===
 
@@ -109,21 +168,41 @@ For the managed cluster networking requirements, see the following table:
 Clusters that are using Submariner require three open ports. The following table shows which ports you might use:
 
 |===
-| Direction | Connection | Port (if specified)
+| Direction | Protocol | Connection | Port (if specified)
 
 | Outbound and inbound
+| UDP
 | Each of the managed clusters
-| 4800/UDP
+| 4800
 
 | Outbound and inbound
+| UDP
 | Each of the managed clusters
-| 4500/UDP, 500/UDP, and any other ports that are used for IPSec traffic on the gateway nodes
+| 4500, 500, and any other ports that are used for IPSec traffic on the gateway nodes
 
 | Inbound
+| TCP
 | Each of the managed clusters
-| 8080/TCP
+| 8080
 
 |===
+
+[#network-configuration-hive]
+=== Additional networking requirements when installing using the Hive Operator
+
+When you are installing bare metal managed clusters with the Hive Operator, which includes using Central Infrastructure Management, you must configure a layer 2 or layer 3 port connection between the hub cluster and the `libvirt` provisioning host. This connection to the provisioning host is required during the creation of a base metal cluster with Hive. See the following table for more information:
+
+|===
+| Direction | Protocol | Connection | Port (if specified)
+
+| Hub cluster outbound and inbound to the `libvirt` provisioning host
+| IP
+| Connects the hub cluster, where the Hive operator is installed, to the `libvirt` provisioning host that serves as a bootstrap when creating the bare metal cluster
+| 
+
+|===
+
+**Note:** These requirements only apply when installing, and are not required when upgrading clusters that were installed with Infrastructure Operator.
 
 [#network-configuration-app-deploy]
 === Application deployment network requirements
