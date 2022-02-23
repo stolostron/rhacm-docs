@@ -142,10 +142,10 @@ volsync-rsync-dst-src-destination-name
 +
 ----
 $ kubectl create ns source
-$ kubectl create -n source -f examples/source-application
+$ kubectl create -n source -f application-destination
 ----
 
-.. Run the following command to confirm that the database is running:
+.. Run the following command to confirm that the application is running:
 +
 ----
 $ kubectl get pods -n source
@@ -155,7 +155,7 @@ The returned information should resemble the following example:
 +
 ----
 NAME                    READY   STATUS    RESTARTS   AGE
-mysql-8b9c5c8d8-24w6g   1/1     Running   0          17s
+application-878097   1/1     Running   0          17s
 ----
 
 . Create the `ReplicationSource` items.
@@ -194,7 +194,9 @@ Replace `my.host.com` with the host address that you copied from the `.status.rs
 +
 If your storage driver supports cloning, using `Clone` as the value for `copyMethod` might be a more streamlined process for the replication.
 + 
-The `storageClassName` and `volumeSnapshotClassName` are optional parameters. If you are using a storage class and volume snapshot class name that are different than the defaults for your environment, specify those values. 
+If your storage driver supports cloning, using `Clone` as the value for `copyMethod` might be a more streamlined process for the replication.
++ 
+`StorageClassName` and `volumeSnapshotClassName` are optional parameters. If you are using a storage class and volume snapshot class name that are different than the defaults for your environment, specify those values. 
 +
 You can now set up the synchronization method of the persistent volume.
 
@@ -263,17 +265,17 @@ Status:
 +
 If the `Last Sync Time` has no time listed, then the replication is not complete. 
 
-.. Create a database in the `mysql` pod that is running in the source namespace by entering the following commands on the destination cluster:
+.. Create a database in the `application` pod that is running in the source namespace by entering the following commands on the destination cluster:
 +
 ----
 $ kubectl exec --stdin --tty -n source `kubectl get pods -n source | grep mysql | awk '{print $1}'` -- /bin/bash
-$ mysql -u root -p$MYSQL_ROOT_PASSWORD
+$ application -u root -p$APPLICATION_ROOT_PASSWORD
 > show databases;
 +--------------------+
 | Database           |
 +--------------------+
 | information_schema |
-| mysql              |
+| application              |
 | performance_schema |
 | sys                |
 +--------------------+
@@ -285,7 +287,7 @@ $ mysql -u root -p$MYSQL_ROOT_PASSWORD
 $ exit
 ----
 +
-The `mysql` database is deployed to the `dest` namespace, which uses the replicated data. 
+The `application` application is deployed to the `dest` namespace, which uses the replicated data. 
 
 ... Identify the latest snapshot from the `ReplicationDestination` object by entering the following command:
 +
@@ -297,27 +299,27 @@ Note the value of the latest snapshot for when you create your PVC.
 .. Create the Deployment, Service, PVC, and Secret by entering the following commands on the destination cluster:
 +
 ----
-$ sed -i 's/snapshotToReplace/volsync-dest-database-destination-20201203174504/g' examples/destination-database/mysql-pvc.yaml
-$ kubectl create -n dest -f examples/destination-database/
+$ sed -i 's/snapshotToReplace/volsync-dest-database-destination-20201203174504/g' application/application-pvc.yaml
+$ kubectl create -n dest -f <application>/destination-database/
 ----
 
-.. Validate that the `mysql` pod is running in the environment by entering the following command:
+.. Validate that the `application` pod is running in the environment by entering the following command:
 +
 ----
 $ kubectl get pods -n dest
 ----
 
-.. Connect to the `mysql` pod and list the databases to verify that the synchronized database exists by entering the following command:
+.. Connect to the `application` pod and list the databases to verify that the synchronized database exists by entering the following command:
 +
 ----
-$ kubectl exec --stdin --tty -n dest `kubectl get pods -n dest | grep mysql | awk '{print $1}'` -- /bin/bash
-$ mysql -u root -p$MYSQL_ROOT_PASSWORD
+$ kubectl exec --stdin --tty -n dest `kubectl get pods -n dest | grep <application> | awk '{print $1}'` -- /bin/bash
+$ <application> -u root -p$APPLICATION_ROOT_PASSWORD
 > show databases;
 +--------------------+
 | Database           |
 +--------------------+
 | information_schema |
-| mysql              |
+| application        |
 | performance_schema |
 | synced             |
 | sys                |
