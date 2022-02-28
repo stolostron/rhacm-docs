@@ -136,27 +136,9 @@ You will have to enter it on the source cluster when you configure the source. T
 volsync-rsync-dst-src-destination-name
 ----
 
-. Deploy your application. For this example, the application is: `application-destination`.
-
-.. On the source cluster, `source-cluster`, enter the following commands to create and prepare the application: 
+. Identify the source persistent volume claim that you want to replicate.
 +
-----
-$ kubectl create ns source
-$ kubectl create -n source -f application-destination
-----
-
-.. Run the following command to confirm that the application is running:
-+
-----
-$ kubectl get pods -n source
-----
-+
-The returned information should resemble the following example:
-+
-----
-NAME                    READY   STATUS    RESTARTS   AGE
-application-878097   1/1     Running   0          17s
-----
+*Note:* The source persistent volume claim must be on a CSI storage class.
 
 . Create the `ReplicationSource` items.
 +
@@ -184,7 +166,7 @@ spec:
 +
 Replace `source_name` with the name for your replication source CR. See step 3f for instructions on how to replace this automatically.
 +
-Replace `source` with the name of the namespace where your source is located. See step 3f for instructions on how to replace this automatically. 
+Replace `source` with the name of the persistent volume claim where your source is located. See step 3f for instructions on how to replace this automatically. 
 +
 Replace `persistent_volume_claim` with the name of your source claim.
 +
@@ -192,8 +174,6 @@ Replace `mysshkeys` with the keys that you copied from the `.status.rsync.sshKey
 +
 Replace `my.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it. 
 +
-If your storage driver supports cloning, using `Clone` as the value for `copyMethod` might be a more streamlined process for the replication.
-+ 
 If your storage driver supports cloning, using `Clone` as the value for `copyMethod` might be a more streamlined process for the replication.
 + 
 `StorageClassName` and `volumeSnapshotClassName` are optional parameters. If you are using a storage class and volume snapshot class name that are different than the defaults for your environment, specify those values. 
@@ -230,18 +210,26 @@ $ kubectl create -f /tmp/secret.yaml
 ----
 $ sed -i "s/<my.host.com>/$ADDRESS/g" replication_source.yaml
 $ sed -i "s/<mysshkeys>/$SSHKEYS/g" replication_source.yaml
-$ kubectl create -n source -f replication_source.yaml
+$ kubectl create -n <source> -f replication_source.yaml
 ----
 +
-Replace `mysshkeys` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it. 
+Replace `my.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it.
 +
-Replace `my.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it. 
+Replace `mysshkeys` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it.
++
+Replace `source` with the name of the persistent volume claim where your source is located.
++
+*Note:* You must create the the file in the same namespace as the persistent volume claim that you want to replicate. 
 
 .. Verify that the replication completed by running the following command on the `ReplicationSource` object:
 +
 ----
-$ kubectl describe ReplicationSource -n source application-source
+$ kubectl describe ReplicationSource -n source <pvc-source>
 ----
++
+Replace `source` with the name of the persistent volume claim where your source is located.
++
+Replace `pvc-source` with the name of your replication source CR. 
 +
 If the replication was successful, the output should be similar to the following example:
 +
@@ -263,68 +251,53 @@ Status:
   Next Sync Time:          2021-10-14T20:48:00Z
 ----
 +
-If the `Last Sync Time` has no time listed, then the replication is not complete. 
+If the `Last Sync Time` has no time listed, then the replication is not complete.
 
-.. Create a database in the `application` pod that is running in the source namespace by entering the following commands on the destination cluster:
-+
-----
-$ kubectl exec --stdin --tty -n source `kubectl get pods -n source | grep mysql | awk '{print $1}'` -- /bin/bash
-$ application -u root -p$APPLICATION_ROOT_PASSWORD
-> show databases;
-+--------------------+
-| Database           |
-+--------------------+
-| information_schema |
-| application              |
-| performance_schema |
-| sys                |
-+--------------------+
-4 rows in set (0.00 sec)
+[#volsync-convert-backup-pvc]
+== Converting a replicated image to a usable persistent volume claim
 
+There might be a time when you need to use the replicated image. The image must be converted to a persistent volume claim before it can be used. To convert a replicated image to a persistent volume claim, complete the following steps:
 
-> create database synced;
-> exit
-$ exit
-----
-+
-The `application` application is deployed to the `dest` namespace, which uses the replicated data. 
-
-... Identify the latest snapshot from the `ReplicationDestination` object by entering the following command:
+. When the replication is complete, identify the latest snapshot from the `ReplicationDestination` object by entering the following command:
 +
 ----
 $ kubectl get replicationdestination database-destination -n dest --template={{.status.latestImage.name}}
 ----
-Note the value of the latest snapshot for when you create your PVC. 
+Note the value of the latest snapshot for when you create your persistent volume claim. 
 
-.. Create the Deployment, Service, PVC, and Secret by entering the following commands on the destination cluster:
+. Create a `pvc.yaml` file that resembles the following example:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: <pvc-name>
+  namespace: <dest-namespace>
+spec:
+  accessModes:
+    - ReadWriteOnce
+  dataSource:
+    kind: VolumeSnapshot
+    apiGroup: snapshot.storage.k8s.io
+    name: <snapshot_to_replace>
+  resources:
+    requests:
+      storage: 2Gi
+----
++
+Replace `pvc-name` with a name for your new persistent volume claim.
++
+Replace `dest-namespace` with the namespace of the namespace where the persistent volume claim is located.  
++
+Replace `snapshot_to_replace` with the snapshot name that you found in the previous step.
++
+You can update `resources.requests.storage` with a different value, but it is best proctice when the value is at least the same size as the initial source persistent volume claim.
+
+. Validate that your persistent volume claim pod is running in the environment by entering the following command:
 +
 ----
-$ sed -i 's/snapshotToReplace/volsync-dest-database-destination-20201203174504/g' application/application-pvc.yaml
-$ kubectl create -n dest -f <application>/destination-database/
-----
-
-.. Validate that the `application` pod is running in the environment by entering the following command:
-+
-----
-$ kubectl get pods -n dest
-----
-
-.. Connect to the `application` pod and list the databases to verify that the synchronized database exists by entering the following command:
-+
-----
-$ kubectl exec --stdin --tty -n dest `kubectl get pods -n dest | grep <application> | awk '{print $1}'` -- /bin/bash
-$ <application> -u root -p$APPLICATION_ROOT_PASSWORD
-> show databases;
-+--------------------+
-| Database           |
-+--------------------+
-| information_schema |
-| application        |
-| performance_schema |
-| synced             |
-| sys                |
-+--------------------+
-5 rows in set (0.00 sec)
+$ kubectl get pods -n <dest-namespace>
 ----
 
 [#volsync-start]
