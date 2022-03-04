@@ -75,7 +75,7 @@ apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
   name: <destination_name>
-  namespace: <dest>
+  namespace: <destination-ns>
 spec:
   rsync:
     serviceType: LoadBalancer
@@ -90,7 +90,7 @@ spec:
 +
 Replace `destination_name` with the name of your replication destination CR.
 +
-Replace `dest` with the name of the namespace where your destination is located.
+Replace `destination-ns` with the name of the namespace where your destination is located.
 +
 For this example, the `ServiceType` value of `LoadBalancer` is used. The load balancer service is created by the source cluster to enable your source managed cluster to transfer information to a different destination managed cluster. You can use `ClusterIP` as the service type if your source and destinations are on the same cluster. Note the address of the Load Balancer and the name of the secret to refer to when you configure the source cluster.
 + 
@@ -99,8 +99,10 @@ The `storageClassName` and `volumeSnapshotClassName` are optional parameters. If
 .. Run the following command on the destination cluster to create the `replicationdestination` resource:
 +
 ----
-$ kubectl create -n dest -f replication_destination.yaml
+$ kubectl create -n <destination-ns> -f replication_destination.yaml
 ----
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
 +
 After the `replicationdestination` resource is created, following parameters and values are added to the resource: 
 +
@@ -151,7 +153,7 @@ apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
   name: <source_name>
-  namespace: <source>
+  namespace: <source-ns>
 spec:
   sourcePVC: <persistent_volume_claim>
   trigger:
@@ -166,9 +168,9 @@ spec:
 +
 Replace `source_name` with the name for your replication source CR. See step 3f for instructions on how to replace this automatically.
 +
-Replace `source` with the name of the persistent volume claim where your source is located. See step 3f for instructions on how to replace this automatically. 
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located. See step 3f for instructions on how to replace this automatically. 
 +
-Replace `persistent_volume_claim` with the name of your source claim.
+Replace `persistent_volume_claim` with the name of your source persistent volume claim.
 +
 Replace `mysshkeys` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it. 
 +
@@ -183,8 +185,10 @@ You can now set up the synchronization method of the persistent volume.
 .. Copy the SSH secret from the destination cluster by entering the following command against the destination cluster:
 +
 ----
-$ kubectl get secret -n dest $SSHKEYS -o yaml > /tmp/secret.yaml
+$ kubectl get secret -n <destination-ns> $SSHKEYS -o yaml > /tmp/secret.yaml
 ----
++
+Replace `destination-ns` with the namespace of the persistent volume claim where your destination is located.
 
 .. Open the secret file in the `vi` editor by entering the following command:
 +
@@ -224,10 +228,10 @@ Replace `source` with the name of the persistent volume claim where your source 
 .. Verify that the replication completed by running the following command on the `ReplicationSource` object:
 +
 ----
-$ kubectl describe ReplicationSource -n source <pvc-source>
+$ kubectl describe ReplicationSource -n <source-ns> <pvc-source>
 ----
 +
-Replace `source` with the name of the persistent volume claim where your source is located.
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
 +
 Replace `pvc-source` with the name of your replication source CR. 
 +
@@ -261,9 +265,13 @@ There might be a time when you need to use the replicated image. The image must 
 . When the replication is complete, identify the latest snapshot from the `ReplicationDestination` object by entering the following command:
 +
 ----
-$ kubectl get replicationdestination database-destination -n dest --template={{.status.latestImage.name}}
+$ kubectl get replicationdestination <destination-name> -n <destination-ns> --template={{.status.latestImage.name}}
 ----
-Note the value of the latest snapshot for when you create your persistent volume claim. 
+Note the value of the latest snapshot for when you create your persistent volume claim.
++
+Replace `destination-name` with the name of your replication destination. 
++
+Replace `destination-ns` with the namespace of your destination. 
 
 . Create a `pvc.yaml` file that resembles the following example:
 +
@@ -273,7 +281,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: <pvc-name>
-  namespace: <dest-namespace>
+  namespace: <destination-ns>
 spec:
   accessModes:
     - ReadWriteOnce
@@ -288,16 +296,16 @@ spec:
 +
 Replace `pvc-name` with a name for your new persistent volume claim.
 +
-Replace `dest-namespace` with the namespace of the namespace where the persistent volume claim is located.  
+Replace `destination-ns` with the namespace where the persistent volume claim is located.  
 +
-Replace `snapshot_to_replace` with the snapshot name that you found in the previous step.
+Replace `snapshot_to_replace` with the `VolumeSnapshot` name that you found in the previous step.
 +
 You can update `resources.requests.storage` with a different value, but it is best proctice when the value is at least the same size as the initial source persistent volume claim.
 
-. Validate that your persistent volume claim pod is running in the environment by entering the following command:
+. Validate that your persistent volume claim is running in the environment by entering the following command:
 +
 ----
-$ kubectl get pods -n <dest-namespace>
+$ kubectl get pvc -n <destination-ns>
 ----
 
 [#volsync-start]
