@@ -18,14 +18,16 @@ Before installing VolSync on your clusters, you must have the following requirem
 
 * At least two configured clusters that are managed by the same {product-title-short} hub cluster.
 
+* The storage driver that you use for your source persistent volume must be CSI-compatible and able to support snapshots. 
+
 [#volsync-install-clusters]
 == Installing VolSync on the managed clusters
 
 To enable VolSync on two clusters in your environment, you must install it on both the source and the target managed clusters. Complete the following steps to leverage the policy template in {product-title-short} to install VolSync:
 
-. Deploy the required VolSync resources to the clusters.
-
-.. Download the https://github.com/stolostron/policy-collection/blob/main/community/CM-Configuration-Management/policy-persistent-data-management.yaml[policy-persistent-data-management] policy template from the GitHub repository. In its current format, this policy starts an installation of VolSync on the hub cluster. After it is installed on the hub cluster, it automatically installs the required VolSync components on all of the managed clusters of the hub.
+. Download the https://github.com/stolostron/policy-collection/blob/main/community/CM-Configuration-Management/policy-persistent-data-management.yaml[policy-persistent-data-management] policy template from the GitHub repository. In its current format, this policy starts an installation of VolSync on the hub cluster. After it is installed on the hub cluster, it automatically installs the required VolSync components on all of the managed clusters of the hub.
++
+*Note:* If you downloaded and used this policy before {product-title-short} version 2.4.2, download the file again. The path has changed for the file and some of its references.  
 +
 You can specify a different label to identify which clusters will have VolSync installed by modifying the following section of the policy file:
 +
@@ -36,8 +38,10 @@ spec:
     matchLabels:
       vendor: OpenShift
 ----
-
-.. Apply the policy while you are logged in to your hub cluster by entering the following command:
++
+*Note:* Do not modify the content for the `clusterSelector` later in the file that applies to the `local-cluster`.
+ 
+. Apply the policy while you are logged in to your hub cluster by entering the following command:
 +
 ----
 oc -n <namespace> apply -f ./policy-persistent-data-management.yaml
@@ -45,146 +49,273 @@ oc -n <namespace> apply -f ./policy-persistent-data-management.yaml
 +
 Replace `namespace` with a namespace on your hub cluster.
 
-. If your default `StorageClass` on each of the clusters where you plan to configure VolSync does not refer to a CSI-based storage driver, change the default configuration to refer to a CSI-based storage driver. 
-+
-* Your steps might resemble the following procedure for an Amazon Web Services environment:
+[#volsync-rsync-clusters]
+== Configuring Rsync replication across managed clusters
 
-.. Change your default `StorageClass` by entering the following commands: 
-+
-----
-kubectl annotate sc/gp2 storageclass.kubernetes.io/is-default-class="false" --overwrite
-kubectl annotate sc/gp2-csi storageclass.kubernetes.io/is-default-class="true" --overwrite
-----
+For Rsync-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and the `sshKeys` to ensure that the transferred data is secure.
 
-.. If a corresponding `VolumeSnapshotClass` does not exist, create one by running the following command:
+**Note:** You must copy the values for `address` and `sshKeys` from the destination to the source, so configure the destination before you configure the source.
 
-----
-kubectl create -f - << SNAPCLASS
-----
+This example provides the steps to configure an Rsync replication from a persistent volume claim on the `source` cluster in the `source-ns` namespace to a persistent volume claim on a `destination` cluster in the `destination-ns` namespace. You can replace those values with other values, if necessary.
 
-+
-[source,yaml]
-----
-apiVersion: snapshot.storage.k8s.io/v1beta1
-kind: VolumeSnapshotClass
-metadata:
-  name: gp2-csi
-driver: ebs.csi.aws.com
-deletionPolicy: Delete
-SNAPCLASS
-----
+. Configure your destination cluster.
 
-.. Set `gp2-csi` as your default `VolumeSnapshotClass` by running the following command:
+.. Run the following command on the destination cluster to create the namespace:
 +
 ----
-kubectl annotate volumesnapshotclass/gp2-csi snapshot.storage.kubernetes.io/is-default-class="true"
+$ kubectl create ns <destination-ns>
 ----
 +
-Your CSI is now configured on an Amazon Web Services environment.
+Replace `destination-ns` with a name for the namespace that will contain your destination persitent volume claim.
 
-* The steps might resemble the following for a Google Cloud Platform environment:
-
-.. Change your default `StorageClass` by entering the following commands: 
-+
-----
-kubectl annotate sc/standard storageclass.kubernetes.io/is-default-class="false" --overwrite
-kubectl annotate sc/standard-csi storageclass.kubernetes.io/is-default-class="true" --overwrite
-----
-
-.. Install a `VolumeSnapshotClass` by running the following command:
-+
-----
-kubectl create -f - << SNAPCLASS
-----
+.. Copy the following YAML content to create a new file called `replication_destination.yaml`:
 +
 [source,yaml]
 ----
-apiVersion: snapshot.storage.k8s.io/v1beta1
-kind: VolumeSnapshotClass
-metadata:
-  name: gp2-csi
-driver: ebs.csi.aws.com
-deletionPolicy: Delete
-SNAPCLASS
-----
-
-.. Set `standard-csi` as your default `VolumeSnapshotClass` by running the following command:
-+
-----
-kubectl annotate volumesnapshotclass/standard-csi snapshot.storage.kubernetes.io/is-default-class="true"
-----
-+
-Your CSI is now configured on a Google Cloud Platform environment.
-
-. For Rsync-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and the `sshKeys` to ensure that the transferred data is secure. **Note:** You must copy the values for `address` and `sshKeys` from the destination to the source, so configure the destination before you configure the source. 
-
-.. Configure your destination.
-
-... Add the following minimal custom resource information to the YAML file of your destination cluster:
-+
-[source,yaml]
-----
+---
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
-  name: <destination_name>
-  namespace: <destination_namespace>
+  name: <destination>
+  namespace: <destination-ns>
 spec:
   rsync:
+    serviceType: LoadBalancer
     copyMethod: Snapshot
-    capacity: 10Gi
-    accessModes: ["ReadWriteOnce"]
+    capacity: 2Gi
+    accessModes: [ReadWriteOnce]
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: gp2-csi
 ----
 +
 *Note:* The `capacity` value should match the capacity of the persistent volume claim that is being replicated.
 +
-Replace `destination_name` with the name of your destination volume.
+Replace `destination` with the name of your replication destination CR.
 +
-Replace `destination_namespace` with the name of the namespace where your destination is located.
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+For this example, the `ServiceType` value of `LoadBalancer` is used. The load balancer service is created by the source cluster to enable your source managed cluster to transfer information to a different destination managed cluster. You can use `ClusterIP` as the service type if your source and destinations are on the same cluster. Note the address of the Load Balancer and the name of the secret to refer to when you configure the source cluster.
++ 
+The `storageClassName` and `volumeSnapshotClassName` are optional parameters. If you are using a storage class and volume snapshot class name that are different than the defaults for your environment, specify those values. 
 
-... After the `ReplicationDestination` custom resource is created, copy the value of `.status.rsync.address`. This value is automatically generated when the custom resource is created. You will have to enter it when you configure the source. The following example shows the custom resource information that is added to the `ReplicationDestination` after it is created:
+.. Run the following command on the destination cluster to create the `replicationdestination` resource:
++
+----
+$ kubectl create -n <destination-ns> -f replication_destination.yaml
+----
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+After the `replicationdestination` resource is created, following parameters and values are added to the resource: 
++
+|==========
+| Parameter | Value
+
+| `.status.rsync.address` | IP address of the destination cluster that is used to enable the source and destination clusters to communicate.
+| `.status.rsync.sshKeys` | Name of the SSH key file that enables secure data transfer from the source cluster to the destination cluster. 
+|==========
+
+.. Run the following command to copy the value of `.status.rsync.address` to use on the source cluster:
++
+----
+$ ADDRESS=`kubectl get replicationdestination <destination> -n <destination-ns> --template={{.status.rsync.address}}`
+$ echo $ADDRESS
+----
++
+Replace `destination` with the name of your replication destination CR.
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+The output should appear similar to the following output, which is for an Amazon Web Services environment:
++
+----
+a831264645yhrjrjyer6f9e4a02eb2-5592c0b3d94dd376.elb.us-east-1.amazonaws.com
+----
+
+.. Run the following command to copy the name of the secret and the contents of the secret that are provided as the value of `.status.rsync.sshKeys`.
++
+----
+$ SSHKEYS=`kubectl get replicationdestination <destination> -n <destination-ns> --template={{.status.rsync.sshKeys}}`
+$ echo $SSHKEYS
+----
++
+Replace `destination` with the name of your replication destination CR.
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+You will have to enter it on the source cluster when you configure the source. The output should be the name of your SSH keys secret file, which might resemble the following name:
++
+----
+volsync-rsync-dst-src-destination-name
+----
+
+. Identify the source persistent volume claim that you want to replicate.
++
+*Note:* The source persistent volume claim must be on a CSI storage class.
+
+. Create the `ReplicationSource` items.
++
+.. Copy the following YAML content to create a new file called `replication_source.yaml` on the source cluster: 
 +
 [source,yaml]
 ----
-...
-status:
-  rsync:
-    address: 10.01.101.001
-    sshKeys: volsync-rsync-dest-src-test
-----
-
-... Copy the name of the secret and the contents of the secret that are provided as the value of `.status.rsync.sshKeys`. You will have to enter them on the source cluster when you configure the source.  
-
-.. Configure your source. Add the following minimal custom resource information to the YAML file of your source cluster:
-+
-[source,yaml]
-----
+---
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: <name>
-  namespace: <source_namespace>
+  name: <source>
+  namespace: <source-ns>
 spec:
   sourcePVC: <persistent_volume_claim>
   trigger:
-    schedule: "*/5 * * * *"
+    schedule: "*/3 * * * *"
   rsync:
-    sshKeys: <volsync-rsync-destination-src-database-destination>
-    address: <source.host.com>
-    copyMethod: Clone
+    sshKeys: <mysshkeys>
+    address: <my.host.com>
+    copyMethod: Snapshot
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: gp2-csi
 ----
 +
-Replace `name` with a unique name for your replication.
+Replace `source` with the name for your replication source CR. See step _3-vi_ in this procedure for instructions on how to replace this automatically.
 +
-Replace `source_namespace` with the name of the namespace where your source is located.
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located. See step _3-vi_ in this procedure for instructions on how to replace this automatically. 
 +
-Replace `persistent_volume_claim` with the name of your source claim.
+Replace `persistent_volume_claim` with the name of your source persistent volume claim.
 +
-Replace `volsync-rsync-destination-src-database-destination` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it. 
+Replace `mysshkeys` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it. 
 +
-Replace `source.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it. 
-
+Replace `my.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it. 
++
+If your storage driver supports cloning, using `Clone` as the value for `copyMethod` might be a more streamlined process for the replication.
++ 
+`StorageClassName` and `volumeSnapshotClassName` are optional parameters. If you are using a storage class and volume snapshot class name that are different than the defaults for your environment, specify those values. 
++
 You can now set up the synchronization method of the persistent volume.
+
+.. Copy the SSH secret from the destination cluster by entering the following command against the destination cluster:
++
+----
+$ kubectl get secret -n <destination-ns> $SSHKEYS -o yaml > /tmp/secret.yaml
+----
++
+Replace `destination-ns` with the namespace of the persistent volume claim where your destination is located.
+
+.. Open the secret file in the `vi` editor by entering the following command:
++
+----
+$ vi /tmp/secret.yaml
+----
+
+.. In the open secret file on the destination cluster, make the following changes:
++
+* Change the namespace to the namespace of your source cluster. For this example, it is `source-ns`.
+* Remove the owner references (`.metadata.ownerReferences`).
+
+.. On the source cluster, create the secret file by entering the following command on the source cluster:
++
+----
+$ kubectl create -f /tmp/secret.yaml
+----
+
+.. On the source cluster, modify the `replication_source.yaml` file by replacing the value of the `address` and `sshKeys` in the `ReplicationSource` object with the values that you noted from the destintation cluster by entering the following commands:
++
+----
+$ sed -i "s/<my.host.com>/$ADDRESS/g" replication_source.yaml
+$ sed -i "s/<mysshkeys>/$SSHKEYS/g" replication_source.yaml
+$ kubectl create -n <source> -f replication_source.yaml
+----
++
+Replace `my.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it.
++
+Replace `mysshkeys` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it.
++
+Replace `source` with the name of the persistent volume claim where your source is located.
++
+*Note:* You must create the the file in the same namespace as the persistent volume claim that you want to replicate. 
+
+.. Verify that the replication completed by running the following command on the `ReplicationSource` object:
++
+----
+$ kubectl describe ReplicationSource -n <source-ns> <source>
+----
++
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
++
+Replace `source` with the name of your replication source CR. 
++
+If the replication was successful, the output should be similar to the following example:
++
+----
+Status:
+  Conditions:
+    Last Transition Time:  2021-10-14T20:48:00Z
+    Message:               Synchronization in-progress
+    Reason:                SyncInProgress
+    Status:                True
+    Type:                  Synchronizing
+    Last Transition Time:  2021-10-14T20:41:41Z
+    Message:               Reconcile complete
+    Reason:                ReconcileComplete
+    Status:                True
+    Type:                  Reconciled
+  Last Sync Duration:      5m20.764642395s
+  Last Sync Time:          2021-10-14T20:47:01Z
+  Next Sync Time:          2021-10-14T20:48:00Z
+----
++
+If the `Last Sync Time` has no time listed, then the replication is not complete.
+
+[#volsync-convert-backup-pvc]
+== Converting a replicated image to a usable persistent volume claim
+
+There might be a time when you need to use the replicated image to recover data or to create a new instance of a persistent volume claim. The copy of the image must be converted to a persistent volume claim before it can be used. To convert a replicated image to a persistent volume claim, complete the following steps:
+
+. When the replication is complete, identify the latest snapshot from the `ReplicationDestination` object by entering the following command:
++
+----
+$ kubectl get replicationdestination <destination> -n <destination-ns> --template={{.status.latestImage.name}}
+----
+Note the value of the latest snapshot for when you create your persistent volume claim.
++
+Replace `destination` with the name of your replication destination. 
++
+Replace `destination-ns` with the namespace of your destination. 
+
+. Create a `pvc.yaml` file that resembles the following example:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: <pvc-name>
+  namespace: <destination-ns>
+spec:
+  accessModes:
+    - ReadWriteOnce
+  dataSource:
+    kind: VolumeSnapshot
+    apiGroup: snapshot.storage.k8s.io
+    name: <snapshot_to_replace>
+  resources:
+    requests:
+      storage: 2Gi
+----
++
+Replace `pvc-name` with a name for your new persistent volume claim.
++
+Replace `destination-ns` with the namespace where the persistent volume claim is located.  
++
+Replace `snapshot_to_replace` with the `VolumeSnapshot` name that you found in the previous step.
++
+You can update `resources.requests.storage` with a different value, but it is best practice when the value is at least the same size as the initial source persistent volume claim.
+
+. Validate that your persistent volume claim is running in the environment by entering the following command:
++
+----
+$ kubectl get pvc -n <destination-ns>
+----
 
 [#volsync-start]
 == Scheduling your synchronization
