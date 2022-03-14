@@ -1,0 +1,213 @@
+[#importing-a-cluster]
+= Importing a cluster
+
+After you install the multicluster engine for Kubernetes operator, you are ready to import a cluster to manage. Using the Red Hat OpenShift Container Platform CLI, you can import a cluster using the `kubeconfig` file of the cluster you are importing. Alternatively, you can run import commands manually on the cluster you are importing. Both procedures are available in this documentation.
+
+See the following procedure to import from the CLI:
+
+* <<cli-prerequisites,Prerequisites>>
+* <<prepare-for-import,Prepare for import>>
+* <<importing-wth-the-auto-import-secret,Importing with the auto import secret>>
+* <<importing-with-manual-commands,Importing with manual commands>>
+* <<detaching-managed-cluster,Detaching a managed cluster>>
+
+[#cli-prerequisites]
+== Prerequisites
+
+* You can use Linux (x86_64, s390x, ppc64le) or macOS.
+* Ensure you installed the multicluster engine for Kubernetes operater and installed the MultiClusterEngine custom resource on a Kubernetes cluster.
+* You need a another separate cluster that you want to manage and Internet connectivity.
+* You need the OpenShift Container Platform CLI version 4.6 or later, to run `oc` commands. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.8/html/cli_tools/openshift-cli-oc#cli-getting-started[Getting started with the OpenShift CLI] for information about installing and configuring the Red Hat OpenShift CLI, `oc`.
+
++
+*Note:* Download the installation file for CLI tools from the  OpenShift Container Platform console.
+
+* If you are importing a cluster that was not created by OpenShift Container Platform, you need a `multiclusterengine.spec.imagePullSecret` defined. This secret might have been created when multicluster engine for Kubernetes was installed. See xref:./adv_config_install.adoc#advanced-config-engine[Advanced configuration] for more information about defining the secret. 
+
+[#prepare-for-import]
+== Prepare for import
+
+. Log in to your _engine cluster_. The _engine cluster_ is the cluster that contains the the multicluster engine for Kubernetes operater and the custom resource. Run the following command:
++
+----
+oc login
+----
+
+. Run the following command on the engine cluster to create the project: 
++
+*Note:* The cluster name that is defined in `CLUSTER_NAME` and is also used as the cluster namespace in the `.yaml` file and commands:
+
++
+----
+oc new-project ${CLUSTER_NAME}
+----
+
+. Run the following command to create the namespace:
+
++
+----
+oc label namespace ${CLUSTER_NAME} cluster.open-cluster-management.io/managedCluster=${CLUSTER_NAME}
+----
+
+. Edit the example `ManagedCluster` with the following sample of YAML:
+
++
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: ${CLUSTER_NAME}
+spec:
+  hubAcceptsClient: true
+----
+
+. Save the file as `managed-cluster.yaml`.
+. Apply the YAML file with the following command:
++
+----
+oc apply -f managed-cluster.yaml
+----
+
+[#importing-wth-the-auto-import-secret]
+== Importing with the auto import secret
+
+Proceed with the following steps while still logged in to your engine cluster:
+
+. Retrieve the `kubeconfig` file of the cluster that you are importing or the kube API server and token of the cluster that you are importing. See the documentation for your Kubernetes cluster to learn where to locate your `kubeconfig` file or your kube api server and token
+
+. Use your `kubeconfig` or your server/token pair to create a YAML file that contains content that is similar to the following template:
+
++
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: auto-import-secret
+stringData:
+  # the following value to specify the retry times when your cluster failed to import
+  autoImportRetry: "5"
+  # If you are using the kubeconfig file, add the following value for the kubeconfig file
+  # that has the current context set to the cluster to import:
+  kubeconfig: |- <kubeconfig_file>
+  # If you are using the server/token pair, add the following two values:
+  server: <cluster_api_url>
+  token: <Token to access the cluster>
+type: Opaque
+----
+
+. Save the file as auto-import-secret.yaml
+
+. Generate the import secret in the `${CLUSTER_NAME}` namespace using the `kubeconfig` file of the cluster you are importing. Run the following command with your path to your `kubeconfig` and `CLUSTER_NAME`:
+
++
+----
+oc apply -f auto-import-secret.yaml
+----
+
++
+*Note:* The auto import secret is used one time and deleted when the import process completes.
+
+. Validate the `JOINED` and `AVAILABLE` status for your imported cluster. Run the following command from the multicluster engine for Kubernetes cluster:
+
++
+----
+oc get managedcluster ${CLUSTER_NAME}
+----
++
+Proceed with the following steps in the separate cluster that you are importing:
+
+. Log in to the cluster that you are importing. Run the following command:
+
++
+----
+oc login
+----
+
+. Validate the pod status on the cluster that you are importing. Run the following command:
+
++
+----
+oc get pod -n open-cluster-management-agent
+----
+
+. Add-ons will be installed after the cluster that you are importing is `AVAILABLE`. Validate the pod status of add-ons on the cluster. Run the following command:
+
++
+----
+oc get pod -n open-cluster-management-agent-addon
+----
+
+Your cluster is now imported.
+
+[#importing-with-manual-commands]
+== Importing with manual command
+
+*Important:* The import command contains pull secret information that is copied to each of the imported clusters. Anyone who can access the imported clusters can also view the pull secret information.
+
+. Obtain the `klusterlet-crd.yaml` that was generated by the import controller on your engine cluster. Run the following command:
++
+[source,bash]
+----
+oc get secret ${CLUSTER_NAME}-import -n ${CLUSTER_NAME} -o jsonpath={.data.crds\\.yaml} | base64 --decode > klusterlet-crd.yaml
+----
+
+. Obtain the `import.yaml` that was generated by the import controller on your engine cluster. Run the following command:
++
+[source,bash]
+----
+oc get secret ${CLUSTER_NAME}-import -n ${CLUSTER_NAME} -o jsonpath={.data.import\\.yaml} | base64 --decode > import.yaml
+----
++
+Proceed with the following steps in the separate cluster that you are importing:
+
+. Log in to the cluster that you are importing.
+
++
+----
+oc login
+----
+
+. Apply the `klusterlet-crd.yaml` that you generated in the previous step. Run the following command:
++
+----
+oc apply -f klusterlet-crd.yaml
+----
+
+. Apply the `import.yaml` file that you previously generated. Run the following command:
++
+----
+oc apply -f import.yaml
+----
+
+. Validate the pod status on the cluster you are importing. Run the following command:
++
+----
+oc get pod -n open-cluster-management-agent
+----
+
+. Validate `JOINED` and `AVAILABLE` status for the cluster that you are importing. From the engine cluster, run the following command:
++
+----
+oc get managedcluster ${CLUSTER_NAME}
+----
++
+Add-ons are installed after the cluster you are importing is `AVAILABLE`. 
+
+. Validate the pod status of add-ons on the cluster you are importing. Run the following command:
++
+----
+oc get pod -n open-cluster-management-agent-addon
+----
+
+Your cluster is now imported and you can manage that cluster from the engine cluster.
+
+[#detaching-managed-cluster]
+== Detaching a managed cluster
+
+A managed cluster is a cluster that was successfully imported. To detach a managed cluster from the engine cluster, run the following command:
+
+----
+oc delete managedcluster ${CLUSTER_NAME}
+----
+
+Your cluster is now detached.

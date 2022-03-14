@@ -1,0 +1,109 @@
+[#deploying-workload]
+= Deploying workload with ManifestWork 
+
+You can deploy workloads onto your managed clusters from your multicluster engine for Kubernetes cluster. For example. See the following sample with `ManifestWork` to create a basic deployment on your managed cluster from your multicluster engine for Kubernetes cluster:
+
+. Log in to your multicluster engine for Kubernetes cluster:
+
++
+----
+oc login
+----
+
+. Create a YAML file to configure the `ManifestWork` resource as it is in the following example. Replace `CLUSTER_NAME` with the name of the managed cluster that you imported from the xref:./import_cli.adoc#importing-a-cluster[Importing a cluster] documentation. The example YAML deploys to your managed cluster `default` namespace when you apply the file:
+
++
+[source,yaml]
+----
+apiVersion: work.open-cluster-management.io/v1
+kind: ManifestWork
+metadata:
+  name: hello-work
+  namespace: ${CLUSTER_NAME}
+  labels:
+    app: hello
+spec:
+  workload:
+    manifests:
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: hello
+        namespace: default
+      spec:
+        selector:
+          matchLabels:
+            app: hello
+        template:
+          metadata:
+            labels:
+              app: hello
+          spec:
+            containers:
+              - name: hello
+                image: quay.io/asmacdo/busybox
+                command: ['/bin/sh', '-c', 'echo "Hello, Kubernetes!" && sleep 300']
+    - apiVersion: v1
+      kind: Service
+      metadata:
+        labels:
+          app: hello
+        name: hello
+        namespace: default
+      spec:
+        ports:
+        - port: 8000
+          protocol: TCP
+          targetPort: 8000
+        selector:
+          app: hello
+----
+
+. Apply the YAML file. Run the following command:
+
++
+----
+oc apply -f manifestwork.yaml
+----
+
+. Run the following command to check the status of the `ManifestWork` from your multicluster engine for Kubernetes cluster:
+
++
+----
+oc get manifestwork -n ${CLUSTER_NAME} hello-work -o yaml
+----
+
+. Log in to your managed cluster to view the results. See the following command:
+
++
+----
+oc login
+----
+
+. View the deployment that you created with your multicluster engine for Kubernetes cluster:
+
++
+----
+$ oc get deploy -n default
+NAME    READY   UP-TO-DATE   AVAILABLE   AGE
+hello   1/1     1            1           37s
+----
+
++
+You can also view the created pod with the following command:
+
++
+----
+$ oc get pod
+NAME                     READY   STATUS    RESTARTS   AGE
+hello-65f58985ff-4rm57   1/1     Running   0          42s
+----
+
++
+If you view the logs for the created pod, you see a message similar to the following:
+
++
+----
+$ oc logs hello-65f58985ff-4rm57
+Hello, Kubernetes!
+----
