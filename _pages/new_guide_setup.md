@@ -10,23 +10,23 @@ Follow these instructions if you have to set up a new book/guide or need to rena
 **Prerequisites**: You must have access to the following tools and directories:
 
 * GitHub
-* The `open-cluster-management` repository
+* The `stolostron` repository
 * Red Hat VPN
 * Pantheon
 * GitLab
 
 **Important**: Do you really need a new guide? See the documentation architect to discuss placement of new content.
 
-To create a new guide in the product documentation, you must create a new folder in your repository, and a new book in Pantheon. When you create a new folder, you must also create a `master.adoc` and `docinfo.xml` file for your new folder. See the repository for examples. 
+To create a new guide in the product documentation, you must create a new folder in your repository, and a new book in Pantheon. When you create a new folder, you must also create a `main.adoc`, a `master.adoc` symlink to the `main.adoc` file, and `docinfo.xml` file in your new folder. See the repository for examples. 
 
 ## Creating a new folder 
 
 **Create a new folder from GitHub**
 
-1. Log in to GitHub and navigate to the `open-cluster-management/rhacm-doc` repository. 
+1. Log in to GitHub and navigate to the `stolostron/rhacm-doc` repository. 
 2. Click the **Add file** button > **Create new file**. 
 3. When you enter the name of the folder, select the forward slash (`/`) to continue adding a file to your folder. 
-4. Add the `master.adoc` file for your folder. The contents of your file might resemble the following file:
+4. Add the `main.adoc` file for your folder. The contents of your file might resemble the following file:
 
    ```
    include::modules/common-attributes.adoc[]
@@ -37,8 +37,10 @@ To create a new guide in the product documentation, you must create a new folder
    include::guide_task1.adoc[leveloffset=+2]
    include::guide_task2.adoc[leveloffset=+2]
    ```
+   
+   **Important:** The "Book/guide name" must match the name of the book in Pantheon. If not, the build will fail.
 
-5. Add the `docinfo.xml` file to your new folder. Your `docinfo.xm`l file might resemble the following information:
+5. Add the `docinfo.xml` file to your new folder. Your `docinfo.xml` file might resemble the following information:
 
    ```
    <productname>{product-title}</productname>
@@ -80,6 +82,21 @@ You must add a `symlink` to the `modules` folder in your new folder to resolve t
    ```
    ln -s ../modules modules
    ```
+   
+3. Commit the change to your Git repository.
+
+### Add a _symlink_ to reference the `main.adoc` file from the `master.adoc` file 
+
+This moves us toward minimizing non-inclusive language. You must add a `symlink` to reference the `main.adoc` file so the `master.adoc` becomes a passthrough. Complete the following steps (Mac only):
+
+1. Open a terminal and navigate to the new GitHub folder.
+
+2. Enter the following command:
+   ```
+   ln -s main.adoc master.adoc
+   ```
+   
+   If there is already a `master` file, you will see an error that it already exists. Copy the content of the master file into your `main` file and delete the existing `master` file.  
    
 3. Commit the change to your Git repository.
 
