@@ -1,0 +1,72 @@
+[#managed-serviceaccount-addon]
+= Enabling Managed-ServiceAccount add-ons
+
+By default, the `Managed-ServiceAccount` add-on is disabled. This component when enabled allows you to create or delete a service account on a managed cluster. 
+
+When a `ManagedServiceAccount` custom resource is created in the `<managed_cluster>` namespace on the hub cluster, a `ServiceAccount` is created on the managed cluster. 
+
+A `TokenRequest` is made with the `ServiceAccount` on the managed cluster to the Kubernetes API server on the managed cluster. The token is then stored in a `Secret` in the `<target_managed_cluster>` namespace on the hub cluster.
+
+To configure a Managed-ServiceAccount add-on for a hub cluster and a managed cluster, complete the following steps:
+
+**Required access:** Editor 
+
+//this is MCE -- not sure this is correct
+. Enable the `ManagedServiceAccount`` add-on on {product-title} hub cluster by following the Installation Advanced Configuration for enabling Managed-
+ServiceAccount (link)
+
+. Deploy the `ManagedServiceAccount` add-on to the target and apply it to your target managed cluster. Create the following YAML file and replace `target_managed_cluster` with the name of the managed cluster where you are applying the cluster proxy add-on:
+//managedservice?:
+
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: managed-serviceaccount
+  namespace: <target_managed_cluster>
+spec:
+  installNamespace: open-cluster-management-agent-addon
+----
+
+. Run the following command to apply the file:
+
++
+----
+oc apply -f -
+----
+
+You have now enabled the `Managed-ServiceAccount` plugin for your managed cluster.
+
+. Create a `ManagedServiceAccount` custom resource with the following YAML source:
+
++
+[source,yaml]
+----
+apiVersion: authentication.open-cluster-management.io/v1alpha1
+kind: ManagedServiceAccount
+metadata:
+  name: <managed_serviceaccount_name>
+  namespace: <target_managed_cluster>
+spec:
+  rotation: {}
+----
++
+- Replace `managed_serviceaccount_name` with the name of your `ManagedServiceAccount`.
++
+- Replace `target_managed_cluster` with the name of the managed cluster to which you are applying the `ManagedServiceAccount`.
+
+. To verify, view the `tokenSecretRef` attribute in the `ManagedServiceAccount` object status to find the secret name and namespace. Run the following command with your account and cluster:
+
++
+----
+oc get managedserviceaccount <managed_serviceaccount_name> -n <target_managed_cluster> -o yaml
+----
+
+. View the `Secret` containing the retrieved token tied to the created `ServiceAccount` on the managed cluster
++
+----
+oc get secret <managed_serviceaccount_name> -n <target_managed_cluster> -o yaml
+----
+
