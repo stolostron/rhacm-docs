@@ -11,7 +11,7 @@ title: ''
 
 ### **THIS IS FOR EXTERNAL CUSTOMERS ONLY!**
 
-Red Hatters please open issues in the [developer backlog](https://github.com/open-cluster-management/backlog/issues/new/choose), or BugZilla if you are not an authorized user for the backlog.
+Red Hatters please open issues in the [developer backlog](https://github.com/stolostron/backlog/issues/new/choose), or BugZilla if you are not an authorized user for the backlog.
 
 **Note:** Doc team will update the current version and the two previous versions (n-2). For earlier versions, we will address only Sev 1, customer-reported bugs for releases in support.
 
