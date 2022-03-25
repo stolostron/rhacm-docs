@@ -36,6 +36,7 @@ Continue reading to view descriptions and examples for some of the custom templa
 * <<autoindent-function,autoindent function>>
 * <<toInt-function,toInt function>>
 * <<toBool-function,toBool function>>
+* <<protect-function,protect function>>
 
 [#fromsecret-func]
 === fromSecret function
@@ -393,6 +394,37 @@ spec:
         {{ (fromConfigMap "site-config" "site1" "enabled")  | toBool }}
 ----
 
+[#protect-function]
+=== protect function
+
+The `protect` function enables you to encrypt a string in a hub cluster policy template. View the following example of the configuration policy that uses the `protect` function:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: demo-template-function
+  namespace: test
+spec:
+  namespaceSelector:
+    exclude:
+    - kube-*
+    include:
+    - default
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+    ...
+    spec:
+      enabled:  |
+        {{hub "(lookup "v1" "Secret" "default" "my-hub-secret").data.message | protect hub}}
+----
++
+In the previous YAML example, there is an existing hub cluster policy template that is defined to use the `lookup` fucntion. On the replicated policy in the managed cluster namespace, the value might resemble the following syntax: `$ocm_encrypted:okrrBqt72oI+3WT/0vxeI3vGa+wpLD7Z0ZxFMLvL204=`
+
+This ensures that your decrypted value is to never be stored in the policy on the managed cluster
+
 [#hub-templates]
 == Support for hub cluster templates in configuration policies
 
@@ -402,6 +434,10 @@ Hub cluster templates are based on Golang text template specifications, and the 
 
 *Important:* If you use hub cluster templates to propagate secrets or other sensitive data, the sensitive data exists in the managed cluster namespace on the hub cluster and on the managed clusters where that policy is distributed. The template content is expanded in the policy, and policies are not encrypted by the {ocp-short} ETCD encryption support.
 
+[#sensitive-data-hub]
+=== Secure sensitive data in hub cluster policy templates
+
+// Add info on how to do this 
 [#template-processing]
 === Template processing
 
@@ -429,7 +465,7 @@ See the following table for a comparison of hub cluster and managed cluster temp
 | {{ … }}
 
 | Functions
-| A set of template functions that support dynamic access to Kubernetes resources and string manipulation. See <<template-functions,Template functions>> for more information. *Note*: The `fromSecret` template function is not available.
+| A set of template functions that support dynamic access to Kubernetes resources and string manipulation. See <<template-functions,Template functions>> for more information.
 | A set of template functions support dynamic access to Kubernetes resources and string manipulation. See <<template-functions,Template functions>> for more information.
 
 | Function output storage
