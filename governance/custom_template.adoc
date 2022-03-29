@@ -420,10 +420,14 @@ spec:
       enabled:  |
         {{hub "(lookup "v1" "Secret" "default" "my-hub-secret").data.message | protect hub}}
 ----
-+
+
 In the previous YAML example, there is an existing hub cluster policy template that is defined to use the `lookup` function. On the replicated policy in the managed cluster namespace, the value might resemble the following syntax: `$ocm_encrypted:okrrBqt72oI+3WT/0vxeI3vGa+wpLD7Z0ZxFMLvL204=`
 
+Each encryption algorithm used is AES-CBC using 256 bit keys. Each encryption key is unique per managed cluster and is automatically rotated every 30 days.
+
 This ensures that your decrypted value is to never be stored in the policy on the managed cluster.
+
+To force an immediate rotation, delete the `policy.open-cluster-management.io/last-rotated` annotation on the `policy-encryption-key` Secret in the managed cluster namespace on the hub cluster.
 
 [#hub-templates]
 == Support for hub cluster templates in configuration policies
@@ -466,7 +470,12 @@ See the following table for a comparison of hub cluster and managed cluster temp
 
 | Functions
 | A set of template functions that support dynamic access to Kubernetes resources and string manipulation. See <<template-functions,Template functions>> for more information.
+
+The `fromSecret` template function on the hub cluster stores the resulting value as an encrypted string on the replicated policy, in the managed cluster namespace. 
+
+The equivalent call might use the folllowing syntax: `{{hub "(lookup "v1" "Secret" "default" "my-hub-secret").data.message | protect hub}}`
 | A set of template functions support dynamic access to Kubernetes resources and string manipulation. See <<template-functions,Template functions>> for more information.
+
 
 | Function output storage
 | The output of template functions are stored in `Policy` resource objects in each applicable managed cluster namespace on the hub cluster, before it is synced to the managed cluster. This means that any sensitive results from template functions are readable by anyone with read access to the `Policy` resource objects on the hub cluster, and read access with `ConfigurationPolicy` resource objects on the managed clusters. Additionally, if link:https://docs.openshift.com/container-platform/4.9/security/encrypting-etcd.html[etcd encryption] is enabled, the `Policy` and `ConfigurationPolicy` resource objects are not encrypted. It is best to carefully consider this when using template functions that return sensitive output (e.g. from a secret).
