@@ -3,168 +3,6 @@
 
 Before you deploy Submariner with {product-title}, you must manually prepare the clusters on the hosting environment for the connection. The requirements are different for different hosting environments, so follow the instructions for your hosting environment.
 
-[#preparing-aws]
-== Preparing Amazon Web Services to deploy Submariner
-
-You can use the `SubmarinerConfig` API to configure the AWS cluster to integrate with a Submariner deployment. Follow the steps that apply to your situation to prepare AWS to install Submariner:
-
-. If you did not create the managed cluster with {product-title-short}, you must manually create a secret on your hub cluster in the namespace of your managed cluster that contains your AWS credential secret. If you created the cluster with {product-title-short}, skip to step 2.
-+
-To create the secret, enter the commands that contain information that is similar to the following example and YAML. Apply the YAML content after customizing it with your information:
-+
-----
-export AWS_ACCESS_KEY_ID=<aws-access-key-id>
-export AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
-----
-+
-[source,yaml]
-----
-apiVersion: v1
-kind: Secret
-metadata:
-    name: <managed-cluster-name>-aws-creds
-    namespace: <managed-cluster-namespace>
-type: Opaque
-data:
-    aws_access_key_id: $(echo -n ${AWS_ACCESS_KEY_ID} | base64 -w0)
-    aws_secret_access_key: $(echo -n ${AWS_SECRET_ACCESS_KEY} | base64 -w0)
-----
-+
-Replace `managed-cluster-name` with the name of your managed cluster.
-+
-Replace `managed-cluster-namespace` with the namespace of your managed cluster.
-+
-Replace `aws-access-key-id` with your AWS access key ID.
-+
-Replace `aws-secret-access-key` with your AWS access key.
-
-. If you created the managed cluster with {product-title-short}, or after you create the secret in the previous step, prepare the cluster by applying YAML content that is similar to the following example:
-
-+
-[source,yaml]
-----
-apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
-kind: SubmarinerConfig
-metadata:
-    name: submariner
-    namespace: <managed-cluster-namespace>
-spec:
-    gatewayConfig:
-	    aws:
-	        instanceType: c5d.large
-    credentialsSecret:
-      name: <managed-cluster-name>-aws-creds
-----
-+
-Replace `managed-cluster-namespace` with the namespace of your managed cluster.
-+
-Replace `managed-cluster-name` with the name of your managed cluster. The value of `managed-cluster-name-aws-creds` is your AWS credential secret name, which you can find in the cluster namespace of your hub cluster. 
-+
-*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
-+
-This configuration automatically opens the Submariner required ports: network address translation - traversal (NATT) port (4500/UDP), virtual extensible LAN (VXLAN) port (4800/UCP), and Submariner metrics port (8080/TCP) on your AWS instance. It also creates one AWS instance as the Submariner gateway with the AWS instance type `c5d.large`.
- 
-[#preparing-gcp]
-== Preparing Google Cloud Platform to deploy Submariner
-
-You can use the `SubmarinerConfig` API to configure the Google Cloud Platform cluster to integrate with a Submariner deployment. Follow the steps that apply to your situation to prepare Google Cloud Platform to install Submariner:
-
-. If you did not create the managed cluster with {product-title-short}, you must manually create a secret on your hub cluster in the namespace of your managed cluster that contains your Google Cloud Platform credential secret. If you created the cluster with {product-title-short}, then skip to step 2.
-+
-To create the secret, customize and apply YAML content that is similar to the following example:
-+
-[source,yaml]
-----
-apiVersion: v1
-kind: Secret
-metadata:
-    name: <managed-cluster-name>-gcp-creds
-    namespace: <managed-cluster-namespace>
-type: Opaque
-data:
-    osServiceAccount.json: <gcp-os-service-account-json-file-content>
-----
-+
-Replace `managed-cluster-name` with the name of your managed cluster. The value of `managed-cluster-name-aws-creds` is your Google Cloud Platform credential secret name, which you can find in the cluster namespace of your hub cluster.
-+
-Replace `managed-cluster-namespace` with the namespace of your managed cluster.
-+
-Replace `gcp-os-service-account-json-file-content` with the contents of your encoded Google Cloud Platform `osServiceAccount.json: $(base64 -w0 )` file.
-
-. If you created the managed cluster with {product-title-short}, or you have already created the secret in the previous step, prepare the cluster by customizing and applying YAML content that is similar to the following example:
-+
-[source,yaml]
-----
-apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
-kind: SubmarinerConfig
-metadata:
-    name: submariner
-    namespace: <managed-cluster-namespace>
-spec:
-    credentialsSecret:
-      name: <managed-cluster-name>-gcp-creds
-----
-+
-Replace `managed-cluster-namespace` with the namespace of your managed cluster.
-+
-Replace `managed-cluster-name` with the name of your managed cluster. The value of `managed-cluster-name-gcp-creds` is your Google Cloud Platform credential secret name, which you can find in the cluster namespace of your hub cluster. 
-+
-*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
-+
-This configuration automatically opens the Submariner required ports: network address translation - traversal (NATT) port (4500/UDP), virtual extensible LAN (VXLAN) port (4800/UCP), and Submariner metrics port (8080/TCP) on your Google Cloud Platform instance. It also labels one worker node as the Submariner gateway and enables the public IP address of this node in your Google Cloud Platform cluster.
-
-[#preparing-vm]
-== Preparing to deploy Submariner on VMware vSphere
-
-Submariner uses IPsec to establish the secure tunnels between the clusters on the gateway nodes. You can use the default port or specify a custom port. When you run this procedure without specifying an IPsec NATT port, the default port is automatically used for the communication. The default port is 4500/UDP. 
-
-Submariner uses virtual extensible LAN (VXLAN) to encapsulate traffic when it moves from the worker and master nodes to the gateway nodes. The VXLAN port cannot be customized, and is always port 4800/UDP.
-
-Submariner uses 8080/TCP to send its metrics information among nodes in the cluster, this port cannot be customized.
-
-The following ports must be opened by your VMWare vSphere administrator before you can enable Submariner:
-
-.VMware vSphere and Submariner ports
-|===
-| Name | Default value | Customizable 
-
-| IPsec NATT
-| 4500/UDP
-| Yes
-
-| VXLAN
-| 4800/UDP
-| No
-
-| Submariner metrics
-| 8080/TCP
-| No
-|===
-
-To prepare VMware vSphere clusters for deploying Submariner, complete the following steps:
-
-. Ensure that the IPsec NATT, VXLAN, and metrics ports are open.
-
-. Customize and apply YAML content that is similar to the following example:
-+
-[source,yaml]
-----
-apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
-kind: SubmarinerConfig
-metadata:
-    name: submariner
-    namespace: <managed-cluster-namespace>
-spec:{}
-----
-+
-Replace `managed-cluster-namespace` with the namespace of your managed cluster.
-+
-*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
-+
-This configuration uses the default network address translation - traversal (NATT) port (4500/UDP) for your Submariner and one worker node is labeled as the Submariner gateway on your vSphere cluster.
-+
-Submariner uses IP security (IPsec) to establish the secure tunnels between the clusters on the gateway nodes. You can either use the default IPsec NATT port, or you can specify a different port that you configured. When you run this procedure without specifying an IPsec NATT port of 4500/UDP is automatically used for the communication.
-
 [#preparing-azure]
 == Preparing Microsoft Azure to deploy Submariner
 
@@ -314,29 +152,88 @@ To configure the ROKS clusters on a VPC to use Submariner, complete the steps in
 
 . Refer to https://submariner.io/operations/deployment/calico/[Calico] to configure Calico CNI by creating IPPools in the cluster.
 
-[#preparing-osd]
-== Preparing Red Hat OpenShift Dedicated to deploy Submariner
+[#preparing-vm]
+== Preparing to deploy Submariner on VMware vSphere
 
-Red Hat OpenShift Dedicated supports clusters that were provisioned by AWS and Google Cloud Platform.
+Submariner uses IPsec to establish the secure tunnels between the clusters on the gateway nodes. You can use the default port or specify a custom port. When you run this procedure without specifying an IPsec NATT port, the default port is automatically used for the communication. The default port is 4500/UDP. 
 
-[#preparing-osd-aws]
-=== Preparing Red Hat OpenShift Dedicated to deploy Submariner on AWS
+Submariner uses virtual extensible LAN (VXLAN) to encapsulate traffic when it moves from the worker and master nodes to the gateway nodes. The VXLAN port cannot be customized, and is always port 4800/UDP.
 
-To configure the AWS clusters on Red Hat OpenShift Dedicated, complete the following steps:
+Submariner uses 8080/TCP to send its metrics information among nodes in the cluster, this port cannot be customized.
 
-. Submit a https://issues.redhat.com/secure/CreateIssue!default.jspa[support ticket] to the Red Hat OpenShift Hosted SRE Support team to grant `cluster-admin` group access to the Red Hat OpenShift Dedicated cluster. The default access of `dedicated-admin` does not have the permission that is required the create a `MachineSet`.
+The following ports must be opened by your VMWare vSphere administrator before you can enable Submariner:
 
-. After the group is created, add the user name to the `cluster-admin` group that you created by completing the steps in https://docs.openshift.com/dedicated/4/administering_a_cluster/cluster-admin-role.html[Granting the cluster-admin role to users] in the Red Hat OpenShift Dedicated documentation.
+.VMware vSphere and Submariner ports
+|===
+| Name | Default value | Customizable 
 
-. Configure the credentials of the user `osdCcsAdmin`, so you can use that as a service account.
+| IPsec NATT
+| 4500/UDP
+| Yes
 
-. Import your cluster to {product-title-short}, and follow the instructions in xref:../services/submariner/submariner_deploy_console.adoc#submariner-deploy-console[Deploying Submariner with the console].
+| VXLAN
+| 4800/UDP
+| No
 
-[#preparing-osd-gcp]
-=== Preparing Red Hat OpenShift Dedicated to deploy Submariner on Google Cloud Platform
+| Submariner metrics
+| 8080/TCP
+| No
+|===
 
-To configure the Google Cloud Platform clusters on Red Hat OpenShift Dedicated, complete the following steps:
+To prepare VMware vSphere clusters for deploying Submariner, complete the following steps:
 
-. Configure a service account named `osd-ccs-admin` that you can use to manage the deployment.
+. Ensure that the IPsec NATT, VXLAN, and metrics ports are open.
 
-. Import your cluster to {product-title-short}, and follow the instructions in xref:../services/submariner/submariner_deploy_console.adoc#submariner-deploy-console[Deploying Submariner with the console].
+. Customize and apply YAML content that is similar to the following example:
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:{}
+----
++
+Replace `managed-cluster-namespace` with the namespace of your managed cluster.
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
++
+This configuration uses the default network address translation - traversal (NATT) port (4500/UDP) for your Submariner and one worker node is labeled as the Submariner gateway on your vSphere cluster.
++
+Submariner uses IP security (IPsec) to establish the secure tunnels between the clusters on the gateway nodes. You can either use the default IPsec NATT port, or you can specify a different port that you configured. When you run this procedure without specifying an IPsec NATT port of 4500/UDP is automatically used for the communication.
+
+[#preparing-bare]
+== Preparing to deploy Submariner on bare metal
+
+To prepare bare metal clusters for deploying Submariner, complete the following steps: **Copied from VMware, for now**
+
+. Ensure that the IPsec NATT, VXLAN, and metrics ports are open.
+
+. Customize and apply YAML content that is similar to the following example:
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:{}
+----
++
+Replace `managed-cluster-namespace` with the namespace of your managed cluster.
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
++
+This configuration uses the default network address translation - traversal (NATT) port (4500/UDP) for your Submariner and one worker node is labeled as the Submariner gateway on your bare metal cluster.
++
+Submariner uses IP security (IPsec) to establish the secure tunnels between the clusters on the gateway nodes. You can either use the default IPsec NATT port, or you can specify a different port that you configured. When you run this procedure without specifying an IPsec NATT port of 4500/UDP is automatically used for the communication.
+
+[#preparing-openstack]
+== Preparing to deploy Submariner on Red Hat OpenStack Platform
+
+To prepare Red Hat OpenStack Platform clusters for deploying Submariner, complete the following steps:
+
+...
