@@ -3,7 +3,13 @@
 
 The cluster backup and restore operator provides disaster recovery solutions for when {product-title} hub cluster goes down and needs to be recreated. It runs on the hub cluster, and depends on the link:https://github.com/openshift/oadp-operator[OADP Operator] to create a connection to a backup storage location on the hub cluster. The backup storage location is then used to backup and restore the user-created hub cluster resources.
 
-The cluster backup and restore operator is not instaleld automatically. Enable the backup component by setting the `cluster-backup` parameter to `true`, in the `MultiClusterHub` resource. The OADP Operator is automatically installed, in the same namesapce as the backup resource, when you install the cluster backup and restore operator. 
+The cluster backup and restore operator is not instaleld automatically. Enable the backup component by setting the `cluster-backup` parameter to `true`, in the `MultiClusterHub` resource. The OADP Operator is automatically installed, in the same namesapce as the backup resource, when you install the cluster backup and restore operator.
+
+*Notes*: 
+
+* The OADP Operator 1.0 has disabled building multi-arch builds and only produces `x86_64` builds for the official release. This means that if you are using an architecture other than `x86_64`, the OADP Operator installed by the backup component must be replaced with the correct version. In this case, uninstall the OADP Operator and find the operator matching your architecture, then install it.
+
+* If you have previously installed and used the OADP Operator on the hub cluster, uninstall this version since the backup component works now with OADP installed in the component namespace. Use the same storage location for the link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-dataprotectionapplication-custom-resource[`DataProtectionApplication`] resource owned by the OADP Operator installed with the backup component; it accesses the same backup data as the previous operator. Velero backup resources are now loaded within the new OADP Operator namespace on this hub cluster.
 
 link:https://velero.io/[Velero] is installed with the OADP Operator on the {product-title-short} hub cluster; Velero is used to backup and restore {product-title-short} hub cluster resources. 
 
@@ -12,7 +18,7 @@ For a list of supported storage providers for Velero, see https://velero.io/docs
 * <<prerequisites-backup-restore,Prerequisites>>
 * <<backup-restore-architecture,Backup and restore operator architecture>>
 * <<restore-backup,Restore a backup>>
-** <<restore-passive-resources,Restore pasive resources>>
+** <<restore-passive-resources,Restore passive resources>>
 ** <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>>
 ** <<restore-activation-resources,Restore activation resources>>
 * <<backup-validation-using-a-policy,Backup validation using a policy>>
@@ -88,7 +94,7 @@ The valid options for the previously mentioned properties are following values:
 ** `<backup_name>` - This property restores the specified backup pointing to it by name. 
 
 The name of the `restore.velero.io` resources that are created by the `restore.cluster.open-cluster-management.io` is generated using the following template rule, `<restore.cluster.open-cluster-management.io name>-<velero-backup-resource-name>`. View the following descriptions:
-
+//Should the passive resource names be added to this list???
 * `restore.cluster.open-cluster-management.io name` is the name of the current `restore.cluster.open-cluster-management.io` resource, which initiates the restore.
 * `velero-backup-resource-name` is the name of the Velero backup file that is used for restoring the data. For example, the `restore.cluster.open-cluster-management.io` resource named `restore-acm` creates `restore.velero.io` restore resources. View the following examples for the format:
 +
@@ -118,7 +124,7 @@ spec:
 ** When you restore a backup on a new hub cluster, make sure that the previous hub cluster, where the backup was created, is shut down. If it is running, the previous hub cluster tries to reimport the managed clusters as soon as the managed cluster reconciliation finds that the managed clusters are no longer available.
 
 [#restore-passive-resources]
-=== Restore pasive resources
+=== Restore passive resources
 
 Passive data is backup data such as secrets, ConfigMaps, applications, policies, and all the managed cluster custom resources, which do not activate a connection between managed clusters and hub clusters. The backup resources are restored on the hub cluster by the credentials backup and restore resources.
 
@@ -154,7 +160,7 @@ spec:
 [#restore-activation-resources]
 === Restore activation resources
 
-Use the 
+Use the link:https://github.com/stolostron/cluster-backup-operator/blob/main/config/samples/cluster_v1beta1_restore_passive_activate.yaml[`restore-passive-activate`] sample when you want the hub cluster to manage the clusters. In this case it is assumed that the other data has been restored already on the hub cluster that using the passive resource.
 
 [#backup-validation-using-a-policy]
 == Backup validation using a policy
