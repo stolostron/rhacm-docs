@@ -137,8 +137,11 @@ Passive hub clusters continuously retrieve the latest backups and restore the pa
 
 Active and passive hub clusters are connected to the same storage location, where the primary hub cluster backs up data for passive hub clusters to access the primary hub cluster backups. For more details on how to setup this automatic restore configuration, see the <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>> section.
 
+In the following diagram, the actuve hub cluster manages the local clusters and backs up the hub cluster data at regular intervals:
 
 image:../images/active_passive_config_design.png[Active passive configration diagram] 
+
+The passive hub cluster restores this data, except for the managed cluster activation data, which moves the managed clusters to the passive hub cluster. The passive hub clusters can restore the passive data continuously, see the <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>> section. Passive hub clusters can restore passive data as a one-time operation, see <<restore-passive-resources,Restore passive resources>> section fo rmore details. 
 
 [#managed-cluster-activation-data]
 === Managed cluster activation data
@@ -215,20 +218,14 @@ spec:
 
 [#disaster-recovery]
 == Disaster recovery
-//still going through this section
-When the primary hub cluster goes down, one of the passive hubclusters is chosen by the administrator to take over the managed clusters. In the following image, the administrator decides to use _Hub cluster N_ as the new primary hub cluster:
+
+When the primary hub cluster goes down, one of the passive hub clusters is chosen by the administrator to take over the managed clusters. In the following image, the administrator decides to use _Hub cluster N_ as the new primary hub cluster:
 
 image:../images/disaster_recovery.png[Disaster recovery diagram] 
 
-_Hub cluster N_ restores the managed cluster activation data. At this point, the managed clusters connect with _Hub cluster N_. The administrator activates a backup on the new primary hub cluster, _Hub cluster 1_, by creating a `BackupSchedule.cluster.open-cluster-management.io` resource, and storing the backups at the same storage location as the initial primary hub cluster.
+_Hub cluster N_ restores the managed cluster activation data. At this point, the managed clusters connect with _Hub cluster N_. The administrator activates a backup on the new primary hub cluster, _Hub cluster N_, by creating a `BackupSchedule.cluster.open-cluster-management.io` resource, and storing the backups at the same storage location as the initial primary hub cluster.
 
-All other passive hub clusters now restore passive data using the backup data created by the new primary hub cluster. Hub D behaves now as the primary hub, managing clusters and backing up data.
-Note:
-
-Step 1 is not automated since the admin should decide if the primary hub is down and needs to be replaced, or there is some network communication error between the hub and managed clusters. The admin also decides which passive hub should become primary. If desired, this step could be automated using the Policy integration with Ansible jobs: the admin can setup an Ansible job to be executed when the Backup Policy reports backup execution errors.
-Although Step 2 above is manual, the admin will be notified using the Backups are actively running as a cron job if he omits to start creating backups from the new primary hub.
-
-
+All other passive hub clusters now restore passive data using the backup data created by the new primary hub cluster. _Hub N_ is now the primary hub cluster, managing clusters and backing up data.
 
 [#backup-validation-using-a-policy]
 == Backup validation using a policy
