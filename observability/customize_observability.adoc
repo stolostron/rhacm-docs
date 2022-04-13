@@ -13,10 +13,11 @@ Collect logs about new information that is created for observability resources w
 * <<updating-replicas,Updating the _multiclusterobservability_ CR replicas from the console>>
 * <<forward-alerts,Forwarding alerts>>
 * <<customizing-route-cert,Customizing route certification>>
+* <<customizing-certificates-object-store,Customizing certificates for accessing the object store>>
 * <<viewing-and-exploring-data,Viewing and exploring data>>
-  * <<viewing-etcd-grafana,Viewing the etcd table>>
-  * <<viewing-cluster-fleet-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster fleet service-level overview for the Kubernetes API server dashboard>>
-  * <<viewing-cluster-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster service-level overview for the Kubernetes API server dashboard>>
+** <<viewing-etcd-grafana,Viewing the etcd table>>
+** <<viewing-cluster-fleet-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster fleet service-level overview for the Kubernetes API server dashboard>>
+** <<viewing-cluster-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster service-level overview for the Kubernetes API server dashboard>>
 * <<disable-observability,Disable observability>>
 
 [#creating-custom-rules]
@@ -232,6 +233,45 @@ To learn more, see the https://prometheus.io/docs/alerting/latest/alertmanager/[
 == Customizing route certification
 
 If you want to customize the {ocp-short} route certification, you must add the routes in the `alt_names` section. To ensure your {ocp-short} routes are accessible, add the following information: `alertmanager.apps.<domainname>`, `observatorium-api.apps.<domainname>`, `rbac-query-proxy.apps.<domainname>`.
+
+*Note*: Users are responsible for certificate rotations and updates.
+
+[#customizing-certificates-object-store]
+=== Customizing certificates for accessing the object store
+
+You can customize certificates for accessing the object store. Edit the `http_config` section by adding the certificate in the object store secret. View the following example:
+
+[source,yaml]
+----
+ thanos.yaml: |
+    type: s3
+    config:
+      bucket: "thanos"
+      endpoint: "minio:9000"
+      insecure: false
+      access_key: "minio"
+      secret_key: "minio123"
+      http_config:
+        tls_config:
+          ca_file: /etc/minio/certs/ca.crt
+          cert_file: /etc/minio/certs/public.crt
+          key_file: /etc/minio/certs/private.key
+          insecure_skip_verify: false
+----
+
+You must provide a secret in the `open-cluster-management-observability` namespace. The secret must contain the `ca.crt`, `public.crt`, and `private.key` that you defined in the previous secret example. 
+
+You can also configure the secret name, the `TLSSecretName` parameter in the `MultiClusterObservability` CR. View the following example where the secret name is `tls-certs-secret`:
+
+[source,yaml]
+----
+metricObjectStorage:
+      key: thanos.yaml
+      name: thanos-object-storage
+      tlsSecretName: tls-certs-secret
+----
+
+This secret can be mounted into all components that need to access the object store, and it includes the following components: `receiver`, `store`, `ruler`, `compact`.
 
 [#viewing-and-exploring-data]
 == Viewing and exploring data

@@ -1,0 +1,52 @@
+[#volsync-convert-backup-pvc]
+= Converting a replicated image to a usable persistent volume claim
+
+There might be a time when you need to use the replicated image to recover data or to create a new instance of a persistent volume claim. The copy of the image must be converted to a persistent volume claim before it can be used. To convert a replicated image to a persistent volume claim, complete the following steps:
+
+. When the replication is complete, identify the latest snapshot from the `ReplicationDestination` object by entering the following command:
++
+----
+$ kubectl get replicationdestination <destination> -n <destination-ns> --template={{.status.latestImage.name}}
+----
+Note the value of the latest snapshot for when you create your persistent volume claim.
++
+Replace `destination` with the name of your replication destination. 
++
+Replace `destination-ns` with the namespace of your destination. 
+
+. Create a `pvc.yaml` file that resembles the following example:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: <pvc-name>
+  namespace: <destination-ns>
+spec:
+  accessModes:
+    - ReadWriteOnce
+  dataSource:
+    kind: VolumeSnapshot
+    apiGroup: snapshot.storage.k8s.io
+    name: <snapshot_to_replace>
+  resources:
+    requests:
+      storage: 2Gi
+----
++
+Replace `pvc-name` with a name for your new persistent volume claim.
++
+Replace `destination-ns` with the namespace where the persistent volume claim is located.  
++
+Replace `snapshot_to_replace` with the `VolumeSnapshot` name that you found in the previous step.
++
+You can update `resources.requests.storage` with a different value, but it is best practice when the value is at least the same size as the initial source persistent volume claim.
+
+. Validate that your persistent volume claim is running in the environment by entering the following command:
++
+----
+$ kubectl get pvc -n <destination-ns>
+----
+
+Your original backup image is running as the main persistent volume claim.
