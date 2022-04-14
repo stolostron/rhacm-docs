@@ -1,13 +1,11 @@
-[#volsync]
-= Replicating persistent volumes with VolSync (Technology Preview)
-
-VolSync is a Kubernetes operator that enables asynchronous replication of persistent volumes within a cluster, or across clusters with storage types that are not otherwise compatible for replication. It uses the Container Storage Interface (CSI) to overcome the compatibility limitation. After deploying the VolSync operator in your environment, you can leverage it to create and maintain copies of your persistent data.
-
-**Note:** VolSync does not meet the requirements of the FIPS standard. 
+[#volsync-rsync-rep]
+= Replicating persistent volumes with VolSync
 
 There are three methods that you can use to replicate when you use VolSync, which depend on the number of synchronization locations that you have. The Rsync method is used for this example. For information about the other methods and more information about Rsync, see https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation.  
 
 Rsync replication is a one-to-one replication of persistent volumes, and is likely to be the most commonly used. This is used for replicating data to a remote site. 
+
+VolSync does not create its own namespace, so it is in the same namespace as other {ocp-short} all-namespace operators. Any changes that you make to the operator settings for VolSync also affects the other operators in the same namespace. For example, if you change to manual approval for channel updates. 
 
 [#volsync-prereq]
 == Prerequisites
@@ -18,37 +16,96 @@ Before installing VolSync on your clusters, you must have the following requirem
 
 * At least two configured clusters that are managed by the same {product-title-short} hub cluster.
 
+* Network connectivity between the clusters that you are configuring with VolSync. If the clusters are not on the same network, you can configure the link:../services/submariner.adoc#submariner[Submariner network service] and use the `ClusterIP` value for `ServiceType` to network the clusters or use a load balancer with the `LoadBalancer` value for `ServiceType`. 
+
 * The storage driver that you use for your source persistent volume must be CSI-compatible and able to support snapshots. 
 
 [#volsync-install-clusters]
 == Installing VolSync on the managed clusters
 
-To enable VolSync on two clusters in your environment, you must install it on both the source and the target managed clusters. Complete the following steps to leverage the policy template in {product-title-short} to install VolSync:
+To enable VolSync to replicate the persistent volume claim on one cluster to the persistent volume claim of another cluster, you must install VolSync on both the source and the target managed clusters. You can use either of two methods to install VolSync on two clusters in your environment. You can either add a label to each of the managed clusters in the hub cluster, or you can manually create and apply a `ManagedClusterAddOn`.
 
-. Download the https://github.com/stolostron/policy-collection/blob/main/community/CM-Configuration-Management/policy-persistent-data-management.yaml[policy-persistent-data-management] policy template from the GitHub repository. In its current format, this policy starts an installation of VolSync on the hub cluster. After it is installed on the hub cluster, it automatically installs the required VolSync components on all of the managed clusters of the hub.
+[#volsync-install-label]
+=== Installing VolSync using labels
+
+To install VolSync on the managed cluster by adding a label, complete the following steps:
+
+* From the {product-title-short} console:
 +
-*Note:* If you downloaded and used this policy before {product-title-short} version 2.4.2, download the file again. The path has changed for the file and some of its references.  
+. Select one of the managed clusters from the `Clusters` page in the hub cluster console to view its details.
+
+. In the *Labels* field, add the following label: 
 +
-You can specify a different label to identify which clusters will have VolSync installed by modifying the following section of the policy file:
+----
+addons.open-cluster-management.io/volsync=true
+----
++
+The VolSync service pod is installed on the managed cluster. 
+
+. Add the same label the other managed cluster. 
+
+. Run the following command on each managed cluster to confirm that the VolSync operator is installed:
++
+----
+oc get csv -n openshift-operators
+----
++
+There is an operator listed for VolSync when it is installed.
+
+* From the command-line interface:
++
+. Start a command-line session on the hub cluster. 
+
+. Enter the following command to add the label to the first cluster:
++
+----
+oc label managedcluster <managed-cluster-1> "addons.open-cluster-management.io/volsync"="true"
+----
++
+Replace `managed-cluster-1` with the name of one of your managed clusters.
+
+. Enter the following command to add the label to the second cluster: 
++
+----
+oc label managedcluster <managed-cluster-2> "addons.open-cluster-management.io/volsync"="true"
+----
++
+Replace `managed-cluster-2` with the name of your other managed cluster.
++
+A `ManagedClusterAddOn` resource should be created automatically on your hub cluster in the namespace of each corresponding managed cluster.
+
+[#volsync-install-mcaddon]
+=== Installing VolSync using a ManagedClusterAddOn
+
+To install VolSync on the managed cluster by adding a `ManagedClusterSetAddOn` manually, complete the following steps:
+
+. On the hub cluster, create a YAML file called `volsync-mcao.yaml` that contains content that is similar to the following example: 
 +
 [source,yaml]
 ----
-spec:
-  clusterSelector:
-    matchLabels:
-      vendor: OpenShift
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: volsync
+  namespace: <managed-cluster-1-namespace>
+spec: {}
 ----
 +
-*Note:* Do not modify the content for the `clusterSelector` later in the file that applies to the `local-cluster`.
- 
-. Apply the policy while you are logged in to your hub cluster by entering the following command:
+Replace `managed-cluster-1-namespace` with the namespace of one of your managed clusters. This namespace is the same as the name of the managed cluster.
 +
-----
-oc -n <namespace> apply -f ./policy-persistent-data-management.yaml
-----
-+
-Replace `namespace` with a namespace on your hub cluster.
+*Note:* The name must be `volsync`. 
 
+. Apply the file to your configuration by entering a command similar to the following example:
++
+----
+oc apply -f volsync-mcao.yaml
+----
+
+. Repeat the procedure for the other managed cluster.
++
+A `ManagedClusterAddOn` resource should be created automatically on your hub cluster in the namespace of each corresponding managed cluster.
+
+ 
 [#volsync-rsync-clusters]
 == Configuring Rsync replication across managed clusters
 
@@ -85,7 +142,7 @@ spec:
     capacity: 2Gi
     accessModes: [ReadWriteOnce]
     storageClassName: gp2-csi
-    volumeSnapshotClassName: gp2-csi
+    volumeSnapshotClassName: csi-aws-vsc
 ----
 +
 *Note:* The `capacity` value should match the capacity of the persistent volume claim that is being replicated.
@@ -94,9 +151,9 @@ Replace `destination` with the name of your replication destination CR.
 +
 Replace `destination-ns` with the name of the namespace where your destination is located.
 +
-For this example, the `ServiceType` value of `LoadBalancer` is used. The load balancer service is created by the source cluster to enable your source managed cluster to transfer information to a different destination managed cluster. You can use `ClusterIP` as the service type if your source and destinations are on the same cluster. Note the address of the Load Balancer and the name of the secret to refer to when you configure the source cluster.
+For this example, the `ServiceType` value of `LoadBalancer` is used. The load balancer service is created by the source cluster to enable your source managed cluster to transfer information to a different destination managed cluster. You can use `ClusterIP` as the service type if your source and destinations are on the same cluster, or if you have Submariner network service configured. Note the address and the name of the secret to refer to when you configure the source cluster.
 + 
-The `storageClassName` and `volumeSnapshotClassName` are optional parameters. If you are using a storage class and volume snapshot class name that are different than the defaults for your environment, specify those values. 
+The `storageClassName` and `volumeSnapshotClassName` are optional parameters. Specify the values for your environment, particularly if you are using a storage class and volume snapshot class name that are different than the default values for your environment. 
 
 .. Run the following command on the destination cluster to create the `replicationdestination` resource:
 +
@@ -266,75 +323,4 @@ Status:
 +
 If the `Last Sync Time` has no time listed, then the replication is not complete.
 
-[#volsync-convert-backup-pvc]
-== Converting a replicated image to a usable persistent volume claim
-
-There might be a time when you need to use the replicated image to recover data or to create a new instance of a persistent volume claim. The copy of the image must be converted to a persistent volume claim before it can be used. To convert a replicated image to a persistent volume claim, complete the following steps:
-
-. When the replication is complete, identify the latest snapshot from the `ReplicationDestination` object by entering the following command:
-+
-----
-$ kubectl get replicationdestination <destination> -n <destination-ns> --template={{.status.latestImage.name}}
-----
-Note the value of the latest snapshot for when you create your persistent volume claim.
-+
-Replace `destination` with the name of your replication destination. 
-+
-Replace `destination-ns` with the namespace of your destination. 
-
-. Create a `pvc.yaml` file that resembles the following example:
-+
-[source,yaml]
-----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: <pvc-name>
-  namespace: <destination-ns>
-spec:
-  accessModes:
-    - ReadWriteOnce
-  dataSource:
-    kind: VolumeSnapshot
-    apiGroup: snapshot.storage.k8s.io
-    name: <snapshot_to_replace>
-  resources:
-    requests:
-      storage: 2Gi
-----
-+
-Replace `pvc-name` with a name for your new persistent volume claim.
-+
-Replace `destination-ns` with the namespace where the persistent volume claim is located.  
-+
-Replace `snapshot_to_replace` with the `VolumeSnapshot` name that you found in the previous step.
-+
-You can update `resources.requests.storage` with a different value, but it is best practice when the value is at least the same size as the initial source persistent volume claim.
-
-. Validate that your persistent volume claim is running in the environment by entering the following command:
-+
-----
-$ kubectl get pvc -n <destination-ns>
-----
-
-[#volsync-start]
-== Scheduling your synchronization
-
-You have a few options to select from when determining how you start your replications: always running, on a schedule, or manually. Scheduling your replications is an option that is the option that is often selected. 
-
-The *Schedule* option runs replications at scheduled times. A schedule is defined by a `cronspec`, so the schedule can be configured as intervals of time or as specific times. The order of the schedule values are:
-
-`"minute (0-59) hour (0-23) day-of-month (1-31) month (1-12) day-of-week (0-6)"`
-
-The replication starts when the scheduled time occurs. Your setting for this replication option might resemble the following content:
-
-[source,yaml]
-----
-spec:
-  trigger:
-    schedule: "*/6 * * * *"
-----
-
-After enabling one of these methods, your synchronization schedule runs according to the method that you configured.
-
-See the https://volsync.readthedocs.io/en/latest/index.html[VolSync] documentation for additional information and options.
+You have a replica of your original persistent volume claim. 

@@ -22,11 +22,11 @@ The logs from the subscription controller pod `multicluster-operators-hub-subscr
 oc apply -f apps.open-cluster-management.io_channels_crd.yaml
 ----
 
-. In the `open-cluster-management` namespace, edit the `advanced-cluster-management.v2.2.0` CSV, run the following command and edit:
+. In the `open-cluster-management` namespace, edit the `advanced-cluster-management.<version, example 2.5.0>` CSV, run the following command and edit:
 
 +
 ----
-oc edit csv advanced-cluster-management.v2.2.0 -n open-cluster-management
+oc edit csv advanced-cluster-management.<version, example 2.5.0> -n open-cluster-management
 ----
 
 +
@@ -37,11 +37,11 @@ Find the following containers:
 - `multicluster-operators-hub-subscription` 
 
 +
-Replace the container images with the following:
+Replace the container images with the container that you want to use:
 
 +
 ----
-quay.io/open-cluster-management/multicluster-operators-subscription:2.2-PR337-91af6cb37d427d22160b2c055589a4418dada4eb
+quay.io/open-cluster-management/multicluster-operators-subscription:<your image tag>
 ---- 
 
 +
@@ -53,7 +53,7 @@ The update recreates the following pods in the `open-cluster-management` namespa
 - `multicluster-operators-hub-subscription-<random-characters>` 
 
 . Check that the new pods are running with the new docker image. Run the following command, then find the new docker image:
-
++
 ----
 oc get pod multicluster-operators-standalone-subscription-<random-characters> -n open-cluster-management -o yaml
 oc get pod multicluster-operators-hub-subscription-<random-characters> -n open-cluster-management -o yaml
@@ -62,30 +62,25 @@ oc get pod multicluster-operators-hub-subscription-<random-characters> -n open-c
 . Update the images on managed clusters. 
 
 +
-On the hub cluster, run the following command by replacing `CLUSTER_NAME` with the actual managed cluster name:
+On the hub cluster, run the following command to update the image value in the `multicluster_operators_subscription` key to the image that you want to use:
 
 +
 ----
-oc annotate klusterletaddonconfig -n CLUSTER_NAME CLUSTER_NAME klusterletaddonconfig-pause=true --overwrite=true
+oc edit configmap -n open-cluster-management mch-image-manifest-<version, example 2.5.0>
+...
+data:
+multicluster_operators_subscription: <your image with tag>
 ----
 
-. Run the following command, replacing `CLUSTER_NAME` with the actual managed cluster name:
+. Restart the existing `multicluster-operators-hub-subscription` pod:
 
 +
 ----
-oc edit manifestwork -n CLUSTER_NAME  CLUSTER_NAME-klusterlet-addon-appmgr
+oc delete pods -n open-cluster-management multicluster-operators-hub-subscription--<random-characters>
 ----
-  
-. Find `spec.global.imageOverrides.multicluster_operators_subscription` and set the value to:
-
 
 +
-----
-quay.io/open-cluster-management/multicluster-operators-subscription:2.2-PR337-91af6cb37d427d22160b2c055589a4418dada4eb
----- 
-
-+
-This recreates the `klusterlet-addon-appmgr-<random-characters>` pod in `open-cluster-management-agent-addon` namespace on the managed cluster. 
+This recreates the `application-manager-<random-characters>` pod in `open-cluster-management-agent-addon` namespace on the managed cluster. 
 
 . Check that the new pod is running with the new docker image.
 
