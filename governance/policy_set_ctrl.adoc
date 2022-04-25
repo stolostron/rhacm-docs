@@ -1,0 +1,119 @@
+[#policy-set-controller]
+= Policy set controller
+
+The policy set controller aggregates the policy status scoped to policies that are defined in the same namespace. Create a policy set (`PolicySet`) to group policies that in the same namespace. All policies in the `PolicySet` are placed together in a selected cluster by creating a `PlacementBinding` to bind the `PolicySet` and `Placement`. The policy set is deployed to the hub cluster.
+
+Additionally, when a policy is a part of multiple policy sets, existing and new `Placement` resources remain in the policy. When a user removes a policy from the policy set, the policy is not applied to the cluster that is selected in the policy set, but the placements remain. The policy set controller only checks for violations in clusters that include the policy set placement.
+
+Learn more details about the policy set structure in the following sections:
+
+* <<policy-set-yaml-structure,Policy set controller YAML structure>>
+* <<policy-set-table,Policy set controller YAML table>>
+* <<policy-set-sample,Policy set CR sample>>
+
+[#policy-set-yaml-structure]
+== Policy set YAML structure
+
+Your policy set might resemble the following YAML file:
+ 
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicySet
+metadata:
+  name: demo-policyset  
+spec:
+  policies:
+  - policy-demo
+
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: demo-policyset-pb
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: demo-policyset-pr
+subjects:
+- apiGroup: policy.open-cluster-management.io
+  kind: PolicySet
+  name: demo-policyset
+---
+apiVersion: apps.open-cluster-management.io
+kind: PlacementRule
+metadata: 
+  name: demo-policyset-pr
+spec: 
+  clusterConditions:pagewidth:
+  - status: "True"
+    type: ManagedCLusterConditionAvailable
+  clusterSelectors: 
+    matchExpressions: 
+      - key: name
+        operator: In
+        values: 
+          - lcoal-cluster
+----
+
+
+[#policy-set-table]
+== Policy set table
+
+View the following parameter table for descriptions:
+
+.Parameter table
+|===
+| Field | Description
+
+| apiVersion
+| Required.
+Set the value to `policy.open-cluster-management.io/v1`.
+
+| kind
+| Required.
+Set the value to `PolicySet` to indicate the type of policy.
+
+| metadata.name
+| Required.
+The name for identifying the policy resource.
+
+| spec
+| Required.
+Add configuration details for your policy.
+
+| spec.policies
+| Optional.
+The list of policies that you want to group together in the policy set.
+|===
+
+
+[#policy-set-sample]
+== Policy set sample
+
+See https://github.com/stolostron/policy-collection/blob/main/stable/AC-Access-Control/policy-limitclusteradmin.yaml[`policy-limitclusteradmin.yaml`] to view the IAM policy sample. See xref:../governance/create_policy.adoc#managing-security-policies[Managing security policies] for more information.
+
+Refer to xref:../governance/policy_controllers.adoc#policy-controllers[Policy controllers] for more topics.
+
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicySet
+metadata:
+  name: pci
+  namespace: default  
+spec:
+  description: Policies for PCI compliance
+  policies:
+  - policy-pod
+  - policy-namespace
+status:
+  compliant: NonCompliant
+  placement:
+  - placementBinding: binding1
+    placementRule: placement1
+    policySet: policyset-ps
+----
+
+See the _Creating policy sets_ section in the xref:../governance/create_policy.adoc#creating-policy-sets[Managing security policies] topic.
