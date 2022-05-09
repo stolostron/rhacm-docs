@@ -234,6 +234,73 @@ Submariner uses IP security (IPsec) to establish the secure tunnels between the 
 [#preparing-openstack]
 == Preparing Red Hat OpenStack Platform for Submariner
 
-To prepare Red Hat OpenStack Platform clusters for deploying Submariner, complete the following steps:
+You can use the `SubmarinerConfig` API to configure the Red Hat OpenStack Platform cluster to integrate with a Submariner deployment. To prepare Red Hat OpenStack Platform clusters for deploying Submariner, complete the following steps:
 
-...
+. If you did not create the managed cluster with {product-title-short}, you must manually create a secret on your hub cluster in the namespace of your managed cluster that contains your Red Hat OpenStack Platform credential secret. If you created the cluster with {product-title-short}, then skip to step 2.
+
+.. Create a file named `openstack_secret.yaml` and add the following example content: Run the command to apply the file:
++
+[source,yaml]
+apiVersion: v1
+kind: Secret
+metadata:
+   name: <managed-cluster-name>-rhos-creds
+   namespace: <managed-cluster-namespace>
+type: Opaque
+data:
+   clouds.yaml: <rhos-clouds-yaml-file-content>
+   cloud : <rhos-cloud-name>
+auth:
+   auth_url: https://rhos-d.infra.prod.upshift.rdu2.redhat.com:13000
+   application_credential_id: <id>
+   application_credential_secret: <secret>
+region_name: "regionOne"
+interface: "public"
+identity_api_version: 3
+auth_type: "v3applicationcredential"
++
+Replace `managed-cluster-name` with the name of your managed cluster. The value of `managed-cluster-name-rhos-creds` is your Red Hat OpenStack Platform credential secret name, which you can find in the cluster namespace of your hub cluster.
++
+Replace `managed-cluster-namespace` with the namespace of your managed cluster.
++
+Replace `rhos-clouds-yaml-file-content` with the contents of your encoded Red Hat OpenStack Platform `clouds.yaml: $(base64 -w0 )` file.
++
+Replace `rhos-cloud-name` with your encoded Red Hat OpenStack Platform cloud name `<cloud-name>: $base64 -w0 )`
+
+.. Run the following command to apply the file:
++
+----
+oc apply -f openstack_secret.yaml
+----
+
+. If you created the managed cluster with {product-title-short}, or created the secret in the previous step, prepare the cluster.
+
+.. Create a file named `submar_addon.yaml` with content that is similar to the following example: 
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:
+    credentialsSecret:
+      name: <managed-cluster-name>-rhos-creds
+----
++
+Replace `managed-cluster-namespace` with the namespace of your managed cluster.
++
+Replace `managed-cluster-name` with the name of your managed cluster. The value of `managed-cluster-name-rhos-creds` is your Red Hat OpenStack Platform credential secret name, which you can find in the cluster namespace of your hub cluster.
++
+*Note:* The name of the `SubmarinerConfig` custom resource must be `submariner`, as shown in the example.
+
+.. Run the following command to apply the file:
++
+----
+oc apply -f submar_addon
+----
+
+This configuration automatically opens the Submariner required ports: network address translation - traversal (NATT) port (4500/UDP), virtual extensible LAN (VXLAN) port (4800/UCP), and Submariner metrics port (8080/TCP) on your RHOS instance. It also labels one worker node as the Submariner gateway and enables the public IP address of this node in your Red Hat OpenStack Platform cluster.
+
+If you want to customize the Network Address Translation-Traversal (NATT) port, number of gateway nodes, or instance type of your gateway nodes for your deployment, see link:../submariner/submariner_customizations.adoc#submariner-customizations[Customizing Submariner deployments] for the required steps.
