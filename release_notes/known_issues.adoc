@@ -840,3 +840,16 @@ Avoid backup collisions by setting the `BackupSchedule.cluster.open-cluster-mana
 The backup collision is reported by the link:https://github.com/stolostron/cluster-backup-chart/blob/main/stable/cluster-backup-chart/templates/hub-backup-pod.yaml[`hub-backup-pod`] policy. The administrator must verify which hub cluster writes data to the storage location. Then remove the `BackupSchedule.cluster.open-cluster-management.io` resource from the passive hub cluster, and recreate a new `BackupSchedule.cluster.open-cluster-management.io` resource on the primary hub cluster to resume the backup.
 
 See link:../clusters/backup_and_restore.adoc#hub-backup-and-restore[Cluster backup and restore operator] for more information.
+
+[#restore-limitations]
+=== Restore limitations
+
+View the following restore limitations:
+
+* The new hub cluster is not identical to the initial hub cluster, where the data is restored, when there is an existing policy on the new hub cluster before the backup data is restored on the initial hub cluster. The policy should not be running on the new hub cluster since this is a policy that is unavailable with the backup resources.
+
+* Since Velero skips existing resources, the policy on the new hub cluster is unchanged. Therefore, the policy is not the same as the one backed up on the initial hub cluster.
+
+* The new hub cluster has a different configuration from the active hub cluster when a user reapplies the backup on the new hub cluster. Since there is an existing policy on the hub cluster from a previous restore, it is not restored again. Even when the backup contains the expected updates, the policy contents are not updated by Velero on the new hub cluster. 
+
+To address the previously mentioned limitations, create a `restore.cluster.open-cluster-management.io` resource for the cluster backup and restore operator runs a set of steps, which cleans up the hub cluster before Velero restore begins. For more information, see link:../clusters/backup_and_restore.adoc#clean-hub-restore[Clean the hub cluster before restore].
