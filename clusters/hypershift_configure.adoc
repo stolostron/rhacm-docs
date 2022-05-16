@@ -1,0 +1,170 @@
+[#hypershift-configure]
+= Configuring HyperShift
+
+You can configure HyperShift by converting an existing cluster to a HyperShift management cluster and then deploying a cluster that is managed by the HyperShift management cluster that you converted. 
+
+*Important:* Because HyperShift is a Technology Preview feature, the related components are disabled by default. Enable the feature by editing the `multiclusterengine` custom resource to set the `spec.overrides.components[?(@.name=='hypershift-preview')].enabled` to `true`. 
+
+Enter the following command to enable the HyperShift feature:
+
+----
+oc get mce multiclusterengine-sample -ojsonpath="{.spec.overrides.components[?(@.name=='hypershift-preview')].enabled}"
+true
+----
+
+[#hypershift-convert-mgt-cluster]
+== Converting an existing cluster to a HyperShift management cluster
+
+[#hypershift-convert-mgt-cluster-prereq]
+=== Prerequisites
+
+You must have the multicluster engine operator installed on at least one cluster that is managed by {ocp}. The multicluster engine operator is automatically installed when you install {product-title-short} version 2.5, and later.
+
+*Note:* If you want your {product-title-short} hub cluster to be your HyperShift management cluster, you can configure `local-cluster` as your HyperShift management cluster.
+
+Complete the following steps to convert an {ocp-short} managed cluster to a HyperShift management cluster:
+
+. Install the HyperShift add-on
++
+The cluster that hosts the HyperShift operator is the HyperShift management cluster. In this step, use the `hypershift-addon` to install a HyperShift operator on a managed cluster.
++
+.. Create the `ManagedClusterAddon` HyperShift add-on by creating a file that resembles the following example:
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: hypershift-addon
+  namespace: <hypershift-management-cluster> 
+spec:
+  installNamespace: open-cluster-management-agent-addon
+----
++
+Replace `hypershift-management-cluster` with the name of the managed cluster on which you want to install the HyperShift operator.
+
+.. Apply the file by running the following command:
++
+----
+oc apply -f <filename>
+----
++
+Replace `filename` with the name of the file that you created. 
+
+. Create an oidc s3 credentials secret for the HyperShift operator, named `hypershift-operator-oidc-provider-s3-credentials`. Create the secret in the same namespace where your `hypershift-management-cluster` is hosted. 
++
+The secret must contain 3 fields:
++
+* `bucket`: An S3 bucket with public access to host OIDC discovery documents for your HyperShift clusters
+*  `credentials`: credentials to access the bucket
+* `region`: region of the s3 bucket
+
++
+See https://hypershift-docs.netlify.app/getting-started/[Getting started] in the HyperShift documentation for more information about the secret. The following example shows a sample Amazon Web services secret template:
++
+----
+oc create secret generic hypershift-operator-oidc-provider-s3-credentials --from-file=credentials=$HOME/.aws/credentials --from-literal=bucket=<s3-bucket-for-hypershift> 
+--from-literal=region=<region> -n <hypershift-management-cluster>
+----
+
++
+*Tip:* Add the label to ensure that the `hypershift-operator-oidc-provider-s3-credentials` secret is backed up for disaster recovery by entering the following command:
++
+----
+oc label secret hypershift-operator-oidc-provider-s3-credentials -n <hypershift-management-cluster> cluster.open-cluster-management.io/backup=true
+----
+
+. Confirm that the `hypershift-addon` is installed by running the following command:
++
+----
+oc get managedclusteraddons -n local-cluster hypershift-addon
+----
++
+The output resembles the following example, when the add-on is installed:
++
+----
+NAME               AVAILABLE   DEGRADED   PROGRESSING
+hypershift-addon   True
+----
+
+Your HyperShift add-on is installed and the management cluster is available to managed HyperShift clusters. 
+
+[#hypershift-deploy-cluster]
+== Deploying a HyperShift managed cluster
+
+After you install the HyperShift operator and convert an existing cluster into a HyperShift management clusters, you can now provision a HyperShift hosted cluster by creating a `HypershiftDeployment` custom resource. 
+
+. Create a cloud provider secret as a credential using the console or a file addition. The following example shows the format for Amazon Web Services:
++
+[source,yaml]
+----
+apiVersion: v1
+metadata:
+  name: my-aws-cred
+  namespace: default      # Where you create HypershiftDeployment resources
+type: Opaque
+kind: Secret
+stringData:
+  ssh-publickey:          # Value
+  ssh-privatekey:         # Value
+  pullSecret:             # Value, required
+  baseDomain:             # Value, required
+  aws_secret_access_key:  # Value, required
+  aws_access_key_id:      # Value, required
+----
++
+* To create this secret with the console, follow the credential creation steps by accessing *Credentials* in the navigation. 
++
+* To create the secret using the command line, run the following commands:
++
+----
+oc create secret generic <my-secret> -n <hypershift-deployment-namespace> --from-literal=baseDomain='your.domain.com' --from-literal=aws_access_key_id='your-aws-access-key' --from-literal=aws_secret_access_key='your-aws-secret-key' --from-literal=pullSecret='{"auths":{"cloud.openshift.com":{"auth":"auth-info", "email":"xx@redhat.com"}, "quay.io":{"auth":"auth-info", "email":"xx@redhat.com"} } }' --from-literal=ssh-publickey='your-ssh-publickey' --from-literal=ssh-privatekey='your-ssh-privatekey'
+
+$ oc label secret <my-secret> -n <hypershift-deployment-namespace> cluster.open-cluster-management.io/backup=true
+----
++
+*Note:* The value of `cluster.open-cluster-management.io/backup=true` is added to the secret so the secret is backed up for disaster recovery.
+
+. Create a `HypershiftDeployment` custom resource file in the cloud provider secret namespace.
++
+.. Create a file that contains information that resembles the following example: 
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: HypershiftDeployment
+metadata:
+  name: hypershift-demo
+  namespace: default
+spec:
+  hostingCluster: hypershift-management-cluster     # the hypershift management cluster name.
+  hostingNamespace: clusters     # specify the namespace to which hostedcluster and noodpools belong on the hypershift management cluster.
+  infrastructure:
+    cloudProvider:
+      name: <my-secret>
+    configure: True
+    platform:
+      aws:
+        region: <region>
+----
+.. Apply the file by entering the following command:
++
+----
+oc apply -f <filename>
+----
++
+You can refer to the https://github.com/stolostron/hypershift-deployment-controller/blob/main/api/v1alpha1/hypershiftdeployment_types.go[field definitions] of the API to ensure that they are correct.
+
+. Check the `HypershiftDeployment` status by running the following command:
++
+----
+oc get hypershiftdeployment -n default hypershift-demo -w
+----
+
+. After the hosted cluster is created, it is automatically imported to the hub. You can verify this by running the following command: 
++
+----
+oc get managedcluster <hypershiftDeployment.Spec.infraID>
+----
+
+Your managed cluster is created. Continue with link:../clusters/hypershift_access.adoc#hypershift-access[Accessing a HyperShift managed cluster].
