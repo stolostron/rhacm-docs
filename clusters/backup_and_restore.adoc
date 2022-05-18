@@ -1,7 +1,7 @@
 [#hub-backup-and-restore]
 = Cluster backup and restore operator
 
-The cluster backup and restore operator provides disaster recovery solutions for when {product-title} hub cluster goes down and needs to be recreated. It runs on the hub cluster, and depends on the link:https://github.com/openshift/oadp-operator[OADP Operator] to install Velero. Velero is the component that runs the backup and restore operations, and then creates a connection from the hub cluster to a backup storage location where the backup data is stored. It provides backup and restore support for all {product-title-short} hub cluster resources, like managed clusters, applications, policies, and bare metal assets. When the cluster backup and restore operator is installed, the OADP Operator is installed by default and installed in the same namespace as the operator.
+The cluster backup and restore operator provides disaster recovery solutions for when {product-title} hub cluster goes down and needs to be recreated. It runs on the hub cluster and depends on the link:https://github.com/openshift/oadp-operator[OADP Operator] to install Velero, and to create a connection from the hub cluster to the backup storage location where the data is stored. Velero is the component that runs the backup and restore operations. The cluster backup and restore operator solution provides backup and restore support for all {product-title-short} hub cluster resources, like managed clusters, applications, policies, and bare metal assets.
 
 It supports backups of any third-party resources that extend the hub cluster installation. With this backup solution, you can define cron-based backup schedules which run at specified time intervals. When the hub cluster goes down, a new hub cluster can be deployed and the backed up data is moved to the new hub cluster. 
 
@@ -21,12 +21,14 @@ For a list of supported storage providers for Velero, see https://velero.io/docs
 * <<backup-restore-architecture,Backup and restore operator architecture>>
 ** <<schedule-backup,Schedule a cluster backup>>
 * <<restore-backup,Restore a backup>>
-* <<active-passive-config,Active passive configuration>>
-** <<managed-cluster-activation-data,Managed cluster activation data>>
+** <<prepare-new-hub,Prepare the new hub cluster>>
+** <<clean-hub-restore,Clean the hub cluster before restore>>
 ** <<resources-restored-managed-cluster,Resources restored at managed activation time>>
 ** <<restore-passive-resources,Restore passive resources>>
 ** <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>>
 ** <<restore-activation-resources,Restore activation resources>>
+* <<active-passive-config,Active passive configuration>>
+** <<managed-cluster-activation-data,Managed cluster activation data>>
 * <<disaster-recovery,Disaster recovery>>
 * <<backup-validation-using-a-policy,Backup validation using a policy>>
 
@@ -35,9 +37,48 @@ For a list of supported storage providers for Velero, see https://velero.io/docs
 
 - Be sure to complete the steps to link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-credentials-secret[Create credentials secret] for the cloud storage where the backups are saved. 
 
-- Use the created secret when you link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-velero-custom-resource[Create the Velero Custom Resource].
+- Use the created secret when you create a `DataProtectionAppliation` resource. Your `DataProtectionAppliation` resource might resemble the following YAML file:
+
+[source,yaml]
+----
+apiVersion: oadp.openshift.io/v1alpha1
+kind: DataProtectionApplication
+metadata:
+  name: dpa-sample
+spec:
+  configuration:
+    velero:
+      defaultPlugins:
+      - openshift
+      - aws
+    restic:
+      enable: true
+  backupLocations:
+    - name: default
+      velero:
+        provider: aws
+        default: true
+        objectStorage:
+          bucket: my-bucket
+          prefix: my-prefix
+        config:
+          region: us-east-1
+          profile: "default"
+        credential:
+          name: cloud-credentials
+          key: cloud
+  snapshotLocations:
+    - name: default
+      velero:
+        provider: aws
+       config:
+          region: us-west-2
+          profile: "default"
+----
 
 **Note**: The cluster backup and restore operator resources must be created in the same namespace where the OADP Operator is installed.
+
+See an example to create the link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-dataprotectionapplication-custom-resource[`DataProtectionApplication` resource].
 
 [#backup-restore-architecture]
 == Backup and restore operator architecture
@@ -77,18 +118,11 @@ os get schedules -A | grep acm
 
 Resources are separately backed up in the following groups:
 
-* _Credential backup_, which contains three backup files for Hive, {product-title-short}, and generic backups.
+* _Credential backup_, which contains three backup files for Hive, {product-title-short}, and user-created credentials.
 * _Resource backup_, which contains one backup for the {product-title-short} resources and one for generic resources. These resources use the following label, `cluster.open-cluster-management.io/backup`.
-* _Managed clusters backup_, which contains only resources that activte the managed cluster connection to the hub cluster, where the backup is restored. The scheduled backup uses the following label, `cluster.open-cluster-management.io/backup-schedule-type: acm-managed-clusters`.
+* _Managed clusters backup_, which contains only resources that activte the managed cluster connection to the hub cluster, where the backup is restored.
 
-*Notes*: 
-
-* The _resource backup_ file contains managed cluster-specific resources, but does not contain the subset of resources that connect managed clusters to the hub cluster. The resources that connect managed clusters are also called activation resources and are contained in the managed clusters backup. When you restore backups only for the _credentials_ and _resource_ backup on a new hub cluser, the new hub cluster shows all managed clusters in a detatched state. The managed clusters are still connected to the original hub cluster that created the backup files.
-
-* Only created managed clusters that use the Hive API are automatically connected with the new hub cluster when the `acm-managed-clusters` backup, from the _managed clusters_ backup is restored on another hub cluster. All other managed clusters are in the `Pending Import` state and must be imported back onto the new hub cluster.
-
-* When you restore the `acm-managed-clusters` backup on a new hub cluster by using the `veleroManagedClustersBackupName: latest` option in the restore resource, verify that the backups from the previous hub cluster is shut down. Otherwise, the previous hub cluster attempts to reconnect with the managed cluster, immediately after the managed cluster reconciliation add-ons find that the mangaed clusters are no longer available. If this occurs, both hub clusters attempt to manage clusters at the same time. 
-
+*Note*: The _resource backup_ file contains managed cluster-specific resources, but does not contain the subset of resources that connect managed clusters to the hub cluster. The resources that connect managed clusters are also called activation resources and are contained in the managed clusters backup. When you restore backups only for the _credentials_ and _resource_ backup on a new hub cluster, the new hub cluster shows all managed clusters in a detached state. The managed clusters are still connected to the original hub cluster that created the backup files.
 
 [#restore-backup]
 == Restore a backup
@@ -142,58 +176,37 @@ spec:
 
 **Notes**:
 
-** Only managed clusters created using the `hive` API are automatically imported when the backup is restored on another hub cluster. All other managed clusters show up as _Pending Import_ and must be manually imported back on the new hub cluster.
+** Only managed clusters created by the Hive API are automatically connected with the new hub cluster when the `acm-managed-clusters` backup, from the _managed clusters_ backup is restored on another hub cluster. All other managed clusters are in the `Pending Import` state and must be imported back onto the new hub cluster. The Hive API managed clusters can be connected with the new hub cluster because Hive provides the `kubeconfig` file to connect to the managed cluster. This is backed up and restored on the new hub cluster. The import controller updates the bootstrap `kubeconfig` file on the managed cluster using the restored configuration. The `kubeconfig` file is only available for managed clusters created by using the Hive API.
 ** When you restore a backup on a new hub cluster, make sure that the previous hub cluster, where the backup was created, is shut down. If it is running, the previous hub cluster tries to reimport the managed clusters as soon as the managed cluster reconciliation finds that the managed clusters are no longer available.
 
-[#active-passive-config]
-== Active passive configuration
+[#prepare-new-hub]
+=== Prepare the new hub cluster 
 
-In an active passive configuration, there is one active hub cluster and passive hub clusters. An active hub cluster is also considered the primary hub cluster, which manages clusters and backs up resources at defined time intervals, using the `BackupSchedule.cluster.open-cluster-management.io` resource. 
+Before running the restore operation on a new hub cluster, you need to manually configure the hub cluster and install the same operators as on the initial hub cluster. You must install the {product-title-short} operator in the same namespace as the initial hub cluster, create the link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-dataprotectionapplication-custom-resource[`DataProtectionApplication`] resource, and then connect to the same storage location where the initial hub cluster previously backed up data.
 
-Passive hub clusters continuously retrieve the latest backups and restore the passive data. The passive hubs use the `Restore.cluster.open-cluster-management.io` resource to restore passive data from the primary hub cluster when new backup data is available. These hub clusters are on standby to become a primary hub when the primary hub cluster goes down.
+For example, if the initial hub cluster has any other operators installed, such as Ansible Automation Platform, Red Hat OpenShift GitOps, `cert-manager`, you have to install them before running the restore operation. This ensures that the new hub cluster is configured in the same way as the initial hub cluster.
 
-Active and passive hub clusters are connected to the same storage location, where the primary hub cluster backs up data for passive hub clusters to access the primary hub cluster backups. For more details on how to setup this automatic restore configuration, see the <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>> section.
+[#clean-hub-restore]
+=== Clean the hub cluster before restore
 
-In the following diagram, the active hub cluster manages the local clusters and backs up the hub cluster data at regular intervals:
+Velero currently skips existing backed up resources on the hub cluster. This limits the scenarios that can be used when you restore hub cluster data on a new hub cluster. If the new hub cluster is not used and the restore is applied only once, the hub cluster is not the recommended option to use for passive configuration. The data on the new hub cluster is not reflective of the data available with the restored resources.
 
-image:../images/active_passive_config_design.png[Active passive configration diagram] 
+When a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning up the hub cluster before the Velero restore begins.
 
-The passive hub cluster restores this data, except for the managed cluster activation data, which moves the managed clusters to the passive hub cluster. The passive hub clusters can restore the passive data continuously, see the <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>> section. Passive hub clusters can restore passive data as a one-time operation, see <<restore-passive-resources,Restore passive resources>> section for more details. 
+The cleanup option uses the `cleanupBeforeRestore` property to identify the subset of objects to clean up. There are three options you can set for this clean up:
 
-[#managed-cluster-activation-data]
-=== Managed cluster activation data
+* `None`: No clean up necessary, just begin Velero restore. This is to be used on a brand new hub cluster.
+* `CleanupRestored`: Clean up all resources created by a previous {product-title-short} restore. It is recommended to use this property because it is less intrusive than the `CleanupAll` property.
+* `CleanupAll`: Clean up all resources on the hub cluster, which can be part of an {product-title-short} backup, even if the resources are not created as a result of a restore operation. This is to be used when extra content has been created on the hub cluster, which requires clean up. Use this option with caution because this option cleans up resources on the hub cluster created by the user, not by a previous backup. It is strongly recommended to use the `CleanupRestored` option, and to refrain from manually updating hub cluster content when the hub cluster is designated as a passive cluster for a disaster scenario. Use the `CleanupAll` option as a last alternative.
 
-Managed cluster activation data is the backup data that is being actively managed by the hub cluster, when restored on the hub cluster. Activation data resources are stored by the managed clusters backup and by the resource-generic backup, using the `cluster.open-cluster-management.io/backup: cluster-activation` label. 
+*Notes*:
 
-[#resources-restored-managed-cluster]
-=== Resources restored at managed activation time
+* Velero sets the status, `PartiallyFailed`, for a velero restore resource if the restored backup has no resources. This means that a `restore.cluster.open-cluster-management.io` resource can be in `PartiallyFailed` status if any of the created `restore.velero.io` resources do not restore any resources because the corresponding backup is empty.
 
-When the `cluster.open-cluster-management.io/backup: cluster-activation` label is added to a resource the resource is automatically backed up in the `acm-resources-generic-schedule` backup resource. If any of these resources need to be restored, only when the managed clusters are moved to the new hub cluster, you have to set the label value to `cluster-activation` when the `veleroManagedClustersBackupName:latest` label is used in the restored resource. 
+* The `restore.cluster.open-cluster-management.io` resource is run once, unless you use the `syncRestoreWithNewBackups:true` to keep restoring passive data when new backups are available. For this case, follow the restore passive with sync sample. See <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>>. After the restore operation is complete and you want to run another restore operation on the same hub cluster, you have to create a new `restore.cluster.open-cluster-management.io` resource.
 
-Your resource might resemble the following example:
-
-[source,yaml]
-----
-apiVersion: my.group/v1alpha1
-kind: MyResource
-metadata:
-  labels:
-    cluster.open-cluster-management.io/backup: cluster-activation
-----
-
-There are also default resources in the activation set that are backed up by the `acm-managed-clusters-schedule` resource. View the following default resources that are restored by the `acm-managed-clusters-schedule` resource:
-
-* `managedcluster.cluster.open-cluster-management.io`
-* `managedcluster.clusterview.open-cluster-management.io`
-* `klusterletaddonconfig.agent.open-cluster-management.io`
-* `managedclusteraddon.addon.open-cluster-management.io`
-* `managedclusterset.cluster.open-cluster-management.io`
-* `managedclusterset.clusterview.open-cluster-management.io`
-* `managedclustersetbinding.cluster.open-cluster-management.io`
-* `clusterpool.hive.openshift.io`
-* `clusterclaim.hive.openshift.io`
-* `clustercurator.cluster.open-cluster-management.io`
-
+* Although you can create multiple `restore.cluster.open-cluster-management.io` resources, only one can be active at any moment in time.
+  
 [#restore-activation-resources]
 === Restore activation resources
 
@@ -203,7 +216,6 @@ Use the link:https://github.com/stolostron/cluster-backup-operator/blob/main/con
 === Restore passive resources
 
 Passive data is backup data such as secrets, ConfigMaps, applications, policies, and all the managed cluster custom resources, which do not activate a connection between managed clusters and hub clusters. The backup resources are restored on the hub cluster by the credentials backup and restore resources.
-
 
 [#restore-passive-resources-check-backups]
 === Restore passive resources while checking for backups
@@ -233,6 +245,55 @@ spec:
   veleroResourcesBackupName: latest
 ----
 
+[#active-passive-config]
+== Active passive configuration
+
+In an active passive configuration, there is one active hub cluster and passive hub clusters. An active hub cluster is also considered the primary hub cluster, which manages clusters and backs up resources at defined time intervals, using the `BackupSchedule.cluster.open-cluster-management.io` resource. 
+
+Passive hub clusters continuously retrieve the latest backups and restore the passive data. The passive hubs use the `Restore.cluster.open-cluster-management.io` resource to restore passive data from the primary hub cluster when new backup data is available. These hub clusters are on standby to become a primary hub when the primary hub cluster goes down.
+
+Active and passive hub clusters are connected to the same storage location, where the primary hub cluster backs up data for passive hub clusters to access the primary hub cluster backups. For more details on how to setup this automatic restore configuration, see the <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>> section.
+
+In the following diagram, the active hub cluster manages the local clusters and backs up the hub cluster data at regular intervals:
+
+image:../images/active_passive_config_design.png[Active passive configration diagram] 
+
+The passive hub cluster restores this data, except for the managed cluster activation data, which moves the managed clusters to the passive hub cluster. The passive hub clusters can restore the passive data continuously, see the <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>> section. Passive hub clusters can restore passive data as a one-time operation, see <<restore-passive-resources,Restore passive resources>> section for more details. 
+
+[#managed-cluster-activation-data]
+=== Managed cluster activation data
+
+Managed cluster activation data or other activation data is the backup data that is being actively managed by the hub cluster, when it is restored on the hub cluster. Activation data resources are stored by the managed clusters backup and by the resource-generic backup, whe you use the `cluster.open-cluster-management.io/backup: cluster-activation` label. 
+
+[#resources-restored-managed-cluster]
+=== Resources restored at managed activation time
+
+When you add the `cluster.open-cluster-management.io/backup: cluster-activation` label to a resource, the resource is automatically backed up in the `acm-resources-generic-schedule` backup resource. If any of these resources need to be restored, only when the managed clusters are moved to the new hub cluster, you have to set the `veleroManagedClustersBackupName:latest` label value to `cluster-activation`. This ensures that the resource is not restored unless the managed cluster activation starts.
+
+Your resource might resemble the following example:
+
+[source,yaml]
+----
+apiVersion: my.group/v1alpha1
+kind: MyResource
+metadata:
+  labels:
+    cluster.open-cluster-management.io/backup: cluster-activation
+----
+
+There are also default resources in the activation set that are backed up by the `acm-managed-clusters-schedule` resource. View the following default resources that are restored by the `acm-managed-clusters-schedule` resource:
+
+* `managedcluster.cluster.open-cluster-management.io`
+* `managedcluster.clusterview.open-cluster-management.io`
+* `klusterletaddonconfig.agent.open-cluster-management.io`
+* `managedclusteraddon.addon.open-cluster-management.io`
+* `managedclusterset.cluster.open-cluster-management.io`
+* `managedclusterset.clusterview.open-cluster-management.io`
+* `managedclustersetbinding.cluster.open-cluster-management.io`
+* `clusterpool.hive.openshift.io`
+* `clusterclaim.hive.openshift.io`
+* `clustercurator.cluster.open-cluster-management.io`
+
 [#disaster-recovery]
 == Disaster recovery
 
@@ -256,6 +317,10 @@ The following templates check the pod status for the backup component and depend
 ** `acm-backup-pod-running` template checks if the backup and restore operator pod is running.
 ** `oadp-pod-running` template checks if the OADP operator pod is running. 
 ** `velero-pod-running` template checks if the Velero pod is running.
+
+- *Data Protection Application validation*
++
+* `data-protection-application-available` template checks if a `DataProtectioApplicatio.oadp.openshift.io` resource is created. This OADP resource sets up Velero configurations.
 
 - *Backup storage validation*
 +
