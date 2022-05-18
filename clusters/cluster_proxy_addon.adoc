@@ -9,22 +9,6 @@ To configure a cluster proxy add-on for a hub cluster and a managed cluster, com
 
 . Enable the cluster proxy add-on on {product-title} hub cluster. See xref:../install/adv_config_install.adoc#cluster-proxy-addon[Advanced configuration] to learn more.
 
-. Deploy the cluster proxy add-on to the target managed cluster by applying it to your target managed cluster by entering the following command:
-+
-----
-cat <<EOF | oc apply -f -
-apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: ManagedClusterAddOn
-metadata:
-  name: cluster-proxy
-  namespace: <target_managed_cluster>
-spec:
-  installNamespace: open-cluster-management-agent-addon
-EOF
-----
-+
-Replace `target_managed_cluster` with the name of the managed cluster to which you are applying the cluster proxy add-on.
-
 . Configure the `kubeconfig` file to access the managed cluster `kube-apiserver` by completing the following steps:
 
 .. Provide a valid access token for the managed cluster. You can use the corresponding token of the service account, assuming the default service account is in the default namespace.
@@ -67,7 +51,11 @@ export TARGET_MANAGE_CLUSTER=<cluster1>
 
 export NEW_SERVER=https://$(oc get route -n open-cluster-management cluster-proxy-addon-user -o=jsonpath='{.spec.host}')/$TARGET_MANAGE_CLUSTER
 
-sed -i'' -e '/server:/c\ server: '"$NEW_SERVER"'' cluster-proxy.kubeconfig
+sed -i'' -e '/server:/c\    server: '"$NEW_SERVER"'' cluster-proxy.kubeconfig
+
+export CADATA=$(oc get configmap -n openshift-service-ca kube-root-ca.crt -o=go-template='{{index .data "ca.crt"}}' | base64)
+
+sed -i'' -e '/certificate-authority-data:/c\    certificate-authority-data: '"$CADATA"'' cluster-proxy.kubeconfig
 ----
 +
 Replace `cluster1` with a managed cluster name that you want to access. 
