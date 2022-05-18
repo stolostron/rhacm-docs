@@ -1,0 +1,239 @@
+[#preparing-selected-hosts-to-deploy-submariner]
+= Preparing selected hosts to deploy Submariner
+
+Before you deploy Submariner with {product-title}, you must manually prepare the clusters on the hosting environment for the connection. The requirements are different for different hosting environments, so follow the instructions for your hosting environment.
+
+[#preparing-azure]
+== Preparing Microsoft Azure for Submariner
+
+To prepare the clusters on your Microsoft Azure for deploying the Submariner component, complete the following steps:
+
+. Create the inbound and outbound firewall rules on your Microsoft Azure environment to open the IP security NAT traversal ports (by default 4500/UDP) to enable Submariner communication:
++
+----
+# Create inbound NAT rule
+$ az network lb inbound-nat-rule create --lb-name <lb-name> \
+--resource-group <res-group> \
+--name <name> \
+--protocol Udp --frontend-port <ipsec-port> \
+--backend-port <ipsec-port> \
+--frontend-ip-name <frontend-ip-name>
+
+# Add VM network interface to the just-created inbound NAT rule
+$ az network nic ip-config inbound-nat-rule add \
+--lb-name <lb-name> --resource-group <res-group> \
+--inbound-nat-rule <nat-name> \
+--nic-name <nic-name> --ip-config-name <pipConfig>
+----
++
+Replace `lb-name` with your load balancer name.
++
+Replace `res-group` with your resource group name.
++
+Replace `nat-name` with your load balancing inbound NAT rule name.
++
+Replace `ipsec-port` with your IPsec port.
++
+Replace `pipConfig` with your cluster frontend IP configuration name.
++
+Replace `nic-name` with your network interface card (NIC) name.
+
+. Create one load balancing inbound NAT rules to forward Submariner gateway metrics service request:
++
+----
+# Create inbound NAT rule
+$ az network lb inbound-nat-rule create --lb-name <lb-name> \
+--resource-group <res-group> \
+--name <name> \
+--protocol Tcp --frontend-port 8080 --backend-port 8080 \
+--frontend-ip-name <frontend-ip-name>
+
+# Add VM network interface to the just-created inbound NAT rule
+$ az network nic ip-config inbound-nat-rule add \
+--lb-name <lb-name> --resource-group <res-group> \
+--inbound-nat-rule <nat-name> \
+--nic-name <nic-name> --ip-config-name <pipConfig>
+----
++
+Replace `lb-name` with your load balancer name.
++
+Replace `res-group` with your resource group name.
++
+Replace `nat-name` with your load balancing inbound NAT rule name.
++
+Replace `pipConfig` with your cluster frontend IP configuration name.
++
+Replace `nic-name` with your network interface card (NIC) name.
+
+. Create network security groups (NSG) security rules on your Azure to open a NAT traversal port (by default 4500/UDP) for Submariner:
++
+----
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Inbound --access Allow \
+--protocol Udp --destination-port-ranges <ipsec-port>
+
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Outbound --access Allow \
+--protocol Udp --destination-port-ranges <ipsec-port>
+----
++
+Replace `res-group` with your resource group name.
++
+Replace `nsg-name` with your NSG name.
++
+Replace `priority` with your rule priority.
++
+Replace `name` with your rule name.
++
+Replace `ipsec-port` with your IPsec port.
+
+. Create the NSG rules to open 4800/UDP port to encapsulate pod traffic from the worker and master nodes to the Submariner Gateway nodes:
++
+----
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Inbound --access Allow \
+--protocol Udp --destination-port-ranges 4800 \
+
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Outbound --access Allow \
+--protocol Udp --destination-port-ranges 4800
+----
++
+Replace `res-group` with your resource group name.
++
+Replace `nsg-name` with your NSG name.
++
+Replace `priority` with your rule priority.
++
+Replace `name` with your rule name.
+
+. Create the NSG rules to open 8080/TCP port to export metrics service from the Submariner Gateway nodes:
++
+----
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Inbound --access Allow \
+--protocol Tcp --destination-port-ranges 8080 \
+
+$ az network nsg rule create --resource-group <res-group> \
+--nsg-name <nsg-name> --priority <priority> \
+--name <name> --direction Outbound --access Allow \
+--protocol Udp --destination-port-ranges 8080
+----
++
+Replace `res-group` with your resource group name.
++
+Replace `nsg-name` with your NSG name.
++
+Replace `priority` with your rule priority.
++
+Replace `name` with your rule name.
+
+. Label a worker node in the cluster with the following label: `submariner.io/gateway=true`.
+
+[#preparing-ibm]
+== Preparing IBM Cloud for Submariner
+
+There are two kinds of Red Hat OpenShift Kubernetes Service (ROKS) on IBM Cloud: the classic cluster and the second generation of compute infrastructure in a virtual private cloud (VPC). Submariner cannot run on the classic ROKS cluster since it cannot configure the IPsec ports for the classic cluster.
+
+To configure the ROKS clusters on a VPC to use Submariner, complete the steps in the following links:
+
+. Before you create a cluster, specify subnets for pods and services, which avoids overlapping CIDRs with other clusters. Make sure there are no overlapping pods and services CIDRs between clusters if you are using an existing cluster. See https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics[VPC Subnets] for the procedure.
+
+. Attach a public gateway to subnets used in the cluster. See https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics_pgw[Public Gateway] for the procedure.
+
+. Create inbound rules for the default security group of the cluster by completing the steps in https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-network-policy#security_groups_ui[Security Group]. Ensure that the firewall allows inbound and outbound traffic on 4500/UDP and 500/UDP ports for Gateway nodes, and allows inbound and outbound UDP/4800 for all the other nodes.
+
+. Label a node that has the public gateway as `submariner.io/gateway=true` in the cluster.
+
+. Refer to https://submariner.io/operations/deployment/calico/[Calico] to configure Calico CNI by creating IPPools in the cluster.
+
+[#preparing-vm]
+== Preparing VMware vSphere for Submariner 
+
+Submariner uses IPsec to establish the secure tunnels between the clusters on the gateway nodes. You can use the default port or specify a custom port. When you run this procedure without specifying an IPsec NATT port, the default port is automatically used for the communication. The default port is 4500/UDP. 
+
+Submariner uses virtual extensible LAN (VXLAN) to encapsulate traffic when it moves from the worker and master nodes to the gateway nodes. The VXLAN port cannot be customized, and is always port 4800/UDP.
+
+Submariner uses 8080/TCP to send its metrics information among nodes in the cluster, this port cannot be customized.
+
+The following ports must be opened by your VMWare vSphere administrator before you can enable Submariner:
+
+.VMware vSphere and Submariner ports
+|===
+| Name | Default value | Customizable 
+
+| IPsec NATT
+| 4500/UDP
+| Yes
+
+| VXLAN
+| 4800/UDP
+| No
+
+| Submariner metrics
+| 8080/TCP
+| No
+|===
+
+To prepare VMware vSphere clusters for deploying Submariner, complete the following steps:
+
+. Ensure that the IPsec NATT, VXLAN, and metrics ports are open.
+
+. Customize and apply YAML content that is similar to the following example:
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:{}
+----
++
+Replace `managed-cluster-namespace` with the namespace of your managed cluster.
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
++
+This configuration uses the default network address translation - traversal (NATT) port (4500/UDP) for your Submariner and one worker node is labeled as the Submariner gateway on your vSphere cluster.
++
+Submariner uses IP security (IPsec) to establish the secure tunnels between the clusters on the gateway nodes. You can either use the default IPsec NATT port, or you can specify a different port that you configured. When you run this procedure without specifying an IPsec NATT port of 4500/UDP is automatically used for the communication.
+
+[#preparing-bare]
+== Preparing bare metal for Submariner
+
+To prepare bare metal clusters for deploying Submariner, complete the following steps: **Copied from VMware, for now**
+
+. Ensure that the IPsec NATT, VXLAN, and metrics ports are open.
+
+. Customize and apply YAML content that is similar to the following example:
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:{}
+----
++
+Replace `managed-cluster-namespace` with the namespace of your managed cluster.
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
++
+This configuration uses the default network address translation - traversal (NATT) port (4500/UDP) for your Submariner and one worker node is labeled as the Submariner gateway on your bare metal cluster.
++
+Submariner uses IP security (IPsec) to establish the secure tunnels between the clusters on the gateway nodes. You can either use the default IPsec NATT port, or you can specify a different port that you configured. When you run this procedure without specifying an IPsec NATT port of 4500/UDP is automatically used for the communication.
+
+[#preparing-openstack]
+== Preparing Red Hat OpenStack Platform for Submariner
+
+To prepare Red Hat OpenStack Platform clusters for deploying Submariner, complete the following steps:
+
+...

@@ -1,0 +1,85 @@
+[#deploying-submariner-mcaddon-api]
+= Deploy Submariner with the ManagedClusterAddOn API
+
+To deploy Submariner by using the `ManagedClusterAddOn` API, complete the following steps:
+
+. Create a `ManagedClusterSet` on the hub cluster by using the instructions provided in link:../../clusters/managedclustersets.adoc#managedclustersets[Creating and managing ManagedClusterSets]. Your entry for the `ManagedClusterSet` should resemble the following content:
+
++
+[source,yaml]
+----   
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: ManagedClusterSet
+metadata:
+  name: <managed-cluster-set-name>
+----
++
+Replace `managed-cluster-set-name` with a name for the `ManagedClusterSet` that you are creating.
++
+*Note:* The maximum length of the name of the Kubernetes namespace is 63 characters, so the maximum length of the `<managed-cluster-set-name>` is 56 characters. If the length of `<managed-cluster-set-name>` exceeds 56, the `<managed-cluster-set-name>` is truncated from the head.
++
+After the `ManagedClusterSet` is created, the `submariner-addon` creates a namespace called `<managed-cluster-set-name>-broker` and deploys the Submariner broker to it.
+
+. Create the `Broker` configuration on the hub cluster in the `<managed-cluster-set-name>-broker` namespace by customizing and applying YAML content that is similar to the following example:
++
+[source,yaml]
+----
+apiVersion: submariner.io/v1alpha1
+kind: Broker
+metadata:
+     name: submariner-broker
+     namespace: <managed-cluster-set-name>-broker
+spec:
+     globalnetEnabled: false
+----
++
+Replace `managed-cluster-set-name` with the name of the managed cluster. 
++
+Set the the value of `globalnetEnabled` to `true` if you want to enable Submariner Globalnet in the `ManagedClusterSet`.
+
+. Add one managed cluster to the `ManagedClusterSet` by entering the following command:
++
+----
+oc label managedclusters <managed-cluster-name> "cluster.open-cluster-management.io/clusterset=<managed-cluster-set-name>" --overwrite
+----
++
+Replace `<managed-cluster-name>` with the name of the managed cluster that you want to add to the `ManagedClusterSet`.
++
+Replace `<managed-cluster-set-name>` with the name of the `ManagedClusterSet` to which you want to add the managed cluster. 
+
+.  Deploy Submariner on the managed cluster by customizing and applying YAML content that is similar to the following example:
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+     name: submariner
+     namespace: <managed-cluster-name>
+spec:
+     installNamespace: submariner-operator
+----
++
+Replace `managed-cluster-name` with the name of the managed cluster that you want to use with Submariner. 
++
+The `installNamespace` field in the spec of the `ManagedClusterAddOn` is the namespace on the managed cluster where it installs Submariner. Currently, Submariner must be installed in the `submariner-operator` namespace.
++
+After the `ManagedClusterAddOn` is created, the `submariner-addon` deploys Submariner to the `submariner-operator` namespace on the managed cluster. You can view the deployment status of Submariner from the status of this `ManagedClusterAddOn`.
++
+*Note:* The name of `ManagedClusterAddOn` must be `submariner`.
+
+. Repeat steps three and four for all of the managed clusters that you want to enable Submariner on.
+
+. After Submariner is deployed on the managed cluster, you can verify the Submariner deployment status by checking the status of submariner `ManagedClusterAddOn` by entering the following command: 
++
+----
+oc -n <managed-cluster-name> get managedclusteraddons submariner -oyaml
+----
++
+Replace `managed-cluster-name` with the name of the managed cluster.
++
+In the status of the Submariner `ManagedClusterAddOn`, three conditions indicate the  deployment status of Submariner:
++
+* `SubmarinerGatewayNodesLabeled` condition indicates whether there are labeled Submariner gateway nodes on the managed cluster.
+* `SubmarinerAgentDegraded` condition indicates whether the Submariner is successfully deployed on the managed cluster.
+* `SubmarinerConnectionDegraded` condition indicates how many connections are established on the managed cluster with Submariner.
