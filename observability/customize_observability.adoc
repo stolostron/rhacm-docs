@@ -9,6 +9,10 @@ Collect logs about new information that is created for observability resources w
 * <<configuring-alertmanager,Configuring AlertManager>>
 * <<adding-custom-metrics, Adding custom metrics>>
 * <<removing-default-metrics,Removing default metrics>>
+* <<export-metrics-to-external-endpoints,Export metrics to external endpoints>>
+** <<creating-the-kubernetes-secret-for-external-endpoint,Creating the Kubernetes secret for an external endpoint>>
+** <<updating-the-multiclusterobservability-cr,Updating the multiclusterobservability CR>>
+** <<viewing-the-status-of-metrics-export,Viewing the status of metric export>>
 * <<adding-advanced-config,Adding _advanced_ configuration>>
 * <<updating-replicas,Updating the _multiclusterobservability_ CR replicas from the console>>
 * <<forward-alerts,Forwarding alerts>>
@@ -161,6 +165,59 @@ Create the `observability-metrics-custom-allowlist` ConfigMap in the
 `open-cluster-management-observability` namespace with the following command: `oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml`.
 
 Verify that the specific metric is not being collected from your managed clusters. When you query the metric from the Grafana dashboard, the metric is not displayed.
+
+[#export-metrics-to-external-endpoints]
+== Export metrics to external endpoints
+//do you think its necessary for us to say real time? is somethinng being uploaded? How is prometheus remote write protocol supported? I suggest that we remove 'in real time"
+You can customize observability to export the metrics to external endpoints, which support Prometheus Remote Write protocol in real time. For more information, see link:https://docs.google.com/document/d/1LPhVRSFkGNSuU1fBd81ulhsCPR4hkSZyyBj1SZ8fWOM/edit#heading=h.3p42p5s8n0ui[Prometheus Remote Write protocol].
+
+[#creating-the-kubernetes-secret-for-external-endpoint]
+=== Creating the Kubernetes secret for an external endpoint
+
+You must create a Kubernetes secret with the access information of the external endpoint in the `open-cluster-management-observability` namespace. View the following example secret:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: victoriametrics
+  namespace: open-cluster-management-observability
+type: Opaque
+stringData:
+  ep.yaml: |
+    url: http://victoriametrics:8428/api/v1/write
+    http_client_config:
+      basic_auth:
+        username: test
+        password: test
+----
+
+The `ep.yaml` is the key of the content and is used in the `multiclusterobservability` CR in next step. Currently, observability supports exporting metrics to endpoints without any security checks, with basic authentication or with `tls` enablement. View the following full list of supported attributes in the content, see the link:../apis/observability[Observability API]
+
+
+[#updating-the-multiclusterobservability-cr]
+=== Updating the _multiclusterobservability_ CR
+
+After you create the Kubernetes secret, you must update the `multiclusterobservability` CR to add `writeStorage` in  the `spec.storageConfig` parameter. View the following example:
+
+[source,yaml]
+----
+spec:
+  storageConfig:
+    writeStorage:
+    - key: ep.yaml
+      name: victoriametrics
+----
+
+The value for `writeStorage` is a list. You can add an item to the list when you want to export metrics to one external endpoint. If you add more than one item to the list, then the metrics are exported to multiple external endpoints. Each item conntains two attributes: _name_ and _key_. _Name_ is the name of the Kubernetes secret that contains endpiont access information, and _key_ is the key of the content in the secret.
+
+[#viewing-the-status-of-metrics-export]
+=== Viewing the status of metric export
+
+After the metrics export is enabled, you can view the status of metrics export by checking the `acm_remote_write_requests_total` metric. From the OpenShift console of your hub cluster, navigate to the _Metrics_ page by clicking *Metrics* in the _Observe_ section. 
+
+Then query the `acm_remote_write_requests_total` metric. The value of that metric is the total number of requests with a specific response for one external endpoint, on one observatirum API instance. The `name` label is the name for the external endpoint. The `code` label is the return code of the HTTP request for the metrics export.
 
 [#adding-advanced-config]
 == Adding _advanced_ configuration
