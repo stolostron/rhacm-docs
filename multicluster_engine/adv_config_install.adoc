@@ -6,8 +6,7 @@ The multicluster engine for Kubernetes operator is installed using an operator t
 [#custom-image-pull-secret]
 == Custom image pull secret
 
-If you plan to import Kubernetes clusters that were not created by OpenShift Container Platform or 
-multicluster engine for Kubernetes, generate a secret that contains your OpenShift Container Platform pull secret information to access the entitled content from the distribution registry. 
+If you plan to import Kubernetes clusters that were not created by OpenShift Container Platform or the multicluster engine for Kubernetes operator, generate a secret that contains your OpenShift Container Platform pull secret information to access the entitled content from the distribution registry. 
 
 The secret requirements for OpenShift Container Platform clusters are automatically resolved by OpenShift Container Platform and multicluster engine for Kubernetes, so you do not have to create the secret if you are not importing other types of Kubernetes clusters to be managed.
 
@@ -25,7 +24,7 @@ oc create secret generic <secret> -n <namespace> --from-file=.dockerconfigjson=<
 - Replace `namespace` with your project namespace, as the secrets are namespace-specific.
 - Replace `path-to-pull-secret` with the path to your OpenShift Container Platform pull secret that you downloaded.
 
-The following example displays the template to use if you want to use a custom pull secret. Replace `namespace` with the name of your project namespace. Replace `secret` with the name of your pull secret:
+The following example displays the `spec.imagePullSecret` template to use if you want to use a custom pull secret. Replace `secret` with the name of your pull secret:
 
 [source,yaml]
 ----
@@ -42,9 +41,9 @@ spec:
 
 The operands can be installed in a designated namespace by specifying a location in the `MultiClusterEngine` custom resource. This namespace is created upon application of the `MultiClusterEngine` custom resource.
 
-*Important:* If no target namespace is specified, the namespace of the operator is used for the operands and is stated in the `MultiClusterEngine` custom resource specification.
+*Important:* If no target namespace is specified, the operator will install to the `multicluster-engine` namespace and will set it in the `MultiClusterEngine` custom resource specification.
 
-The following example displays the template that you can use to specify a target namespace. Replace `target` with the name of your destination namespace:
+The following example displays the `spec.targetNamespace` template that you can use to specify a target namespace. Replace `target` with the name of your destination namespace. *Note:* The `target` namespace cannot be the `default` namespace:
 
 [source,yaml]
 ----
@@ -56,13 +55,98 @@ spec:
   targetNamespace: <target>
 ----
 
-*Note:* The `target` namespace cannot be the `default` namespace.
+[#availability-config]
+== availabilityConfig
 
-[#managed-serviceaccount-addon-intro]
-== ManagedServiceAccount add-on
+The {product-title-short} hub cluster has two availabilities: `High` and `Basic`. By default, the hub cluster has an availability of `High`, which gives hub cluster components a `replicaCount` of `2`. This provides better support in cases of failover but consumes more resources than the `Basic` availability, which gives components a `replicaCount` of `1`.
 
-By default, the `Managed-ServiceAccount` add-on is disabled. This component when enabled allows you to create or delete a service account on a managed cluster. 
+The following examples shows the `spec.availabilityConfig` template with `Basic` availability:
 
-When a `ManagedServiceAccount` custom resource is created in the `<managed_cluster>` namespace on the hub cluster, a `ServiceAccount` is created on the managed cluster. A `TokenRequest` is made with the `ServiceAccount` on the managed cluster to the Kubernetes API server on the managed cluster. The resulting token is then stored in a `Secret` in the `<target_managed_cluster>` namespace on the hub cluster.
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterEngine
+metadata:
+  name: multiclusterengine
+spec:
+  availabilityConfig: "Basic"
+----
 
-See xref:../addon_managed_service.adoc#managed-serviceaccount-addon[Enabling ManagedServiceAccount add-ons] to enable.
+[#node-selector]
+== nodeSelector
+
+You can define a set of node selectors in the `MultiClusterEngine` to install to specific nodes on your cluster. The following example shows `spec.nodeSelector` to assign {product-title-short} pods to nodes with the label `node-role.kubernetes.io/infra`:
+
+[source,yaml]
+----
+spec:
+  nodeSelector:
+    node-role.kubernetes.io/infra: ""
+----
+
+[#tolerations]
+== tolerations
+
+You can define a list of tolerations to allow the `MultiClusterEngine` to tolerate specific taints defined on the cluster. The following example shows a `spec.tolerations` that matches a `node-role.kubernetes.io/infra` taint:
+
+[source,yaml]
+----
+spec:
+  tolerations:
+  - key: node-role.kubernetes.io/infra
+    effect: NoSchedule
+    operator: Exists
+----
+
+The previous infra-node toleration is set on pods by default without specifying any tolerations in the configuration. Customizing tolerations in the configuration will replace this default behavior.
+
+[#serviceaccount-addon-intro]
+== ManagedServiceAccount add-on (Technical Preview)
+
+By default, the `Managed-ServiceAccount` add-on is disabled. This component when enabled allows you to create or delete a service account on a managed cluster. To install with this add-on enabled, include the following in the `MultiClusterEngine` specification in `spec.overrides`:
+
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterEngine
+metadata:
+  name: multiclusterengine
+spec:
+  overrides:
+    components:
+    - name: managedserviceaccount-preview
+      enabled: true
+----
+
+The `Managed-ServiceAccount` add-on can be enabled after creating `MultiClusterEngine` by editing the resource on the command line and setting the `managedserviceaccount-preview` component to `enabled: true`. Alternatively, you can run the following command and replace <multiclusterengine-name> with the name of your `MultiClusterEngine` resource.
+
+----
+oc patch MultiClusterEngine <multiclusterengine-name> --type=json -p='[{"op": "add", "path": "/spec/overrides/components/-","value":{"name":"managedserviceaccount-preview","enabled":true}}]'
+----
+
+See xref:../multicluster_engine/addon_managed_service.adoc#managed-serviceaccount-addon[Enabling ManagedServiceAccount add-ons] to enable.
+
+[#hypershift-addon-intro]
+== Hypershift add-on (Technical Preview)
+
+By default, the `Hypershift` add-on is disabled. To install with this add-on enabled, include the following in the `MultiClusterEngine` values in `spec.overrides`:
+
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterEngine
+metadata:
+  name: multiclusterengine
+spec:
+  overrides:
+    components:
+    - name: hypershift-preview
+      enabled: true
+----
+
+The `Hypershift` add-on can be enabled after creating `MultiClusterEngine` by editing the resource on the command line, setting the `hypershift-preview` component to `enabled: true`. Alternatively, you can run the following command and replace <multiclusterengine-name> with the name of your `MultiClusterEngine` resource:
+
+----
+oc patch MultiClusterEngine <multiclusterengine-name> --type=json -p='[{"op": "add", "path": "/spec/overrides/components/-","value":{"name":"hypershift-preview","enabled":true}}]'
+----
+

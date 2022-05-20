@@ -50,78 +50,6 @@ If this happens, you can either find the specified section manually or complete 
 [#installation-known-issues]
 == Installation known issues
 
-[#upgrade-2.2.x-issue]
-=== Upgrade from 2.2.x to 2.3.4 might cause klusterlet deletion
-// 2.4, 18011
-
-After you upgrade from 2.2.x to 2.3.4, the Klusterlet might be deleted. See the following procedure to work around this issue:
-
-. Upgrade the work-agent to 2.3.3.
-
-.. Create a JSON file `work-image-override.json` with the following JSON content:
-+
-[source,json]
-----
-[
-  {
-    "image-name": "work-rhel8",
-    "image-remote": "registry.redhat.io/rhacm2",
-    "image-digest": "sha256:b6606f6bb6504acfb48f13cd5296473c17088caf380097ff7ce316f781c4f196",
-    "image-key": "work"
-  }
-] 
-----
-
-.. Create a ConfigMap for image override on the hub cluster:
-
-+  
-----
-kubectl -n open-cluster-management create configmap work-image-override --from-file=./work-image-override.json
-----
-
-.. Enable the image override by annotating `mch` on the hub cluster.
-
-+
-----
-kubectl -n open-cluster-management annotate mch multiclusterhub --overwrite mch-imageOverridesCM=work-image-override
-----
-
-.. Restart `multiclusterhub-operator` to enforce the change.
-
-+
-----
-kubectl -n open-cluster-management delete pod multiclusterhub-operator-xxxxx-xxxxx
-----
-
-+
-Wait for about 30 minutes to make sure that work-agent running on all managed clusters have been restarted with the overridden image.
-
-. Upgrade from 2.2.x to 2.3.4.
-
-. Disable the image override for work-agent. 
-
-. After the upgrade is done, it's safe to remove the image override for work-agent.
-
-+
-----
-kubectl -n open-cluster-management annotate mch multiclusterhub mch-imageOverridesCM- --overwrite
-kubectl -n open-cluster-management delete configmap work-image-override
-----
-
-[#upgrade-231-error-chart]
-=== Upgrade from version 2.2.x to 2.3.1 upgrade fails to progress
-// 2.3.1: 15425
-
-When you upgrade your {product-title-short} from version 2.2.x to 2.3.1, the upgrade fails. The `Multiclusterhub` status displays: `failed to download chart from helm repo` in the component error messages. You may also see errors that reference a problem with `no endpoints available for service "ocm-webhook"`.
-
-On your hub cluster, run the following command in the namespace where {product-title-short} is installed to restart deployments and upgrade to version 2.3.1:
-
-----
-oc delete deploy ocm-proxyserver ocm-controller ocm-webhook multiclusterhub-repo
-----
-
-*Note:* The errors resolve, but the reconciliation process might not start immediately. This can be accelerated by restarting the `multicluster-operators-standalone-subscription` in the same namespace that the product is installed.
-
 [#openshift-container-platform-cluster-upgrade-failed-status]
 === OpenShift Container Platform cluster upgrade failed status
 // 2.0.0:3442
@@ -236,12 +164,35 @@ When observability is enabled or disabled on {ocp-short} managed clusters that a
 [#cluster-management-issues]
 == Cluster management known issues
 
+[#clusterset-label-not-removed]
+=== Deleting a managed cluster set does not automatically remove its label
+//2.5:20727
+
+After you delete a `ManagedClusterSet`, the label that is added to each managed cluster that associates the cluster to the cluster set is not automatically removed. Manually remove the label from each of the managed clusters that were included in the deleted managed cluster set. The label resembles the following example: `cluster.open-cluster-management.io/clusterset:<ManagedClusterSet Name>`.
+
+[#hive-cluster-claim]
+=== ClusterClaim error
+//2.5:19968
+
+If you create a Hive `ClusterClaim` against a `ClusterPool` and manually set the `ClusterClaimspec` lifetime field to an invalid golang time value, {product-title-short} stops fulfilling and reconciling all `ClusterClaims`, not just the malformed claim.  
+
+If this error occurs. you see the following content in the `clusterclaim-controller` pod logs, which is a specific example with the pool name and invalid lifetime included:
+
+----
+E0203 07:10:38.266841       1 reflector.go:138] sigs.k8s.io/controller-runtime/pkg/cache/internal/informers_map.go:224: Failed to watch *v1.ClusterClaim: failed to list *v1.ClusterClaim: v1.ClusterClaimList.Items: []v1.ClusterClaim: v1.ClusterClaim.v1.ClusterClaim.Spec: v1.ClusterClaimSpec.Lifetime: unmarshalerDecoder: time: unknown unit "w" in duration "1w", error found in #10 byte of ...|time":"1w"}},{"apiVe|..., bigger context ...|clusterPoolName":"policy-aas-hubs","lifetime":"1w"}},{"apiVersion":"hive.openshift.io/v1","kind":"Cl|...
+----
+
+You can delete the invalid claim.
+
+If the malformed claim is deleted, claims begin successfully reconciling again without any further interaction.
+
 [#clusterimageset-fast-channel]
+=== The product channel out of sync with provisioned cluster
 //2.4:17790
 
-The `clusterimageset` is in `"fast"` channel, but the provisioned cluster is in `"stable"` channel. Currently, the product does not sync the `"channel"` to the provisioned {ocp-short} cluster. 
+The `clusterimageset` is in `fast` channel, but the provisioned cluster is in `stable` channel. Currently the product does not sync the `channel` to the provisioned {ocp-short} cluster. 
 
-Change to the right channel in the {ocp-short} console: **Administration** > **Cluster Settings** > **Details Channel**.
+Change to the right channel in the {ocp-short} console. Click **Administration** > **Cluster Settings** > **Details Channel**.
 
 [#ca-certificate-hub-restore]
 === Restoring the connection of a managed cluster with custom CA certificates to its restored hub cluster might fail
@@ -508,10 +459,10 @@ You cannot use the {product-title-short} console to upgrade {ocp-short} managed 
 The search details page for a certain resource on a certain managed cluster might fail. You must ensure that the work-manager add-on in the managed cluster is in `Available` status before you can search.
 
 [#no-create-clusters-across-architectures]
-=== Cannot create clusters across architectures
+=== A manually-created release image is required when creating clusters across architectures
 //2.2.3:14631
 
-You cannot create a managed cluster on a different architecture than the architecture of the hub cluster without creating a release image (`ClusterImageSet`) that contains files for both architectures. For example, you cannot create an `x86_64` cluster from a `ppc64le` or `s390x` hub cluster. The cluster creation fails because the {ocp-short} release registry does not provide a multi-architecture image manifest. 
+To create a managed cluster on a different architecture than the architecture of the hub cluster, you need to create a release image (`ClusterImageSet`) that contains files for both architectures. For example, you need to create a release image if you want to create an `x86_64` cluster from a `ppc64le` or `s390x` hub cluster. If you create the release image with both sets of files, the cluster creation succeeds because the new release image enables the {ocp-short} release registry to provide a multi-architecture image manifest. 
 
 To work around this issue, complete steps similar to the following example for your architecture type:
 
@@ -638,18 +589,6 @@ The `policy.open-cluster-management.io/v1` resources are no longer deployed by a
 A subscription administrator needs to deploy the application subscription to change this default behavior.
 
 See link:../applications/allow_deny.adoc[Creating an allow and deny list as subscription administrator] for information. `policy.open-cluster-management.io/v1` resources that were deployed by existing application subscriptions in previous {product-title-short} versions remain, but are no longer reconciled with the source repository unless the application subscriptions are deployed by a subscription administrator.
-
-[#app-topology-not-grouped-properly]
-=== Application topology clusters with multiple subscriptions not grouped properly 
-//2.3.0: 14107
-
-A cluster might not group properly in the _Application topology_ if the cluster is using multiple subscriptions.
-
-When you deploy an application with multiple subscriptions, you might see that the _All subscriptions_ view does not group the cluster nodes properly. 
-
-For instance, when you deploy an application with multiple subscriptions containing a mixed combination of _Helm_ and _Git_ repositories, the _All subscriptions_ view does not display statuses correctly for the resources within the Helm subscription.
-
-View the topology from the individual subscription views instead to display the correct cluster node grouping information.
 
 [#application-ansible-standalone]
 === Application Ansible hook stand-alone mode
@@ -846,6 +785,11 @@ See the following limitations to various _Application_ tables in the console:
 
 - From the _Advanced configuration_ table for _Channels_, the _Subscriptions_ column displays the total number of subscriptions on the local cluster that use that channel, but this does not include subscriptions that are deployed by other subscriptions, which are included in the search result.
 
+[#app-topology]
+=== No Application console topology filtering
+
+The _Console_ and _Topology_ for _Application_ changes for the {product-version}. There is no filtering capability from the console Topology page.
+
 [#governance-known-issues]
 == Governance known issues
 
@@ -856,22 +800,17 @@ When you use an external identity provider to log in to {product-title-short}, y
 
 You must log out of the external identity provider before you attempt to log out of {product-title-short}. 
 
-[#placement-console-support]
-=== Placement resource limitations
-
-As a reminder, a policy must use either a `PlacementRule` or a `Placement` resource to control the deployment of policies to specific managed clusters. If you create policies that use the `Placement` resource, you might encounter the following limitations:
-
-* The placement information is not shown when you view the details of the policy from the console.
-* The placement information is not removed when the policy is deleted from the console.
-* When you edit the policy from the console, the placement details are not updated. 
-
-Use the command line interface (CLI) to make updates to the policies when you use the `Placement` resource.
-
 [#gatekeeper-upgrade]
 === Gatekeeper operator installation fails
 //2.4:16673
 
 When you install the gatekeeper operator on {ocp} version 4.9, the installation fails. Before you upgrade {ocp-short} to version 4.9.0., you must upgrade the gatekeeper operator to version 0.2.0. See link:../governance/create_gatekeeper.adoc#upgrading-gatekeeper-gatekeeper-operator[Upgrading gatekeeper and the gatekeeper operator] for more information.
+
+[#config-policy-stuck]
+=== Configuration policy listed complaint when namespace is stuck in _Terminating_ state
+//2.2:20715
+
+When you have a configuration policy that is configured with `mustnothave` for the `complianceType` parameter and `enforce` for the `remediationAction` parameter, the policy is listed as compliant after a deletion request is made to the Kubernetes API. Therefore, the Kubernetes object can be stuck in a `Terminating` state while the policy is listed as compliant.
 
 [#backup-known-issues]
 == Backup and restore known issues
@@ -881,18 +820,6 @@ When you install the gatekeeper operator on {ocp} version 4.9, the installation 
 //2.4:17229
 
 The backup and restore feature for the hub cluster requires the OpenShift API for Data Protection (OADP) operator. The OADP operator is not available on the IBM Power or IBM Z architectures.
-
-[#no-resource-status-after-restore]
-=== Application and policy show no resource status on managed cluster after a restore operation
-//2.4:17342
-
-When a restore operation is run on a new hub cluster, using data backed up from another hub cluster, the application and policy shows no status for resources on managed clusters. This happens because the search and policy add-ons are not reset to point to the new hub cluster. 
-
-From the new hub cluster, you must restart the `addon-certpolicyctrl` and `addon-search` for all managed clusters. Run the following commands to restart the pods:
-
-----
-oc get pods -n open-cluster-management-agent-addon | grep search | awk '{print $1}' | xargs kubectl delete pod
----- 
 
 [#backup-collision]
 === Avoid backup collision
@@ -918,3 +845,16 @@ Avoid backup collisions by setting the `BackupSchedule.cluster.open-cluster-mana
 The backup collision is reported by the link:https://github.com/stolostron/cluster-backup-chart/blob/main/stable/cluster-backup-chart/templates/hub-backup-pod.yaml[`hub-backup-pod`] policy. The administrator must verify which hub cluster writes data to the storage location. Then remove the `BackupSchedule.cluster.open-cluster-management.io` resource from the passive hub cluster, and recreate a new `BackupSchedule.cluster.open-cluster-management.io` resource on the primary hub cluster to resume the backup.
 
 See link:../clusters/backup_and_restore.adoc#hub-backup-and-restore[Cluster backup and restore operator] for more information.
+
+[#restore-limitations]
+=== Velero restore limitations
+
+View the following restore limitations:
+
+* The new hub cluster is not identical to the initial hub cluster, where the data is restored, when there is an existing policy on the new hub cluster before the backup data is restored on the initial hub cluster. The policy should not be running on the new hub cluster since this is a policy that is unavailable with the backup resources.
+
+* Since Velero skips existing resources, the policy on the new hub cluster is unchanged. Therefore, the policy is not the same as the one backed up on the initial hub cluster.
+
+* The new hub cluster has a different configuration from the active hub cluster when a user reapplies the backup on the new hub cluster. Since there is an existing policy on the hub cluster from a previous restore, it is not restored again. Even when the backup contains the expected updates, the policy contents are not updated by Velero on the new hub cluster. 
+
+To address the previously mentioned limitations, when a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning the hub cluster before Velero restore begins. For more information, see link:../clusters/backup_and_restore.adoc#clean-hub-restore[Clean the hub cluster before restore].

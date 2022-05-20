@@ -1,7 +1,7 @@
 [#subscribing-git-resources]
 = Subscribing Git resources 
 
-By default, when a subscription deploys subscribed applications to target clusters, the applications are deployed to that subscription namespace, even if the application resources are associated with other namespaces. A _subscription_ administrator can change default behavior, as described in xref:../applications/subscription_admin.adoc#granting-subscription-admin-privilege[Granting subscription admin privilege].
+By default, when a subscription deploys subscribed applications to target clusters, the applications are deployed to that subscription namespace, even if the application resources are associated with other namespaces. A _subscription administrator_ can change default behavior, as described in xref:../applications/subscription_admin.adoc#granting-subscription-admin-privilege[Granting subscription admin privilege].
 
 Additionally, if an application resource exists in the cluster and was not created by the subscription, the subscription cannot apply a new resource on that existing resource. See the following processes to change default settings as the subscription administrator:
 
@@ -123,6 +123,8 @@ spec:
 
 *Applicable channel types:* Git, ObjectBucket (Object storage in the console)
 
+*Note:* The resource overwrite option is not applicable to `helm` charts from the Git repository because the `helm` chart resources are managed by Helm.
+
 In this example, the following ConfigMap already exists in the target cluster. 
 
 [source,yaml]
@@ -138,7 +140,6 @@ data:
 ----
 
 Subscribe the following sample resource YAML file from a Git repository and replace the existing ConfigMap. See the change in the `data` specification:
-
 
 [source,yaml]
 ----
@@ -190,6 +191,46 @@ data:
 When the `merge` option is used, entries from subscribed resource are either created or updated in the existing resource. No entry is removed from the existing resource.
 
 *Important:* If the existing resource you want to overwrite with a subscription is automatically reconciled by another operator or controller, the resource configuration is updated by both subscription and the controller or operator. Do not use this method in this case.
+
+[#mergeandown-option]
+=== mergeAndOwn option
+
+With `mergeAndOwn`, entries from subscribed resource are either created or updated in the existing resource. Log in as a subscription administrator and create a subscription with `apps.open-cluster-management.io/reconcile-option: mergeAndOwn` annotation. See the following example:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: subscription-example
+  namespace: sub-ns
+  annotations:
+    apps.open-cluster-management.io/git-path: sample-resources
+    apps.open-cluster-management.io/reconcile-option: mergeAndOwn
+spec:
+  channel: channel-ns/somechannel
+  placement:
+    placementRef:
+      name: dev-clusters
+----
+
+When this subscription is created by a subscription administrator and subscribes the ConfigMap resource, the existing ConfigMap is merged, as you can see in the following example:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-configmap-1
+  namespace: sub-ns
+  annotations:
+    apps.open-cluster-management.io/hosting-subscription: sub-ns/subscription-example
+data:
+  name: user1
+  age: 20
+----
+
+As previosly mentioned, when the `mergeAndOwn` option is used, entries from subscribed resource are either created or updated in the existing resource. No entry is removed from the existing resource. It also adds the `apps.open-cluster-management.io/hosting-subscription` annotation to indicate that the resource is now owned by the subscription. Deleting the subscription deletes the ConfigMap.
 
 [#replace-option]
 === Replace option
