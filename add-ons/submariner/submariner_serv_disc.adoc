@@ -1,9 +1,14 @@
+[#manage-service-discovery-submariner]
+= Managing service discovery for Submariner
+
+The `submariner-addon` component is a *Technology Preview* feature.
+
+After Submariner is deployed into the same environment as your managed clusters, the routes are configured for secure IP routing between the pod and services across the clusters in the managed cluster set.
+
 [#enable-service-discovery-submariner]
-= Enabling service discovery for Submariner
+== Enabling service discovery for Submariner
 
-The `submariner-addon` component is a *technology preview* feature.
-
-After Submariner is deployed into the same environment as your managed clusters, the routes are configured for secure IP routing between the pod and services across the clusters in the `ManagedClusterSet`. To make a service from a cluster visible and discoverable to other clusters in the `ManagedClusterSet`, you must create a `ServiceExport` object. After a service is exported with a `ServiceExport` object, you can access the the service by the following format: `<service>.<namespace>.svc.clusterset.local`. If multiple clusters export a service with the same name, and from the same namespace, they are recognized by other clusters as a single logical service. 
+To make a service from a cluster visible and discoverable to other clusters in the managed cluster set, you must create a `ServiceExport` object. After a service is exported with a `ServiceExport` object, you can access the service by the following format: `<service>.<namespace>.svc.clusterset.local`. If multiple clusters export a service with the same name, and from the same namespace, they are recognized by other clusters as a single logical service. 
 
 This example uses the `nginx` service in the `default` namespace, but you can discover any Kubernetes `ClusterIP` service or headless service: 
 
@@ -14,18 +19,17 @@ oc -n default create deployment nginx --image=nginxinc/nginx-unprivileged:stable
 oc -n default expose deployment nginx --port=8080
 ----
 
-. Export the service by creating a `ServiceExport` entry that resembles the following content in the YAML file:
+. Export the service by creating a `ServiceExport` entry by entering a command with the `subctl` tool that is similar to the following command:
 +
-[source,yaml]
 ----
-apiVersion: multicluster.x-k8s.io/v1alpha1
-kind: ServiceExport
-metadata:
-  name: <service-name>
-  namespace: <service-namespace>
+subctl export service --namespace <service-namespace> <service-name>
 ----
-Replace `_service-name_` with the name of the service that you are exporting. In this example, it is `nginx`. 
-Replace `_service-namespace_` with the name of the namespace where the service is located. In this example, it is `default`.
++
+Replace `service-namespace` with the name of the namespace where the service is located. In this example, it is `default`.
++
+Replace `service-name` with the name of the service that you are exporting. In this example, it is `nginx`. 
++
+See https://submariner.io/operations/deployment/subctl/#export[`export`] in the Submariner documentation for more information about other available flags.
 
 . Run the following command from a different managed cluster to confirm that it can access the `nginx` service:
 +
@@ -34,3 +38,20 @@ oc -n default run --generator=run-pod/v1 tmp-shell --rm -i --tty --image quay.io
 ----
 
 The `nginx` service discovery is now configured for Submariner.
+
+[#disabling-service-discovery-submariner]
+== Disabling service discovery for Submariner
+
+To disable a service from being exported to other clusters, enter a command similar to the following example for `nginx`:
+
+----
+subctl unexport service --namespace <service-namespace> <service-name>
+----
+
+Replace `service-namespace` with the name of the namespace where the service is located.
+
+Replace `service-name` with the name of the service that you are exporting.  
+
+See https://submariner.io/operations/deployment/subctl/#unexport[`unexport`] in the Submariner documentation for more information about other available flags.
+
+The service is no longer available for discovery by clusters.
