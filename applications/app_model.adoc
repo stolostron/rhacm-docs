@@ -69,7 +69,80 @@ Placement rules (`placementrule.apps.open-cluster-management.io`) define the tar
 [#applicationset]
 == ApplicationSet
 
-`ApplicationSet` is a sub-project of Argo CD that adds multicluster support for Argo CD applications. You can create an `ApplicationSet`` from the product console editor. 
+`ApplicationSet` is a sub-project of Argo CD that is supported by the GitOps Operator. `ApplicationSet` adds multicluster support for Argo CD applications. You can create an `ApplicationSet` from the {product-title-short}.console. 
+
+{ocp-short} GitOps uses Argo CD to maintain cluster resources. Argo CD is an open-source declarative tool for the continuous integration and continuous deployment (CI/CD) of applications. {ocp-short} GitOps implements Argo CD as a controller ({ocp-short} GitOps Operator) so that it continuously monitors application definitions and configurations defined in a Git repository. Then, Argo CD compares the specified state of these configurations with their live state on the cluster.
+
+
+The `ApplicationSet` controller is installed on the cluster through a GitOps operator instance and supplements it by adding additional features in support of cluster-administrator-focused scenarios. The `ApplicationSet` controller provides the following function:
+
+* The ability to use a single Kubernetes manifest to target multiple Kubernetes clusters with the GitOps operator.
+
+* The ability to use a single Kubernetes manifest to deploy multiple applications from one or multiple Git repositories with the GitOps operator.
+
+* Improved support for monorepo, which is in the context of Argo CD, multiple Argo CD Application resources that are defined within a single Git repository.
+
+* Within multitenant clusters, improved ability of individual cluster tenants to deploy applications using Argo CD without needing to involve privileged cluster administrators in enabling the destination clusters/namespaces.
+
+The `ApplicationSet` operator leverages the cluster decision generator to interface Kubernetes custom resources that use custom resource-specific logic to decide which managed clusters to deploy to. A cluster decision resource generates a list of managed clusters, which are then rendered into the template fields of the `ApplicationSet` resource. This is done using duck-typing, which does not require knowledge of the full shape of the referenced Kubernetes resource. 
+
+See the following example of a `generators.clusterDecisionResource` value within an `ApplicationSet`:
+
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: sample-application-set
+  namespace: sample-gitops-namespace
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: sample-application-placement
+        requeueAfterSeconds: 180
+  template:
+    metadata:
+      name: sample-application-{{name}}
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/sampleapp/apprepo.git
+        targetRevision: main
+        path: sample-application
+      destination:
+        namespace: sample-application
+        server: "{{server}}"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+          - Replace=true
+          - ApplyOutOfSyncOnly=true
+          - Validate=false
+        automated:
+          prune: true
+          allowEmpty: true
+          selfHeal: true
+----
+
+See the following `Placement`:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: sample-application-placement
+  namespace: sample-gitops-namespace
+spec:
+  clusterSets:
+    - sampleclusterset
+----
+
+If you would like to learn more about `ApplicationSets`, see link:https://argocd-applicationset.readthedocs.io/en/stable/Generators-Cluster-Decision-Resource/[Cluster Decision Resource Generator].
 
 [#applicationdoc]
 == Application documentation
