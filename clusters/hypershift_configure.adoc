@@ -1,11 +1,11 @@
 [#hypershift-configure]
-= Configuring HyperShift
+= Configuring Hosted Control Planes
 
-You can configure HyperShift by converting an existing cluster to a HyperShift management cluster and then deploying a cluster that is managed by the HyperShift management cluster that you converted. 
+You can deploy Hosted Control Planes by converting an existing cluster to a Hosting Service cluster and then deploying a cluster that is managed by the HyperShift management cluster that you converted. 
 
-*Important:* Because HyperShift is a Technology Preview feature, the related components are disabled by default. Enable the feature by editing the `multiclusterengine` custom resource to set the `spec.overrides.components[?(@.name=='hypershift-preview')].enabled` to `true`. 
+*Important:* Because Hosted Control Planes is a Technology Preview feature, the related components are disabled by default. Enable the feature by editing the `multiclusterengine` custom resource to set the `spec.overrides.components[?(@.name=='hypershift-preview')].enabled` to `true`. 
 
-Enter the following command to verify that the HyperShift feature is enabled:
+Enter the following command to verify that the Hosted Control Planes feature is enabled:
 
 ----
 oc get mce multiclusterengine-sample -ojsonpath="{.spec.overrides.components[?(@.name=='hypershift-preview')].enabled}"
@@ -13,20 +13,20 @@ true
 ----
 
 [#hypershift-convert-mgt-cluster]
-== Converting an existing cluster to a HyperShift management cluster
+== Converting an existing cluster to a Hosting Service Cluster
 
 [#hypershift-convert-mgt-cluster-prereq]
 === Prerequisites
 
 You must have the multicluster engine operator installed on at least one cluster that is managed by {ocp}. The multicluster engine operator is automatically installed when you install {product-title-short} version 2.5, and later.
 
-*Note:* If you want your {product-title-short} hub cluster to be your HyperShift management cluster, you can configure `local-cluster` as your HyperShift management cluster.
+*Note:* If you want your {product-title-short} hub cluster to be your Hosted Control Planes management cluster, you can configure `local-cluster` as your Hosting Service Cluster.
 
-Complete the following steps to convert an {ocp-short} managed cluster to a HyperShift management cluster:
+Complete the following steps to convert an {ocp-short} managed cluster to a Hosting Service cluster:
 
 . Install the HyperShift add-on.
 +
-The cluster that hosts the HyperShift operator is the HyperShift management cluster. In this step, use the `hypershift-addon` to install a HyperShift operator on a managed cluster.
+The cluster that hosts the HyperShift operator is the Hosting Service Cluster. This step, uses the `hypershift-addon` to install the HyperShift operator on a managed cluster.
 +
 .. Create the `ManagedClusterAddon` HyperShift add-on by creating a file that resembles the following example:
 +
@@ -92,9 +92,11 @@ Your HyperShift add-on is installed and the management cluster is available to m
 [#hypershift-deploy-cluster]
 == Deploying a HyperShift managed cluster
 
-After you install the HyperShift operator and convert an existing cluster into a HyperShift management cluster, you can provision a HyperShift hosted cluster by creating a `HypershiftDeployment` custom resource. 
+After installing the HyperShift operator and converting an existing cluster into a Hosting Service Cluster, you can provision a HyperShift hosted cluster by creating a `HypershiftDeployment` custom resource. 
 
-. Create a cloud provider secret as a credential using the console or a file addition. The following example shows the format for Amazon Web Services:
+. Create a cloud provider secret as a credential using the console or a file addition. You must have permissions to create infrastructure resources for your cluster, like VPCs, subnets, and NAT gateways,. The account also must correspond to the account for your guest cluster, where your workers live. See https://hypershift-docs.netlify.app/how-to/aws/create-infra-iam-separately/[Create AWS infrastructure and IAM resources separately] in the HyperShift documentation for more information about the required permissions.
++
+The following example shows the format for Amazon Web Services:
 +
 [source,yaml]
 ----
@@ -127,7 +129,7 @@ oc create secret generic <my-secret> -n <hypershift-deployment-namespace> --from
 oc label secret <my-secret> -n <hypershift-deployment-namespace> cluster.open-cluster-management.io/backup=""
 ----
 
-. Create a `HypershiftDeployment` custom resource file in the cloud provider secret namespace. The `HypershiftDeployment` custom resource creates the infrastructure in the provider account, creates a hosted control plane on a management cluster, and configures the infrastructure compute capacity in the created infrastructure.
+. Create a `HypershiftDeployment` custom resource file in the cloud provider secret namespace. The `HypershiftDeployment` custom resource creates the infrastructure in the provider account, creates a hosted control plane on a Hosting Service Cluster, and configures the infrastructure compute capacity in the created infrastructure.
 +
 .. Create a file that contains information that resembles the following example: 
 +
@@ -139,8 +141,8 @@ metadata:
   name: hypershift-demo
   namespace: default
 spec:
-  hostingCluster: hypershift-management-cluster     # the hypershift management cluster name.
-  hostingNamespace: clusters     # specify the namespace to which hostedcluster and nodepools belong on the hypershift management cluster.
+  hostingCluster: <hosting-service-cluster> 
+  hostingNamespace: <clusters>  
   infrastructure:
     cloudProvider:
       name: <my-secret>
@@ -149,6 +151,11 @@ spec:
       aws:
         region: <region>
 ----
++
+Replace `hosting-service-cluster` with the name of the cluster that hosts the HypersShift operator. 
++ 
+Replace `cluster` with the namespace to which hosted cluster and nodepools belong on the Hosting Service Cluster.
+
 .. Apply the file by entering the following command:
 +
 ----
