@@ -5,7 +5,7 @@ There might be times when you need to override the registry images on the manage
 
 The `ManagedClusterImageRegistry` CRD is a namespace-scoped resource.
 
-The `ManagedClusterImageRegistry` CRD specifies a set of managed clusters for a Placement to select, but need different images from the custom image registry. After the managed clusters are updated with the new images, the following label is added to each managed cluster for identification: `open-cluster-management.io/image-registry=<namespace>.<managedClusterImageRegistryName>`.
+The `ManagedClusterImageRegistry` CRD specifies a set of managed clusters for a Placement to select, but needs different images from the custom image registry. After the managed clusters are updated with the new images, the following label is added to each managed cluster for identification: `open-cluster-management.io/image-registry=<namespace>.<managedClusterImageRegistryName>`.
 
 The following example shows a `ManagedClusterImageRegistry` CRD:
 
@@ -23,14 +23,38 @@ spec:
     name: <placementName> 
   pullSecret:
     name: <pullSecretName>
-  registry: <registryAddress>
+  registries:
+  - mirror: <mirrored-image-registry-address>
+    source: <image-registry-address>
+  - mirror: <mirrored-image-registry-address>
+    source: <image-registry-address>
 ----
 
 In the `spec` section:
 
-* Replace `placementRef` with a Placement in the same namespace that selects a set of managed clusters.
-* Replace `pullSecret` with the name of the pull secret that is used to pull images from the custom image registry.
-* Replace `registry` with the custom registry address.
+* Replace `placementName` with the name of a Placement in the same namespace that selects a set of managed clusters.
+* Replace `pullSecretName` with the name of the pull secret that is used to pull images from the custom image registry.
+* List the values for each of the `source` and `mirror` registries. Replace the `mirrored-image-registry-address` and `image-registry-address` with the value for  each of the `mirror` and `source` values of the registries. 
++
+** Example 1: To replace the source image registry named `registry.redhat.io/rhacm2` with `localhost:5000/rhacm2`, and `registry.redhat.io/multicluster-engine` with `localhost:5000/multicluster-engine`, use the following example:
++
+[source,yaml]
+----
+registries:
+- mirror: localhost:5000/rhacm2/
+    source: registry.redhat.io/rhacm2
+- mirror: localhost:5000/multicluster-engine
+    source: registry.redhat.io/multicluster-engine
+----
+
+** Example 2: To replace the source image, `registry.redhat.io/rhacm2/registration-rhel8-operator` with `localhost:5000/rhacm2-registration-rhel8-operator`, use the following example:
++
+[source,yaml]
+----
+registries:
+- mirror: localhost:5000/rhacm2-registration-rhel8-operator
+    source: registry.redhat.io/rhacm2/registration-rhel8-operator
+----
 
 [#imp-clust-managedclusterimageregistry]
 == Importing a cluster with a ManagedClusterImageRegistry CRD
@@ -58,7 +82,12 @@ metadata:
 spec:
   clusterSets:
   - myClusterSet
+  tolerations:
+  - key: "cluster.open-cluster-management.io/unreachable"
+    operator: Exists
 ----
++
+*Note:* The `unreachable` toleration is required for the Placement to be able to select the cluster. 
 
 . Create a `ManagedClusterSet` resource and bind it to your namespace.
 +
