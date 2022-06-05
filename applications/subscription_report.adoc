@@ -1,0 +1,227 @@
+[#subscription-reports]
+= Subscription reports 
+
+Subscription reports are collections of application statuses from all the managed clusters in your fleet. Specifically, the parent application resource can hold reports from a scalable amount of managed clusters. 
+
+Detailed application status is available on the managed clusters, while the `subscriptionReports` on the hub cluster are lightweight and more scalable. See the following three types of subsription status reports:
+
+- SubscriptionStatus: This is a package-level managed cluster status in the `appsub` namespace. 
+- Cluster resource SubscriptionReport: This is the status report on all the applications that are deployed to a particular cluster and the cluster overall status.
+- Application resource SubscriptionReport: This is the status report on all the managed clusters that a particular application is deployed to and the application overall status.
+
+* <<package-subscription-status,subscriptionStatus>>
+* <<subscription-report-cluster,SubscriptionReport cluster>>
+* <<cluster-level-appsub,Package level AppSub status>>
+* <<managed-cluster-view,managedClusterView>>
+* <<-cli-appsub-status,subscriptionStatus>>
+
+[#subscription-status]
+== SubscriptionStatus
+
+The package-level managed cluster status is located in `namespace.appsub` on the managed cluster and contains detailed status for all the resources that are deployed by the application. For every `appsub` that is deployed to a managed cluster, there is a `SubscriptionStatus` CR created in the `appsub` namespace on the managed cluster. Every resource is reported with detailed errors if errors exist. 
+
+See the following `SubscriptionStatus` sample YAML file:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1alpha1
+kind: SubscriptionStatus
+metadata:
+  labels:
+    apps.open-cluster-management.io/cluster: managed-k3s-cluster-bd7a7772
+    apps.open-cluster-management.io/hosting-subscription: test-ns-2.git-gb-subscription-1
+  name: git-gb-subscription-1
+  namespace: your-appsub-namespace
+statuses:
+  packages:
+  - apiVersion: v1
+    kind: Service
+    lastUpdateTime: "2021-09-13T20:12:34Z"
+    Message: <detailed error. visible only if the package fails>
+    name: frontend
+    namespace: test-ns-2
+    phase: Deployed 
+  - apiVersion: apps/v1
+    kind: Deployment
+    lastUpdateTime: "2021-09-13T20:12:34Z"
+    name: frontend
+    namespace: test-ns-2
+    phase: Deployed
+  - apiVersion: v1
+    kind: Service
+    lastUpdateTime: "2021-09-13T20:12:34Z"
+    name: redis-master
+    namespace: test-ns-2
+    phase: Deployed
+  - apiVersion: apps/v1
+    kind: Deployment
+    lastUpdateTime: "2021-09-13T20:12:34Z"
+    name: redis-master
+    namespace: test-ns-2
+    phase: Deployed
+  - apiVersion: v1
+    kind: Service
+    lastUpdateTime: "2021-09-13T20:12:34Z"
+    name: redis-slave
+    namespace: test-ns-2
+    phase: Deployed
+  - apiVersion: apps/v1
+    kind: Deployment
+    lastUpdateTime: "2021-09-13T20:12:34Z"
+    name: redis-slave
+    namespace: test-ns-2
+    phase: Deployed
+----
+
+[#subscription-report-cluster]
+== SubscriptionReport cluster
+
+The cluster-level status is located in `namespace.cluster` on the the hub cluster and only contains the overall status on each application on that managed cluster. The `subscriptionReport` in each cluster namespace on the hub cluster reports one of the following statuses:
+  
+  - `Deployed`
+  - `Failed`
+  - `propagationFailed`
+
+See the following `SubscriptionStatus` sample YAML file:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1alpha1
+kind: subscriptionReport
+metadata:
+  labels:
+    apps.open-cluster-management.io/cluster: "true"
+  name: cluster-1
+  namespace: cluster-1                              // cluster namespace 
+reportType: Cluster
+results:
+- result: deployed
+  source: appsub-1-ns/appsub-1                     // appsub 1 namespaced name
+  timestamp:
+    nanos: 0
+    seconds: 1634137362
+- result: failed
+  source: appsub-2-ns/appsub-2                     // appsub 2 namespaced name
+  timestamp:
+    nanos: 0
+    seconds: 1634137362
+- result: propagationFailed
+  source: appsub-3-ns/appsub-3                     // appsub 3 namespaced name
+  timestamp:
+    nanos: 0
+    seconds: 1634137362
+----
+
+[#subscription-report-application]
+== SubscriptionReport application
+
+One `Application` `subscriptionReport` for each application is located in `namespace.cluster` in `appsub` namespace on the hub cluster and contains the following information:
+
+- The overall status of the application for each managed cluster
+- A list of all resources for the application
+- A report summary with the total number of total clusters 
+- A report summary with the total number of clusters where the application is in the status: `deployed`, `failed`, `propagationFailed`, and `inProgress`. 
+ 
+*Note:* The `inProcess` status is the total minus `deployed`, minus `failed `, and minus `propagationFailed`.
+
+See the following `SubscriptionStatus` sample YAML file:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1alpha1
+kind: subscriptionReport
+metadata:
+  labels:
+    apps.open-cluster-management.io/hosting-subscription: appsub-1-ns.appsub-1
+  name: appsub-1
+  namespace: appsub-1-ns
+reportType: Application
+resources:
+- apiVersion: v1
+  kind: Service
+  name: redis-master2
+  namespace: playback-ns-2
+- apiVersion: apps/v1
+  kind: Deployment
+  name: redis-master2
+  namespace: playback-ns-2
+- apiVersion: v1
+  kind: Service
+  name: redis-slave2
+  namespace: playback-ns-2
+- apiVersion: apps/v1
+  kind: Deployment
+  name: redis-slave2
+  namespace: playback-ns-2
+- apiVersion: v1
+  kind: Service
+  name: frontend2
+  namespace: playback-ns-2
+- apiVersion: apps/v1
+  kind: Deployment
+  name: frontend2
+  namespace: playback-ns-2
+results:
+- result: deployed
+  source: cluster-1                            //cluster 1 status
+  timestamp:
+    nanos: 0
+    seconds: 0
+- result: failed
+  source: cluster-3                            //cluster 2 status
+  timestamp:
+    nanos: 0
+    seconds: 0
+- result: propagationFailed
+  source: cluster-4                            //cluster 3 status
+  timestamp:
+    nanos: 0
+    seconds: 0
+summary:
+  deployed: 8
+  failed: 1
+  inProgress: 0
+  propagationFailed: 1
+  clusters: 10
+----
+
+[#managed-cluster-view]
+== ManagedClusterView
+ 
+A `ManagedClusterView` CR is reported on the first `failed` cluster. If an application is deployed on multiple clusters with resource deployment failures, only one `managedClusterView` CR is created for the first failing cluster namespace on the hub cluster. The `managedClusterView` CR retrieves the detailed subscription status from the failing cluster so that the application owner does not need to access the failing remote cluster.
+
+See the following command that you can run to get the status:
+
+----
+% oc get managedclusterview -n <failing-clusternamespace> "<app-name>-<app name>"
+----
+
+[#cli-appsub-status]
+== CLI application-level status
+
+You can use the CLI to get the package-level `appSub` status on a managed cluster. As a result, either the cluster level or the `appsub` level subscription report does not directly provide the detailed status for an application. It turns out holding such detailed status for all applications in the cluster-level subscriptionReport increases the size of the cluster subscriptionReport dramatically. Accordingly it impacts the whole performance of the hub cluster. It is necessary to provide a hub backend CLI, so that the end users can run it on the hub cluster for getting the detailed status for an application deployed on a specific cluster.
+
+----
+% getAppSubStatus.sh -c <managed cluster Name> -s <AppSub Namespace> -n <Appsub Name>
+// the relative package level AppSub status CR on the managed cluster will be fetched and displayed.
+----
+
+This CLI, uses identity details in the Application subscriptionReport, to create a managedClusterView resource, to see the managed cluster application SubscriptionStatus so the user can identify exactly what is wrong with the application.
+
+The CLI can be downloaded here from https://github.com/open-cluster-management-io/multicloud-operators-subscription/blob/main/cmd/scripts/getAppSubStatus.sh[multicloud-operators-subscription].
+
+
+
+This CLI is for getting the Last Update Time of an AppSub on a given managed cluster
+
+It may be desirable to find out when an AppSub was last updated on a managed cluster. It is not always practical to login to each managed cluster to retrieve this information. Thus, an utility script was created to simplify the retrieval of the Last Update Time of an AppSub on a managed cluster. This script is designed to run on the Hub cluster. It creates a managedClusterView resource to get the AppSub from the managed cluster, and parses the data to get the Last Update Time.
+
+The CLI can be downloaded from here:
+
+https://github.com/open-cluster-management-io/multicloud-operators-subscription/blob/main/cmd/scripts/getLastUpdateTime.sh
+
+To run the script:
+----
+% getLastUpdateTime.sh -c <managed cluster Name> -s <AppSub Namespace> -n <Appsub Name>
+// the AppSub CR on the managed cluster will be fetched and the Last Update Time will be displayed
+----
