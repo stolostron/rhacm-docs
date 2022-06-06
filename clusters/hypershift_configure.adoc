@@ -1,7 +1,7 @@
 [#hypershift-configure]
 = Configuring hosted control planes
 
-You can deploy hosted control planes by converting an existing cluster to a hosting service cluster and then deploying a cluster that is managed by the HyperShift management cluster that you converted. 
+You can deploy hosted control planes by converting an existing cluster to a hosting service cluster and then deploying a cluster that is managed by the HyperShift hosting service cluster that you converted. 
 
 *Important:* Because hosted control planes is a Technology Preview feature, the related components are disabled by default. Enable the feature by editing the `multiclusterengine` custom resource to set the `spec.overrides.components[?(@.name=='hypershift-preview')].enabled` to `true`. 
 
@@ -20,7 +20,7 @@ true
 
 You must have the multicluster engine operator installed on at least one cluster that is managed by {ocp}. The multicluster engine operator is automatically installed when you install {product-title-short} version 2.5, and later.
 
-*Note:* If you want your {product-title-short} hub cluster to be your hosted control planes management cluster, you can configure `local-cluster` as your hosting service cluster.
+*Note:* If you want your {product-title-short} hub cluster to be your hosted control planes hosting service cluster, you can configure `local-cluster` as your hosting service cluster.
 
 Complete the following steps to convert an {ocp-short} managed cluster to a hosting service cluster:
 
@@ -36,12 +36,12 @@ apiVersion: addon.open-cluster-management.io/v1alpha1
 kind: ManagedClusterAddOn
 metadata:
   name: hypershift-addon
-  namespace: <hypershift-management-cluster> 
+  namespace: <hypershift-hosting-service-cluster> 
 spec:
   installNamespace: open-cluster-management-agent-addon
 ----
 +
-Replace `hypershift-management-cluster` with the name of the managed cluster on which you want to install the HyperShift operator.
+Replace `hypershift-hosting-service-cluster` with the name of the managed cluster on which you want to install the HyperShift operator.
 
 .. Apply the file by running the following command:
 +
@@ -51,7 +51,7 @@ oc apply -f <filename>
 +
 Replace `filename` with the name of the file that you created. 
 
-. Create an OIDC s3 credentials secret file named `hypershift-operator-oidc-provider-s3-credentials` for the HyperShift operator. Create the secret in the same namespace where your `hypershift-management-cluster` is hosted. 
+. Create an OIDC s3 credentials secret file named `hypershift-operator-oidc-provider-s3-credentials` for the HyperShift operator. Create the secret in the same namespace where your `hypershift-hosting-service-cluster` is hosted. 
 +
 The secret must contain 3 fields:
 +
@@ -64,20 +64,20 @@ See https://hypershift-docs.netlify.app/getting-started/[Getting started] in the
 +
 ----
 oc create secret generic hypershift-operator-oidc-provider-s3-credentials --from-file=credentials=$HOME/.aws/credentials --from-literal=bucket=<s3-bucket-for-hypershift> 
---from-literal=region=<region> -n <hypershift-management-cluster>
+--from-literal=region=<region> -n <hypershift-hosting-service-cluster>
 ----
 
 +
 *Note:* Disaster recovery backup for the secret is not automatically enabled. Run the following command to add the label that enables the `hypershift-operator-oidc-provider-s3-credentials` secret to be backed up for disaster recovery:
 +
 ----
-oc label secret hypershift-operator-oidc-provider-s3-credentials -n <hypershift-management-cluster> cluster.open-cluster-management.io/backup=""
+oc label secret hypershift-operator-oidc-provider-s3-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
 ----
 
 . Confirm that the `hypershift-addon` is installed by running the following command:
 +
 ----
-oc get managedclusteraddons -n local-cluster hypershift-addon
+oc get managedclusteraddons -n <hypershift-hosting-service-cluster> hypershift-addon
 ----
 +
 The output resembles the following example, when the add-on is installed:
@@ -87,7 +87,7 @@ NAME               AVAILABLE   DEGRADED   PROGRESSING
 hypershift-addon   True
 ----
 
-Your HyperShift add-on is installed and the management cluster is available to managed HyperShift clusters. 
+Your HyperShift add-on is installed and the hosting service cluster is available to managed HyperShift clusters.
 
 [#hypershift-deploy-cluster]
 == Deploying a HyperShift managed cluster
@@ -129,7 +129,7 @@ oc create secret generic <my-secret> -n <hypershift-deployment-namespace> --from
 oc label secret <my-secret> -n <hypershift-deployment-namespace> cluster.open-cluster-management.io/backup=""
 ----
 
-. Create a `HypershiftDeployment` custom resource file in the cloud provider secret namespace. The `HypershiftDeployment` custom resource creates the infrastructure in the provider account, creates a hosted control plane on a hosting service cluster, and configures the infrastructure compute capacity in the created infrastructure.
+. Create a `HypershiftDeployment` custom resource file in the cloud provider secret namespace. The `HypershiftDeployment` custom resource creates the infrastructure in the provider account, configures the infrastructure compute capacity in the created infrastructure, provisions the `nodePools` that use the hosted control plane, and creates a hosted control plane on a hosting service cluster.
 +
 .. Create a file that contains information that resembles the following example: 
 +
@@ -170,7 +170,7 @@ You can refer to the https://github.com/stolostron/hypershift-deployment-control
 oc get hypershiftdeployment -n default hypershift-demo -w
 ----
 
-. After the hosted cluster is created, it is automatically imported to the hub. You can verify this by running the following command: 
+. After the hosted cluster is created, it is automatically imported to the hub. You can verify this by viewing the cluster list in the {product-name-short} console, or by running the following command: 
 +
 ----
 oc get managedcluster <hypershiftDeployment.Spec.infraID>
