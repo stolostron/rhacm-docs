@@ -18,11 +18,9 @@ Configuration policies support the inclusion of Golang text templates in the obj
 [#template-functions]
 == Template functions
 
-Template functions, such as resource-specific and generic, `lookup` template functions, are available for referencing Kubernetes resources on the cluster. The resource-specific functions are used for convenience and makes content of the resources more accessible. If you use the generic function, `lookup`, which is more advanced, it is best to be familiar with the YAML structure of the resource that is being looked up. In addition to these functions, utility functions like `base64encode`, `base64decode`, `indent`, `autoindent`, `toInt`, `toBool` etc. are also available.
+Template functions, such as resource-specific and generic `lookup` template functions, are available for referencing Kubernetes resources on the cluster. The resource-specific functions are used for convenience and makes content of the resources more accessible. If you use the generic function, `lookup`, which is more advanced, it is best to be familiar with the YAML structure of the resource that is being looked up. In addition to these functions, utility functions like `base64encode`, `base64decode`, `indent`, `autoindent`, `toInt`, `toBool`, and more are also available.
 
-To conform templates into YAML syntax, templates must be set in the policy resource as strings using quotes or a block character (`|` or `>`). This causes the resolved template value to also be a string. To override this, consider using `toInt` or `toBool` as the final function in the template to initiate further processing that forces the value to be interpreted as an integer, or boolean.
-
-*Note*: If the string value is more than 80 characters, this block character, `|` needs to be used to avoid YAML parsing errors.
+To conform templates with YAML syntax, templates must be set in the policy resource as strings using quotes or a block character (`|` or `>`). This causes the resolved template value to also be a string. To override this, consider using `toInt` or `toBool` as the final function in the template to initiate further processing that forces the value to be interpreted as an integer or boolean respectively.
 
 Continue reading to view descriptions and examples for some of the custom template functions that are supported:
 
@@ -432,11 +430,13 @@ To force an immediate rotation, delete the `policy.open-cluster-management.io/la
 [#hub-templates]
 == Support for hub cluster templates in configuration policies
 
-{product-title-short} also supports hub cluster templates to define configuration policies that are dynamically customized to the target cluster. This reduces the need to create separate policies for each target cluster or hardcode configuration values in the policy definitions. 
+In addition to managed cluster templates that are dynamically customized to the target cluster, {product-title-short} also supports hub cluster templates to define configuration policies using values from the hub cluster. This combination reduces the need to create separate policies for each target cluster or hardcode configuration values in the policy definitions. 
 
 Hub cluster templates are based on Golang text template specifications, and the `{{hub … hub}}` delimiter indicates a hub cluster template in a configuration policy.
 
-*Important:* If you use hub cluster templates to propagate secrets or other sensitive data, the sensitive data exists in the managed cluster namespace on the hub cluster and on the managed clusters where that policy is distributed. The template content is expanded in the policy, and policies are not encrypted by the {ocp-short} ETCD encryption support.
+For security, both resource-specific and the generic lookup functions in hub cluster templates are restricted to the namespace of the policy on the hub cluster.
+
+*Important:* If you use hub cluster templates to propagate secrets or other sensitive data, the sensitive data exists in the managed cluster namespace on the hub cluster and on the managed clusters where that policy is distributed. The template content is expanded in the policy, and policies are not encrypted by the {ocp-short} ETCD encryption support. To address this, use `fromSecret`, which automatically encrypts the values from the Secret, or `protect` to encrypt other values.
 
 [#template-processing]
 === Template processing
@@ -469,7 +469,7 @@ See the following table for a comparison of hub cluster and managed cluster temp
 
 The `fromSecret` template function on the hub cluster stores the resulting value as an encrypted string on the replicated policy, in the managed cluster namespace. 
 
-The equivalent call might use the folllowing syntax: `{{hub "(lookup "v1" "Secret" "default" "my-hub-secret").data.message | protect hub}}`
+The equivalent call might use the folllowing syntax: `{{hub "(lookup "v1" "Secret" "default" "my-hub-secret").data.message \| protect hub}}`
 | A set of template functions support dynamic access to Kubernetes resources and string manipulation. See <<template-functions,Template functions>> for more information.
 
 
