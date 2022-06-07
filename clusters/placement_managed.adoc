@@ -10,46 +10,67 @@ A `Placement` resource is a namespace-scoped resource that defines a rule to sel
 
 See the following information about how placement with managed clusters works:
 
-- Kubernetes clusters are registered with the hub cluster as cluster-scoped `ManagedClusters`.
+* Kubernetes clusters are registered with the hub cluster as cluster-scoped `ManagedClusters`.
 
-- The `ManagedClusters` are organized into cluster-scoped `ManagedClusterSets`.
+* The `ManagedClusters` are organized into cluster-scoped `ManagedClusterSets`.
 
-- The `ManagedClusterSets` are bound to workload namespaces.
+* The `ManagedClusterSets` are bound to workload namespaces.
 
-- The namespace-scoped `Placements` specify a portion of `ManagedClusterSets` that select a working set of the potential `ManagedClusters`.
+* The namespace-scoped `Placements` specify a portion of `ManagedClusterSets` that select a working set of the potential `ManagedClusters`.
 
-- `Placements` select from that working set by using label and claim selectors.
+* `Placements` select from that working set by using label and claim selectors.
 +
 *Important:* `Placement` does not select a `ManagedCluster` if there is no `ManagedClusterSet` bound to the placement namespace.
 
-- The placement of `ManagedClusters` can be controlled by using taints and tolerations. See link:../clusters/man_clust_taints_tol.adoc#taints-toleration-manclust[Using taints and tolerations to place managed clusters] for more infotrmation.
+* The placement of `ManagedClusters` can be controlled by using taints and tolerations. See link:../clusters/man_clust_taints_tol.adoc#taints-toleration-manclust[Using taints and tolerations to place managed clusters] for more information.
 
 The `Placement` specification includes the following fields:
 
-- `ClusterSets` represents the `ManagedClusterSets` from which the `ManagedClusters` are selected. 
+* `ClusterSets` represents the `ManagedClusterSets` from which the `ManagedClusters` are selected. 
 
   ** If not specified, `ManagedClusters` is selected from the `ManagedClusterSets` that are bound to the placement namespace. 
 
   ** If specified, `ManagedClusters` is selected from the intersection of this set and the `ManagedClusterSets` that are bound to the placement namespace.
 
-- `NumberOfClusters` represents the desired number of `ManagedClusters` to be selected, which meet the placement requirements. 
+* `NumberOfClusters` represents the desired number of `ManagedClusters` to be selected, which meet the placement requirements. 
 +
 If not specified, all `ManagedClusters` that meet the placement requirements are selected.
 
-- `Predicates` represents a slice of predicates to select `ManagedClusters` with label and claim selector. The predicates are ORed.
+* `Predicates` represents a slice of predicates to select `ManagedClusters` with label and claim selector. The predicates are ORed.
 
-- `prioritizerPolicy` represents the policy of prioritizers. 
-  - `mode` is either `Exact`, `Additive`, or `""` where `""` is Additive by default.
-    - In `Additive` mode, any prioritizer that is not specifically provided with configuration values is enabled with its default configurations. In the current default configuration, the _Steady_ and _Balance_ prioritizers have the weight of 1, while the other prioritizers have the weight of 0. The default configurations might change in the future, which might  change the prioritization. `Additive` mode does not require that you configure all of the prioritizers. 
-    - In `Exact` mode, any prioritizer that is not specifically provided with configuration values has the weight of zero. `Exact` mode requires that you input the full set of prioritizers that you want, but avoids behavior changes between releases.
-  - `configurations` represents the configuration of prioritizers.
-    - `name` is the name of a prioritizer. See the following list of valid names of the prioritizers:
-      - `Balance`: Balances the decisions among the clusters
-      - `Steady`: Ensures that the existing decision is stabilized
-      - `ResourceAllocatableCPU` & `ResourceAllocatableMemory`: sort clusters based on the allocatable.
-    - `weight` defines the weight of prioritizer. The value must be in the range of [0,10].
+* `prioritizerPolicy` represents the policy of prioritizers. 
+  
+  ** `mode` is either `Exact`, `Additive`, or `""` where `""` is `Additive` by default.
+    
+    *** In `Additive` mode, any prioritizer that is not specifically provided with configuration values is enabled with its default configurations. In the current default configuration, the _Steady_ and _Balance_ prioritizers have the weight of 1, while the other prioritizers have the weight of 0. The default configurations might change in the future, which might change the prioritization. `Additive` mode does not require that you configure all of the prioritizers. 
+
+    *** In `Exact` mode, any prioritizer that is not specifically provided with configuration values has the weight of zero. `Exact` mode requires that you input the full set of prioritizers that you want, but avoids behavior changes between releases.
+
+  ** `configurations` represents the configuration of prioritizers.
+
+    *** scoreCoordinate represents the configuration of the prioritizer and score source.
+
+      **** `type` defines the type of the prioritizer score. Type is either `BuiltIn`, `AddOn`, or `" "`, where `" "` is `BuiltIn` by default. When the type is `BuiltIn`, the built in prioritizer name must be specified. When the type is `AddOn`, you need to configure the score source in `AddOn`.
+      
+      **** `builtIn` defines the name of a BuiltIn prioritizer. The following list includes the valid `BuiltIn` prioritizer names:
+         
+        ***** Balance: Balance the decisions among the clusters.
+
+        ***** Steady: Ensure the existing decision is stabilized.
+
+        ***** ResourceAllocatableCPU & ResourceAllocatableMemory: Sort clusters based on the allocatable resources.
+
+      **** `addOn` defines the resource name and score name. `AddOnPlacementScore` is introduced to describe addon scores. See <<extensible_scheduling,Extensible scheduling>> to learn more about it.
+
+      ***** `resourceName` defines the resource name of the `AddOnPlacementScore`. The placement prioritizer selects the `AddOnPlacementScore` custom resource by this name.
+
+      ***** `scoreName` defines the score name inside of the `AddOnPlacementScore`. `AddOnPlacementScore` contains a list of the score name and the score value. The `scoreName`, specifies the score to be used by the prioritizer.
+
+    *** `weight` defines the weight of prioritizer. The value must be in the range of [-10,10].
       Each prioritizer calculates an integer score of a cluster in the range of [-100, 100]. The final score of a cluster is determined by the following formula `sum(weight * prioritizer_score)`.
-      A higher weight indicates that the prioritizer receives a higher weight in the cluster selection, while 0 weight indicate thats the prioritizer is disabled.
+      A higher weight indicates that the prioritizer receives a higher weight in the cluster selection, while 0 weight indicates that the prioritizer is disabled. A negative weight indicates that it is one of the last ones selected.
+
+**Note:** The `configurations.name` file will be removed in v1beta1 and replaced by the `scoreCoordinate.builtIn` file. If both `name` and `scoreCoordinate.builtIn` are defined, the value in `scoreCoordinate.builtIn` is used to determine the selection.
 
 [#placement-binding]
 == Placement examples
@@ -143,7 +164,7 @@ spec:
 
 - Select a cluster with the largest allocatable memory.
 +
-*Note:* Similar to Kubernetes https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#node-allocatable[Node Allocatable], 'allocatable' here is defined as the amount of compute resources that are available for pods on each cluster.
+*Note:* Similar to Kubernetes https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#node-allocatable[Node Allocatable], 'allocatable' is defined as the amount of compute resources that are available for pods on each cluster.
 +
 [source,yaml]
 ----
@@ -170,7 +191,7 @@ metadata:
   name: placement7
   namespace: ns1
 spec:
-  numberOfClusters: 2
+  numberOfClusters: 1
   prioritizerPolicy:
     configurations:
       - scoreCoordinate:
@@ -319,3 +340,14 @@ spec:
             - key: feature.open-cluster-management.io/addon-application-manager
               operator: DoesNotExist
 ----
+
+[#extensible-scheduling]
+== Extensible scheduling
+
+In placement resource-based scheduling, sometimes the prioritizer needs more data than the default value provided by the `MananagedCluster` resource to calculate the score of the managed cluster. For example, schedule the clusters based on CPU or memory usage data of the clusters that are fetched obtained through a monitoring system.
+
+The API `AddOnPlacementScore` supports a more extensible way to schedule based on customized scores.
+- You can specify the score in the `placement.yaml` file to select clusters.
+- As a  score provider, a 3rd party controller can run on either the hub cluster or the managed cluster, to maintain the lifecycle of `AddOnPlacementScore` and update score into it.
+
+Refer to https://github.com/open-cluster-management-io/enhancements/blob/main/enhancements/sig-architecture/32-extensiblescheduling/32-extensiblescheduling.md[placement extensible scheduling enhancement] in the `open-cluster-management` repository to learn more.
