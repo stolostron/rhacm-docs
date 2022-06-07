@@ -918,3 +918,22 @@ View the following restore limitations:
 * The new hub cluster has a different configuration from the active hub cluster when a user reapplies the backup on the new hub cluster. Since there is an existing policy on the hub cluster from a previous restore, it is not restored again. Even when the backup contains the expected updates, the policy contents are not updated by Velero on the new hub cluster. 
 
 To address the previously mentioned limitations, when a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning the hub cluster before Velero restore begins. For more information, see link:../clusters/backup_and_restore.adoc#clean-hub-restore[Clean the hub cluster before restore].
+
+[#submariner-issues]
+== Submariner known issues
+
+[#mtu-issue]
+=== Submariner Globalnet can fail on MTU between on-premises and public clusters
+//2.5:22261
+
+Your Submariner network might fail when connecting an on-premises cluster with a public cluster. This issue is a datapath issue that is related to MTU. To work around this issue, manually add the following rule to the gateway nodes for each remote endpoint:
+
+----
+iptables -t mangle -I POSTROUTING 1  -d <remote-ep-cidr>  -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss <default-iface-mtu-120>
+----
+
+Replace `remote-ep-cidr` with the the CIDR of the endpoint.
+
+Replace `default-iface-mtu-120` with a numeric value that is equal to 120 less than the default interface MTU value. 
+
+Run the `subctl verify` command to confirm that the end-to-end tests pass.
