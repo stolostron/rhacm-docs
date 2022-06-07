@@ -138,11 +138,52 @@ oc label secret <my-secret> -n <hypershift-deployment-namespace> cluster.open-cl
 apiVersion: cluster.open-cluster-management.io/v1alpha1
 kind: HypershiftDeployment
 metadata:
-  name: hypershift-demo
+  name: <cluster>
   namespace: default
 spec:
-  hostingCluster: <hosting-service-cluster> 
-  hostingNamespace: <clusters>  
+  hostingCluster: <hosting-service-cluster>
+  hostingNamespace: clusters
+  hostedClusterSpec:
+    networking:
+      machineCIDR: 10.0.0.0/16    # Default
+      networkType: OpenShiftSDN
+      podCIDR: 10.132.0.0/14      # Default
+      serviceCIDR: 172.31.0.0/16  # Default
+    platform:
+      type: AWS
+    pullSecret:
+      name: <cluster>-pull-secret    # This secret is created by the controller
+    release:
+      image: quay.io/openshift-release-dev/ocp-release:4.10.15-x86_64  # Default
+    services:
+    - service: APIServer
+      servicePublishingStrategy:
+        type: LoadBalancer
+    - service: OAuthServer
+      servicePublishingStrategy:
+        type: Route
+    - service: Konnectivity
+      servicePublishingStrategy:
+        type: Route
+    - service: Ignition
+      servicePublishingStrategy:
+        type: Route
+    sshKey: {}
+  nodePools:
+  - name: <cluster>
+    spec:
+      clusterName: <cluster>
+      management:
+        autoRepair: false
+        replace:
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 0
+          strategy: RollingUpdate
+        upgradeType: Replace
+      release:
+        image: quay.io/openshift-release-dev/ocp-release:4.10.15-x86_64 # Default
+      replicas: 2
   infrastructure:
     cloudProvider:
       name: <my-secret>
@@ -153,8 +194,12 @@ spec:
 ----
 +
 Replace `hosting-service-cluster` with the name of the cluster that hosts the HyperShift operator. 
++
+Replace `cluster` with the name of the cluster. 
++
+Replace `my-secret` with the secret to access your cloud provider. 
 + 
-Replace `clusters` with the namespace to which hosted cluster and node pools belong on the hosting service cluster.
+Replace `region` with the region of your cloud provider.
 
 .. Apply the file by entering the following command:
 +
