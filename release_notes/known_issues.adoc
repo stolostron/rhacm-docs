@@ -161,8 +161,57 @@ By default, Prometheus on OpenShift uses ephemeral storage. Prometheus loses all
 
 When observability is enabled or disabled on {ocp-short} managed clusters that are managed by {product-title-short}, the observability endpoint operator updates the `cluster-monitoring-config` `ConfigMap` by adding additional alertmanager configuration that restarts the local Prometheus automatically. 
 
+[#error-ingesting-out-of-order-samples]
+=== Error ingesting out-of-order samples
+//2.4:15666
+
+Observability `receive` pods report the following error message:
+
+----
+Error on ingesting out-of-order samples
+----
+
+The error message means that the time series data sent by a managed cluster, during a metrics collection interval is older than the time series data it sent in the previous collection interval. When this problem happens, data is discarded by the Thanos receivers and this might create a gap in the data shown in Grafana dashboards. If the error is seen frequently, it is recommended to increase the metrics collection interval to a higher value. For example, you can increase the interval to 60 seconds.
+
+The problem is only noticed when the time series interval is set to a lower value, such as 30 seconds. Note, this problem is not seen when the metrics collection interval is set to the default value of 300 seconds.
+
 [#cluster-management-issues]
 == Cluster management known issues
+
+[#volsync-remove-csv-managed]
+=== Manual removal of the VolSync CSV required on managed cluster when removing the add-on
+//2.5:21356
+
+When you remove the VolSync `ManagedClusterAddOn` from the hub cluster, it removes the VolSync operator subscription on the managed cluster but does not remove the cluster service version (CSV). To remove the CSV from the managed clusters, run the following command on each managed cluster from which you are removing VolSync:
+
+----
+oc delete csv -n openshift-operators volsync-product.v0.4.0
+----
+
+If you have a different version of VolSync installed, replace `v0.4.0` with your installed version. 
+
+[#provision-bare-sushy-tools]
+=== Provisioning a bare metal managed cluster fails when using sushy-tools
+//2.5:22559
+
+When you provision a managed cluster on bare metal with sushy-tools, the provision might fail with a `virtual media cd query return` 500 error. Using sushy-tools is not guaranteed to be reliable for long running clusters. 
+
+Ensure that you have the latest version of sushy-tools, and restart the sushy emulator to work around the issue.
+
+[#disable_prov_network]
+=== Provisioning a bare metal cluster on {ocp-short} 4.10 fails on a dual stack hub
+//2.5:22488
+
+When you provision a bare metal cluster on a dual stack hub that is running {ocp-short} version 4.10, the provision fails with the following error message: 'timeout reached while inspecting the node'. To bypass this issue, disable the provisioning network in your `install-config.yaml` file, as shown in the following example: 
+
+[source,yaml]
+----
+platform:
+  baremetal:
+    provisioningNetwork: "Disabled" 
+----
+
+See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html/installing/deploying-installer-provisioned-clusters-on-bare-metal#modifying-install-config-for-no-provisioning-network_ipi-install-installation-workflow[Deploying with no provisioning network] in the {ocp-short} documentation for more information about the provisioning network.
 
 [#clusterset-label-not-removed]
 === Deleting a managed cluster set does not automatically remove its label
@@ -462,18 +511,19 @@ The search details page for a certain resource on a certain managed cluster migh
 === A manually-created release image is required when creating clusters across architectures
 //2.2.3:14631
 
-To create a managed cluster on a different architecture than the architecture of the hub cluster, you need to create a release image (`ClusterImageSet`) that contains files for both architectures. For example, you need to create a release image if you want to create an `x86_64` cluster from a `ppc64le` or `s390x` hub cluster. If you create the release image with both sets of files, the cluster creation succeeds because the new release image enables the {ocp-short} release registry to provide a multi-architecture image manifest. 
+To create a managed cluster on a different architecture than the architecture of the hub cluster, you need to create a release image (`ClusterImageSet`) that contains files for both architectures. For example, you need to create a release image if you want to create an `x86_64` cluster from a `ppc64le`, `aarch64`, or `s390x` hub cluster. If you create the release image with both sets of files, the cluster creation succeeds because the new release image enables the {ocp-short} release registry to provide a multi-architecture image manifest. 
 
 To work around this issue, complete steps similar to the following example for your architecture type:
 
-. From the https://quay.io/repository/openshift-release-dev/ocp-release[{ocp-short} release registry], create a https://docs.docker.com/registry/spec/manifest-v2-2/[manifest list] that includes `x86_64`, `s390x` and `ppc64le` release images.
+. From the https://quay.io/repository/openshift-release-dev/ocp-release[{ocp-short} release registry], create a https://docs.docker.com/registry/spec/manifest-v2-2/[manifest list] that includes `x86_64`, `s390x`, `aarch64`, and `ppc64le` release images.
 
-.. Pull the manifest lists for both architectures in your environment from the Quay repository:
+.. Pull the manifest lists for both architectures in your environment from the https://quay.io/repository/openshift-release-dev/ocp-release?tab=tags[Quay repository] using the following example commands:
 +
 ----
-$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.1-x86_64
-$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.1-ppc64le
-$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.1-s390x
+$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.36-x86_64
+$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.36-ppc64le
+$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.36-s390x
+$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.36-aarch64
 ----
 
 .. Log in to your private repository where you maintain your images:
@@ -487,9 +537,10 @@ Replace `private-repo` with the path to your repository.
 .. Add the release image manifest to your private repository by running the following commands that apply to your environment:
 +
 ----
-$ podman push quay.io/openshift-release-dev/ocp-release:4.9.1-x86_64 <private-repo>/ocp-release:4.9.1-x86_64
-$ podman push quay.io/openshift-release-dev/ocp-release:4.9.1-ppc64le <private-repo>/ocp-release:4.9.1-ppc64le
-$ podman push quay.io/openshift-release-dev/ocp-release:4.9.1-s390x <private-repo>/ocp-release:4.9.1-s390x
+$ podman push quay.io/openshift-release-dev/ocp-release:4.9.36-x86_64 <private-repo>/ocp-release:4.9.36-x86_64
+$ podman push quay.io/openshift-release-dev/ocp-release:4.9.36-ppc64le <private-repo>/ocp-release:4.9.36-ppc64le
+$ podman push quay.io/openshift-release-dev/ocp-release:4.9.36-s390x <private-repo>/ocp-release:4.9.36-s390x
+$ podman push quay.io/openshift-release-dev/ocp-release:4.9.36-aarch64 <private-repo>/ocp-release:4.9.36-aarch64
 ----
 +
 Replace `private-repo` with the path to your repository.
@@ -503,9 +554,10 @@ $ podman manifest create mymanifest
 .. Add references to both release images to the manifest list:
 +
 ----
-$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.1-x86_64
-$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.1-ppc64le
-$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.1-s390x
+$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.36-x86_64
+$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.36-ppc64le
+$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.36-s390x
+$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.36-aarch64
 ----
 +
 Replace `private-repo` with the path to your repository.
@@ -513,7 +565,7 @@ Replace `private-repo` with the path to your repository.
 .. Merge the list in your manifest list with the existing manifest:
 +
 ----
-$ podman manifest push mymanifest docker://<private-repo>/ocp-release:4.9.1
+$ podman manifest push mymanifest docker://<private-repo>/ocp-release:4.9.36
 ----
 +
 Replace `private-repo` with the path to your repository.
@@ -530,9 +582,9 @@ metadata:
   labels:
     channel: fast
     visible: "true"
-  name: img4.9.1-appsub
+  name: img4.9.36-appsub
 spec:
-  releaseImage: <private-repo>/ocp-release:4.9.1
+  releaseImage: <private-repo>/ocp-release:4.9.36
 ----
 +
 Replace `private-repo` with the path to your repository.
@@ -546,6 +598,8 @@ oc apply -f <file-name>.yaml
 Replace `file-name` with the name of the `YAML` file that you just created. 
 
 . Select the new release image when you create your {ocp-short} cluster. 
+
+. If you deploy the managed cluster using the {product-title-short} console, specify the architecture for the managed cluster in the _Architecture_ field during the cluster creation process.
 
 The creation process uses the merged release images to create the cluster.  
 
@@ -579,6 +633,16 @@ For more information about the `LoadBalancer` types, see the _Service_ page in t
 
 [#application-management-known-issues]
 == Application management known issues
+
+[#application-topology-displays-wrong-application]
+=== Application topology displays wrong application 
+//2.5.0: 22677
+
+The Application topology displays the wrong application if `ApplicationSets` with the same name are created in different Gitops instances.
+If you have multiple Gitops instances installed, you will have ApplicationSets with the same name in each Gitops instance and the topology for the `ApplicationSets`` will not display correctly. This is due to the topology not differentiating the namespace for the `ApplicationSets` that are created.
+
+Be sure to create `ApplicationSets` with different names in each of the Gitops instances to display the topology correctly.
+
 
 [#policy-needs-subscription-admin]
 === Policy resource not deployed unless by subscription administrator
@@ -811,6 +875,14 @@ When you install the gatekeeper operator on {ocp} version 4.9, the installation 
 //2.2:20715
 
 When you have a configuration policy that is configured with `mustnothave` for the `complianceType` parameter and `enforce` for the `remediationAction` parameter, the policy is listed as compliant after a deletion request is made to the Kubernetes API. Therefore, the Kubernetes object can be stuck in a `Terminating` state while the policy is listed as compliant.
+
+[#operators-deployed-with-policies]
+=== Operators deployed with policies do not support ARM
+
+While installation into an ARM environment is supported, operators that are deployed with policies might not support ARM environments. The following policies that install operators do not support ARM environments:
+
+* link:https://github.com/stolostron/policy-collection/blob/main/stable/SI-System-and-Information-Integrity/policy-imagemanifestvuln.yaml[{product-title-short} policy for the Quay Container Security Operator]
+* link:https://github.com/stolostron/policy-collection/blob/main/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[{product-title-short} policy for the Compliance Operator] 
 
 [#backup-known-issues]
 == Backup and restore known issues

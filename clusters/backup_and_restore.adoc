@@ -19,6 +19,7 @@ For a list of supported storage providers for Velero, see https://velero.io/docs
 
 * <<prerequisites-backup-restore,Prerequisites>>
 * <<backup-restore-architecture,Backup and restore operator architecture>>
+** <<resource-requests-and-limits,Resource requests and limits customization>>
 ** <<schedule-backup,Schedule a cluster backup>>
 * <<restore-backup,Restore a backup>>
 ** <<prepare-new-hub,Prepare the new hub cluster>>
@@ -88,6 +89,61 @@ The operator defines the `backupSchedule.cluster.open-cluster-management.io` res
 image:../images/cluster_backup_controller_dataflow25.png[Backup and restore architecture diagram] 
 
 
+[#resource-requests-and-limits]
+=== Resource requests and limits customization
+
+When Velero is initially installed, Velero pod is set to the default CPU and memory limits as defined in the following sample:
+
+[source,yaml]
+----
+resources:
+ limits:
+   cpu: "1"
+   memory: 256Mi
+ requests:
+   cpu: 500m
+   memory: 128Mi
+----
+
+The limits from the previous sample work well with some scenarios, but might need to be updated when your cluster backs up a large number of resources. For instance, when back up is run on a hub cluster that manages 2000 clusters, then the Velero pod crashes due to the out-of-memory error (OOM). The following configuration allows for the backup to complete for this scenario:
+
+[source,yaml]
+----
+  limits:
+    cpu: "2"
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 256Mi
+----
+
+To update the limits and requests for the Velero pod resource, you need to update the `DataProtectionApplication` resource and insert the `resourceAllocation` template for the Velero pod. View the following sample:
+
+[source,yaml]
+----
+apiVersion: oadp.openshift.io/v1alpha1
+kind: DataProtectionApplication
+metadata:
+  name: velero
+  namespace: open-cluster-management-backup
+spec:
+...
+  configuration:
+...
+    velero:
+      podConfig:
+        resourceAllocations:
+          limits:
+            cpu: "2"
+            memory: 1Gi
+          requests:
+            cpu: 500m
+            memory: 256Mi
+----
+
+Refer to the link:https://github.com/openshift/oadp-operator/blob/master/docs/config/resource_req_limits.md[Velero resource requests and limits customization] to find out more about the `DataProtectionApplication` parameters.
+
+
 [#schedule-backup]
 === Schedule a cluster backup
 
@@ -120,7 +176,7 @@ Resources are separately backed up in the following groups:
 
 * _Credential backup_, which contains three backup files for Hive, {product-title-short}, and user-created credentials.
 * _Resource backup_, which contains one backup for the {product-title-short} resources and one for generic resources. These resources use the following label, `cluster.open-cluster-management.io/backup`.
-* _Managed clusters backup_, which contains only resources that activte the managed cluster connection to the hub cluster, where the backup is restored.
+* _Managed clusters backup_, which contains only resources that activate the managed cluster connection to the hub cluster, where the backup is restored.
 
 *Note*: The _resource backup_ file contains managed cluster-specific resources, but does not contain the subset of resources that connect managed clusters to the hub cluster. The resources that connect managed clusters are also called activation resources and are contained in the managed clusters backup. When you restore backups only for the _credentials_ and _resource_ backup on a new hub cluster, the new hub cluster shows all managed clusters in a detached state. The managed clusters are still connected to the original hub cluster that created the backup files.
 
