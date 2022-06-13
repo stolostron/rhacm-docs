@@ -937,4 +937,20 @@ To address the previously mentioned limitations, when a `restore.cluster.open-cl
 [#submariner-no-rhel]
 === Submariner currently does not support Red Hat Enterprise Linux nodes as worker nodes.
 
-When deploying Submariner on a cluster that includes Red Hat Enterprise Linux worker nodes, application work-loads fail to communicate with remote clusters. Submariner only supports {ocp-short} clusters that use Red Hat Enterprise Linux CoreOS nodes.
+When deploying Submariner on a cluster that includes Red Hat Enterprise Linux worker nodes, application workloads fail to communicate with remote clusters. Submariner only supports {ocp-short} clusters that use Red Hat Enterprise Linux CoreOS nodes.
+
+[#mtu-issue]
+=== Connectivity issues caused by an MTU mismatch when using Submariner Globalnet on managed clusters across on-premises and public clouds
+//2.5:22261
+
+Your Submariner network might fail when connecting an on-premises cluster with a public cluster. This issue is a datapath issue that is related to MTU. To work around this issue, manually add the following rule to the gateway nodes for each remote endpoint:
+
+----
+iptables -t mangle -I POSTROUTING 1  -d <remote-ep-cidr>  -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss <default_Interface_MTU-120>
+----
+
+Replace `remote-ep-cidr` with the the global CIDR of the remote endpoint.
+
+Replace `default_Interface_MTU-120` with a numeric value that is equal to 120 less than the default interface MTU value. 
+
+Run the `subctl verify` command to confirm that the end-to-end tests pass.
