@@ -8,132 +8,57 @@ Before you deploy Submariner with {product-title}, you must manually prepare the
 
 To prepare the clusters on your Microsoft Azure for deploying the Submariner component, complete the following steps:
 
-. Create the inbound and outbound firewall rules on your Microsoft Azure environment to open the IP security NAT traversal ports (by default 4500/UDP) to enable Submariner communication:
+. Tag a node as a gateway node.
 +
 ----
-# Create inbound NAT rule
-$ az network lb inbound-nat-rule create --lb-name <lb-name> \
---resource-group <res-group> \
---name <name> \
---protocol Udp --frontend-port <ipsec-port> \
---backend-port <ipsec-port> \
---frontend-ip-name <frontend-ip-name>
+kubectl label nodes <worker-node-name> "submariner.io/gateway=true" --overwrite
+----
++
+. Create a public IP and assign it to the VM of the node that was tagged as gateway node, where the <gw-vm-nic> is the interface address and res-group is the resource group of the cluster.
++
+----
+az network public-ip create --name <public-ip-name> --resource-group <res-group>
+az network nic ip-config update --name <name>  --nic-name <gw-vm-nic> --resource-group <res-group>  --public-ip-address <public-ip-name>
+----
++
+. Create a network security group for submariner gateway
++
+----
+az network nsg create --name <gw-nsg-name> --resource-group <res-group>
+----
++
+. Create network security groups rules on your Azure to open  Tunnel port(by default 4500/UDP), NAT discovery port (by default 4490/UDP) and metrics port (by default 8080/TCP and 8081/TCP) for Submariner. This needs to be created in both inbound and outbound directions for each of the ports.
++
+----
+az network nsg rule create --resource-group <res-group> \
+--nsg-name <gw-nsg-name> --priority <priority> \
+--name <name> --direction Inbound --access Allow \
+--protocol <Protocol> --destination-port-ranges <port>
 
-# Add VM network interface to the just-created inbound NAT rule
-$ az network nic ip-config inbound-nat-rule add \
---lb-name <lb-name> --resource-group <res-group> \
---inbound-nat-rule <nat-name> \
---nic-name <nic-name> --ip-config-name <pipConfig>
+az network nsg rule create --resource-group <res-group> \
+--nsg-name <gw-nsg-name> --priority <priority> \
+--name <name> --direction Outbound --access Allow \
+--protocol <Protocol> --destination-port-ranges <port>
 ----
 +
-Replace `lb-name` with your load balancer name.
-+
-Replace `res-group` with your resource group name.
-+
-Replace `nat-name` with your load balancing inbound NAT rule name.
-+
-Replace `ipsec-port` with your IPsec port.
-+
-Replace `pipConfig` with your cluster frontend IP configuration name.
-+
-Replace `nic-name` with your network interface card (NIC) name.
-
-. Create one load balancing inbound NAT rules to forward Submariner gateway metrics service request:
+. Attach the security group to the gateway VM interface
 +
 ----
-# Create inbound NAT rule
-$ az network lb inbound-nat-rule create --lb-name <lb-name> \
---resource-group <res-group> \
---name <name> \
---protocol Tcp --frontend-port 8080 --backend-port 8080 \
---frontend-ip-name <frontend-ip-name>
-
-# Add VM network interface to the just-created inbound NAT rule
-$ az network nic ip-config inbound-nat-rule add \
---lb-name <lb-name> --resource-group <res-group> \
---inbound-nat-rule <nat-name> \
---nic-name <nic-name> --ip-config-name <pipConfig>
+az network nic update -g <res-group> -n <gw-vm-nic>  --network-security-group <gw-nsg-name>
 ----
 +
-Replace `lb-name` with your load balancer name.
-+
-Replace `res-group` with your resource group name.
-+
-Replace `nat-name` with your load balancing inbound NAT rule name.
-+
-Replace `pipConfig` with your cluster frontend IP configuration name.
-+
-Replace `nic-name` with your network interface card (NIC) name.
-
-. Create network security groups (NSG) security rules on your Azure to open a NAT traversal port (by default 4500/UDP) for Submariner:
-+
+. Create network security groups rules on your Azure to open VXLAN port (by default 4800/UDP) on the existing security groups(<resource-group-name>-nsg by default) that is associated with the worker and the master
 ----
-$ az network nsg rule create --resource-group <res-group> \
+az network nsg rule create --resource-group <res-group> \
 --nsg-name <nsg-name> --priority <priority> \
 --name <name> --direction Inbound --access Allow \
---protocol Udp --destination-port-ranges <ipsec-port>
+--protocol udp --destination-port-ranges <vxlan-port>
 
-$ az network nsg rule create --resource-group <res-group> \
+az network nsg rule create --resource-group <res-group> \
 --nsg-name <nsg-name> --priority <priority> \
 --name <name> --direction Outbound --access Allow \
---protocol Udp --destination-port-ranges <ipsec-port>
+--protocol udp --destination-port-ranges <vxlan-port>
 ----
-+
-Replace `res-group` with your resource group name.
-+
-Replace `nsg-name` with your NSG name.
-+
-Replace `priority` with your rule priority.
-+
-Replace `name` with your rule name.
-+
-Replace `ipsec-port` with your IPsec port.
-
-. Create the NSG rules to open 4800/UDP port to encapsulate pod traffic from the worker and master nodes to the Submariner Gateway nodes:
-+
-----
-$ az network nsg rule create --resource-group <res-group> \
---nsg-name <nsg-name> --priority <priority> \
---name <name> --direction Inbound --access Allow \
---protocol Udp --destination-port-ranges 4800 \
-
-$ az network nsg rule create --resource-group <res-group> \
---nsg-name <nsg-name> --priority <priority> \
---name <name> --direction Outbound --access Allow \
---protocol Udp --destination-port-ranges 4800
-----
-+
-Replace `res-group` with your resource group name.
-+
-Replace `nsg-name` with your NSG name.
-+
-Replace `priority` with your rule priority.
-+
-Replace `name` with your rule name.
-
-. Create the NSG rules to open 8080/TCP port to export metrics service from the Submariner Gateway nodes:
-+
-----
-$ az network nsg rule create --resource-group <res-group> \
---nsg-name <nsg-name> --priority <priority> \
---name <name> --direction Inbound --access Allow \
---protocol Tcp --destination-port-ranges 8080 \
-
-$ az network nsg rule create --resource-group <res-group> \
---nsg-name <nsg-name> --priority <priority> \
---name <name> --direction Outbound --access Allow \
---protocol Udp --destination-port-ranges 8080
-----
-+
-Replace `res-group` with your resource group name.
-+
-Replace `nsg-name` with your NSG name.
-+
-Replace `priority` with your rule priority.
-+
-Replace `name` with your rule name.
-
-. Label a worker node in the cluster with the following label: `submariner.io/gateway=true`.
 
 [#preparing-ibm]
 == Preparing IBM Cloud for Submariner
