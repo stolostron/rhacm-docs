@@ -1,12 +1,9 @@
 [#remove-managed-cluster]
 = Removing a cluster from management
 
-When you remove an {ocp-short} cluster from management that was created with {product-title}, you can either _detach_ it or _destroy_ it.
+When you remove an {ocp-short} cluster from management that was created with {product-title}, you can either _detach_ it or _destroy_ it. Detaching a cluster removes it from management, but does not completely delete it. You can import it again if you want to manage it. This is only an option when the cluster is in a _Ready_ state.
 
-Detaching a cluster removes it from management, but does not completely delete it. You can import it again if you want to manage it.
-This is only an option when the cluster is in a _Ready_ state.
-
-These procedures remove a cluster from management in either of the following situations:
+The following procedures remove a cluster from management in either of the following situations:
 
 * You already deleted the cluster and want to remove the deleted cluster from {product-title-short}.
 * You want to remove the cluster from management, but have not deleted the cluster.
@@ -23,14 +20,15 @@ These procedures remove a cluster from management in either of the following sit
 
 [#remove-a-cluster-by-using-the-console]
 == Remove a cluster by using the console
-//easy UI step removal here
 
-. From the navigation menu, navigate to *Infrastructure* > *Clusters*.
-. Select *Destroy cluster* or *Detach cluster* from the options menu beside the cluster that you want to remove from management.
+
+From the navigation menu, navigate to *Infrastructure* > *Clusters* and select *Destroy cluster* or *Detach cluster* from the options menu beside the cluster that you want to remove from management.
 +
 *Tip:* You can detach or destroy multiple clusters by selecting the check boxes of the clusters that you want to detach or destroy and selecting *Detach* or *Destroy*.
 
-*Note:* If you attempt to detach the hub cluster while it is managed, which is called a `local-cluster`, check to see if the default setting of `disableHubSelfManagement` is `false`. This setting causes the hub cluster to reimport itself and manage itself when it is detached, and it reconciles the `MultiClusterHub` controller. It might take hours for the hub cluster to complete the detachment process and reimport. If you want to reimport the hub cluster without waiting for the processes to finish, you can enter the following command to restart the `multiclusterhub-operator` pod and reimport faster:
+*Note:* If you attempt to detach the hub cluster while it is managed, which is called a `local-cluster`, check to see if the default setting of `disableHubSelfManagement` is `false`. This setting causes the hub cluster to reimport itself and manage itself when it is detached, and it reconciles the `MultiClusterHub` controller. It might take hours for the hub cluster to complete the detachment process and reimport. 
+
+To reimport the hub cluster without waiting for the processes to finish, you can enter the following command to restart the `multiclusterhub-operator` pod and reimport faster:
 
 ----
 oc delete po -n open-cluster-management `oc get pod -n open-cluster-management | grep multiclusterhub-operator| cut -d' ' -f1`
@@ -80,11 +78,13 @@ open-cluster-management-agent         Active   10m
 open-cluster-management-agent-addon   Active   10m
 ----
 
-. Download the https://github.com/stolostron/deploy/blob/master/hack/cleanup-managed-cluster.sh[`cleanup-managed-cluster`] script from the `deploy` Git repository.
-. Run the `cleanup-managed-cluster.sh` script by entering the following command:
+. Run the following command to removed the remaining resources:
+
 +
 ----
-./cleanup-managed-cluster.sh
+oc delete namespaces open-cluster-management-agent open-cluster-management-agent-addon --wait=false
+oc get crds | grep open-cluster-management.io | awk '{print $1}' | xargs oc delete crds --wait=false
+oc get crds | grep open-cluster-management.io | awk '{print $1}' | xargs oc patch crds --type=merge -p '{"metadata":{"finalizers": []}}'
 ----
 . Run the following command to ensure that both namespaces are removed: 
 +
