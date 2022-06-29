@@ -13,7 +13,7 @@ The lead is the primary board focal because the lead needs to know the team's co
   - Issues need to be labeled properly (dev squad label if it is release work, requires dev team validations, or is a cross squad issue).
   - Officially ask for more information if it is needed (use comments to track the discussion).
   - If there is not sufficient info, label `doc-awaiting-input` and keep in untriaged.
-  - If it is ready with adequate info, label `doc-input-provided` and move the appropriate column.
+  - If it is ready with adequate info, label `doc-input-provided` and move to the appropriate column.
   - DDF is assigned to one person automatically, leave untriaged until acknowledged by a focal. (Would like this to change if possible--bcs)
   
 # Existing issues:
