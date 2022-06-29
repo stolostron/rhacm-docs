@@ -8,7 +8,7 @@ This is not designed to teach you GitHub. Learning GitHub and Git comes with tim
 
 ID teams and Dev teams alike have increased efficiency and collaboration with GitHub/Git and Markdown. Early ICP ID team members learned Git via CLI, as the instructions display, but there is also a desktop client with sufficient documentation for others who do not use the CLI.
 
-**Prerequisite: All onboarding members should review the DE's Playbook, which is required also for developers. Here you will find many resources and guidelines already published about learning GitHub, Agile practices, Slack, and more. Much of these processes, like linking issues to PRs, apply to the ID team, as well.
+**Prerequisite:** All onboarding members should review the DE's Playbook, which is required also for developers. Here you will find many resources and guidelines already published about learning GitHub, Agile practices, Slack, and more. Much of these processes, like linking issues to PRs, apply to the ID team, as well.
 
 
  - [Things to remember](#remember)
