@@ -40,6 +40,8 @@ These are the final copies, and your branch off of those branches is your worksp
 For example, if I want to work on 1.2, I need to check out `1.2_prod`, run `git pull` to get the latest changes that were committed by the team, then checkout my own branch from prod. If you do not run `git pull` before you check out your branch, you don't have the most recent copy of the branch.
   
 **Pull request:** Since you opened your own branch, `<my-branch>`, against the production branch, you must create a pull request to get your changes into the main branch `<_stage>`. (Really, think of it as a PUSH request.)
+
+New users must first receive permission to write from an admin in order to use pull requests.
   
 **Commit:** Used as a verb, or noun. When you check in your changes, you are "committing" to your branch. A "commit" is your change. Think: Checking in code.
   
