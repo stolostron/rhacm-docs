@@ -13,8 +13,8 @@ The lead is the primary board focal because the lead needs to know the team's co
   - Issues need to be labeled properly (dev squad label if it is release work, requires dev team validations, or is a cross squad issue).
   - Officially ask for more information if it is needed (use comments to track the discussion).
   - If there is not sufficient info, label `doc-awaiting-input` and keep in untriaged.
-  - If it is ready with adequate info, label `doc-input-provided` and move the the appropriate column.
-  - DDF is assigned to one person automatically, leave untriaged until acknowledged by a focal. (Would like this to xhange if possible--bcs)
+  - If it is ready with adequate info, label `doc-input-provided` and move the appropriate column.
+  - DDF is assigned to one person automatically, leave untriaged until acknowledged by a focal. (Would like this to change if possible--bcs)
   
 # Existing issues:
 
@@ -41,7 +41,7 @@ The lead is the primary board focal because the lead needs to know the team's co
 
 # Sprints
 
-  - To avoid all doc work going into one release and not spread out across sprints, use sprints for release work that is tied to a dev issue.
+  - To avoid all doc work going into one release and not spread out across sprints, use sprints for release work that is related to a dev issue.
   - Use refresh release labels for valid refresh changes.
   - Blogs can go into a sprint milestone. Please also label `blog`.
   - DDF items are often requests from Red Hatters for enhancements to the product. These are treated as RFEs via the Jira process. Comment and close unless doc changes are required. 
