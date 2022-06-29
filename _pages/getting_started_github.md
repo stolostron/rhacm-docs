@@ -142,7 +142,7 @@ Git is actually the term related to the Git CLI. See [Here are all the Git comma
  
 8. Next, you need to [Create a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request) to get your changes into the final staging branch. 
 
-From your branch, you want to "PR" into the staging branch that you branched from. Creating the PR is fairly intuitive. Additionally, this is where you ask for peer reviewers and developer reviewers to approve your content before you merge.
+From your branch, you want to "PR" in to the staging branch that you branched from. Creating the PR is fairly intuitive. Additionally, this is where you ask for peer reviewers and developer reviewers to approve your content before you merge.
 
 ## Other resources
 
