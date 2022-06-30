@@ -4,6 +4,7 @@ title: "Learn GitHub: Tips and resources"
 ---
 
 # Learn GitHub: Tips and resources
+
 This is not designed to teach you GitHub. Learning GitHub and Git comes with time, practice, and curiosity, just like learning any other tool. If you are coming from an old tool, some of the terms may be unfamiliar, so we listed a few. Learn more from [Git docs](https://git-scm.com/).
 
 ID teams and Dev teams alike have increased efficiency and collaboration with GitHub/Git and Markdown. Early ICP ID team members learned Git via CLI, as the instructions display, but there is also a desktop client with sufficient documentation for others who do not use the CLI.
@@ -41,7 +42,7 @@ For example, if I want to work on 1.2, I need to check out `1.2_prod`, run `git 
   
 **Pull request:** Since you opened your own branch, `<my-branch>`, against the production branch, you must create a pull request to get your changes into the main branch `<_stage>`. (Really, think of it as a PUSH request.)
 
-New users must first receive permission to write from an admin in order to use pull requests.
+As a new user, you need to receive permission to `write`. See an admin for access to edit and create pull requests.
   
 **Commit:** Used as a verb, or noun. When you check in your changes, you are "committing" to your branch. A "commit" is your change. Think: Checking in code.
   
