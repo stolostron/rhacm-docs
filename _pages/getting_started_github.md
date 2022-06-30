@@ -147,6 +147,52 @@ Git is actually the term related to the Git CLI. See [Here are all the Git comma
 
 From your branch, you want to "PR" into the staging branch that you branched from. Creating the PR is fairly intuitive. Additionally, this is where you ask for peer reviewers and developer reviewers to approve your content before you merge.
 
+## Got git problems after a reimage or new repo?
+
+Read about SSH:
+https://help.github.com/en/github/authenticating-to-github/about-ssh
+
+Basic steps:
+
+1. Open terminal
+2. Check for and/or add your SSH, see links
+3. Copy into the browser where you add a key
+4. Clone the repo using Clone with SSH; you may need XCode (see prompt)
+
+Tips:
+
+If you are heading to a new Mac, you can show your hidden folders and use Air drop to get your git config files on your new Mac. If you are successful here, you can get to work very quickly bc your config files will be in the same directory on your new machine.
+
+Even if you have old rsa files that you move to the same directory, you may need to set up new ssh or chmod 600 your current. (With airdrop, I didn’t have to redo this.)
+
+Example: chmod 600 ~/.ssh/id_rsa  
+
+**Note:** You must also run chmod 600 ~/.ssh/id_rsa.pub  
+
+If you set up new SSH, you may want to remove old files on your mac, run: rm  ~/.ssh/id_rsa*   
+
+1. To set up new, follow https://help.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys
+
+2. Check, then add in the command line, then pb copy into the browser:
+
+https://help.github.com/en/github/authenticating-to-github/adding-a-new-ssh-key-to-your-github-account
+
+3. Run to test: 
+   ```
+   ssh -T git@github.com
+   ```
+  {: codeblock}
+
+You want “Hi bcpswope!”
+
+You should get an email. If you still cannot push a new branch or run git pull, see this process:
+
+https://help.github.com/en/github/using-git/changing-a-remotes-url
+
+If nothing is working, try reclone with SSH. 
+
+Get rid of your local cloned folder and reclone with your new SSH.
+
 ## Other resources
 
 We gathered some resources, but this is not a complete list of all that can help you learn new tools and processes:
