@@ -3,4 +3,4 @@ permalink: /blogging_main
 title: "Blogging"
 ---
 
-Add content
+Add content when available
