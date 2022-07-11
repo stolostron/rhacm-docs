@@ -9,31 +9,13 @@ Our diagrams are somewhat standardized on the Customer Portal. There is a graphi
 
 Diagrams: Adobe Illustrator 
 
-## Screenshots
-
-### When to use screenshots
-
-Add content
-
-### Standards for creating screenshots
-
-Add content (size, filetype, naming convention)
-
 ## Diagrams
-
-### When to use diagrams
-
-Diagrams include flow charts, and artwork that use shapes and objects to show relationships and transfer of information.
 
 ### Requesting a diagram
 
-1. Submit a request for a diagram at the following link: https://docs.google.com/forms/d/e/1FAIpQLSdF8V0n3E-aAfRen8vZchXCxwA0iDTd0QYyASnutznfGLATvA/viewform.
+Submit a [Technical Diagram Request Form](https://docs.google.com/forms/d/e/1FAIpQLSdF8V0n3E-aAfRen8vZchXCxwA0iDTd0QYyASnutznfGLATvA/viewform) for a diagram.
 
-2. Generally, allow about 4 days for a single diagram. If you submit a few, it will likely take more time.
-
-3. Review the artwork and provide comments. They can also work with an SME, when needed. 
-
-4. When they complete your artwork, the design team will send you a final copy of the diagram in PNG format for you to add to our *images* folder.
+Based on the form, expect to receive confirmation of your request within 1-2 days. Otherwise, allow about 4 days for a single diagram. If you submit a few, it will likely take more time. Review the artwork and provide comments (usually through email. They can also work with an SME, when needed. When they complete your artwork, the design team will send you a final copy of the diagram in PNG format for you to add to our *images* folder.
 
 The design team will keep the source file so they can use it for any updates. 
 
@@ -42,20 +24,19 @@ The design team will keep the source file so they can use it for any updates.
 - Generally use blue colors (not red)
 - Sentence-style capitalization
 
-### Standard components and usage
+### How to add images to the rhacm-docs repository
 
-Add content
+1. After you recieve the link from the designer, download the image locally.
+2. From Visual Studio Code (VSC), create a new branch.
+3. If you are using MacOS, use the Finder application to view the new downloaded file.
+4. Click, hold the file and drag it to VSC. Be sure to add the image into the `images` folder.
 
-### Sample diagrams
+### When to use diagrams
 
-Add links, examples
+Diagrams include flow charts, and artwork that use shapes and objects to show relationships and transfer of information. To add a diagram into the product documentation, use similar syntax that you use for linking. For example, reference the Governance architecture diagram with following syntax:
 
-## SVG images
+```
+image:../images/governance_arch_2.4.png[Governance architecture diagram]
+```
 
-### When to use SVG images
 
-Add content
-
-### Standards for creating SVG images
-
-Add content
