@@ -1,28 +1,56 @@
-[#hypershift-configure]
+[#hosted-control-plane-configure]
 = Configuring hosted control planes
 
-You can deploy hosted control planes by converting an existing cluster to a hosting service cluster and then deploying a cluster that is managed by the HyperShift hosting service cluster that you converted. 
+Hosted control planes is a Technology Preview feature, so the related components are disabled by default. Enable the feature by editing the `multiclusterengine` custom resource to set the `spec.overrides.components[?(@.name=='hypershift-preview')].enabled` to `true`. 
 
-*Important:* Because hosted control planes is a Technology Preview feature, the related components are disabled by default. Enable the feature by editing the `multiclusterengine` custom resource to set the `spec.overrides.components[?(@.name=='hypershift-preview')].enabled` to `true`. 
-
-Enter the following command to verify that the hosted control planes feature is enabled:
+Enter the following command to ensure that the hosted control planes feature is enabled:
 
 ----
-oc get mce multiclusterengine-sample -ojsonpath="{.spec.overrides.components[?(@.name=='hypershift-preview')].enabled}"
-true
+oc patch mce multiclusterengine-sample--type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift-preview","enabled": true}]}}}'
 ----
 
-[#hypershift-convert-mgt-cluster]
-== Converting an existing cluster to a hosting service cluster
+[#hosting-service-cluster-configure]
+== Using an existing cluster as a hosting service cluster
 
-[#hypershift-convert-mgt-cluster-prereq]
+You can deploy hosted control planes by configuring an existing cluster to function as a hosting service cluster, and then deploying a cluster that is managed by the HyperShift hosting service cluster that you enabled as the hosting service cluster. The hosting service cluster is the {ocp-short} cluster where the control planes are hosted, and can be the hub cluster or one of the {ocp-short} managed clusters.
+
+[#hosting-service-cluster-configure-prereq]
 === Prerequisites
 
-You must have the multicluster engine operator installed on at least one cluster that is managed by {ocp}. The multicluster engine operator is automatically installed when you install {product-title-short} version 2.5, and later.
+You must have the following prerequisites to configure a hosting service cluster: 
 
-*Note:* If you want your {product-title-short} hub cluster to be your hosted control planes hosting service cluster, you can configure `local-cluster` as your hosting service cluster. A hub cluster that is also managed by itself is designated as `local-cluster` in the list of clusters. 
+* Multicluster engine operator installed on at least one cluster that is managed by {ocp}. The multicluster engine operator is automatically installed when you install {product-title-short} version 2.5, and later, and can also be installed without {product-title-short} as an operator from the {ocp-short} OperatorHub.
 
-Complete the following steps to convert an {ocp-short} managed cluster to a hosting service cluster:
+* If you want your {product-title-short} hub cluster to be your hosting service cluster, you must configure `local-cluster` as your hosting service cluster by completing the following steps:
++
+. Create a YAML file named `import-hub.yaml` that is similar to the following example: 
++
+----
+[source,yaml]
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  labels:
+    local-cluster: "true"
+  name: local-cluster
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+----
++
+. Apply the file by entering:
++
+----
+oc apply -f import-hub.yaml
+----
+
++
+A hub cluster that is also managed by itself is designated as `local-cluster` in the list of clusters. 
+
+[#hosting-service-cluster]
+== Configuring the hosting service cluster
+
+Complete the following steps on the cluster where the multicluster engine operator is installed to enable an {ocp-short} managed cluster as a hosting service cluster:
 
 . Install the HyperShift add-on.
 +
@@ -36,12 +64,12 @@ apiVersion: addon.open-cluster-management.io/v1alpha1
 kind: ManagedClusterAddOn
 metadata:
   name: hypershift-addon
-  namespace: <hypershift-hosting-service-cluster> 
+  namespace: <managed-cluster-name> 
 spec:
   installNamespace: open-cluster-management-agent-addon
 ----
 +
-Replace `hypershift-hosting-service-cluster` with the name of the managed cluster on which you want to install the HyperShift operator.
+Replace `managed-cluster-name` with the name of the managed cluster on which you want to install the HyperShift operator. If you are installing on the {product-title-short} hub cluster, then use `local-cluster` for this value.
 
 .. Apply the file by running the following command:
 +
@@ -51,7 +79,7 @@ oc apply -f <filename>
 +
 Replace `filename` with the name of the file that you created. 
 
-. Create an OIDC s3 credentials secret file named `hypershift-operator-oidc-provider-s3-credentials` for the HyperShift operator. Create the secret in the same namespace where your `hypershift-hosting-service-cluster` is hosted. 
+. Because hosted control planes is a Technology Preview feature only on AWS, create an OIDC S3 credentials secret named `hypershift-operator-oidc-provider-s3-credentials` for the HyperShift operator. Save the secret in the managed cluster namespace, which is the namespace of the managed cluster that is used as the hosting service cluster. If you used `local-cluster`, then create the secret in the `local-cluster` namespace
 +
 The secret must contain 3 fields:
 +
@@ -69,7 +97,7 @@ oc create secret generic hypershift-operator-oidc-provider-s3-credentials --from
 
 +
 *Note:* Disaster recovery backup for the secret is not automatically enabled. Run the following command to add the label that enables the `hypershift-operator-oidc-provider-s3-credentials` secret to be backed up for disaster recovery:
-
++
 ----
 oc label secret hypershift-operator-oidc-provider-s3-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
 ----
@@ -89,10 +117,10 @@ hypershift-addon   True
 
 Your HyperShift add-on is installed and the hosting service cluster is available to managed HyperShift clusters.
 
-[#hypershift-deploy-cluster]
-== Deploying a HyperShift managed cluster
+[#hosted-deploy-cluster]
+== Deploying a hosted cluster
 
-After installing the HyperShift operator and converting an existing cluster into a hosting service cluster, you can provision a HyperShift hosted cluster by creating a `HypershiftDeployment` custom resource. 
+After installing the HyperShift operator and enabling an existing cluster as a hosting service cluster, you can provision a HyperShift hosted cluster by creating a `HypershiftDeployment` custom resource. 
 
 . Create a cloud provider secret as a credential using the console or a file addition. You must have permissions to create infrastructure resources for your cluster, like VPCs, subnets, and NAT gateways,. The account also must correspond to the account for your guest cluster, where your workers live. See https://hypershift-docs.netlify.app/how-to/aws/create-infra-iam-separately/[Create AWS infrastructure and IAM resources separately] in the HyperShift documentation for more information about the required permissions.
 +
@@ -120,10 +148,11 @@ stringData:
 * To create the secret using the command line, run the following commands:
 +
 ----
-oc create secret generic <my-secret> -n <hypershift-deployment-namespace> --from-literal=baseDomain='your.domain.com' --from-literal=aws_access_key_id='your-aws-access-key' --from-literal=aws_secret_access_key='your-aws-secret-key' --from-literal=pullSecret='{"auths":{"cloud.openshift.com":{"auth":"auth-info", "email":"xx@redhat.com"}, "quay.io":{"auth":"auth-info", "email":"xx@redhat.com"} } }' --from-literal=ssh-publickey='your-ssh-publickey' --from-literal=ssh-privatekey='your-ssh-privatekey'
+oc create secret generic <my-secret> -n <hypershift-deployment-namespace> --from-literal=baseDomain='your.domain.com' --from-literal=aws_access_key_id='your-aws-access-key' --from-literal=aws_secret_access_key='your-aws-secret-key' --from-literal=pullSecret='your-quay-pull-secret' --from-literal=ssh-publickey='your-ssh-publickey' --from-literal=ssh-privatekey='your-ssh-privatekey'
 ----
 +
 *Note:* Disaster recovery backup for the secret is not automatically enabled. Run the following command to add a label that enables the secret to be backed up for disaster recovery:
++
 ----
 oc label secret <my-secret> -n <hypershift-deployment-namespace> cluster.open-cluster-management.io/backup=""
 ----
@@ -224,4 +253,4 @@ oc get hypershiftdeployment -n default hypershift-demo -w
 oc get managedcluster <hypershiftDeployment.Spec.infraID>
 ----
 
-Your managed cluster is created. Continue with xref:../clusters/hypershift_access.adoc#hypershift-access[Accessing a Hosting Service Cluster].
+Your managed cluster is created. Continue with xref:../clusters/hosting_service_cluster_access.adoc#hosting-service-cluster-access[Accessing a hosting service cluster].
