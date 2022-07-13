@@ -50,13 +50,10 @@ The following tips help with translation, readability, usability, presentation, 
 
 ## Writing concisely and clearly
 
-* Analyze your sentence structure.
-
-Examples:
+* Analyze your sentence structure. Examples:
   - First draft: Only users belonging to the certain role can view data belonging to a certain namespace.
   - Better draft: Only users who are assigned to a certain role can view data within a namespace.
-
-Why? Belonging is confusing and can mean many things, and it is used twice. A relative pronoun is better used to connect a clause or phrase to a noun or pronoun. The clause modifies, or describes, the noun. The most common relative pronouns are who, whom, whose, which, and that. 
+  - Why? Belonging is confusing and can mean many things, and it is used twice. A relative pronoun is better used to connect a clause or phrase to a noun or pronoun. The clause modifies, or describes, the noun. The most common relative pronouns are who, whom, whose, which, and that. 
 
 * Sometimes when and where can be used as relative pronouns, as well.
 * Mood and voice (avoid subjunctive mood, write in active voice): 
