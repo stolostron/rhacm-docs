@@ -15,7 +15,7 @@ Diagrams: Adobe Illustrator
 
 Submit a [Technical Diagram Request Form](https://docs.google.com/forms/d/e/1FAIpQLSdF8V0n3E-aAfRen8vZchXCxwA0iDTd0QYyASnutznfGLATvA/viewform) for a diagram.
 
-Based on the form, expect to receive confirmation of your request within 1-2 days. Otherwise, allow about 4 days for a single diagram. If you submit a few, it will likely take more time. Review the artwork and provide comments (usually through email. They can also work with an SME, when needed. When they complete your artwork, the design team will send you a final copy of the diagram in PNG format for you to add to our *images* folder.
+Based on the form, expect to receive confirmation of your request within 1-2 days. Otherwise, allow about 4 days for a single diagram. If you submit a few, it will likely take more time. Review the artwork and provide comments (usually through email). They can also work with a SME, when needed. When they complete your artwork, the design team will send you a final copy of the diagram in PNG format for you to add to our *images* folder.
 
 The design team will keep the source file so they can use it for any updates. 
 
