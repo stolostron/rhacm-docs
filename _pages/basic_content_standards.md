@@ -75,4 +75,4 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * Careful with inline links-- do not overuse. If user needs lots of links, consider a section for references within the topic.
 * Name the link so that the user sees value in the title and can better decide whether to click or come back later. Don't name the link [here].
 * URLs to GitHub issues are usually long and uninformative. Take the extra step to define the link with a good link title. 
-* Never link to internal materials (Internal GitHub issues, files, other internal-only docs like scripts. Have the developer replace a script with steps.) Some initial drafts can require this removal. Ensure linked materials are from public spaces.
+* Never link to internal materials like internal GitHub issues, files, other internal-only docs like scripts. Have the developer replace a script with steps. Some initial drafts can require this removal. Ensure linked materials are from public spaces.
