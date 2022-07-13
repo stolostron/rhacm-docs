@@ -18,7 +18,7 @@ Review the _IBM Style manual_ and other resources such as [Writing for Web Acces
 - Do not refer to shapes.
 - Avoid idioms, which to some users can be take quite literally. (This is also for translation)
 - Avoid references like "content below" or "enter this under...". Rewrite: The following content... Rewrite: Enter in the user name field...
-
+- Remember the style guide recommends, quotation marks are only for citations, which are rarely used in tech doc. Only use them if they are part of the command so not to confuse anyone not able to read the text without a screen reader.
 
 
 
