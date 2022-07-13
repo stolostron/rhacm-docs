@@ -13,18 +13,18 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 
 * Request peer reviews for all new topics and other changes that result in more than a couple of lines.
 * Request techincal review for any changes other than typos or broken links. (BZ or DDF are not usually opened by SMEs; seek engineer approval before making changes.)
-* Check broken links as you build content. Use the link checker plug-in on each PR in preview file mode.
-* Check your PR requests from team members daily. 
-* Add number of peer reviews you requested or completed to your Sprint work.
+* Check broken links as you build content. Use the easy _Check my links_ plug-in on each PR in preview mode.
+* Check your PR requests from team members. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
+* Add the number of peer reviews you requested or completed to your Sprint work and accomplishments. This counts as work.
 
 ## Creating a file or section
 
-* Be sure file names increase UX and don't confuse the reader or writer. Example: `man_clu_set` changes to `manage_clusterset`. This will help the entire product team better manage links in the doc and the console.
-* Know if this is one of three files: Task, reference, concept. Tasks require gerunds in the title.
-* Know the technology. What is the purpose of the new function? If you don't understand it, you won't be able to advocate for the customer with the content.
-* Ask where the user will interact with the feature. Day 1? During Application lifecycle?
+* Be sure file names increase UX and don't confuse the reader or writer. Example: `man_clu_set` changes to `manage_clusterset`, a file that is titled: _Managing ClusterSets_. This will help the entire product team better manage links in the doc and the console, and it increases expectation about the contents of the file.
+* Recognize the goal of the content: Task, reference, concept? Tasks require gerunds in the title, for example.
+* Know something about the technology. What is the purpose of the new function? If you don't understand it, you won't be able to advocate for the customer with the content.
+* Ask where the user will interact with the feature. Day 1? Day 2? During the Application lifecycle?
 * Seek guidance from the architect before creating a book or section so that the team can agree on the best placement for the new content.
-* Don't use internal terms to define a file. Example: Wizard, Hypershift. Name the file after what the user will hear about the product.
+* Don't use internal terms to define a file. Example: Wizard. Name the file after what the user will hear about the product.
 * Validation steps need to be concrete.
 
 ## Short descriptions
@@ -33,20 +33,20 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 * Avoid self-referential language: “This topic...” (Obviously the user knows they are reading this topic.)
 * Don't repeat the title in the description.
 * Give the user a little knowledge in just a couple sentences about what the topic is about. 
-* If it is a task, make it clear that it is a procedure in the description. If it is a reference, make that clear. If it is just a concept, make it clear it is only for information.
-
+* If it is a task, make it clear that it is a procedure in the description. If it is a reference, be sure the user knows to refer to the topic for information. If it is just a concept, make it clear it is only for details about a component or function. (These can be blended, but use steps for tasks.)
 
 ## Key tips for quality, translatable, accessible content
 
-* Use proper grammar and follow IBM style (Style manuals are typical in most writing professions)
+The following tips help with translation, readability, usability, presentation, voice.
+
+* Use proper grammar and follow IBM style. (Style manuals are typical in most writing professions.)
 * Use concise sentences. This means remove extra words. (See more examples later.)
     - First draft: `There are many ways that you can use this feature, but this is one way.` 
-    - Second draft: `This is one of many procedures that you can use.`
-* Write using minimalistic writing. Get to the point early.
+    - Second draft: `This is one of many procedures...`
+* Write using minimalistic writing. Get to the point early. Bulleted lists and steps in place of cumbersome paragraphs.
 * Avoid dangling modifiers. Be sure subject and predicate agree.
-* Use Github to search for filenames if you change a filename so that you can replace them in links.
-* **NOTE:** Avoid HTML, it causes translation errors and you can usually find a better solution.
-* All this helps translation, readability, usability, presentation, voiceInstructionsfor link & spell checker  and running local build
+* Use Github to search for file names if you change a file name so that you can replace URL paths.
+* See instructions for link & spell checker.
 
 ## Writing concisely and clearly
 
@@ -61,11 +61,11 @@ Why? Belonging is confusing and can mean many things, and it is used twice. A re
 * Sometimes when and where can be used as relative pronouns, as well.
 * Mood and voice (avoid subjunctive mood, write in active voice): 
   - Wish, desire, please –- all of these are not concrete, not imperative
-  - Should (rarely used, but needs clarification—make it must!)
+  - Should (rarely used, but needs clarification)
  * Tense: Always strive for present tense.  
-  - First draft: If you were to save the file (not present, wordy, room for interpretations
+  - First draft: If you were to save the file (not present, wordy, room for interpretation)
   - Better draft: If you save the file ... (Clear, concise)
-* Active voice almost always:
+* Voice: Use active voice almost always:
   - No: When the latch has been opened, the panel will slide forward.
   - Yes: When you open the latch, the panel slides forward.
   
@@ -75,7 +75,7 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 
 "Embedded links are links that appear mid-sentence or mid-paragraph. Such links are disruptive because the user must decide whether to go immediately to the information..." (263)
 
-* Careful with inline links-- do not overuse. If user needs lots of links, consider a section for references in the topic.
-* Name the link so that the user sees value in the title and can better decide whether to click or come back later.
+* Careful with inline links-- do not overuse. If user needs lots of links, consider a section for references within the topic.
+* Name the link so that the user sees value in the title and can better decide whether to click or come back later. Don't name the link [here].
 * URLs to GitHub issues are usually long and uninformative. Take the extra step to define the link with a good link title. 
-* Never link to internal materials (GitHub issues, Box files, other internal-only docs like scripts. Have the developer replace a script with steps). Some initial drafts can require this removal. Ensure linked materials are from public spaces.
+* Never link to internal materials (Internal GitHub issues, files, other internal-only docs like scripts. Have the developer replace a script with steps.) Some initial drafts can require this removal. Ensure linked materials are from public spaces.
