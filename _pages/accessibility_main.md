@@ -4,4 +4,21 @@ permalink: /accessibility_main
 title: "Accessibility"
 ---
 
-This content is under construction. 
+# Writing for accessibility
+
+Review the _IBM Style manual_ and other resources such as [Writing for Web Accessibility]https://www.w3.org/WAI/tips/writing/, in addition to the [Section 508 of the US Rehabilitation Act of 1973, as amended]https://www.w3.org/WAI/policies/united-states/#section-508-of-the-us-rehabilitation-act-of-1973-as-amended.
+
+[Disability Language Style Guide]https://ncdj.org/style-guide/ addresses the way writers and console designers should address terms and severity and such when guiding teams to write or design for everyone.
+
+## Highlights 
+
+- Do not use directional language, such as "upper/lower right-hand area of the screen."
+- Do not use bold tags for emphasis, see the manuals. Use bold for clickable items.
+- Do not refer to colors.
+- Do not refer to shapes.
+- Avoid idioms, which to some users can be take quite literally. (This is also for translation)
+- Avoid references like "content below" or "enter this under...". Rewrite: The following content... Rewrite: Enter in the user name field...
+
+
+
+
