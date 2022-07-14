@@ -17,6 +17,8 @@ If you are new to Red Hat, to the Information Development field, or you just nee
 
 The IBM style guide is the main authority on style issues, but there are supplementary Red Hat style guides you want to take a look at as well.
 
+**Note:** Enter your Red Hat email account. When the Red Hat SSO appears, enter your credentials. Your IBMiD is automatically created after you read the *Important Notice* and proceed to log in.
+
 - [IBM style guide](https://www.ibm.com/docs/en/ibm-style)
 
 - [Red Hat supplementary style guide](https://redhat-documentation.github.io/supplementary-style-guide/)
