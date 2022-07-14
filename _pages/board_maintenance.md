@@ -28,6 +28,7 @@ The lead is the primary board focal because the lead needs to know the team's co
   - Doc issues must be placed a minimum of 2 sprints ahead of the related dev issue. For example, if the dev issue is placed in _Sprint 1_, then the doc issue is to be placed in the _Sprint 3_ realistically.
   - Use meetings to plan for the sprint and update the team on progress. Lead takes snapshot after planning.
   - Bring up any `unplanned` work that got in the way on progress, use the label.
+  - Put issue in `awaiting verification` when you feel you are ready for peer/tech review.
 
 # Board review in scrums:
 
