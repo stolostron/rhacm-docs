@@ -3,43 +3,38 @@ permalink: /resources_writing
 title: "Writing and ID resources"
 ---
 
-If you are new to IBM, to the Information Development field, or you just need a review, you want to take a look at the following resources, as they offer critical knowledge:
+If you are new to Red Hat, to the Information Development field, or you just need a review, you want to take a look at the following resources, as they offer critical knowledge:
 
-### IBM Cloud documentation resources
+### The basics of writing at Red Hat
 
-The IBM Cloud documentation provides guidelines that can help you learn content strategy and writing techniques that can be applied to IBM Hybrid Cloud documentation. Explore the links to get information about Markdown, Github, Markdown tools and tips, accessibility, translation, and other topics.
+- [Writing concisely](https://writingcenter.unc.edu/tips-and-tools/conciseness-handout/)
 
-- [Content design and development getting started](https://test.cloud.ibm.com/docs/developing/writing?topic=writing-get-started-onboarding)
+- [Markdown](https://www.markdownguide.org/getting-started/)
 
-- [Getting started with markdown](https://test.cloud.ibm.com/docs/developing/writing?topic=writing-getting-started-with-markdown)
+- [AsciiDoc](https://asciidoctor.org/docs/asciidoc-writers-guide/)
 
-- [Creating IBM Cloud content in markdown](https://test.cloud.ibm.com/docs/developing/writing/markdown?topic=writing-create-content-md#creating-bluemix-content-in-markdown)
+### Style resources
 
-### IBM Knowledge Center resources
+The IBM style guide is the main authority on style issues, but there are supplementary Red Hat style guides you want to take a look at as well.
 
-- [IBM Knowledge Center documentation](https://rtpdoc01.rtp.raleigh.ibm.com:9445/kc/docs_kc_20/kcdoc_home/kc_welcome.html)
+**Note:** Enter your Red Hat email account. When the Red Hat SSO appears, enter your credentials. Your IBMiD is automatically created after you read the *Important Notice* and proceed to log in.
 
-  - [Knowledge Center for Cloud offerings](https://rtpdoc01.rtp.raleigh.ibm.com:9445/kc/docs_kc_20/kccloud/cloudintro.html)
+- [IBM style guide](https://www.ibm.com/docs/en/ibm-style)
 
-    The IBM Knowledge Center for Cloud offering makes it possible for cloud product teams to:
+- [Red Hat supplementary style guide](https://redhat-documentation.github.io/supplementary-style-guide/)
 
-    - Quickly and easily contribute, update and manage user assistance content
-    - Deploy that content easily in a simple and branded framework.
+- [Red Hat trademarks (general)](https://www.redhat.com/en/about/brand/standards/trademarks)
 
-    This documentation includes details for using Git and Markdown for creating documentation.
+  - [Red Hat copyright notices and trademark legends](https://source.redhat.com/departments/legal/redhatintellectualproperty/trademarks/trademarks_and_domain_names_wiki/copyright_notices_and_trademark_legends)
 
-- [External IBM Knowledge Center](https://www.ibm.com/support/knowledgecenter/)
-- [Preview server for IBM Knowledge Center](https://www-01preview.ibm.com/support/knowledgecenter/)
-- [Preproduction (staging) server for IBM Knowledge Center](https://www-03preprod.ibm.com/support/knowledgecenter/)
+- [Red Hat trademark guidelines](https://static.redhat.com/legacy/f/pdf/corp/RH-3573_284204_TM_Gd.pdf)
 
-### Writing IBM documentation
+- [Red Hat trademark style guide](https://static.redhat.com/legacy/f/pdf/corp/trademark_usage.pdf)
 
-- [IBM Copyright and trademark information](https://www.ibm.com/legal/us/en/copytrade.shtml#section-R)
+- [Red Hat products style guide](https://docs.google.com/spreadsheets/d/1DLS_lS3VKidgZIvcLmLp9BoiqptkvqHWfe1D5FD2kfk/edit#gid=1375785039)
 
-  - [Using trademarked terms](https://apps.na.collabserv.com/wikis/home?lang=en-us#!/wiki/W18e544042a85_4b63_915a_1d1ed2cf8338/page/Using%20and%20Marking%20-%20IBM%20Trademark%20Guidelines?section=terms)
-
-- [IBM Style community](https://apps.na.collabserv.com/communities/service/html/communitystart?communityUuid=279b622e-3902-4086-9cc7-6c07d8d2d745)
+- [PatternFly style guide](https://www.patternfly.org/v4/ux-writing/about/)
 
 ### Writing for accessibility and globalization
 
-- [Translation @ IBM](http://w3-03.ibm.com/globalization/page/2693)
+- [Writing for accessibility](accessibility_main.md)
