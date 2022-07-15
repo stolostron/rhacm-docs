@@ -94,7 +94,7 @@ When the file runs successfully, it should look similar to what you saw on the s
 
 ## Resolve error `zsh: permission denied`
 
-Running step 10 from the [Set up local build topic](#set-up-local-build) results in the error `zsh: permission denied` if the correct permissions are not set up. To work around this issue, complete the following steps.
+Running step 10 from the [Set up local build topic](#set-up-local-build) results in the error `zsh: permission denied` if the correct permissions are not set up. To work around this issue, complete the following steps:
 
 1. Give the terminal full write access to the disk.
 2. Run the following command after filling in your username and the correct path to the acm_sync_asciidoc.sh file:
