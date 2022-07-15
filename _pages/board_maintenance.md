@@ -5,7 +5,7 @@ title: "Documentation board hygiene and maintance"
 
 # Board maintenance
 
-The lead is the primary board focal because the lead needs to know the team's commitment in order to speak truthfully about the teams effort, priorities, and sprint planning. Everyone helps maintian their issues with the following guidance:
+The lead is the primary board focal because the lead needs to know the team's commitment in order to speak truthfully about the teams effort, priorities, and sprint planning. Everyone helps maintain their issues with the following guidance:
 
 ## New issues: 
 
