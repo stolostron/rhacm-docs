@@ -12,7 +12,7 @@ A _removed_ item is typically function that was deprecated in previous releases 
 
 Keep content only for two releases unless not removed and only deprecated. Use a cross-squad issue to get the topic examined every issue. For new entries, developers need to open new issues for doc.
 
-API deprecations and removals: follows the Kubernetes deprecation guidelines for APIs. See the https://kubernetes.io/docs/reference/using-api/deprecation-policy/[Kubernetes Deprecation Policy] for more details about that policy. 
+API deprecations and removals: follows the Kubernetes deprecation guidelines for APIs. See the [Kubernetes Deprecation Policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/) for more details about that policy. 
 
 APIs are only deprecated or removed outside of the following timelines:
   
