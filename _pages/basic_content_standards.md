@@ -15,7 +15,7 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 * Request techincal review for any changes other than typos or broken links. (BZ or DDF are not usually opened by SMEs; seek engineer approval before making changes.)
 * Check broken links as you build content. Use the easy _Check my links_ plug-in on each PR in preview mode.
 * Check your PR requests from team members. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
-* Add the number of peer reviews you requested or completed to your Sprint work and accomplishments. This counts as work.
+* Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`.
 
 ## Creating a file or section
 
@@ -45,7 +45,7 @@ The following tips help with translation, readability, usability, presentation, 
     - Second draft: `This is one of many procedures...`
 * Write using minimalistic writing. Get to the point early. Bulleted lists and steps in place of cumbersome paragraphs.
 * Avoid dangling modifiers. Be sure subject and predicate agree.
-* Use Github to search for file names if you change a file name so that you can replace URL paths.
+* Use GitHub to search for file names if you change a file name so that you can replace URL paths.
 * See instructions for link & spell checker.
 
 ## Writing concisely and clearly
@@ -76,3 +76,23 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * Name the link so that the user sees value in the title and can better decide whether to click or come back later. Don't name the link [here].
 * URLs to GitHub issues are usually long and uninformative. Take the extra step to define the link with a good link title. 
 * Never link to internal materials like internal GitHub issues, files, other internal-only docs like scripts. Have the developer replace a script with steps. Some initial drafts can require this removal. Ensure linked materials are from public spaces.
+
+## Modals
+
+Using the following modals is acceptable:
+
+* Can: Use to indicate ability.
+* Might: Use to indicate possibility.
+* Must: Use instead of "have to" or "need to" unless it is too restrictive. Example: "You don't have to" is different than "you must not".
+
+Avoid the following modals:
+
+* Could: Don't use in present tense. Use "can" or "might" instead.
+* Should: Avoid by writing in a more direct way.
+* Would: Avoid as an auxiliary verb. Only use when referring to an unfulfilled condition ("x would have resulted in y").
+
+Use the following modals only in the manner described by the IBM style guide:
+
+* May: Indicates permission, but it is better to use "can" or "might".
+
+
