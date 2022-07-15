@@ -13,7 +13,6 @@ Producing documentation requires patience and diligence because the work can bec
 - [Technical reviews](#review)
 
 ## Markdown tools
-{: #md}
 
 Markdown has a few tools to help you validate that you are producing error-free files, such as the [Link checking tool](#link),[Spellcheck tool](#spell), and [Local build tool](#local).
 
@@ -27,14 +26,12 @@ Markdown has a few tools to help you validate that you are producing error-free 
      ```
      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
      ```
-     {: codeblock}
+
   3. Install NPM from your Terminal by running the following command:
   
      ```
      brew install node
      ```
-     {: codeblock}
-     
      
 * If you are a Windows user, complete the following steps to install NPM:
 
@@ -49,7 +46,6 @@ Markdown has a few tools to help you validate that you are producing error-free 
      
      npm -v
      ```
-     {: codeblock}
      
 You are now ready to validate your documentation. 
 
@@ -66,21 +62,18 @@ Install and run the broken link tool from your terminal by completing the follow
    ```
    npm install -g markdown-link-check
    ```
-   {: codeblock}
    
 2. On your local drive, navigate to the directory where the `docs` repository is cloned. Run the following command:
 
    ```
    cd ~/Documents/docs
    ```
-   {: codeblock}
    
 3. Run the link check tool on the `docs` repository. To create a text file of your results from the tool, run the following command:
 
    ```
    find . -name "*.md" -exec markdown-link-check -q {} \; > ../filename.txt
    ```
-   {: codeblock}
    
  4. Open the text file that has the broken link results by navigating to the file with the Finder application. 
    
@@ -101,7 +94,6 @@ Install and run the broken link tool from your terminal by completing the follow
    [✖] ../../../manage_cluster/cluster_endpoints.md#master
    [✖] ../../..//apis/cfc_api_files/directory_mgmt.md#list
    ```
-   {: codeblock}
    
    * Remember, icons are considered to be internal links. Be sure to use the _Preview_ feature view in Visiual Studio Code (or another text editor), or select the _Preview changes_ tab in GitHub from the browser. 
    * When you reference a section on the same page or a different one, ensure that the anchor name matches the spelling of the anchor in the section.
@@ -138,7 +130,6 @@ Complete the following steps to run the broken link tool:
    ```
    find . -name "*.md" -exec markdown-link-check -q {} \; > ../combine.txt
    ```
-   {: codeblock}
    
 7. Open the `combine.txt` file to view the results.
 
@@ -159,10 +150,8 @@ Complete the following steps to run the broken link tool on more than one reposi
    cd combined
    find . -name \*.md -exec markdown-link-check -q {} \; > broken_links.txt
    ```
-   {: codeblock}
 
 ### Spellcheck tool
-{: #spell}
 
 Install the Markdown spellcheck tool to extract misspelled words from markdown files.
 
@@ -175,24 +164,20 @@ Install and run the spellcheck tool from your terminal by completing the followi
    ```
    npm i markdown-spellcheck -g
    ```
-   {: codeblock}
    
 2. On your local drive, naviagte to the directory where the `docs` repository is cloned by running the following command:
 
    ```
    cd ~/Documents/docs
    ```
-   {: codeblock}
    
 3. Run the spellcheck tool and create a text file with the results by running the following command:
 
    ```
    mdspell -r -n -a --en-us *.md **/*.md **/**/*.md **/**/**/*.md > ../yourfilename.txt
    ```
-   {: codeblock}
    
 4. Open the text file that has the results of the misspelled words by navigating to the file from the Finder application. 
-
 
 #### Windows
 
@@ -204,7 +189,6 @@ Create shortcuts on your local drive to run the spellcheck tool. Complete the fo
    ```
    C:\Windows\System32\cmd.exe /k mdspell -r -n -a --en-us *.md **/*.md **/**/*.md **/**/**/*.md > ../yourfilename.txt
    ```
-   {: codeblock}
 
 3. Click **Next**. 
 
@@ -219,7 +203,6 @@ Create shortcuts on your local drive to run the spellcheck tool. Complete the fo
 8. Check your specified destination for the resulting files (either your root Docs folder or your output folder).
 
 ### Local build tool
-{: #local}
 
 Install and run the [Markdown marked-it tool](https://github.com/IBM/marked-it-cli/blob/master/README.md) to access a HTML preview of your .md files. Produce a local build by completing the following steps: 
 
@@ -228,7 +211,6 @@ Install and run the [Markdown marked-it tool](https://github.com/IBM/marked-it-c
    ```
    npm install -g marked-it-cli
    ```
-   {: codeblock}
    
    **Note**: If your installation is unsuccessful, run the following command: `sudo npm install -g marked-it-cli`.
    
@@ -237,10 +219,8 @@ Install and run the [Markdown marked-it tool](https://github.com/IBM/marked-it-c
    ```
    marked-it-cli /Users/mikeladockery@ibm.com/docs-icp/ --output=/Users/mikeladockery@ibm.com/Documents/output --conref-file=/Users/mikeladockery@ibm.com/Documents/docs-icp/conrefs.yml --toc-xml --overwrite --verbose
    ```
-   {: codeblock} 
    
-   **Important**: According to the path that is previously provided, the results of the local build are located in my `Documents/output` folder. You can rename your output folder. 
-   
+   **Important**: According to the path that is previously provided, the results of the local build are located in my `Documents/output` folder. You can rename your output folder.  
 
 #### Running the local build tool on multiple repositories
 
@@ -262,19 +242,15 @@ Complete the following steps to run the marked-it tool on multiple repositories 
    
    marked-it-cli /Users/mikeladockery@ibm.com/common-services-docs/ --output=/Users/mikeladockery@ibm.com/Documents/output-combo --conref-file=/Users/mikeladockery@ibm.com/Documents/docs-icp/conrefs.yml --toc-xml --overwrite --verbose
    ```
-   {: codeblock}
 
 ## Acrolinx
-{: #acro}
 
 Add Content 
 
 ## Accessibility testing
-{: #accessible}
 
 Add Content 
 
 ## Technical reviews
-{: #review}
 
 Add Content 
