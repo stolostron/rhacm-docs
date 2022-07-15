@@ -19,7 +19,6 @@ ID teams and Dev teams alike have increased efficiency and collaboration with Gi
  - [Common commands](#commands)
 
 ## Things to remember
-{: remember}
 
 1. **Developer issues that need doc changes require a new doc issue.**
 
@@ -28,7 +27,6 @@ ID teams and Dev teams alike have increased efficiency and collaboration with Gi
 2. **Issues are used to track decisions,** such as removing a popular conref, changing a name, etc... See an example of how issues are used to track decisions. Examples:
 
 ## Terms
-{: terms}
 
 A few terms are listed here, but you can learn more from the GitHub documentation and since it is widely used, you can easily search online for anything unfamiliar.
 
@@ -51,7 +49,6 @@ As a new user, you need to receive permission to `write`. See an admin for acces
 **Clone:** When you are ready to start, you first have to clone the repo. You should only do this once at the beginning, then you always have the repo, you just check out the branches you need. Cloning pulls the copy of the staging branch to your machine.
 
 ## Set up an editor
-{: editor}
    
 You want to use these editors to easily set up plug-ins, preview to catch mistakes, set up local build, and build tables/lists/code items properly. (Recommend VS Code over Atom, many developers also use VS Code.)
 
@@ -59,10 +56,11 @@ You want to use these editors to easily set up plug-ins, preview to catch mistak
 
 2. [Download Atom](https://atom.io/) 
 
+**Note:** [Atom is being archived on Dec. 15 2022](https://github.blog/2022-06-08-sunsetting-atom/)
+
 These are widely used tools. As with Git and other open tools, you can search online if you have problems, questions, or want to learn more.
 
 ## Set up GitHub
-{: git}
 
 1. Go to the Mac@IBM store to get Git and other "Whitewater" tools. 
 
@@ -81,10 +79,8 @@ These are widely used tools. As with Git and other open tools, you can search on
   ```
   git@github.ibm.com:IBMPrivateCloud/CP4MCM-docs.git
   ```
-  {: codeblock}
      
 ## Common commands
-{: commands}
 
 Git is actually the term related to the Git CLI. See [Here are all the Git commands I used last week, and what they do](https://www.freecodecamp.org/news/git-cheat-sheet-and-best-practices-c6ce5321f52/) for a few regular commands you will use. There are many, many other articles online for reference. You can also use Git documentation. Also, becoming familiar with Linux commands will help.
 
@@ -97,14 +93,12 @@ Git is actually the term related to the Git CLI. See [Here are all the Git comma
  ```
  git pull
  ```
- {: codeblock}
   
 3. To create a branch, run the following:
 
   ```
   git checkout -b <named-branch>
   ```
-  {: codeblock}
   
   **Note:** Start the branch with a letter, not a number. Example: `install-defect`. (This is to not confuse our personal branches with the GA, refresh, or NLV branches.
   
@@ -113,39 +107,36 @@ Git is actually the term related to the Git CLI. See [Here are all the Git comma
   ```
   git push --set-upstream origin test-swope
   ```
-  {: codeblock}
   
 4. Make changes, then check them. To check changes, run the following:
 
   ```
   git diff
   ```
-  {: codeblock}
   
 5. To add your changes, run the following command (`.` = all files, but you can add only certain files by naming them accordingly):
 
   ```
   git add .
   ```
-  {: codeblock}
       
 6. Commit your changes. Use this syntax to record the commits and link the PR to the Issue you are working:
 
   ```
   git commit -m <"#issue/roadmap#xxxx - description of change">
   ```
-  {: codeblock}
     
 7. Push content upstream (to the repo); basically "check in" your changes to your branch:
 
  ```
  git push
  ```
- {: codeblock}
  
 8. Next, you need to [Create a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request) to get your changes into the final staging branch. 
 
 From your branch, you want to "PR" in to the staging branch that you branched from. Creating the PR is fairly intuitive. Additionally, this is where you ask for peer reviewers and developer reviewers to approve your content before you merge.
+
+You can find a cheat sheet [here](https://docs.google.com/document/d/1VM2OMJxHM_LgeSTPA8sN7LlavTNaX4V4mK10mjl5Cm8) with every step and procedure listed in order. (we are trying to avoid Google docs, might pull in this info later if it makes sense)
 
 ## Got git problems after a reimage or new repo?
 
@@ -181,7 +172,6 @@ https://help.github.com/en/github/authenticating-to-github/adding-a-new-ssh-key-
    ```
    ssh -T git@github.com
    ```
-  {: codeblock}
 
 You want “Hi bcpswope!”
 
@@ -206,8 +196,8 @@ We gathered some resources, but this is not a complete list of all that can help
    ```
    git cherry-pick [commit_ID]
    ```
-   {: codeblock}
 
  - You can [change the base branch in your PR](https://help.github.com/en/articles/changing-the-base-branch-of-a-pull-request).
+
 
 
