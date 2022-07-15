@@ -12,7 +12,7 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 ## Team requirements for each PR
 
 * Request peer reviews for all new topics and other changes that result in more than a couple of lines.
-* Request techincal review for any changes other than typos or broken links. (BZ or DDF are not usually opened by SMEs; seek engineer approval before making changes.)
+* Request technical review for any changes other than typos or broken links. (BZ or DDF are not usually opened by SMEs; seek engineer approval before making changes.)
 * Check broken links as you build content. Use the easy _Check my links_ plug-in on each PR in preview mode.
 * Check your PR requests from team members. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
 * Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`.
