@@ -30,10 +30,12 @@ There are several ways reference links in the ASCII source file (`.adoc`). View 
 * External links and cross-book references :
 
   ```
+  //External link
   link:https://your-url-here.com[Your URL]
   
-  // OR 
+  OR 
   
+  //cross-book reference
   link:../console/web_console.adoc#random-web-console[Web console link example]
   ```
 
