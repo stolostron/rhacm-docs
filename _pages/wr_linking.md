@@ -27,10 +27,16 @@ There are several ways reference links in the ASCII source file (`.adoc`). View 
 
   **Note:** It is not required for the anchor to match the entire name of the document or title. Ensure that the link reference includes the correct anchor for a specific document. Avoid using spaces and special characters in the brackets
 
-* External links:
+* External links and cross-book references :
 
   ```
-  https://your-url-here.com[Your URL]
+  //External link
+  link:https://your-url-here.com[Your URL]
+  
+  OR 
+  
+  //cross-book reference
+  link:../console/web_console.adoc#random-web-console[Web console link example]
   ```
 
 * Internal cross reference links:
@@ -38,9 +44,6 @@ There are several ways reference links in the ASCII source file (`.adoc`). View 
   ```
   // Inline cross reference
   <<<section-anchor,section-title>>>
-
-  // book cross reference
-  link:../console/web_console.adoc#random-web-console[Web console link example]
 
   //same book cross reference
   xref:../console/web_console.adoc#random-web-console[Web console link example]
