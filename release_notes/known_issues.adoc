@@ -7,7 +7,7 @@ Please follow this format:
 Title of known issue, be sure to match header and make title, header unique
 
 Hidden comment: Release: #issue
-Known issue with workaround if:
+Known issue process and when to write:
 
 - Doesn't work the way it should
 - Straightforward to describe
@@ -15,6 +15,8 @@ Known issue with workaround if:
 - Quick workaround, of any
 - Applies to most, if not all, users
 - Something that is likely to be fixed next release (never preannounce)
+- Always comment with the issue number and version: //2.4:19417
+- Link to customer BugZilla ONLY if it helps; don't link to internal BZs and GH issues.
 
 Or consider a troubleshooting topic.
 ////
@@ -119,6 +121,18 @@ Upgrade to the latest version for the best console compatibility.
 When you update the storage size in the `searchcustomization` CR, the PVC configuration does not change. If you need to update the storage size, update the PVC (`_<storageclassname>-search-redisgraph-0_`) with the following command:
 ----
 oc edit pvc <storageclassname>-search-redisgraph-0
+----
+
+[#search-query-issue]
+=== Search query parsing error
+//2.5:22391 
+
+If an environment becomes large and requires more tests for scaling, the search queries can timeout which results in an parsing error message being displayed. This error is displayed after 30 seconds of waiting for a search query.
+
+Extend the timeout time with the following command:
+
+----
+kubectl annotate route multicloud-console haproxy.router.openshift.io/timeout=Xs
 ----
 
 [#observability-known-issues]
@@ -437,12 +451,6 @@ You cannot delete the namespace of a managed cluster manually. The managed clust
 
 After you upgrade {product-title-short} to version 2.3, you cannot change the credential secret for any of the managed clusters that were created and managed by {product-title-short} before the upgrade.  
 
-[#no-create-bm-47]
-=== Cannot create bare metal managed clusters on {ocp-short} version 4.8
-// 2.2:10581
-
-You cannot create bare metal managed clusters by using the {product-title-short} hub cluster when the hub cluster is hosted on {ocp-short} version 4.8.
-
 [#hub-managed-clusters-clock]
 === Hub cluster and managed clusters clock not synced
 // 2.1:5636
@@ -556,102 +564,6 @@ You cannot use the {product-title-short} console to upgrade {ocp-short} managed 
 
 The search details page for a certain resource on a certain managed cluster might fail. You must ensure that the work-manager add-on in the managed cluster is in `Available` status before you can search.
 
-[#no-create-clusters-across-architectures]
-=== A manually-created release image is required when creating clusters across architectures
-//2.2.3:14631
-
-To create a managed cluster on a different architecture than the architecture of the hub cluster, you need to create a release image (`ClusterImageSet`) that contains files for both architectures. For example, you need to create a release image if you want to create an `x86_64` cluster from a `ppc64le`, `aarch64`, or `s390x` hub cluster. If you create the release image with both sets of files, the cluster creation succeeds because the new release image enables the {ocp-short} release registry to provide a multi-architecture image manifest. 
-
-To work around this issue, complete steps similar to the following example for your architecture type:
-
-. From the https://quay.io/repository/openshift-release-dev/ocp-release[{ocp-short} release registry], create a https://docs.docker.com/registry/spec/manifest-v2-2/[manifest list] that includes `x86_64`, `s390x`, `aarch64`, and `ppc64le` release images.
-
-.. Pull the manifest lists for both architectures in your environment from the https://quay.io/repository/openshift-release-dev/ocp-release?tab=tags[Quay repository] using the following example commands:
-+
-----
-$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.36-x86_64
-$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.36-ppc64le
-$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.36-s390x
-$ podman pull quay.io/openshift-release-dev/ocp-release:4.9.36-aarch64
-----
-
-.. Log in to your private repository where you maintain your images:
-+
-----
-$ podman login <private-repo>
-----
-+
-Replace `private-repo` with the path to your repository.
-
-.. Add the release image manifest to your private repository by running the following commands that apply to your environment:
-+
-----
-$ podman push quay.io/openshift-release-dev/ocp-release:4.9.36-x86_64 <private-repo>/ocp-release:4.9.36-x86_64
-$ podman push quay.io/openshift-release-dev/ocp-release:4.9.36-ppc64le <private-repo>/ocp-release:4.9.36-ppc64le
-$ podman push quay.io/openshift-release-dev/ocp-release:4.9.36-s390x <private-repo>/ocp-release:4.9.36-s390x
-$ podman push quay.io/openshift-release-dev/ocp-release:4.9.36-aarch64 <private-repo>/ocp-release:4.9.36-aarch64
-----
-+
-Replace `private-repo` with the path to your repository.
-
-.. Create a manifest for the new information:
-+
----- 
-$ podman manifest create mymanifest
-----
-
-.. Add references to both release images to the manifest list:
-+
-----
-$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.36-x86_64
-$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.36-ppc64le
-$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.36-s390x
-$ podman manifest add mymanifest <private-repo>/ocp-release:4.9.36-aarch64
-----
-+
-Replace `private-repo` with the path to your repository.
-
-.. Merge the list in your manifest list with the existing manifest:
-+
-----
-$ podman manifest push mymanifest docker://<private-repo>/ocp-release:4.9.36
-----
-+
-Replace `private-repo` with the path to your repository.
-
-. On the hub cluster, create a release image that references the manifest in your repository.
-
-.. Create a `YAML` file that contains information that is similar to the following example:
-+
-[source,yaml]
-----
-apiVersion: hive.openshift.io/v1
-kind: ClusterImageSet
-metadata:
-  labels:
-    channel: fast
-    visible: "true"
-  name: img4.9.36-appsub
-spec:
-  releaseImage: <private-repo>/ocp-release:4.9.36
-----
-+
-Replace `private-repo` with the path to your repository.
-
-.. Run the following command on your hub cluster to apply the changes:
-+
-----
-oc apply -f <file-name>.yaml
-----
-+
-Replace `file-name` with the name of the `YAML` file that you just created. 
-
-. Select the new release image when you create your {ocp-short} cluster. 
-
-. If you deploy the managed cluster using the {product-title-short} console, specify the architecture for the managed cluster in the _Architecture_ field during the cluster creation process.
-
-The creation process uses the merged release images to create the cluster.  
-
 [#argo-not-supported-power]
 === Argo CD is not supported with IBM Power or IBM Z system hub cluster
 // 2.3:13524
@@ -679,17 +591,43 @@ oc get managedclusterinfo <clusterName> -n <clusterNamespace> -o json | jq -r '.
 
 For more information about the `LoadBalancer` types, see the _Service_ page in the link:https://kubernetes.io/docs/concepts/services-networking/service[Kubernetes documentation.]
 
+[#search-placement-not-working]
+=== Cannot use Search placement in Advanced Configuration table
+// 2.5:22668
+
+You cannot use _Search placement_ in the _Advanced Configuration_ table because the feature contains an invalid API version.
+
+To work around this issue, complete the following steps:
+
+. Remove the API version from the search url.
+. Delete the preset filters and search manually.
+
+[#cluster-proxy-addon-not-starting]
+=== Cluster-proxy-addon does not start after upgrade
+// 2.5:23631
+
+After you upgrade from version 2.4.x to 2.5.0, `cluster-proxy-addon` does not start and `cluster-proxy-addon-manager` raises a nil pointer exception.
+
+To work around this issue, complete the following steps:
+
+. Disable `cluster-proxy-addon`. See link:../install/adv_config_install.adoc#clusterproxyaddon-technology-preview[Advanced configuration] to learn more.
+. Delete the `cluster-proxy-signer` secret from the `open-cluster-management` namespace.
+. Enable `cluster-proxy-addon`.
 
 [#application-management-known-issues]
 == Application management known issues
 
 See the following known issues for the application lifecycle component.
 
+[#object-bucket-subscription-admin]
+=== Application ObjectBucket channel type cannot use allow and deny lists
+//2.5.0: 22807
+
+You cannot specify allow and deny lists with ObjectBucket channel type in the `subscription-admin` role. In other channel types, the allow and deny lists in the subscription indicates which Kubernetes resources can be deployed, and which Kubernetes resources should not be deployed.
 [#argo-app-set-version]
 === Argo Application cannot be deployed on 3.x {ocp-short} managed clusters
 
-Argo Application set from the console cannot be deployed on 3.x {ocp-short} managed clusters because the `Infrastructure.config.openshift.io` API is not available on  on 3.x.
-
+Argo `ApplicationSet` from the console cannot be deployed on 3.x {ocp-short} managed clusters because the `Infrastructure.config.openshift.io` API is not available on  on 3.x.
 
 [#changes-not-automatic]
 === Changes to the multicluster_operators_subscription image do not take effect automatically
@@ -704,10 +642,9 @@ If the image that is used by the subscription operator is overrided by changing 
 //2.5.0: 22677
 
 The Application topology displays the wrong application if `ApplicationSets` with the same name are created in different Gitops instances.
-If you have multiple Gitops instances installed, you will have ApplicationSets with the same name in each Gitops instance and the topology for the `ApplicationSets`` will not display correctly. This is due to the topology not differentiating the namespace for the `ApplicationSets` that are created.
+If you have multiple Gitops instances installed, you will have `ApplicationSets` with the same name in each Gitops instance and the topology for the `ApplicationSets` will not display correctly. This is due to the topology not differentiating the namespace for the `ApplicationSets` that are created.
 
 Be sure to create `ApplicationSets` with different names in each of the Gitops instances to display the topology correctly.
-
 
 [#policy-needs-subscription-admin]
 === Policy resource not deployed unless by subscription administrator
@@ -903,7 +840,7 @@ status:
 ----
 
 [#application-tables]
-=== Application console tables
+=== Application console table limitations
 // 2.3:12410
 
 See the following limitations to various _Application_ tables in the console:
@@ -918,6 +855,12 @@ See the following limitations to various _Application_ tables in the console:
 === No Application console topology filtering
 
 The _Console_ and _Topology_ for _Application_ changes for the {product-version}. There is no filtering capability from the console Topology page.
+
+[#appset-resources-no-topolgy]
+=== ApplicationSet resources do not show status in topology
+// 2.5:22760
+
+When you create `ApplicationSet` applications that deploy resources to a different namespace than the namespace defined in the `ApplicationSet` YAML, the resource status does not appear in the topology.
 
 [#governance-known-issues]
 == Governance known issues
@@ -1045,6 +988,14 @@ overrides:
 
 If you have manually installed OADP, you must manually uninstall OADP before you upgrade. After the upgrade is successful and backup and restore is reenabled, OADP is installed automatically.
 
+[#managed-cluster-resources-not-restored]
+=== Managed cluster resource not restored
+//2.5:22402
+
+When you restore the settings for the `local-cluster` managed cluster resource and overwrite the `local-cluster` data on a new hub cluster, the settings are misconfigured. Content from the previous hub cluster `local-cluster` is not backed up because the resource contains `local-cluster` specific information, such as the cluster URL details.
+
+You must manually apply any configuration changes that are related to the `local-cluster` resource on the restored cluster. See link:../clusters/backup_and_restore.adoc#prepare-new-hub[Prepare the new hub cluster] for more details. 
+
 [#submariner-known-issues]
 == Submariner known issues
 
@@ -1054,42 +1005,41 @@ If you have manually installed OADP, you must manually uninstall OADP before you
 Only OpenShiftSDN is supported as a CNI network provider. OVN is currently not supported.
 
 [#submariner-no-rhel]
-=== Submariner does not support Red Hat Enterprise Linux nodes as worker nodes
+=== Submariner does not support some Red Hat Enterprise Linux nodes as worker nodes
 
-When deploying Submariner on a cluster that includes Red Hat Enterprise Linux worker nodes, application workloads fail to communicate with remote clusters. Submariner only supports {ocp-short} clusters that use Red Hat Enterprise Linux CoreOS nodes.
+When deploying Submariner on a cluster that includes Red Hat Enterprise Linux worker nodes with the kernel version between 4.18.0-359.el8.x86_64 and 4.18.0-372.11.1.el8_6.x86_64, application workloads fail to communicate with remote clusters.
 
-[#submariner-not-all-infra]
+[#not-all-infrastructure]
 === Submariner does not support all infrastructure providers that {product-title-short} can manage
 
 Submariner is not supported with all of the infrastructure providers that {product-title-short} can manage. Refer to the https://access.redhat.com/articles/6663461[{product-title-short} support matrix] for a list of supported providers.
 
-[#submariner-mtu-issue]
-=== Connectivity issues caused by an MTU mismatch when using Submariner Globalnet on managed clusters across on-premises and public clouds
-//2.5:22261
-
-Your Submariner network might fail when connecting an on-premises cluster with a public cluster. This issue is a datapath issue that is related to MTU. To work around this issue, manually add the following rule to the gateway nodes for each remote endpoint:
-
-----
-iptables -t mangle -I POSTROUTING 1  -d <remote-ep-cidr>  -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss <default_Interface_MTU-120>
-----
-
-Replace `remote-ep-cidr` with the the global CIDR of the remote endpoint.
-
-Replace `default_Interface_MTU-120` with a numeric value that is equal to 120 less than the default interface MTU value. 
-
-Run the `subctl verify` command to confirm that the end-to-end tests pass.
-
-[#submariner-openstack-ui]
+[#openstack-ui]
 === Submariner does not support preparing the Red Hat OpenStack Platform infrastructure from the {product-title-short} console
 
 Automatic cloud preparation for Red Hat OpenStack clusters is not supported for Submariner from the product-title-short} console. You can use the {product-title-short} APIs to prepare the clouds manually.
 
-[#submariner-headless-services-globalnet]
+[#headless-services-globalnet]
 === Submariner does not support headless services with Globalnet
+//2.5:24159
 
-When using headless services with Globalnet, DNS resolution for local pods does not work when using the `clusterset.local` domain name.
+Submariner supports headless services with Globalnet. However, when you access the exported headless service from a client that resides in the same cluster by using `clusterset.local` domain name, the `globalIP` that is associated with the headless service is returned to the client, which is not routable in the cluster. 
+
+You can use `cluster.local` domain name to access the local headless services.
 
 [#submariner-airgap]
 === Submariner does not support air-gapped clusters
 
 Submariner is not validated for clusters that are provisioned in an air-gapped environment.
+
+[#gateway-limits]
+=== Numerous gateways cannot be deployed
+//2.5:23706
+
+You cannot deploy multiple gateways.
+
+[#submariner-vxlan]
+=== Submariner does not support VXLAN when NAT is enabled
+//2.5:24258
+
+Submariner with the VXLAN cable driver is currently only supported in non-NAT deployments.
