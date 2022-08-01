@@ -16,13 +16,13 @@ These procedures remove a cluster from management in either of the following sit
 - Destroying a cluster removes it from management and deletes the components of the cluster.
 - When you detach a managed cluster, the related namespace is automatically deleted. Do not place custom resources in this namespace. 
 
-* <<remove-a-cluster-by-using-the-console,Remove a cluster by using the console>>
-* <<remove-a-cluster-by-using-the-cli,Remove a cluster by using the command line>>
-* <<removing-a-cluster-from-management-in-special-cases,Remove remaining resources after removing a cluster>>
+* <<remove-a-cluster-by-using-the-console,Removing a cluster by using the console>>
+* <<remove-a-cluster-by-using-the-cli,Removing a cluster by using the command line>>
+* <<removing-a-cluster-from-management-in-special-cases,Removing remaining resources after removing a cluster>>
 * <<defragmenting-the-hub-cluster-etcd-database,Defragmenting the etcd database after removing a cluster>>
 
 [#remove-a-cluster-by-using-the-console]
-== Remove a cluster by using the console
+== Removing a cluster by using the console
 
 . From the navigation menu, navigate to *Infrastructure* > *Clusters*.
 . Select the option menu beside the cluster that you want to remove from management.
@@ -40,12 +40,18 @@ oc delete po -n open-cluster-management `oc get pod -n open-cluster-management |
 You can change the value of the hub cluster to not import automatically by changing the `disableHubSelfManagement` value to `true`, as described in link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online].
 
 [#remove-a-cluster-by-using-the-cli]
-== Remove a cluster by using the command line
+== Removing a cluster by using the command line
 
 To detach a managed cluster by using the command line of the hub cluster, run the following command: 
 
 ----
 oc delete managedcluster $CLUSTER_NAME
+----
+
+To delete the managed cluster after detaching, run the following command:
+
+----
+oc delete clusterdeployment <CLUSTER_NAME> -n $CLUSTER_NAME
 ----
 
 *Note:* If you attempt to detach the hub cluster, which is named `local-cluster`, be aware that the default setting of `disableHubSelfManagement` is `false`. This setting causes the hub cluster to reimport itself and manage itself when it is detached and it reconciles the `MultiClusterHub` controller. It might take hours for the hub cluster to complete the detachment process and reimport. If you want to reimport the hub cluster without waiting for the processes to finish, you can enter the following command to restart the `multiclusterhub-operator` pod and reimport faster:
@@ -57,7 +63,7 @@ oc delete po -n open-cluster-management `oc get pod -n open-cluster-management |
 You can change the value of the hub cluster to not import automatically by changing the `disableHubSelfManagement` value to `true`, as described in link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online].
 
 [#removing-a-cluster-from-management-in-special-cases]
-== Remove remaining resources after removing a cluster
+== Removing remaining resources after removing a cluster
 
 If there are remaining resources on the managed cluster that you removed, there are additional steps that are required to ensure that you remove all of the remaining components. Situations when these extra steps are required include the following examples:
 
@@ -81,16 +87,20 @@ open-cluster-management-agent         Active   10m
 open-cluster-management-agent-addon   Active   10m
 ----
 
-. Download the https://github.com/stolostron/deploy/blob/master/hack/cleanup-managed-cluster.sh[`cleanup-managed-cluster`] script from the `deploy` Git repository.
-. Run the `cleanup-managed-cluster.sh` script by entering the following command:
+. Run the following command to remove the remaining resources:
+
 +
 ----
-./cleanup-managed-cluster.sh
+oc delete namespaces open-cluster-management-agent open-cluster-management-agent-addon --wait=false
+oc get crds | grep open-cluster-management.io | awk '{print $1}' | xargs oc delete crds --wait=false
+oc get crds | grep open-cluster-management.io | awk '{print $1}' | xargs oc patch crds --type=merge -p '{"metadata":{"finalizers": []}}'
 ----
-. Run the following command to ensure that both namespaces are removed: 
+
+. Run the following command to ensure that both namespaces and all open cluster management `crds` are removed: 
 +
 ----
-oc get ns | grep open-cluster-management-agent 
+oc get crds | grep open-cluster-management.io | awk '{print $1}'
+oc get ns | grep open-cluster-management-agent
 ----
 
 [#defragmenting-the-hub-cluster-etcd-database]
