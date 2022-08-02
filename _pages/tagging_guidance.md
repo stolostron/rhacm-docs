@@ -30,11 +30,3 @@ Place **Technology preview** at the highest level of the component that is tech 
 Example:
 
 **Technology preview:** What's new is this is tech preview.
-
-## APIs
-
-Use a plug in to change an API draft from YAML to JSON. You can use, for instance, the VS Code plugin: YAML to JSON.
-
-From the command pallet, you can either copy the clipboard or the selected text and change YAML to JSON.
-
-You will need to copy all the definitions manually.
