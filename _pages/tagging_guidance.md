@@ -1,5 +1,5 @@
 ---
-permalink: /wr_guide
+permalink: /tagging_guidance
 title: "Special tagging"
 ---
 
