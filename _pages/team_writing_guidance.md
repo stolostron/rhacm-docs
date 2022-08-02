@@ -1,9 +1,11 @@
 ---
 permalink: /wr_guide
-title: "Guide for writing documentation"
+title: "Guide for Highlighting"
 ---
 
 ## Highlighting
+
+(need to add link to IBM style manual, RH supplemental, and patternFly)
 
 ### Special tag
 
