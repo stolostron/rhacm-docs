@@ -1,6 +1,6 @@
 ---
 permalink: /plan_main
-title: "Planning"
+title: "Planning work for the release"
 ---
 
-Add content
+Add content (lead will add)
