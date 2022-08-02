@@ -1,6 +1,6 @@
 ---
-permalink: /new_documentation
-title: "Planning new documentation"
+permalink: /new_guide
+title: "Setting up new guides/books"
 ---
 
 # Setting up a new book or renaming books

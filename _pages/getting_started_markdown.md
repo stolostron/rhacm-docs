@@ -3,6 +3,8 @@ permalink: /getting_started_markdown
 title: "Markdown tips and tricks"
 ---
 
+Markdown is used on our team for blogs.
+
 So you gotta start writing in Markdown? If you love DITA, this might be a hard transition. When you get going, you will probably grow to enjoy Markdown. And who does not enjoy having a new skill?
 
 1. Start here with a [basic tutorial](https://www.markdowntutorial.com/). (Should this trusty tutorial go down, search for another one online--but it has been available for a few years now.)
