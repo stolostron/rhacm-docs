@@ -1,6 +1,6 @@
 ---
 permalink: /wr_guide
-title: "Guide for Highlighting"
+title: "Special tagging"
 ---
 
 ## Highlighting
