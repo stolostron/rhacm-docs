@@ -3,6 +3,8 @@ permalink: /ui_text_writing
 title: "Writing about user interfaces"
 ---
 
+## UI writing supplemental 
+
 ## Prerequisites
 
 Always start with the [IBM Style Guide](https://source.redhat.com/groups/public/ccs/ccs_folder/ibm_style_guide/ibm_stylepdf). From the navigation, notice that the style guide covers not only product documentation, but a variety of other topics.
