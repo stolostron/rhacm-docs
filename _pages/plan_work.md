@@ -1,5 +1,5 @@
 ---
-permalink: /plan_main
+permalink: /plan_work
 title: "Planning work for the release"
 ---
 
