@@ -1,9 +1,9 @@
 ---
-permalink: /wr_guide
+permalink: /tagging_guidance
 title: "Special tagging"
 ---
 
-## Highlighting
+## Special tagging
 
 (need to add link to IBM style manual, RH supplemental, and patternFly)
 
