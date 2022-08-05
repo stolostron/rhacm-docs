@@ -9,7 +9,7 @@ title: "Special tagging"
 
 ### Special tag
 
-Please limit special tagging. Look around the documentation to see how and when tags are used. (Bold, with colon inside the bold tag
+Please limit special tagging. Look around the documentation to see how and when tags are used. (Bold, with colon inside the bold tag)
 
 **Note:** Use for extra information that is helpful.
 
