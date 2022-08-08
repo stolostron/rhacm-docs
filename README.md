@@ -57,8 +57,31 @@ dropdown: false
 ---
 ```
 4. Add a title for your tab  after `title:`.
-5. Add the link to the Markdown file (topic) you want your tab to link to. See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
+5. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:`. See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
 6. Add an integer after `nav_order:` to choose where the tab appears on the website.
+
+## Add new dropdown tab
+
+1. Create a new Markdown file on the __pages_ folder.
+2. Name the file `dropdown#.md` (replace # with an integer)
+3. Add the following template:
+```
+---
+layout: page
+title: 
+permalink: /
+nav: true
+nav_order:
+dropdown: true
+children: 
+    - title: 
+      permalink: /
+    - title: divider
+---
+```
+4. Add a title for your tab  after `title:`.
+5. Add an integer after `nav_order:` to choose where the tab appears on the website.
+6. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:` below `children:` See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
 
 ## Add new link card
 
