@@ -28,7 +28,10 @@ You can add new topics, tabs and cards to the website using Markdown files. GitH
 
 ## Add new topic
 
-1. Create new Markdown file in the __pages_ folder (observe the naming conventions).
+1. Create new Markdown file in the __pages_ folder.
+
+**Note:** Observe the naming conventions.
+
 2. Add the following template:
 ```
 ---
@@ -44,7 +47,10 @@ horizontal: false
 ## Add new tab
 
 1. Create a new Markdown file on the __pages_ folder.
-2. Name the file `tab#.md` (replace # with an integer)
+2. Name the file `tab#.md`.
+
+**Note:** Replace # with an integer.
+
 3. Add the following template:
 ```
 ---
@@ -57,13 +63,19 @@ dropdown: false
 ---
 ```
 4. Add a title for your tab  after `title:`.
-5. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:`. See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
+5. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:`.
+
+**Note:** See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
+
 6. Add an integer after `nav_order:` to choose where the tab appears on the website.
 
 ## Add new dropdown tab
 
 1. Create a new Markdown file on the __pages_ folder.
-2. Name the file `dropdown#.md` (replace # with an integer)
+2. Name the file `dropdown#.md`.
+
+**Note:** Replace `#` with an integer.
+
 3. Add the following template:
 ```
 ---
@@ -81,11 +93,16 @@ children:
 ```
 4. Add a title for your tab  after `title:`.
 5. Add an integer after `nav_order:` to choose where the tab appears on the website.
-6. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:` below `children:` See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
+6. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:` below `children:`
+
+**Note:** See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
 
 ## Add new link card
 
-1. Create a new Markdown file in the __projects_ folder (observe the naming conventions).
+1. Create a new Markdown file in the __projects_ folder.
+
+**Note:** Observe the naming conventions.
+
 2. Add the following template:
 ```
 ---
@@ -98,9 +115,15 @@ importance:
 category: work
 ---
 ```
-3. Add a title for your card after `title:`. It must fit on a single line and must not exceed three words in length.
+3. Add a title for your card after `title:`.
+
+**Note:** It must fit on a single line and must not exceed three words in length.
+
 4. Add a description for your card. It appears under the title and must fill three lines once published.
-5. Create a screenshot for the website you are linking the card to. See [Screenshot requirements](/README.md#Screenshot-requirements) for more details.
+5. Create a screenshot for the website you are linking the card to.
+
+**Note:** See [Screenshot requirements](/README.md#Screenshot-requirements) for more details.
+
 6. Add the link to the website you want to link to after `redirect:`
 7. Add an integer after `importance:` to set where the card appears in the list.
 
