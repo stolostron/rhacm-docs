@@ -2,11 +2,9 @@
 
 It is helpful learn how to build  a website for GitHub pages using Jekyll from scratch. This ensures that your system is set up correctly. If you only want to maintain this website, you can skip to [Maintaining](/README.md#Maintaining).
 
-## Build from scratch
+## Prerequisites
 
-### Prerequisites
-
-#### MacOS
+### MacOS
 
 Install the following software packages:
 
@@ -18,15 +16,53 @@ Install the following software packages:
 - [Make](https://formulae.brew.sh/formula/make#default)
 - [Jekyll](https://jekyllrb.com/docs/installation/macos/)
 
-### Installation
+## Installation
 
 1. Choose a theme for your website. [Cayman](https://github.com/pages-themes/cayman) is the default option but there are many themes available on GitHub. This website uses [al-folio](https://github.com/pages-themes/cayman).
 
 2. 
 
-## Maintaining
+# Maintaining
 
-Insert how-to maintain and add content.
+Insert how to maintain and add content.
+
+## Add new topic
+
+1. Create new Markdown file in the __pages_ folder (observe the naming conventions).
+2. Add the following template:
+```
+---
+layout: page
+title:
+permalink: /
+horizontal: false
+---
+```
+3. Add a title for your topic after `title:`.
+4. Add the link to the file you just created after `permalink:`.
+
+## Add new tab
+
+1. Create a new Markdown file on the __pages_ folder.
+2. Name the file `tab#.md` (replace # with an integer)
+3. Add the following template:
+```
+---
+layout: page
+title: 
+permalink: /
+nav: true
+nav_order:
+dropdown: false
+---
+```
+4. Add a title for your tab  after `title:`.
+5. Add the link to the Markdown file (topic) you want your tab to link to. See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
+6. Add an integer after `nav_order:` to choose where the tab appears on the website.
+
+## Add new link card
+
+Insert content.
 
 # Deployment
 
