@@ -24,7 +24,7 @@ Install the following software packages:
 
 # Maintaining
 
-Insert how to maintain and add content.
+You can add new topics, tabs and cards to the website using Markdown files. GitHub pages will automatically update the site when changes are detected.
 
 ## Add new topic
 
@@ -85,7 +85,32 @@ children:
 
 ## Add new link card
 
-Insert content.
+1. Create a new Markdown file in the __projects_ folder (observe the naming conventions).
+2. Add the following template:
+```
+---
+layout: page
+title: 
+description: 
+img: assets/img/##-source.png
+redirect: 
+importance: 
+category: work
+---
+```
+3. Add a title for your card after `title:`. It must fit on a single line and must not exceed three words in length.
+4. Add a description for your card. It appears under the title and must fill three lines once published.
+5. Create a screenshot for the website you are linking the card to. See [Screenshot requirements](/README.md#Screenshot-requirements) for more details.
+6. Add the link to the website you want to link to after `redirect:`
+7. Add an integer after `importance:` to set where the card appears in the list.
+
+## Screenshot requirements
+
+- Screenshot size must be 700x575 pixels.
+- Save screenshot as a `.png` file.
+- Only screenshot website content. No user interface that must be visible that is not part of the HTML code of the website.
+- Remove sensitive information from the screenshot by painting over it. Do not use blur.
+- The naming convention of the file must follow `##-name`.
 
 # Deployment
 
