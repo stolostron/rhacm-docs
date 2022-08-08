@@ -49,7 +49,7 @@ horizontal: false
 1. Create a new Markdown file on the __pages_ folder.
 2. Name the file `tab#.md`.
 
-**Note:** Replace # with an integer.
+**Note:** Replace `#` with an integer.
 
 3. Add the following template:
 ```
