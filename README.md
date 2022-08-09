@@ -28,7 +28,7 @@ You can add new topics, tabs, and cards to the website using Markdown files. Git
 
 ## Add new topic
 
-1. Create new Markdown file in the __pages_ folder.
+1. Create a new Markdown file in the __pages_ folder.
 2. Add the following template:
 ```
 ---
