@@ -1,9 +1,9 @@
 ---
 layout: page
-title: ACM glossary
-description: Important terms and names of systems related to ACM, including descriptions.
-img: assets/img/09-acmglossary.png
-redirect: https://docs.google.com/document/d/1UBydkX3bmCLRi5a3ExVllYt_Hi-njvuiyQ2hOpWx7rQ/edit#heading=h.w8wgh38e324
+title: ACM docs
+description: Published verison of Red Hat Advanced Cluster Management for Kubernetes documentation.
+img: assets/img/09-acmdocs.png
+redirect: https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/
 importance: 9
 category: work
 ---
