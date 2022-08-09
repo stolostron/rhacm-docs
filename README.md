@@ -155,10 +155,9 @@ The previous command will create or update static HTML files for other hosting p
 
 # Upgrading from a previous version
 
-You can upgrade to the latest al-folio version by runniong the following commands:
+Assuming the current directory is <your-repo-name>, you can upgrade to the latest al-folio version by running the following commands:
 
 ```bash
-# Assuming the current directory is <your-repo-name>
 $ git remote add upstream https://github.com/alshedivat/al-folio.git
 $ git fetch upstream
 $ git rebase vx.x.x
