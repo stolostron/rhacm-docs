@@ -259,29 +259,6 @@ oc delete csv -n openshift-operators volsync-product.v0.4.0
 
 If you have a different version of VolSync installed, replace `v0.4.0` with your installed version. 
 
-[#provision-bare-sushy-tools]
-=== Provisioning a bare metal managed cluster fails when using sushy-tools
-//2.5:22559
-
-When you provision a managed cluster on bare metal with sushy-tools, the provision might fail with a `virtual media cd query return` 500 error. Using sushy-tools is not guaranteed to be reliable for long running clusters. 
-
-Ensure that you have the latest version of sushy-tools, and restart the sushy emulator to work around the issue.
-
-[#disable_prov_network]
-=== Provisioning a bare metal cluster on {ocp-short} 4.10 fails on a dual stack hub
-//2.5:22488
-
-When you provision a bare metal cluster on a dual stack hub that is running {ocp-short} version 4.10, the provision fails with the following error message: 'timeout reached while inspecting the node'. To bypass this issue, disable the provisioning network in your `install-config.yaml` file, as shown in the following example: 
-
-[source,yaml]
-----
-platform:
-  baremetal:
-    provisioningNetwork: "Disabled" 
-----
-
-See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html/installing/deploying-installer-provisioned-clusters-on-bare-metal#modifying-install-config-for-no-provisioning-network_ipi-install-installation-workflow[Deploying with no provisioning network] in the {ocp-short} documentation for more information about the provisioning network.
-
 [#clusterset-label-not-removed]
 === Deleting a managed cluster set does not automatically remove its label
 //2.5:20727
@@ -341,22 +318,6 @@ oc delete deployment multiclusterhub-repo -n <namespace>
 
 When you create an on-premises cluster using the {product-title-short} console, you must select an available subnet for your cluster. It is not marked as a required field. 
 
-
-[#create-fail-gcp]
-=== Cluster provisioning on Google Cloud Platform fails
-//2.4:17930
-
-When you try to provision a cluster on Google Cloud Platform (GCP), it might fail with the following error:
-
-----
-Cluster initialization failed because one or more operators are not functioning properly.
-The cluster should be accessible for troubleshooting as detailed in the documentation linked below,
-https://docs.openshift.com/container-platform/latest/support/troubleshooting/troubleshooting-installations.html
-The 'wait-for install-complete' subcommand can then be used to continue the installation
-----
-
-You can work around this error by enabling the https://console.cloud.google.com/apis/library/networksecurity.googleapis.com[Network Security API] on the GCP project, which allows your cluster installation to continue.  
-
 [#iso-image-name-too-long]
 === Cluster provisioning with Infrastructure Operator fails
 //2.4:17411
@@ -389,16 +350,6 @@ If this problem occurs, it is typically on the following versions of {ocp-short}
 * 4.9.6 and earlier
 
 To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9.7 or later.
-
-[#cannot-hibernate-azure-gov]
-=== Cannot hibernate an Azure Government cluster
-//2.4:17580
-
-When you try to hibernate an Azure Government cluster, the hibernation fails with the following error that is added to the provision pod log:
-
-----
-Confidential Client is not supported in Cross Cloud request
-----
 
 [#cluster-local-offline-reimport]
 === Local-cluster status offline after reimporting with a different name
@@ -470,57 +421,11 @@ Hub cluster and manage cluster time might become out-of-sync, displaying in the 
 You cannot import IBM {ocp-short} Kubernetes Service version 3.11 clusters.
 Later versions of IBM OpenShift Kubernetes Service are supported.
 
-[#detaching-openshift-container-platform-3.11-does-not-remove-the-open-cluster-management-agent]
-=== Detaching {ocp-short} 3.11 does not remove the _open-cluster-management-agent_
-// 2.0.0:3847
-
-When you detach managed clusters on {ocp-short} 3.11, the `open-cluster-management-agent` namespace is not automatically deleted. Manually remove the namespace by running the following command:
-
-----
-oc delete ns open-cluster-management-agent
-----
-
 [#automatic-secret-updates-for-provisioned-clusters-is-not-supported]
 === Automatic secret updates for provisioned clusters is not supported
 // 2.0.0:3702
 
-When you change your cloud provider access key, the provisioned cluster access key is not updated in the namespace. This is required when your credentials expire on the cloud provider where the managed cluster is hosted and you try delete the managed cluster. If something like this occurs, run the following command for your cloud provider to update the access key: 
-
-* Amazon Web Services (AWS)
-
-+
-----
-oc patch secret {CLUSTER-NAME}-aws-creds -n {CLUSTER-NAME} --type json -p='[{"op": "add", "path": "/stringData", "value":{"aws_access_key_id": "{YOUR-NEW-ACCESS-KEY-ID}","aws_secret_access_key":"{YOUR-NEW-aws_secret_access_key}"} }]'
-----
-
-* Google Cloud Platform (GCP)
-
-+
-You can identify this issue by a repeating log error message that reads, `Invalid JWT Signature` when you attempt to destroy the cluster. If your log contains this message, obtain a new Google Cloud Provider service account JSON key and enter the following command:
-
-+
-----
-oc set data secret/<CLUSTER-NAME>-gcp-creds -n <CLUSTER-NAME> --from-file=osServiceAccount.json=$HOME/.gcp/osServiceAccount.json
-----
-+
-Replace `_CLUSTER-NAME_` with the name of your cluster.
-+
-Replace the path to the file `$HOME/.gcp/osServiceAccount.json` with the path to the file that contains your new Google Cloud Provider service account JSON key. 
-
-
-* Microsoft Azure 
-
-+
-----
-oc set data secret/{CLUSTER-NAME}-azure-creds -n {CLUSTER-NAME} --from-file=osServiceAccount.json=$HOME/.azure/osServiceAccount.json
-----
-
-* VMware vSphere
-
-+
-----
-oc patch secret {CLUSTER-NAME}-vsphere-creds -n {CLUSTER-NAME} --type json -p='[{"op": "add", "path": "/stringData", "value":{"username": "{YOUR-NEW-VMware-username}","password":"{YOUR-NEW-VMware-password}"} }]'
-----
+When you change your cloud provider access key on the cloud provider side, you also need to update the corresponding credential for this cloud provider on the console of {product-title-short}. This is required when your credentials expire on the cloud provider where the managed cluster is hosted and you try to delete the managed cluster.
 
 [#node-information-from-the-managed-cluster-cannot-be-viewed-in-search]
 === Node information from the managed cluster cannot be viewed in search
