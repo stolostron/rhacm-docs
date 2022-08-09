@@ -155,7 +155,7 @@ The previous command will create or update static HTML files for other hosting p
 
 # Upgrading from a previous version
 
-You can upgrade to the latest al-folio version by completing the following steps:
+You can upgrade to the latest al-folio version by runniong the following commands:
 
 ```bash
 # Assuming the current directory is <your-repo-name>
