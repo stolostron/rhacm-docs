@@ -161,8 +161,9 @@ You can upgrade to the latest al-folio version by runniong the following command
 # Assuming the current directory is <your-repo-name>
 $ git remote add upstream https://github.com/alshedivat/al-folio.git
 $ git fetch upstream
-$ git rebase v0.3.5
+$ git rebase v#.#.#
 ```
+**Note:** Replace `#` to match the current version of [al-folio](https://github.com/alshedivat/al-folio)
 
 If you have extensively customized a previous version, it might be trickier to upgrade. You can still follow the steps above, but `git rebase` may result in merge conflicts that must be resolved. See [git rebase manual](https://help.github.com/en/github/using-git/about-git-rebase) and how to [resolve conflicts](https://help.github.com/en/github/using-git/resolving-merge-conflicts-after-a-git-rebase) for more information.
 
