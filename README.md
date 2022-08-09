@@ -137,7 +137,7 @@ This website is already deployed using [GitHub Pages](https://pages.github.com/)
 
 ### Manual deployment to GitHub Pages
 
-Run the deploy script from the root directory of your repository:
+Run the following script from the root directory of your repository:
 ```bash
 $ ./bin/deploy
 ```
@@ -145,7 +145,7 @@ The previous command uses the `master` branch for the source code and deploys th
 
 ### Deployment to a different hosting server
 
-Run the following command to build your website for other hosting options besides GitHub Pages.
+Run the following command to build your website for other hosting options besides GitHub Pages:
 ```bash
 $ bundle exec jekyll build
 ```
