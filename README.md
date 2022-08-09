@@ -153,9 +153,9 @@ The previous command will create or update static HTML files for other hosting p
 
 **Note:** Correctly set the `url` and `baseurl` fields in `_config.yml` before building the website. If you are deploying your website to `your-domain.com/your-project/`, you must set `url: your-domain.com` and `baseurl: /your-project/`. If you are deploing directly to `your-domain.com`, leave `baseurl` blank.
 
-# Upgrading from a previous version
+# Upgrading theme version
 
-Assuming the current directory is <your-repo-name>, you can upgrade to the latest al-folio version by running the following commands:
+Assuming the current directory is `your-repo-name`, you can upgrade to the latest al-folio version by running the following commands:
 
 ```bash
 $ git remote add upstream https://github.com/alshedivat/al-folio.git
