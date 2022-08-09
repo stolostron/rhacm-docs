@@ -7,10 +7,6 @@ horizontal: false
 
 Links to software we use in our workflow. Feel free to use alternatives if you prefer, but it is better to start with the same software that our team uses so they can provide support if needed.
 
-# Essential
-
-Required for the work we do.
-
 ## Visual Studio Code
 
 [Download](https://code.visualstudio.com/download/)
@@ -28,10 +24,6 @@ Messaging software to interact with Red Hat employees.
 [Download](https://www.bluejeans.com/downloads/)
 
 Video-conferencing software used for Red Hat meetings.
-
-# Optional
-
-Ueful for side projects or other limited use cases.
 
 ## GIMP
 
