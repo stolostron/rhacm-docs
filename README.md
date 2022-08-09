@@ -149,7 +149,7 @@ Run the following command to build your website for other hosting options beside
 ```bash
 $ bundle exec jekyll build
 ```
-The previous command will create or update static HTML files for other hosting platforms in the __site/_ folder.
+The previous command will create or update static HTML files for other hosting platforms in the __site_ folder.
 
 **Note:** Correctly set the `url` and `baseurl` fields in `_config.yml` before building the website. If you are deploying your website to `your-domain.com/your-project/`, you must set `url: your-domain.com` and `baseurl: /your-project/`. If you are deploing directly to `your-domain.com`, leave `baseurl` blank.
 
