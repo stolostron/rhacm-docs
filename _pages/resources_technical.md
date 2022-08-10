@@ -5,10 +5,15 @@ permalink: /resources_technical
 horizontal: false
 ---
 
+Additional reading for relevant topics.
+
 ## Red Hat OpenShift
   - [OpenShift resources](https://www.openshift.com/learn/resources/)
   - [Get started](https://www.openshift.com/learn/get-started/)
   - [OpenShift Container Platform documentation](https://docs.openshift.com/container-platform/4.2/welcome/index.html)
+
+## Hypershift
+  - [HyperShift documentation](https://hypershift-docs.netlify.app/)
 
 ## Kubernetes
   - [Kubernetes documentation](https://kubernetes.io/docs/home/)
@@ -17,6 +22,7 @@ horizontal: false
 ## GitHub
   - [Introduction to GitHub](https://lab.github.com/githubtraining/introduction-to-github)
   - [GitHub training](https://lab.github.com/githubtraining)
+  - [GitHub pages](https://pages.github.com/)
 
 ## Helm
   - [Helm documentation](https://helm.sh/docs/)
