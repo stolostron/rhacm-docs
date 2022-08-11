@@ -1,10 +1,8 @@
 [#managing-security-policies]
 = Managing security policies
 
-Create a security policy to report and validate your cluster compliance based on your specified security standards, categories, and controls. To create a policy for {product-title}, you must create a YAML file on your managed clusters.
-
-*Note*: You can copy and paste an existing policy in to the _Policy YAML_.
-The values for the parameter fields are automatically entered when you paste your existing policy. You can also search the contents in your policy YAML file with the search feature.
+Create a security policy to report and validate your cluster compliance based on your specified security standards,
+categories, and controls.
 
 View the following sections:
 
@@ -42,11 +40,11 @@ Complete the following steps to create a policy from the command line interface 
 . Create a policy by running the following command:
 +
 ----
-kubectl create -f policy.yaml -n <namespace>
+kubectl create -f policy.yaml -n <policy-namespace>
 ----
 
 . Define the template that the policy uses.
-Edit your `.yaml` file by adding a `templates` field to define a template.
+Edit your `.yaml` file by adding a `policy-templates` field to define a template.
 Your policy might resemble the following YAML file:
 
 +
@@ -59,16 +57,17 @@ metadata:
 spec:
   remediationAction: "enforce" # or inform
   disabled: false # or true
-  namespaces:
-    include: ["default"]
-    exclude: ["kube*"]
+  namespaceSelector:
+    include:
+    - "default"
+    - "my-namespace"
   policy-templates:
     - objectDefinition:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          namespace: kube-system # will be inferred
           name: operator
+          # namespace: # will be supplied by the controller via the namespaceSelector
         spec:
           remediationAction: "inform"
           object-templates:
@@ -108,7 +107,7 @@ spec:
       cloud: IBM
 ----
 
-. Define a `PlacementBinding` to bind your policy and your `PlacementRule`.
+. Define a `PlacementBinding` to bind your policy to your `PlacementRule`.
 Your `PlacementBinding` might resemble the following YAML sample:
 +
 [source,yaml]
@@ -135,13 +134,13 @@ Complete the following steps to view your security policy from the CLI:
 . View details for a specific security policy by running the following command:
 +
 ----
-kubectl get securitypolicy <policy-name> -n <namespace> -o yaml
+kubectl get policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace> -o yaml
 ----
 
 . View a description of your security policy by running the following command:
 +
 ----
-kubectl describe securitypolicy <name> -n <namespace>
+kubectl describe policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace>
 ----
 
 [#creating-a-cluster-security-policy-from-the-console]
@@ -167,7 +166,7 @@ Your YAML file might resemble the following policy:
      policy.open-cluster-management.io/standards: 'NIST,HIPAA'
  spec:
    complianceType: musthave
-   namespaces:
+   namespaceSelector:
      exclude: ["kube*"]
      include: ["default"]
    object-templates:
@@ -279,10 +278,10 @@ Delete a security policy from the CLI or the console.
 .. Delete a security policy by running the following command:
 +
 ----
-kubectl delete policy <securitypolicy-name> -n <open-cluster-management-namespace>
+kubectl delete policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace>
 ----
 +
-After your policy is deleted, it is removed from your target cluster or clusters. Verify that your policy is removed by running the following command: `kubectl get policy <securitypolicy-name> -n <open-cluster-management-namespace>`
+After your policy is deleted, it is removed from your target cluster or clusters. Verify that your policy is removed by running the following command: `kubectl get policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace>`
 
 * Delete a security policy from the console:
 +
