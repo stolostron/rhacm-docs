@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Writing guidance
-permalink: /wr_guidance
+title: Special tag guidance
+permalink: /wr_special_tag_guidance
 horizontal: false
 ---
 

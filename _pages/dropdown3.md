@@ -18,8 +18,8 @@ children:
     - title: Accessibility
       permalink: /accessibility_main
     - title: divider
-    - title: Writing guidance
-      permalink: /wr_guidance
+    - title: Special tag guidance
+      permalink: /wr_special_tag_guidance
     - title: divider
     - title: Style resources
       permalink: /resource_links
