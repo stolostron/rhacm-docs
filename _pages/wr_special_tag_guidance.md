@@ -5,7 +5,7 @@ permalink: /wr_special_tag_guidance
 horizontal: false
 ---
 
-Limit special tagging. Look around the documentation to see how and when tags are used. (Bold, with colon inside the bold tag
+Limit special tagging. All special tags we use bold text and bold colon. See the following list on how and when to use special tags:
 
 **Note:** Use for extra information that is helpful.
 
