@@ -5,7 +5,7 @@ permalink: board_maintenance
 horizontal: false
 ---
 
-The lead is the primary board focal because the lead needs to know the team's commitment in order to speak truthfully about the teams effort, priorities, and sprint planning. Everyone helps maintain their issues with the following guidance:
+As the primary board focal, the lead needs to know everyone's commitment in order to speak truthfully about the team's effort, priorities, and sprint planning. Everyone helps maintain their issues with the following guidance:
 
 ## New issues
 
