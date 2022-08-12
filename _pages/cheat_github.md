@@ -62,7 +62,7 @@ $ git push --set-upstream origin of-bz-22189-25
 $ git branch
 ```
 
-17. Switch back to base branch in Visual Studio Code
+17. Switch back to base branch
 ```
 $ git checkout 2.5_stage
 ```
@@ -72,7 +72,7 @@ $ git checkout 2.5_stage
 $ git pull
 ```
 
-19. Check that your changes downloads in Visual Studio Code after step 18
+19. Check that your changes download in Visual Studio Code after step 18
 
 20. Delete your local branch after in Visual Studio Code
 ```
