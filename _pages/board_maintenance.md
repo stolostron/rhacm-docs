@@ -18,7 +18,7 @@ As the primary board focal, the lead needs to know everyone's commitment in orde
   
 ## Existing issues
 
-  - Keep up with existing issues, but no issues should be 6 months old untouched, for instance. Removing three `stale` bots is a possible sign of inefficent template, process, not enough information, low priority, etc... Please close issues that are going no where after three `stale` bots, or remove our `squad doc` label. Originator can always open new effort during the next release. (Including `blog` issues)
+  - Keep up with existing issues, but no issues should be 6 months old untouched, for instance. Removing three `stale` bots is a possible sign of inefficient template, process, not enough information, low priority, etc... Please close issues that are going nowhere after three `stale` bots, or remove our `squad doc` label. Originator can always open a new effort during the next release. (Including `blog` issues)
   - If issue is not release work or customer reported, ask if still valid based on the current doc. (Compare to latest release)
   - If an enhancement or an addition is requested internally, it may be suitable for the next release. Ask the originator and PM.
   
@@ -32,13 +32,13 @@ As the primary board focal, the lead needs to know everyone's commitment in orde
 
 ## Board review in scrums
 
-  - Scrum lead looks at each assignees board for balance of issues
-  - Scan for old or duplicate issues
-  - Prioritize issues if needed
-  - Assign any unassigned issues
-  - Check for issues sitting in verificication (what is needed to close them?)
-  - Leads sprint planning for members
-  - Comments and snapshots incomplete or unplanned sprint work to capture trends and viloscity 
+  - Scrum lead looks at each assignees board for balance of issues.
+  - Scan for old or duplicate issues.
+  - Prioritize issues if needed.
+  - Assign any unassigned issues.
+  - Check for issues sitting in verification (what is needed to close them?).
+  - Leads sprint planning for members.
+  - Comments and snapshots incomplete or unplanned sprint work to capture trends and viloscity .
 
 ## Sprints
 
