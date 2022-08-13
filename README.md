@@ -66,7 +66,7 @@ dropdown: false
 
 ## Add new dropdown tab
 
-1. Create a new Markdown file on the __pages_ folder.
+1. Create a new Markdown file in the __pages_ folder.
 2. Name the file `dropdown#.md`. Replace `#` with an integer.
 3. Add the following template:
 ```
