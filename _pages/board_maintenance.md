@@ -47,7 +47,7 @@ As the primary board focal, the lead needs to know everyone's commitment in orde
   - Blogs can go into a sprint milestone. Please also label `blog`.
   - DDF items are often requests from Red Hatters for enhancements to the product. These are treated as RFEs via the Jira process. Comment and close unless doc changes are required. 
   - DDF items are also often requests for doc enhancements. Label them enhancements, not bugs. Get with developers to see what changes make sense, if any.
-  - DDF items are also not opened in the proper release and sprint. Please change before you move from `untriage`. 
+  - DDF items are also not opened in the proper release and sprint. Please change before you move from `untriaged`. 
   
 
   
