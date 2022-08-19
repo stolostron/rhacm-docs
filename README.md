@@ -19,6 +19,7 @@ Install the following software packages:
 - [GCC](https://formulae.brew.sh/formula/gcc)
 - [Make](https://formulae.brew.sh/formula/make#default)
 - [Jekyll](https://jekyllrb.com/docs/installation/macos/)
+- [Bundle](https://docs.brew.sh/Manpage#bundle-subcommand)
 
 ## Installation
 
