@@ -117,6 +117,10 @@ category: work
 - Remove sensitive information from the screenshot by painting over it. Do not use blur.
 - The naming convention of the file must follow `##-name`.
 
+## Easter eggs
+
+Easter eggs must be squirrel-themed.
+
 # Deployment
 
 This website is already deployed using [GitHub Pages](https://pages.github.com/). Some themes don't automatically update when changes are made to the repository but [al-folio](https://github.com/alshedivat/al-folio) supports this feature. No further deployment is needed. If you do need to deploy the website again, see the following instructions:
