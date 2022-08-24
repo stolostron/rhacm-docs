@@ -25,12 +25,13 @@ After you log into your {product-title-short} hub cluster, select *Governance* f
 
 Configure an automation for a specific policy by clicking *Configure* in the _Automation_ column. You can create automation when the policy automation panel appears. From the _Ansible credential_ section, click the drop-down menu to select an Ansible credential. If you need to add a credential, see link:../multicluster_engine/credentials/credential_intro.adoc#managing-credentials-overview[Managing credentials overview].
 
-*Note*: This credential is copied to the same namespace as the policy. The credential is used by the `AnsibleJob` resource that is created to initiate the automation. Changes to the Ansible credential in the _Credentials_ section of the console is automatically updated.
+*Note:* This credential is copied to the same namespace as the policy. The credential is used by the `AnsibleJob` resource that is created to initiate the automation. Changes to the Ansible credential in the _Credentials_ section of the console is automatically updated.
 
-After a credential is selected, click the Ansible job drop-down list to select a job template. In the _Extra variables_ section, add the parameter values from the `extra_vars` section of the `PolicyAutomation`. Select the frequency of the automation. You can select _Run once mode_, or _Disable automation_.
+After a credential is selected, click the Ansible job drop-down list to select a job template. In the _Extra variables_ section, add the parameter values from the `extra_vars` section of the `PolicyAutomation`. Select the frequency of the automation. You can select _Run once mode_, _Run everyEvent mode_, or _Disable automation_.
 
 ** _Manual run_: Manually set this automation to run once. After the automation runs, it is set to `disabled`. *Note*: You can only select _Manual run_ mode when the schedule frequency is disabled.
 ** _Run once mode_: When a policy is violated, the automation runs one time. After the automation runs, it is set to `disabled`. After the automation is set to `disabled`, you must continue to run the automation manually. When you run _once mode_, the extra variable of `target_clusters` is automatically supplied with the list of clusters that violated the policy. The Ansible Tower Job template must have `PROMPT ON LAUNCH` enabled for the `EXTRA VARIABLES` section.
+** _Run everyEvent mode_: When a policy is violated, the automation runs every time for each unique policy violation per managed cluster. Use the `DelayAfterRunSeconds` parameter to set the minimum seconds before an automation can be restarted on the same cluster. If the policy is violated multiple times during the delay period and kept in the violated state, the automation runs one time after the delay period. The default is 0 seconds and is only applicable for the `everyEvent` mode. When you run `everyEvent` mode, the extra variable of `target_clusters` and Ansible Tower Job template is the same as _once mode_.
 ** _Disable automation_: When the scheduled automation is set to `disabled`, the automation does not run until the setting is updated.
 
 Save your policy violation automation by selecting *Submit*. When you select the _View Job_ link from the Ansible job details side panel, the link directs you to the job template on the _Search_ page. After you successfully create the automation, it is displayed in the _Automation_ column.
@@ -69,9 +70,12 @@ spec:
 
 . In the `extra_vars` section, add any parameters you need to pass to the Ansible job template.
 
-. Set the mode to either `once` or `disabled`.  The `once` mode runs the job one time and then the mode is set to `disabled`.
+. Set the mode to either `once`, `everyEvent`, or `disabled`.
 +
 ** _once mode_: When a policy is violated, the automation runs one time. After the automation runs, it is set to `disabled`. After the automation is set to `disabled`, you must continue to run the automation manually. When you run _once mode_, the extra variable of `target_clusters` is automatically supplied with the list of clusters that violated the policy. The Ansible Tower Job template must have `PROMPT ON LAUNCH` enabled for the `EXTRA VARIABLES` section.
++
+*** _everyEvent mode_: When a policy is violated, the automation runs every time for each unique policy violation per managed cluster. Use the `DelayAfterRunSeconds`parameter to set the minimum seconds before an automation can be restarted on the same cluster. If the policy is violated multiple times during the delay period and kept in the violated state, the automation runs one time after the delay period. The default is 0 seconds and is only applicable for the `everyEvent` mode. When you run `everyEvent` mode, the extra variable of `target_clusters` and Ansible Tower Job template is the same as _once mode_.
+
 ** _Disable automation_: When the scheduled automation is set to `disabled`, the automation does not run until the setting is updated.
 
 . Set the `policyRef` to the name of your policy.
@@ -92,3 +96,5 @@ metadata:
 ----
 
 * When the policy is in `once` mode, the automation runs when the policy is non-compliant. The `extra_vars` variable, named `target_clusters` is added and the value is an array of each managed cluster name where the policy is non-compliant.
+
+* When the policy is in `_everyEvent_` mode and the `DelayAfterRunSeconds` exceeds the defined time value, the policy is non-compliant and the automation runs for every policy violation.
