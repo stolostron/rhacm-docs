@@ -1,7 +1,14 @@
 [#volsync-rsync-rep]
 = Replicating persistent volumes with VolSync
 
-You can use three methods to replicate persistent volumes with VolSync, which depend on the number of synchronization locations that you have. The Rsync method is used for this example. For information about the other methods and more information about Rsync, see https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation.  
+You can use three methods to replicate persistent volumes with VolSync, which depend on the number of synchronization locations that you have. 
+
+[#rsync-backup-volsync]
+== Comfiguring an Rsync backup
+
+An Rsync backup creates a 1:1 asynchronous replication of persistent volumes. You can use Rsync-based replication for disaster recovery or sending data to a remote site.
+
+The Rsync method is used for this example. For information about Rsync, see https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation.  
 
 Rsync replication is a commonly used, one-to-one replication of persistent volumes. This is used for replicating data to a remote site. 
 
@@ -328,3 +335,139 @@ Status:
 If the `Last Sync Time` has no time listed, then the replication is not complete.
 
 You have a replica of your original persistent volume claim. 
+
+[#restic-backup-volsync]
+== Configuring a restic backup
+
+A restic-based backup copies a restic-based backup copy for the persistent volume in a location that is specified in your `restic-config.yaml` secret file.
+
+Complete the following steps to configure a restic-based backup:
+
+. Specify a repository where your backup images are stored by creating a secret that resembles the following YAML content:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: restic-config
+type: Opaque
+stringData:
+  # The repository url
+  RESTIC_REPOSITORY: <my-restic-repository>
+  # The repository encryption key
+  RESTIC_PASSWORD: <my-secure-restic-password>
+  # ENV vars specific to the chosen back end
+  # https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html
+  AWS_ACCESS_KEY_ID: access
+  AWS_SECRET_ACCESS_KEY: password
+----
++
+Replace `my-restic-repository` with the location of the S3 bucket repository where you want to store your backup files.
++
+Replace `my-secure-restic-password` with the encryption key that is required to access the repository. 
++ 
+Replace `access` and `password` with the credentials for your provider, if required. 
++
+*Important:* When backing up multiple persistent volume claims to the same S3 bucket, the path to the bucket must be unique for each persistent volume claim. Each persistent volume claim is backed up with a separate `ReplicationSource`, and each requires a separate restic-config secret.
++
+By sharing the same S3 bucket, each `ReplicationSource` has write access to the entire S3 bucket.
+
+. Configure your backup policy by creating a `ReplicationSource` object that resembles the following YAML content: 
++
+[source,yaml]
+----
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: mydata-backup
+spec:
+  # The PVC to be backed up
+  sourcePVC: mydata
+  trigger:
+    # Take a backup every 30 minutes
+    schedule: "*/30 * * * *"
+restic:
+  # Prune the repository (repack to free space) every 2 weeks
+  pruneIntervalDays: 14
+  # Name of the Secret with the connection information
+  repository: restic-config
+  # Retention policy for backups
+  retain:
+    hourly: 6
+    daily: 5
+    weekly: 4
+    monthly: 2
+    yearly: 1
+  # Clone the source volume prior to taking a backup to ensure a
+  # point-in-time image.
+  copyMethod: Clone
+  # The StorageClass to use when creating the PiT copy (same as source PVC if omitted)
+  #storageClassName: my-sc-name
+  # The VSC to use if the copy method is Snapshot (default if omitted)
+  #volumeSnapshotClassName: my-vsc-name
+----
+
+[#rclone-backup-volsync]
+== Configuring an Rclone backup
+
+An Rclone backup copies a single persistent volume to multiple locations by using Rclone through an intermediate object storage location, like AWS S3.
+
+Complete the following steps to configure Rclone backups:
+
+. Create a `ReplicationSource` custom that resembles the following example: 
++
+[source,yaml]
+----
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: database-source
+  namespace: source
+spec:
+  # The PVC to sync
+  sourcePVC: mysql-pv-claim
+  trigger:
+    # Synchronize every 6 minutes
+    schedule: "*/6 * * * *"
+  rclone:
+    # The configuration section of the rclone config file to use
+    rcloneConfigSection: "aws-s3-bucket"
+    # The path to the object bucket
+    rcloneDestPath: "volsync-test-bucket/mysql-pv-claim"
+    # Secret holding the rclone configuration
+    rcloneConfig: "rclone-secret"
+    # Method used to generate the PiT copy
+    copyMethod: Snapshot
+    # The StorageClass to use when creating the PiT copy (same as source PVC if omitted)
+    storageClassName: my-sc-name
+    # The VSC to use if the copy method is Snapshot (default if omitted)
+    volumeSnapshotClassName: my-vsc-name
+----
+
+. Create a `ReplicationDestination` custom resource that resembles the following example:
++
+[source,yaml]
+----
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: database-destination
+  namespace: dest
+spec:
+  trigger:
+    # Every 6 minutes, offset by 3 minutes
+    schedule: "3,9,15,21,27,33,39,45,51,57 * * * *"
+  rclone:
+    rcloneConfigSection: "aws-s3-bucket"
+    rcloneDestPath: "volsync-test-bucket/mysql-pvc-claim"
+    rcloneConfig: "rclone-secret"
+    copyMethod: Snapshot
+    accessModes: [ReadWriteOnce]
+    capacity: 10Gi
+    storageClassName: my-sc
+    volumeSnapshotClassName: my-vsc
+----
