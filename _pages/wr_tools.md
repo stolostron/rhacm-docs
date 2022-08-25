@@ -7,7 +7,8 @@ horizontal: false
 
 Quality of the Red Hat Advanced Cluster Management for Kubernetes (RHACM) documentation is vital for customer success. Some items of quality that we verify are functionality of links and spelling. Maintain the quality of the RHACM docs by using the following tools:
 
-* [Check My Links](https://chrome.google.com/webstore/detail/check-my-links/ojkcdipcgfaekbeaelaapakgnjflfglf)
+* [Check My Links (Chrome)](https://chrome.google.com/webstore/detail/check-my-links/ojkcdipcgfaekbeaelaapakgnjflfglf)
+* [Broken Link Checker (Firefox)](https://add0n.com/broken-link-checker.html)
 * [`client9/misspell`](https://github.com/client9/misspell)
 
 ## Check my links tool
