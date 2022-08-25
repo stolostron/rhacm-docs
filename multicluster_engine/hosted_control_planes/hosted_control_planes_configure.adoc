@@ -1,14 +1,14 @@
 [#hosted-control-planes-configure]
 = Configuring hosted control planes
 
-Configuring hosted control planes requires a hosting service cluster and a hosted cluster. By deploying the HyperShift operator on an existing cluster, you can make that cluster into a hosting service cluster and start the creation of the hosted cluster. 
+Configuring hosted control planes requires a hosting service cluster. By deploying the HyperShift operator on an existing cluster, you can make that cluster into a hosting service cluster and start the creation of the hosted cluster. 
 
 Hosted control planes is a Technology Preview feature, so the related components are disabled by default. Enable the feature by editing the `multiclusterengine` custom resource to set the `spec.overrides.components[?(@.name=='hypershift-preview')].enabled` to `true`. 
 
 Enter the following command to ensure that the hosted control planes feature is enabled:
 
 ----
-oc patch mce multiclusterengine-sample--type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift-preview","enabled": true}]}}}'
+oc patch mce multiclusterengine-sample --type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift-preview","enabled": true}]}}}'
 ----
 
 [#hosting-service-cluster-configure]
@@ -70,6 +70,88 @@ oc create secret generic hypershift-operator-oidc-provider-s3-credentials --from
 ----
 oc label secret hypershift-operator-oidc-provider-s3-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
 ----
+
+. If you plan to provision hosted clusters on the AWS platform with Private Link, create an AWS credential secret for the HyperShift operator, and name it `hypershift-operator-private-link-credentials`. It should reside in the managed cluster namespace (i.e., the namespace of the managed cluster that will be used as the hosting service cluster). If you used `local-cluster`, then create the secret in the `local-cluster` namespace. See steps 1-5 in https://hypershift-docs.netlify.app/how-to/aws/deploy-aws-private-clusters/[Deploy AWS private clusters]. 
++
+Instructions result in the following AWS resources:
++
+* Create an IAM policy in AWS
++
+* Create an IAM user for the Hypershift operator to use
++
+* Attach the IAM policy to the IAM user
++
+* Create an IAM access key for the user, use the access key and secret in the next section
++
+The secret must contain 3 fields:
++
+* `aws-access-key-id`: AWS credential access key id
++
+* `aws-secret-access-key`: AWS credential access key secret
++
+* `region`: Region for use with Private Link
++
+See https://hypershift-docs.netlify.app/getting-started/[Getting started] in the HyperShift documentation for more information about the secret. The following example shows sample `hypershift-operator-private-link-credentials` secret template:
++
+----
+oc create secret generic hypershift-operator-private-link-credentials --from-literal=aws-access-key-id=<aws-access-key-id> --from-literal=aws-secret-access-key=<aws-secret-access-key> --from-literal=region=<region> -n <hypershift-hosting-service-cluster>
+----
++
+*Note:* Disaster recovery backup for the secret is not automatically enabled. Run the following command to add the label that enables the `hypershift-operator-private-link-credentials` secret to be backed up for disaster recovery:
++
+----
+oc label secret hypershift-operator-private-link-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
+----
++
+Set the following parameter in HypershiftDeployment, when creating a cluster:
++
+[source,yaml]
+----
+spec:
+  hostedClusterSpec:
+    platform:
+      type: AWS
+      aws:
+        endpointAccess: Private
+---
+
+. If you plan to use service-level DNS for Control Plane Service on AWS platform, create an external DNS credential secret for the HyperShift operator, and name it hypershift-operator-external-dns-credentials. It should reside in the managed cluster namespace (i.e., the namespace of the managed cluster that will be used as the hosting service cluster). If you used local-cluster, then create the secret in the local-cluster namespace
++
+The secret must contain 3 fields:
++
+* `provider`: DNS provider that manages the service-level DNS zone (example: aws)
++
+* `domain-filter`: The service-level domain
++
+* `credentials`: (Optional, only when using aws keys) - For all external DNS types, a credential file is supported
++
+* `aws-access-key-id`: (Optional) - When using AWS DNS service, credential access key id
++
+* `aws-secret-access-key`: (Optional) - When using AWS DNS service, When using AWS DNS service, credential access key secret
++
+See https://hypershift-docs.netlify.app/how-to/external-dns/[HyperShift Project Documentation] for details. The following example shows sample `hypershift-operator-external-dns-credentials` secret template:
++
+----
+oc create secret generic hypershift-operator-external-dns-credentials --from-literal=provider=aws --from-literal=domain-filter=service.my.domain.com --from-file=credentials=<credentials-file> -n <hypershift-hosting-service-cluster>
+----
++
+*Note:* Disaster recovery backup for the secret is not automatically enabled. Run the following command to add the label that enables the `hypershift-operator-external-dns-credentials` secret to be backed up for disaster recovery:
++
+----
+oc label secret hypershift-operator-external-dns-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
+----
++
+Set the following parameter in HypershiftDeployment, when creating a cluster:
++
+[source,yaml]
+----
+spec:
+  hostedClusterSpec:
+    platform:
+      type: AWS
+      aws:
+        endpointAccess: PublicAndPrivate
+---
 
 . Install the HyperShift add-on.
 +
@@ -153,7 +235,7 @@ oc create secret generic <my-secret> -n <hypershift-deployment-namespace> --from
 oc label secret <my-secret> -n <hypershift-deployment-namespace> cluster.open-cluster-management.io/backup=""
 ----
 
-. Create a `HypershiftDeployment` custom resource file in the cloud provider secret namespace. The `HypershiftDeployment` custom resource creates the infrastructure in the provider account, configures the infrastructure compute capacity in the created infrastructure, provisions the `nodePools` that use the hosted control plane, and creates a hosted control plane on a hosting service cluster.
+. Create a `HypershiftDeployment` custom resource. The `HypershiftDeployment` custom resource creates the infrastructure in the provider account, configures the infrastructure compute capacity in the created infrastructure, provisions the `nodePools` that use the hosted control plane, and creates a hosted control plane on a hosting service cluster.
 +
 .. Create a file that contains information that resembles the following example: 
 +
@@ -167,51 +249,6 @@ metadata:
 spec:
   hostingCluster: <hosting-service-cluster>
   hostingNamespace: clusters
-  hostedClusterSpec:
-    networking:
-      machineCIDR: 10.0.0.0/16    # Default
-      networkType: OpenShiftSDN
-      podCIDR: 10.132.0.0/14      # Default
-      serviceCIDR: 172.31.0.0/16  # Default
-    platform:
-      type: AWS
-    pullSecret:
-      name: <cluster>-pull-secret    # This secret is created by the controller
-    release:
-      image: quay.io/openshift-release-dev/ocp-release:4.10.15-x86_64  # Default
-    services:
-    - service: APIServer
-      servicePublishingStrategy:
-        type: LoadBalancer
-    - service: OAuthServer
-      servicePublishingStrategy:
-        type: Route
-    - service: Konnectivity
-      servicePublishingStrategy:
-        type: Route
-    - service: Ignition
-      servicePublishingStrategy:
-        type: Route
-    sshKey: {}
-  nodePools:
-  - name: <cluster>
-    spec:
-      clusterName: <cluster>
-      management:
-        autoRepair: false
-        replace:
-          rollingUpdate:
-            maxSurge: 1
-            maxUnavailable: 0
-          strategy: RollingUpdate
-        upgradeType: Replace
-      platform:
-        aws:
-          instanceType: m5.large
-        type: AWS
-      release:
-        image: quay.io/openshift-release-dev/ocp-release:4.10.15-x86_64 # Default
-      replicas: 2
   infrastructure:
     cloudProvider:
       name: <my-secret>
@@ -256,3 +293,72 @@ You can now access your cluster. The access secrets are stored in the `hypershif
 
 - `kubeconfig` secret: `<hypershiftDeployment.Spec.hostingNamespace>-<hypershiftDeployment.Name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
 - `kubeadmin` password secret: `<hypershiftDeployment.Spec.hostingNamespace>-<hypershiftDeployment.Name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
+
+[#customizing-hosted-cluster-specifications]
+== Customizing hosted cluster specifications in HypershiftDeployment
+
+In a `HypershiftDeployment` custom resource, you can change `hostedcluster` and `nodepool` specifications. For example, you can change the OCP release image of the hosted cluster control plane and/or the nodepool, the management spec of the nodepool or the number of nodes in the nodepool.
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: HypershiftDeployment
+metadata:
+  name: <cluster>
+  namespace: default
+spec:
+  hostingCluster: <hosting-service-cluster>
+  hostingNamespace: clusters
+  hostedClusterSpec:
+    networking:
+      machineCIDR: 10.0.0.0/16    # Default
+      networkType: OVNKubernetes
+      podCIDR: 10.132.0.0/14      # Default
+      serviceCIDR: 172.31.0.0/16  # Default
+    platform:
+      type: AWS
+    pullSecret:
+      name: <cluster>-pull-secret    # This secret is created by the controller
+    release:
+      image: quay.io/openshift-release-dev/ocp-release:4.11.2-x86_64  # Default
+    services:
+    - service: APIServer
+      servicePublishingStrategy:
+        type: LoadBalancer
+    - service: OAuthServer
+      servicePublishingStrategy:
+        type: Route
+    - service: Konnectivity
+      servicePublishingStrategy:
+        type: Route
+    - service: Ignition
+      servicePublishingStrategy:
+        type: Route
+    sshKey: {}
+  nodePools:
+  - name: <cluster>
+    spec:
+      clusterName: <cluster>
+      management:
+        autoRepair: false
+        replace:
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 0
+          strategy: RollingUpdate
+        upgradeType: Replace
+      platform:
+        aws:
+          instanceType: m5.large
+        type: AWS
+      release:
+        image: quay.io/openshift-release-dev/ocp-release:4.11.2-x86_64 # Default
+      replicas: 2
+  infrastructure:
+    cloudProvider:
+      name: <my-secret>
+    configure: True
+    platform:
+      aws:
+        region: <region>
+---
