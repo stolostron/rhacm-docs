@@ -1,7 +1,7 @@
 [#hosted-control-planes-configure]
 = Configuring hosted control planes
 
-Configuring hosted control planes requires a hosting service cluster. By deploying the HyperShift operator on an existing cluster, you can make that cluster into a hosting service cluster and start the creation of the hosted cluster. 
+Configuring hosted control planes requires a hosting service cluster and a hosted cluster. By deploying the HyperShift operator on an existing cluster, you can make that cluster into a hosting service cluster and start the creation of the hosted cluster. 
 
 Hosted control planes is a Technology Preview feature, so the related components are disabled by default. Enable the feature by editing the `multiclusterengine` custom resource to set the `spec.overrides.components[?(@.name=='hypershift-preview')].enabled` to `true`. 
 
@@ -71,19 +71,9 @@ oc create secret generic hypershift-operator-oidc-provider-s3-credentials --from
 oc label secret hypershift-operator-oidc-provider-s3-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
 ----
 
-. If you plan to provision hosted clusters on the AWS platform with Private Link, create an AWS credential secret for the HyperShift operator, and name it `hypershift-operator-private-link-credentials`. It should reside in the managed cluster namespace (i.e., the namespace of the managed cluster that will be used as the hosting service cluster). If you used `local-cluster`, then create the secret in the `local-cluster` namespace. See steps 1-5 in https://hypershift-docs.netlify.app/how-to/aws/deploy-aws-private-clusters/[Deploy AWS private clusters]. 
+. If you plan to provision hosted clusters on the AWS platform with Private Link, create an AWS credential secret for the HyperShift operator and name it `hypershift-operator-private-link-credentials`. It must reside in the managed cluster namespace that is the namespace of the managed cluster that will be used as the hosting service cluster)\. If you used `local-cluster`, create the secret in the `local-cluster` namespace. See steps 1-5 in https://hypershift-docs.netlify.app/how-to/aws/deploy-aws-private-clusters/[Deploy AWS private clusters] for more details. 
 +
-Instructions result in the following AWS resources:
-+
-* Create an IAM policy in AWS
-+
-* Create an IAM user for the Hypershift operator to use
-+
-* Attach the IAM policy to the IAM user
-+
-* Create an IAM access key for the user, use the access key and secret in the next section
-+
-The secret must contain 3 fields:
+The secret must contain the following 3 fields:
 +
 * `aws-access-key-id`: AWS credential access key id
 +
@@ -91,7 +81,7 @@ The secret must contain 3 fields:
 +
 * `region`: Region for use with Private Link
 +
-See https://hypershift-docs.netlify.app/getting-started/[Getting started] in the HyperShift documentation for more information about the secret. The following example shows sample `hypershift-operator-private-link-credentials` secret template:
+See https://hypershift-docs.netlify.app/getting-started/[Getting started] in the HyperShift documentation for more information about the secret. The following example shows the sample `hypershift-operator-private-link-credentials` secret template:
 +
 ----
 oc create secret generic hypershift-operator-private-link-credentials --from-literal=aws-access-key-id=<aws-access-key-id> --from-literal=aws-secret-access-key=<aws-secret-access-key> --from-literal=region=<region> -n <hypershift-hosting-service-cluster>
@@ -103,7 +93,7 @@ oc create secret generic hypershift-operator-private-link-credentials --from-lit
 oc label secret hypershift-operator-private-link-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
 ----
 +
-Set the following parameter in HypershiftDeployment, when creating a cluster:
+Set the following parameter in `HypershiftDeployment` custom resource when creating a cluster:
 +
 [source,yaml]
 ----
@@ -115,9 +105,9 @@ spec:
         endpointAccess: Private
 ----
 +
-. If you plan to use service-level DNS for Control Plane Service on AWS platform, create an external DNS credential secret for the HyperShift operator, and name it hypershift-operator-external-dns-credentials. It should reside in the managed cluster namespace (i.e., the namespace of the managed cluster that will be used as the hosting service cluster). If you used local-cluster, then create the secret in the local-cluster namespace
+. If you plan to use service-level DNS for control plane services on the AWS platform, reate an external DNS credential secret for the HyperShift operator and name it `hypershift-operator-external-dns-credentials`. It must reside in the managed cluster namespace that is the namespace of the managed cluster that will be used as the hosting service cluster. If you used local-cluster, then create the secret in the local-cluster namespace
 +
-The secret must contain 3 fields:
+The secret must contain the following 3 fields:
 +
 * `provider`: DNS provider that manages the service-level DNS zone (example: aws)
 +
@@ -129,7 +119,7 @@ The secret must contain 3 fields:
 +
 * `aws-secret-access-key`: (Optional) - When using AWS DNS service, When using AWS DNS service, credential access key secret
 +
-See https://hypershift-docs.netlify.app/how-to/external-dns/[HyperShift Project Documentation] for details. The following example shows sample `hypershift-operator-external-dns-credentials` secret template:
+See https://hypershift-docs.netlify.app/how-to/external-dns/[Use Service-level DNS for Control Plane Services] for more details. The following example shows the sample `hypershift-operator-external-dns-credentials` secret template:
 +
 ----
 oc create secret generic hypershift-operator-external-dns-credentials --from-literal=provider=aws --from-literal=domain-filter=service.my.domain.com --from-file=credentials=<credentials-file> -n <hypershift-hosting-service-cluster>
@@ -141,7 +131,7 @@ oc create secret generic hypershift-operator-external-dns-credentials --from-lit
 oc label secret hypershift-operator-external-dns-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
 ----
 +
-Set the following parameter in HypershiftDeployment, when creating a cluster:
+Set the following parameter in `HypershiftDeployment` custom resource when creating a cluster:
 +
 [source,yaml]
 ----
@@ -280,7 +270,7 @@ You can refer to the https://github.com/stolostron/hypershift-deployment-control
 oc get hypershiftdeployment -n default hypershift-demo -w
 ----
 
-. After the hosted cluster is created, it is automatically imported to the hub. You can verify this by viewing the cluster list in the {product-title-short} console, or by running the following command: 
+. After the hosted cluster is created, it is automatically imported to the hub. To verify that the hosted cluster is imported, view the cluster list in the {product-title-short} console, or by running the following command: 
 +
 ----
 oc get managedcluster <hypershiftDeployment.Spec.infraID>
@@ -289,7 +279,7 @@ oc get managedcluster <hypershiftDeployment.Spec.infraID>
 [#hosting-service-cluster-access]
 == Accessing a hosting service cluster
 
-You can now access your cluster. The access secrets are stored in the `hypershift-hosting-service-cluster` namespace. This namespace is the same as the name of the hosting service cluster. Learn about the following formats secret name formats:
+The access secrets are stored in the `hypershift-hosting-service-cluster` namespace. This namespace is the same as the name of the hosting service cluster. The access secret name formats are:
 
 - `kubeconfig` secret: `<hypershiftDeployment.Spec.hostingNamespace>-<hypershiftDeployment.Name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
 - `kubeadmin` password secret: `<hypershiftDeployment.Spec.hostingNamespace>-<hypershiftDeployment.Name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
@@ -297,7 +287,7 @@ You can now access your cluster. The access secrets are stored in the `hypershif
 [#customizing-hosted-cluster-specifications]
 == Customizing hosted cluster specifications in HypershiftDeployment
 
-In a `HypershiftDeployment` custom resource, you can change `hostedcluster` and `nodepool` specifications. For example, you can change the OCP release image of the hosted cluster control plane and/or the nodepool, the management spec of the nodepool or the number of nodes in the nodepool.
+In a `HypershiftDeployment` custom resource, you can change `hostedcluster` and `nodepool` specifications. For example, you can change the OCP release image of the hosted cluster control plane and/or the nodepool, the management spec of the nodepool, or the number of nodes in the nodepool.
 
 [source,yaml]
 ----
