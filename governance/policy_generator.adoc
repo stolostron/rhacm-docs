@@ -547,45 +547,82 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | Required
 | Set the value to `policy.open-cluster-management.io/v1`.
 
-| `complianceType`
-| Optional
-| Determines the policy controller behavior when comparing the manifest to objects on the cluster. The parameter values are `musthave`, `mustonlyhave`, or `mustnothave`. The default value is `musthave`.
-
 | `kind`
 | Required
 | Set the value to `PolicyGenerator` to indicate the type of policy.
-
-| `metadata`
-| Required
-| Used to uniquely identify the configuration file.
 
 | `metadata.name`
 | Required
 | The name for identifying the policy resource.
 
-| `placementBindingDefaults`
-| Required
-| Used to consolidate multiple policies in a `PlacementBinding`, so that the generator can create unique `PlacementBinding` names using the name that is defined.
-
 | `placementBindingDefaults.name`
 | Optional
-| It is best practice to set an explicit placement binding name to use rather than use the default value.
+| If multiple policies use the same placement, this name is used to generate a unique name for the resulting `PlacementBinding` binding the placement with the array of policies that reference it.
 
-| `policyDefaults`
+3+a| ==== `policyDefaults` +
+Required. Any default value listed here is overridden by an entry in the policies array except for `namespace`.
+
+| `policyDefaults.namespace`
 | Required
-| Any default value listed here is overridden for an entry in the policies array except for `namespace`.
+| The namespace of all the policies.
+
+| `policyDefaults.complianceType`
+| Optional
+| Determines the policy controller behavior when comparing the manifest to objects on the cluster ("musthave",  "mustonlyhave", or "mustnothave"). Defaults to "musthave".
+
+| `policyDefaults.metadataComplianceType`
+| Optional
+| Overrides complianceType when comparing the manifest's metadata section to objects on the cluster ("musthave", "mustonlyhave"). Default is unset to not override `complianceType` for metadata.
 
 | `policyDefaults.categories`
 | Optional
 | Array of categories to be used in the `policy.open-cluster-management.io/categories` annotation. The default value is `CM Configuration Management`.
 
+| `policyDefaults.controls`
+| Optional
+| Array of controls to be used in the `policy.open-cluster-management.io/controls` annotation. The default value is `CM-2 Baseline Configuration`.
+
+| `policyDefaults.standards`
+| Optional
+| An array of standards to be used in the `policy.open-cluster-management.io/standards` annotation. The default value is `NIST SP 800-53`.
+
+| `policyDefaults.policyAnnotations`
+| Optional
+| Annotations that the policy will include under its `metadata.annotations`. It will be applied for all policies unless specified in the policy. The default value is empty (`{}`).
+
 | `policyDefaults.configurationPolicyAnnotations`
 | Optional
 | Key-value pairs of annotations to set on generated configuration policies. For example, you can disable policy templates by defining the following parameter: `{"policy.open-cluster-management.io/disable-templates": "true"}`. The default value is empty (`{}`).
 
-| `policyDefaults.controls`
+| `policyDefaults.severity`
 | Optional
-| Array of controls to be used in the `policy.open-cluster-management.io/controls` annotation. The default value is `CM-2 Baseline Configuration`.
+| The severity of the policy violation. The default value is `low`.
+
+| `policyDefaults.disabled`
+| Optional
+| Whether the policy is disabled, meaning it will not be propagated and will have no status as a result. The default value is `false` to enable the policy.
+
+| `policyDefaults.remediationAction`
+| Optional
+| The remediation mechanism of your policy. The parameter values are `enforce` and `inform`. The default value is `inform`.
+
+a| [source, yaml]
+----
+policyDefaults.namespaceSelector:
+  include: []
+  exclude: []
+----
+| Optional
+| 
+
+a| [source, yaml]
+----
+policyDefaults.evaluationInterval
+  compliant: ""
+  noncompliant: ""
+----
+| Optional
+| How often a policy should be evaluated when in a particular compliance state. When managed clusters have low CPU resources, the evaluation interval can be increased to to reduce CPU usage on the Kubernetes API. These are in the format of durations (e.g. "1h25m3s"). These can also be set to "never" to avoid evaluating the policy after it has become a particular compliance state.
 
 | `policyDefaults.consolidateManifests`
 | Optional
@@ -599,61 +636,86 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | Optional
 | When the policy references a Kyverno policy manifest, this determines if an additional configuration policy should be generated to receive policy violations in {product-title-short}, when the Kyverno policy has been violated. The default value is `true`.
 
-| `policyDefaults.namespace`
-| Required
-| The namespace of all the policies.
-
-| `policyDefaults.placement`
+| `policyDefaults.policySets`
 | Optional
-| The placement configuration for the policies. This defaults to a placement configuration that matches all clusters.
+| Array of policy sets that the policy will join. Policy set details can be defined in the `policySets` section. When a policy is part of a policy set, a placement binding will not be generated for the policy since one is generated for the set. Set `policies[].generatePlacementWhenInSet` or `policyDefaults.generatePlacementWhenInSet` to override.
 
-| `placement.clusterSelectors`
+| `policyDefaults.generatePlacementWhenInSet`
 | Optional
-| Specify a placement by defining a cluster selector in the following format, `key:value`. See `placementRulePath` to specify an existing file.
+| When a policy is part of a policy set, by default the generator will not generate the placement for this policy since a placement is generated for the policy set. If a placement should still be generated, set it to "true" so that the policy will be deployed with both policy placement and policy set placement. This defaults to "false".
 
-| `placement.name`
+3+a| ==== `policyDefaults.placement` +
+The placement configuration for the policies. This defaults to a placement configuration that matches all clusters.
+
+| `policyDefaults.placement.name`
 | Optional
-| Specify a name to consolidate placement rules that contain the same cluster selectors.
+| Specifying a name here will consolidate placement rules that contain the same cluster selectors.
 
-| `placement.placementRulePath`
+| `policyDefaults.placement.placementName`
 | Optional
-| To reuse an existing placement rule, specify the path here relative to the `kustomization.yaml` file. If provided, this placement rule is used by all policies by default. See `clusterSelectors` to generate a new `Placement`.
+| To use a placement that already exists on the cluster, specify its name here. A `Placement` will not be created, but a `PlacementBinding` will bind the policy to this `Placement`.
 
-| `policyDefaults.remediationAction`
+| `policyDefaults.placement.placementPath`
 | Optional
-| The remediation mechanism of your policy. The parameter values are `enforce` and `inform`. The default value is `inform`.
+| To reuse an existing placement, specify the path here relative to the `kustomization.yaml` file. If provided, this placement rule is used by all policies by default. See `clusterSelectors` to generate a new `Placement`.
 
-| `policyDefaults.severity`
+| `policyDefaults.placement.clusterSelectors`
 | Optional
-| The severity of the policy violation. The default value is `low`.
+| Specify a placement by defining a cluster selector in the following format, `key:value`. See `placementPath` to specify an existing file.
 
-| `policyDefaults.standards`
+| `policyDefaults.placement.placementRuleName`
 | Optional
-| An array of standards to be used in the `policy.open-cluster-management.io/standards` annotation. The default value is `NIST SP 800-53`.
+| To use a placement rule that already exists on the cluster, specify its name here. A `PlacementRule` will not be created, but a `PlacementBinding` will bind the policy to this `PlacementRule`.
 
-| `policies`
-| Required
-| The list of policies to create along with overrides to either the default values, or the values that are set in `policyDefaults.`
+| `policyDefaults.placement.placementRulePath`
+| Optional
+| To reuse an existing placement rule, specify the path here relative to the `kustomization.yaml` file. If provided, this placement rule is used by all policies by default. See `labelSelector` to generate a new `PlacementRule`.
 
-| `policies[].manifests`
-| Required
-| The list of Kubernetes object manifests to include in the policy.
+| `policyDefaults.placement.labelSelector`
+| Optional
+| Specify a placement rule by defining a cluster selector in the following format, `key:value`. See `placementRulePath` to specify an existing file.
+
+3+a| ==== `policies` +
+Required. The list of policies to create along with overrides to either the default values, or the values that are set in `policyDefaults.`
 
 | `policies[].name`
 | Required
 | The name of the policy to create.
 
-| `policies[].manifests[].complianceType`
-| Optional
-| Determines the policy controller behavior when comparing the manifest to objects on the cluster. The parameter values are `musthave`, `mustonlyhave`, or `mustnothave`. The default value is `musthave`.
+| `policies[].manifests`
+| Required
+| The list of Kubernetes object manifests to include in the policy.
 
 | `policies[].manifests[].path`
 | Required
 | Path to a single file or a flat directory of files relative to the `kustomization.yaml` file.
 
+| `policies[].manifests[].complianceType`
+| Optional
+| Determines the policy controller behavior when comparing the manifest to objects on the cluster. The parameter values are `musthave`, `mustonlyhave`, or `mustnothave`. The default value is `musthave` (or the value set in `policyDefaults.complianceType`).
+
 | `policies[].manifests[].patches`
 | Optional
 | A Kustomize patch to apply to the manifest at the path. If there are multiple manifests, the patch requires the `apiVersion`, `kind`, `metadata.name`, and `metadata.namespace` (if applicable) fields to be set so Kustomize can identify the manifest that the patch applies to. If there is a single manifest, the `metadata.name` and `metadata.namespace` fields can be patched.
+
+3+a| ==== `policySets` +
+Optional. The list of policy sets to create. To include a policy in a policy set, use `policyDefaults.policySets`, `policies[].policySets`,  or `policySets.policies`.
+
+| `policySets[].name`
+| Required
+| The name of the policy set to create.
+
+| `policySets[].description`
+| Optional
+| The description of the policy set to create.
+
+| `policySets[].policies`
+| Optional
+| The list of policies to be included in the policy set. If `policyDefaults.policySets` or `policies[].policySets` is also specified, the lists are merged.
+
+| `policySets[].placement`
+| Optional
+| The placement configuration for the policy set. This defaults to a placement configuration that matches all clusters. (See `policyDefaults.placement` for placement documentation--however `policyDefaults.placement` settings do not get applied to policy sets.)
 |===
 
-Return to the xref:../governance/thirf_party_policy.adoc#integrate-third-party-policy-controllers[Integrate third-party policy controllers] documentation or refer to the xref:../governance/grc_intro.adoc#governance[Governance] documentation for more topics.
+Return to the xref:../governance/third_party_policy.adoc#integrate-third-party-policy-controllers[Integrate third-party policy controllers] documentation or refer to the xref:../governance/grc_intro.adoc#governance[Governance] documentation for more topics.
