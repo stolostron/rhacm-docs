@@ -764,7 +764,32 @@ When you have a configuration policy that is configured with `mustnothave` for t
 While installation into an ARM environment is supported, operators that are deployed with policies might not support ARM environments. The following policies that install operators do not support ARM environments:
 
 * link:https://github.com/stolostron/policy-collection/blob/main/stable/SI-System-and-Information-Integrity/policy-imagemanifestvuln.yaml[{product-title-short} policy for the Quay Container Security Operator]
-* link:https://github.com/stolostron/policy-collection/blob/main/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[{product-title-short} policy for the Compliance Operator] 
+* link:https://github.com/stolostron/policy-collection/blob/main/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[{product-title-short} policy for the Compliance Operator]
+
+[#configurationpolicy-crd-terminating]
+=== ConfigurationPolicy CRD is stuck in terminating
+
+When you remove the 'config-policy-controller' addon from a managed cluster by disabling the policy controller in the `KlusterletAddonConfig or by detaching the cluster, the `ConfigurationPolicy` CRD might get stuck in a terminating state.
+
+This can cause new policies to not be added to the cluster if the addon is re-installed later. You can also receive the following error:
+
+----
+ NonCompliant; Failed to create policy template create not allowed while custom resource definition is terminating
+----
+
+Use the following command to check if the CRD is stuck: 
+
+----
+oc get crd configurationpolicies.policy.open-cluster-management.io -o=jsonpath='{.metadata.deletionTimestamp}'
+----
+
+If a deletion timestamp is present on the resource, the CRD is stuck. To resolve the issue, remove all finalizers from configuration policies that remain on the cluster. Use the following command on the managed cluster and replace '<cluster-namespace>' with the managed cluster namespace:
+
+----
+oc get configurationpolicy -n <cluster-namespace> -o name | xargs oc patch -n <cluster-namespace> --type=merge -p '{"metadata":{"finalizers": []}}'
+----
+
+The configuration policy resources are automatically removed from the cluster and the CRD will exit its terminating state. If the addon has already been re-installed, the CRD will be recreated automatically and it will not have a deletion timestamp.
 
 [#backup-known-issues]
 == Backup and restore known issues
