@@ -16,6 +16,10 @@ The policy generator and its integration with the {product-title-short} applicat
 View the following topics to for more information:
 
 * <<policy-generator-configuration,Policy generator configuration structure>>
+//this is a large PR, PTO is coming up, and GA around the corner so commenting my suggestion so that I don't forget
+//To improve architecture of this doc, let's make this easier to read by moving the Generating a policy to install an Operator section + subsections to its own file
+//I also plan to add a reference link to the new file at the end of this file
+//holding off on this change bc links can become broken when creating a new file (file not added to main.adoc, misspelled file name, wrong folder, wrong syntax, etc. 
 * <<policy-gen-install-operator,Generating a policy to install an Operator>>
 ** <<policy-install-ocp-gitops,A policy to install OpenShift GitOps>>
 ** <<policy-gen-install-compliance-operator,A policy to install the Compliance Operator>>
@@ -413,10 +417,6 @@ spec:
 
 See the link:https://docs.openshift.com/container-platform/4.11/security/compliance_operator/compliance-operator-understanding.html[Compliance Operator documentation] for more details. 
 
-
-//[#policy-gen-policy-sets]
-//=== A policy to create policy sets
-
 [#policy-gen-install-on-openshift-gitops]
 == Install the policy generator on OpenShift GitOps (ArgoCD)
 
@@ -557,10 +557,11 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | `placementBindingDefaults.name`
 | Optional
-| If multiple policies use the same placement, this name is used to generate a unique name for the resulting `PlacementBinding` binding the placement with the array of policies that reference it.
+| If multiple policies use the same placement, this name is used to generate a unique name for the resulting `PlacementBinding`, binding the placement with the array of policies that reference it.
 
-3+a| ==== `policyDefaults` +
-Required. Any default value listed here is overridden by an entry in the policies array except for `namespace`.
+|*`policyDefaults`*
+| Required
+| Any default value listed here is overridden by an entry in the policies array except for `namespace`.
 
 | `policyDefaults.namespace`
 | Required
@@ -568,11 +569,11 @@ Required. Any default value listed here is overridden by an entry in the policie
 
 | `policyDefaults.complianceType`
 | Optional
-| Determines the policy controller behavior when comparing the manifest to objects on the cluster ("musthave",  "mustonlyhave", or "mustnothave"). Defaults to "musthave".
+| Determines the policy controller behavior when comparing the manifest to objects on the cluster. The values that you can use are `"musthave"`,  `"mustonlyhave"`, or `"mustnothave"`. The default value is "musthave".
 
 | `policyDefaults.metadataComplianceType`
 | Optional
-| Overrides complianceType when comparing the manifest's metadata section to objects on the cluster ("musthave", "mustonlyhave"). Default is unset to not override `complianceType` for metadata.
+| Overrides `complianceType` when comparing the manifest metadata section to objects on the cluster. The values that you can use are `"musthave"`, and `"mustonlyhave"`. The default value is empty (`{}`) to avoid overriding the `complianceType` for metadata.
 
 | `policyDefaults.categories`
 | Optional
@@ -588,7 +589,7 @@ Required. Any default value listed here is overridden by an entry in the policie
 
 | `policyDefaults.policyAnnotations`
 | Optional
-| Annotations that the policy will include under its `metadata.annotations`. It will be applied for all policies unless specified in the policy. The default value is empty (`{}`).
+| Annotations that the policy includes in the `metadata.annotations` section. It is applied for all policies unless specified in the policy. The default value is empty (`{}`).
 
 | `policyDefaults.configurationPolicyAnnotations`
 | Optional
@@ -600,29 +601,19 @@ Required. Any default value listed here is overridden by an entry in the policie
 
 | `policyDefaults.disabled`
 | Optional
-| Whether the policy is disabled, meaning it will not be propagated and will have no status as a result. The default value is `false` to enable the policy.
+| Whether the policy is disabled, meaning it is not propagated and no status as a result. The default value is `false` to enable the policy.
 
 | `policyDefaults.remediationAction`
 | Optional
 | The remediation mechanism of your policy. The parameter values are `enforce` and `inform`. The default value is `inform`.
 
-a| [source, yaml]
-----
-policyDefaults.namespaceSelector:
-  include: []
-  exclude: []
-----
-| Optional
-| 
+| *`policyDefaults.namespaceSelector`*
+| Required for namespaced objects that do not have a namespace specified
+| Determines namespaces in the managed cluster that the object is applied to. The `include` and `exclude` parameters accept file path expressions to include and exclude namespaces by name. The `matchExpressions` and `matchLabels` parameters specify namespaces to include by label. See the https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/[Kubernetes labels and selectors] documentation. The resulting list is compiled by using the intersection of results from all parameters.
 
-a| [source, yaml]
-----
-policyDefaults.evaluationInterval
-  compliant: ""
-  noncompliant: ""
-----
+| *`policyDefaults.evaluationInterval`*
 | Optional
-| How often a policy should be evaluated when in a particular compliance state. When managed clusters have low CPU resources, the evaluation interval can be increased to to reduce CPU usage on the Kubernetes API. These are in the format of durations (e.g. "1h25m3s"). These can also be set to "never" to avoid evaluating the policy after it has become a particular compliance state.
+| The frequency for a policy to be evaluated when in a particular compliance state. When managed clusters have low CPU resources, the evaluation interval can be increased to to reduce CPU usage on the Kubernetes API. These are in the format of durations (e.g. "1h25m3s"). These can also be set to "never" to avoid evaluating the policy after it has become a particular compliance state.
 
 | `policyDefaults.consolidateManifests`
 | Optional
@@ -638,22 +629,23 @@ policyDefaults.evaluationInterval
 
 | `policyDefaults.policySets`
 | Optional
-| Array of policy sets that the policy will join. Policy set details can be defined in the `policySets` section. When a policy is part of a policy set, a placement binding will not be generated for the policy since one is generated for the set. Set `policies[].generatePlacementWhenInSet` or `policyDefaults.generatePlacementWhenInSet` to override.
+| Array of policy sets that the policy joins. Policy set details can be defined in the `policySets` section. When a policy is part of a policy set, a placement binding is not generated for the policy since one is generated for the set. Set `policies[].generatePlacementWhenInSet` or `policyDefaults.generatePlacementWhenInSet` to override `policyDefaults.policySets`.
 
 | `policyDefaults.generatePlacementWhenInSet`
 | Optional
-| When a policy is part of a policy set, by default the generator will not generate the placement for this policy since a placement is generated for the policy set. If a placement should still be generated, set it to "true" so that the policy will be deployed with both policy placement and policy set placement. This defaults to "false".
+| When a policy is part of a policy set, by default, the generator does not generate the placement for this policy since a placement is generated for the policy set. If a placement should still be generated, set it to `true` so that the policy is deployed with both policy placement and policy set placement. The default value is `false`.
 
-3+a| ==== `policyDefaults.placement` +
-The placement configuration for the policies. This defaults to a placement configuration that matches all clusters.
+| `policyDefaults.placement`
+| Required
+| The placement configuration for the policies. This defaults to a placement configuration that matches all clusters.
 
 | `policyDefaults.placement.name`
 | Optional
-| Specifying a name here will consolidate placement rules that contain the same cluster selectors.
+| Specifying a name to consolidate placement rules that contain the same cluster selectors.
 
 | `policyDefaults.placement.placementName`
 | Optional
-| To use a placement that already exists on the cluster, specify its name here. A `Placement` will not be created, but a `PlacementBinding` will bind the policy to this `Placement`.
+| Define this parameter to use a placement that already exists on the cluster. A `Placement` is not created, but a `PlacementBinding` binds the policy to this `Placement`.
 
 | `policyDefaults.placement.placementPath`
 | Optional
@@ -665,7 +657,7 @@ The placement configuration for the policies. This defaults to a placement confi
 
 | `policyDefaults.placement.placementRuleName`
 | Optional
-| To use a placement rule that already exists on the cluster, specify its name here. A `PlacementRule` will not be created, but a `PlacementBinding` will bind the policy to this `PlacementRule`.
+| To use a placement rule that already exists on the cluster, specify its name here. A `PlacementRule` is not created, but a `PlacementBinding` binds the policy to this `PlacementRule`.
 
 | `policyDefaults.placement.placementRulePath`
 | Optional
@@ -675,8 +667,9 @@ The placement configuration for the policies. This defaults to a placement confi
 | Optional
 | Specify a placement rule by defining a cluster selector in the following format, `key:value`. See `placementRulePath` to specify an existing file.
 
-3+a| ==== `policies` +
-Required. The list of policies to create along with overrides to either the default values, or the values that are set in `policyDefaults.`
+| *`policies`*
+| Required. 
+| The list of policies to create along with overrides to either the default values, or the values that are set in `policyDefaults.`
 
 | `policies[].name`
 | Required
@@ -698,8 +691,9 @@ Required. The list of policies to create along with overrides to either the defa
 | Optional
 | A Kustomize patch to apply to the manifest at the path. If there are multiple manifests, the patch requires the `apiVersion`, `kind`, `metadata.name`, and `metadata.namespace` (if applicable) fields to be set so Kustomize can identify the manifest that the patch applies to. If there is a single manifest, the `metadata.name` and `metadata.namespace` fields can be patched.
 
-3+a| ==== `policySets` +
-Optional. The list of policy sets to create. To include a policy in a policy set, use `policyDefaults.policySets`, `policies[].policySets`,  or `policySets.policies`.
+| *`policySets`*
+| Optional
+| The list of policy sets to create. To include a policy in a policy set, use `policyDefaults.policySets`, `policies[].policySets`,  or `policySets.policies`.
 
 | `policySets[].name`
 | Required
@@ -715,7 +709,9 @@ Optional. The list of policy sets to create. To include a policy in a policy set
 
 | `policySets[].placement`
 | Optional
-| The placement configuration for the policy set. This defaults to a placement configuration that matches all clusters. (See `policyDefaults.placement` for placement documentation--however `policyDefaults.placement` settings do not get applied to policy sets.)
+| The placement configuration for the policy set. This defaults to a placement configuration that matches all clusters. See `policyDefaults.placement` for placement documentation, however `policyDefaults.placement` settings do not get applied to policy sets.
 |===
 
-Return to the xref:../governance/third_party_policy.adoc#integrate-third-party-policy-controllers[Integrate third-party policy controllers] documentation or refer to the xref:../governance/grc_intro.adoc#governance[Governance] documentation for more topics.
+Return to the xref:../governance/third_party_policy.adoc#integrate-third-party-policy-controllers[Integrate third-party policy controllers] documentation, or refer to the xref:../governance/grc_intro.adoc#governance[Governance] documentation for more topics.
+
+//Add reference to new file at the end of this file 
