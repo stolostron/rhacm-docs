@@ -98,13 +98,21 @@ oc edit pvc <storageclassname>-search-redisgraph-0
 === Search query parsing error
 //2.5:22391 
 
-If an environment becomes large and requires more tests for scaling, the search queries can timeout which results in an parsing error message being displayed. This error is displayed after 30 seconds of waiting for a search query.
+If an environment becomes large and requires more tests for scaling, the search queries can timeout which results in a parsing error message being displayed. This error is displayed after 30 seconds of waiting for a search query.
 
 Extend the timeout time with the following command:
 
 ----
 kubectl annotate route multicloud-console haproxy.router.openshift.io/timeout=Xs
 ----
+
+[#ansible-tower-credentials-need-secure-host-automation-templates]
+=== Cannot use Ansible Tower credentials with host URL containing insecure protocol
+//2.6:25265
+
+When you create an Ansible Tower automation template with the console automation flow, the Ansible Tower credential that you use must specify a host URL that uses a secure protocol (https). When you try to use an Ansible Tower credential that specifies an insecure protocol, the job list cannot be populated in the drop-down menu. To work around this issue, use a secure protocol (https) in the host URL.
+
+*Note:* While you cannot create Ansible Tower templates from credentials with a host URL that contains an insecure protocol using the console, you can still manually create or patch a resource using an insecure protocol.
 
 [#observability-known-issues]
 == Observability known issues
@@ -764,7 +772,30 @@ When you have a configuration policy that is configured with `mustnothave` for t
 While installation into an ARM environment is supported, operators that are deployed with policies might not support ARM environments. The following policies that install operators do not support ARM environments:
 
 * link:https://github.com/stolostron/policy-collection/blob/main/stable/SI-System-and-Information-Integrity/policy-imagemanifestvuln.yaml[{product-title-short} policy for the Quay Container Security Operator]
-* link:https://github.com/stolostron/policy-collection/blob/main/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[{product-title-short} policy for the Compliance Operator] 
+* link:https://github.com/stolostron/policy-collection/blob/main/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[{product-title-short} policy for the Compliance Operator]
+
+[#configurationpolicy-crd-terminating]
+=== ConfigurationPolicy CRD is stuck in terminating
+
+When you remove the `config-policy-controller` add-on from a managed cluster by disabling the policy controller in the `KlusterletAddonConfig` or by detaching the cluster, the `ConfigurationPolicy` CRD might get stuck in a terminating state. If the `ConfigurationPolicy` CRD is stuck in a terminating state, new policies might not be added to the cluster if the add-on is reinstalled later. You can also receive the following error:
+
+----
+template-error; Failed to create policy template: create not allowed while custom resource definition is terminating
+----
+
+Use the following command to check if the CRD is stuck: 
+
+----
+oc get crd configurationpolicies.policy.open-cluster-management.io -o=jsonpath='{.metadata.deletionTimestamp}'
+----
+
+If a deletion timestamp is on the resource, the CRD is stuck. To resolve the issue, remove all finalizers from configuration policies that remain on the cluster. Use the following command on the managed cluster and replace `<cluster-namespace>` with the managed cluster namespace:
+
+----
+oc get configurationpolicy -n <cluster-namespace> -o name | xargs oc patch -n <cluster-namespace> --type=merge -p '{"metadata":{"finalizers": []}}'
+----
+
+The configuration policy resources are automatically removed from the cluster and the CRD exits its terminating state. If the add-on has already been reinstalled, the CRD is recreated automatically without a deletion timestamp.
 
 [#backup-known-issues]
 == Backup and restore known issues
@@ -798,7 +829,7 @@ Avoid backup collisions by setting the `BackupSchedule.cluster.open-cluster-mana
 
 The backup collision is reported by the link:https://github.com/stolostron/cluster-backup-chart/blob/main/stable/cluster-backup-chart/templates/hub-backup-pod.yaml[`hub-backup-pod`] policy. The administrator must verify which hub cluster writes data to the storage location. Then remove the `BackupSchedule.cluster.open-cluster-management.io` resource from the passive hub cluster, and recreate a new `BackupSchedule.cluster.open-cluster-management.io` resource on the primary hub cluster to resume the backup.
 
-See link:../backup_restore/backup_and_restore.adoc#hub-backup-and-restore[Cluster backup and restore operator] for more information.
+See link:../backup_restore/backup_and_restore.adoc#hub-backup-and-restore[Enabling the backup and restore operator] for more information.
 
 [#restore-limitations]
 === Velero restore limitations
@@ -918,3 +949,9 @@ You cannot deploy multiple gateways.
 //2.5:24258
 
 Only non-NAT deployments support Submariner deployments with the VXLAN cable driver.
+
+[#submariner-ovn-k8]
+=== OVN Kubernetes support limitations
+//2.6:25275
+
+Using the OVN Kubernetes CNI network provider requires Red Hat OpenShift 4.11 or later. OVN Kubernetes does not support Globalnet.
