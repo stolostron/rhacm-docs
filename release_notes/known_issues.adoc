@@ -67,38 +67,8 @@ As a workaround for this problem, delete the failed pod. Kubernetes automaticall
 
 When an {ocp-short} cluster is in the upgrade stage, the cluster pods are restarted and the cluster might remain in `upgrade failed` status for a variation of 1-5 minutes. This behavior is expected and resolves after a few minutes.
 
-=== Two cluster curator controllers are running at the same time after upgrade
-// 2.5:22382
-
-After you upgrade from 2.4.x to 2.5.0, two cluster curator controllers might run at the same time. Two or more `AnsibleJobs` were created for some of the prehooks and posthooks for the Cluster Lifecycle Ansible integration. See the following procedure to resolve this issue:
-
-. Check to see if there are two cluster curator controllers running. Run the following commands, which contain the `multicluster-engine` namespace from the multicluster engine operator, as well as the `open-cluster-management` namespace:
-
-+
-----
-kubectl -n multicluster-engine get deploy cluster-curator-controller
-----
-
-+
-----
-kubectl -n open-cluster-management get deploy cluster-curator-controller
-----
-
-. If two cluster curator controllers are running, delete the `cluster-curator-controller` in the `open-cluster-management` namespace. Run the following command:
-
-+
-----
-kubectl -n open-cluster-management delete deploy cluster-curator-controller
-----
-
 [#web-console-known-issues]
 == Web console known issues
-
-[#search-result-node]
-=== Node discrepancy between Cluster page and search results
-// 2.0, 2.1, 2.2:9987
-
-You might see a discrepancy between the nodes displayed on the _Cluster_ page and the _Search_ results.
 
 [#ldap-user-names-are-case-sensitive]
 === LDAP user names are case-sensitive
@@ -111,8 +81,9 @@ You must use the name exactly the way it is configured in your LDAP directory.
 === Console features might not display in Firefox earlier version
 // 1.0.0:before 1.0.0.1
 
-The product supports Mozilla Firefox 74.0 or the latest version that is available for Linux, macOS, and Windows.
-Upgrade to the latest version for the best console compatibility.
+There are known issues with dark theme styling for older versions of Firefox. Upgrade to the latest version for the best console compatibility.
+
+For more information, see link:../install/requirements.adoc#supported-browsers[Supported browsers].
 
 [#restrictions-for-storage-size-in-searchcustomization]
 === Restrictions for storage size in search customization
@@ -127,13 +98,21 @@ oc edit pvc <storageclassname>-search-redisgraph-0
 === Search query parsing error
 //2.5:22391 
 
-If an environment becomes large and requires more tests for scaling, the search queries can timeout which results in an parsing error message being displayed. This error is displayed after 30 seconds of waiting for a search query.
+If an environment becomes large and requires more tests for scaling, the search queries can timeout which results in a parsing error message being displayed. This error is displayed after 30 seconds of waiting for a search query.
 
 Extend the timeout time with the following command:
 
 ----
 kubectl annotate route multicloud-console haproxy.router.openshift.io/timeout=Xs
 ----
+
+[#ansible-tower-credentials-need-secure-host-automation-templates]
+=== Cannot use Ansible Tower credentials with host URL containing insecure protocol
+//2.6:25265
+
+When you create an Ansible Tower automation template with the console automation flow, the Ansible Tower credential that you use must specify a host URL that uses a secure protocol (https). When you try to use an Ansible Tower credential that specifies an insecure protocol, the job list cannot be populated in the drop-down menu. To work around this issue, use a secure protocol (https) in the host URL.
+
+*Note:* While you cannot create Ansible Tower templates from credentials with a host URL that contains an insecure protocol using the console, you can still manually create or patch a resource using an insecure protocol.
 
 [#observability-known-issues]
 == Observability known issues
@@ -153,16 +132,16 @@ The observability endpoint operator fails if you create a pull-secret to deploy 
 For more information, see link:../observability/observability_enable.adoc#enabling-observability[Enabling observability].
 
 [#missing-data-roks]
-=== There is no data from ROKS cluster
+=== There is no data from ROKS and HyperShift clusters
 //2.2.3:12114
 
-{product-title-short} observability does not display data from an ROKS cluster on some panels within built-in dashboards. This is because ROKS does not expose any API Server metrics from servers they manage. The following Grafana dashboards contain panels that do not support ROKS clusters: `Kubernetes/API server`, `Kubernetes/Compute Resources/Workload`, `Kubernetes/Compute Resources/Namespace(Workload)`
+{product-title-short} observability does not display data from an ROKS cluster and HyperShift cluster on some panels within built-in dashboards. This is because ROKS and HyperShift do not expose any API Server metrics from servers they manage. The following Grafana dashboards contain panels that do not support ROKS and HyperShift clusters: `Kubernetes/API server`, `Kubernetes/Compute Resources/Workload`, `Kubernetes/Compute Resources/Namespace(Workload)`
 
 [#missing-etcd-data-roks]
-=== There is no etcd data from ROKS clusters
+=== There is no etcd data from ROKS and HyperShift clusters
 //2.2.3:12114
 
-For ROKS clusters, {product-title-short} observability does not display data in the _etcd_ panel of the dashboard.
+For ROKS clusters and HyperShift clusters, {product-title-short} observability does not display data in the _etcd_ panel of the dashboard.
 
 [#search-high-cpu]
 === High CPU usage by the search-collector pod
@@ -475,11 +454,6 @@ You cannot use the {product-title-short} console to upgrade {ocp-short} managed 
 
 The search details page for a certain resource on a certain managed cluster might fail. You must ensure that the work-manager add-on in the managed cluster is in `Available` status before you can search.
 
-[#argo-not-supported-power]
-=== Argo CD is not supported with IBM Power or IBM Z system hub cluster
-// 2.3:13524
-The link:https://argo-cd.readthedocs.io/en/stable/[Argo CD] integration with {product-title-short} does not work on a {product-title-short} hub cluster that is running on IBM Power or IBM Z systems because there are no available `ppc64le` or `s390x` images.
-
 [#no-ansible-power-hub]
 === Cannot use Ansible Tower integration with an IBM Power or IBM Z system hub cluster
 // 2.3:13523
@@ -525,6 +499,12 @@ To work around this issue, complete the following steps:
 . Delete the `cluster-proxy-signer` secret from the `open-cluster-management` namespace.
 . Enable `cluster-proxy-addon`.
 
+[#hypershift-proxy-install-not-supported-ocp-410z]
+=== {ocp-short} 4.10.z does not support hosted control plane clusters with proxy configuration
+// 2.6:25156
+
+When you create a hosting service cluster with a cluster-wide proxy configuration on {ocp-short} 4.10.z, the `nodeip-configuration.service` service does not start on the worker nodes.
+
 [#application-management-known-issues]
 == Application management known issues
 
@@ -547,15 +527,6 @@ Argo `ApplicationSet` from the console cannot be deployed on 3.x {ocp-short} man
 The `application-manager` add-on that is running on the managed clusters is now handled by the subscription operator, when it was previously handled by the klusterlet operator. The subscription operator is not managed the `multicluster-hub`, so changes to the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap do not take effect automatically.
 
 If the image that is used by the subscription operator is overrided by changing the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap, the `application-manager` add-on on the managed clusters does not use the new image until the subscription operator pod is restarted. You need to restart the pod.
-
-[#application-topology-displays-wrong-application]
-=== Application topology displays wrong application 
-//2.5.0: 22677
-
-The Application topology displays the wrong application if `ApplicationSets` with the same name are created in different Gitops instances.
-If you have multiple Gitops instances installed, you will have `ApplicationSets` with the same name in each Gitops instance and the topology for the `ApplicationSets` will not display correctly. This is due to the topology not differentiating the namespace for the `ApplicationSets` that are created.
-
-Be sure to create `ApplicationSets` with different names in each of the Gitops instances to display the topology correctly.
 
 [#policy-needs-subscription-admin]
 === Policy resource not deployed unless by subscription administrator
@@ -801,7 +772,30 @@ When you have a configuration policy that is configured with `mustnothave` for t
 While installation into an ARM environment is supported, operators that are deployed with policies might not support ARM environments. The following policies that install operators do not support ARM environments:
 
 * link:https://github.com/stolostron/policy-collection/blob/main/stable/SI-System-and-Information-Integrity/policy-imagemanifestvuln.yaml[{product-title-short} policy for the Quay Container Security Operator]
-* link:https://github.com/stolostron/policy-collection/blob/main/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[{product-title-short} policy for the Compliance Operator] 
+* link:https://github.com/stolostron/policy-collection/blob/main/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[{product-title-short} policy for the Compliance Operator]
+
+[#configurationpolicy-crd-terminating]
+=== ConfigurationPolicy CRD is stuck in terminating
+
+When you remove the `config-policy-controller` add-on from a managed cluster by disabling the policy controller in the `KlusterletAddonConfig` or by detaching the cluster, the `ConfigurationPolicy` CRD might get stuck in a terminating state. If the `ConfigurationPolicy` CRD is stuck in a terminating state, new policies might not be added to the cluster if the add-on is reinstalled later. You can also receive the following error:
+
+----
+template-error; Failed to create policy template: create not allowed while custom resource definition is terminating
+----
+
+Use the following command to check if the CRD is stuck: 
+
+----
+oc get crd configurationpolicies.policy.open-cluster-management.io -o=jsonpath='{.metadata.deletionTimestamp}'
+----
+
+If a deletion timestamp is on the resource, the CRD is stuck. To resolve the issue, remove all finalizers from configuration policies that remain on the cluster. Use the following command on the managed cluster and replace `<cluster-namespace>` with the managed cluster namespace:
+
+----
+oc get configurationpolicy -n <cluster-namespace> -o name | xargs oc patch -n <cluster-namespace> --type=merge -p '{"metadata":{"finalizers": []}}'
+----
+
+The configuration policy resources are automatically removed from the cluster and the CRD exits its terminating state. If the add-on has already been reinstalled, the CRD is recreated automatically without a deletion timestamp.
 
 [#backup-known-issues]
 == Backup and restore known issues
@@ -835,7 +829,7 @@ Avoid backup collisions by setting the `BackupSchedule.cluster.open-cluster-mana
 
 The backup collision is reported by the link:https://github.com/stolostron/cluster-backup-chart/blob/main/stable/cluster-backup-chart/templates/hub-backup-pod.yaml[`hub-backup-pod`] policy. The administrator must verify which hub cluster writes data to the storage location. Then remove the `BackupSchedule.cluster.open-cluster-management.io` resource from the passive hub cluster, and recreate a new `BackupSchedule.cluster.open-cluster-management.io` resource on the primary hub cluster to resume the backup.
 
-See link:../clusters/backup_and_restore.adoc#hub-backup-and-restore[Cluster backup and restore operator] for more information.
+See link:../backup_restore/backup_and_restore.adoc#hub-backup-and-restore[Enabling the backup and restore operator] for more information.
 
 [#restore-limitations]
 === Velero restore limitations
@@ -848,7 +842,7 @@ View the following restore limitations:
 
 * The new hub cluster has a different configuration from the active hub cluster when a user reapplies the backup on the new hub cluster. Since there is an existing policy on the hub cluster from a previous restore, it is not restored again. Even when the backup contains the expected updates, the policy contents are not updated by Velero on the new hub cluster. 
 
-To address the previously mentioned limitations, when a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning the hub cluster before Velero restore begins. For more information, see link:../clusters/backup_and_restore.adoc#clean-hub-restore[Clean the hub cluster before restore].
+To address the previously mentioned limitations, when a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning the hub cluster before Velero restore begins. For more information, see link:../backup_restore/backup_and_restore.adoc#clean-hub-restore[Clean the hub cluster before restore].
 
 [#imported-clusters-not-displayed]
 === Imported managed clusters are not displayed
@@ -905,7 +899,7 @@ If you have manually installed OADP, you must manually uninstall OADP before you
 
 When you restore the settings for the `local-cluster` managed cluster resource and overwrite the `local-cluster` data on a new hub cluster, the settings are misconfigured. Content from the previous hub cluster `local-cluster` is not backed up because the resource contains `local-cluster` specific information, such as the cluster URL details.
 
-You must manually apply any configuration changes that are related to the `local-cluster` resource on the restored cluster. See link:../clusters/backup_and_restore.adoc#prepare-new-hub[Prepare the new hub cluster] for more details. 
+You must manually apply any configuration changes that are related to the `local-cluster` resource on the restored cluster. See link:../backup_restore/backup_and_restore.adoc#prepare-new-hub[Prepare the new hub cluster] for more details. 
 
 [#submariner-known-issues]
 == Submariner known issues
@@ -955,3 +949,9 @@ You cannot deploy multiple gateways.
 //2.5:24258
 
 Only non-NAT deployments support Submariner deployments with the VXLAN cable driver.
+
+[#submariner-ovn-k8]
+=== OVN Kubernetes support limitations
+//2.6:25275
+
+Using the OVN Kubernetes CNI network provider requires Red Hat OpenShift 4.11 or later. OVN Kubernetes does not support Globalnet.
