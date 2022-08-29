@@ -1,0 +1,96 @@
+[#creating-a-cluster-on-bare-metal]
+= Creating a cluster on bare metal (Deprecated)
+
+You can use the {mce} console to create a {ocp} cluster in a bare metal environment.
+
+**Deprecation notice:** The procedure for creating bare metal clusters using bare metal assets is deprecated. Bare metal assets will be removed from a future release.
+
+When you create a cluster, note that the creation process uses the {ocp-short} installer with the Hive resource. If you have questions about cluster creation after completing this procedure, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html/installing/installing-on-bare-metal[Installing on bare metal] in the {ocp-short} documentation for more information.
+
+* <<bare-prerequisites,Prerequisites>>
+* <<create-bare-metal,Creating a bare metal cluster>>
+
+[#bare-prerequisites]
+== Prerequisites
+
+See the following prerequisites before creating a cluster in a bare metal environment:
+
+* You must have a deployed {mce} hub cluster on {ocp-short} version 4.6 or later.
+* You need Internet access for your {mce} hub cluster (connected), or a connection to an internal or mirror registry that has a connection to the Internet (disconnected) to retrieve the required images for creating the cluster.
+* You need a temporary external KVM host that runs a bootstrap virtual machine, which is used to create a Hive cluster. See xref:../credentials/credential_bare.adoc#bare-set-up-provisioning[Preparing a provisioning host] for more information.
+* The deployed {mce} hub cluster must be able to route to the provisioning network.
+* You need your bare metal server login credentials, which includes the libvirt URI from the bootstrap virtual machine in the previous item, the SSH Private Key, and a list of SSH known hosts. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html/installing/deploying-installer-provisioned-clusters-on-bare-metal#ipi-install-installation-workflow[Setting up the environment for an OpenShift installation] for more information.
+* You need a configured bare metal credential. See xref:../credentials/credential_bare.adoc#creating-a-credential-for-bare-metal[Creating a credential for bare metal] for more information.
+* You must have login credentials for your bare metal environment, which include user name, password, and Baseboard Management Controller Address.
+
+* You need an {ocp-short} image pull secret. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/images/managing-images#using-image-pull-secrets[Using image pull secrets] for more information.
++
+*Notes:*
++
+** The bare metal asset, managed bare metal cluster, and its related secret must be in the same namespace.
++
+** If you change your cloud provider access key, you must manually update the provisioned cluster access key. For more information, see the known issue, link:../../release_notes/known_issues.adoc#automatic-secret-updates-for-provisioned-clusters-is-not-supported[Automatic secret updates for provisioned clusters is not supported].
++
+** When you create a cluster by using the Bare metal provider and a disconnected installation, you must store all your settings in the credential in the _Configuration for disconnected installation_ section. You cannot enter them in the cluster creation console editor.
+
+[#create-bare-metal]
+== Creating a bare metal cluster
+
+To create a cluster from the {mce} console, navigate to *Infrastructure* > *Clusters*. On the _Clusters_ page, click *Create cluster* and complete the steps in the console. 
+
+*Note:* This procedure is for creating a cluster. If you have an existing cluster that you want to import, see xref:../cluster_lifecycle/import.adoc#importing-a-target-managed-cluster-to-the-hub-cluster[Importing a target managed cluster to the hub cluster] for those steps.
+
+If you need to create a credential, see xref:../credentials/credential_bare.adoc#creating-a-credential-for-bare-metal[Creating a credential for bare metal] for more information about creating a credential.
+
+For a bare metal cluster, the name of the cluster cannot be an arbitrary name. It is associated with the cluster URL. Make sure that the cluster name that you use is consistent with your DNS and network setup.
+
+*Important:* When you create a cluster, the {product-title-short} controller creates a namespace for the cluster and its resources. Ensure that you include only resources for that cluster instance in that namespace. Destroying the cluster deletes the namespace and all of the resources in it.
+
+*Tip:* Select *YAML: On* to view content updates as you enter the information in the console.
+
+If you want to add your cluster to an existing cluster set, you must have the correct permissions on the cluster set to add it. If you do not have `cluster-admin` privileges when you are creating the cluster, you must select a cluster set on which you have `clusterset-admin` permissions. If you do not have the correct permissions on the specified cluster set, the cluster creation fails. Contact your cluster administrator to provide you with `clusterset-admin` permissions to a cluster set if you do not have any cluster set options to select.
+
+Every managed cluster must be associated with a managed cluster set. If you do not assign the managed cluster to a `ManagedClusterSet`, it is automatically added to the `default` managed cluster set.
+
+The base domain of your provider is used to create routes to your {ocp} cluster components. It is configured in the DNS of your cluster provider as a Start of Authority (SOA) record. This name is used in the hostname of the cluster.
+
+If there is already a base DNS domain that is associated with the selected credential that you configured for your bare metal provider account, that value is populated in that field. You can change the value by overwriting it, but you cannot change the name after the cluster is created. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/installing/installing-on-bare-metal[Installing on bare metal] in the {ocp-short} documentation for more information. 
+
+The release image identifies the version of the {ocp-short} image that is used to create the cluster. If the image that you want to use is not a standard image, you can enter the URL to the image that you want to use. See xref:../cluster_lifecycle/release_images.adoc#release-images[Release images] for more information about release images.
+
+The following table shows the networking options and their descriptions:
+
+|===
+| Parameter | Description | Required or Optional
+
+| Provisioning network CIDR | The CIDR for the network to use for provisioning. The example format is: 172.30.0.0/16. | Required
+| Provisioning network interface | The name of the network interface on the control plane nodes that are connected to the provisioning network. | Required
+| Provisioning network bridge | The name of the bridge on the hypervisor that is attached to the provisioning network. | Required
+| External network bridge | The name of the bridge of the hypervisor that is attached to the external network. | Required
+| API VIP | The Virtual IP to use for internal API communication. The DNS must be pre-configured with an A/AAAA or CNAME record so the `api.<cluster_name>.<Base DNS domain>` path resolves correctly. | Required
+| Ingress VIP | The Virtual IP to use for ingress traffic. The DNS must be pre-configured with an A/AAAA or CNAME record so the `*.apps.<cluster_name>.<Base DNS domain>` path resolves correctly. | Optional
+| Network type | The pod network provider plug-in to deploy. Only the OpenShiftSDN plug-in is supported on {ocp-short} 4.3. The OVNKubernetes plug-in is available as a Technology Preview on {ocp-short} versions 4.3, 4.4, and 4.5. It is generally available on {ocp-short} version 4.6, and later. OVNKubernetes must be used with IPv6. The default value is `OpenShiftSDN`. | Required
+| Cluster network CIDR | A block of IP addresses from which pod IP addresses are allocated. The OpenShiftSDN network plug-in supports multiple cluster networks. The address blocks for multiple cluster networks must not overlap. Select address pools large enough to fit your anticipated workload. The default value is 10.128.0.0/14. | Required
+| Network host prefix | The subnet prefix length to assign to each individual node. For example, if hostPrefix is set to 23, then each node is assigned a /23 subnet out of the given CIDR, allowing for 510 (2^(32-23)-2) pod IP addresses. The default is 23. | Required
+| Service network CIDR | A block of IP addresses for services. OpenShiftSDN allows only one serviceNetwork block. The address must not overlap any other network block. The default value is 172.30.0.0/16. | Required
+| Machine CIDR | A block of IP addresses used by the {ocp-short} hosts. The address block must not overlap any other network block. The default value is 10.0.0.0/16. | Required
+|===
+
+You must have more than one network if you are using IPv6 addresses. 
+
+Proxy information that is provided in the credential is automatically added to the proxy fields. You can use the information as it is, overwrite it, or add the information if you want to enable a proxy. The following list contains the required information for creating a proxy: 
+
+* HTTP proxy URL: The URL that should be used as a proxy for `HTTP` traffic. 
+
+* HTTPS proxy URL: The secure proxy URL that should be used for `HTTPS` traffic. If no value is provided, the same value as the `HTTP Proxy URL` is used for both `HTTP` and `HTTPS`.
+
+* No proxy domains: A comma-separated list of domains that should bypass the proxy. Begin a domain name with a period `.` to include all of the subdomains that are in that domain. Add an asterisk `*` to bypass the proxy for all destinations. 
+
+* Additional trust bundle: The contents of the certificate file that is required to access the mirror registry.
+  
+When you review your information and optionally customize it before creating the cluster, you can select *YAML: On* to view the `install-config.yaml` file content in the panel. You can edit the YAML file with your custom settings, if you have any updates.  
+
+*Note:* You do not have to run the `kubectl` command that is provided with the cluster details to import the cluster. When you create the cluster, it is automatically configured with the management of {product-title-short}.
+
+Continue with xref:../cluster_lifecycle/access_cluster.adoc#accessing-your-cluster[Accessing your cluster] for instructions for accessing your cluster. 
+
