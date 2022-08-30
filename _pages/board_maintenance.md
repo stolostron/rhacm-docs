@@ -15,6 +15,7 @@ As the primary board focal, the lead needs to know everyone's commitment in orde
   - If there is not sufficient info, label `doc-awaiting-input` and keep in untriaged.
   - If it is ready with adequate info, label `doc-input-provided` and move to the appropriate column.
   - DDF is assigned to one person automatically, leave untriaged until acknowledged by a focal. (Would like this to change if possible--bcs)
+  - When placed in `product` or `release` column, no sprint is assigned to issue. Please wait to assign the sprint when it is moved to `sprint` column, usually done by the lead in the scrum, but sometimes done by other teammates.
   
 ## Existing issues
 
