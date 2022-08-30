@@ -137,7 +137,7 @@ Only rename a folder/guide when absolutely needed as a result of product change.
    4. Using find/replace, change all links that are impacted.
    5. Log in to Pantheon.
    6. Click **Edit title**.
-   7. Change the name and the URL fragment. Keep URL fragment in lowercase.
+   7. Change the name and the URL fragment. The URL fragment is automatically created as you type your name. Use this value, as the build seems to depend on that later. Keep URL fragment in lowercase.
    8. Click **Rename** to save.
    9. Select the drop-down error for the book and click **Edit Configuration**.
    10. Update the _Content Directory_ field with the new name of the folder.
