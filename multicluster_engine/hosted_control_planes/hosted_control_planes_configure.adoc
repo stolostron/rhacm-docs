@@ -21,7 +21,7 @@ You can deploy hosted control planes by configuring an existing cluster to funct
 
 You must have the following prerequisites to configure a hosting service cluster: 
 
-* Multicluster engine operator installed on at least one cluster that is managed by {ocp}. The multicluster engine operator is automatically installed when you install {product-title-short} version 2.5, and later, and can also be installed without {product-title-short} as an operator from the {ocp-short} OperatorHub.
+* {mce} installed on at least one cluster that is managed by {ocp}. The {mce} is automatically installed when you install {product-title-short} version 2.5, and later, and can also be installed without {product-title-short} as an operator from the {ocp-short} OperatorHub.
 
 * If you want your {product-title-short} hub cluster to be your hosting service cluster, you must configure `local-cluster` as your hosting service cluster by completing the following steps:
 +
@@ -52,7 +52,7 @@ A hub cluster that is also managed by itself is designated as `local-cluster` in
 [#hosting-service-cluster]
 === Configure the hosting service cluster
 
-Complete the following steps on the cluster where the multicluster engine operator is installed to enable an {ocp-short} managed cluster as a hosting service cluster:
+Complete the following steps on the cluster where the {mce} is installed to enable an {ocp-short} managed cluster as a hosting service cluster:
 
 . If you plan to create and manage hosted clusters on AWS, create an OIDC S3 credentials secret named `hypershift-operator-oidc-provider-s3-credentials` for the HyperShift operator. Save the secret in the managed cluster namespace, which is the namespace of the managed cluster that is used as the hosting service cluster. If you used `local-cluster`, then create the secret in the `local-cluster` namespace
 +
@@ -270,24 +270,18 @@ You can refer to the https://github.com/stolostron/hypershift-deployment-control
 oc get hypershiftdeployment -n default hypershift-demo -w
 ----
 
-. After the hosted cluster is created, it is automatically imported to the hub. To verify that the hosted cluster is imported, view the cluster list in the {product-title-short} console, or by running the following command: 
+. After the hosted cluster is created, it is automatically imported to the hub. You can verify this by viewing the cluster list in the {product-title-short} console, or by running the following command: 
 +
 ----
 oc get managedcluster <hypershiftDeployment.Spec.infraID>
 ----
 
-[#hosting-service-cluster-access]
-== Accessing a hosting service cluster
+[#hosted-deploy-cluster-customize]
+== Deploying a customized hosted cluster
 
-The access secrets are stored in the `hypershift-hosting-service-cluster` namespace. This namespace is the same as the name of the hosting service cluster. The access secret name formats are:
+The `HypershiftDeployment` custom resource that you created provisions the hosted control plane and its nodePools with default values. You can also customize the hosted control plane and the nodePools by specifying `hostedClusterSpec` and `nodePools` in the `HypershiftDeployment` custom resource.
 
-- `kubeconfig` secret: `<hypershiftDeployment.Spec.hostingNamespace>-<hypershiftDeployment.Name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
-- `kubeadmin` password secret: `<hypershiftDeployment.Spec.hostingNamespace>-<hypershiftDeployment.Name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
-
-[#customizing-hosted-cluster-specifications]
-== Customizing hosted cluster specifications in HypershiftDeployment
-
-In a `HypershiftDeployment` custom resource, you can change `hostedcluster` and `nodepool` specifications. For example, you can change the OCP release image of the hosted cluster control plane and/or the nodepool, the management spec of the nodepool, or the number of nodes in the nodepool.
+Create a file that contains information that resembles the following example: 
 
 [source,yaml]
 ----
@@ -326,7 +320,7 @@ spec:
         type: Route
     sshKey: {}
   nodePools:
-  - name: <cluster>
+  - name: <cluster>-<zone-1>
     spec:
       clusterName: <cluster>
       management:
@@ -342,8 +336,26 @@ spec:
           instanceType: m5.large
         type: AWS
       release:
-        image: quay.io/openshift-release-dev/ocp-release:4.11.2-x86_64 # Default
-      replicas: 2
+        image: quay.io/openshift-release-dev/ocp-release:4.10.15-x86_64
+      replicas: 3
+  - name: <cluster>-<zone-2>
+    spec:
+      clusterName: <cluster>
+      management:
+        autoRepair: false
+        replace:
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 0
+          strategy: RollingUpdate
+        upgradeType: Replace
+      platform:
+        aws:
+          instanceType: m5.large
+        type: AWS
+      release:
+        image: quay.io/openshift-release-dev/ocp-release:4.10.15-x86_64
+      replicas: 3
   infrastructure:
     cloudProvider:
       name: <my-secret>
@@ -351,4 +363,19 @@ spec:
     platform:
       aws:
         region: <region>
----
+        zones:
+          - <zone-1>
+          - <zone-2>
+----
+
+Replace `zone-1` with the name of the zone in the region.
+
+Replace `zone-2` with the name of the zone in the region. 
+
+[#hosting-service-cluster-access]
+== Accessing a hosting service cluster
+
+You can now access your cluster. The access secrets are stored in the `hypershift-hosting-service-cluster` namespace. This namespace is the same as the name of the hosting service cluster. Learn about the following formats secret name formats:
+
+- `kubeconfig` secret: `<hypershiftDeployment.Spec.hostingNamespace>-<hypershiftDeployment.Name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
+- `kubeadmin` password secret: `<hypershiftDeployment.Spec.hostingNamespace>-<hypershiftDeployment.Name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
