@@ -8,7 +8,7 @@ Hosted control planes is a Technology Preview feature, so the related components
 Enter the following command to ensure that the hosted control planes feature is enabled:
 
 ----
-oc patch mce multiclusterengine-sample--type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift-preview","enabled": true}]}}}'
+oc patch mce multiclusterengine-sample --type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift-preview","enabled": true}]}}}'
 ----
 
 [#hosting-service-cluster-configure]
@@ -21,7 +21,7 @@ You can deploy hosted control planes by configuring an existing cluster to funct
 
 You must have the following prerequisites to configure a hosting service cluster: 
 
-* Multicluster engine operator installed on at least one cluster that is managed by {ocp}. The multicluster engine operator is automatically installed when you install {product-title-short} version 2.5, and later, and can also be installed without {product-title-short} as an operator from the {ocp-short} OperatorHub.
+* {mce} installed on at least one cluster that is managed by {ocp}. The {mce} is automatically installed when you install {product-title-short} version 2.5, and later, and can also be installed without {product-title-short} as an operator from the {ocp-short} OperatorHub.
 
 * If you want your {product-title-short} hub cluster to be your hosting service cluster, you must configure `local-cluster` as your hosting service cluster by completing the following steps:
 +
@@ -52,7 +52,7 @@ A hub cluster that is also managed by itself is designated as `local-cluster` in
 [#hosting-service-cluster]
 === Configure the hosting service cluster
 
-Complete the following steps on the cluster where the multicluster engine operator is installed to enable an {ocp-short} managed cluster as a hosting service cluster:
+Complete the following steps on the cluster where the {mce} is installed to enable an {ocp-short} managed cluster as a hosting service cluster:
 
 . If you plan to create and manage hosted clusters on AWS, create an OIDC S3 credentials secret named `hypershift-operator-oidc-provider-s3-credentials` for the HyperShift operator. Save the secret in the managed cluster namespace, which is the namespace of the managed cluster that is used as the hosting service cluster. If you used `local-cluster`, then create the secret in the `local-cluster` namespace
 +
@@ -71,6 +71,78 @@ oc create secret generic hypershift-operator-oidc-provider-s3-credentials --from
 oc label secret hypershift-operator-oidc-provider-s3-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
 ----
 
+. If you plan to provision hosted clusters on the AWS platform with Private Link, create an AWS credential secret for the HyperShift operator and name it `hypershift-operator-private-link-credentials`. It must reside in the managed cluster namespace that is the namespace of the managed cluster being used as the hosting service cluster. If you used `local-cluster`, create the secret in the `local-cluster` namespace. See steps 1-5 in https://hypershift-docs.netlify.app/how-to/aws/deploy-aws-private-clusters/[Deploy AWS private clusters] for more details. 
++
+The secret must contain the following three fields:
++
+* `aws-access-key-id`: AWS credential access key id
++
+* `aws-secret-access-key`: AWS credential access key secret
++
+* `region`: Region for use with Private Link
++
+See https://hypershift-docs.netlify.app/getting-started/[Getting started] in the HyperShift documentation for more information about the secret. The following example shows the sample `hypershift-operator-private-link-credentials` secret template:
++
+----
+oc create secret generic hypershift-operator-private-link-credentials --from-literal=aws-access-key-id=<aws-access-key-id> --from-literal=aws-secret-access-key=<aws-secret-access-key> --from-literal=region=<region> -n <hypershift-hosting-service-cluster>
+----
++
+*Note:* Disaster recovery backup for the secret is not automatically enabled. Run the following command to add the label that enables the `hypershift-operator-private-link-credentials` secret to be backed up for disaster recovery:
++
+----
+oc label secret hypershift-operator-private-link-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
+----
++
+Set the following parameter in the `HypershiftDeployment` custom resource when creating a cluster:
++
+[source,yaml]
+----
+spec:
+  hostedClusterSpec:
+    platform:
+      type: AWS
+      aws:
+        endpointAccess: Private
+----
++
+. If you plan to use service-level DNS for control plane services on the AWS platform, create an external DNS credential secret for the HyperShift operator and name it `hypershift-operator-external-dns-credentials`. It must reside in the managed cluster namespace that is the namespace of the managed cluster being used as the hosting service cluster. If you used `local-cluster`, then create the secret in the `local-cluster` namespace
++
+The secret must contain the following three fields:
++
+* `provider`: DNS provider that manages the service-level DNS zone (example: aws)
++
+* `domain-filter`: The service-level domain
++
+* `credentials`: (Optional, only when using aws keys) - For all external DNS types, a credential file is supported
++
+* `aws-access-key-id`: (Optional) - When using AWS DNS service, credential access key id
++
+* `aws-secret-access-key`: (Optional) - When using AWS DNS service, When using AWS DNS service, credential access key secret
++
+See https://hypershift-docs.netlify.app/how-to/external-dns/[Use Service-level DNS for Control Plane Services] for more details. The following example shows the sample `hypershift-operator-external-dns-credentials` secret template:
++
+----
+oc create secret generic hypershift-operator-external-dns-credentials --from-literal=provider=aws --from-literal=domain-filter=service.my.domain.com --from-file=credentials=<credentials-file> -n <hypershift-hosting-service-cluster>
+----
++
+*Note:* Disaster recovery backup for the secret is not automatically enabled. Run the following command to add the label that enables the `hypershift-operator-external-dns-credentials` secret to be backed up for disaster recovery:
++
+----
+oc label secret hypershift-operator-external-dns-credentials -n <hypershift-hosting-service-cluster> cluster.open-cluster-management.io/backup=""
+----
++
+Set the following parameter in the `HypershiftDeployment` custom resource when creating a cluster:
++
+[source,yaml]
+----
+spec:
+  hostedClusterSpec:
+    platform:
+      type: AWS
+      aws:
+        endpointAccess: PublicAndPrivate
+----
++
 . Install the HyperShift add-on.
 +
 The cluster that hosts the HyperShift operator is the hosting service cluster. This step uses the `hypershift-addon` to install the HyperShift operator on a managed cluster.
@@ -153,7 +225,7 @@ oc create secret generic <my-secret> -n <hypershift-deployment-namespace> --from
 oc label secret <my-secret> -n <hypershift-deployment-namespace> cluster.open-cluster-management.io/backup=""
 ----
 
-. Create a `HypershiftDeployment` custom resource file in the cloud provider secret namespace. The `HypershiftDeployment` custom resource creates the infrastructure in the provider account, configures the infrastructure compute capacity in the created infrastructure, provisions the `nodePools` that use the hosted control plane, and creates a hosted control plane on a hosting service cluster.
+. Create a `HypershiftDeployment` custom resource. The `HypershiftDeployment` custom resource creates the infrastructure in the provider account, configures the infrastructure compute capacity in the created infrastructure, provisions the `nodePools` that use the hosted control plane, and creates a hosted control plane on a hosting service cluster.
 +
 .. Create a file that contains information that resembles the following example: 
 +
@@ -167,51 +239,6 @@ metadata:
 spec:
   hostingCluster: <hosting-service-cluster>
   hostingNamespace: clusters
-  hostedClusterSpec:
-    networking:
-      machineCIDR: 10.0.0.0/16    # Default
-      networkType: OpenShiftSDN
-      podCIDR: 10.132.0.0/14      # Default
-      serviceCIDR: 172.31.0.0/16  # Default
-    platform:
-      type: AWS
-    pullSecret:
-      name: <cluster>-pull-secret    # This secret is created by the controller
-    release:
-      image: quay.io/openshift-release-dev/ocp-release:4.10.15-x86_64  # Default
-    services:
-    - service: APIServer
-      servicePublishingStrategy:
-        type: LoadBalancer
-    - service: OAuthServer
-      servicePublishingStrategy:
-        type: Route
-    - service: Konnectivity
-      servicePublishingStrategy:
-        type: Route
-    - service: Ignition
-      servicePublishingStrategy:
-        type: Route
-    sshKey: {}
-  nodePools:
-  - name: <cluster>
-    spec:
-      clusterName: <cluster>
-      management:
-        autoRepair: false
-        replace:
-          rollingUpdate:
-            maxSurge: 1
-            maxUnavailable: 0
-          strategy: RollingUpdate
-        upgradeType: Replace
-      platform:
-        aws:
-          instanceType: m5.large
-        type: AWS
-      release:
-        image: quay.io/openshift-release-dev/ocp-release:4.10.15-x86_64 # Default
-      replicas: 2
   infrastructure:
     cloudProvider:
       name: <my-secret>
@@ -248,6 +275,102 @@ oc get hypershiftdeployment -n default hypershift-demo -w
 ----
 oc get managedcluster <hypershiftDeployment.Spec.infraID>
 ----
+
+[#hosted-deploy-cluster-customize]
+== Deploying a customized hosted cluster
+
+The `HypershiftDeployment` custom resource that you created provisions the hosted control plane and its nodePools with default values. You can also customize the hosted control plane and the nodePools by specifying `hostedClusterSpec` and `nodePools` in the `HypershiftDeployment` custom resource.
+
+Create a file that contains information that resembles the following example: 
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: HypershiftDeployment
+metadata:
+  name: <cluster>
+  namespace: default
+spec:
+  hostingCluster: <hosting-service-cluster>
+  hostingNamespace: clusters
+  hostedClusterSpec:
+    networking:
+      machineCIDR: 10.0.0.0/16    # Default
+      networkType: OVNKubernetes
+      podCIDR: 10.132.0.0/14      # Default
+      serviceCIDR: 172.31.0.0/16  # Default
+    platform:
+      type: AWS
+    pullSecret:
+      name: <cluster>-pull-secret    # This secret is created by the controller
+    release:
+      image: quay.io/openshift-release-dev/ocp-release:4.11.2-x86_64  # Default
+    services:
+    - service: APIServer
+      servicePublishingStrategy:
+        type: LoadBalancer
+    - service: OAuthServer
+      servicePublishingStrategy:
+        type: Route
+    - service: Konnectivity
+      servicePublishingStrategy:
+        type: Route
+    - service: Ignition
+      servicePublishingStrategy:
+        type: Route
+    sshKey: {}
+  nodePools:
+  - name: <cluster>-<zone-1>
+    spec:
+      clusterName: <cluster>
+      management:
+        autoRepair: false
+        replace:
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 0
+          strategy: RollingUpdate
+        upgradeType: Replace
+      platform:
+        aws:
+          instanceType: m5.large
+        type: AWS
+      release:
+        image: quay.io/openshift-release-dev/ocp-release:4.10.15-x86_64
+      replicas: 3
+  - name: <cluster>-<zone-2>
+    spec:
+      clusterName: <cluster>
+      management:
+        autoRepair: false
+        replace:
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 0
+          strategy: RollingUpdate
+        upgradeType: Replace
+      platform:
+        aws:
+          instanceType: m5.large
+        type: AWS
+      release:
+        image: quay.io/openshift-release-dev/ocp-release:4.10.15-x86_64
+      replicas: 3
+  infrastructure:
+    cloudProvider:
+      name: <my-secret>
+    configure: True
+    platform:
+      aws:
+        region: <region>
+        zones:
+          - <zone-1>
+          - <zone-2>
+----
+
+Replace `zone-1` with the name of the zone in the region.
+
+Replace `zone-2` with the name of the zone in the region. 
 
 [#hosting-service-cluster-access]
 == Accessing a hosting service cluster
