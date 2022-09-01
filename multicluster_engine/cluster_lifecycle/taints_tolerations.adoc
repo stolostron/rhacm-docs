@@ -1,0 +1,149 @@
+[#taints-tolerations-managed]
+= Using taints and tolerations to place managed clusters
+
+You can control the placement of your managed clusters or managed cluster sets by using taints and tolerations. Taints and tolerations provide a way to prevent managed clusters from being selected for certain placements. This control can be helpful if you want to prevent certain managed clusters from being included in some placements. You can add a taint to the managed cluster, and add a toleration to the placement. If the taint and the toleration do not match, then the managed cluster is not selected for that placement.
+
+[#adding-a-taint-to-a-managed-cluster]
+== Adding a taint to a managed cluster
+
+Taints are specified in the properties of a managed cluster and allow a placement to repel a managed cluster or a set of managed clusters. You can add a taint to a managed cluster by entering a command that resembles the following example:
+
+----
+kubectl taint ManagedCluster <managed_cluster_name> key=value:NoSelect
+----
+
+The specification of a taint includes the following fields:
+
+* *Required* Key - The taint key that is applied to a cluster. This value must match the value in the toleration for the managed cluster to meet the criteria for being added to that placement. You can determine this value. For example, this value could be `bar` or `foo.example.com/bar`.
+* *Optional* Value - The taint value for the taint key. This value must match the value in the toleration for the managed cluster to meet the criteria for being added to that placement. For example, this value could be `value`. 
+* *Required* Effect - The effect of the taint on placements that do not tolerate the taint, or what occurs when the taint and the toleration of the placement do not match. The value of the effects must be one of the following values:
+** `NoSelect` - Placements are not allowed to select a cluster unless they tolerate this taint. If the cluster was selected by the placement before the taint was set, the cluster is removed from the placement decision.
+** `NoSelectIfNew` - The scheduler cannot select the cluster if it is a new cluster. Placements can only select the cluster if they tolerate the taint and already have the cluster in their cluster decisions.
+* *Required* `TimeAdded` - The time when the taint was added. This value is automatically set.
+
+[#identifying-built-in-taints]
+== Identifying built-in taints to reflect the status of managed clusters
+
+When a managed cluster is not accessible, you do not want the cluster added to a placement. The following taints are automatically added to managed clusters that are not accessible:
+
+* `cluster.open-cluster-management.io/unavailable` - This taint is added to a managed cluster when the cluster has a condition of `ManagedClusterConditionAvailable` with status of `False`. The taint has the effect of `NoSelect` and an empty value to prevent an unavailable cluster from being scheduled. An example of this taint is provided in the following content: 
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+ name: cluster1
+spec:
+ hubAcceptsClient: true
+ taints:
+   - effect: NoSelect
+     key: cluster.open-cluster-management.io/unavailable
+     timeAdded: '2022-02-21T08:11:54Z'
+----
+	 
+* `cluster.open-cluster-management.io/unreachable` - This taint is added to a managed cluster when the status of the condition for `ManagedClusterConditionAvailable` is either `Unknown` or has no condition. The taint has effect of `NoSelect` and an empty value to prevent an unreachable cluster from being scheduled. An example of this taint is provided in the following content:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: cluster.open-cluster-management.io/unreachable
+      timeAdded: '2022-02-21T08:11:06Z'
+----
+	  
+[#adding-a-toleration-to-a-placement]
+== Adding a toleration to a placement
+
+Tolerations are applied to placements, and allow the placements to repel managed clusters that do not have taints that match the tolerations of the placement. The specification of a toleration includes the following fields:
+
+* *Optional* Key - The key matches the taint key to allow the placement.
+* *Optional* Value - The value in the toleration must match the value of the taint for the toleration to allow the placement.
+* *Optional* Operator - The operator represents the relationship between a key and a value. Valid operators are `equal` and `exists`. The default value is `equal`. A toleration matches a taint when the keys are the same, the effects are the same, and the operator is one of the following values:
+** `equal` - The operator is `equal` and the values are the same in the taint and the toleration.
+** `exists` - The wildcard for value, so a placement can tolerate all taints of a particular category.
+* *Optional* Effect - The taint effect to match. When left empty, it matches all taint effects. The allowed values when specified are `NoSelect` or `NoSelectIfNew`.
+* *Optional* TolerationSeconds -  The length of time, in seconds, that the toleration tolerates the taint before moving the managed cluster to a new placement. If the effect value is not `NoSelect` or `PreferNoSelect`, this field is ignored. The default value is `nil`, which indicates that there is no time limit. The starting time of the counting of the `TolerationSeconds` is automatically listed as the `TimeAdded` value in the taint, rather than in the value of the cluster scheduled time or the `TolerationSeconds` added time.
+
+The following example shows how to configure a toleration that tolerates clusters that have taints:
+
+* Taint on the managed cluster for this example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: gpu
+      value: "true"
+      timeAdded: '2022-02-21T08:11:06Z'
+----
+
+* Toleration on the placement that allows the taint to be tolerated
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement1
+  namespace: default
+spec:
+  tolerations:
+    - key: gpu
+      value: "true"
+      operator: Equal
+----
++
+With the example tolerations defined, `cluster1` could be selected by the placement because the `key: gpu` and `value: "true"` match. 
+
+*Note:* A managed cluster is not guaranteed to be placed on a placement that contains a toleration for the taint. If other placements contain the same toleration, the managed cluster might be placed on one of those placements.  
+
+[#specifying-a-temporary-toleration]
+== Specifying a temporary toleration
+
+The value of `TolerationSeconds` specifies the period of time that the toleration tolerates the taint. This temporary toleration can be helpful when a managed cluster is offline and you can transfer applications that are deployed on this cluster to another managed cluster for a tolerated time.
+
+For example, the managed cluster with the following taint becomes unreachable:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: cluster.open-cluster-management.io/unreachable
+      timeAdded: '2022-02-21T08:11:06Z'
+----
+
+If you define a placement with a value for `TolerationSeconds`, as in the following example, the workload transfers to another available managed cluster after 5 minutes.
+
+[source,yaml]
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: Placement
+metadata:
+  name: demo4
+  namespace: demo1
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+----
+
+The application is moved to another managed cluster after the managed cluster is unreachable for 5 minutes. 

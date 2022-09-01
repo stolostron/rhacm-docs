@@ -1,0 +1,155 @@
+[#release-images]
+= Release images
+
+When you create a cluster on a provider by using {mce}, you must specify a release image to use for the new cluster.
+The release image specifies which version of {ocp} is used to build the cluster.
+
+The files that reference the release images are YAML files that are maintained in the `acm-hive-openshift-releases` GitHub repository.
+{product-title-short} uses those files to create the list of the available release images in the console. This includes the latest fast channel images from {ocp-short}. The console only displays the latest release images for the three latest versions of {ocp-short}. For example, you might see the following release images displayed in the console options:
+
+* quay.io/openshift-release-dev/ocp-release:4.6.23-x86_64
+* quay.io/openshift-release-dev/ocp-release:4.10.1-x86_64
+
+*Note:* Only release images with the label of: `visible: 'true'` are available to select when creating clusters in the console. An example of this label in a `ClusterImageSet` resource is provided in the following content: 
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: ClusterImageSet
+metadata:
+  labels:
+    channel: fast
+    visible: 'true'
+  name: img4.10.1-x86-64-appsub
+spec:
+  releaseImage: quay.io/openshift-release-dev/ocp-release:4.10.1-x86_64
+----
+ 
+Additional release images are stored, but are not visible in the console. To view all of the available release images, run `kubectl get clusterimageset` in your CLI. Only the latest versions are in the console to encourage the creation of clusters with the latest release images. In some cases, you might need to create a cluster that is a specific version, which is why the older versions are available.
+{product-title-short} uses those files to create the list of the available release images in the console. This includes the latest fast channel images from {ocp-short}. 
+
+The repository contains the `clusterImageSets` directory and the `subscription` directory, which are the directories that you use when working with the release images.
+
+The `clusterImageSets` directory contains the following directories:
+
+* Fast: Contains files that reference the latest versions of the release images for each {ocp-short} version that is supported. The release images in this folder are tested, verified, and supported.
+
+* Releases: Contains files that reference all of the release images for each {ocp-short} version (stable, fast, and candidate channels)
+*Note:* These releases have not all been tested and determined to be stable.
+
+* Stable: Contains files that reference the latest two stable versions of the release images for each {ocp-short} version that is supported.
+
+**Note:** By default, the current list of release images is updated one time an hour. After upgrading the product, it may take up to an hour for the list to reflect the recommended release image versions for the new version of the product.
+
+You can curate your own `ClusterImageSets` in three ways:
+
+The first step for any of the three ways is to disable the included subscription that automatically updates the latest fast channel images. The automatic curation of the latest fast `ClusterImageSets` can be disabled by using an installer parameter on the `multiclusterhub` resource. By toggling the `spec.disableUpdateClusterImageSets` parameter between `true` and `false`, the subscription installed with {product-title-short} is disabled or enabled, respectively. If you want to curate your own images, set the `spec.disableUpdateClusterImageSets` to `true` to disable the subscription.
+
+**Option 1:** Specify the image reference for the specific `ClusterImageSet` that you want to use in the console when creating a cluster. Each new entry you specify persists and is available for all future cluster provisions. An example of an entry is: `quay.io/openshift-release-dev/ocp-release:4.6.8-x86_64`.
+
+**Option 2:** Manually create and apply a `ClusterImageSets` YAML file from the `acm-hive-openshift-releases` GitHub repository.
+
+**Option 3:** Follow the `README.md` in the `acm-hive-openshift-releases` GitHub repository to enable automatic updates of `ClusterImageSets` from a forked GitHub repository.
+
+The `subscription` directory contains files that specify where the list of release images is pulled from.
+
+The default release images for {product-title-short} are provided in a Quay.io directory.
+
+The images are referenced by the files in the https://github.com/stolostron/acm-hive-openshift-releases/tree/release-2.5[acm-hive-openshift-releases GitHub repository for release 2.5].
+
+[#manual-release-image-cross-arch]
+== Creating a release image to deploy a cluster on a different architecture
+
+You can create a cluster on an architecture that is different from the architecture of the hub cluster by manually creating a release image that contains the files for both architectures. 
+
+For example, you might need to create an `x86_64` cluster from a hub cluster that is running on the `ppc64le`, `aarch64`, or `s390x` architecture. If you create the release image with both sets of files, the cluster creation succeeds because the new release image enables the {ocp-short} release registry to provide a multi-architecture image manifest. 
+
+To create the release image, complete steps similar to the following example for your architecture type:
+
+. From the https://quay.io/repository/openshift-release-dev/ocp-release[{ocp-short} release registry], create a https://docs.docker.com/registry/spec/manifest-v2-2/[manifest list] that includes `x86_64`, `s390x`, `aarch64`, and `ppc64le` release images.
+
+.. Pull the manifest lists for both architectures in your environment from the https://quay.io/repository/openshift-release-dev/ocp-release?tab=tags[Quay repository] using the following example commands:
++
+----
+podman pull quay.io/openshift-release-dev/ocp-release:4.10.1-x86_64
+podman pull quay.io/openshift-release-dev/ocp-release:4.10.1-ppc64le
+podman pull quay.io/openshift-release-dev/ocp-release:4.10.1-s390x
+podman pull quay.io/openshift-release-dev/ocp-release:4.10.1-aarch64
+----
+
+.. Log in to your private repository where you maintain your images:
++
+----
+podman login <private-repo>
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Add the release image manifest to your private repository by running the following commands that apply to your environment:
++
+----
+podman push quay.io/openshift-release-dev/ocp-release:4.10.1-x86_64 <private-repo>/ocp-release:4.10.1-x86_64
+podman push quay.io/openshift-release-dev/ocp-release:4.10.1-ppc64le <private-repo>/ocp-release:4.10.1-ppc64le
+podman push quay.io/openshift-release-dev/ocp-release:4.10.1-s390x <private-repo>/ocp-release:4.10.1-s390x
+podman push quay.io/openshift-release-dev/ocp-release:4.10.1-aarch64 <private-repo>/ocp-release:4.10.1-aarch64
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Create a manifest for the new information:
++
+---- 
+podman manifest create mymanifest
+----
+
+.. Add references to both release images to the manifest list:
++
+----
+podman manifest add mymanifest <private-repo>/ocp-release:4.10.1-x86_64
+podman manifest add mymanifest <private-repo>/ocp-release:4.10.1-ppc64le
+podman manifest add mymanifest <private-repo>/ocp-release:4.10.1-s390x
+podman manifest add mymanifest <private-repo>/ocp-release:4.10.1-aarch64
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Merge the list in your manifest list with the existing manifest:
++
+----
+podman manifest push mymanifest docker://<private-repo>/ocp-release:4.10.1
+----
++
+Replace `private-repo` with the path to your repository.
+
+. On the hub cluster, create a release image that references the manifest in your repository.
+
+.. Create a YAML file that contains information that is similar to the following example:
++
+[source,yaml]
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterImageSet
+metadata:
+  labels:
+    channel: fast
+    visible: "true"
+  name: img4.10.1-appsub
+spec:
+  releaseImage: <private-repo>/ocp-release:4.10.1
+----
++
+Replace `private-repo` with the path to your repository.
+
+.. Run the following command on your hub cluster to apply the changes:
++
+----
+oc apply -f <file-name>.yaml
+----
++
+Replace `file-name` with the name of the YAML file that you just created. 
+
+. Select the new release image when you create your {ocp-short} cluster. 
+
+. If you deploy the managed cluster using the {product-title-short} console, specify the architecture for the managed cluster in the _Architecture_ field during the cluster creation process.
+
+The creation process uses the merged release images to create the cluster. 

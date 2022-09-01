@@ -19,6 +19,7 @@ View the following sections:
 ** <<disabling-security-policies,Disabling security policies>>
 * <<deleting-a-security-policy,Deleting a security policy>>
 ** <<deleting-policy-sets,Deleting policy sets from the console>>
+* <<cleaning-up-resources-from-policies,Cleaning up resources that are created by policies>>
 
 [#creating-a-security-policy]
 == Creating a security policy
@@ -32,7 +33,7 @@ You can create a security policy from the command line interface (CLI) or from t
 * _PlacementRule_: Defines a _cluster selector_ where the policy must be deployed.
 * _PlacementBinding_: Binds the placement to a placement rule.
 
-View more descriptions of the policy YAML files in the xref:../governance/policy_example.adoc#policy-overview[Policy overview].
+View more descriptions of the policy YAML files in the xref:../governance/policy_intro.adoc#policy-overview[Policy overview].
 
 [#creating-a-security-policy-from-the-command-line-interface]
 === Creating a security policy from the command line interface
@@ -86,7 +87,7 @@ spec:
 ----
 
 . Define a `PlacementRule`.
-Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. View link:../applications/placement_sample.adoc#placement-rule-samples[Placement rule samples overview]
+Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied by adjusting the `clusterSelector`. View link:../applications/placement_sample.adoc#placement-rule-samples[Placement rule samples overview]
 +
 Your `PlacementRule` might resemble the following content:
 +
@@ -103,7 +104,7 @@ spec:
   clusterNames:
   - "cluster1"
   - "cluster2"
-  clusterLabels:
+- clusterSelector
     matchLabels:
       cloud: IBM
 ----
@@ -157,59 +158,58 @@ Your YAML file might resemble the following policy:
 
 [source,yaml]
 ----
- apiVersion: policy.open-cluster-management.io/v1
- kind: Policy
- metadata:
-   name: policy-pod
-   annotations:
-     policy.open-cluster-management.io/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
-     policy.open-cluster-management.io/controls: 'control example'
-     policy.open-cluster-management.io/standards: 'NIST,HIPAA'
- spec:
-   complianceType: musthave
-   namespaces:
-     exclude: ["kube*"]
-     include: ["default"]
-   object-templates:
-   - complianceType: musthave
-     objectDefinition:
-       apiVersion: v1
-       kind: Pod
-       metadata:
-         name: pod1
-       spec:
-         containers:
-         - name: pod-name
-           image: 'pod-image'
-           ports:
-           - containerPort: 80
-   remediationAction: enforce
-   disabled: false
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-pod
+  annotations:
+    policy.open-cluster-management.io/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
+    policy.open-cluster-management.io/controls: 'control example'
+    policy.open-cluster-management.io/standards: 'NIST,HIPAA'
+spec:
+  complianceType: musthave
+  namespaces:
+    exclude: ["kube*"]
+    include: ["default"]
+    pruneObjectBehavior: None
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: pod1
+      spec:
+        containers:
+        - name: pod-name
+          image: 'pod-image'
+          ports:
+          - containerPort: 80
+  remediationAction: enforce
+  disabled: false
 
- ---
- apiVersion: apps.open-cluster-management.io/v1
- kind: PlacementBinding
- metadata:
-   name: binding-pod
- placementRef:
-   name: placement-pod
-   kind: PlacementRule
-   apiGroup: apps.open-cluster-management.io
- subjects:
- - name: policy-pod
-   kind: Policy
-   apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-pod
+placementRef:
+  name: placement-pod
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-pod
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
 
- ---
- apiVersion: apps.open-cluster-management.io/v1
+---
+apiVersion: apps.open-cluster-management.io/v1
  kind: PlacementRule
  metadata:
    name: placement-pod
- spec:
-   clusterConditions:
-     - type: ManagedClusterConditionAvailable
-       status: "True"
-   clusterLabels:
+spec:
+  clusterConditions: []
+  clusterSelector:
      matchLabels:
        cloud: "IBM"
 ----
@@ -299,3 +299,16 @@ Click the *Delete* button.
 
 To manage other policies, see xref:../governance/create_policy.adoc#managing-security-policies[Managing security policies] for more information.
 Refer to xref:../governance/grc_intro.adoc#governance[Governance] for more topics about policies.
+
+[#cleaning-up-resources-from-policies]
+== Cleaning up resources that are created by policies
+
+Use the `pruneObjectBehavior` parameter in a configuration policy to clean up resources that are created by the policy. When `pruneObjectBehavior` is set, the related objects are only cleaned up after the configuration policy (or parent policy) associated with them is deleted. View the following descriptions of the values that can be used for the parameter:
+
+* `DeleteIfCreated`: Cleans up any resources created by the policy.
+* `DeleteAll`: Cleans up all resources managed by the policy.
+* `None`: This is the default value and maintains the same behavior from previous releases, where no related resources are deleted.
+
+You can set the value directly in the YAML as you create a policy from the CLI. From the console, you can select the value in the _Prune Object Behavior_ section of the the _Policy templates_ step.
+
+*Note:* If a policy that installs an operator uses the `pruneObjectBehavior` parameter defined, then additional clean up is needed to complete the operator uninstall. Additional clean up might include deleting the operator `ClusterServiceVersion` object.
