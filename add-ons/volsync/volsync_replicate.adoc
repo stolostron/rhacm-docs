@@ -16,26 +16,17 @@ Before installing VolSync on your clusters, you must have the following requirem
 
 * The storage driver that you use for your source persistent volume must be CSI-compatible and able to support snapshots. 
 
+[#volsync-install-clusters]
+== Installing VolSync on the managed clusters
 
-[#rsync-backup-volsync]
-== Configuring an Rsync backup
-
-You can create a 1:1 asynchronous replication of persistent volumes by using an Rsync backup. You can use Rsync-based replication for disaster recovery or sending data to a remote site.
-
-The following example shows how to configure by using the Rsync method. For additional information about Rsync, see https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation.  
+To enable VolSync to replicate the persistent volume claim on one cluster to the persistent volume claim of another cluster, you must install VolSync on both the source and the target managed clusters.
 
 VolSync does not create its own namespace, so it is in the same namespace as other {ocp-short} all-namespace operators. Any changes that you make to the operator settings for VolSync also affects the other operators in the same namespace, such as if you change to manual approval for channel updates. 
-
-
-[#volsync-install-clusters]
-=== Installing VolSync on the managed clusters
-
-To enable VolSync to replicate the persistent volume claim on one cluster to the persistent volume claim of another cluster, you must install VolSync on both the source and the target managed clusters. 
 
 You can use either of two methods to install VolSync on two clusters in your environment. You can either add a label to each of the managed clusters in the hub cluster, or you can manually create and apply a `ManagedClusterAddOn`, as they are described in the following sections:
 
 [#volsync-install-label]
-==== Installing VolSync using labels
+=== Installing VolSync using labels
 
 To install VolSync on the managed cluster by adding a label.
 
@@ -86,7 +77,7 @@ Replace `managed-cluster-2` with the name of your other managed cluster.
 A `ManagedClusterAddOn` resource should be created automatically on your hub cluster in the namespace of each corresponding managed cluster.
 
 [#volsync-install-mcaddon]
-==== Installing VolSync using a ManagedClusterAddOn
+=== Installing VolSync using a ManagedClusterAddOn
 
 To install VolSync on the managed cluster by adding a `ManagedClusterSetAddOn` manually, complete the following steps:
 
@@ -116,6 +107,13 @@ oc apply -f volsync-mcao.yaml
 +
 A `ManagedClusterAddOn` resource should be created automatically on your hub cluster in the namespace of each corresponding managed cluster.
 
+
+[#rsync-replication-volsync]
+== Configuring an Rsync replication
+
+You can create a 1:1 asynchronous replication of persistent volumes by using an Rsync replication. You can use Rsync-based replication for disaster recovery or sending data to a remote site.
+
+The following example shows how to configure by using the Rsync method. For additional information about Rsync, see https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation.  
  
 [#volsync-rsync-clusters]
 === Configuring Rsync replication across managed clusters
@@ -190,7 +188,7 @@ $ ADDRESS=`kubectl get replicationdestination <destination> -n <destination-ns> 
 $ echo $ADDRESS
 ----
 +
-Replace `destination` with the name of your replication destination CR.
+Replace `destination` with the name of your replication destination custom resource.
 +
 Replace `destination-ns` with the name of the namespace where your destination is located.
 +
@@ -207,7 +205,7 @@ $ SSHKEYS=`kubectl get replicationdestination <destination> -n <destination-ns> 
 $ echo $SSHKEYS
 ----
 +
-Replace `destination` with the name of your replication destination CR.
+Replace `destination` with the name of your replication destination custom resource.
 +
 Replace `destination-ns` with the name of the namespace where your destination is located.
 +
@@ -245,7 +243,7 @@ spec:
     volumeSnapshotClassName: gp2-csi
 ----
 +
-Replace `source` with the name for your replication source CR. See step _3-vi_ of this procedure for instructions on how to replace this automatically.
+Replace `source` with the name for your replication source custom resource. See step _3-vi_ of this procedure for instructions on how to replace this automatically.
 +
 Replace `source-ns` with the namespace of the persistent volume claim where your source is located. See step _3-vi_ of this procedure for instructions on how to replace this automatically. 
 +
@@ -310,7 +308,7 @@ $ kubectl describe ReplicationSource -n <source-ns> <source>
 +
 Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
 +
-Replace `source` with the name of your replication source CR. 
+Replace `source` with the name of your replication source custom resource. 
 +
 If the replication was successful, the output should be similar to the following example:
 +
@@ -463,12 +461,12 @@ Replace `pvc-name` with the name of the new persistent volume claim where you wa
 
 The restore process only needs to be completed once, and this example restores the most recent backup. For more information about restore options, see https://volsync.readthedocs.io/en/latest/usage/restic/index.html#restore-options[Restore options] in the VolSync documentation. 
 
-[#rclone-backup-volsync]
-== Configuring an Rclone backup
+[#rclone-replication-volsync]
+== Configuring an Rclone replication
 
 An Rclone backup copies a single persistent volume to multiple locations by using Rclone through an intermediate object storage location, like AWS S3. It can be helpful when distributing data to multiple locations. 
 
-Complete the following steps to configure Rclone backups:
+Complete the following steps to configure an Rclone replication:
 
 . Create a `ReplicationSource` custom resource that resembles the following example: 
 +
@@ -485,33 +483,33 @@ spec:
   trigger:
     schedule: "*/6 * * * *"
   rclone:
-    rcloneConfigSection: "<intermediate-s3-bucket>"
-    rcloneDestPath: "<destination-bucket>"
-    rcloneConfig: "<rclone-secret>"
+    rcloneConfigSection: <intermediate-s3-bucket>
+    rcloneDestPath: <destination-bucket>
+    rcloneConfig: <rclone-secret>
     copyMethod: Snapshot
     storageClassName: <my-sc-name>
-    volumeSnapshotClassName: <my-vsc-name>
+    volumeSnapshotClassName: <my-vsc>
 ----
 +
 Replace `source-pvc` with the name for your replication source custom resource. 
 +
 Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
 +
-Replace `source` with the persistent volume claim that you are backing up.
+Replace `source` with the persistent volume claim that you are replicating.
 +
-Replace the value for `schedule` with how often to run the backup. This example has the schedule for every 6 minutes. This value must be within quotation marks. See xref:../volsync/volsync_schedule.adoc#volsync-schedule[Scheduling your synchronization] for more information.
+Replace the value of `schedule` with how often to run the replication. This example has the schedule for every 6 minutes. This value must be within quotation marks. See xref:../volsync/volsync_schedule.adoc#volsync-schedule[Scheduling your synchronization] for more information.
 +
-Replace `intermediate-s3-bucket` with the path to the configuration section of the Rclone configuration file. This value must be within quotation marks. 
+Replace `intermediate-s3-bucket` with the path to the configuration section of the Rclone configuration file. 
 +
-Replace `destination-bucket` with the path to the object bucket where you want your replicated files copied. This value must be contaned within quotation marks. 
+Replace `destination-bucket` with the path to the object bucket where you want your replicated files copied. 
 +
-Replace `rclone-secret` with the name of the secret that contains your Rclone configuration information. This value must be contained within quotation marks. 
+Replace `rclone-secret` with the name of the secret that contains your Rclone configuration information. 
 +
 Set the value for `copyMethod` as `Clone`, `Direct`, or `Snapshot`. This value specifies whether the point-in-time copy is generated, and if so, what method is used for generating it.
 +
 Replace `my-sc-name` with the name of the storage class that you want to use for your point-in-time copy. If not specified, the storage class of the source volume is used.
 +
-Replace `my-vsc-name` with the name of the `VolumeSnapshotClass` to use, if you specified `Snapshot` as your `copyMethod`. This is not required for other types of `copyMethod`.
+Replace `my-vsc` with the name of the `VolumeSnapshotClass` to use, if you specified `Snapshot` as your `copyMethod`. This is not required for other types of `copyMethod`.
 
 . Create a `ReplicationDestination` custom resource that resembles the following example:
 +
@@ -527,25 +525,25 @@ spec:
   trigger:
     schedule: "3,9,15,21,27,33,39,45,51,57 * * * *"
   rclone:
-    rcloneConfigSection: "intermediate-s3-bucket"
-    rcloneDestPath: "destination-bucket"
-    rcloneConfig: "rclone-secret"
+    rcloneConfigSection: <intermediate-s3-bucket>
+    rcloneDestPath: <destination-bucket>
+    rcloneConfig: <rclone-secret>
     copyMethod: Snapshot
     accessModes: [ReadWriteOnce]
     capacity: 10Gi
     storageClassName: <my-sc>
-    volumeSnapshotClassName: my-vsc
+    volumeSnapshotClassName: <my-vsc>
 ----
 +
-Replace the value for `schedule` with how often to move the backup to the destination. The schedules for the source and destination must be offset to allow the data to finish replicating before it is pulled from the destination. This example has the schedule for every 6 minutes, offset by 3 minutes. This value must be within quotation marks. See xref:../volsync/volsync_schedule.adoc#volsync-schedule[Scheduling your synchronization] for more information.
+Replace the value for `schedule` with how often to move the replication to the destination. The schedules for the source and destination must be offset to allow the data to finish replicating before it is pulled from the destination. This example has the schedule for every 6 minutes, offset by 3 minutes. This value must be within quotation marks. See xref:../volsync/volsync_schedule.adoc#volsync-schedule[Scheduling your synchronization] for more information.
 +
-Replace `intermediate-s3-bucket` with the path to the configuration section of the Rclone configuration file. This value must be within quotation marks.
+Replace `intermediate-s3-bucket` with the path to the configuration section of the Rclone configuration file.
 +
-Replace `destination-bucket` with the path to the object bucket where you want your replicated files copied. This value must be contaned within quotation marks.
+Replace `destination-bucket` with the path to the object bucket where you want your replicated files copied.
 +
-Replace `rclone-secret` with the name of the secret that contains your Rclone configuration information. This value must be contained within quotation marks.
+Replace `rclone-secret` with the name of the secret that contains your Rclone configuration information.
 +
-Set the value for `copyMethod` as `Clone`, `Direct`, or `Snapshot`. This value specifies whether the point-in-time copy is generated, and if so, what method is used for generating it.
+Set the value for `copyMethod` as `Clone`, `Direct`, or `Snapshot`. This value specifies whether the point-in-time copy is generated, and if so, which method is used for generating it.
 +
 The value for `accessModes` specifies the access modes for the persistent volume claim. Valid values are `ReadWriteOnce` or `ReadWriteMany`.
 +
@@ -553,4 +551,4 @@ The `capacity` specifies the size of the destination volume, which must be large
 +
 Replace `my-sc` with the name of the storage class that you want to use as the destination for your point-in-time copy. If not specified, the system storage class is used.
 +
-Replace `my-vsc-name` with the name of the `VolumeSnapshotClass` to use, if you specified `Snapshot` as your `copyMethod`. This is not required for other types of `copyMethod`. If not included, the system default `VolumeSnapshotClass` is used. 
+Replace `my-vsc` with the name of the `VolumeSnapshotClass` to use, if you specified `Snapshot` as your `copyMethod`. This is not required for other types of `copyMethod`. If not included, the system default `VolumeSnapshotClass` is used. 
