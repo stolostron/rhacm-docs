@@ -1,64 +1,21 @@
 [#kubernetes-configuration-policy-controller]
 = Kubernetes configuration policy controller
 
-Configuration policy controller can be used to configure any Kubernetes resource and apply security policies across your clusters.
+The configuration policy controller can be used to configure any Kubernetes resource and apply security policies across your clusters. The configuration policy is provided in the `policy-templates` field of the policy on the hub cluster, and is propagated to the selected managed clusters by the governance framework. See the xref:../governance/policy_intro.adoc[Policy overview] for more details on the hub cluster policy.
 
-The configuration policy controller communicates with the local Kubernetes API server to get the list of your configurations that are in your cluster.
-For more information about CRDs, see https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/[Extend the Kubernetes API with CustomResourceDefinitions].
+A Kubernetes object is defined (in whole or in part) in the `object-templates` array in the configuration policy, indicating to the configuration policy controller of the fields to compare with objects on the managed cluster. The configuration policy controller communicates with the local Kubernetes API server to get the list of your configurations that are in your cluster.
 
-The configuration policy controller is created on the hub cluster during installation.
-Configuration policy controller supports the `enforce` feature and monitors the compliance of the following policies:
+The configuration policy controller is created on the managed cluster during installation. The configuration policy controller supports the `enforce` feature to remediate when the configuration policy is non-compliant. When the `remediationAction` for the configuration policy is set to `enforce`, the controller applies the specified configuration to the target managed cluster.
 
-//create an issue to create a table with brief descriptions instead of this bulleted list
+You can also use templated values within the configuration policies. For more information, see xref:../governance/custom_template.adoc#support-templates-in-config-policies[Support for templates in configuration policies].
 
-* xref:../governance/memory_policy.adoc#memory-usage-policy[Memory usage policy]
-* xref:../governance/namespace_policy.adoc#namespace-policy[Namespace policy]
-* xref:../governance/image_vuln_policy.adoc#image-vulnerability-policy[Image vulnerability policy]
-* xref:../governance/pod_policy.adoc#pod-policy[Pod policy]
-* xref:../governance/psp_policy.adoc#pod-security-policy[Pod security policy]
-* xref:../governance/role_policy.adoc#role-policy[Role policy]
-* xref:../governance/rolebinding_policy.adoc#role-binding-policy[Role binding policy]
-* xref:../governance/scc_policy.adoc#security-context-constraints-policy[Security content constraints (SCC) policy]
-* xref:../governance/etcd_encryption_policy.adoc#etcd-encryption-policy[ETCD encryption policy]
-* xref:../governance/compliance_operator_policy.adoc#compliance-operator-policy[Compliance operator policy]
-* xref:../governance/gatekeeper_policy.adoc#gatekeeper-policy[Integrating gatekeeper constraints and constraint templates]
-
-When the `remediationAction` for the configuration policy is set to `enforce`, the controller creates a replicate policy on the target managed clusters. You can also use templates in configuration policies. For more information, see xref:../governance/custom_template.adoc#support-templates-in-config-policies[Support for templates in configuration policies].
+If you have existing Kubernetes manifests that you want to put in a policy, the xref:../governance/policy_generator.adoc[policy generator] is a useful tool to accomplish this.
 
 Continue reading to learn more about the configuration policy controller: 
 
-* <<configuration-policy-controller-yaml-structure,Configuration policy controller YAML structure>>
 * <<configuration-policy-sample,Configuration policy sample>>
 * <<configuration-policy-yaml-table,Configuration policy YAML table>>
-
-[#configuration-policy-controller-yaml-structure]
-== Configuration policy controller YAML structure
-
-[source,yaml]
-----
-Name:         configuration-policy-example
-Namespace:
-Labels:
-APIVersion:   policy.open-cluster-management.io/v1
-Kind:         ConfigurationPolicy
-Metadata:
-  Finalizers:
-    finalizer.policy.open-cluster-management.io
-Spec:
-  Conditions:
-    Ownership:
-    NamespaceSelector:
-      Exclude:
-      Include:
-    RemediationAction:
- Status:
-   CompliancyDetails:
-     Configuration-Policy-Example:
-       Default:
-       Kube - Public:
-   Compliant:          Compliant
- Events:
-----
+* <<configure-config-policy-controller,Configure the configuration policy controller>>
 
 [#configuration-policy-sample]
 == Configuration policy sample
@@ -73,24 +30,26 @@ spec:
   namespaceSelector:
     include: ["default"]
     exclude: []
+    matchExpressions: []
+    matchLabels: {}
   remediationAction: inform
-    severity: low
-    object-templates:
-    - complianceType: musthave
-      objectDefinition:
-        apiVersion: v1
-        kind: Pod
-        metadata:
-          name: pod
-        spec:
-          containers:
-          - image: 'pod-image'
-            name: 
-            ports:
-           - containerPort: 80
+  severity: low
   evaluationInterval:
     compliant:
     noncompliant:
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: pod
+      spec:
+        containers:
+        - image: pod-image
+          name: pod-name
+          ports:
+          - containerPort: 80
 ----
 
 [#configuration-policy-yaml-table]
@@ -100,66 +59,71 @@ spec:
 |===
 | Field | Optional or required | Description
 
-| apiVersion
+| `apiVersion`
 | Required
 | Set the value to `policy.open-cluster-management.io/v1`.
 
-| kind
+| `kind`
 | Required
 | Set the value to `ConfigurationPolicy` to indicate the type of policy.
 
-| metadata.name
+| `metadata.name`
 | Required
 | The name of the policy.
 
-| spec
+| `spec.namespaceSelector`
+| Required for namespaced objects that do not have a namespace specified
+| Determines namespaces in the managed cluster that the object is applied to. The `include` and `exclude` parameters accept file path expressions to include and exclude namespaces by name. The `matchExpressions` and `matchLabels` parameters specify namespaces to include by label. See the link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/[Kubernetes labels and selectors] documentation. The resulting list is compiled by using the intersection of results from all parameters.
+
+| `spec.remediationAction`
 | Required
-| Specifications of which configuration policy to monitor and how to remediate them.
+| Specifies the action to take when the policy is non-compliant. Use the following parameter values: `inform` or `enforce`.
 
-| spec.namespace
-| Required for namespaced objects or resources.
-| The namespaces in the hub cluster that the policy is applied to.
-Enter at least one namespace for the `include` parameter, which are the namespaces you want to apply to the policy to.
-
-The `exclude` parameter specifies the namespaces you explicitly do not want to apply the policy to.
-
-| spec.remediationAction
-| Required
-| Specifies the remediation of your policy. Enter  `inform`.
-
-| spec.remediationAction.severity
+| `spec.severity`
 | Required
 | Specifies the severity when the policy is non-compliant. Use the following parameter values: `low`, `medium`, or `high`.
 
-| spec.remediationAction.complianceType
-| Required
-| Used to list expected behavior for roles and other Kubernetes object that must be evaluated or applied to the managed clusters. You must use the following verbs as parameter values:
-
-`mustonlyhave`: Indicates that an object must exist with the exact name and relevant fields.
-
-`musthave`: Indicates an object must exist with the same name as specified object-template. The other fields in the template are a subset of what exists in the object.
-
-`mustnothave`: Indicated that an object with the same name or labels cannot exist and need to be deleted, regardless of the specification or rules.
-
-| spec.evaluationInterval.compliant
+| `spec.evaluationInterval.compliant`
 | Optional
 | Used to define how often the policy is evaluated when it is in the compliant state. The values must be in the format of a duration which is a sequence of numbers with time unit suffixes. For example, `12h30m5s` represents 12 hours, 30 minutes, and 5 seconds. It can also be set to `never` so that the policy is not reevaluated on the compliant cluster, unless the policy `spec` is updated.
 
-| spec.evaluationInterval.noncompliant
+| `spec.evaluationInterval.noncompliant`
 | Optional
-| Used to define how often the policy is evaluated when it is in the non-compliant state. Similar to the `evaluationInterval.compliant` parameter, the values must be in the format of a duration which is a sequence of numbers with time unit suffixes. It can also be set to `never` so that the policy is not reevaluated on the noncompliant cluster, unless the policy `spec` is updated.
+| Used to define how often the policy is evaluated when it is in the non-compliant state. Similar to the `evaluationInterval.compliant` parameter, the values must be in the format of a duration which is a sequence of numbers with time unit suffixes. It can also be set to `never` so that the policy is not reevaluated on the non-compliant cluster, unless the policy `spec` is updated.
+
+| `spec.object-templates`
+| Required
+| The array of Kubernetes objects (either fully defined or containing a subset of fields) for the controller to compare with objects on the managed cluster.
+
+| `spec.object-templates[].complianceType`
+| Required
+| Used to define the desired state of the Kubernetes object on the managed clusters. You must use one of the following verbs as the parameter value:
+
+`mustonlyhave`: Indicates that an object must exist with the exact fields and values as defined in the object.
+
+`musthave`: Indicates an object must exist with the same fields as specified in the objectDefinition. The fields in the template are a subset of what exists in the object. In general, array values are appended. The exception for the array to be patched is when the item contains a `name` key with a value that matches an existing item. Use a fully defined `objectDefinition` using the `mustonlyhave` compliance type, if you want to replace the array.
+
+`mustnothave`: Indicates that an object with the same fields as specified in the objectDefinition cannot exist.
+
+| `spec.object-templates[].metadataComplianceType`
+| Optional
+| Overrides `spec.object-templates[].complianceType` when comparing the manifest's metadata section to objects on the cluster ("musthave", "mustonlyhave"). Default is unset to not override `complianceType` for metadata.
+
+| `spec.object-templates[].objectDefinition`
+| Required
+| A Kubernetes object (either fully defined or containing a subset of fields) for the controller to compare with objects on the managed cluster.
 |===
 
-See the policy samples that use https://nvd.nist.gov/800-53/Rev4/control/CA-1[NIST Special Publication 800-53 (Rev. 4)], and are supported by {product-title-short} from the https://github.com/stolostron/policy-collection/tree/main/stable/CM-Configuration-Management[`CM-Configuration-Management` folder]. Learn about how policies are applied on your hub cluster, see xref:../governance/policy_sample_intro.adoc#supported-policies[Supported policies] for more details. 
+See the policy samples that use link:https://nvd.nist.gov/800-53/Rev4/control/CA-1[NIST Special Publication 800-53 (Rev. 4)], and are supported by {product-title-short} from the link:https://github.com/stolostron/policy-collection/tree/main/stable/CM-Configuration-Management[`CM-Configuration-Management` folder]. Learn about how policies are applied on your hub cluster, see xref:../governance/policy_sample_intro.adoc#supported-policies[Supported policies] for more details. 
 
 Learn how to create and customize policies, see xref:../governance/manage_policy_intro.adoc#manage-security-policies[Manage security policies]. Refer to xref:../governance/policy_controllers.adoc#policy-controllers[Policy controllers] for more details about controllers.
 
-[#configuration-config-policy-controller]
-== Configuring the configuration policy controller
+[#configure-config-policy-controller]
+== Configure the configuration policy controller
 
-You can configure the concurrency of the configuration policy controller per managed cluster to change how many configuration policies it can evaluate at the same time. To change the default value of `2`, set the `policy-evaluation-concurrency` annotation with a non-zero integer within quotes. You can set the value on the `ManagedClusterAddOn` object called `config-policy-controller` in the managed cluster namespace of the hub.
+You can configure the concurrency of the configuration policy controller for each managed cluster to change how many configuration policies it can evaluate at the same time. To change the default value of `2`, set the `policy-evaluation-concurrency` annotation with a non-zero integer within quotes. You can set the value on the `ManagedClusterAddOn` object called `config-policy-controller` in the managed cluster namespace of the hub cluster.
 
-*Note*: Higher concurrency values increase CPU and memory utilization on the `config-policy-controller` pod, Kubernetes API server, and OpenShift API server.
+*Note:* Higher concurrency values increase CPU and memory utilization on the `config-policy-controller` pod, Kubernetes API server, and OpenShift API server.
 
 In the following YAML example, concurrency is set to `5` on the managed cluster called `cluster1`:
 
@@ -175,3 +139,9 @@ metadata:
 spec:
   installNamespace: open-cluster-management-agent-addon
 ----
+
+Continue reading the following topics to learn more about how you can you use configuration policies:
+
+* xref:../governance/custom_template.adoc#support-templates-in-config-policies[Support for templates in configuration policies]
+* xref:../governance/policy_sample_intro.adoc[Supported policy samples]
+* xref:../governance/policy_generator.adoc[Generate configuration policies from existing manifests]
