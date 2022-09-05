@@ -505,6 +505,25 @@ To work around this issue, complete the following steps:
 
 When you create a hosting service cluster with a cluster-wide proxy configuration on {ocp-short} 4.10.z, the `nodeip-configuration.service` service does not start on the worker nodes.
 
+[#provision-ocp-411-azure-fails]
+=== Cannot provision {ocp-short} 4.11 cluster on Azure
+
+Provisioning an {ocp-short} 4.11 cluster on Azure fails due to an authentication operator timeout error. To work around the issue, use a different worker node type in the `install-config.yaml` file or set the `vmNetworkingType` parameter to `Basic`. See the following `install-config.yaml` example:
+
+[source,yaml]
+----
+compute:
+- hyperthreading: Enabled
+  name: 'worker'
+  replicas: 3
+  platform:
+    azure:
+      type:  Standard_D2s_v3
+      osDisk:
+        diskSizeGB: 128
+      vmNetworkingType: 'Basic'
+----
+
 [#application-management-known-issues]
 == Application management known issues
 
@@ -750,6 +769,12 @@ When you create `ApplicationSet` applications that deploy resources to a differe
 
 The `allow` and `deny` list feature does not work in Object storage application subscriptions.
 
+[#appset-topology-status-icon-spinning]
+=== ApplicationSet topology status icon spins continuously
+// 2.6:25301
+
+The `ApplicationSet` topology status icon spins continuously if an `ApplicationSet` application is deployed, but has no associated Argo applications.
+
 [#governance-known-issues]
 == Governance known issues
 
@@ -803,6 +828,12 @@ oc get configurationpolicy -n <cluster-namespace> -o name | xargs oc patch -n <c
 
 The configuration policy resources are automatically removed from the cluster and the CRD exits its terminating state. If the add-on has already been reinstalled, the CRD is recreated automatically without a deletion timestamp.
 
+[#pruneobjbeh-not-working-existing-config-policy]
+=== PruneObjectBehavior does not work when modifying existing configuration policy
+//2.6:25261
+
+When modifying an existing configuration policy, `DeleteAll` or `DeleteIfCreated` in the `pruneObjectBehavior` feature does not clean up old resources that were created before modifying. Only new resources from policy creations and policy updates are tracked and deleted when you delete the configuration policy.
+
 [#backup-known-issues]
 == Backup and restore known issues
 
@@ -835,7 +866,7 @@ Avoid backup collisions by setting the `BackupSchedule.cluster.open-cluster-mana
 
 The backup collision is reported by the link:https://github.com/stolostron/cluster-backup-chart/blob/main/stable/cluster-backup-chart/templates/hub-backup-pod.yaml[`hub-backup-pod`] policy. The administrator must verify which hub cluster writes data to the storage location. Then remove the `BackupSchedule.cluster.open-cluster-management.io` resource from the passive hub cluster, and recreate a new `BackupSchedule.cluster.open-cluster-management.io` resource on the primary hub cluster to resume the backup.
 
-See link:../backup_restore/backup_and_restore.adoc#hub-backup-and-restore[Enabling the backup and restore operator] for more information.
+See link:../backup_restore/backup_restore_enable.adoc#hub-backup-and-restore[Enabling the backup and restore operator] for more information. 
 
 [#restore-limitations]
 === Velero restore limitations
@@ -848,7 +879,7 @@ View the following restore limitations:
 
 * The new hub cluster has a different configuration from the active hub cluster when a user reapplies the backup on the new hub cluster. Since there is an existing policy on the hub cluster from a previous restore, it is not restored again. Even when the backup contains the expected updates, the policy contents are not updated by Velero on the new hub cluster. 
 
-To address the previously mentioned limitations, when a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning the hub cluster before Velero restore begins. For more information, see link:../backup_restore/backup_and_restore.adoc#clean-hub-restore[Clean the hub cluster before restore].
+To address the previously mentioned limitations, when a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning the hub cluster before Velero restore begins. For more information, see link:../backup_restore/backup_restore_enable.adoc#clean-hub-restore[Clean the hub cluster before restore].
 
 [#imported-clusters-not-displayed]
 === Imported managed clusters are not displayed
@@ -905,7 +936,7 @@ If you have manually installed OADP, you must manually uninstall OADP before you
 
 When you restore the settings for the `local-cluster` managed cluster resource and overwrite the `local-cluster` data on a new hub cluster, the settings are misconfigured. Content from the previous hub cluster `local-cluster` is not backed up because the resource contains `local-cluster` specific information, such as the cluster URL details.
 
-You must manually apply any configuration changes that are related to the `local-cluster` resource on the restored cluster. See link:../backup_restore/backup_and_restore.adoc#prepare-new-hub[Prepare the new hub cluster] for more details. 
+You must manually apply any configuration changes that are related to the `local-cluster` resource on the restored cluster. See link:../backup_restore/backup_restore_enable.adoc#prepare-new-hub[Prepare the new hub cluster] for more details. 
 
 [#submariner-known-issues]
 == Submariner known issues

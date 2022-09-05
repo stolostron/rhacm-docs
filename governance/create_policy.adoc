@@ -1,10 +1,7 @@
 [#managing-security-policies]
 = Managing security policies
 
-Create a security policy to report and validate your cluster compliance based on your specified security standards, categories, and controls. To create a policy for {product-title}, you must create a YAML file on your managed clusters.
-
-*Note*: You can copy and paste an existing policy in to the _Policy YAML_.
-The values for the parameter fields are automatically entered when you paste your existing policy. You can also search the contents in your policy YAML file with the search feature.
+Create a security policy to report and validate your cluster compliance based on your specified security standards, categories, and controls.
 
 View the following sections:
 
@@ -19,6 +16,7 @@ View the following sections:
 ** <<disabling-security-policies,Disabling security policies>>
 * <<deleting-a-security-policy,Deleting a security policy>>
 ** <<deleting-policy-sets,Deleting policy sets from the console>>
+* <<cleaning-up-resources-from-policies,Cleaning up resources that are created by policies>>
 
 [#creating-a-security-policy]
 == Creating a security policy
@@ -27,12 +25,12 @@ You can create a security policy from the command line interface (CLI) or from t
 
 **Required access**: Cluster administrator
 
-*Important*: You must define a placement rule and placement binding to apply your policy to a specific cluster. Enter a valid value for the _Cluster selector_ field to define a `PlacementRule` and `PlacementBinding`. See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#resources-that-support-set-based-requirements[Resources that support support set-based requirements] in the Kubernetes documentation for a valid expression. View the definitions of the objects that are required for your {product-title-short} policy:
+*Important:* You must define a placement rule and placement binding to apply your policy to a specific cluster. Enter a valid value for the _Cluster selector_ field to define a `PlacementRule` and `PlacementBinding`. See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#resources-that-support-set-based-requirements[Resources that support support set-based requirements] in the Kubernetes documentation for a valid expression. View the definitions of the objects that are required for your {product-title-short} policy:
 
 * _PlacementRule_: Defines a _cluster selector_ where the policy must be deployed.
 * _PlacementBinding_: Binds the placement to a placement rule.
 
-View more descriptions of the policy YAML files in the xref:../governance/policy_example.adoc#policy-overview[Policy overview].
+View more descriptions of the policy YAML files in the xref:../governance/policy_intro.adoc#policy-overview[Policy overview].
 
 [#creating-a-security-policy-from-the-command-line-interface]
 === Creating a security policy from the command line interface
@@ -42,11 +40,11 @@ Complete the following steps to create a policy from the command line interface 
 . Create a policy by running the following command:
 +
 ----
-kubectl create -f policy.yaml -n <namespace>
+kubectl create -f policy.yaml -n <policy-namespace>
 ----
 
 . Define the template that the policy uses.
-Edit your `.yaml` file by adding a `templates` field to define a template.
+Edit your `.yaml` file by adding a `policy-templates` field to define a template.
 Your policy might resemble the following YAML file:
 
 +
@@ -59,16 +57,17 @@ metadata:
 spec:
   remediationAction: "enforce" # or inform
   disabled: false # or true
-  namespaces:
-    include: ["default"]
-    exclude: ["kube*"]
+  namespaceSelector:
+    include:
+    - "default"
+    - "my-namespace"
   policy-templates:
     - objectDefinition:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          namespace: kube-system # will be inferred
           name: operator
+          # namespace: # will be supplied by the controller via the namespaceSelector
         spec:
           remediationAction: "inform"
           object-templates:
@@ -86,7 +85,7 @@ spec:
 ----
 
 . Define a `PlacementRule`.
-Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied, either by `clusterNames`, or `clusterLabels`. View link:../applications/placement_sample.adoc#placement-rule-samples[Placement rule samples overview]
+Be sure to change the `PlacementRule` to specify the clusters where the policies need to be applied by adjusting the `clusterSelector`. View link:../applications/placement_sample.adoc#placement-rule-samples[Placement rule samples overview]
 +
 Your `PlacementRule` might resemble the following content:
 +
@@ -103,12 +102,12 @@ spec:
   clusterNames:
   - "cluster1"
   - "cluster2"
-  clusterLabels:
+- clusterSelector
     matchLabels:
       cloud: IBM
 ----
 
-. Define a `PlacementBinding` to bind your policy and your `PlacementRule`.
+. Define a `PlacementBinding` to bind your policy to your `PlacementRule`.
 Your `PlacementBinding` might resemble the following YAML sample:
 +
 [source,yaml]
@@ -135,13 +134,13 @@ Complete the following steps to view your security policy from the CLI:
 . View details for a specific security policy by running the following command:
 +
 ----
-kubectl get securitypolicy <policy-name> -n <namespace> -o yaml
+kubectl get policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace> -o yaml
 ----
 
 . View a description of your security policy by running the following command:
 +
 ----
-kubectl describe securitypolicy <name> -n <namespace>
+kubectl describe policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace>
 ----
 
 [#creating-a-cluster-security-policy-from-the-console]
@@ -157,59 +156,58 @@ Your YAML file might resemble the following policy:
 
 [source,yaml]
 ----
- apiVersion: policy.open-cluster-management.io/v1
- kind: Policy
- metadata:
-   name: policy-pod
-   annotations:
-     policy.open-cluster-management.io/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
-     policy.open-cluster-management.io/controls: 'control example'
-     policy.open-cluster-management.io/standards: 'NIST,HIPAA'
- spec:
-   complianceType: musthave
-   namespaces:
-     exclude: ["kube*"]
-     include: ["default"]
-   object-templates:
-   - complianceType: musthave
-     objectDefinition:
-       apiVersion: v1
-       kind: Pod
-       metadata:
-         name: pod1
-       spec:
-         containers:
-         - name: pod-name
-           image: 'pod-image'
-           ports:
-           - containerPort: 80
-   remediationAction: enforce
-   disabled: false
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-pod
+  annotations:
+    policy.open-cluster-management.io/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
+    policy.open-cluster-management.io/controls: 'control example'
+    policy.open-cluster-management.io/standards: 'NIST,HIPAA'
+spec:
+  complianceType: musthave
+  namespaces:
+    exclude: ["kube*"]
+    include: ["default"]
+    pruneObjectBehavior: None
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: pod1
+      spec:
+        containers:
+        - name: pod-name
+          image: 'pod-image'
+          ports:
+          - containerPort: 80
+  remediationAction: enforce
+  disabled: false
 
- ---
- apiVersion: apps.open-cluster-management.io/v1
- kind: PlacementBinding
- metadata:
-   name: binding-pod
- placementRef:
-   name: placement-pod
-   kind: PlacementRule
-   apiGroup: apps.open-cluster-management.io
- subjects:
- - name: policy-pod
-   kind: Policy
-   apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-pod
+placementRef:
+  name: placement-pod
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-pod
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
 
- ---
- apiVersion: apps.open-cluster-management.io/v1
+---
+apiVersion: apps.open-cluster-management.io/v1
  kind: PlacementRule
  metadata:
    name: placement-pod
- spec:
-   clusterConditions:
-     - type: ManagedClusterConditionAvailable
-       status: "True"
-   clusterLabels:
+spec:
+  clusterConditions: []
+  clusterSelector:
      matchLabels:
        cloud: "IBM"
 ----
@@ -220,7 +218,7 @@ Click *Create Policy*. A security policy is created from the console.
 ==== Viewing your security policy from the console
 
 View any security policy and its status from the console.
-Navigate to the _Governance_ page to view a table list of your policies. *Note*: You can filter the table list of your policies by selecting the _Policies_ tab or _Cluster violations_ tab.
+Navigate to the _Governance_ page to view a table list of your policies. *Note:* You can filter the table list of your policies by selecting the _Policies_ tab or _Cluster violations_ tab.
 
 Select one of your policies to view more details. The _Details_, _Clusters_, and _Templates_ tabs are displayed. When the cluster or policy status cannot be determined, the following message is displayed: `No status`.
 
@@ -250,7 +248,7 @@ Learn to update security policies by viewing the following section.
 
 Run the following command to edit your policy set: `kubectl edit policysets your-policyset-name`
 
-Add the policy name to the list in the `policies` section of the policy set. Apply your added policy in the placement section of your policy set with the following command: `kubectl apply -f your-added-policy.yaml`. A `PlacementBinding` and `PlacementRule` are created. *Note*: If you delete the placement binding, the policy is still placed by the policy set.
+Add the policy name to the list in the `policies` section of the policy set. Apply your added policy in the placement section of your policy set with the following command: `kubectl apply -f your-added-policy.yaml`. A `PlacementBinding` and `PlacementRule` are created. *Note:* If you delete the placement binding, the policy is still placed by the policy set.
 
 [#adding-a-policy-ui]
 === Adding a policy to a policy set from the console
@@ -279,10 +277,10 @@ Delete a security policy from the CLI or the console.
 .. Delete a security policy by running the following command:
 +
 ----
-kubectl delete policy <securitypolicy-name> -n <open-cluster-management-namespace>
+kubectl delete policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace>
 ----
 +
-After your policy is deleted, it is removed from your target cluster or clusters. Verify that your policy is removed by running the following command: `kubectl get policy <securitypolicy-name> -n <open-cluster-management-namespace>`
+After your policy is deleted, it is removed from your target cluster or clusters. Verify that your policy is removed by running the following command: `kubectl get policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace>`
 
 * Delete a security policy from the console:
 +
@@ -299,3 +297,16 @@ Click the *Delete* button.
 
 To manage other policies, see xref:../governance/create_policy.adoc#managing-security-policies[Managing security policies] for more information.
 Refer to xref:../governance/grc_intro.adoc#governance[Governance] for more topics about policies.
+
+[#cleaning-up-resources-from-policies]
+== Cleaning up resources that are created by policies
+
+Use the `pruneObjectBehavior` parameter in a configuration policy to clean up resources that are created by the policy. When `pruneObjectBehavior` is set, the related objects are only cleaned up after the configuration policy (or parent policy) associated with them is deleted. View the following descriptions of the values that can be used for the parameter:
+
+* `DeleteIfCreated`: Cleans up any resources created by the policy.
+* `DeleteAll`: Cleans up all resources managed by the policy.
+* `None`: This is the default value and maintains the same behavior from previous releases, where no related resources are deleted.
+
+You can set the value directly in the YAML as you create a policy from the CLI. From the console, you can select the value in the _Prune Object Behavior_ section of the the _Policy templates_ step.
+
+*Note:* If a policy that installs an operator uses the `pruneObjectBehavior` parameter defined, then additional clean up is needed to complete the operator uninstall. Additional clean up might include deleting the operator `ClusterServiceVersion` object.
