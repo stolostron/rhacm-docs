@@ -13,19 +13,7 @@ If you only want to maintain this website, you can skip to [Maintaining](/README
 You need the following:
 
 - [GitHub account](https://github.com/)
-- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-- [Retrieve your git keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys)
-
-Install the following software packages:
-
-- [Homebrew](https://brew.sh/)
-- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-- [Ruby](https://formulae.brew.sh/formula/ruby)
-- [RubyGems](https://formulae.brew.sh/formula/brew-gem)
-- [GCC](https://formulae.brew.sh/formula/gcc)
-- [Make](https://formulae.brew.sh/formula/make#default)
-- [Jekyll](https://jekyllrb.com/docs/installation/macos/)
-- [Bundle](https://docs.brew.sh/Manpage#bundle-subcommand)
+- [Retrieve your Git keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys)
 
 ## Installation
 
@@ -42,11 +30,23 @@ brew install chruby ruby-install xz
 ```
 ruby-install ruby
 ```
-**Important:** You must use the previous commands to install ruby, even if your system already comes with ruby pre-installed. The pre-installed version does not function correctly.
+**Important:** You must use the previous commands to install ruby, even if your system already comes with ruby pre-installed. The pre-installed version does not function correctly. This step might take several minutes.
 
-3. Install rubygems by using the following command:
+3. Install rubygems by running the following command:
 ```
 brew install brew-gem
+```
+
+4. Configure ruby by running the following commands:
+```
+echo "source $(brew --prefix)/opt/chruby/share/chruby/chruby.sh" >> ~/.zshrc
+echo "source $(brew --prefix)/opt/chruby/share/chruby/auto.sh" >> ~/.zshrc
+echo "chruby ruby-3.1.2" >> ~/.zshrc
+```
+
+5. Quit the terminal and restart it. Run the following command to verify that ruby is installed and functioning correctly:
+```
+ruby -v
 ```
 
 4. Install gcc make by using the following command:
@@ -65,11 +65,10 @@ brew install git
 ```
 
 7. Install jekyll and bundler by running the following command:
-
 ```
 gem install jekyll bundler
 ```
-**Note:** If you receive an ERROR: Could not find a valid gem 'jekyll' (>=0) error message, run the following commands before repeating step 7:
+**Note:** This step might take several minutes. If you receive an `ERROR: Could not find a valid gem 'jekyll' (>=0)` error message, run the following commands before repeating step 7:
 ```
 gem sources --remove https://rubygems.org/
 ```
@@ -77,9 +76,24 @@ gem sources --remove https://rubygems.org/
 gem sources -a http://rubygems.org/
 ```
 
-8. Choose a theme for your website. [Cayman](https://github.com/pages-themes/cayman) is the default option but there are many themes available on GitHub. This website uses [al-folio](https://github.com/alshedivat/al-folio).
+8. Quit the terminal and restart. Verify that jekyll installed correctly by using the following command:
+```
+jekyll -v
+```
 
-9. 
+9. Install bundle by running the following command:
+```
+bundle install
+```
+
+10. Choose a theme for your website. [Cayman](https://github.com/pages-themes/cayman) is the default option but there are many themes available on GitHub. This website uses [al-folio](https://github.com/alshedivat/al-folio).
+
+11. To verify that jekyll works, navigate to the main folder of your theme and run the following command:
+```
+bundle exec jekyll serve
+```
+
+Copy the server address into your browser. If your website appears, you have installed jekyll and ruby successfully.
 
 # Maintaining
 
