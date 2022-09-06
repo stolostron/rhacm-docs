@@ -4,11 +4,17 @@
 
 # Building with Jekyll
 
-It is helpful learn how to build  a website for GitHub Pages using Jekyll from scratch. This ensures that your system is set up correctly. If you only want to maintain this website, you can skip to [Maintaining](/README.md#Maintaining).
+If you only want to maintain this website, you can skip to [Maintaining](/README.md#Maintaining).
 
 ## Prerequisites
 
 ### MacOS
+
+You need the following:
+
+- [GitHub account](https://github.com/)
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- [Retrieve your git keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys)
 
 Install the following software packages:
 
@@ -23,9 +29,57 @@ Install the following software packages:
 
 ## Installation
 
-1. Choose a theme for your website. [Cayman](https://github.com/pages-themes/cayman) is the default option but there are many themes available on GitHub. This website uses [al-folio](https://github.com/alshedivat/al-folio).
+1. Install [Hombrew](https://brew.sh) by running the following command:
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+**Note:** This might take several minutes.
 
-2. 
+2. To install ruby, run the following commands:
+```
+brew install chruby ruby-install xz
+```
+```
+ruby-install ruby
+```
+**Important:** You must use the previous commands to install ruby, even if your system already comes with ruby pre-installed. The pre-installed version does not function correctly.
+
+3. Install rubygems by using the following command:
+```
+brew install brew-gem
+```
+
+4. Install gcc make by using the following command:
+```
+brew install gcc
+```
+
+5. Install make by using the following command:
+```
+brew install make
+```
+
+6. Install git by using the following command:
+```
+brew install git
+```
+
+7. Install jekyll and bundler by running the following command:
+
+```
+gem install jekyll bundler
+```
+**Note:** If you receive an ERROR: Could not find a valid gem 'jekyll' (>=0) error message, run the following commands before repeating step 7:
+```
+gem sources --remove https://rubygems.org/
+```
+```
+gem sources -a http://rubygems.org/
+```
+
+8. Choose a theme for your website. [Cayman](https://github.com/pages-themes/cayman) is the default option but there are many themes available on GitHub. This website uses [al-folio](https://github.com/alshedivat/al-folio).
+
+9. 
 
 # Maintaining
 
