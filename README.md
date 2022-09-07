@@ -4,13 +4,9 @@
 
 # Building with Jekyll
 
-If you only want to maintain this website, you can skip to [Maintaining](/README.md#Maintaining).
+If you only want to maintain this website, you can skip to [Maintaining](/README.md#Maintaining). If you want to create a new project similar to this website, you need Jekyll and Ruby. See the following topics for a complete guide on installing Jekyll and Ruby on MacOS.
 
 ## Prerequisites
-
-### MacOS
-
-You need the following:
 
 - [GitHub account](https://github.com/)
 - [Retrieve your Git keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys)
@@ -23,7 +19,7 @@ You need the following:
 ```
 **Note:** This might take several minutes.
 
-2. To install ruby, run the following commands:
+2. To install Ruby, run the following commands:
 ```
 brew install chruby ruby-install xz
 ```
@@ -32,39 +28,39 @@ ruby-install ruby
 ```
 **Important:** You must use the previous commands to install ruby, even if your system already comes with ruby pre-installed. The pre-installed version does not function correctly. This step might take several minutes.
 
-3. Install rubygems by running the following command:
+3. Install RubyGems by running the following command:
 ```
 brew install brew-gem
 ```
 
-4. Configure ruby by running the following commands:
+4. Configure Ruby by running the following commands:
 ```
 echo "source $(brew --prefix)/opt/chruby/share/chruby/chruby.sh" >> ~/.zshrc
 echo "source $(brew --prefix)/opt/chruby/share/chruby/auto.sh" >> ~/.zshrc
 echo "chruby ruby-3.1.2" >> ~/.zshrc
 ```
 
-5. Quit the terminal and restart it. Run the following command to verify that ruby is installed and functioning correctly:
+5. Quit the terminal and restart it. Run the following command to verify that Ruby is installed and functioning correctly:
 ```
 ruby -v
 ```
 
-4. Install gcc make by using the following command:
+4. Install GCC make by using the following command:
 ```
 brew install gcc
 ```
 
-5. Install make by using the following command:
+5. Install Make by using the following command:
 ```
 brew install make
 ```
 
-6. Install git by using the following command:
+6. Install Git by using the following command:
 ```
 brew install git
 ```
 
-7. Install jekyll and bundler by running the following command:
+7. Install Jekyll and Bundler by running the following command:
 ```
 gem install jekyll bundler
 ```
@@ -76,7 +72,7 @@ gem sources --remove https://rubygems.org/
 gem sources -a http://rubygems.org/
 ```
 
-8. Quit the terminal and restart. Verify that jekyll installed correctly by using the following command:
+8. Quit the terminal and restart. Verify that Jekyll installed correctly by using the following command:
 ```
 jekyll -v
 ```
@@ -88,12 +84,14 @@ bundle install
 
 10. Choose a theme for your website. [Cayman](https://github.com/pages-themes/cayman) is the default option but there are many themes available on GitHub. This website uses [al-folio](https://github.com/alshedivat/al-folio).
 
-11. To verify that jekyll works, navigate to the main folder of your theme and run the following command:
+11. To verify that Jekyll works, navigate to the main folder of your theme and run the following command:
 ```
 bundle exec jekyll serve
 ```
 
-Copy the server address into your browser. If your website appears, you have installed jekyll and ruby successfully.
+Copy and paste the server address into your browser and hit enter. If your website appears, you have installed Jekyll and Ruby successfully. Use the previous command to preview your website as you work in your repository. Changes you make in the repository are automtically pushed to the preview. Refresh the page in your browser to update the live view after changing and saving files in your repository.
+
+To publish your new website, see [Deployment](/README.md#Deployment) for more details.
 
 # Maintaining
 
