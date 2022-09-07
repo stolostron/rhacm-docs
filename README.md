@@ -45,7 +45,7 @@ echo "chruby ruby-3.1.2" >> ~/.zshrc
 ruby -v
 ```
 
-4. Install GCC make by using the following command:
+4. Install GCC by using the following command:
 ```
 brew install gcc
 ```
