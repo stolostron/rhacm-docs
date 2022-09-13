@@ -89,7 +89,7 @@ bundle install
 bundle exec jekyll serve
 ```
 
-Copy and paste the server address into your browser and hit enter. If your website appears, you have installed Jekyll and Ruby successfully. Use the previous command to preview your website as you work in your repository. Changes you make in the repository are automtically pushed to the preview. Refresh the page in your browser to update the live view after changing and saving files in your repository.
+Copy and paste the server address into your browser and hit enter. If your website appears, you have installed Jekyll and Ruby successfully. Use the previous command to preview your website as you work in your repository. Changes you make in the repository are automatically pushed to the preview. Refresh the page in your browser to update the live view after changing and saving files in your repository.
 
 To publish your new website, see [Deployment](/README.md#Deployment) for more details.
 
