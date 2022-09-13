@@ -94,6 +94,18 @@ kubectl -n open-cluster-management delete deploy cluster-curator-controller
 [#web-console-known-issues]
 == Web console known issues
 
+[#dark-mode-not-supported]
+=== Dark mode is not supported on {product-title-short} version 2.5.x
+//2.5.2:25554
+
+While {product-title-short} version 2.5.2, and later 2.5.x versions are supported on {ocp} version 4.11, dark mode is not supported on {product-title-short} 2.5.x. Either disable dark mode in the settings, or upgrade to {product-title-short} version 2.6 to enable dark mode. 
+
+[#dark-mode-not-supported]
+=== Dark mode is not supported on {mce} version 2.0.x
+//2.5.2:25554
+
+While {mce} version 2.0.2, and later 2.0.x versions are supported on {ocp} version 4.11, dark mode is not supported on {mce} 2.0.x. Either disable dark mode in the settings, or upgrade to {mce} version 2.1 to enable dark mode.
+
 [#ldap-user-names-are-case-sensitive]
 === LDAP user names are case-sensitive
 // 1.0.0:before 1.0.0.1
@@ -128,6 +140,26 @@ Extend the timeout time with the following command:
 ----
 kubectl annotate route multicloud-console haproxy.router.openshift.io/timeout=Xs
 ----
+
+[#cannot-edit-namespace-bindings-for-cluster-set]
+=== Cannot edit namespace bindings for cluster set
+//2.5:25389
+
+When you edit namespace bindings for a cluster set with the `admin` role, you might encounter an error that resembles the following message:
+
+`ResourceError: managedclustersetbindings.cluster.open-cluster-management.io "<cluster-set>" is forbidden: User "<user>" cannot create/delete resource "managedclustersetbindings" in API group "cluster.open-cluster-management.io" in the namespace "<namespace>".`
+
+To resolve the issue, make sure you also have permission to create or delete a `ManagedClusterSetBinding` resource in the namespace you want to bind. The role bindings only allow you to bind the cluster set to the namespace.
+
+[#false-scaling-alert-cluster-details]
+=== False scaling alert in cluster details
+//2.6:25390
+
+When you view cluster details in the console, you might see the following message in the _Nodes_ or _Machine pools_ tab:
+
+`Worker nodes are currently being removed from this cluster. Click the View machines button to see the status of the scaling operations (it may take a few minutes for the changes to be reflected on this console).`
+
+If there are no machine pools present, which is the case for providers that use User Provisioned Infrastructure (UPI) installation, ignore the false alert. The alert appears when there are worker nodes that are not part of the control plane. The false alert can also appear for clusters that were provisioned by using Installer Provisioned Infrastructure (IPI) installation if worker nodes are added to the cluster directly instead of by scaling the machine pool.
 
 [#observability-known-issues]
 == Observability known issues
@@ -857,6 +889,12 @@ The _Console_ and _Topology_ for _Application_ changes for the {product-version}
 
 When you create `ApplicationSet` applications that deploy resources to a different namespace than the namespace defined in the `ApplicationSet` YAML, the resource status does not appear in the topology.
 
+[#allow-deny-list-not-working-objectstorage-app]
+=== Allow and deny list does not work in Object storage applications
+// 2.6:25445
+
+The `allow` and `deny` list feature does not work in Object storage application subscriptions.
+
 [#governance-known-issues]
 == Governance known issues
 
@@ -990,6 +1028,28 @@ If you have manually installed OADP, you must manually uninstall OADP before you
 When you restore the settings for the `local-cluster` managed cluster resource and overwrite the `local-cluster` data on a new hub cluster, the settings are misconfigured. Content from the previous hub cluster `local-cluster` is not backed up because the resource contains `local-cluster` specific information, such as the cluster URL details.
 
 You must manually apply any configuration changes that are related to the `local-cluster` resource on the restored cluster. See link:../clusters/backup_and_restore.adoc#prepare-new-hub[Prepare the new hub cluster] for more details. 
+
+[#preparedforbackup-called-when-velero-schedules-are-created]
+=== prepareForBackup is only called when Velero schedules are first created
+//2.5.1:24012
+
+Any labels defined in the `prepareForBackup` function are not added to resources created after the schedules creation. This affects Hive and {assist-install} secrets that are being labeled before the backup is initiated.
+
+View the list of affected resources:
+
+* Secrets that are used by `clusterDeployments` and created by cluster claims
+* Cluster pool secrets
+* Secrets with the labels, `agent-install.openshift.io/watch` and `environment.metal3.io`
+
+Update the `BackupSchedule`, `veleroSchedule`, or `veleroTTL` values to start a new set of schedules. Then use the resulted backup for a restore, which is defined to label the latest resources for the backup.
+
+[#restored-hive-managed-clusters-unable-new-hub]
+=== Restored Hive managed clusters might not be able to connect with the new hub cluster
+//2.6:23930
+
+When you restore the backup of the changed or rotated certificate of authority (CA) for the Hive managed cluster, on a new hub cluster, the managed cluster fails to connect to the new hub cluster. The connection fails because the `admin` `kubeconfig` secret for this managed cluster, available with the backup, is no longer valid. 
+
+You must manually update the restored `admin` `kubeconfig` secret of the managed cluster on the new hub cluster.
 
 [#submariner-known-issues]
 == Submariner known issues
