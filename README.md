@@ -239,7 +239,7 @@ $ git rebase vx.x.x
 ```
 **Note:** Replace all instances of `x` to match the current version of [al-folio](https://github.com/alshedivat/al-folio).
 
-Upgrading a customized version of al-folio can cause issues during the upgrade. You can still follow the previous steps, but `git rebase` may result in merge conflicts that you must resolve. See [git rebase manual](https://help.github.com/en/github/using-git/about-git-rebase) and how to [resolve conflicts](https://help.github.com/en/github/using-git/resolving-merge-conflicts-after-a-git-rebase) for more information.
+Upgrading a customized version of al-folio can cause issues during the upgrade. You can still follow the previous steps, but `git rebase` may result in merge conflicts that you must resolve. See [Git rebase manual](https://help.github.com/en/github/using-git/about-git-rebase) and how to [resolve conflicts](https://help.github.com/en/github/using-git/resolving-merge-conflicts-after-a-git-rebase) for more information.
 
 If rebasing causes too many issues or fails, reinstall the new version of the theme from scratch and port over your content and changes from the previous version manually.
 
