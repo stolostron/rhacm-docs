@@ -10,3 +10,7 @@ See the following email addresses that are useful for various circumstances:
 ## infosec@redhat.com
 
 Report a security incident or receive consultation on how to share information securely.
+
+## askprivacy@redhat.com
+
+Requests details about the personal data that Red Hat stores about you. Requests are processed in one month or less. For customers requests, use the (https://www.redhat.com/en/about/personal-data-request)[Red Hat personal data request form.]
