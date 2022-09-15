@@ -16,6 +16,5 @@ Find out which password to use for which login.
 | Connect to the VPN |  | PIN + token |
 | Log in to The Source |  | PIN + token |
 | Log in to PnT GitLab |  | PIN + token |
-| Connect to Red Hat WIFI |  | PIN + token |
-| Connect to Red Hat Guest WIFI |  | <details>Shadowman38</details> |
-
+| Connect to Red Hat WIFI |  | <details>See [KB0000239](https://redhat.service-now.com/help?id=kb_article_view&sysparm_article=KB0000239)</details> |
+| Connect to Red Hat Guest WIFI |  | <details>See [KB0001297](https://redhat.service-now.com/help?id=kb_article_view&sysparm_article=KB0001297)</details> |
