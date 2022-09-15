@@ -9,7 +9,7 @@ See the following email addresses that are useful for various circumstances:
 
 ## infosec@redhat.com
 
-Report a security incident or receive consultation on how to share information securely.
+Report security concerns, incidents, or receive consultation on how to share information securely.
 
 ## askprivacy@redhat.com
 
