@@ -1,6 +1,6 @@
 ---
 layout: page
-title: ACM docs
+title: Portal doc
 description: Published verison of Red Hat Advanced Cluster Management for Kubernetes documentation.
 img: assets/img/09-acmdocs.png
 redirect: https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes
