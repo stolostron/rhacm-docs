@@ -67,6 +67,18 @@ As a workaround for this problem, delete the failed pod. Kubernetes automaticall
 
 When an {ocp-short} cluster is in the upgrade stage, the cluster pods are restarted and the cluster might remain in `upgrade failed` status for a variation of 1-5 minutes. This behavior is expected and resolves after a few minutes.
 
+[#create-multiclusterengine-button-not-working]
+=== Create MultiClusterEngine button not working
+//2.6:25641
+
+After installing {product-title} in the {ocp} console, a pop-up window with the following message appears:
+
+`MultiClusterEngine required`
+
+`Create a MultiClusterEngine instance to use this Operator.`
+
+The *Create MultiClusterEngine* button in the pop-up window message might not work. To work around the issue, select *Create instance* in the MultiClusterEngine tile in the Provided APIs section.
+
 [#web-console-known-issues]
 == Web console known issues
 
@@ -113,6 +125,34 @@ kubectl annotate route multicloud-console haproxy.router.openshift.io/timeout=Xs
 When you create an Ansible Tower automation template with the console automation flow, the Ansible Tower credential that you use must specify a host URL that uses a secure protocol (https). When you try to use an Ansible Tower credential that specifies an insecure protocol, the job list cannot be populated in the drop-down menu. To work around this issue, use a secure protocol (https) in the host URL.
 
 *Note:* While you cannot create Ansible Tower templates from credentials with a host URL that contains an insecure protocol using the console, you can still manually create or patch a resource using an insecure protocol.
+
+[#cannot-edit-namespace-bindings-for-cluster-set]
+=== Cannot edit namespace bindings for cluster set
+//2.6:25389
+
+When you edit namespace bindings for a cluster set with the `admin` role or `bind` role, you might encounter an error that resembles the following message:
+
+`ResourceError: managedclustersetbindings.cluster.open-cluster-management.io "<cluster-set>" is forbidden: User "<user>" cannot create/delete resource "managedclustersetbindings" in API group "cluster.open-cluster-management.io" in the namespace "<namespace>".`
+
+To resolve the issue, make sure you also have permission to create or delete a `ManagedClusterSetBinding` resource in the namespace you want to bind. The role bindings only allow you to bind the cluster set to the namespace.
+
+[#false-scaling-alert-cluster-details]
+=== False scaling alert in cluster details
+//2.6:25390
+
+When you view cluster details in the console, you might see the following message in the _Nodes_ or _Machine pools_ tab:
+
+`Worker nodes are currently being removed from this cluster. Click the View machines button to see the status of the scaling operations (it may take a few minutes for the changes to be reflected on this console).`
+
+If there are no machine pools present, which is the case for providers that use User Provisioned Infrastructure (UPI) installation, ignore the false alert. The alert appears when there are worker nodes that are not part of the control plane. The false alert can also appear for clusters that were provisioned by using Installer Provisioned Infrastructure (IPI) installation if worker nodes are added to the cluster directly instead of by scaling the machine pool.
+
+[#wrong-node-count-overview-page]
+=== Wrong node count on Overview page
+//2.6:25391
+
+The summary card on the console *Overview* page shows the total number of nodes across all clusters, even when you select an infrastructure provider tile. All other values are filtered according to the selected tile.
+
+To see the correct number of nodes for the selected infrastructure provider, click the total number of nodes on the summary card and check the related node count in the search results.
 
 [#observability-known-issues]
 == Observability known issues
@@ -866,7 +906,7 @@ Avoid backup collisions by setting the `BackupSchedule.cluster.open-cluster-mana
 
 The backup collision is reported by the link:https://github.com/stolostron/cluster-backup-chart/blob/main/stable/cluster-backup-chart/templates/hub-backup-pod.yaml[`hub-backup-pod`] policy. The administrator must verify which hub cluster writes data to the storage location. Then remove the `BackupSchedule.cluster.open-cluster-management.io` resource from the passive hub cluster, and recreate a new `BackupSchedule.cluster.open-cluster-management.io` resource on the primary hub cluster to resume the backup.
 
-See link:../backup_restore/backup_restore_enable.adoc#hub-backup-and-restore[Enabling the backup and restore operator] for more information. 
+See link:../backup_restore/backup_restore_enable.adoc#enable-backup-and-restore[Enabling the backup and restore operator] for more information. 
 
 [#restore-limitations]
 === Velero restore limitations
@@ -879,7 +919,9 @@ View the following restore limitations:
 
 * The new hub cluster has a different configuration from the active hub cluster when a user reapplies the backup on the new hub cluster. Since there is an existing policy on the hub cluster from a previous restore, it is not restored again. Even when the backup contains the expected updates, the policy contents are not updated by Velero on the new hub cluster. 
 
-To address the previously mentioned limitations, when a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning the hub cluster before Velero restore begins. For more information, see link:../backup_restore/backup_restore_enable.adoc#clean-hub-restore[Clean the hub cluster before restore].
+To address the previously mentioned limitations, when a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning the hub cluster before Velero restore begins. 
+
+For more information, see _Clean the hub cluster before restore_ in the link:../backup_restore/backup_restore_enable.adoc#enable-backup-and-restore[Enabling the backup and restore operator] topic.
 
 [#imported-clusters-not-displayed]
 === Imported managed clusters are not displayed
@@ -936,10 +978,10 @@ If you have manually installed OADP, you must manually uninstall OADP before you
 
 When you restore the settings for the `local-cluster` managed cluster resource and overwrite the `local-cluster` data on a new hub cluster, the settings are misconfigured. Content from the previous hub cluster `local-cluster` is not backed up because the resource contains `local-cluster` specific information, such as the cluster URL details.
 
-You must manually apply any configuration changes that are related to the `local-cluster` resource on the restored cluster. See link:../backup_restore/backup_restore_enable.adoc#prepare-new-hub[Prepare the new hub cluster] for more details. 
+You must manually apply any configuration changes that are related to the `local-cluster` resource on the restored cluster. See _Prepare the new hub cluster_ in the link:../backup_restore/backup_restore_enable.adoc#enable-backup-and-restore[Enabling the backup and restore operator] topic.
 
 [#restored-hive-managed-clusters-unable-new-hub]
-=== Restored Hive managed clusters might be able to connect with the new hub cluster
+=== Restored Hive managed clusters might not be able to connect with the new hub cluster
 //2.6:23930
 
 When you restore the backup of the changed or rotated certificate of authority (CA) for the Hive managed cluster, on a new hub cluster, the managed cluster fails to connect to the new hub cluster. The connection fails because the `admin` `kubeconfig` secret for this managed cluster, available with the backup, is no longer valid. 
@@ -963,7 +1005,7 @@ When deploying Submariner on a cluster that includes Red Hat Enterprise Linux wo
 [#not-all-infrastructure]
 === Not all of the infrastructure providers that {product-title-short} can manage are supported
 
-Submariner is not supported with all of the infrastructure providers that {product-title-short} can manage. Refer to the https://access.redhat.com/articles/6663461[{product-title-short} support matrix] for a list of supported providers.
+Submariner is not supported with all of the infrastructure providers that {product-title-short} can manage. Refer to the https://access.redhat.com/articles/6968787[{product-title-short} support matrix] for a list of supported providers.
 
 [#openstack-ui]
 === Preparing the Red Hat OpenStack Platform infrastructure from the {product-title-short} console is not supported
