@@ -17,5 +17,5 @@ Find out which password to use for which login.
 | Log in to The Source |  | PIN + token |
 | Log in to PnT GitLab |  | PIN + token |
 | Connect to Red Hat WIFI |  | PIN + token |
-| Connect to Red Hat Guest WIFI |  | <details>See [https://redhat.service-now.com/help?id=kb_article_view&sysparm_article=KB0001297](KB0001297)</details> |
+| Connect to Red Hat Guest WIFI |  | <details>See [KB0001297](https://redhat.service-now.com/help?id=kb_article_view&sysparm_article=KB0001297)</details> |
 
