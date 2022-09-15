@@ -13,4 +13,4 @@ Report a security incident or receive consultation on how to share information s
 
 ## askprivacy@redhat.com
 
-Requests details about the personal data that Red Hat stores about you. Requests are processed in one month or less. For customers requests, use the [https://www.redhat.com/en/about/personal-data-request](Red Hat personal data request form).
+Request details about the personal data that Red Hat stores about you. Requests must be processed in 30 days or less. For customer requests, use the [Red Hat personal data request form](https://www.redhat.com/en/about/personal-data-request).
