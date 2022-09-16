@@ -26,7 +26,7 @@ brew install chruby ruby-install xz
 ```
 ruby-install ruby
 ```
-**Important:** You must use the previous commands to install ruby, even if your system already comes with ruby pre-installed. The pre-installed version does not function correctly. This step might take several minutes.
+**Important:** You must use the previous commands to install Ruby, even if your system already comes with Ruby pre-installed. The pre-installed version does not function correctly. This step might take several minutes.
 
 3. Install RubyGems by running the following command:
 ```
