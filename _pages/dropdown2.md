@@ -23,4 +23,7 @@ children:
     - title: divider
     - title: Board maintenance
       permalink: /board_maintenance
+    - title: divider
+    - title: Issue points
+      permalink: /arch_points
 ---
