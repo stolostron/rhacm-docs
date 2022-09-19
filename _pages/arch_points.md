@@ -170,146 +170,54 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 &nbsp;
 
-## Case studies
+## Examples
 
-### Adding technology preview (`1` point)
+### `1` point
 
-**Issue title:**
-Cluster scaling is technology preview #25677
-
-**Link:**
-[25677](https://github.com/stolostron/backlog/issues/25677)
-
-This is an open and shut case of a SME pointing out that "technology preview" was accidentally removed and needs to be added back to a topic. The solution was to add back the missing "technology preview" to the title of the topic.
-
-More `1` point examples:
-
+- [25677](https://github.com/stolostron/backlog/issues/25677)
 - [25092](https://github.com/stolostron/backlog/issues/25092)
 
-### Adding simple new known issue (`2` points)
+### `2` points
 
-**Issue title:**
-Add new installation known issue for blue button #25641 
-
-**Link:**
-[25641](https://github.com/stolostron/backlog/issues/25641)
-
-A simple and short new known issue where a strong draft and even screenshot for verification was provided. The solution only required minor style and formatting edits to the provided draft. The screenshot provided verifiaction the UI steps, which any technical writer could also verify on the console themselves as well.
-
-More `2` point examples:
-
+- [25641](https://github.com/stolostron/backlog/issues/25641)
 - [11423](https://github.com/stolostron/backlog/issues/11423)
 
-### Documenting horizontal scaling of ocp clusters (`3` points)
+### `3` points
 
-**Issue title:**
-Add details for horizontal scaling of an ocp cluster that's deployed using CIM (Central Infra Management) #24059
-
-**Link:**
-[24059](https://github.com/stolostron/backlog/issues/24059)
-
-The original request was to add steps explaining how to add more nodes to an existing ocp cluster. Some information was missing, such as details in the provided steps and a suggested location for the new steps. After a quick discussion in the issue and some additional review in the associated PR, the solution was to add a short new topic in one of the suggested locations that made the most sense from an architecture perspective and using the provided information, which was supplemented by an additional developer.
-
-More `3` point examples:
-
+- [24059](https://github.com/stolostron/backlog/issues/24059)
 - [25389](https://github.com/stolostron/backlog/issues/25389)
 
-### Adding technology preview (`4` points)
+### `4` points
 
-**Issue title:**
-Add details for horizontal scaling of an ocp cluster that's deployed using CIM (Central Infra Management) #24059
-
-**Link:**
-[24059](https://github.com/stolostron/backlog/issues/24059)
-
-The report asks to adjust the documentation because cluster proxy add-on moved. The solution required some awareness of the doc architecture and careful review to make sure content was moved properly from and to the correct locations. Drafts were provided but, as always, needed to be review and edited for formatting and style.
-
-More `4` point examples:
-
+- [24059](https://github.com/stolostron/backlog/issues/24059)
 - [18252](https://github.com/stolostron/backlog/issues/18252)
 
-### Draft (`5` points)
+### `5` points
 
-**Issue title:**
-Draft
+- [](https://github.com/stolostron/backlog/issues/)
+- [](https://github.com/stolostron/backlog/issues/)
 
-**Link:**
-[Draft](https://github.com/stolostron/backlog/issues/Draft)
+### `6` points
 
-Draft
+- [](https://github.com/stolostron/backlog/issues/)
+- [](https://github.com/stolostron/backlog/issues/)
 
-More `5` point examples:
+### `7` points
 
-- [Draft](https://github.com/stolostron/backlog/issues/Draft) 
+- [](https://github.com/stolostron/backlog/issues/)
+- [](https://github.com/stolostron/backlog/issues/)
 
-### Draft (`6` points)
+### `8` points
 
-**Issue title:**
-Draft
+- [](https://github.com/stolostron/backlog/issues/)
+- [](https://github.com/stolostron/backlog/issues/)
 
-**Link:**
-[Draft](https://github.com/stolostron/backlog/issues/Draft)
+### `9` points
 
-Draft
+- [](https://github.com/stolostron/backlog/issues/)
+- [](https://github.com/stolostron/backlog/issues/)
 
-More `6` point examples:
+### `10` points
 
-- [Draft](https://github.com/stolostron/backlog/issues/Draft) 
-
-### Draft (`7` points)
-
-**Issue title:**
-Draft
-
-**Link:**
-[Draft](https://github.com/stolostron/backlog/issues/Draft)
-
-Draft
-
-More `7` point examples:
-
-- [Draft](https://github.com/stolostron/backlog/issues/Draft) 
-
-### Draft (`8` points)
-
-**Issue title:**
-Draft
-
-**Link:**
-[Draft](https://github.com/stolostron/backlog/issues/Draft)
-
-Draft
-
-More `8` point examples:
-
-- [Draft](https://github.com/stolostron/backlog/issues/Draft) 
-
-### Draft (`9` points)
-
-**Issue title:**
-Draft
-
-**Link:**
-[Draft](https://github.com/stolostron/backlog/issues/Draft)
-
-Draft
-
-More `9` point examples:
-
-- [Draft](https://github.com/stolostron/backlog/issues/Draft) 
-
-
-### Draft (`10` points)
-
-**Issue title:**
-Draft
-
-**Link:**
-[Draft](https://github.com/stolostron/backlog/issues/Draft)
-
-Draft
-
-More `10` point examples:
-
-- [Draft](https://github.com/stolostron/backlog/issues/Draft) 
-
+- [](https://github.com/stolostron/backlog/issues/)
+- [](https://github.com/stolostron/backlog/issues/)
