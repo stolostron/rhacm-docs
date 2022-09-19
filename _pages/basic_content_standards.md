@@ -103,4 +103,7 @@ Use the following modals only in the manner described by the IBM style guide:
 
 * May: Indicates permission, but it is better to use "can" or "might".
 
+## Supplemental resources
+
+* https://www.namingthings.co/naming-things-principles
 
