@@ -106,4 +106,5 @@ Use the following modals only in the manner described by the IBM style guide:
 ## Supplemental resources
 
 * https://www.namingthings.co/naming-things-principles
+* https://techwhirl.com/whats-in-a-name-guidelines-for-naming-files/
 
