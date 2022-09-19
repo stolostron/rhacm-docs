@@ -17,7 +17,7 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 * Check your PR requests from team members. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
 * Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`.
 
-## Creating a file or section
+## Creating a file, section, or list
 
 * Be sure file names increase UX and don't confuse the reader or writer. Example: `man_clu_set` changes to `manage_clusterset`, a file that is titled: _Managing ClusterSets_. This will help the entire product team better manage links in the doc and the console, and it increases expectation about the contents of the file.
 * Recognize the goal of the content: Task, reference, concept? Tasks require gerunds in the title, for example.
@@ -26,11 +26,19 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 * Seek guidance from the architect before creating a book or section so that the team can agree on the best placement for the new content.
 * Don't use internal terms to define a file. Example: Wizard. Name the file after what the user will hear about the product.
 * Validation steps need to be concrete.
-
+* Headers: parallel, separate headers with content, etc... See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-headings
+    - Choose gerunds for tasks
+    - No code in headers
+    - Make headers and anchors unique but intuitive (think about search engine optimization
+* List: avoiding nesting more than 2, parallelism, etc... See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-lists
+    - Definition lists are built with term in bold and colon.
+    - **Definition list:** DLs look like this.
+    - Choose complete sentences, or not, but commit!
+    
 ## Short descriptions
 
 * Use complete, but concise sentences with no more than 50 words at a time. 
-* Avoid self-referential language: “This topic...” (Obviously the user knows they are reading this topic.)
+* Avoid self-referential language when you can: “This topic...” (Obviously the user knows they are reading this topic.)
 * Don't repeat the title in the description.
 * Give the user a little knowledge in just a couple sentences about what the topic is about. 
 * If it is a task, make it clear that it is a procedure in the description. If it is a reference, be sure the user knows to refer to the topic for information. If it is just a concept, make it clear it is only for details about a component or function. (These can be blended, but use steps for tasks.)
