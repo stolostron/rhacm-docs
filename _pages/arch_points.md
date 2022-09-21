@@ -209,7 +209,7 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 ### `8` points
 
-- [](https://github.com/stolostron/backlog/issues/)
+- [24630](https://github.com/stolostron/backlog/issues/24630)
 - [](https://github.com/stolostron/backlog/issues/)
 
 ### `9` points
