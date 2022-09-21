@@ -32,7 +32,7 @@ Consider the following rubrics when assinging points to GitHub issues:
 
 ## `1` point
 
-The most basic type of issue usually consisting of fixing typos and adding or removing characters. The information provided in the issue is always sufficient to solve the issue quickly, with no additional research, communication or even review needed.
+The most basic type of issue usually consisting of fixing typos and adding or removing characters. The information provided in the issue is always sufficient to solve the issue quickly, with no additional research, communication, or even review needed.
 
 | **Rubric** | | **`1` point description** |
 | ----------- | | ----------- |
@@ -122,7 +122,7 @@ The first level of issue difficulty that requires strong awareness of doc archit
 | ----------- | | ----------- |
 | Time | | Requires multiple sprints. |
 | Difficulty | | Complex authoring of new content based on limited available information. You need to have strong awareness of the doc architecture to make the right decisions. | 
-| Research | | Intensive research required to understand the issue and topic. You also need to gather complex information thriough various means and verify it. | 
+| Research | | Intensive research required to understand the issue and topic. You also need to gather complex information through various channels and verify it. Meetings with SMEs are likely necessary. | 
 | Length | | Varies, but can require some input in a dozen or more files. | 
 | Review | | Peer review and multiple devs or team leaders. |
 
@@ -136,9 +136,9 @@ A complex issue similar to 7 point issues, but with even more investment require
 | ----------- | | ----------- |
 | Time | | Requires multiple sprints. |
 | Difficulty | | Complex authoring of new content based on limited available information. You need to have strong awareness of the doc architecture to make the right decisions. | 
-| Research | | Intensive research required to understand the issue and topic. You also need to gather complex information through various means and verify it. | 
+| Research | | Intensive research required to understand the issue and topic. You also need to gather complex information through various channels and verify it. Meetings with SMEs and team leaders are likely necessary. | 
 | Length | | Varies, but can require input in dozens of files. | 
-| Review | | Peer review and multiple devs or team leaders. |
+| Review | | Multipls peer reviews and multiple devs or team leaders. |
 
 &nbsp;
 
@@ -158,7 +158,7 @@ Draft
 
 ## `10` points
 
-An extremely complex issue that requires massive work on all fronts and input from multiple parties. Can require an epic and might consist of multiple issues. Several meetings and extensive review are required.
+An extremely complex issue that requires massive work on all fronts and input from multiple parties. Can require an epic and might consist of multiple smaller issues. Several meetings and extensive review are required.
 
 | **Rubric** | | **`10` points description** |
 | ----------- | | ----------- |
