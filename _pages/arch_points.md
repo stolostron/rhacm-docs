@@ -163,8 +163,8 @@ An extremely complex issue that requires massive work on all fronts and input fr
 | **Rubric** | | **`10` points description** |
 | ----------- | | ----------- |
 | Time | | Varies but requires multiple sprints or even releases. |
-| Difficulty | | Draft | 
-| Research | | Draft | 
+| Difficulty | | Complex authoring, editing, and decision-making on content that might not exist yet. You need mastery of the doc architecture to make the right decisions. | 
+| Research | | Extenstive research on all fronts, from style to technical concepts and customer needs. Information comes from a multitude of sources. Recurring meetings with product managers, SMEs, developers, and team leaders are required. | 
 | Length | | Up to a whole book in size (massive input in hundreds of files). | 
 | Review | | Multiple peer, developer, team leader, and proudct manager reviews through meetings and via GitHub. |
 
