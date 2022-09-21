@@ -9,7 +9,7 @@ Not all issues are created equal. To help plan our anticipated workloads for eac
 
 ## General rules
 
-- The range of points conists of integers from `1` to `10`, with `1` being "I can knock this out in 5 minutes" and `10` being "this will give me grey hairs." Do not use fractions or integers above 10.
+- The range of points consists of integers from `1` to `10`, with `1` being "I can knock this out in 5 minutes" and `10` being "this will give me grey hairs." Do not use fractions or integers above 10.
 - Estimate points when triaging issues, but feel free to change them any time during your work process, including after you have already closed the issue.
 
 ## Rubrics
@@ -36,7 +36,7 @@ The most basic type of issue usually consisting of fixing typos and adding or re
 
 | **Rubric** | | **`1` point description** |
 | ----------- | | ----------- |
-| Time | | A few minutes at most. |
+| Time | | Quick. |
 | Difficulty | | Copy and paste with no further considerations required. | 
 | Research | | None. | 
 | Length | | A single or a few characters added/changed in one file. A phrase at most. | 
@@ -50,7 +50,7 @@ A simple issue that requires mostly copy and paste. These are often straightforw
 
 | **Rubric** | | **`2` points description** |
 | ----------- | | ----------- |
-| Time | | Multiple 1 point issues. |
+| Time | | Relatively quick. |
 | Difficulty | | Largely copy and paste. Might require minimal style and formatting considerations. | 
 | Research | | Minimal (in the form of verification) to none. | 
 | Length | | One or a few paragraphs in one file. | 
@@ -64,7 +64,7 @@ A relatively simple issue that requires minimal additional research and editing.
 
 | **Rubric** | | **`3` points description** |
 | ----------- | | ----------- |
-| Time | | Varies from hours to days. |
+| Time | | Not so quick. |
 | Difficulty | | Some rewriting and editing is required. | 
 | Research | | You might need to reach out for verification or have short discussions about the implementation. | 
 | Length | | One or a few paragraphs in one or more files. | 
@@ -78,7 +78,7 @@ A relatively simple issue that requires minimal additional research and editing.
 
 | **Rubric** | | **`4` points description** |
 | ----------- | | ----------- |
-| Time | | Can be easily completed within a sprint. |
+| Time | | Varies but can be done within a sprint. |
 | Difficulty | | Includes drafting new content or adapting drafts that require verification, discussuion, and review from SMEs. | 
 | Research | | You might need familarize yourself with the topic and learn basic new concepts.  | 
 | Length | | Varies, but often requires several lines across multiple files. | 
@@ -92,7 +92,7 @@ A somewhat difficult issue that requires you to research topics, reach out to SM
 
 | **Rubric** | | **`5` points description** |
 | ----------- | | ----------- |
-| Time | | Can be completed in one sprint but can require more time. |
+| Time | | Varies but can be done within a sprint. |
 | Difficulty | | You need to author new topics and content based on multiple sources. Includes research and communication with multiple SMEs. Consider style, formatting, user needs, and, to some extent, the architecture of the doc. | 
 | Research | | Reaching out to SMEs, learning new technical and product concepts as well as becoming familiar with the architecture of the doc section affected. | 
 | Length | | Varies, but often requires several topics across multiple files. | 
@@ -106,7 +106,7 @@ A difficult issue similar to 5 point issues, but with even more investment requi
 
 | **Rubric** | | **`6` points description** |
 | ----------- | | ----------- |
-| Time | | Can be completed in one sprint but sometimes requires more time. |
+| Time | | Varies but requires more than a sprint. |
 | Difficulty | | You need to author new topics and content based on multiple sources. Includes research, communication with multiple SMEs, and, sometimes, meetings for discussion. You need to consider the doc architecture, style, formatting, and user needs. | 
 | Research | | Reaching out to SMEs, learning new technical and product concepts as well as becoming familiar with the architecture of the doc section affected. Meetings might be helpful. | 
 | Length | | Varies, but often requires several topics across multiple files. | 
@@ -120,7 +120,7 @@ The first level of issue difficulty that requires strong awareness of doc archit
 
 | **Rubric** | | **`7` points description** |
 | ----------- | | ----------- |
-| Time | | Requires multiple sprints. |
+| Time | | Varies but requires multiple sprints. |
 | Difficulty | | Complex authoring of new content based on limited available information. You need to have strong awareness of the doc architecture to make the right decisions. | 
 | Research | | Intensive research required to understand the issue and topic. You also need to gather complex information through various channels and verify it. Meetings with SMEs are likely necessary. | 
 | Length | | Varies, but can require some input in a dozen or more files. | 
@@ -134,7 +134,7 @@ A complex issue similar to 7 point issues, but with even more investment require
 
 | **Rubric** | | **`8` points description** |
 | ----------- | | ----------- |
-| Time | | Requires multiple sprints. |
+| Time | | Varies but requires multiple sprints. |
 | Difficulty | | Complex authoring of new content based on limited available information. You need to have strong awareness of the doc architecture to make the right decisions. | 
 | Research | | Intensive research required to understand the issue and topic. You also need to gather complex information through various channels and verify it. Meetings with SMEs and team leaders are likely necessary. | 
 | Length | | Varies, but can require input in dozens of files. | 
@@ -144,15 +144,15 @@ A complex issue similar to 7 point issues, but with even more investment require
 
 ## `9` points
 
-Draft
+A highly complex issue characterized by a the lack of a clear, stable direction. As content and features are still in the planning phase, expect frequent changes that you need to deal with, in addition to the difficulties of 7 and 8 point issues.
 
 | **Rubric** | | **`9` points description** |
 | ----------- | | ----------- |
-| Time | | Requires multiple sprints. |
-| Difficulty | | Draft | 
-| Research | | Draft | 
+| Time | | Varies but requires multiple sprints. |
+| Difficulty | | Complex authoring of new content that is still being decided. It will likely require more effort to try to work these issues because you have to deal with frequent changes. You need to have strong awareness of the doc architecture to make the right decisions. | 
+| Research | | Requires lengthy research to understand the content and explain it. Often requires putting together information from multiple sources. | 
 | Length | | Varies, but can require major input in dozens of files. | 
-| Review | | Draft |
+| Review | | Multiple peer reviews and multiple devs or team leaders. |
 
 &nbsp;
 
@@ -162,7 +162,7 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 | **Rubric** | | **`10` points description** |
 | ----------- | | ----------- |
-| Time | | Requires multiple sprints or even releases. |
+| Time | | Varies but requires multiple sprints or even releases. |
 | Difficulty | | Draft | 
 | Research | | Draft | 
 | Length | | Up to a whole book in size (massive input in hundreds of files). | 
