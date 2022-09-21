@@ -144,7 +144,7 @@ A complex issue similar to 7 point issues, but with even more investment require
 
 ## `9` points
 
-A highly complex issue characterized by a the lack of a clear, stable direction. As content and features are still in the planning phase, expect frequent changes that you need to deal with, in addition to the difficulties of 7 and 8 point issues.
+A highly complex issue characterized by the lack of a clear, stable direction. As content and features are still in the planning phase, expect frequent changes that you need to deal with, in addition to the difficulties of 7 and 8 point issues.
 
 | **Rubric** | | **`9` points description** |
 | ----------- | | ----------- |
