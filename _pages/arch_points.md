@@ -219,5 +219,5 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 ### `10` points
 
-- [](https://github.com/stolostron/backlog/issues/)
+- [24960](https://github.com/stolostron/backlog/issues/24960)
 - [](https://github.com/stolostron/backlog/issues/)
