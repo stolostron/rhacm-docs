@@ -71,7 +71,7 @@ To build locally:
 
 1. Log on to the VPN.
 2. Install homebrew, if you don't already have it installed.
-3. Find and download the build script is located in the master branch at: https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management: acm_sync_asciidoc.sh. We are assuming it went to the `Downloads` folder.
+3. Download the build script to a folder of your choice from the master branch at: https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/blob/master/acm_sync_asciidoc.sh
 5. Change to the folder you chose, in this case, the `Downloads` folder: `cd ~/Downloads`
 6. Make the script executable by entering: `chmod +x acm_sync_asciidoc.sh`
 7. Check for `gsed` install, or install if needed.
