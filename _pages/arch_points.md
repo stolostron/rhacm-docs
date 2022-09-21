@@ -21,7 +21,7 @@ Consider the following rubrics when assinging points to GitHub issues:
 | Time | | How long it takes to solve an issue. |
 | Difficulty | | How complex an issue is and how many additional factors you have to consider. | 
 | Research | | How much new information you need to seek out and learn to understand or solve the issue. | 
-| Length | | How many new files, topics or individual lines it takes to solve the issue. | 
+| Length | | How many new files, topics, or individual lines it takes to solve the issue. | 
 | Review | | Who and how many people need to review your solution before merging. |
 
 &nbsp;
