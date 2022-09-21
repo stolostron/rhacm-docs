@@ -564,6 +564,43 @@ compute:
       vmNetworkingType: 'Basic'
 ----
 
+[#client-cannot-reach-ipxe-script]
+=== Client cannot reach iPXE script
+//2.6:25157
+
+iPXE is an open source network boot firmware. See link:https://ipxe.org/[iPXE] for more details.
+
+When booting a node, the URL length limitation in some DHCP servers cuts off the `ipxeScript` URL in the `InfraEnv` custom resource definition, resulting in the following error message in the console:
+
+`no bootable devices`
+
+To work around the issue, complete the following steps:
+
+. Apply the `InfraEnv` custom resource definition when using an assisted installation to expose the `bootArtifacts`, which might resemble the following file:
++
+----
+status:
+  agentLabelSelector:
+    matchLabels:
+      infraenvs.agent-install.openshift.io: qe2
+  bootArtifacts:
+    initrd: https://assisted-image-service-multicluster-engine.apps.qe1.kni.lab.eng.bos.redhat.com/images/73450317-b378-4f77-a3d0-e6fd98e5aefb/pxe-initrd?api_key=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbmZyYV9lbnZfaWQiOiI3MzQ1MDMxNy1iMzc4LTRmNzctYTNkMC1lNmZkOThlNWFlZmIifQ.fLDph1ueGjXWQYyjWg9lPQ60mYvgQZN5KtFjRGUGdTCTEUbsWnu9A6FcnCMYVq3la3r7_ByZvWGyAvTK_M2g-g&arch=x86_64&version=4.11
+    ipxeScript: https://assisted-service-multicluster-engine.apps.qe1.kni.lab.eng.bos.redhat.com/api/assisted-install/v2/infra-envs/73450317-b378-4f77-a3d0-e6fd98e5aefb/downloads/files?api_key=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbmZyYV9lbnZfaWQiOiI3MzQ1MDMxNy1iMzc4LTRmNzctYTNkMC1lNmZkOThlNWFlZmIifQ.O88mwk_WnztkmYSYmOIXwZ3fmNv_WeVmlWJm6_lZuoUaRymweFKv1TNdCurzG6pT5wtgBg7_UzV_-7d6LcyxuQ&file_name=ipxe-script
+    kernel: https://assisted-image-service-multicluster-engine.apps.qe1.kni.lab.eng.bos.redhat.com/boot-artifacts/kernel?arch=x86_64&version=4.11
+    rootfs: https://assisted-image-service-multicluster-engine.apps.qe1.kni.lab.eng.bos.redhat.com/boot-artifacts/rootfs?arch=x86_64&version=4.11
+----
+
+. Create a proxy server to expose the `bootArtifacts` with short URLs.
+
+. Copy the `bootArtifacts` and add them them to the proxy by running the following commands:
++
+----
+for artifact in oc get infraenv qe2 -ojsonpath="{.status.bootArtifacts}" | jq ". | keys[]" | sed "s/\"//g"
+do curl -k oc get infraenv qe2 -ojsonpath="{.status.bootArtifacts.${artifact}}"` -o $artifact 
+----
+
+. Add the `ipxeScript` artifact proxy URL to the `bootp` parameter in `libvirt.xml`.
+
 [#application-management-known-issues]
 == Application management known issues
 
