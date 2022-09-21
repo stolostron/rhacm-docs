@@ -138,7 +138,7 @@ A complex issue similar to 7 point issues, but with even more investment require
 | Difficulty | | Complex authoring of new content based on limited available information. You need to have strong awareness of the doc architecture to make the right decisions. | 
 | Research | | Intensive research required to understand the issue and topic. You also need to gather complex information through various channels and verify it. Meetings with SMEs and team leaders are likely necessary. | 
 | Length | | Varies, but can require input in dozens of files. | 
-| Review | | Multipls peer reviews and multiple devs or team leaders. |
+| Review | | Multiple peer reviews and multiple devs or team leaders. |
 
 &nbsp;
 
