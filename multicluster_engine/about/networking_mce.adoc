@@ -1,0 +1,175 @@
+[#networking-mce]
+= Networking
+
+Learn about network requirements for the {mce} hub cluster and managed clusters.
+
+* <<hub-network-config-mce,Hub cluster network configuration>>
+* <<managed-network-config-mce,Managed cluster network configuration>>
+* <<network-configuration-infra-operator-mce,Additional networking requirements when installing using the infrastructure operator>>
+* <<network-configuration-hive-mce,Additional networking requirements when installing using the Hive Operator>>
+
+[#hub-network-config-mce]
+== Hub cluster network configuration
+
+You can refer to the configuration for your hub cluster network.
+
+[#hub-network-table-mce]
+=== Hub cluster network configuration table
+
+See the hub cluster network requirements in the following table:
+
+|===
+| Direction | Protocol | Connection | Port (if specified) | Source address | Destination address
+
+| Outbound to the managed cluster 
+| HTTPS 
+| Retrieval of logs dynamically from Search console for the pods of the managed cluster, uses the `klusterlet-addon-workmgr` service that is running on the managed cluster
+| 443 
+| None
+| IP address to access managed cluster route
+
+| Outbound to the managed cluster 
+| HTTPS 
+| Kubernetes API server of the managed cluster that is provisioned during installation to install the klusterlet 
+| 6443 
+| None
+| IP of Kubernetes managed cluster API server  
+
+| Outbound to the channel source 
+| HTTPS 
+| The channel source, including GitHub, Object Store, and Helm repository, which is only required when you are using Application lifecycle, OpenShift GitOps, or ArgoCD to connect
+| 443 
+| None
+| IP of the channel source
+
+| Inbound from the managed cluster 
+| HTTPS 
+| Managed cluster to push metrics and alerts that are gathered only for managed clusters that are running {ocp-short} version 4.8, or later
+| 443 
+| None
+| IP address to hub cluster access route
+
+| Inbound from the managed cluster 
+| HTTPS 
+| Kubernetes API Server of hub cluster that is watched for changes from the managed cluster 
+| 6443 
+| None 
+| IP address of hub cluster Kubernetes API Server
+
+| Outbound to the ObjectStore 
+| HTTPS 
+| Sends Observability metric data for long term storage when the Cluster Backup Operator is running
+| 443 
+| None 
+| IP address of ObjectStore
+
+| Outbound to the image repository 
+| HTTPS 
+| Access images for {ocp-short} and {ice} 
+| 443 
+| None 
+| IP address of image repository
+
+|===
+
+[#managed-network-config-mce]
+== Managed cluster network configuration
+
+You can refer to the configuration for your managed cluster network.
+
+[#managed-network-table]
+=== Managed cluster network configuration table
+
+See the managed cluster network requirements in the following table:
+
+|===
+|Direction | Protocol | Connection | Port (if specified) | Source address | Destination address
+
+| Inbound from the hub cluster 
+| HTTPS 
+| Sending of logs dynamically from Search console for the pods of the managed cluster, uses the `klusterlet-addon-workmgr` service that is running on the managed cluster 
+| 443 
+| None
+| IP address to access managed cluster route
+
+| Inbound from the hub cluster 
+| HTTPS 
+| Kubernetes API server of the managed cluster that is provisioned during installation to install the klusterlet 
+| 6443 
+| None
+| IP of Kubernetes managed cluster API server 
+
+| Outbound to the image repository 
+| HTTPS 
+| Access images for OpenShift Container Platform and {mce} 
+| 443 
+| None 
+| IP address of image repository
+
+| Outbound to the hub cluster 
+| HTTPS 
+| Managed cluster to push metrics and alerts that are gathered only for managed clusters that are running {ocp-short} version 4.8, or later
+| 443 
+| None 
+| IP address to hub cluster access route
+
+| Outbound to the hub cluster 
+| HTTPS 
+| Watches the Kubernetes API server of the hub cluster for changes 
+| 6443 
+| None 
+| IP address of hub cluster Kubernetes API Server
+
+| Outbound to the channel source 
+| HTTPS 
+| The channel source, including GitHub, Object Store, and Helm repository, which is only required when you are using Application lifecycle, OpenShift GitOps, or ArgoCD to connect
+| 443 
+| None 
+| IP of the channel source
+
+|===
+
+[#network-configuration-infra-operator-mce]
+== Additional networking requirements when installing using the infrastructure operator
+
+When you are installing bare metal managed clusters with the Infrastructure Operator, see the following table for the additional networking requirements:
+
+|===
+| Direction | Protocol | Connection | Port (if specified)
+
+| Hub cluster outbound to the ISO/rootfs image repository
+| HTTPS (HTTP in a disconnected environment
+| Used to create an ISO image on the {product-title-short} hub
+| 443 (80 in disconnected environments)
+
+| Hub cluster outbound to BMC interface at single node {ocp-short} managed cluster
+| HTTPS (HTTP in disconnected environment)
+| Boot the {ocp-short} cluster
+| 443
+
+| Outbound from the {ocp-short} managed cluster to the hub cluster
+| HTTPS
+| Reports hardware information using the `assistedService` route 
+| 443
+
+| Outbound from the {ocp-short} managed cluster to the ISO/rootfs image repository
+| HTTP
+| Downloads the rootfs image
+| 80
+
+[#network-configuration-hive-mce]
+== Additional networking requirements when installing using the Hive Operator
+
+When you are installing bare metal managed clusters with the Hive Operator, which includes using Central Infrastructure Management, you must configure a layer 2 or layer 3 port connection between the hub cluster and the `libvirt` provisioning host. This connection to the provisioning host is required during the creation of a base metal cluster with Hive. See the following table for more information:
+
+|===
+| Direction | Protocol | Connection | Port (if specified)
+
+| Hub cluster outbound and inbound to the `libvirt` provisioning host
+| IP
+| Connects the hub cluster, where the Hive operator is installed, to the `libvirt` provisioning host that serves as a bootstrap when creating the bare metal cluster
+| 
+
+|===
+
+**Note:** These requirements only apply when installing, and are not required when upgrading clusters that were installed with Infrastructure Operator.
