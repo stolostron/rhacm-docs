@@ -46,7 +46,7 @@ The most basic type of issue usually consisting of fixing typos and adding or re
 
 ## `2` points
 
-A simple issue that requires mostly copy and paste. These are often straightforward new known issues being requested by developers, complete with a full and mostly edited draft. At most you might need to remind yourself of a style item or rearrange some sentences, but the information is complete and ready to be implemented in your solution.
+A simple issue that requires mostly copy and paste. These are often straightforward new known issues being requested by developers, complete with a full and mostly edited draft. You might need to remind yourself of a style item or rearrange some sentences, but the information is complete and ready to be implemented in your solution.
 
 | **Rubric** | | **`2` points description** |
 | ----------- | | ----------- |
