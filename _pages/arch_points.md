@@ -80,7 +80,7 @@ A relatively simple issue that requires minimal additional research and editing.
 | ----------- | | ----------- |
 | Time | | Varies but can be done within a sprint. |
 | Difficulty | | Includes drafting new content or adapting drafts that require verification, discussuion, and review from SMEs. | 
-| Research | | You might need familarize yourself with the topic and learn basic new concepts.  | 
+| Research | | You might need to familarize yourself with the topic and learn basic new concepts.  | 
 | Length | | Varies, but often requires several lines across multiple files. | 
 | Review | | Peer review and one dev review. |
 
