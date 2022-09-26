@@ -144,12 +144,12 @@ A complex issue similar to 7 point issues, but with even more investment require
 
 ## `9` points
 
-A highly complex issue characterized by the lack of a clear, stable direction. As content and features are still in the planning phase, expect frequent changes that you need to deal with, in addition to the difficulties of 7 and 8 point issues.
+A highly complex but rare issue characterized by the lack of a clear, stable direction. As content and features are still in the planning phase, expect frequent changes that you need to deal with, in addition to the difficulties of 7 and 8 point issues.
 
 | **Rubric** | | **`9` points description** |
 | ----------- | | ----------- |
 | Time | | Varies but requires multiple sprints. |
-| Difficulty | | Complex authoring of new content that is still being decided. It will likely require more effort to try to work these issues because you have to deal with frequent changes. You need to have strong awareness of the doc architecture to make the right decisions. | 
+| Difficulty | | Complex authoring of new content that is still being decided. Expect additional effort when dealing with frequent changes. You need to have strong awareness of the doc architecture to make the right decisions. | 
 | Research | | Requires lengthy research to understand the content and explain it. Often requires putting together information from multiple sources. | 
 | Length | | Varies, but can require major input in dozens of files. | 
 | Review | | Multiple peer reviews and multiple devs or team leaders. |
@@ -194,30 +194,29 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 ### `5` points
 
-- [](https://github.com/stolostron/backlog/issues/)
-- [](https://github.com/stolostron/backlog/issues/)
+- [24510](https://github.com/stolostron/backlog/issues/24510)
+- [24564](https://github.com/stolostron/backlog/issues/24564)
 
 ### `6` points
 
 - [20569](https://github.com/stolostron/backlog/issues/20569)
-- [](https://github.com/stolostron/backlog/issues/)
+- [21351](https://github.com/stolostron/backlog/issues/21351)
 
 ### `7` points
 
-- [](https://github.com/stolostron/backlog/issues/)
-- [](https://github.com/stolostron/backlog/issues/)
+- [24809](https://github.com/stolostron/backlog/issues/24809)
+- [18194](https://github.com/stolostron/backlog/issues/18194)
 
 ### `8` points
 
 - [24630](https://github.com/stolostron/backlog/issues/24630)
-- [](https://github.com/stolostron/backlog/issues/)
+- [22188](https://github.com/stolostron/backlog/issues/22188)
 
 ### `9` points
 
-- [](https://github.com/stolostron/backlog/issues/)
-- [](https://github.com/stolostron/backlog/issues/)
+- [18180](https://github.com/stolostron/backlog/issues/18180)
 
 ### `10` points
 
 - [24960](https://github.com/stolostron/backlog/issues/24960)
-- [](https://github.com/stolostron/backlog/issues/)
+- [24307](https://github.com/stolostron/backlog/issues/24307)
