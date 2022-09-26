@@ -135,6 +135,62 @@ agentserviceconfig.agent-install.openshift.io/agent created
 
 Your CIM service is configured. You can verify that it is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. Continue with xref:../clusters/create_infra_env.adoc#creating-your-infra-env-with-the-console[Creating your infrastructure environment with the console].
 
+[#enable-cim-aws]
+=== Enabling CIM on Amazon Web Services
+
+If you are running CIM on Amazon Web Services, complete the following additional steps after  <<enable-cim,Enabling CIM>>:
+
+. Create a new `IngressController` with a unique domain using the `NLB` `type` parameter:
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: ingress-controller-with-nlb
+  namespace: openshift-ingress-operator
+spec:
+  domain: nlb-apps.<domain>.com
+  routeSelector:
+      matchLabels:
+        router-type: nlb
+  endpointPublishingStrategy:
+    type: LoadBalancerService
+    loadBalancer:
+      scope: External
+      providerParameters:
+        type: AWS
+        aws:
+          type: NLB
+----
+
+. Find the unique domain configured on the assisted-image-service by running the following command:
++
+----
+oc get routes --all-namespaces | grep assisted-image-service
+----
++
+Your domain might resemble the following example:
+`assisted-image-service-multicluster-engine.apps.<yourdomain>.com`
+
+. Add <yourdomain> to the `domain` parameter in `IngressController` by replacing `<domain>` in `nlb-apps.<domain>.com` with `<yourdomain`.
+
+. Run the following command to edit the assisted-image-service route to use the `nlb-apps` location:
++
+----
+oc edit route assisted-image-service -n <namespace>
+----
+
+. Add the following lines to the metadata in the assisted-image-service route:
++
+[source,yaml]
+----
+  labels:
+    router-type: nlb
+----
+
+. In the assisted-image-service route, replace `spec` with `hosts` and replace `apps`` with `nlb-apps`.
+
 [#creating-your-infra-env-with-the-console]
 == Creating your infrastructure environment with the console
 
