@@ -9,7 +9,7 @@ Before starting at Red Hat, you need to set up VPN access to the Red Hat environ
 
 ## Red Hat environment overview
 
-Most of our shared service applications (email, support portal) are available via the public network. To access these applications you just need your Red Hat credentials. Other applications like software development tools access to the Red Hat private network before entering your Red Hat credentials.
+Most of our shared service applications (email, support portal) are available via the public network. To access these applications you just need your Red Hat credentials. Other applications like software development tools require access to the Red Hat private network before entering your Red Hat credentials.
 
 Become familiar with the following terms before proceeding:
 
