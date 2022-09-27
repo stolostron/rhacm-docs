@@ -166,7 +166,7 @@ An extremely complex issue that requires massive work on all fronts and input fr
 | Difficulty | | Complex authoring, editing, and decision-making on content that might not exist yet. You need mastery of the doc architecture to make the right decisions. | 
 | Research | | Extensive research on all fronts, from style to technical concepts and customer needs. Information comes from a multitude of sources. Recurring meetings with product managers, SMEs, developers, and team leaders are required. | 
 | Length | | Up to a whole book in size (massive input in hundreds of files). | 
-| Review | | Multiple peer, developer, team leader, and proudct manager reviews through meetings and via GitHub. |
+| Review | | Multiple peer, developer, team leader, and product manager reviews through meetings and via GitHub. |
 
 &nbsp;
 
