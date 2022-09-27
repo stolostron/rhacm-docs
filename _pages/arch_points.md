@@ -9,8 +9,9 @@ Not all issues are created equal. To help plan our anticipated workloads for eac
 
 ## General rules
 
-- The range of points consists of integers from `1` to `10`, with `1` being "I can knock this out in 5 minutes" and `10` being "this will give me grey hairs." Do not use fractions or integers above 10.
+- The range of points consists of integers from `1` to `10`, with `1` being "I can knock this out in 5 minutes" and `10` being "I'm sending 'UNSUBSQUIRREL' as reply all to memo-list" Do not use fractions or integers above 10.
 - Estimate points when triaging issues, but feel free to change them any time during your work process, including after you have already closed the issue.
+- With all issues, including `1` point issues, it's important to take a step back and consider the purpose and necessity of the change.
 
 ## Rubrics
 
@@ -37,7 +38,7 @@ The most basic type of issue usually consisting of fixing typos and adding or re
 | **Rubric** | | **`1` point description** |
 | ----------- | | ----------- |
 | Time | | Quick. |
-| Difficulty | | Copy and paste with no further considerations required. | 
+| Difficulty | | Copy and paste with minimal considerations. | 
 | Research | | None. | 
 | Length | | A single or a few characters added/changed in one file. A phrase at most. | 
 | Review | | None required. |
