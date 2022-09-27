@@ -189,8 +189,8 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 ### `4` points
 
-- [24059](https://github.com/stolostron/backlog/issues/24059)
-- [18252](https://github.com/stolostron/backlog/issues/18252)
+- [25514](https://github.com/stolostron/backlog/issues/25514)
+- [25157](https://github.com/stolostron/backlog/issues/25157)
 
 ### `5` points
 
