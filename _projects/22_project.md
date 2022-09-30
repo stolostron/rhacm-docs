@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Advice
-description: Recommendations for various services in the Raleigh area by Red Hatters.
-img: assets/img/22-recs.png
-redirect: https://source.redhat.com/groups/public/employee-recommendations/red_hatters_recommendations_wiki/rdu_recommendation_document_index
+title: Weekly menu
+description: Weekly menu for the cafeteria at the Red Hat Tower in Downtown Raleigh.
+img: assets/img/22-menu.png
+redirect: https://thehatrack.rosetteculinary.com/Menu/Weekly
 importance: 22
 category: work
 ---
