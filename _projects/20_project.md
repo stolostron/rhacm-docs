@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Publish blog
-description: Request to publish a blog that you helped edit by filling out this form.
-img: assets/img/20-publishblog.png
-redirect: https://docs.google.com/forms/d/e/1FAIpQLSc1K0qKDZokKMmMVp9KIFi8lSdeUb7gxBP0XxlfJd5Haf27yg/viewform
+title: Shorten link
+description: Internal service to shorten links for security or creating temporary links.
+img: assets/img/20-shortenurl.png
+redirect: https://url.corp.redhat.com/
 importance: 20
 category: work
 ---

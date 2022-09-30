@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Laptops
-description: Request a new laptop or licensed software and return your old hardware.
-img: assets/img/19-request.png
-redirect: https://redhat.service-now.com/help?id=rh_sc_sub_cat&category=9ccc4bc91b2ec554839e32a3cc4bcb18
+title: Publish blog
+description: Request to publish a blog that you helped edit by filling out this form.
+img: assets/img/19-publishblog.png
+redirect: https://docs.google.com/forms/d/e/1FAIpQLSc1K0qKDZokKMmMVp9KIFi8lSdeUb7gxBP0XxlfJd5Haf27yg/viewform
 importance: 19
 category: work
 ---
