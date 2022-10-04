@@ -87,11 +87,11 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 
 ## Comments
 
-When commenting in the source, avoid miscommunications by being specific about the context and nature of the comment by providing the following information when leaving comments:
+When commenting in the source, avoid miscommunications by being specific about the context of the comment. Provide the following information when leaving comments:
 
-`//comment | GitHub name | date`
+`//comment | GitHub account name | date`
 
-Comments should be temporary. Use the date when the comment was signed along with its purpose to determine if the comment is worth removing. 
+Comments should be temporary. Use the date when the comment was signed along with its purpose to determine if the comment is worth removing. If you need additional information, consider reaching out to the person who signed the comment.
 
 ## Modals
 
