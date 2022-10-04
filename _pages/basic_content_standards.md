@@ -85,6 +85,14 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * URLs to GitHub issues are usually long and uninformative. Take the extra step to define the link with a good link title. 
 * Never link to internal materials like internal GitHub issues, files, other internal-only docs like scripts. Have the developer replace a script with steps. Some initial drafts can require this removal. Ensure linked materials are from public spaces.
 
+## Comments
+
+When commenting in the source, avoid miscommunications by being specific about the context and nature of the comment by providing the following information when leaving comments:
+
+`//comment | GitHub name | date`
+
+Comments should be temporary. Use the date when the comment was signed along with its purpose to determine if the comment is worth removing. 
+
 ## Modals
 
 Using the following modals is acceptable:
