@@ -1,5 +1,5 @@
 [#upgrading-by-using-the-operator]
-= Upgrading by using the operator
+= Upgrading {product-title}
 
 You control your {product-title} upgrades by using the operator subscription settings in the {ocp} console. When you initially deploy {product-title-short} by using the operator, you make the following selections:
 
@@ -68,3 +68,127 @@ If you are link:../multicluster_engine/cluster_lifecycle/cluster_pool_manage.ado
 Set `cluster.open-cluster-management.io/createmanagedcluster: "false"` in the `ClusterClaim` metadata.annotations. 
 
 All existing cluster claims are automatically imported when the product is upgraded unless you change this setting.
+
+
+== Upgrading in a disconnected network environment
+
+As was the case for initial installation, there are special considerations to keep in mind
+when upgrading {product-title} in a disconnected network environment.
+
+[#disconnect-upgrading]
+=== Considerations when upgrading from release 2.5 or later
+
+During your installation, or upgrade, of {product-title} to release 2.5 or later,
+you will have already encountered the need for special consderations related
+to the interdependency between the
+{product-title} and multicluster engine for Kubernetes operators.
+Refer to topic
+TODO-need-ref-to-install-file for details about these installt-ime
+special considerations.
+
+Similar considerations continue to apply when upgrading {product-title}.
+
+Please see the following sections for things to keep in
+mind when preparing to upgrade {product-title}.
+We recommend that you satisfy these requirements before you trigger
+the upgrade of {product-title} (before changing the update channel
+in your OLM subscription to the channel for the new release).
+Failure to do so may result in a stalled upgrade which could impact
+the availability/functioning of {product-title} services.
+
+
+=== Ensure that required packages are updated in your mirror catalog
+
+During instalaltion (or previous update), you created a mirror catalog and
+registry containing operator packages and images needed to install
+{product-title} in a disconnected network environment.
+In order to upgrade to a new release of {product-title}, you will need to update
+your mirror catalog and registry to pick up the updated versions
+of the operator packages.
+
+Similar to what was required when initially installing, ensure that your procedures
+for updating your mirror catalog and registry include the following operator
+packagesin the list of operator backges to be included/updated:
+
+* `advanced-cluster-manager`
+* `multicluster-engine`
+
+=== Verify your MutliclusterHub resource instance
+
+During instalaltion (or previous update), you created an instance
+of the `MulticlusterHub` resource, and due to the disconnected environment,
+you added a `mce-subscription-spec` annotation to that resource.
+
+If your procedures for updating your mirror catalog and registry
+resulted in the updated catalog being available on the {ocp-short} cluster
+via a `CatalogSource` with the same name as previouly used, there should
+be no need to update your `MulticlusterHub` resource to update the
+`mce-subscriptino-spec` annotation.
+
+On the other hand, if your procedures for updating your mirro catalog and
+registry resulted in a new (differently-named) `CatalogSource` being
+created, be sure to update the `mce-subscription-spec` annotation in
+your `MulticlusterHub` resource to reflect the new catalog source name.
+
+
+[#disconnect-upgrading-from-24]
+=== Considerations when upgrading from release 2.4
+
+{product-title} release 2.5.0 is the first release in which {product-title} uses the
+related multicluster engine for Kubernetes operator functionality to provide foundational
+services that previously were delivered as part of {product-title} itself.
+Releases 2.5 and later of the {product-title} operator will automatically install and manage
+the required multicluster engine for Kubernetes operator and `MulticlusterEngine` resource
+instance as part of its installation and upgrade of the Hub.
+
+In connected network environments, it is able to do so without any special actions on the part
+of the cluster administrator installing or upgrading {product-title}.
+
+However, because installation of any OLM operator in a disconnected environment involves the use of special mirror
+catalogs and catalog sources (as described in the earlier sections), some additional steps are necessary above
+what was done when installing {product-title} release 2.4 or earlier, as described below.
+
+=== Update your procedures for populating the mirror catalog
+
+If, when installing {product-title} release 2.4, you mirroring procedures created a full copy of
+the Red Hat Operators catalog, no special updates to your mirroring proecreus are required other
+than refreshing your catalog to pick up the updated content for the new operator releases.
+
+If, on the other hand, your procedures populated mirror catalog that is a filtered catalog,
+you will need to update your mirroring procedures to ensure that the `multcluster-engine`
+operator package is included in the mirror catalog in addition to
+the `advanced-cluster-management` package.
+Topic TODO:Need link to disconnect-include-acm-pkgs in install file
+provides examples of the options to use when populting the mirror catalog.
+Update the operator-package lists used in your procedures to match these new requirements.
+
+=== Update your MutliclusterHub resource instance
+
+As described in the topic
+<<disconnect-install-op-and-hub,Install the RHACM operator and Hub>>
+above, a new annotation is required on the `MulticlusterHub` resource
+when the Hub is being installd or upgraded in a disconnected environment.
+
+For the smoothest upgrade experience, Red Hat recommends that you update your `MulticlusterHub` resource instance
+to include the needed annotation before you change the OLM update channel in your OLM subscription
+to the `advanced-cluster-management` operator package to trigger the upgrade from release 2.4.
+Making this update first allows the upgrade to proceed without delay once initiated.
+
+Use the `oc edit` command to update your `Multiclusterub` resource to add the `mce-subscription-spec` annotation
+as shown in this example:
+
+[source,yaml]
+----
+metadata:
+   annotations:
+      installer.open-cluster-management.io/mce-subscription-spec: '{"source": "<my-mirror-catalog-source>"}'
+----
+
+Replace <my-mirror-catalog-source> shown in this example with the name of the `CatalogSource` resource
+(in the `openshift-marketplace` namespace) for your mirror catalog.
+
+If you trigger an upgrade from release 2.4 to release 2.5 before mating this upgrade, the upgrade will begin
+but then stall at the point the operator attempts to install a subscription to `multicluster-engine` under the covers.
+The status of the `MulitclusterHub` resource will continue to show status `Upgrading` when this occurs.
+However, this situation can be corrected, and the upgrade completed by using `oc edit` to add the
+`mce-subscription-spec` annocation as shown above.
