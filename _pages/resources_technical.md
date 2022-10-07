@@ -24,7 +24,7 @@ Additional reading for relevant topics.
   - [Introduction to GitHub](https://lab.github.com/githubtraining/introduction-to-github)
   - [GitHub training](https://lab.github.com/githubtraining)
   - [GitHub pages](https://pages.github.com/)
-  - [Remove commit](https://stackoverflow.com/questions/30893040/git-remove-commit-from-history/30893291#30893291)
+  - [Remove commit from history](https://stackoverflow.com/questions/30893040/git-remove-commit-from-history/30893291#30893291)
   - BFG Repo-Cleaner (search The Source)
 
 ## Helm
