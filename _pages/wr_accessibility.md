@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Accessibility
-permalink: /accessibility_main
+permalink: /wr_accessibility
 horizontal: false
 ---
 

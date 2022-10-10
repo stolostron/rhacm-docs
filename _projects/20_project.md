@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Shorten link
-description: Internal service to shorten links for security or creating temporary links.
-img: assets/img/20-shortenurl.png
-redirect: https://url.corp.redhat.com/
+title: Weekly menu
+description: Weekly menu for the cafeteria at the Red Hat Tower in Downtown Raleigh.
+img: assets/img/20-menu.png
+redirect: https://thehatrack.rosetteculinary.com/Menu/Weekly
 importance: 20
 category: work
 ---

@@ -13,7 +13,6 @@ When you are ready to start working the new release, use the most recent snapsho
 
 When you are ready to create a build, you can create the `XX_prod` from the most recent version of your staged branch. Create the production branch, then add the same protection with an additional protection that **prevents administrator override.** The extra protection prevents one team member from refreshing the documentation without agreement from at least on other team member.
 
-
 ## Creating a branch to work
 
 When you are creating a branch for your work, from the `default` branch,  **start your personal branch with a letter**, such as your initials, so your branch is never confused with a release or staging branch.

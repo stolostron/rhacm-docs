@@ -13,7 +13,7 @@ Quality of the Red Hat Advanced Cluster Management for Kubernetes (RHACM) docume
 
 ## Check my links tool
 
-Download the Google Chrome web extension, [Check My Links](https://chrome.google.com/webstore/detail/check-my-links/ojkcdipcgfaekbeaelaapakgnjflfglf). 
+Download the Google Chrome web extension [Check My Links](https://chrome.google.com/webstore/detail/check-my-links/ojkcdipcgfaekbeaelaapakgnjflfglf) or Firefox add-on [Broken Link Checker (Firefox)](https://add0n.com/broken-link-checker.html).
 
 ## client9/misspell tool
 

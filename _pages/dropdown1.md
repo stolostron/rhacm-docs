@@ -6,9 +6,6 @@ nav: true
 nav_order: 1
 dropdown: true
 children: 
-    - title: Access
-      permalink: /onboarding_access
-    - title: divider
     - title: Software
       permalink: /onboarding_software
     - title: divider

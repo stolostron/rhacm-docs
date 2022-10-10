@@ -63,7 +63,7 @@ You must verify that the links are functioning as expected. If there are broken 
 
 ## Tips
 
-1. Install and use the link check extension for Google Chrome, _Check my links_. For more information, see [Check My Links](https://chrome.google.com/webstore/detail/check-my-links/ojkcdipcgfaekbeaelaapakgnjflfglf?hl=en).
+1. Install and use the link check extension for Google Chrome [Check My Links](https://chrome.google.com/webstore/detail/check-my-links/ojkcdipcgfaekbeaelaapakgnjflfglf?hl=en) or Firefox add-on [Broken Link Checker Firefox](https://add0n.com/broken-link-checker.html).
 
 2. If you discover that there is a broken link from the Pantheon log, use Visual Studio Code for efficiency, to find out which file the broken link resides. Select the **Search** icon in Visual Studio Code, to search for the anchor that is in the Pantheon log. All instances are returned.
 
