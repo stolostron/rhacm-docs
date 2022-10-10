@@ -46,7 +46,7 @@ Use this process to refresh a public version or build internally.
 2. When the build output says `"DONE"`, the commit number and branch are displayed. Take note of the last commit number that is listed (in this case, `9ce7819`). See the following example:
 
    ```
-   + e7cd514...9ce7819 2._stage -> 2.8 (forced update)
+   + e7cd514...9ce7819 2.8_stage -> 2.8 (forced update)
    ```
 
 3. Open the Pantheon UI that lists the books for the release that you are building. 
