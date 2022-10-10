@@ -1,9 +1,9 @@
 ---
 layout: page
-title: ACM playbook
-description: Contains detailed information and guidelines for anyone working on the ACM team.
-img: assets/img/07-playbook.png
-redirect: https://docs.google.com/document/d/1YTqpZRH54Bnn4WJ2nZmjaCoiRtqmrc2w6DdQxe_yLZ8
+title: IBM style
+description: The main authority on style that we follow at Red Hat. Use your Red Hat login to access.
+img: assets/img/07-ibmstyle.png
+redirect: https://www.ibm.com/docs/en/ibm-style
 importance: 7
 category: work
 ---

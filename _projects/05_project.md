@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Pantheon
-description: The staging environment where you can preview changes you made to the source files.
-img: assets/img/05-pantheon.png
-redirect: https://pantheon.cee.redhat.com/#/titles/red_hat_advanced_cluster_management_for_kubernetes
+title: ACM devs
+description: Find an appropriate developer to tag for issues you are working on.
+img: assets/img/05-devs.png
+redirect: https://docs.google.com/drawings/d/1Cm04QxjhRwe_ejBBE4epFYStoXx0pelB7r6ZTGGOA74/edit
 importance: 5
 category: work
 ---

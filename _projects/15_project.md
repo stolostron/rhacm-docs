@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Report issue
-description: List of issue templates to report an issue. Choose the correct template for your issue.
-img: assets/img/15-templates.png
-redirect: https://github.com/stolostron/backlog/issues/new/choose
+title: Shorten link
+description: Internal service to shorten links for security or creating temporary links.
+img: assets/img/15-shortenurl.png
+redirect: https://url.corp.redhat.com/
 importance: 15
 category: work
 ---

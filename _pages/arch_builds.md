@@ -40,13 +40,13 @@ Use this process to refresh a public version or build internally.
    Example:
 
    ```
-   ./acm_sync_asciidoc.sh 2.7 2.7_stage 
+   ./acm_sync_asciidoc.sh 2.8 2.8_stage 
    ```
    
 2. When the build output says `"DONE"`, the commit number and branch are displayed. Take note of the last commit number that is listed (in this case, `9ce7819`). See the following example:
 
    ```
-   + e7cd514...9ce7819 2.7_stage -> 2.7 (forced update)
+   + e7cd514...9ce7819 2.8_stage -> 2.8 (forced update)
    ```
 
 3. Open the Pantheon UI that lists the books for the release that you are building. 
@@ -77,7 +77,7 @@ To build locally:
 7. Check for `gsed` install, or install if needed.
 8. Edit the script in an editor to change the 3 instances of `sed` to `gsed`. (They are on lines 67, 70, and 73. This is required for running it on a Mac.) 
 9. Save the changes to the file.
-10. Run the file with the following command: `./acm_sync_asciidoc.sh 2.7 2.7_stage`. **Note:** The first number is the GitLab branch number (which corresponds to our release number). The second number is our github branch. Both prod and stage go to the same Gitlab branch.
+10. Run the file with the following command: `./acm_sync_asciidoc.sh 2.8 2.8_stage`. **Note:** The first number is the GitLab branch number (which corresponds to our release number). The second number is our github branch. Both prod and stage go to the same Gitlab branch.
 11. Enter your github password when prompted.
 12. Enter your gitlab password, if you have one. Since we use SAML, we probably don't. In that case, enter your SSH keys into GitLab. Find your SSH, for example:
     `vi /Users/cdawson/.ssh/id_rsa.pub`:

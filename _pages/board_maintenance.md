@@ -50,7 +50,13 @@ As the primary board focal, the lead needs to know everyone's commitment in orde
   - DDF items are also often requests for doc enhancements. Label them enhancements, not bugs. Get with developers to see what changes make sense, if any.
   - DDF items are also not opened in the proper release and sprint. Please change before you move from `untriaged`. 
   
+## Development training
 
+  - Every two sprints, feel free to create an issue dedicated to learning.
+  - Name the issue 'Development training: Your learning topics (Sprint x/x)'
+  - Add the `Learning/Discovery' and 'squad-doc' label.
+  - Assign the next two sprints to the learning issue.
+  - Use the learning issue for many purposes, including learning, development, training, experimentation, and other work that you would like to complete but feel like you don't get time to. 
   
 
   
