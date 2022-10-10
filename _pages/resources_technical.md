@@ -11,7 +11,6 @@ Additional reading for relevant topics.
   - [OpenShift resources](https://www.openshift.com/learn/resources/)
   - [Get started](https://www.openshift.com/learn/get-started/)
   - [OpenShift Container Platform documentation](https://docs.openshift.com/container-platform/4.2/welcome/index.html)
-  - [Learn OpenShift](https://developers.redhat.com/learn/openshift/explore-openshift)
 
 ## Hypershift
   - [HyperShift documentation](https://hypershift-docs.netlify.app/)

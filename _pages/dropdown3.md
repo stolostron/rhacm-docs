@@ -16,7 +16,7 @@ children:
       permalink: /wr_linking
     - title: divider
     - title: Accessibility
-      permalink: /accessibility_main
+      permalink: /wr_accessibility
     - title: divider
     - title: Special tag guidance
       permalink: /wr_special_tag_guidance

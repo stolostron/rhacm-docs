@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Publish blog
-description: Request to publish a blog that you helped edit by filling out this form.
-img: assets/img/19-publishblog.png
-redirect: https://docs.google.com/forms/d/e/1FAIpQLSc1K0qKDZokKMmMVp9KIFi8lSdeUb7gxBP0XxlfJd5Haf27yg/viewform
+title: Advice
+description: Recommendations for various services in the Raleigh area by Red Hatters.
+img: assets/img/19-recs.png
+redirect: https://source.redhat.com/groups/public/employee-recommendations/red_hatters_recommendations_wiki/rdu_recommendation_document_index
 importance: 19
 category: work
 ---
