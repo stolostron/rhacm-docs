@@ -1,9 +1,9 @@
 ---
 layout: page
-title: ACM docs
-description: Published verison of Red Hat Advanced Cluster Management for Kubernetes documentation.
-img: assets/img/09-acmdocs.png
-redirect: https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes
+title: Patternfly
+description: An additional style guide that focuses on user interface strings.
+img: assets/img/09-patternfly.png
+redirect: https://www.patternfly.org/v4/ux-writing/about
 importance: 9
 category: work
 ---

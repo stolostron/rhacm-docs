@@ -1,9 +1,9 @@
 ---
 layout: page
-title: ACM devs
-description: Find an appropriate developer to tag for issues you are working on.
-img: assets/img/08-devs.png
-redirect: https://docs.google.com/drawings/d/1Cm04QxjhRwe_ejBBE4epFYStoXx0pelB7r6ZTGGOA74/edit
+title: Red Hat style
+description: Supplementary style guide for issue not covered in the IBM style guide.
+img: assets/img/08redhatstyle.png
+redirect: https://redhat-documentation.github.io/supplementary-style-guide/
 importance: 8
 category: work
 ---

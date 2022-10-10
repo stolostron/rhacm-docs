@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Red Hat uni
-description: Training and learning materials for new hires, including courses for further development.
-img: assets/img/16-learning.png
-redirect: https://start.learning.redhat.com
+title: Weekly menu
+description: Weekly menu for the cafeteria at the Red Hat Tower in Downtown Raleigh.
+img: assets/img/16-menu.png
+redirect: https://thehatrack.rosetteculinary.com/Menu/Weekly
 importance: 16
 category: work
 ---

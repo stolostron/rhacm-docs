@@ -1,9 +1,9 @@
 ---
 layout: page
-title: ACM glossary
-description: Important terms and names of systems related to ACM, including descriptions.
-img: assets/img/13-acmglossary.png
-redirect: https://docs.google.com/document/d/1UBydkX3bmCLRi5a3ExVllYt_Hi-njvuiyQ2hOpWx7rQ/edit#heading=h.w8wgh38e324
+title: Red Hat uni
+description: Training and learning materials for new hires, including courses for further development.
+img: assets/img/13-learning.png
+redirect: https://start.learning.redhat.com
 importance: 13
 category: work
 ---
