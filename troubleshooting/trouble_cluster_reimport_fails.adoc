@@ -1,0 +1,81 @@
+[#troubleshooting-cluster-reimport-kubeconfig]
+= Reimporting cluster fails with unknown authority error
+
+If you experience a problem when reimporting a managed cluster to your {product-title-short} hub cluster, follow the procedure to troubleshoot the problem.
+
+[#symptom-cluster-reimport-kubeconfig]
+== Symptom: Reimporting cluster fails with unknown authority error
+
+After you provision an {ocp-short} cluster with {product-title-short}, reimporting the cluster might fail with a `x509: certificate signed by unknown authority` error when you change or add API server certificates to your :ocp-short: cluster.
+
+[#identifying-the-problem-cluster-reimport-kubeconfig]
+== Identifying the problem: Reimporting cluster fails with unknown authority error
+
+After failing to reimport your managed cluster, run the following command to get the import controller log on your {product-title-short} hub cluster:
+
+----
+kubectl -n multicluster-engine logs -l app=managedcluster-import-controller-v2 -f
+----
+
+If the following error log appears, your managed cluster API server certificates might have changed:
+
+`ERROR	Reconciler error	{"controller": "clusterdeployment-controller", "object": {"name":"awscluster1","namespace":"awscluster1"}, "namespace": "awscluster1", "name": "awscluster1", "reconcileID": "a2cccf24-2547-4e26-95fb-f258a6710d80", "error": "Get \"https://api.awscluster1.dev04.red-chesterfield.com:6443/api?timeout=32s\": x509: certificate signed by unknown authority"}`
+
+To determine if your managed cluster API server certificates have changed, complete the following steps:
+
+. Run the following command to specify your managed cluster name by replacing `your-managed-cluster-name` with the name of your managed cluster:
++
+----
+cluster_name=<your-managed-cluster-name>
+----
+
+. Get your managed cluster `kubeconfig` secret name by running the following command:
++
+----
+kubeconfig_secret_name=$(oc -n ${cluster_name} get clusterdeployments ${cluster_name} -ojsonpath='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}')
+----
+
+. Export `kubeconfig` to a new file by running the following commands:
++
+----
+oc -n ${cluster_name} get secret ${kubeconfig_secret_name} -ojsonpath={.data.kubeconfig} | base64 -d > kubeconfig.old
+----
++
+----
+export KUBECONFIG=kubeconfig.old
+----
+
+. Get the namespace from your managed cluster with `kubeconfig` by running the following command:
++
+----
+oc get ns
+----
+
+If you receive an error that resembles the following message, your cluster API server ceritificates have been changed and your `kubeconfig` file is invalid.
+
+`Unable to connect to the server: x509: certificate signed by unknown authority`
+
+[#resolving-the-problem-reimport-kubeconfig]
+== Resolving the problem: Reimporting cluster fails with unknown authority error
+
+The managed cluster admin must create a new valid `kubeconfig` file for your managed cluster.
+
+After creating a new `kubeconfig`, complete the following steps to update the new `kubeconfig` for your managed cluster:
+
+. Run the following command to specify your managed cluster name by replacing `your-managed-cluster-name` with the name of your managed cluster:
++
+----
+cluster_name=<your-managed-cluster-name>
+----
+
+. Run the following commands to update the new `kubeconfig` for your managed cluster:
++
+----
+kubeconfig=$(cat <your-new-valid-kubeconfig-file-path> | base64 -w0)
+kubeconfig_patch="[{\"op\":\"replace\", \"path\":\"/data/kubeconfig\", \"value\":\"${kubeconfig}\"}]"
+kubeconfig_secret_name=$(oc -n ${cluster_name} get clusterdeployments ${cluster_name} -ojsonpath='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}')
+----
++
+----
+oc -n ${cluster_name} patch secrets ${kubeconfig_secret_name} --type='json' -p=${kubeconfig_patch}
+----
