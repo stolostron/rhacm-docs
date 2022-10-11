@@ -7,6 +7,8 @@ horizontal: false
 
 Links to software we use in our workflow. Feel free to use alternatives if you prefer, but it is better to start with the same software that our team uses so they can provide support if needed.
 
+# Software
+
 ## Visual Studio Code
 
 [Download](https://code.visualstudio.com/download/)
@@ -42,3 +44,17 @@ Open source Illustrator alternative.
 [Download](https://www.libreoffice.org/download/download/)
 
 Open source Microsoft Office alternative.
+
+# Mac OS tools
+
+## Scroll reverser
+
+Fix the scroll direction when using an external mouse.
+
+[Download](https://github.com/pilotmoon/Scroll-Reverser)
+
+## Automatic keyboard inpout source switcher
+
+Fix the keyboard layout when using an external keyboard with a different layout.
+
+[Download](https://github.com/ohueter/autokbisw)
