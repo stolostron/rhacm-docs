@@ -177,7 +177,7 @@ category: work
 
 ## Screenshot requirements
 
-- Screenshot size must be 700x575 pixels.
+- Screenshot size must be 400x300 pixels.
 - Save screenshot as a `.png` file in /assets/img/
 - Only screenshot website content. No user interface elements must be visible that are not part of the HTML code of the website.
 - Remove sensitive information from the screenshot by painting over it. Do not use blur.
