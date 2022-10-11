@@ -58,3 +58,23 @@ Fix the scroll direction when using an external mouse.
 Fix the keyboard layout when using an external keyboard with a different layout.
 
 [Download](https://github.com/ohueter/autokbisw)
+
+## WhichSpace
+
+Shows which desktop you are on.
+
+[Download](https://github.com/gechr/WhichSpace)
+
+## Amethyst
+
+A tiling window manager for Mac OS.
+
+[Download](https://github.com/ianyh/Amethyst)
+
+## Yabai
+
+A tiling window manager for Mac OS.
+
+[Download](https://github.com/koekeishiya/yabai)
+
+
