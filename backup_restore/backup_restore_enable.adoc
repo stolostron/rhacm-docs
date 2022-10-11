@@ -29,9 +29,10 @@ For a list of supported storage providers for Velero, see https://velero.io/docs
 ** <<prepare-new-hub,Preparing the new hub cluster>>
 ** <<clean-hub-restore,Cleaning the hub cluster before restore>>
 ** <<resources-restored-managed-cluster,Resources restored at managed activation time>>
-** <<restore-passive-resources,Restoring passive resources>>
 ** <<restore-passive-resources-check-backups,Restoring passive resources while checking for backups>>
+** <<restore-passive-resources,Restoring passive resources>>
 ** <<restore-activation-resources,Restoring activation resources>>
+** <<restore-all-resources,Restoring all resources>>
 *** <<primary-cluster-shut-down,Primary cluster must be shut down>>
 * <<active-passive-config,Active passive configuration>>
 ** <<managed-cluster-activation-data,Managed cluster activation data>>
@@ -383,25 +384,6 @@ The cleanup option uses the `cleanupBeforeRestore` property to identify the subs
 * The `restore.cluster.open-cluster-management.io` resource is run once, unless you use the `syncRestoreWithNewBackups:true` to keep restoring passive data when new backups are available. For this case, follow the restore passive with sync sample. See <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>>. After the restore operation is complete and you want to run another restore operation on the same hub cluster, you have to create a new `restore.cluster.open-cluster-management.io` resource.
 
 * Although you can create multiple `restore.cluster.open-cluster-management.io` resources, only one can be active at any moment in time.
-  
-[#restore-activation-resources]
-=== Restoring activation resources
-
-Use the link:https://github.com/stolostron/cluster-backup-operator/blob/release-2.5/config/samples/cluster_v1beta1_restore_passive_activate.yaml[`restore-passive-activate`] sample when you want the hub cluster to manage the clusters. In this case it is assumed that the other data has been restored already on the hub cluster that using the passive resource.
-
-//original request related to issue 
-[#restore-all-resources]
-=== Restoring all resources
-
-Use the link:https://github.com/stolostron/cluster-backup-operator/blob/main/config/samples/cluster_v1beta1_restore.yaml[`Restore`] sample if you want to restore all data at once and make the hub cluster manage the managed clusters in one step.
-
-After you create a `restore.cluster.open-cluster-management.io` resource on the hub cluster, run the following command to get the status of the restore operation:
-
-----
-oc get restore -n <oadp-operator-ns>
-----
-
-From your hub cluster, verify that the backed up resources contained by the backup file are created.
 
 [#primary-cluster-shut-down]
 ==== Primary cluster must be shut down
@@ -409,13 +391,9 @@ From your hub cluster, verify that the backed up resources contained by the back
 When you restore a backup on a new hub cluster, make sure that the previous hub cluster, where the backup was created, is shut down. If that cluster is running, the previous hub cluster tries to reimport the managed clusters when the managed cluster reconciliation finds that the managed clusters are no longer available.
 
 //Can you remind me of how the user shuts the cluster down? Do they simply run a command? Is there a 'shut down' button in the console that I might have missed?
-[#restore-passive-resources]
-=== Restore passive resources
-
-Passive data is backup data such as secrets, ConfigMaps, applications, policies, and all the managed cluster custom resources, which do not activate a connection between managed clusters and hub clusters. The backup resources are restored on the hub cluster by the credentials backup and restore resources.
 
 [#restore-passive-resources-check-backups]
-=== Restore passive resources while checking for backups
+=== Restoring passive resources while checking for backups
 
 Use the link:https://github.com/stolostron/cluster-backup-operator/blob/release-2.5/config/samples/cluster_v1beta1_restore_passive_sync.yaml[`restore-passive-sync`] sample to restore passive data, while continuing to check if new backups are available and restore them automatically. To automatically restore new backups, you must set the `syncRestoreWithNewBackups` parameter to `true`. You must also only restore the latest passive data.
 
@@ -442,6 +420,30 @@ spec:
   veleroResourcesBackupName: latest
 ----
 
+[#restore-passive-resources]
+=== Restoring passive resources
+
+Passive data is backup data such as secrets, ConfigMaps, applications, policies, and all the managed cluster custom resources, which do not activate a connection between managed clusters and hub clusters. The backup resources are restored on the hub cluster by the credentials backup and restore resources.
+
+[#restore-activation-resources]
+=== Restoring activation resources
+
+Use the link:https://github.com/stolostron/cluster-backup-operator/blob/release-2.5/config/samples/cluster_v1beta1_restore_passive_activate.yaml[`restore-passive-activate`] sample when you want the hub cluster to manage the clusters. In this case it is assumed that the other data has been restored already on the hub cluster that using the passive resource.
+
+//original request related to issue 
+[#restore-all-resources]
+=== Restoring all resources
+
+Use the link:https://github.com/stolostron/cluster-backup-operator/blob/main/config/samples/cluster_v1beta1_restore.yaml[`Restore`] sample if you want to restore all data at once and make the hub cluster manage the managed clusters in one step.
+
+After you create a `restore.cluster.open-cluster-management.io` resource on the hub cluster, run the following command to get the status of the restore operation:
+
+----
+oc get restore -n <oadp-operator-ns>
+----
+
+From your hub cluster, verify that the backed up resources contained by the backup file are created.
+
 [#active-passive-config]
 == Active passive configuration
 
@@ -449,13 +451,13 @@ In an active passive configuration, there is one active hub cluster and passive 
 
 Passive hub clusters continuously retrieve the latest backups and restore the passive data. The passive hubs use the `Restore.cluster.open-cluster-management.io` resource to restore passive data from the primary hub cluster when new backup data is available. These hub clusters are on standby to become a primary hub when the primary hub cluster goes down.
 
-Active and passive hub clusters are connected to the same storage location, where the primary hub cluster backs up data for passive hub clusters to access the primary hub cluster backups. For more details on how to setup this automatic restore configuration, see the <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>> section.
+Active and passive hub clusters are connected to the same storage location, where the primary hub cluster backs up data for passive hub clusters to access the primary hub cluster backups. For more details on how to setup this automatic restore configuration, see the <<restore-passive-resources-check-backups,Restoring passive resources while checking for backups>> section.
 
 In the following diagram, the active hub cluster manages the local clusters and backs up the hub cluster data at regular intervals:
 
 image:../images/active_passive_config_design.png[Active passive configration diagram] 
 
-The passive hub cluster restores this data, except for the managed cluster activation data, which moves the managed clusters to the passive hub cluster. The passive hub clusters can restore the passive data continuously, see the <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>> section. Passive hub clusters can restore passive data as a one-time operation, see <<restore-passive-resources,Restore passive resources>> section for more details. 
+The passive hub cluster restores this data, except for the managed cluster activation data, which moves the managed clusters to the passive hub cluster. The passive hub clusters can restore the passive data continuously, see the <<restore-passive-resources-check-backups,Restoring passive resources while checking for backups>> section. Passive hub clusters can restore passive data as a one-time operation, see <<restore-passive-resources,Restoring passive resources>> section for more details. 
 
 [#managed-cluster-activation-data]
 === Managed cluster activation data
