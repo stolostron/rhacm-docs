@@ -41,4 +41,4 @@ The IBM style guide is the main authority on style issues, but there are supplem
 
 ### Writing for accessibility and globalization
 
-- [Writing for accessibility](accessibility_main.md)
+- [Writing for accessibility (future)](accessibility_main.md)
