@@ -1,0 +1,72 @@
+[#troubleshooting-no-placementdecision-mce]
+= Troubleshooting missing PlacementDecision after creating Placement
+
+If no `PlacementDescision` is generated after creating a `Placement`, follow the procedure to troubleshoot the problem.
+
+[#symptom-no-placementdecision-mce]
+== Symptom: Missing PlacementDecision after creating Placement
+
+After creating a `Placement`, a `PlacementDescision` is not automatically generated.
+
+[#resolving-no-placementdecision-mce]
+== Resolving the problem: Missing PlacementDecision after creating Placement
+
+To resolve the issue, complete the following steps:
+
+. Check the `Placement` conditions by running the following command:
++
+----
+kubectl describe placement <placement-name> 
+----
++
+Replace `placement-name` with the name of the `Placement`.
++
+The output might resemble the following example:
++
+----
+Name:         demo-placement
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+API Version:  cluster.open-cluster-management.io/v1beta1
+Kind:         Placement
+Status:
+  Conditions:
+    Last Transition Time:       2022-09-30T07:39:45Z
+    Message:                    Placement configurations check pass
+    Reason:                     Succeedconfigured
+    Status:                     False
+    Type:                       PlacementMisconfigured
+    Last Transition Time:       2022-09-30T07:39:45Z
+    Message:                    No valid ManagedClusterSetBindings found in placement namespace
+    Reason:                     NoManagedClusterSetBindings
+    Status:                     False
+    Type:                       PlacementSatisfied
+  Number Of Selected Clusters:  0
+----
+
+. Check the output for the `Status` of `PlacementMisconfigured` and `PlacementSatisfied`:
++
+* If the `PlacementMisconfigured` `Status` is true, your `Placement` has configuration errors. Check the included message for more details on the configuration errors and how to resolve them.
+* If the `PlacementSatisfied` `Status` is false, no managed cluster satisfies your `Placement`. Check the included message for more details and how to resolve the error. In the previous example, no `ManagedClusterSetBindings` were found in the placement namespace.
+
+. You can check the score of each cluster in `Events` to find out why some clusters with lower scores are not selected. The output might resemble the following example:
++
+----
+Name:         demo-placement
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+API Version:  cluster.open-cluster-management.io/v1beta1
+Kind:         Placement
+Events:
+  Type    Reason          Age   From                 Message
+  ----    ------          ----  ----                 -------
+  Normal  DecisionCreate  2m10s   placementController  Decision demo-placement-decision-1 is created with placement demo-placement in namespace default
+  Normal  DecisionUpdate  2m10s   placementController  Decision demo-placement-decision-1 is updated with placement demo-placement in namespace default
+  Normal  ScoreUpdate     2m10s   placementController  cluster1:0 cluster2:100 cluster3:200
+  Normal  DecisionUpdate  3s      placementController  Decision demo-placement-decision-1 is updated with placement demo-placement in namespace default
+  Normal  ScoreUpdate     3s      placementController  cluster1:200 cluster2:145 cluster3:189 cluster4:200
+----
++
+*Note:* The placement controller assigns a score and generates an event for each filtered `ManagedCluster`. The placement controller genereates a new event when the cluster score changes.
