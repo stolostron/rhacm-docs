@@ -3,11 +3,7 @@
 
 The cluster backup and restore operator is not installed automatically. Enable the backup component by setting the `cluster-backup` parameter to `true`, in the `MultiClusterHub` resource. The OADP Operator is automatically installed, in the same namespace as the backup resource, when you install the cluster backup and restore operator.
 
-*Notes*: 
-
-* The OADP Operator 1.0 has disabled building multi-arch builds and only produces `x86_64` builds for the official release. This means that if you are using an architecture other than `x86_64`, the OADP Operator installed by the backup component must be replaced with the correct version. In this case, uninstall the OADP Operator and find the operator matching your architecture, then install it.
-
-* If you have previously installed and used the OADP Operator on the hub cluster, uninstall this version since the backup component works now with OADP installed in the component namespace. Use the same storage location for the link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-dataprotectionapplication-custom-resource[`DataProtectionApplication`] resource owned by the OADP Operator installed with the backup component; it accesses the same backup data as the previous operator. Velero backup resources are now loaded within the new OADP Operator namespace on this hub cluster.
+*Note*: If you have previously installed and used the OADP Operator on the hub cluster, in a namespace different from the backup component namespace, uninstall this version since the backup component works now with OADP installed in the component namespace. Use the same storage location for the link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-dataprotectionapplication-custom-resource[`DataProtectionApplication`] resource owned by the OADP Operator installed with the backup component; it accesses the same backup data as the previous operator. Velero backup resources are now loaded within the new OADP Operator namespace on this hub cluster.
 
 link:https://velero.io/[Velero] is installed with the OADP Operator on the {product-title-short} hub cluster; Velero is used to backup and restore {product-title-short} hub cluster resources. 
 
@@ -24,6 +20,7 @@ For a list of supported storage providers for Velero, see link:https://velero.io
 ** <<restore-passive-resources-check-backups,Restoring passive resources while checking for backups>>
 ** <<restore-passive-resources,Restoring passive resources>>
 ** <<restore-all-resources,Restoring all resources>>
+** <<more-restore-samples,Using other restore samples>>
 ** <<viewing-restore-events,Viewing restore events>>
 ** <<primary-cluster-shut-down,Shutting down the primary cluster>>
 * <<backup-validation-using-a-policy,Validating your backup or restore configurations>>
@@ -34,14 +31,13 @@ For a list of supported storage providers for Velero, see link:https://velero.io
 
 You must meet the following prerequisites to enable and use the backup and restore operator:
 
-- Be sure to complete the steps to link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-credentials-secret[Create credentials secret] for the cloud storage where the backups are saved. 
+- Be sure to complete the steps to link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-credentials-secret[Create credentials secret] for the cloud storage where the backups are saved. The secret resource must be created in the OADP operator namespace, which is located in the backup component namespace.
 
-//Prerequisites from the older topic: Managing backup and restore operator (file that i deleted: backup_restore_manage.adoc])
 - *For both active and passive hub clusters*:
 
 ** From your {ocp} cluster, install the {product-title} operator version {product-version}.x. The `MultiClusterHub` resource is automatically created when you install {product-title-short}, and displays the following status: `Running`.
 
-** The cluster backup and restore operator must be installed manually. Enable the cluster backup and restore operator (`cluster-backup`). Edit the `MultiClusterHub` resource by setting the `cluster-backup` parameter to `true`. This installs the OADP operator in the same namespace with the `cluster-backup` resource.
+** The cluster backup and restore operator must be installed manually. Enable the cluster backup and restore operator (`cluster-backup`). Edit the `MultiClusterHub` resource by setting the `cluster-backup` parameter to `true`. This installs the OADP operator in the same namespace with the backup component.
 
 - *For passive hub clusters*:
 
@@ -56,7 +52,7 @@ Complete the following steps to create an instance of the `DataProtectionApplica
 . From the {ocp} console, select *Operators* > *Installed Operators*.
 . Click `Create instance` under DataProtectionApplication.
 . Create the Velero instance by selecting configurations using the {ocp-short) console or by using a YAML file as mentioned in the `DataProtectionApplication` example.
-. Set the specification (spec:) values appropriately for the `DataProtectionApplication` resource. Then click *Create*.
+. Set the specification (`spec:`) values appropriately for the `DataProtectionApplication` resource. Then click *Create*.
 +
 If you intend on using the default backup storage location, set the following value, `default: true` in the `backupStorageLocations` section. View the following `DataProtectionApplication` resource sample:
 +
@@ -100,6 +96,8 @@ spec:
 **Note:** The cluster backup and restore operator resources must be created in the same namespace where the OADP Operator is installed.
 +
 See an example to create the link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-dataprotectionapplication-custom-resource[`DataProtectionApplication` resource].
+
+//locate a link for product doc for data protection application, this is the only doc for now, MJ + VB
 
 ** Before you run the restore operation, verify that other operators, such as Ansible Automation Platform, {ocp} GitOps, or certificate manager are installed. This ensures that the new hub cluster is configured the same way as the initial hub cluster.
 
@@ -159,11 +157,13 @@ apiVersion: operator.open-cluster-management.io/v1
 
 [#using-backup-restore]
 == Using the backup and restore operator
-
+//there is an issue to update this section, MJ, #26262 10/17
 Complete the following steps to schedule and restore backups:
-//is this external link correct? for updates in other versions be sure to check branch name , MJ, 10/11/22; would also like to move the following statement to end of the page possibly: "See the link:"
 
-. Use the backup and restore operator, `backupschedule.cluster.open-cluster-management.io` and `restore.cluster.open-cluster-management.io` resources, to create a `backupschedule.cluster.open-cluster-management.io` resource using the `cluster_v1beta1_backupschedule.yaml` sample file. See the link:https://github.com/stolostron/cluster-backup-operator/tree/release-2.6/config/samples[`cluster-backup-operator` samples]. Run the following command to create a `backupschedule.cluster.open-cluster-management.io` resource using the `cluster_v1beta1_backupschedule.yaml` sample file:
+
+//Change 1 for 26262: Use the backup and restore operator backupschedule.cluster.open-cluster-management.io to create a backup schedule, and the restore.cluster.open-cluster-management.io resources to restore a backup.
+
+. Use the backup and restore operator, `backupschedule.cluster.open-cluster-management.io` and `restore.cluster.open-cluster-management.io` resources, to create a `backupschedule.cluster.open-cluster-management.io` resource using the `cluster_v1beta1_backupschedule.yaml` sample file. Run the following command to create a `backupschedule.cluster.open-cluster-management.io` resource using the `cluster_v1beta1_backupschedule.yaml` sample file:
 +
 ----
 kubectl create -n <oadp-operator-ns> -f config/samples/cluster_v1beta1_backupschedule.yaml
@@ -217,76 +217,12 @@ spec:
   veleroCredentialsBackupName: latest
   veleroResourcesBackupName: latest
 ----
-//commenting this part out bc it is documented later in the Restore section
-//+
-//View the following description of the three required `spec` properties for `restore.cluster.open-cluster-management.io`:
-//+
-//** `veleroManagedClustersBackupName` is used to define the restore option for the managed cluster activiation data.
-//** `veleroCredentialsBackupName` is used to define the restore option for the user credentials.
-//** `veleroResourcesBackupName` is used to define the restore option for the hub cluster resources (`Applications`, `Policy`, and other hub resources like managged cluster passive data).
-//+
-//The valid options for the previously mentioned properties are following values:
-//+
-//** `latest` - This property restores the last available backup file for this type of backup.
-//** `skip` - This property does not attempt to restore this type of backup with the current restore operation.
-//** `backup_name` - This property restores the specified backup by referencing the name.
 
 . View the Velero `Restore` resource by running the following command:
 +
 ----
 oc get restore.velero.io -n <oadp-operator-ns>
 ----
-+
-View the following YAML examples to restore different types of backed up files:
-+
-//should this information be moved to the Restore section since they are all restore samples?
-** Restore all three types of backed up resources:
-+
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: Restore
-metadata:
-  name: restore-acm
-spec:
-  veleroManagedClustersBackupSchedule: latest
-  veleroCredentialsBackupSchedule: latest
-  veleroResourcesBackupSchedule: latest
-----
-+
-** Restore only managed cluster resources:
-+
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: Restore
-metadata:
-  name: restore-acm
-spec:
-  veleroManagedClustersBackupName: latest
-  veleroCredentialsBackupName: skip
-  veleroResourcesBackupName: skip
-----
-+
-** Restore the resources for managed clusters only, using the `acm-managed-clusters-schedule-20210902205438` backup:
-+
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: Restore
-metadata:
-  name: restore-acm
-spec:
-  veleroManagedClustersBackupName: acm-managed-clusters-schedule-20210902205438
-  veleroCredentialsBackupName: skip
-  veleroResourcesBackupName: skip
-----
-+
-*Notes*: 
-+
-* The `restore.cluster.open-cluster-management.io` resource is run once. After the restore operation is completed, you can optionally run another restore operation on the same hub cluster. You must create a new `restore.cluster.open-cluster-management.io` resource to run a new restore operation.
-+
-* You can create multiple `restore.cluster.open-cluster-management.io`, however only one can be run at any moment.
 
 For descriptions of the parameters and samples of `Restore` YAML resources, see the <<restore-backup,Restoring a backup>> section.
 
@@ -313,12 +249,6 @@ spec:
   veleroTtl: 120h
 ----
 
-//If we add the sample examples, is it necessary to add the link to the sample? How will the user return to the product doc? I have concerns about haing too many inline links. If we add a link here, it will disrupt the reader
-
-//Even if we take the alternative: remove the sample and only point the user to the sample in stolostron, there are still concerns about disrupting the user with too many inline links
-
-//Requested reference link: https://github.com/stolostron/cluster-backup-operator/blob/release-2.6/config/samples/cluster_v1beta1_backupschedule.yaml
-
 After you create a `backupschedule.cluster.open-cluster-management.io` resource, run the following command to get the status of the scheduled cluster backups:
 
 ----
@@ -344,7 +274,7 @@ When the activation data is restored, only managed clusters created using the Hi
 
 [#restore-backup]
 == Restoring a backup
-//example of Restore yaml toward the end of the section
+
 In a usual restore scenario, the hub cluster where the backups are run becomes unavailable, and the backed up data needs to be moved to a new hub cluster. This is done by running the cluster restore operation on the new hub cluster. In this case, the restore operation runs on a different hub cluster than the one where the backup is created.
 
 There are also cases where you want to restore the data on the same hub cluster where the backup was collected, so the data from a previous snapshot can be recovered. In this case, both restore and backup operations are run on the same hub cluster.
@@ -392,8 +322,6 @@ spec:
   veleroResourcesBackupName: latest
 ----
 
-// Similar observation; i think it is unnecessary to add a reference link to this. 
-// Requested link to add: https://github.com/stolostron/cluster-backup-operator/blob/release-2.6/config/samples/cluster_v1beta1_restore.yaml
 **Notes**:
 
 ** Only managed clusters created by the Hive API are automatically connected with the new hub cluster when the `acm-managed-clusters` backup, from the _managed clusters_ backup is restored on another hub cluster. All other managed clusters are in the `Pending Import` state and must be imported back onto the new hub cluster. The Hive API managed clusters can be connected with the new hub cluster because Hive provides the `kubeconfig` file to connect to the managed cluster. This is backed up and restored on the new hub cluster. The import controller updates the bootstrap `kubeconfig` file on the managed cluster using the restored configuration. The `kubeconfig` file is only available for managed clusters created by using the Hive API.
@@ -430,8 +358,6 @@ The cleanup option uses the `cleanupBeforeRestore` property to identify the subs
 
 [#restore-passive-resources-check-backups]
 === Restoring passive resources while checking for backups
-//removing the link, sample toward the end of the section 
-//Use the link:https://github.com/stolostron/cluster-backup-operator/blob/release-2.5/config/samples/cluster_v1beta1_restore_passive_sync.yaml[`restore-passive-sync`] sample to restore passive data, while continuing to check if new backups are available and restore them automatically.
 
 Use the `restore-passive-sync` sample to restore passive data, while continuing to check if new backups are available and restore them automatically. To automatically restore new backups, you must set the `syncRestoreWithNewBackups` parameter to `true`. You must also only restore the latest passive data. You can find the sample example at the end of this section.
 
@@ -458,14 +384,9 @@ spec:
   veleroResourcesBackupName: latest
 ----
 
-
-//Similar to other comments, i suggest to not add the reference link to this section, keep the sample
-
-//Link to the Restore sample: https://github.com/stolostron/cluster-backup-operator/blob/release-2.6/config/samples/cluster_v1beta1_restore_passive_sync.yaml
-
 [#restore-passive-resources]
 === Restoring passive resources
-//sample added
+
 Use the `restore-acm-passive` sample to restore hub cluster resources in a passive configuration. Passive data is backup data such as secrets, ConfigMaps, applications, policies, and all the managed cluster custom resources, which do not activate a connection between managed clusters and hub clusters. The backup resources are restored on the hub cluster by the credentials backup and restore resources.
 
 See the following sample:
@@ -483,14 +404,8 @@ spec:
   veleroResourcesBackupName: latest
 ----
 
-//based on earlier comments, I suggest that we add the sample to this section and not add the link 
-//Link to Restore sample: https://github.com/stolostron/cluster-backup-operator/blob/release-2.6/config/samples/cluster_v1beta1_restore_passive.yaml 
-
 [#restore-activation-resources]
 === Restoring activation resources
-
-//sample added
-//Use the link:https://github.com/stolostron/cluster-backup-operator/blob/release-2.5/config/samples/cluster_v1beta1_restore_passive_activate.yaml[`restore-passive-activate`] sample when you want the hub cluster to manage the clusters.
 
 Use the `restore-acm-passive-activate` sample when you want the hub cluster to manage the clusters. In this case it is assumed that the other data has been restored already on the hub cluster that using the passive resource.
 
@@ -513,14 +428,8 @@ You have some options to restore activation resources, depending on how you rest
 
 - If you restored the passive resources as a one time operation, or did not restore any resources yet, choose to restore all resources as specified in the _Restoring all resources_ section.
 
-//I suggest that we remove the link to the sample and provide the sample, this will also help prevent broken links the reference is branch specific
-
-//Link to the Restore sample: https://github.com/stolostron/cluster-backup-operator/blob/release-2.6/config/samples/cluster_v1beta1_restore_passive_activate.yaml
-
 [#restore-all-resources]
 === Restoring all resources
- 
-//Use the link:https://github.com/stolostron/cluster-backup-operator/blob/main/config/samples/cluster_v1beta1_restore.yaml[`Restore`] sample if you want to restore all data at once and make the hub cluster manage the managed clusters in one step.
 
 Use the `restore-acm` sample if you want to restore all data at once and make the hub cluster manage the managed clusters in one step. After you create a `restore.cluster.open-cluster-management.io` resource on the hub cluster, run the following command to get the status of the restore operation:
 
@@ -543,6 +452,59 @@ spec:
 ----
 
 From your hub cluster, verify that the backed up resources contained by the backup file are created.
+
+[#more-restore-samples]
+=== Using other restore samples
+
+View the following Restore section to view the YAML examples to restore different types of backed up files.
+
+** Restore all three types of backed up resources:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+spec:
+  veleroManagedClustersBackupSchedule: latest
+  veleroCredentialsBackupSchedule: latest
+  veleroResourcesBackupSchedule: latest
+----
++
+** Restore only managed cluster resources:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+spec:
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: skip
+  veleroResourcesBackupName: skip
+----
++
+** Restore the resources for managed clusters only, using the `acm-managed-clusters-schedule-20210902205438` backup:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+spec:
+  veleroManagedClustersBackupName: acm-managed-clusters-schedule-20210902205438
+  veleroCredentialsBackupName: skip
+  veleroResourcesBackupName: skip
+----
++
+*Notes*: 
++
+* The `restore.cluster.open-cluster-management.io` resource is run once. After the restore operation is completed, you can optionally run another restore operation on the same hub cluster. You must create a new `restore.cluster.open-cluster-management.io` resource to run a new restore operation.
++
+* You can create multiple `restore.cluster.open-cluster-management.io`, however only one can be run at any moment.
 
 [#viewing-restore-events]
 === Viewing restore events
@@ -607,7 +569,7 @@ Events:
 
 [#primary-cluster-shut-down]
 === Shutting down the primary cluster
-//we might want to rename this to "Shutting down the primary cluster" if there are specifc tasks that the user needs to complete
+
 When you restore a backup on a new hub cluster, make sure that the previous hub cluster, where the backup was created, is shut down. If that cluster is running, the previous hub cluster tries to reimport the managed clusters when the managed cluster reconciliation finds that the managed clusters are no longer available.
 
 //Can you remind me of how the user shuts the cluster down? Do they simply run a command? Is there a 'shut down' button in the console that I might have missed?
@@ -661,9 +623,6 @@ The `acm-validation-policy-schedule` backups are set to expire after the time is
 This policy is intended to help notify the hub cluster administrator of any backup issues when the hub cluster is active and produces or restore backups.
 
 
-Learn how to enable and manage the cluster backup and restore operator, see xref:../backup_restore/backup_restore_enable.adoc#manage-backup-restore[Manage backup and restore operator].
-
-
 [#protecting-data-using-server-side-encryption]
 == Protecting data using server-side encryption
 
@@ -685,15 +644,3 @@ spec:
 ----
 
 Refer to link:https://github.com/vmware-tanzu/velero/blob/main/site/content/docs/main/supported-providers.md[Velero supported storage providers] to find out about all of the configurable parameters of other storage providers.
-
-
-
-
-
-
-
-
-
-
-
-
