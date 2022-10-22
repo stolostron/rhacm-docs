@@ -52,7 +52,7 @@ Complete the following steps:
     1. Click the drop-down arrow in the _Stage_ row of a specific book.
     2. Click **Edit configuration**.
     3. Set the version of the configuration to your new version.
-    4. Change the default setting for each book from **Use default content directory** to the actual name of your folder. 
+    4. Change the default setting for each book from **Use default content directory** to the actual name of your folder in _Content Directory_.
     5. Repeat these steps for each book in your Pantheon title to reference the new version.
 
 7. Disable the preview feature by clicking the drop-down arrow in the _Preview_ row. Select **Disable Job**. We don't use this build.
