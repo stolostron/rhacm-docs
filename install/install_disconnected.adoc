@@ -60,7 +60,7 @@ https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/
 [#additional-requirements]
 === Additional requirements 
 
-When performing the previous pocedures, note the the follow requirements specific to {product-title}:
+When performing the previous procedures, note the the follow requirements specific to {product-title}:
 
 [#disconnect-include-acm-pkgs]
 ==== Include required operator packages in your mirror catalog 
@@ -69,13 +69,16 @@ When performing the previous pocedures, note the the follow requirements specifi
 Red Hat provides the {product-title} operator in the Red Hat operators catalog, which is delivered by the
 `registry.redhat.io/redhat/redhat-operator-index` index image. When you prepare your mirror of this catalog index image, you can choose to either mirror the entire catalog as provided by Red Hat, or you can mirror a subset that contains only the operator packages that you intend to use.
 
-If you are creating a full mirror catalog, no special considerations are needed as all of the packages required to install {product-title} are included. However, if you are creating a partial or filtered mirrored catalog, for which you identify particular packages to be 
-included, you need to include the following package names in your list:
+If you are creating a full mirror catalog, no special considerations are needed as all of the packages required to install {product-title} are included. However, if you are creating a partial or filtered mirrored catalog, for which you identify particular packages to be included, you need to include the following package names in your list:
 
++
 * `advanced-cluster-manager`
 * `multicluster-engine`
 
-If you are creating the mirrored catalog or registry by using the OPM utility, `opm index prune`, include the following package names in the value of the `-p` option as shown in the example:
+* Use one the two mirroring procedures. 
+
++
+- If you are creating the mirrored catalog or registry by using the OPM utility, `opm index prune`, include the following package names in the value of the `-p` option as shown in the example:
 
 ....
 opm index prune \
@@ -84,8 +87,10 @@ opm index prune \
    -t myregistry.example.com:5000/mirror/my-operator-index:v4.10
 ....
 
-If instead you are populating the mirrored catalog or registry by using the `oc-mirror` plugin, include the following package names in the packages list portion of your `ImageSetConfiguration`, as shown in the example:
++
+- If instead you are populating the mirrored catalog or registry by using the `oc-mirror` plugin, include the following package names in the packages list portion of your `ImageSetConfiguration`, as shown in the example:
 
++
 [source,yaml]
 ----
 kind: ImageSetConfiguration
@@ -110,22 +115,16 @@ mirror:
 [#config-olm-registry]
 ==== Configure OLM to use your mirror registry
 
-When you have populated a local mirror registry with the packages required for installing {product-title},
-complete the other steps described in the topic 
-https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html-single/operators/index#olm-restricted-networks[Using Operator Lifecycle Manager on restricted networks]
-to make your mirror registry and catalog available on your disconnected cluster.
-These steps include:
+When you have populated a local mirror registry with the previous packages that are required for installing {product-title}, complete the steps that are described in the topic https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html-single/operators/index#olm-restricted-networks[Using Operator Lifecycle Manager on restricted networks] to make your mirror registry and catalog available on your disconnected cluster which include the following steps:
 
-* https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html-single/operators/index#olm-restricted-networks-operatorhub_olm-restricted-networks[Disabling the default OperatorHub sources]
-* https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html-single/operators/index#olm-mirror-catalog_olm-restricted-networks[Mirroring the Operator catalog]
-* https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html-single/operators/index#olm-creating-catalog-from-index_olm-restricted-networks[Adding a catalog source for your mirrored catalog]
+* https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html-single/operators/index#olm-restricted-networks-operatorhub_olm-restricted-networks[Disabling the default OperatorHub sources]
+* https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html-single/operators/index#olm-mirror-catalog_olm-restricted-networks[Mirroring the Operator catalog]
+* https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html-single/operators/index#olm-creating-catalog-from-index_olm-restricted-networks[Adding a catalog source for your mirrored catalog]
 
 [#note-source-name]
-==== Note of the catalog source name
+==== Note the catalog source name
 
-As described in the procedures in the {ocp} documentation, you will add a catalog source to your 
-disconnected cluster by adding a `CatalougSource` resource into the `openshift-marketplace` namespace
-using a YAML file similar to the following example:
+As described in the procedures in the {ocp} documentation, you will add a catalog source to your disconnected cluster by adding a `CatalougSource` resource into the `openshift-marketplace` namespace by using a YAML file similar to the following example. Take note of the value of the `metadata.name` field, which you need later:
 
 [source,yaml]
 ----
@@ -138,18 +137,16 @@ spec:
   image: myregistry.example.com:5000/mirror/my-operator-index:v4.10
   sourceType: grpc
 ----  
-
-Take note of the name of this resource (the `metadata.name` field) as you will need to specify
-that same name in an annotation of the `MulticlusterHub` resource you will create later.
+ 
+You need the `metadata.name` field value for the annation in the `MulticlusterHub` resource that you create later in this procedure.
 
 [#verify-required-package]
 == Verify required packages are available
 
-Operator Lifecycle Manager will poll catalog sources for available packages on a regular (timed) interval.
-After it has had a chance to poll the catalog source for your mirrored, catalog, you can verify that the
-needed packages are available from on your disconnected cluster by querying the available 
+Operator Lifecycle Manager will poll catalog sources for available packages on a regular (timed) interval. After OLM polls the catalog source for your mirrored catalog, you can verify that the required packages are available from on your disconnected cluster by querying the available 
 `PackageManifest` resources.
-You can do so using the following command, directed at your disconnected cluster:
+
+Run the following command, directed at your disconnected cluster:
 ....
 oc -n openshift-marketplace get packagemanifests 
 ....
@@ -161,21 +158,18 @@ the catalog source for your mirror catalog:
 * `multicluster-engine`
 
 [#disconnect-configure-icsp]
-== Configure image content source policies 
+== Configure image content source policies
 
-In order to have your cluster obtain container images for the {product-title} operator from your 
-mirror registry (rather than from the internet-hosted registries) you must configure an 
-`ImageContentSourcePolciy` on your disconnected cluster to redirected image references to your
+In order to have your cluster obtain container images for the {product-title} operator from your mirror registry,rather than from the internet-hosted registries, you must configure an `ImageContentSourcePolciy` on your disconnected cluster to redirected image references to your
 mirror registry.  
 
-If you mirrored your catalog using `oc adm catalog mirror` command, the needed image content source 
-policy configuration will be in the `imageContentSourcePolicy.yaml` file inside of the `manifests-*`
-directory created by that command.  
-If, instead, you used the oc-mirror plugin to mirror your catalog, the `imageContentSourcePolicy.yam` 
-lfile will instead be within the `oc-mirror-workspace/results-*` directory create by the oc-mirror plugin.
+If you mirrored your catalog using `oc adm catalog mirror` command, the needed image content source policy configuration will be in the `imageContentSourcePolicy.yaml` file inside of the `manifests-*`directory created by that command. 
+
+If, instead, you used the oc-mirror plugin to mirror your catalog, the `imageContentSourcePolicy.yaml` file will instead be within the `oc-mirror-workspace/results-*` directory create by the oc-mirror plugin.
 
 In either case, you can apply the policies to your disconnected command using an `oc apply` or `oc replace`
 command such as:
+
 ....
 oc replace -f ./<path>/imageContentSourcePolicy.yaml
 ....
@@ -211,16 +205,13 @@ spec:
 == Install the {product-title} operator and hub
 
 After you have configured OLM and {ocp} as described in earlier sections, you can install {product-title}
-using either the OperatorHub UI or a CLI, following the same flow as is described in topic
- xref:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online].
+by using either the OperatorHub console or a CLI, following the same flow as is described in topic
+xref:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online].
 
-However, there is a special consideration to note when creating the instance of the `MulticlusterHub` resource
-that triggeers the installation of your hub.
+*Important:* Creating the `MulticlusterHub` resource is the beginning of the installation process of your hub cluster.
 
-Because operator installation on a cluster requires the use of a non-default catalog source for the
-mirror catalog, a special annotation is needed in the `MulticlusterHub` resource in order to provide the
-name of the mirror catalog source to the operator.  The following example shows the required 
-`mce-subscrioption-spec` annotation:
+Because operator installation on a cluster requires the use of a non-default catalog source for the mirror catalog, a special annotation is needed in the `MulticlusterHub` resource to provide the name of the mirror catalog source to the operator.  The following example displays the required 
+`mce-subscription-spec` annotation:
 
 [source,yaml]
 ----
@@ -234,11 +225,9 @@ metadata:
 spec: {}
 ----
 
-If you are creating the resource via CLI, include the `mce-subscription-spec` annotation 
-in the YAML you will use with the `oc apply` command to create the `MulticlusterHub` resource.
+If you are creating the resource with a CLI, include the `mce-subscription-spec` annotation in the YAML that you will use with the `oc apply` command to create the `MulticlusterHub` resource.
 
-If you are creating the resource using the OPeratorHub UI, switch to
-the YAML view and insert the annotation as shown above.
-Note that it is not possible to specify the annotation when usin the field view panels for
-creating the `MulticlusterHub`.
+If you are creating the resource using the OPeratorHub console, switch to the YAML view and insert the annotation as previously shown.
+
+*Important:* There is no field in the OperatorHub console for the annotation in the the _Field view_ panel to create the `MulticlusterHub`.
 
