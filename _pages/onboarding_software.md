@@ -65,12 +65,6 @@ Shows which desktop you are on.
 
 [Download](https://github.com/gechr/WhichSpace)
 
-## Amethyst
-
-A tiling window manager for Mac OS.
-
-[Download](https://github.com/ianyh/Amethyst)
-
 ## Yabai
 
 A tiling window manager for Mac OS.
