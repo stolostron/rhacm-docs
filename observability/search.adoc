@@ -7,6 +7,7 @@ For {product-title}, search provides visibility into your Kubernetes resources a
 * <<search-customization,Search customization>>
 ** <<options-increase-memory,Options to increase the redisgraph memory>>
 ** <<update-search-limit,Update the search limit>>
+** <<search-configurable-collection,Search configurable collection>>
 * <<queries-in-the-console,Queries in the console>>
 ** <<search-argo,Query ArgoCD applications>>
 
@@ -26,7 +27,7 @@ Search is enabled by default. Search is also enabled when you provision or manua
 [#search-customization]
 == Search customization
 
-When you install {product-title-short}, the product is configured to persist the data in-memory to a file system. The StatefulSet `search-redisgraph` deploys the Redisgraph pod, which mounts the persistent volume named `persist`. If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10Gi on the default storage class. If a default storage class does not exist in your cluster, search saves the index in an empty directory (`emptyDir`).
+When you install {product-title-short}, the product is configured to persist the data in-memory to a file system. The `StatefulSet` `search-redisgraph` deploys the Redisgraph pod, which mounts the persistent volume named `persist`. If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10Gi on the default storage class. If a default storage class does not exist in your cluster, search saves the index in an empty directory (`emptyDir`).
 
 You can customize the storage settings for search by creating the `searchcustomization` CR. Search customization is namespace-scoped and located where search is installed in the hub cluster. View the following example of the search customization CR:
 
@@ -70,6 +71,49 @@ After the change is made, the `search-redisgraph` pod automatically restarts wit
 === Update the search limit
 
 By default, there is a limit of ten saved searches for eacch user. Only a user with the `administrator` role can update the limit by adding the following key value to the `console-config` ConfigMap, `key:value: SAVED_SEARCH_LIMIT: x`.
+
+[#search-configurable-collection]
+=== Search configurable collection
+
+Create the `search-collector-config` ConfigMap to define which Kubernetes resources get collected from the cluster by listing the resources in the allow and deny list section. List the resources in the `data.AllowedResources` and `data.DeniedResources` sections within the ConfigMap. Run the following command to create the resource:
+
+----
+oc apply -f configMapFile.yaml
+----
+
+Your ConfigMap might resemble the following YAML file: 
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: search-collector-config
+ namespace: <namespace where search-collector add-on is deployed>
+data:
+ AllowedResources: |-
+   - apiGroups:
+       - "*"
+     resources:
+       - services
+       - pods
+   - apiGroups:
+       - admission.k8s.io
+       - authentication.k8s.io
+     resources:
+       - "*"
+ DeniedResources: |-
+   - apiGroups:
+       - "*"
+     resources:
+       - secrets
+   - apiGroups:
+       - admission.k8s.io
+     resources:
+       - policies
+       - iampolicies
+       - certificatepolicies
+----
 
 [#queries-in-the-console]
 == Queries in the console
