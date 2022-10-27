@@ -160,19 +160,18 @@ apiVersion: operator.open-cluster-management.io/v1
 
 [#using-backup-restore]
 == Using the backup and restore operator
-//there is an issue to update this section, MJ, #26262 10/17
+
 Complete the following steps to schedule and restore backups:
 
+. Use the backup and restore operator, `backupschedule.cluster.open-cluster-management.io`, to create a backup schedule and use the `restore.cluster.open-cluster-management.io` resources to restore a backup.
 
-//Change 1 for 26262: Use the backup and restore operator backupschedule.cluster.open-cluster-management.io to create a backup schedule, and the restore.cluster.open-cluster-management.io resources to restore a backup.
-
-. Use the backup and restore operator, `backupschedule.cluster.open-cluster-management.io` and `restore.cluster.open-cluster-management.io` resources, to create a `backupschedule.cluster.open-cluster-management.io` resource using the `cluster_v1beta1_backupschedule.yaml` sample file. Run the following command to create a `backupschedule.cluster.open-cluster-management.io` resource using the `cluster_v1beta1_backupschedule.yaml` sample file:
+. Run the following command to create a `backupschedule.cluster.open-cluster-management.io` resource:
 +
 ----
-kubectl create -n <oadp-operator-ns> -f config/samples/cluster_v1beta1_backupschedule.yaml
+kubectl create -f cluster_v1beta1_backupschedule.yaml
 ----
 +
-Your resource might resemble the following file:
+Your `cluster_v1beta1_backupschedule.yaml` resource might resemble the following file:
 +
 [source,yaml]
 ----
@@ -180,9 +179,10 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: BackupSchedule
 metadata:
   name: schedule-acm
+  namespace: open-cluster-management-backup
 spec:
-  veleroSchedule: 0 */6 * * * # Create a backup every 6 hours
-  veleroTtl: 72h # deletes scheduled backups after 72h; optional, if not specified, the maximum default value set by velero is used - 720h
+  veleroSchedule: 0 */2 * * * # Create a backup every 2 hours
+  veleroTtl: 120h # deletes scheduled backups after 120h; optional, if not specified, the maximum default value set by velero is used - 720h
 ----
 +
 View the following descriptions of the `backupschedule.cluster.open-cluster-management.io` `spec` properties:
@@ -201,10 +201,10 @@ oc get bsch -n <oadp-operator-ns>
 **Note:** When you restore a backup on a new hub cluster, make sure that the previous hub cluster, where the backup was created, is shut down. If it is running, the previous hub cluster tries to reimport the managed clusters as soon as the managed cluster reconciliation finds that the managed clusters are no longer available.
 +
 You can use the cluster backup and restore operator, `backupschedule.cluster.open-cluster-management.io` and `restore.cluster.open-cluster-management.io` resources, to create a backup or restore resource. See the link:https://github.com/stolostron/cluster-backup-operator/tree/release-2.5/config/samples[`cluster-backup-operator` samples].
-. Run the following command to create a `restore.cluster.open-cluster-management.io` resource using the `cluster_v1beta1_restore.yaml` sample file. Be sure to replace the `oadp-operator-ns` with the namespace name used to install the OADP Operator. The default value for the OADP Operator install namespace is `oadp-operator`:
+. Run the following command to create a `restore.cluster.open-cluster-management.io` resource:
 +
 ----
-kubectl create -n <oadp-operator-ns> -f config/samples/cluster_v1beta1_restore.yaml
+kubectl create -f cluster_v1beta1_backupschedule.yaml
 ----
 +
 Your resource might resemble the following file:
@@ -215,6 +215,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Restore
 metadata:
   name: restore-acm
+  namespace: open-cluster-management-backup
 spec:
   veleroManagedClustersBackupName: latest
   veleroCredentialsBackupName: latest
@@ -224,7 +225,13 @@ spec:
 . View the Velero `Restore` resource by running the following command:
 +
 ----
-oc get restore.velero.io -n <oadp-operator-ns>
+oc get restore.velero.io -n open-cluster-management-backup
+----
+
+. View the {product-title-short} `Restore` events by running the following command:
++
+----
+oc describe restore.cluster.open-cluster-management.io -n open-cluster-management-backup
 ----
 
 For descriptions of the parameters and samples of `Restore` YAML resources, see the <<restore-backup,Restoring a backup>> section.
