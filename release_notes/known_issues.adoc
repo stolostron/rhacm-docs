@@ -1054,6 +1054,36 @@ When you restore the backup of the changed or rotated certificate of authority (
 
 You must manually update the restored `admin` `kubeconfig` secret of the managed cluster on the new hub cluster.
 
+[#limitations-auto-import]
+=== Automatic import limitations
+//2.7:26324
+
+The following situations can prevent the managed cluster from being automatically imported when moving to a new hub cluster:
+
+- When running a hub backup without a `ManagedServiceAccount` token, for example when you create the `ManagedServiceAccount` resource while the managed cluster is not accessible, the backup does not contain a token to auto import the managed cluster.
+
+- The auto import operation fails if the `auto-import-account` secret token is valid and is backed up but the restore operation is run when the token available with the backup has already expired. The `restore.cluster.open-cluster-management.io` resource reports invalid token issues for each managed cluster.
+
+- The auto import operation fails when starting a restore operation while the token is valid but the managed cluster is not accessible. The auto import operation does not try to reconnect. The auto import component log reports import operation failures.
+
+- Since the `auto-import-secret` created on restore uses the `ManagedServiceAccount` token to connect to the managed cluster, the managed cluster must also provide the kube `apiserver` information. The `apiserver` must be set on the `ManagedCluster` resource. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: managed-cluster-name
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+  managedClusterClientConfigs:
+      url: <apiserver>
+----
++
+When a cluster is imported on the hub cluster, the `apiserver` is only set up automatically on {ocp-short} clusters. You must set the `apiserver` manually on other types of managed clusters, such as EKS clusters, otherwise the automatic import feature ignores the clusters. As a result, the clusters remain in the `Pending Import` state when you move them to the restore hub cluster.
+
+
 [#submariner-known-issues]
 == Submariner known issues
 
