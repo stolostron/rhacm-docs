@@ -17,4 +17,7 @@ children:
     - title: divider
     - title: Emails
       permalink: /cheat_emails
+    - title: divider
+    - title: Customization
+      permalink: /cheat_custom
 ---
