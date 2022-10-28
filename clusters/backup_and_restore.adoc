@@ -5,7 +5,7 @@ The cluster backup and restore operator provides disaster recovery solutions for
 
 It supports backups of any third-party resources that extend the hub cluster installation. With this backup solution, you can define cron-based backup schedules which run at specified time intervals. When the hub cluster goes down, a new hub cluster can be deployed and the backed up data is moved to the new hub cluster. 
 
-The cluster backup and restore operator is not installed automatically. Enable the backup component by setting the `cluster-backup` parameter to `true`, in the `MultiClusterHub` resource. The OADP Operator is automatically installed, in the same namespace as the backup resource, when you install the cluster backup and restore operator.
+The cluster backup and restore operator is not installed automatically. Enable the backup component by setting the `cluster-backup` parameter to `true`, in the `MultiClusterHub` resource. The cluster backup operator is installed in the `open-cluster-management-backup` namespace, where {product-title-short} is installed. When you install the cluster backup operator, the OADP Operator is also automatically installed.
 
 *Notes*: 
 
@@ -31,6 +31,7 @@ For a list of supported storage providers for Velero, see https://velero.io/docs
 ** <<resources-restored-managed-cluster,Resources restored at managed activation time>>
 ** <<restore-passive-resources,Restore passive resources>>
 ** <<restore-passive-resources-check-backups,Restore passive resources while checking for backups>>
+** <<restore-imported-managed-clusters,Restore imported managed clusters>>
 ** <<restore-activation-resources,Restore activation resources>>
 * <<active-passive-config,Active passive configuration>>
 ** <<managed-cluster-activation-data,Managed cluster activation data>>
@@ -40,7 +41,7 @@ For a list of supported storage providers for Velero, see https://velero.io/docs
 [#prerequisites-backup-restore]
 == Prerequisites
 
-- Be sure to complete the steps to link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-credentials-secret[Create credentials secret] for the cloud storage where the backups are saved. 
+- Be sure to complete the steps to link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-credentials-secret[Create credentials secret] for the cloud storage where the backups are saved. The secret resource must be created in the OADP operator namespace, which is `open-cluster-management-backup` namespace.
 
 - Use the created secret when you create a `DataProtectionApplication` resource.
 +
@@ -49,7 +50,8 @@ Complete the following steps to create an instance of the `DataProtectionApplica
 . From the {ocp} console, select *Operators* > *Installed Operators*.
 . Click `Create instance` under DataProtectionApplication.
 . Create the Velero instance by selecting configurations using the {ocp-short) console or by using a YAML file as mentioned in the `DataProtectionApplication` example.
-. Set the specification (spec:) values appropriately for the `DataProtectionApplication` resource. Then click *Create*.
+. Set the `DataProtectionApplication` namespace to `open-cluster-management-backup`.
+. Set the specification (`spec:`) values appropriately for the `DataProtectionApplication` resource. Then click *Create*.
 +
 The resource values are mentioned for ease of use. If you intend on using the default backup storage location, set the following value, `default: true` in the `backupStorageLocations` section. Your `DataProtectionApplication` resource might resemble the following YAML file:
 +
@@ -92,8 +94,6 @@ spec:
           profile: "default"
 ----
 +
-**Note**: The cluster backup and restore operator resources must be created in the same namespace where the OADP Operator is installed.
-+
 See an example to create the link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-dataprotectionapplication-custom-resource[`DataProtectionApplication` resource].
 
 [#backup-restore-architecture]
@@ -118,7 +118,7 @@ View the following ordered list of the cluster backup and restore process for id
 * Exclude all CRDs from the following API groups: `admission.cluster.open-cluster-management.io`, `admission.work.open-cluster-management.io`,  `internal.open-cluster-management.io`, `operator.open-cluster-management.io`, `work.open-cluster-management.io`, `search.open-cluster-management.io`, `admission.hive.openshift.io`, `velero.io`.
 * Exclude the following CRDs that are a part of the included API groups, but are either not needed or are being recreated by owner-resources, which are also backed up: `clustermanagementaddon`, `observabilityaddon`, `applicationmanager`, `certpolicycontroller`, `iampolicycontroller`, `policycontroller`, `searchcollector`, `workmanager`, `backupschedule`, `restore`, `clusterclaim.cluster.open-cluster-management.io`.
 * Backup secrets and ConfigMaps with one of the following labels: `cluster.open-cluster-management.io/type`, `hive.openshift.io/secret-type`, `cluster.open-cluster-management.io/backup`. 
-* Use the following label for any other resources that you want to be backed up and are not included in the previously mentioned criteria, `cluster.open-cluster-management.io/backup`. See the following example:
+* Use the `cluster.open-cluster-management.io/backup` label for any other resources that you want to be backed up and are not included in the previously mentioned criteria. See the following example:
 +
 [source,yaml]
 ----
@@ -338,10 +338,7 @@ spec:
   veleroResourcesBackupName: latest
 ----
 
-**Notes**:
-
-** Only managed clusters created by the Hive API are automatically connected with the new hub cluster when the `acm-managed-clusters` backup, from the _managed clusters_ backup is restored on another hub cluster. All other managed clusters are in the `Pending Import` state and must be imported back onto the new hub cluster. The Hive API managed clusters can be connected with the new hub cluster because Hive provides the `kubeconfig` file to connect to the managed cluster. This is backed up and restored on the new hub cluster. The import controller updates the bootstrap `kubeconfig` file on the managed cluster using the restored configuration. The `kubeconfig` file is only available for managed clusters created by using the Hive API.
-** When you restore a backup on a new hub cluster, make sure that the previous hub cluster, where the backup was created, is shut down. If it is running, the previous hub cluster tries to reimport the managed clusters as soon as the managed cluster reconciliation finds that the managed clusters are no longer available.
+*Note:* Only managed clusters created by the Hive API are automatically connected with the new hub cluster when the `acm-managed-clusters` backup from the managed clusters backup is restored on another hub cluster. All other managed clusters remain in the `Pending Import` state and must be imported back onto the new hub cluster. For more information, see <<restore-imported-managed-clusters,Restoring imported managed clusters (Technology Preview)>>.
 
 [#prepare-new-hub]
 === Prepare the new hub cluster 
@@ -408,6 +405,17 @@ spec:
   veleroCredentialsBackupName: latest
   veleroResourcesBackupName: latest
 ----
+
+[#restore-imported-managed-clusters]
+=== Restore imported managed clusters
+
+Only managed clusters connected with the primary hub cluster using the Hive API are automatically connected with the new hub cluster, where the activation data is restored. These clusters have been created on the primary hub cluster using the *Create cluster* button in the *Clusters* tab. Managed clusters connected with the initial hub cluster using the *Import cluster* button appear as `Pending Import` when the activation data is restored, and must be imported back on the new hub cluster.
+
+The Hive managed clusters can be connected with the new hub cluster because Hive stores the managed cluster `kubeconfig` in the managed cluster namespace on the hub cluster. This is backed up and restored on the new hub cluster. The import controller then updates the bootstrap `kubeconfig` on the managed cluster using the restored configuration, which is only available for managed clusters created using the Hive API. It is not available for imported clusters.
+
+To reconnect imported clusters on the new hub cluster, manually create the `auto-import-secret` resource after your start the restore operation. See xref:../clusters/import_cli.adoc#importing-the-cluster-auto-import-secret[Importing the cluster with the auto import secret] for more details.
+
+Create the `auto-import-secret` resource in the managed cluster namespace for each cluster in `Pending Import` state. Use a `kubeconfig` or token with enough permissions for the import component to start the automatic import on the new hub cluster. You must have access for each managed cluster by using a token to connect with the managed cluster. The token must have a `klusterlet` role binding or a role with the same permissions.
 
 [#active-passive-config]
 == Active passive configuration
