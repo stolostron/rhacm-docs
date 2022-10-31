@@ -5,7 +5,7 @@ permalink: arch_builds
 horizontal: false
 ---
 
-We refresh weekly. These directions walk you through a refresh, as well as an internal build to check drafts and error logs in between publish dates.
+We typically refresh weekly, but can adjust the schedule as needed. These directions walk you through a refresh, as well as an internal build to check drafts and error logs in between publish dates.
 
 ## Prerequisites
 
@@ -86,7 +86,7 @@ chmod +x acm_sync_asciidoc.sh
 
 **Note:** The first number is the GitLab branch number (which corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
 
-6. Add your SSH key to your GitLab account. You can find the link to GitLab on Rover Apps. If you have already set up your GitHub account, you have SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). Then, complete the following steps to use your SSH key for your GitLab account:
+6. Add your SSH key to your GitLab account. You can find the link to GitLab on Rover Apps. If you have already set up your GitHub account, you have SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). If you need to create one, see Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) Then, complete the following steps to use your SSH key for your GitLab account:
  - Copy the key.
  - Open GitLab.
  - Open your profile.
