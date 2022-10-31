@@ -67,7 +67,7 @@ Use this process to refresh a public version or build internally.
 
 ## Set up local build
 
-Makes you are logged on to the VPN before completing the following steps to build locally.
+Make sure you are logged on to the VPN before completing the following steps to build locally:
 
 1. Install homebrew, if you don't already have it installed.
 2. Download the build script to a folder of your choice from the master branch at: 
