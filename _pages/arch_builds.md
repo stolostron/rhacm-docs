@@ -100,7 +100,7 @@ Then, complete the following steps to use your SSH key for your GitLab account:
 
 **Note:** The first number is the GitLab branch number (corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
 
-8. When running the script for the first time after adding your SSH key to GitLab, you might receive an erro message resembling the following:
+8. When running the script for the first time after adding your SSH key to GitLab, you might receive an error message resembling the following:
 ```
 The authenticity of host can't be established.
 Are you sure you want to continue connecting (yes/no/[fingerprint])?
