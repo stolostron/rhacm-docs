@@ -91,15 +91,11 @@ chmod +x acm_sync_asciidoc.sh
 **Note:** The first number is the GitLab branch number (which corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
 
 7. Enter your GitHub password when prompted.
-8. Enter your GitLab password if prompted. Since we use SAML, you might not need it. In that case, enter your SSH key into GitLab. To find your SSH key, see the following steps:
- - Check SSH key:
-```
-vi /Users/username/.ssh/id_rsa.pub
-```
+8. Enter your GitLab password if you . Since we use SAML, you might not need it. In that case, enter your SSH key into GitLab. If you have already set up your GitHub account, you might has a SSH key. To find it, see https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys[Checking for existing SSH keys]. Then, complete the following steps:
  - Copy the key.
  - Open GitLab.
  - Open your profile.
- - Select **SSH keys** in the left nav.
+ - Select **SSH Keys** in the left nav.
  - Paste the key and select **Add key**. 
  - Run the script.
   
