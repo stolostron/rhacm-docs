@@ -83,21 +83,20 @@ cd Downloads
 chmod +x acm_sync_asciidoc.sh
 ```
 5. Install `gsed`, if you haven't already.
-6. Run the file with the following command:
-```
-./acm_sync_asciidoc.sh 2.8 2.8_stage
-```
 
 **Note:** The first number is the GitLab branch number (which corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
 
-7. Enter your GitHub password when prompted.
-8. Enter your GitLab password if you . Since we use SAML, you might not need it. In that case, enter your SSH key into GitLab. If you have already set up your GitHub account, you might has a SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). Then, complete the following steps:
+6. Add your SSH key to your GitLab account. You can find the link to GitLab on Rover Apps. If you have already set up your GitHub account, you might has a SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). Then, complete the following steps:
  - Copy the key.
  - Open GitLab.
  - Open your profile.
  - Select **SSH Keys** in the left nav.
- - Paste the key and select **Add key**. 
- - Run the script.
+ - Paste the key and select **Add key**.
+ 
+ 7. Run the file with the following command to build 2.8:
+```
+./acm_sync_asciidoc.sh 2.8 2.8_stage
+```
   
 Pantheon updates automatically, and matches the commit number. If Pantheon does not update automatically, you can manually refresh individual books.
 
