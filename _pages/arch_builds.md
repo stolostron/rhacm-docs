@@ -103,7 +103,7 @@ Then, complete the following steps to use your SSH key for your GitLab account:
 8. When running the script for the first time after adding your SSH key to GitLab, you might receive an erro message resembling the following:
 ```
 The authenticity of host can't be established.
-Are you sure you twant to continue connecting (yes/no/[fingerprint])?
+Are you sure you want to continue connecting (yes/no/[fingerprint])?
 ```
  - Enter `yes` and continue.
  - You might receive an access rights error message. Run the script again. If you have the correct access rights, the script runs successfully. If not, contact your manager to gain access rights.
