@@ -76,7 +76,7 @@ https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advance
 ```
 3. Change to your chosen directory. For example, the following command switches to the Documents folder:
 ```
-cd Downloads
+cd Documents
 ```
 4. Make the script executable by running the following command:
 ```
