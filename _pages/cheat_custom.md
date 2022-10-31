@@ -22,4 +22,4 @@ export PROMPT='%{%F{243}%}%n %{%F{197}%}%~ %{%F{39}%}$(parse_git_branch) %{%F{no
 
 You can customize the colors using ANSI color codes. Using the indicator can help you avoid accidentally creating a new branch from the wrong base branch.
 
-**Tip:** If your `.zshrc` file is hidden, press the Command, Shift, and period (.*) keys at the same time. The hidden files appear as translucent in the folder.
+**Tip:** To show the `.zshrc` file in Finder, press the Command, Shift, and period (.*) keys at the same time. The hidden files appear as translucent in the folder.
