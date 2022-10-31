@@ -106,7 +106,7 @@ The authenticity of host can't be established.
 Are you sure you want to continue connecting (yes/no/[fingerprint])?
 ```
  - Enter `yes` and continue.
- - You might receive an access rights error message. Run the script again. If you have the correct access rights, the script runs successfully. If not, contact your manager to gain access rights.
+ - You might receive an access rights error message. Ignore the message and run the script again. If you have the correct access rights, the script runs successfully. If not, contact your manager to gain access rights.
   
 Pantheon updates automatically, and matches the commit number. If Pantheon does not update automatically, you can manually refresh individual books.
 
