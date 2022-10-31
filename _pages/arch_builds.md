@@ -74,7 +74,7 @@ Make sure you are logged on to the VPN before completing the following steps to 
 ```
 https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/blob/master/acm_sync_asciidoc.sh
 ```
-3. Change to your chosen directory. For exmaple, the following commands switched to the Documents folder:
+3. Change to your chosen directory. For example, the following command switches to the Documents folder:
 ```
 cd Downloads
 ```
