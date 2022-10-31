@@ -84,8 +84,6 @@ chmod +x acm_sync_asciidoc.sh
 ```
 5. Install `gsed`, if you haven't already.
 
-**Note:** The first number is the GitLab branch number (which corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
-
 6. Add your SSH key to your GitLab account. You can find the link to GitLab on Rover Apps. If you have already set up your GitHub account, you have a SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). If you need to create one, see [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) 
 
 Then, complete the following steps to use your SSH key for your GitLab account:
@@ -99,6 +97,8 @@ Then, complete the following steps to use your SSH key for your GitLab account:
 ```
 ./acm_sync_asciidoc.sh 2.8 2.8_stage
 ```
+
+**Note:** The first number is the GitLab branch number (corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
 
 8. When running the script for the first time after adding your SSH key to GitLab, you might receive the an message resembling the following:
 ```
