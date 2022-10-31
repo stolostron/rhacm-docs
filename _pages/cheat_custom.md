@@ -1,7 +1,7 @@
 ---
 layout: page
 title: System customization
-permalink: /cheat_custom
+permalink: cheat_custom
 horizontal: false
 ---
 
