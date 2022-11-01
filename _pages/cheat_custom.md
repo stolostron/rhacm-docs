@@ -3,6 +3,7 @@ layout: page
 title: System customization
 permalink: /cheat_custom
 horizontal: false
+render_with_liquid: false
 ---
 
 You can customize your system to better suit the workflow and processes we use.
