@@ -69,7 +69,7 @@ Use this process to refresh a public version or build internally.
 
 Make sure you are logged on to the VPN before completing the following steps to build locally:
 
-1. Install homebrew, if you don't already have it installed.
+1. Install [Homebrew](https://brew.sh/).
 2. Download the build script to a folder of your choice from the master branch at: 
 ```
 https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/blob/master/acm_sync_asciidoc.sh
@@ -82,7 +82,10 @@ cd Documents
 ```
 chmod +x acm_sync_asciidoc.sh
 ```
-5. Install `gsed`, if you haven't already.
+5. Install gsed by running the following command:
+```
+brew install gnu-sed
+```
 
 6. Add your SSH key to your GitLab account. You can find the link to GitLab on Rover Apps. If you have already set up your GitHub account, you have a SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). If you need to create a new key, see [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
