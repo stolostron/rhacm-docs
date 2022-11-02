@@ -100,9 +100,8 @@ Make sure you are connected to the VPN and have [Homebrew](https://brew.sh/) ins
    - Open GitLab.
    - Open your profile.
    - Select **SSH Keys** in the left nav.
-   - Paste the key and select **Add key**.
-   
-
+   - Paste the key and select **Add key**.   
+      
 6. Run the file with the following command to build 2.8:
 
    ```
