@@ -96,3 +96,158 @@ This configuration uses the default network address translation - traversal (NAT
 Submariner uses IP security (IPsec) to establish the secure tunnels between the clusters on the gateway nodes. You can either use the default IPsec NATT port, or you can specify a different port that you configured. When you run this procedure without specifying an IPsec NATT port of 4500/UDP is automatically used for the communication.
 
 See xref:../submariner/submariner_customizations.adoc#submariner-customizations[Customizing Submariner deployments] for information about the customization options. 
+
+[#preparing-aro-tp]
+== Preparing Microsoft Azure Red Hat OpenShift for Submariner (Technology Preview)
+
+The Microsoft Azure Red Hat OpenShift service combines various tools and resources to help simplify the process of building conatiner-based applications. To prepare Azure Red Hat OpenShift clusters for deploying Submariner, complete the following steps:
+
+. Download the link:https://aka.ms/az-aroext-latest.whl[Python wheel and CLI extension].
+
+. From the Azure CLI, run the following command to install the extension:
++
+----
+az extension add --upgrade -s <path-to-extension>
+----
++
+Replace <path-to-whl-file> with the path to where you downloaded the `.whl` extension file.
+
+. Run the following command to verfiy that the CLI extension is being used:
++
+----
+az extension list
+----
++
+If the extension is being used, the output might resemble the following:
++
+----
+    "experimental": false,
+    "extensionType": "whl",
+    "name": "aro",
+    "path": "<path-to-extension>",
+    "preview": true,
+    "version": "1.0.x"
+----
+
+. From the Azure CLI, register the preview feature by running the following command:
++
+----
+az feature registration create --namespace Microsoft.RedHatOpenShift --name AdminKubeconfig
+----
+
+. Retrieve the administrator `kubconfig` by running the following command:
++
+----
+az aro get-admin-kubeconfig -g <resource group> -n <cluster resource name>
+----
+
+. Import your Azure Red Hat OpenShift cluster to your cluster list by selecting **Infrastructure* > *Clusters* > *Import an existing cluster* from the {product-title-short} console.
+
+. Select the `Kubeconfig` *Import mode* and enter the content from your `kubeconfig` file in the *Kubeconfig* window. Follow the instructions in the console to complete the import.
+
+You can verify that your Azure Red Hat OpenShift cluster was imported successfully by navigating to *Infrastructure* > *Clusters*.
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* and select the *Cluster list* tab. Then, select the checkbox for your Azure Red Hat OpenShift cluster that you imported and click the *Submariner add-ons* tab. 
+
+. Select *Install Submariner add-ons* and set your Azure Red Hat OpenShift cluster as your *Target clusters*.
+
+. Click *Next* to continue to the *Configure clusters* page and enter `dummy` in the following fields:
++
+* *Base domain resource group name*
+* *Subscription ID*
+* *Client ID*
+* *Client secret*
+* *Tenant ID*
++
+Follow the instructions in the console to complete the install.
+
+. Configure Submariner to use the LoadBalancer service by running the following commands to edit the `submarinerconfig` CR on your Azure Red Hat OpenShift cluster:
++
+----
+oc edit submarinerconfig -n <cluster-name> submariner
+----
++
+Replace `<cluster-name>` with the name of your Azure Red Hat OpenShift cluster
+
+. Set the `loadBalancerEnable` parameter to `true` and save the file before exiting.
+
+. To verify that Submariner is using the LoadBalancer service, run the following command on your Azure Red Hat OpenShift cluster:
++
+----
+oc get svc -n submariner-operator --kubeconfig <aro kubeconfig> submariner-gateway
+----
++
+If Submariner is using the LoadBalancer service, the output might resemble the following:
++
+----
+NAME                 TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                         AGE
+submariner-gateway   LoadBalancer   172.28.171.61   20.102.24.193   4500:32323/UDP,4490:30963/UDP   2m31s
+----
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* > *Submariner add-ons* to verify that your Azure Red Hat OpenShift cluster *Connection status* is `Healthy`.
+
+[#preparing-rosa-tp]
+== Preparing Red Hat OpenShift Service on AWS for Submariner (Technology Preview)
+
+Red Hat OpenShift Service on AWS (ROSA) provides a stable and flexible platform for application development and modernization. To prepare ROSA clusters for deploying Submariner, complete the following steps:
+
+. Create a new node to run Submariner gateway by running the following command:
++
+----
+rosa create machinepool --cluster=<cluster_name> --name=sm-gw-mp --replicas=<number of Submariner gateway > --labels='submariner.io/gateway=true'
+----
+
+. Log in to ROSA by running the following commands:
++
+----
+rosa login
+oc login https://api.ybb-rosa.ix7w.p1.openshiftapps.com:6443 --username cluster-admin --password <password>
+----
+
+. Create a `kubeconfig` for your ROSA cluster by running the following command:
++
+----
+oc config view --flatten=true > rosa_kube/kubeconfig
+----
+
+. Import your ROSA cluster to your cluster list by selecting **Infrastructure* > *Clusters* > *Import an existing cluster* from the console.
+
+. Select the `Kubeconfig` *Import mode* and enter the content from your `kubeconfig` file in the *Kubeconfig* window. Follow the instructions in the console to complete the import.
+
+You can verify that your ROSA cluster was imported successfully by navigating to *Infrastructure* > *Clusters*.
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* and select the *Cluster list* tab. Then, select the checkbox for your ROSA cluster that you imported and click the *Submariner add-ons* tab. 
+
+. Select *Install Submariner add-ons* and set your ROSA cluster as your *Target clusters*.
+
+. Click *Next* to continue to the *Configure clusters* page and enter `dummy` in the following fields:
++
+* *Access key ID*
+* *Secret access key*
++
+Follow the instructions in the console to complete the install.
+
+. Configure Submariner to use the LoadBalancer service by running the following command to edit the `submarinerconfig` CR on your ROSA cluster:
++
+----
+oc edit submarinerconfig -n <cluster-name> submariner
+----
++
+Replace <cluster-name> with the name of your ROSA cluster.
+
+. Set the `loadBalancerEnable` parameter to `true` and save the file before exiting.
+
+. To verify that Submariner is using the LoadBalancer service, run the following command on your ROSA cluster:
++
+----
+oc get svc -n submariner-operator submariner-gateway --kubeconfig <rosa kubeconfig>
+----
++
+If Submariner is using the LoadBalancer service, the output might resemble the following:
++
+----
+NAME                 TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                         AGE
+submariner-gateway   LoadBalancer   172.30.159.246   <pending>     4500:32466/UDP,4490:32219/UDP   1s
+----
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* > *Submariner add-ons* to verify that your ROSA cluster *Connection status* is `Healthy`.
