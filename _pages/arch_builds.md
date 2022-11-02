@@ -5,7 +5,7 @@ permalink: arch_builds
 horizontal: false
 ---
 
-We refresh weekly. These directions walk you through a refresh, as well as an internal build to check drafts and error logs in between publish dates.
+We typically refresh weekly, but can adjust the schedule as needed. These directions walk you through a refresh, as well as an internal build to check drafts and error logs in between publish dates.
 
 ## Prerequisites
 
@@ -67,33 +67,52 @@ Use this process to refresh a public version or build internally.
 
 ## Set up local build
 
-To build locally:
+Make sure you are logged on to the VPN before completing the following steps to build locally:
 
-1. Log on to the VPN.
-2. Install homebrew, if you don't already have it installed.
-3. Download the build script to a folder of your choice from the master branch at: https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/blob/master/acm_sync_asciidoc.sh
-5. Change to the folder you chose, in this case, the `Downloads` folder: `cd ~/Downloads`
-6. Make the script executable by entering: `chmod +x acm_sync_asciidoc.sh`
-7. Check for `gsed` install, or install if needed.
-8. Edit the script in an editor to change the 3 instances of `sed` to `gsed`. (They are on lines 67, 70, and 73. This is required for running it on a Mac.) 
-9. Save the changes to the file.
-10. Run the file with the following command: `./acm_sync_asciidoc.sh 2.8 2.8_stage`. **Note:** The first number is the GitLab branch number (which corresponds to our release number). The second number is our github branch. Both prod and stage go to the same Gitlab branch.
-11. Enter your github password when prompted.
-12. Enter your gitlab password, if you have one. Since we use SAML, we probably don't. In that case, enter your SSH keys into GitLab. Find your SSH, for example:
-    `vi /Users/cdawson/.ssh/id_rsa.pub`:
-    
-     - Copy the key.
-     - Open GitLab.
-     - Open your profile.
-     - Select SSH keys in the left nav.
-     - Paste the key and select Add key. 
-     - Try running the file again.
+1. Install homebrew, if you don't already have it installed.
+2. Download the build script to a folder of your choice from the master branch at: 
+```
+https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/blob/master/acm_sync_asciidoc.sh
+```
+3. Change to your chosen directory. For example, the following command switches to the _Documents_ folder:
+```
+cd Documents
+```
+4. Make the script executable by running the following command:
+```
+chmod +x acm_sync_asciidoc.sh
+```
+5. Install `gsed`, if you haven't already.
+
+6. Add your SSH key to your GitLab account. You can find the link to GitLab on Rover Apps. If you have already set up your GitHub account, you have a SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). If you need to create a new key, see [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
+
+Then, complete the following steps to use your SSH key for your GitLab account:
+ - Copy the key.
+ - Open GitLab.
+ - Open your profile.
+ - Select **SSH Keys** in the left nav.
+ - Paste the key and select **Add key**.
+ 
+ 7. Run the file with the following command to build 2.8:
+```
+./acm_sync_asciidoc.sh 2.8 2.8_stage
+```
+
+**Note:** The first number is the GitLab branch number (corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
+
+8. When running the script for the first time after adding your SSH key to GitLab, you might receive an error resembling the following message:
+```
+The authenticity of host can't be established.
+Are you sure you want to continue connecting (yes/no/[fingerprint])?
+```
+ - Enter `yes` and continue.
+ - You might receive an access rights error message. Ignore the message and run the script again. If you have the correct access rights, the script runs successfully. If not, contact your manager to gain access rights.
   
-When the file runs successfully, it should look similar to what you saw on the server, with the commits. Pantheon should update automatically, and match the commit number here, as it does when you use the server. This may take a few minutes, so keep your commit number.
+Pantheon updates automatically and matches the commit number. If Pantheon does not update automatically, you can manually refresh individual books.
 
 ## Resolve error `zsh: permission denied`
 
-Running step 10 from the [Set up local build topic](#set-up-local-build) results in the error `zsh: permission denied` if the correct permissions are not set up. To work around this issue, complete the following steps:
+Running step 7 from the [Set up local build](#set-up-local-build) topic results in the error `zsh: permission denied` if the correct permissions are not set up. To solve the issue, complete the following steps:
 
 1. Give the terminal full write access to the disk.
 2. Run the following command after filling in your username and the correct path to the acm_sync_asciidoc.sh file:
