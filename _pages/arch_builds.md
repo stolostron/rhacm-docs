@@ -67,35 +67,33 @@ Use this process to refresh a public version or build internally.
 
 ## Set up local build
 
-Make sure you are logged on to the VPN before completing the following steps to build locally:
+Make sure you are connected to the VPN and have [Homebrew](https://brew.sh/) installed before completing the following steps to build locally:
 
-1. Install [Homebrew](https://brew.sh/).
-
-2. Download the build script to a folder of your choice from the master branch at: 
+1. Download the build script to a folder of your choice from the master branch at: 
 
    ```
    https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/blob/master/acm_sync_asciidoc.sh
    ```
 
-3. Change to your chosen directory. For example, the following command switches to the _Documents_ folder:
+2. Change to your chosen directory. For example, the following command switches to the _Documents_ folder:
 
    ```
    cd Documents
    ```
 
-4. Make the script executable by running the following command:
+3. Make the script executable by running the following command:
 
    ```
    chmod +x acm_sync_asciidoc.sh
    ```
 
-5. Install gsed by running the following command:
+4. Install gsed by running the following command:
 
    ```
    brew install gnu-sed
    ```
 
-6. Add your SSH key to your GitLab account. You can find the link to GitLab on Rover Apps. If you have already set up your GitHub account, you have a SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). If you need to create a new key, see [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
+5. Add your SSH key to your GitLab account. You can find the link to GitLab on Rover Apps. If you have already set up your GitHub account, you have a SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). If you need to create a new key, see [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
    Then, complete the following steps to use your SSH key for your GitLab account:
    - Copy the key.
@@ -104,7 +102,7 @@ Make sure you are logged on to the VPN before completing the following steps to 
    - Select **SSH Keys** in the left nav.
    - Paste the key and select **Add key**.
  
-7. Run the file with the following command to build 2.8:
+6. Run the file with the following command to build 2.8:
 
    ```
    ./acm_sync_asciidoc.sh 2.8 2.8_stage
@@ -112,7 +110,7 @@ Make sure you are logged on to the VPN before completing the following steps to 
 
    **Note:** The first number is the GitLab branch number (corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
 
-8. When running the script for the first time after adding your SSH key to GitLab, you might receive an error resembling the following message:
+7. When running the script for the first time after adding your SSH key to GitLab, you might receive an error resembling the following message:
 
    ```
    The authenticity of host can't be established.
