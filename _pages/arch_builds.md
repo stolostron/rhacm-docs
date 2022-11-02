@@ -102,6 +102,8 @@ Make sure you are connected to the VPN and have [Homebrew](https://brew.sh/) ins
    - Select **SSH Keys** in the left nav.
    - Paste the key and select **Add key**.
 
+&nbsp;
+
 6. Run the file with the following command to build 2.8:
 
    ```
