@@ -73,27 +73,27 @@ Make sure you are logged on to the VPN before completing the following steps to 
 
 2. Download the build script to a folder of your choice from the master branch at: 
 
-```
-https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/blob/master/acm_sync_asciidoc.sh
-```
+   ```
+   https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/blob/master/acm_sync_asciidoc.sh
+   ```
 
 3. Change to your chosen directory. For example, the following command switches to the _Documents_ folder:
 
-```
-cd Documents
-```
+   ```
+   cd Documents
+   ```
 
 4. Make the script executable by running the following command:
 
-```
-chmod +x acm_sync_asciidoc.sh
-```
+   ```
+   chmod +x acm_sync_asciidoc.sh
+   ```
 
 5. Install gsed by running the following command:
 
-```
-brew install gnu-sed
-```
+   ```
+   brew install gnu-sed
+   ```
 
 6. Add your SSH key to your GitLab account. You can find the link to GitLab on Rover Apps. If you have already set up your GitHub account, you have a SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). If you need to create a new key, see [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
@@ -106,18 +106,18 @@ brew install gnu-sed
  
 7. Run the file with the following command to build 2.8:
 
-```
-./acm_sync_asciidoc.sh 2.8 2.8_stage
-```
+   ```
+   ./acm_sync_asciidoc.sh 2.8 2.8_stage
+   ```
 
    **Note:** The first number is the GitLab branch number (corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
 
 8. When running the script for the first time after adding your SSH key to GitLab, you might receive an error resembling the following message:
 
-```
-The authenticity of host can't be established.
-Are you sure you want to continue connecting (yes/no/[fingerprint])?
-```
+   ```
+   The authenticity of host can't be established.
+   Are you sure you want to continue connecting (yes/no/[fingerprint])?
+   ```
 
    - Enter `yes` and continue.
    - You might receive an access rights error message. Ignore the message and run the script again. If you have the correct access rights, the script runs successfully. If not, contact your manager to gain access rights.
