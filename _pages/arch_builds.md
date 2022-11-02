@@ -110,7 +110,7 @@ brew install gnu-sed
 ./acm_sync_asciidoc.sh 2.8 2.8_stage
 ```
 
-**Note:** The first number is the GitLab branch number (corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
+   **Note:** The first number is the GitLab branch number (corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
 
 8. When running the script for the first time after adding your SSH key to GitLab, you might receive an error resembling the following message:
 
