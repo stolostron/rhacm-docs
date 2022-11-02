@@ -93,7 +93,7 @@ Then, complete the following steps to use your SSH key for your GitLab account:
  - Select **SSH Keys** in the left nav.
  - Paste the key and select **Add key**.
  
- 7. Run the file with the following command to build 2.8:
+7. Run the file with the following command to build 2.8:
 ```
 ./acm_sync_asciidoc.sh 2.8 2.8_stage
 ```
