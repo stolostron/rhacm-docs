@@ -8,7 +8,7 @@ render_with_liquid: false
 
 You can customize your system to better suit the workflow and processes we use. 
 
-# `zsh` show current branch
+## `zsh` show current branch
 
 To add an indicator in your terminal prompt showing you which git branch you are currently on, add the following lines to your `.zshrc` file (located in your home directory):
 
@@ -20,9 +20,9 @@ You can customize the colors using ANSI color codes and replace the command indi
 
 **Tip:** To show the `.zshrc` file in Finder, press the Command, Shift, and period (.) keys at the same time. The hidden files appear as translucent in the folder. Alterantively, you can edit the file with a terminal editor such as visudo.
 
-# Tiling window manager for macOS
+## Tiling window manager for macOS
 
-## yabai
+### yabai
 
 You can use a tiling window manager solution similar to i3 or dwm, but for macOS, by installing [yabai](https://github.com/koekeishiya/yabai). We often work with multiple windows for editing code, running terminal commands, and navigating GitHub and Zenhub. Using a tiling window manager can help you manage windows more efficiently so that you can focus on your work. To install yabai, complete the following steps:
 
@@ -99,7 +99,7 @@ sudo yabai --load-sa
     brew services restart yabai
     ```
 
-## skhd
+### skhd
 
 To configure hotkeys that allow you to manipulate windows managed by yabai in a similar fashion to i3 or dwm, you need to install and set up skhd by completing the following steps:
 
@@ -132,11 +132,11 @@ To configure hotkeys that allow you to manipulate windows managed by yabai in a 
     ```
 
 
-# Color themes
+## Color themes
 
-This website uses the [Catppuccin](https://github.com/catppuccin) pastel theme. You can personalize your machine with the same theme by visting the [Catppuccin repository](https://github.com/catppuccin/catppuccin) and following the provided steps for the software, tools, or website you want to customize. You can also use the [style guide](https://github.com/catppuccin/catppuccin/blob/main/docs/style-guide.md) to create themes for additional platforms that are not listed. Using a pastel theme can help with eye-strain and create a more enjoyable working experience when staring at code all day.
+This website uses the [Catppuccin](https://github.com/catppuccin) pastel theme. You can personalize your machine with the same theme by visiting the [Catppuccin repository](https://github.com/catppuccin/catppuccin) and following the provided steps for the software, tools, or websites you want to customize. You can also use the [style guide](https://github.com/catppuccin/catppuccin/blob/main/docs/style-guide.md) to create themes for additional platforms that are not listed. Using a pastel theme can help with eye strain and create a more enjoyable working experience when staring at code all day.
 
-## Zenhub
+### Zenhub
 
 There is no official Catppuccin theme for Zenhub. You can use one of our custom themes based on Catppuccin Macchiato at the following link:
 
