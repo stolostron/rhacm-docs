@@ -16,7 +16,7 @@ Review the Playbook first to understand general ACM processes, which includes so
 
 ## Set up GitHub
 
-You can use your personal GitHub account if you want, but all of our team members have switched to using GitHub accounts tied to their Red Hat emails by now. When you create a new GitHub account or switch computers, you must set up a new SSH keys. [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) for more information.
+You can use your personal GitHub account if you want, but all of our team members have switched to using GitHub accounts tied to their Red Hat emails by now. When you create a new GitHub account or switch computers, you must set up a new SSH key. See [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) for more information.
 
 ## Common GitHub terms
 
