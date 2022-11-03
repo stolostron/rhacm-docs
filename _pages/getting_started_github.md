@@ -10,15 +10,15 @@ Our documentation source code resides in a GitHub repository. We use the Git con
 - [GitHub documentation](https://docs.github.com/)
 - [Git documetnation](https://git-scm.com/doc)
 
-# Prerequisites
+## Prerequisites
 
 Review the Playbook first to understand general ACM processes, which includes some GitHub and agile practices.
 
-# Set up GitHub
+## Set up GitHub
 
 You can use your personal GitHub account if you want, but all of our team members have switched to using GitHub accounts tied to their Red Hat emails by now. When you create a new GitHub account or switch computers, you must set up a new SSH keys. [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) for more information.
 
-# Common GitHub terms
+## Common GitHub terms
 
 - **Issue:** This is a work item (RTC-lingo), or a ticket (support lingo). An issue is required for doc work or major decisions.
 
@@ -32,11 +32,11 @@ For example, if I want to work on 2.8, I need to check out `2.8_stage` by runnin
   
 - **Repository:** Where the source code, branches, and history live. The repository (repo) contains all the branches.
 
-# Editing
+## Editing
    
 For quick changes you can create branches and edit code on the GitHub website, but for most of the work we do, you are going to want to use Visual Studio Code or a similar code editor with built-in GitHub support.
 
-# Common commands
+## Common commands
 
 Git refers to the Git CLI. See [Here are all the Git commands I used last week, and what they do](https://www.freecodecamp.org/news/git-cheat-sheet-and-best-practices-c6ce5321f52/) for some details on frequently used commands. We regularly use the following commands:
 
@@ -57,6 +57,6 @@ Remember, we try to keep our process simple, streamlined, and efficient. Git has
 
 _We git pull, git add, git commit, and git push. We don't git crazy._
 
-# BFG Repo-Cleaner
+## BFG Repo-Cleaner
 
 If you commit sensitive information, let you manager know and run [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/). Remember, everything you commit is saved in the repo history.
