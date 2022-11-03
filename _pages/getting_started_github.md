@@ -59,4 +59,4 @@ _We git pull, git add, git commit, and git push. We don't git crazy._
 
 ## BFG Repo-Cleaner
 
-If you commit sensitive information, let you manager know and run [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/). Remember, everything you commit is saved in the repo history.
+If you commit sensitive information, let your manager know and run [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/). Remember, everything you commit is saved in the repo history.
