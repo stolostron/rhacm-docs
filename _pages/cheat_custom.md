@@ -116,7 +116,7 @@ To configure hotkeys that allow you to manipulate windows managed by yabai in a 
     ```
     Alternatively, you can use one of our configurations at the following link:
     ```
-    https://github.com/oafischer/dotfiles/blob/main/yabai/yabairc
+    https://github.com/oafischer/dotfiles/blob/main/skhd/skhdrc
     ```
 
 3. Start skhd and add it to your login items by running the following command:
