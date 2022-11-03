@@ -50,7 +50,7 @@ You can use a tiling window manager solution similar to i3 or dwm, but for macOS
     sudo yabai --install-sa
     killall Dock
     ```
-7. Configure the scripting addition by creating the a new file in sudoers:
+7. Configure the scripting addition by creating a new file in _sudoers_:
 
     ```
     sudo visudo -f /private/etc/sudoers.d/yabai
