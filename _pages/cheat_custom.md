@@ -66,7 +66,7 @@ You can use a tiling window manager solution similar to i3 or dwm, but for macOS
     - Replace <user> with your username (echo `whoami`). 
     - Replace <hash> with the sha256 hash of the yabai binary (echo `shasum -a 256 $(which yabai)`). You must update this hash manually again after running `brew upgrade`.
 
-9. Add the following loading script to the top of your `.yabairc` file (located in your home directory) if you are setting up your own configuration.:
+9. Add the following loading script to the top of your `.yabairc` file (located in your home directory), if you are setting up your own configuration:
 
     ```
     yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
