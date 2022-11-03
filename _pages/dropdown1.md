@@ -6,8 +6,8 @@ nav: true
 nav_order: 1
 dropdown: true
 children: 
-    - title: Software
-      permalink: /onboarding_software
+    - title: Docs 101
+      permalink: /getting_started_101
     - title: divider
     - title: GitHub
       permalink: /getting_started_github
