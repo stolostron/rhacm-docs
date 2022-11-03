@@ -101,7 +101,7 @@ sudo yabai --load-sa
 
 ## skhd
 
-To configure hotkeys that allows you to manipulate windows managed by yabai in a similar fashion to i3 or dwm, you need to install and set up skhd by completing the following steps:
+To configure hotkeys that allow you to manipulate windows managed by yabai in a similar fashion to i3 or dwm, you need to install and set up skhd by completing the following steps:
 
 1. Run the following command to install skhd:
 
