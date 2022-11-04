@@ -41,6 +41,7 @@ You can use a tiling window manager solution similar to i3 or dwm, but for macOS
     ```
     csrutil status
     ```
+    
 5. Install Xcode CLI tools by downloading it from the app store. You need an Apple ID for this.
 
 6. Run the following commands to install yabai:
@@ -50,6 +51,7 @@ You can use a tiling window manager solution similar to i3 or dwm, but for macOS
     sudo yabai --install-sa
     killall Dock
     ```
+    
 7. Configure the scripting addition by creating a new file in _sudoers_:
 
     ```
