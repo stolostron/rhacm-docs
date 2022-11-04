@@ -6,7 +6,7 @@ horizontal: false
 render_with_liquid: false
 ---
 
-You can customize your system to better suit the workflow and processes we use. 
+You can customize your system to better suit the workflow and processes we use. If you are new to the tools and procedures we use, some of these customizations might help you get used to them. They can also help you complete tasks faster by removing the need for repetitive steps or commands that we often use.
 
 ## `zsh` show current branch
 
@@ -17,8 +17,6 @@ Due to GitHub liquid syntax limitations, you must copy the lines from https://gi
 ```
 
 You can customize the colors using ANSI color codes and replace the command indicator with a unicode character of your choice, or use the traditional `$`. Using the indicator can help you avoid accidentally creating a new branch from the wrong base branch.
-
-**Tip:** To show the `.zshrc` file in Finder, press the Command, Shift, and period (.) keys at the same time. The hidden files appear as translucent in the folder. Alterantively, you can edit the file with a terminal editor such as visudo.
 
 ## Tiling window manager for macOS
 
