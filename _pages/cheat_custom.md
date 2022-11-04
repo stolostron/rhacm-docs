@@ -143,5 +143,5 @@ This website uses the [Catppuccin](https://github.com/catppuccin) pastel theme. 
 There is no official Catppuccin theme for Zenhub. You can use one of our custom themes based on Catppuccin Macchiato at the following link:
 
     ```
-    https://github.com/oafischer/dotfiles/blob/main/yabai/yabairc
+    https://github.com/oafischer/dotfiles/blob/main/css/zenhub_catppuccin_macchiato.css
     ```
