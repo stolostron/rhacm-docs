@@ -72,7 +72,7 @@ Fix the scroll direction when using an external mouse.
 
 [Download](https://github.com/pilotmoon/Scroll-Reverser)
 
-### Automatic keyboard inpout source switcher
+### Automatic keyboard input source switcher
 
 Fix the keyboard layout when using an external keyboard with a different layout.
 
