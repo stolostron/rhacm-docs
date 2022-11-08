@@ -1,6 +1,6 @@
-# Link to the website
+# RHACM doc process
 
-[<img src="https://cdn-icons-png.flaticon.com/512/1864/1864534.png">](https://stolostron.github.io/rhacm-docs)
+- [Internal Documentation](https://stolostron.github.io/rhacm-docs)
 
 # Building with Jekyll
 
