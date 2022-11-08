@@ -62,22 +62,6 @@ The control system we use to maintain our GitHub repository.
 
 The stream editor we use to build our documentation.
 
-## Useful macOS tools
-
-If you are using a MacBook, you might find the following tools useful:
-
-### Scroll reverser
-
-Fix the scroll direction when using an external mouse.
-
-[Download](https://github.com/pilotmoon/Scroll-Reverser)
-
-### Automatic keyboard input source switcher
-
-Fix the keyboard layout when using an external keyboard with a different layout.
-
-[Download](https://github.com/ohueter/autokbisw)
-
 ## Permissions
 
 Accessing some of our tools and processes requires specific permissions. As you follow various instructions on this website, please reach out to your manager whenever you run into permission issues.
