@@ -1,28 +1,28 @@
 ---
 layout: page
-title: System customization
-permalink: /cheat_custom
+title: Advanced configuration
+permalink: /adv_config
 horizontal: false
 render_with_liquid: false
 ---
 
-You can customize your system to better suit the workflow and processes we use. If you are new to the tools and procedures we use, some of these customizations might help you get used to them. They can also help you complete tasks faster by removing the need for repetitive steps or commands that we often use.
+You can customize your system with additional configurations to better suit the workflow and processes we use. While some of these advanced configurations are personal preferences, they might still be helpful if you are new to some of the tools we use, or simply want to optimize your workflow.
 
 ## `zsh` show current branch
 
-To add an indicator in your terminal prompt showing you which git branch you are currently on, add the following lines to your `.zshrc` file (located in your home directory):
+By default, there is no indicator in the terminal prompt showing you which Git branch you are currently on. Using an indicator can help you avoid accidentally creating a new branch from the wrong base branch. It also saves you time by removing the need to frequently check your branch with the `git branch` command. To add the indicator, add the lines from the following link to your `.zshrc` file (located in your home directory):
 
 ```
-Due to GitHub liquid syntax limitations, you must copy the lines from https://github.com/oafischer/dotfiles/blob/main/zsh/zshrc
+https://github.com/oafischer/dotfiles/blob/main/zsh/zshrc
 ```
 
-You can customize the colors using ANSI color codes and replace the command indicator with a unicode character of your choice, or use the traditional `$`. Using the indicator can help you avoid accidentally creating a new branch from the wrong base branch.
+You can customize the colors using ANSI color codes and replace the command indicator with a unicode character of your choice, or use the traditional `$`.
 
 ## Tiling window manager for macOS
 
 ### yabai
 
-You can use a tiling window manager solution similar to i3 or dwm, but for macOS, by installing [yabai](https://github.com/koekeishiya/yabai). We often work with multiple windows for editing code, running terminal commands, and navigating GitHub and Zenhub. Using a tiling window manager can help you manage windows more efficiently so that you can focus on your work. To install yabai, complete the following steps:
+If you are used to a tiling window manager or want to spend less time managing multiple windows yourself, you can install [yabai](https://github.com/koekeishiya/yabai) by completing the following steps:
 
 1. When starting your Mac, press and hold the power button until `Loading startup options` appears.
 
@@ -50,7 +50,7 @@ You can use a tiling window manager solution similar to i3 or dwm, but for macOS
     killall Dock
     ```
     
-7. Configure the scripting addition by creating a new `yabai `file in _sudoers.d_:
+7. Configure the scripting addition by creating a new `yaba` file in _sudoers.d_:
 
     ```
     sudo visudo -f /private/etc/sudoers.d/yabai
@@ -130,16 +130,22 @@ To configure hotkeys that allow you to manipulate windows managed by yabai in a 
     ```
     brew services restart skhd
     ```
+    
+## Useful macOS tools
 
+If you are using a MacBook, you might find the following tools useful:
+
+### Scroll reverser
+
+Set a separate scroll direction for the touchpad and external mouse.
+
+[Download](https://github.com/pilotmoon/Scroll-Reverser)
 
 ## Color themes
 
-This website uses the [Catppuccin](https://github.com/catppuccin) pastel theme. You can personalize your machine with the same theme by visiting the [Catppuccin repository](https://github.com/catppuccin/catppuccin) and following the provided steps for the software, tools, or websites you want to customize. You can also use the [style guide](https://github.com/catppuccin/catppuccin/blob/main/docs/style-guide.md) to create themes for additional platforms that are not listed. Using a pastel theme can help with eye strain and create a more enjoyable working experience when staring at code all day.
-
-### Zenhub
-
-There is no official Catppuccin theme for Zenhub. You can use one of our custom themes based on Catppuccin Macchiato at the following link:
-
-    ```
-    https://github.com/oafischer/dotfiles/blob/main/css/zenhub_catppuccin_macchiato.css
-    ```
+If you have a coding background, you might already be familiar with color themes. If not, the following resources provide some background information by using the [Dracula theme](https://ui.draculatheme.com/) as an example:
+    
+- [Origin story and context](https://www.protocol.com/workplace/dracula-color-scheme)
+- [Benefits and reasons](https://ui.draculatheme.com/principles)
+    
+[This website](https://stolostron.github.io/rhacm-docs/) uses the [Catppuccin](https://github.com/catppuccin) pastel theme. You can personalize your machine with the same theme by visiting the [Catppuccin repository](https://github.com/catppuccin/catppuccin) and following the provided steps for the software, tools, or websites you want to customize. You can find additional styles in our [dotfiles/css](https://github.com/oafischer/dotfiles/blob/main/css/) repo.
