@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Doc squad introduction
+title: Introduction
 permalink: /getting_started_intro
 horizontal: false
 ---
