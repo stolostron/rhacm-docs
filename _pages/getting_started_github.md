@@ -8,7 +8,7 @@ horizontal: false
 Our documentation source code resides in a GitHub repository. We use the Git control system to manage that repository. The following quick guide will help you get started with GitHub and Git, but for more information, please see the following resoruces:
 
 - [GitHub documentation](https://docs.github.com/)
-- [Git documetnation](https://git-scm.com/doc)
+- [Git documentation](https://git-scm.com/doc)
 
 ## Prerequisites
 
