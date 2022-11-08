@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Doc squad 101
-permalink: /getting_started_101
+title: Doc squad introduction
+permalink: /getting_started_intro
 horizontal: false
 ---
 
