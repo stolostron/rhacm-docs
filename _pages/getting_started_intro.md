@@ -7,19 +7,11 @@ horizontal: false
 
 We (the documentation squad) are part of the ACM team and are responsible for documenting Red Hat Advanced Cluster Management for Kubernetes. We also work on a variety of other tasks, such as reviewing and editing technical blogs, reviewing UI content with designers, and resolving bugs and issues by using agile scrum techniques. We use the `squad:doc` label as an identifier on platforms like GitHub.
 
-We work closely with developers to maintain the documentation. Please see the ACM Playbook for details about how to work as part of the ACM team. This website primarily serves as internal documentation for us (`squad:doc`). It outlines our work processes and standards. That being said, other ACM team members might find the resources and information listed on this website useful as well.
+We work closely with developers to maintain the documentation. Please see the ACM Playbook for details about how to work as part of the ACM team. The ACM Playbook also includes the link to a general onboarding guide. This website primarily serves as internal documentation for us (`squad:doc`). It outlines our work processes and standards. That being said, other ACM team members might find the resources and information listed on this website useful as well.
 
 ## Hardware
 
-See the following topics for information about the hardware we use:
-
-### Computers
-
-Our team uses Apple silicon Macs running macOS. You are free to choose a different system provided by IT or even your own system and OS, as long as you follow IT guidelines. We often work with the terminal, so Linux would be a smart alternative choice. Keep in mind that our team can only offer support for systems we are familiar with. IT can only support systems that they provide.
-
-### Accessories
-
-If you have an assigned desk, feel free to bring your own peripherals and accessories. You can also ask your manager about a higher quality replacement monitor for your desk. Since we work with code, a tall aspect ratio such as 16:10 or 3:2 would be a smart choice for monitors.
+Ask your manager or team members about the hardware we use. You can also ask about hardware options for your assigned desk, if you have one. When choosing a computer, remember that we can only help you with systems we are familiar with. You can also consult with IT, keeping in mind that they can only help you with approved hardware that they provide.
 
 ## Required software
 
