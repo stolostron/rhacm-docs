@@ -6,8 +6,8 @@ nav: true
 nav_order: 1
 dropdown: true
 children: 
-    - title: Docs 101
-      permalink: /getting_started_101
+    - title: Introduction
+      permalink: /getting_started_intro
     - title: divider
     - title: GitHub
       permalink: /getting_started_github
