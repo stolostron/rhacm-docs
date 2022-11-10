@@ -6,7 +6,7 @@ horizontal: false
 render_with_liquid: false
 ---
 
-You can customize your system with additional configurations to better suit the workflow and processes we use. While some of these advanced configurations are personal preferences, they might still be helpful if you are new to some of the tools we use, or simply want to optimize your workflow.
+You can further customize your system with configurations that you might find helpful, though these are not required. These advanced configurations can be helpful in optimizing your personal preferences and workflow.
 
 ## `zsh` show current branch
 
@@ -20,7 +20,9 @@ You can customize the colors using ANSI color codes and replace the command indi
 
 ## Tiling window manager for macOS
 
-### yabai
+There are two tiling window manager options for macOS. Amethyst is limited, especially when it comes to working with multiple monitors, so yabai is a better option. The following two topics explain how to install and set up yabai:
+
+### Installing yabai
 
 If you are used to a tiling window manager or want to spend less time managing multiple windows yourself, you can install [yabai](https://github.com/koekeishiya/yabai) by completing the following steps:
 
@@ -99,7 +101,7 @@ sudo yabai --load-sa
     brew services restart yabai
     ```
 
-### skhd
+### Installing skhd
 
 To configure hotkeys that allow you to manipulate windows managed by yabai in a similar fashion to i3 or dwm, you need to install and set up skhd by completing the following steps:
 
@@ -147,5 +149,10 @@ If you have a coding background, you might already be familiar with color themes
     
 - [Origin story and context](https://www.protocol.com/workplace/dracula-color-scheme)
 - [Benefits and reasons](https://ui.draculatheme.com/principles)
+
+In short, some of the benefits of changing color themes include:
+
+- Improved accessibility (some themes are tested agains Web Content Accessibility Guidelines)
+- Improved consistency (allowing you recognize specific content faster based on shared color)
     
 [This website](https://stolostron.github.io/rhacm-docs/) uses the [Catppuccin](https://github.com/catppuccin) pastel theme. You can personalize your machine with the same theme by visiting the [Catppuccin repository](https://github.com/catppuccin/catppuccin) and following the provided steps for the software, tools, or websites you want to customize. You can find additional styles in our [dotfiles/css](https://github.com/oafischer/dotfiles/blob/main/css/) repo.
