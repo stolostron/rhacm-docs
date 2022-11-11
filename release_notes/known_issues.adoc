@@ -943,12 +943,6 @@ When modifying an existing configuration policy, `DeleteAll` or `DeleteIfCreated
 [#backup-known-issues]
 == Backup and restore known issues
 
-[#no-backup-power-z]
-=== Backup and restore feature does not work on IBM Power and IBM Z
-//2.4:17229
-
-The backup and restore feature for the hub cluster requires the OpenShift API for Data Protection (OADP) operator. The OADP operator is not available on the IBM Power or IBM Z architectures.
-
 [#backup-collision]
 === Avoid backup collision
 //2.5:19469
@@ -977,22 +971,18 @@ See link:../backup_restore/backup_restore_enable.adoc#enable-backup-and-restore[
 [#restore-limitations]
 === Velero restore limitations
 
-View the following restore limitations:
+A new hub cluster can have a different configuration than the active hub cluster if the new hub cluster where the data is restored has user-created resources. For example, this can include an existing policy that was created on the new hub cluster before the backup data is restored on the new hub cluster.
 
-* The new hub cluster is not identical to the initial hub cluster, where the data is restored, when there is an existing policy on the new hub cluster before the backup data is restored on the initial hub cluster. The policy should not be running on the new hub cluster since this is a policy that is unavailable with the backup resources.
+Velero skips existing resources if they are not part of the restored backup, so the policy on the new hub cluster remains unchanged, resulting in a different configuration between the new hub cluster and active hub cluster.
 
-* Since Velero skips existing resources, the policy on the new hub cluster is unchanged. Therefore, the policy is not the same as the one backed up on the initial hub cluster.
-
-* The new hub cluster has a different configuration from the active hub cluster when a user reapplies the backup on the new hub cluster. Since there is an existing policy on the hub cluster from a previous restore, it is not restored again. Even when the backup contains the expected updates, the policy contents are not updated by Velero on the new hub cluster. 
-
-To address the previously mentioned limitations, when a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning the hub cluster before Velero restore begins. 
+To address this limitation, the cluster backup and restore operator runs a post restore operation to clean up the resources created by the user or a different restore operation when a `restore.cluster.open-cluster-management.io` resource is created.
 
 For more information, see _Clean the hub cluster before restore_ in the link:../backup_restore/backup_restore_enable.adoc#enable-backup-and-restore[Enabling the backup and restore operator] topic.
 
 [#imported-clusters-not-displayed]
-=== Imported managed clusters are not displayed
+=== Passive configurations do not display managed clusters
 
-Managed clusters that are manually imported on the primary hub cluster show only when the activation data is restored on the passive hub cluster.
+Managed clusters are only displayed when the activation data is restored on the passive hub cluster.
 
 [#upgrade-limitation]
 === Cluster backup and restore upgrade limitation
@@ -1083,6 +1073,11 @@ spec:
 +
 When a cluster is imported on the hub cluster, the `apiserver` is only set up automatically on {ocp-short} clusters. You must set the `apiserver` manually on other types of managed clusters, such as EKS clusters, otherwise the automatic import feature ignores the clusters. As a result, the clusters remain in the `Pending Import` state when you move them to the restore hub cluster.
 
+[#imported-managed-clusters-pending-import]
+=== Imported managed clusters show a Pending Import status
+//2.7:26797
+
+Managed clusters that are manually imported on the primary hub cluster show a `Pending Import` status when the activation data is restored on the passive hub cluster. For more information, see link:../backup_restore/manage_backup_restore.adoc#auto-connect-clusters-msa[Automatically connecting clusters by using a Managed Service Account (Technology Preview)].
 
 [#submariner-known-issues]
 == Submariner known issues
