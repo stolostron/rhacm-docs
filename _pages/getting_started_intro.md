@@ -5,9 +5,9 @@ permalink: /getting_started_intro
 horizontal: false
 ---
 
-We (the documentation squad) are part of the ACM team and are responsible for documenting Red Hat Advanced Cluster Management for Kubernetes. We also work on a variety of other tasks, such as reviewing and editing technical blogs, reviewing UI content with designers, and resolving bugs and issues by using agile scrum techniques. We use the `squad:doc` label as an identifier on platforms like GitHub.
+We (the documentation squad) are part of the ACM team and are responsible for documenting Red Hat Advanced Cluster Management for Kubernetes. We also work on a variety of other tasks, such as reviewing and editing technical blogs, reviewing UI content with designers, and resolving bugs and issues by using agile scrum techniques. We use the `squad:doc` label as an identifier on platforms like GitHub and work closely with developers to maintain the documentation.
 
-We work closely with developers to maintain the documentation. Please see the ACM Playbook for details about how to work as part of the ACM team. The ACM Playbook also includes the link to a general onboarding guide. This website primarily serves as internal documentation for us (`squad:doc`). It outlines our work processes and standards. That being said, other ACM team members might find the resources and information listed on this website useful as well.
+**Important:** Please see the ACM Playbook for details about how to work as part of the ACM team. The ACM Playbook also includes the link to a general onboarding guide. This website primarily serves as internal documentation for us (`squad:doc`). It outlines our work processes and standards. That being said, other ACM team members might find the resources and information listed on this website useful as well.
 
 ## Hardware
 
