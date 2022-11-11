@@ -152,7 +152,7 @@ If you have a coding background, you might already be familiar with color themes
 
 In short, some of the benefits of changing color themes include:
 
-- Improved accessibility (some themes are tested agains Web Content Accessibility Guidelines)
+- Improved accessibility (some themes are tested against Web Content Accessibility Guidelines)
 - Improved consistency (allowing you recognize specific content faster based on shared color)
     
 [This website](https://stolostron.github.io/rhacm-docs/) uses the [Catppuccin](https://github.com/catppuccin) pastel theme. You can personalize your machine with the same theme by visiting the [Catppuccin repository](https://github.com/catppuccin/catppuccin) and following the provided steps for the software, tools, or websites you want to customize. You can find additional styles in our [dotfiles/css](https://github.com/oafischer/dotfiles/blob/main/css/) repo.
