@@ -111,6 +111,10 @@ Use the following modals only in the manner described by the IBM style guide:
 
 * May: Indicates permission, but it is better to use "can" or "might".
 
+## IP addresses
+
+Do not include public IP addresses from test clusters in the documentation. You can use private IP addresses where necessary.
+
 ## Supplemental resources
 
 * https://www.namingthings.co/naming-things-principles
