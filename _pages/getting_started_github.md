@@ -51,8 +51,6 @@ Git refers to the Git CLI. See [Here are all the Git commands I used last week, 
 - `git push`: Push your changes upstream.
    **Note:** You must create PRs from the GitHub website after pushing your branch.
 
-**Tip:** See our [cheat sheet](cheat_github.md) for a complete, chronological rundown of the Git commands and processes we use from start to finish when working on an issue.
-
 Remember, we try to keep our process simple, streamlined, and efficient. Git has many powerful and potentially dangerous commands. Our motto is:
 
 _We git pull, git add, git commit, and git push. We don't git crazy._
