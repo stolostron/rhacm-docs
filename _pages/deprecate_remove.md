@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Deprecations and discontinuation strategy
+title: Deprecating and removing
 permalink: /deprecate_remove
 horizontal: false
 ---
