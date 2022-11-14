@@ -1,7 +1,7 @@
 ---
 layout: page
 title: GitHub issue points
-permalink: arch_points
+permalink: issue_points
 horizontal: false
 ---
 
