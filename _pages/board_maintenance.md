@@ -5,9 +5,9 @@ permalink: board_maintenance
 horizontal: false
 ---
 
-As the primary board focal, the lead needs to know everyone's commitment in order to speak truthfully about the team's effort, priorities, and sprint planning. Everyone helps maintain their issues with the following guidance:
+As the primary board focal, the lead needs to know everyone's commitment in order to speak truthfully about the team's effort, priorities, and sprint planning. Everyone helps maintain their issues or Jira bugs with the following guidance:
 
-## New issues
+## New issues (ZenHub to phase out, replace with Jira)
 
   - Unassigned and untriaged issues remain in `untriaged` column until acknowledged within a day or so, or if they cannot be worked due to insufficient info. Lead or doc focal will request more info in these cases.
   - Issues need to be labeled properly (dev squad label if it is release work, requires dev team validations, or is a cross squad issue).
@@ -57,6 +57,13 @@ As the primary board focal, the lead needs to know everyone's commitment in orde
   - Add the `Learning/Discovery' and 'squad-doc' label.
   - Assign the next two sprints to the learning issue.
   - Use the learning issue for many purposes, including learning, development, training, experimentation, and other work that you would like to complete but feel like you don't get time to. 
+
+## Jira 
+
+Starting in 2.7, the documentation team accepts bugs in Jira.
+  - Sprint planning requires looking at both scrum boards, GH and Jira.
+  - The Jira board is configured using status and component first.
+  - This is a WIP for 2.7.
   
 
   
