@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Branching strategy
-permalink: /arch_branching
+permalink: /branch_strategy
 horizontal: false
 ---
 
