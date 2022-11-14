@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Branching strategy
+title: Branch strategy
 permalink: /branch_strategy
 horizontal: false
 ---
