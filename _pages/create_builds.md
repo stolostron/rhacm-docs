@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Create builds for a new version
+title: Creating builds
 permalink: /create_builds
 horizontal: false
 ---

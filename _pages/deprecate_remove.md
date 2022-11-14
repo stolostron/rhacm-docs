@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Deprecations and discontinuation strategy
-permalink: /plan_deprecation
+title: Deprecating and removing
+permalink: /deprecate_remove
 horizontal: false
 ---
 

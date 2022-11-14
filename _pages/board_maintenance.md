@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Board maintenance
+title: Maintaining scrum board
 permalink: board_maintenance
 horizontal: false
 ---
