@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Refreshing builds
-permalink: arch_builds
+permalink: refresh_builds
 horizontal: false
 ---
 
