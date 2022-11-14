@@ -1,29 +1,29 @@
 ---
 layout: page
-title: Architecture
-permalink: /arch_main
+title: Building
+permalink:
 nav: true
 nav_order: 2
 dropdown: true
 children:
     - title: Refreshing builds
-      permalink: /arch_builds
+      permalink: /refresh_builds
     - title: divider
     - title: Creating builds
       permalink: /create_builds
     - title: divider
-    - title: Branching strategy
-      permalink: /arch_branching
+    - title: Branch strategy
+      permalink: /branch_strategy
     - title: divider
-    - title: Creating books
-      permalink: /new_guide_setup
+    - title: Creating guides
+      permalink: /new_guide
     - title: divider
-    - title: Deprecations
-      permalink: /plan_deprecation
+    - title: Deprecating and removing
+      permalink: /deprecate_remove
     - title: divider
-    - title: Board maintenance
+    - title: Maintaining scrum board
       permalink: /board_maintenance
     - title: divider
     - title: Issue points
-      permalink: /arch_points
+      permalink: /issue_points
 ---
