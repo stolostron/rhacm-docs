@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Creating and renaming books and guides
+title: Creating guides
 permalink: /new_guide
 horizontal: false
 ---
