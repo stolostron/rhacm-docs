@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Creating and renaming books and guides
-permalink: /new_guide_setup
+permalink: /new_guide
 horizontal: false
 ---
 
