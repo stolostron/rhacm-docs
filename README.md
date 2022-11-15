@@ -1,4 +1,4 @@
-# RHACM doc process
+# RHACM internal doc process
 
 - [Internal Documentation](https://stolostron.github.io/rhacm-docs)
 
@@ -93,13 +93,13 @@ Copy and paste the server address into your browser and hit enter. If your websi
 
 To publish your new website, see [Deployment](/README.md#Deployment) for more details.
 
-# Maintaining
+# Maintaining and updating
 
-You can make changes to the content on the website by editing the Markdown files in __pages_. You can also add new topics, tabs, and cards to the website using Markdown files. GitHub Pages will automatically update the site when changes are detected in the repository.
+You can make changes to the content on the website by editing the Markdown files in `__pages_`. You can also add new topics, tabs, and cards to the website using Markdown files. GitHub Pages will automatically update the site when changes are detected in the repository.
 
 ## Add new topic
 
-1. Create a new Markdown file in the __pages_ folder.
+1. Create a new Markdown file in the `__pages_` folder.
 2. Add the following template:
 ```
 ---
@@ -114,7 +114,7 @@ horizontal: false
 
 ## Add new tab
 
-1. Create a new Markdown file in the __pages_ folder.
+1. Create a new Markdown file in the `__pages_` folder.
 2. Name the file `tab#.md`. Replace `#` with an integer.
 3. Add the following template:
 ```
@@ -133,7 +133,7 @@ dropdown: false
 
 ## Add new dropdown tab
 
-1. Create a new Markdown file in the __pages_ folder.
+1. Create a new Markdown file in the `__pages_` folder.
 2. Name the file `dropdown#.md`. Replace `#` with an integer.
 3. Add the following template:
 ```
@@ -156,7 +156,7 @@ children:
 
 ## Add new link card
 
-1. Create a new Markdown file in the __projects_ folder.
+1. Create a new Markdown file in the `__projects_` folder.
 2. Add the following template:
 ```
 ---
@@ -224,7 +224,7 @@ Run the following command to build your website for other hosting options beside
 ```bash
 $ bundle exec jekyll build
 ```
-The previous command will create or update static HTML files for other hosting platforms in the __site_ folder.
+The previous command will create or update static HTML files for other hosting platforms in the `__site_` folder.
 
 **Note:** Correctly set the `url` and `baseurl` fields in `_config.yml` before building the website. If you are deploying your website to `your-domain.com/your-project/`, you must set `url: your-domain.com` and `baseurl: /your-project/`. If you are deploing directly to `your-domain.com`, leave `baseurl` blank.
 
