@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Technical resources
-permalink: /resources_technical
+permalink: /technical_resources
 horizontal: false
 ---
 

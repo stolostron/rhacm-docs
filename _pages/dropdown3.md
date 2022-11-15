@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Writing
-permalink: /wr_main
+permalink:
 nav: true
 nav_order: 3
 dropdown: true
@@ -22,5 +22,10 @@ children:
       permalink: /wr_special_tag_guidance
     - title: divider
     - title: Style resources
-      permalink: /resource_links
+      permalink: /style_resources
+    - title: UI content
+      permalink: /ui_content
+    - title: divider
+    - title: UI writing
+      permalink: /ui_writing
 ---
