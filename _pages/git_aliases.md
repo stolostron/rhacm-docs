@@ -5,7 +5,7 @@ permalink: /git_aliases
 horizontal: false
 ---
 
-Git aliases allow you to customize git commands by essentially renaming them. Shortening longer commands can help you save time when typing.
+Git aliases allow you to customize `git commands by essentially renaming them. Shortening longer commands can help you save time when typing.
 
 ## Example
 
