@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Style resources
-permalink: /resource_links
+permalink: /style_resources
 horizontal: false
 ---
 

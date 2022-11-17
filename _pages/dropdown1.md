@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Get started
-permalink: /getting_started_main
+permalink:
 nav: true
 nav_order: 1
 dropdown: true
@@ -19,5 +19,5 @@ children:
       permalink: /images_guide
     - title: divider
     - title: Technical resources
-      permalink: /resources_technical
+      permalink: /technical_resources
 ---

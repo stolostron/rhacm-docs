@@ -1,30 +1,15 @@
 ---
 layout: page
-title: Advanced configuration
-permalink: /adv_config
+title: Installing a tiling window manager for macOS
+permalink: /installing_yabai
 horizontal: false
-render_with_liquid: false
 ---
 
-You can further customize your system with configurations that you might find helpful, though these are not required. These advanced configurations can be helpful in optimizing your personal preferences and workflow.
-
-## `zsh` show current branch
-
-By default, there is no indicator in the terminal prompt showing you which Git branch you are currently on. Using an indicator can help you avoid accidentally creating a new branch from the wrong base branch. It also saves you time by removing the need to frequently check your branch with the `git branch` command. To add the indicator, add the lines from the following link to your `.zshrc` file (located in your home directory):
-
-```
-https://github.com/oafischer/dotfiles/blob/main/zsh/zshrc
-```
-
-You can customize the colors using ANSI color codes and replace the command indicator with a unicode character of your choice, or use the traditional `$`.
-
-## Tiling window manager for macOS
-
-There are two tiling window manager options for macOS. Amethyst is limited, especially when it comes to working with multiple monitors, so yabai is a better option. The following two topics explain how to install and set up yabai:
+A tiling window manager can help you spend less time moving windows around by managing multiple windows for you. If you are coming from Linux, you might miss this option in macOS. For macOS, [Amethyst](https://github.com/ianyh/Amethyst) and [yabai](https://github.com/koekeishiya/yabai) are the main options add this feature. yabai has more features and works better with multiple monitors.
 
 ### Installing yabai
 
-If you are used to a tiling window manager or want to spend less time managing multiple windows yourself, you can install [yabai](https://github.com/koekeishiya/yabai) by completing the following steps:
+You can install yabai by completing the following steps:
 
 1. When starting your Mac, press and hold the power button until `Loading startup options` appears.
 
@@ -103,7 +88,7 @@ sudo yabai --load-sa
 
 ### Installing skhd
 
-To configure hotkeys that allow you to manipulate windows managed by yabai in a similar fashion to i3 or dwm, you need to install and set up skhd by completing the following steps:
+To configure hotkeys that allow you to manipulate windows managed by yabai (as is common with tiling window managers), you need to install and set up skhd by completing the following steps:
 
 1. Run the following command to install skhd:
 
@@ -133,26 +118,3 @@ To configure hotkeys that allow you to manipulate windows managed by yabai in a 
     brew services restart skhd
     ```
     
-## Useful macOS tools
-
-If you are using a MacBook, you might find the following tools useful:
-
-### Scroll reverser
-
-Set a separate scroll direction for the touchpad and external mouse.
-
-[Download](https://github.com/pilotmoon/Scroll-Reverser)
-
-## Color themes
-
-If you have a coding background, you might already be familiar with color themes. If not, the following resources provide some background information by using the [Dracula theme](https://ui.draculatheme.com/) as an example:
-    
-- [Origin story and context](https://www.protocol.com/workplace/dracula-color-scheme)
-- [Benefits and reasons](https://ui.draculatheme.com/principles)
-
-In short, some of the benefits of changing color themes include:
-
-- Improved accessibility (some themes are tested against Web Content Accessibility Guidelines)
-- Improved consistency (allowing you recognize specific content faster based on shared color)
-    
-[This website](https://stolostron.github.io/rhacm-docs/) uses the [Catppuccin](https://github.com/catppuccin) pastel theme. You can personalize your machine with the same theme by visiting the [Catppuccin repository](https://github.com/catppuccin/catppuccin) and following the provided steps for the software, tools, or websites you want to customize. You can find additional styles in our [dotfiles/css](https://github.com/oafischer/dotfiles/blob/main/css/) repo.

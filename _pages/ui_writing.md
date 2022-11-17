@@ -1,7 +1,7 @@
 ---
 layout: page
 title: UI writing guidance
-permalink: /ui_text_writing
+permalink: /ui_writing
 horizontal: false
 ---
 
