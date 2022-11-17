@@ -11,8 +11,8 @@ Git aliases allow you to customize `git` commands by essentially renaming them. 
 
 The following command replaces the `checkout` command with `co`:
 
-    ```
+    
     git config --global alias.co checkout
-    ```
+    
 
 See [Git Basics - Git Aliases](https://git-scm.com/book/en/v2/Git-Basics-Git-Aliases) for more information.
