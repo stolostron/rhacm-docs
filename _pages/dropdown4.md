@@ -9,7 +9,7 @@ children:
     - title: Zsh customization
       permalink: /zsh_customization
     - title: divider
-      title: Git aliases
+    - title: Git aliases
       permalink: /git_aliases
     - title: divider
     - title: macOS tools
