@@ -23,6 +23,7 @@ children:
     - title: divider
     - title: Style resources
       permalink: /style_resources
+    - title: divider
     - title: UI content
       permalink: /ui_content
     - title: divider
