@@ -358,6 +358,66 @@ An _in-place_ upgrade directly updates the operating systems of the instances. T
 
 After you create a node pool, you cannot change the upgrade type. If you want to change the upgrade type, create a node pool and delete the other one. Replace upgrades do not preserve any manual changes because the node is re-provisioned entirely. In-place upgrades can preseve manual changes, but will report errors if you made manual changes to any file system or operating system configuration that the cluster directly manages, such as kubelet certificates.
 
+[#deploying-sr-iov]
+== Deploying the SR-IOV Operator
+
+After you configure and deploy the hosting service cluster, you can create a subscription to the SR-IOV Operator on a hosted cluster. The SR-IOV pod runs on workers rather than control planes.
+
+. Create a namespace and an operator group:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-sriov-network-operator
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: sriov-network-operators
+  namespace: openshift-sriov-network-operator
+spec:
+  targetNamespaces:
+  - openshift-sriov-network-operator
+----
+
+. Create a subscription to the SR-IOV Operator: 
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: sriov-network-operator-subsription
+  namespace: openshift-sriov-network-operator
+spec:
+  channel: "4.12"
+  name: sriov-network-operator
+  config:
+    nodeSelector:
+      node-role.kubernetes.io/worker: ""
+  source: s/qe-app-registry/redhat-operators
+  sourceNamespace: openshift-marketplace
+----
+
+. To verify that the SR-IOV Operator is ready, run the following command and view the resulting output:
++
+----
+# oc get csv -n openshift-sriov-network-operator
+----
++
+----
+NAME                                         DISPLAY                   VERSION               REPLACES                                     PHASE
+sriov-network-operator.4.12.0-202211021237   SR-IOV Network Operator   4.12.0-202211021237   sriov-network-operator.4.12.0-202210290517   Succeeded
+----
+
+. To verify that the SR-IOV pods are deployed, run the following command:
++
+----
+oc get pods -n openshift-sriov-network-operator
+----
+
 [#hosting-service-cluster-access]
 == Accessing a hosting service cluster
 
