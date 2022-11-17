@@ -5,7 +5,7 @@ permalink: /installing_yabai
 horizontal: false
 ---
 
-A tiling window manager can help you spend less time moving windows around by managing multiple windows for you. If you are coming from Linux, you might miss this option in macOS. For macOS, [Amethyst](https://github.com/ianyh/Amethyst) and [yabai](https://github.com/koekeishiya/yabai) are the main options add this feature. yabai has more features and works better with multiple monitors.
+A tiling window manager can help you spend less time moving windows around by managing multiple windows for you. If you are coming from Linux, you might miss this option in macOS. [Amethyst](https://github.com/ianyh/Amethyst) and [yabai](https://github.com/koekeishiya/yabai) are the main options for macOS to add this feature. yabai has more features and works better with multiple monitors.
 
 ### Installing yabai
 
