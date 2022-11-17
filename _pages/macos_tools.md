@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Useful macOS tools
-permalink: /adv_config
+permalink: /macos_tools
 horizontal: false
 ---
 
