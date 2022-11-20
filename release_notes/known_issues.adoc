@@ -677,7 +677,6 @@ spec:
 However, this configuration might never create the Ansible instance, since the `spec.placement.local:true` has the subscription running on `standalone` mode. You need to create the subscription in hub mode. 
 
 . Create a placement rule that deploys to `local-cluster`. See the following sample:
-
 +
 [source,yaml]
 ----
@@ -693,7 +692,6 @@ spec:
 ----
 
 . Reference that placement rule in your subscription. See the following:
-
 +
 [source,yaml]
 ----
@@ -756,23 +754,16 @@ If you cannot verify, attempt to import the cluster again and verify again.
 
 Learn about {ocp} SCC at https://docs.openshift.com/container-platform/4.8/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth[Managing Security Context Constraints (SCC)], which is an additional configuration required on the managed cluster.
 
-Different deployments have different security context and different service accounts.
-The subscription operator cannot create an SCC automatically.
-Administrators control permissions for pods.
-A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace:
+Different deployments have different security context and different service accounts. The subscription operator cannot create an SCC CR automatically.. Administrators control permissions for pods. A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace. To manually create an SCC CR in your namespace, complete the following steps:
 
-To manually create an SCC CR in your namespace, complete the following:
-
-. Find the service account that is defined in the deployments.
-For example, see the following `nginx` deployments:
+. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
 +
 ----
- nginx-ingress-52edb
- nginx-ingress-52edb-backend
+nginx-ingress-52edb
+nginx-ingress-52edb-backend
 ----
-
-. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts.
-See the following example where `kind: SecurityContextConstraints` is added:
++
+. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example, where `kind: SecurityContextConstraints` is added:
 +
 [source,yaml]
 ----
@@ -850,23 +841,11 @@ See the following limitations to various _Application_ tables in the console:
 
 The _Console_ and _Topology_ for _Application_ changes for the {product-version}. There is no filtering capability from the console Topology page.
 
-[#appset-resources-no-topolgy]
-=== ApplicationSet resources do not show status in topology
-// 2.5:22760
-
-When you create `ApplicationSet` applications that deploy resources to a different namespace than the namespace defined in the `ApplicationSet` YAML, the resource status does not appear in the topology.
-
 [#allow-deny-list-not-working-objectstorage-app]
 === Allow and deny list does not work in Object storage applications
 // 2.6:25445
 
 The `allow` and `deny` list feature does not work in Object storage application subscriptions.
-
-[#appset-topology-status-icon-spinning]
-=== ApplicationSet topology status icon spins continuously
-// 2.6:25301
-
-The `ApplicationSet` topology status icon spins continuously if an `ApplicationSet` application is deployed, but has no associated Argo applications.
 
 [#unsupported-ocp-versions-listed-after-upgrade]
 === Unsupported {ocp-short} versions listed after hub cluster upgrade
@@ -943,12 +922,6 @@ When modifying an existing configuration policy, `DeleteAll` or `DeleteIfCreated
 [#backup-known-issues]
 == Backup and restore known issues
 
-[#no-backup-power-z]
-=== Backup and restore feature does not work on IBM Power and IBM Z
-//2.4:17229
-
-The backup and restore feature for the hub cluster requires the OpenShift API for Data Protection (OADP) operator. The OADP operator is not available on the IBM Power or IBM Z architectures.
-
 [#backup-collision]
 === Avoid backup collision
 //2.5:19469
@@ -968,7 +941,7 @@ NAMESPACE       NAME               PHASE             MESSAGE
 openshift-adp   schedule-hub-1   BackupCollision   Backup acm-resources-schedule-20220301234625, from cluster with id [be97a9eb-60b8-4511-805c-298e7c0898b3] is using the same storage location. This is a backup collision with current cluster [1f30bfe5-0588-441c-889e-eaf0ae55f941] backup. Review and resolve the collision then create a new BackupSchedule resource to  resume backups from this cluster.
 ----
 
-Avoid backup collisions by setting the `BackupSchedule.cluster.open-cluster-management.io` resource `status` to `BackupCollision`. The `Schedule.velero.io` resources that are created by the `BackupSchedule` resource are automatically deleted. 
+The controller avoids backup collisions by setting the `BackupSchedule.cluster.open-cluster-management.io` resource `status` to `BackupCollision`. The `Schedule.velero.io` resources that are created by the `BackupSchedule` resource are automatically deleted. 
 
 The backup collision is reported by the link:https://github.com/stolostron/cluster-backup-chart/blob/main/stable/cluster-backup-chart/templates/hub-backup-pod.yaml[`hub-backup-pod`] policy. The administrator must verify which hub cluster writes data to the storage location. Then remove the `BackupSchedule.cluster.open-cluster-management.io` resource from the passive hub cluster, and recreate a new `BackupSchedule.cluster.open-cluster-management.io` resource on the primary hub cluster to resume the backup.
 
@@ -976,23 +949,18 @@ See link:../backup_restore/backup_restore_enable.adoc#enable-backup-and-restore[
 
 [#restore-limitations]
 === Velero restore limitations
+A new hub cluster can have a different configuration than the active hub cluster if the new hub cluster, where the data is restored, has user-created resources. For example, this can include an existing policy that was created on the new hub cluster before the backup data is restored on the new hub cluster.
 
-View the following restore limitations:
+Velero skips existing resources if they are not part of the restored backup, so the policy on the new hub cluster remains unchanged, resulting in a different configuration between the new hub cluster and active hub cluster.
 
-* The new hub cluster is not identical to the initial hub cluster, where the data is restored, when there is an existing policy on the new hub cluster before the backup data is restored on the initial hub cluster. The policy should not be running on the new hub cluster since this is a policy that is unavailable with the backup resources.
-
-* Since Velero skips existing resources, the policy on the new hub cluster is unchanged. Therefore, the policy is not the same as the one backed up on the initial hub cluster.
-
-* The new hub cluster has a different configuration from the active hub cluster when a user reapplies the backup on the new hub cluster. Since there is an existing policy on the hub cluster from a previous restore, it is not restored again. Even when the backup contains the expected updates, the policy contents are not updated by Velero on the new hub cluster. 
-
-To address the previously mentioned limitations, when a `restore.cluster.open-cluster-management.io` resource is created, the cluster backup and restore operator runs a set of steps to prepare for restore by cleaning the hub cluster before Velero restore begins. 
+To address this limitation, the cluster backup and restore operator runs a post restore operation to clean up the resources created by the user or a different restore operation when a `restore.cluster.open-cluster-management.io` resource is created.
 
 For more information, see _Clean the hub cluster before restore_ in the link:../backup_restore/backup_restore_enable.adoc#enable-backup-and-restore[Enabling the backup and restore operator] topic.
 
 [#imported-clusters-not-displayed]
-=== Imported managed clusters are not displayed
+=== Passive configurations do not display managed clusters
 
-Managed clusters that are manually imported on the primary hub cluster show only when the activation data is restored on the passive hub cluster.
+Managed clusters are only displayed when the activation data is restored on the passive hub cluster.
 
 [#upgrade-limitation]
 === Cluster backup and restore upgrade limitation
@@ -1067,7 +1035,7 @@ The following situations can prevent the managed cluster from being automaticall
 - The auto import operation fails when starting a restore operation while the token is valid but the managed cluster is not accessible. The auto import operation does not try to reconnect. The auto import component log reports import operation failures.
 
 - Since the `auto-import-secret` created on restore uses the `ManagedServiceAccount` token to connect to the managed cluster, the managed cluster must also provide the kube `apiserver` information. The `apiserver` must be set on the `ManagedCluster` resource. See the following example:
-+
+
 [source,yaml]
 ----
 apiVersion: cluster.open-cluster-management.io/v1
@@ -1080,9 +1048,14 @@ spec:
   managedClusterClientConfigs:
       url: <apiserver>
 ----
-+
+
 When a cluster is imported on the hub cluster, the `apiserver` is only set up automatically on {ocp-short} clusters. You must set the `apiserver` manually on other types of managed clusters, such as EKS clusters, otherwise the automatic import feature ignores the clusters. As a result, the clusters remain in the `Pending Import` state when you move them to the restore hub cluster.
 
+[#imported-managed-clusters-pending-import]
+=== Imported managed clusters show a Pending Import status
+//2.7:26797
+
+Managed clusters that are manually imported on the primary hub cluster show a `Pending Import` status when the activation data is restored on the passive hub cluster. For more information, see link:../backup_restore/manage_backup_restore.adoc#auto-connect-clusters-msa[Automatically connecting clusters by using a Managed Service Account (Technology Preview)].
 
 [#submariner-known-issues]
 == Submariner known issues

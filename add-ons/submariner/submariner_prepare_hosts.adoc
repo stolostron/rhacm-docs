@@ -28,6 +28,7 @@ To prepare bare metal clusters for deploying Submariner, complete the following 
 . Ensure that the IPsec NATT and VXLAN ports are open.
 
 . Customize and apply YAML content that is similar to the following example:
+
 +
 [source,yaml]
 ----
@@ -39,12 +40,117 @@ metadata:
 spec:{}
 ----
 +
-Replace `managed-cluster-namespace` with the namespace of your managed cluster.
-+
-*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
+Replace `managed-cluster-namespace` with the namespace of your managed cluster. The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
 +
 This configuration uses the default network address translation - traversal (NATT) port (4500/UDP) for your Submariner and one worker node is labeled as the Submariner gateway on your bare metal cluster.
 +
 Submariner uses IP security (IPsec) to establish the secure tunnels between the clusters on the gateway nodes. You can either use the default IPsec NATT port, or you can specify a different port that you configured. When you run this procedure without specifying an IPsec NATT port of 4500/UDP is automatically used for the communication.
 
 See xref:../submariner/submariner_customizations.adoc#submariner-customizations[Customizing Submariner deployments] for information about the customization options. 
+
+[#preparing-aro]
+== Preparing Microsoft Azure Red Hat OpenShift for Submariner (Technology Preview)
+
+The Microsoft Azure Red Hat OpenShift service combines various tools and resources to help simplify the process of building container-based applications. To prepare Azure Red Hat OpenShift clusters for deploying Submariner, complete the following steps:
+
+. Download the link:https://aka.ms/az-aroext-latest.whl[Python wheel and CLI extension].
+
+. From the Azure CLI, run the following command to install the extension:
++
+----
+az extension add --upgrade -s <path-to-extension>
+----
++
+Replace `path-to-extension` with the path to where you downloaded the `.whl` extension file.
+
+. Run the following command to verify that the CLI extension is being used:
++
+----
+az extension list
+----
++
+If the extension is being used, the output might resemble the following example:
++
+----
+"experimental": false,
+"extensionType": "whl",
+"name": "aro",
+"path": "<path-to-extension>",
+"preview": true,
+"version": "1.0.x"
+----
+
+. From the Azure CLI, register the preview feature by running the following command:
++
+----
+az feature registration create --namespace Microsoft.RedHatOpenShift --name AdminKubeconfig
+----
+
+. Retrieve the administrator `kubeconfig` by running the following command:
++
+----
+az aro get-admin-kubeconfig -g <resource group> -n <cluster resource name>
+----
++
+*Note:* The `az aro` command saves the `kubeconfig` to the local directory and uses the name `kubeconfig`. To use it, set the environment variable `KUBECONFIG` to match the path of the file. See the following example:
++
+----
+export KUBECONFIG=<path-to-kubeconfig>
+oc get nodes
+----
+
+. Label one of the nodes as a Gateway node by running the following command:
++
+----
+oc label nodes <node_name> submariner.io/gateway=true
+----
++
+Replace `node_name` with the name of the node.
+
+. Import your Azure Red Hat OpenShift cluster to your cluster list by selecting *Infrastructure* > *Clusters* > *Import cluster* from the {product-title-short} console.
+
+. Select the `Kubeconfig` *Import mode* and enter the content from your `kubeconfig` file in the *Kubeconfig* window. Follow the instructions in the console to complete the import.
++
+You can verify that your Azure Red Hat OpenShift cluster was imported successfully by navigating to *Infrastructure* > *Clusters*.
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* and select the name of the cluster set that you want to add. Then, click the *Submariner add-ons* tab. 
+
+. Click the *Install Submariner add-ons* button and set your Azure Red Hat OpenShift cluster as your *Target clusters*. Follow the instructions in the console to complete the install.
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* > *Submariner add-ons* to verify that your Azure Red Hat OpenShift cluster *Connection status* is `Healthy`.
+
+[#preparing-rosa]
+== Preparing Red Hat OpenShift Service on AWS for Submariner (Technology Preview)
+
+Red Hat OpenShift Service on AWS (ROSA) provides a stable and flexible platform for application development and modernization. To prepare ROSA clusters for deploying Submariner, complete the following steps:
+
+. Create a new node to run Submariner gateway by running the following command:
++
+----
+rosa create machinepool --cluster=<cluster_name> --name=sm-gw-mp --replicas=<number of Submariner gateway > --labels='submariner.io/gateway=true'
+----
+
+. Log in to ROSA by running the following commands:
++
+----
+rosa login
+oc login <rosa-cluster-url>:6443 --username cluster-admin --password <password>
+----
+
+. Create a `kubeconfig` for your ROSA cluster by running the following command:
++
+----
+oc config view --flatten=true > rosa_kube/kubeconfig
+----
+
+. Import your ROSA cluster to your cluster list by selecting *Infrastructure* > *Clusters* > *Import cluster* from the {product-title-short} console.
+
+. Select the `Kubeconfig` *Import mode* and enter the content from your `kubeconfig` file in the *Kubeconfig* window. Follow the instructions in the console to complete the import.
++
+You can verify that your ROSA cluster was imported successfully by navigating to *Infrastructure* > *Clusters*.
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* and select the name of the cluster set that you want to add. Then, click the *Submariner add-ons* tab. 
+
+. Click the *Install Submariner add-ons* button and set your ROSA cluster as your *Target clusters*. Follow the instructions in the console to complete the installation.
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* > *Submariner add-ons* to verify that your ROSA cluster *Connection status* is `Healthy`.
