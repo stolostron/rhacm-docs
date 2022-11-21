@@ -16,10 +16,6 @@ The policy generator and its integration with the {product-title-short} applicat
 View the following topics to for more information:
 
 * <<policy-generator-configuration,Policy generator configuration structure>>
-//this is a large PR, PTO is coming up, and GA around the corner so commenting my suggestion so that I don't forget
-//To improve architecture of this doc, let's make this easier to read by moving the Generating a policy to install an Operator section + subsections to its own file
-//I also plan to add a reference link to the new file at the end of this file
-//holding off on this change bc links can become broken when creating a new file (file not added to main.adoc, misspelled file name, wrong folder, wrong syntax, etc. 
 * <<policy-gen-install-operator,Generating a policy to install an Operator>>
 ** <<policy-install-ocp-gitops,A policy to install OpenShift GitOps>>
 ** <<policy-gen-install-compliance-operator,A policy to install the Compliance Operator>>
@@ -559,7 +555,7 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | Optional
 | If multiple policies use the same placement, this name is used to generate a unique name for the resulting `PlacementBinding`, binding the placement with the array of policies that reference it.
 
-|*`policyDefaults`*
+| *`policyDefaults`*
 | Required
 | Any default value listed here is overridden by an entry in the policies array except for `namespace`.
 
@@ -615,6 +611,66 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | Optional
 | Use the parameters `compliant` and `noncompliant` to specify the frequency for a policy to be evaluated when in a particular compliance state. When managed clusters have low CPU resources, the evaluation interval can be increased to reduce CPU usage on the Kubernetes API. These are in the format of durations. For example, `"1h25m3s"` represents 1 hour, 25 minutes, and 3 seconds. These can also be set to "never" to avoid evaluating the policy after it has become a particular compliance state.
 
+| *`policyDefaults.dependencies`*
+| Optional
+| A list of objects that must be in specific compliance states before this policy is applied. Cannot be specified when `policyDefaults.orderPolicies` is set to `true`.
+
+| `policyDefaults.dependencies[].name`
+| Required
+| The name of the object being depended on.
+
+| `policyDefaults.dependencies[].namespace`
+| Optional
+| The namespace of the object being depended on. The default is the namespace of policies set for the policy generator.
+
+| `policyDefaults.dependencies[].compliance`
+| Optional
+| The compliance state the object needs to be in. The default value is `Compliant`.
+
+| `policyDefaults.dependencies[].kind`
+| Optional
+| The kind of the object. By default, the kind is set to `Policy`, but can also be other kinds that have compliance state, such as `ConfigurationPolicy`.
+
+| `policyDefaults.dependencies[].apiVersion`
+| Optional
+| The API version of the object. The default value is `policy.open-cluster-management.io/v1`.
+
+| *`policyDefaults.extraDependencies`*
+| Optional
+| A list of objects that must be in specific compliance states before this policy is applied. The dependencies that you define are added to each policy template (for example, `ConfigurationPolicy`) separately from the `dependencies` list. Cannot be specified when `policyDefaults.orderManifests` is set to `true`.
+
+| `policyDefaults.extraDependencies[].name`
+| Required
+| The name of the object being depended on.
+
+| `policyDefaults.extraDependencies[].namespace`
+| Optional
+| The namespace of the object being depended on. By default, the value is set to the namespace of policies set for the policy generator.
+
+| `policyDefaults.extraDependencies[].compliance`
+| Optional
+| The compliance state the object needs to be in. The default value is `Compliant`.
+
+| `policyDefaults.extraDependencies[].kind`
+| Optional
+| The kind of the object. The default value is to `Policy`, but can also be other kinds that have a compliance state, such as `ConfigurationPolicy`.
+
+| `policyDefaults.extraDependencies[].apiVersion`
+| Optional
+| The API version of the object. The default value is `policy.open-cluster-management.io/v1`.
+
+| `policyDefaults.ignorePending`
+| Optional
+| Bypass compliance status checks when the policy generator is waiting for its dependencies to reach their desired states. The default value is `false`.
+
+| `policyDefaults.orderPolicies`
+| Optional
+| Automatically generate `dependencies` on the policies so they are applied in the order you defined in the policies list. By default, the value is set to `false`. Cannot be specified at the same time as `policyDefaults.dependencies`.
+
+| `policyDefaults.orderManifests`
+| Optional
+| Automatically generate `extraDependencies` on policy templates so that they are applied in the order you defined in the manifests list for that policy. Cannot be specified when `policyDefaults.consolidateManifests` is set to `true`. Cannot be specified at the same time as `policyDefaults.extraDependencies`.
+
 | `policyDefaults.consolidateManifests`
 | Optional
 | This determines if a single configuration policy is generated for all the manifests being wrapped in the policy. If set to `false`, a configuration policy per manifest is generated. The default value is `true`.
@@ -669,7 +725,7 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | *`policies`*
 | Required. 
-| The list of policies to create along with overrides to either the default values, or the values that are set in `policyDefaults`.
+| The list of policies to create along with overrides to either the default values, or the values that are set in `policyDefaults`. See `policyDefaults` for additional fields and descriptions.
 
 | `policies[].name`
 | Required
@@ -677,19 +733,15 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | *`policies[].manifests`*
 | Required
-| The list of Kubernetes object manifests to include in the policy.
+| The list of Kubernetes object manifests to include in the policy, along with overrides to either the default values, the values set in this `policies` item, or the values set in `policyDefaults`. See `policyDefaults` for additional fields and descriptions. When `consolidateManifests` is set to `true`, only `complianceType` and `metadataComplianceType` can be overridden at the `policies[].manifests` level.
 
 | `policies[].manifests[].path`
 | Required
 | Path to a single file or a flat directory of files relative to the `kustomization.yaml` file.
 
-| `policies[].manifests[].complianceType`
-| Optional
-| Determines the policy controller behavior when comparing the manifest to objects on the cluster. The parameter values are `musthave`, `mustonlyhave`, or `mustnothave`. The default value is `musthave` (or the value set in `policyDefaults.complianceType`).
-
 | `policies[].manifests[].patches`
 | Optional
-| A Kustomize patch to apply to the manifest at the path. If there are multiple manifests, the patch requires the `apiVersion`, `kind`, `metadata.name`, and `metadata.namespace` (if applicable) fields to be set so Kustomize can identify the manifest that the patch applies to. If there is a single manifest, the `metadata.name` and `metadata.namespace` fields can be patched.
+| A list of Kustomize patches to apply to the manifest at the path. If there are multiple manifests, the patch requires the `apiVersion`, `kind`, `metadata.name`, and `metadata.namespace` (if applicable) fields to be set so Kustomize can identify the manifest that the patch applies to. If there is a single manifest, the `metadata.name` and `metadata.namespace` fields can be patched.
 
 | *`policySets`*
 | Optional
@@ -714,4 +766,3 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 Return to the xref:../governance/third_party_policy.adoc#integrate-third-party-policy-controllers[Integrate third-party policy controllers] documentation, or refer to the xref:../governance/grc_intro.adoc#governance[Governance] documentation for more topics.
 
-//Add reference to new file at the end of this file 
