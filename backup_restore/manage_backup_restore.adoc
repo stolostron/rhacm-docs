@@ -1,7 +1,7 @@
 [#manage-backup-and-restore]
 = Managing the backup and restore operator
 
-The cluster backup and restore operator is not installed automatically. Enable the backup component by setting the `cluster-backup` parameter to `true`, in the `MultiClusterHub` resource. The cluster backup operator is installed in the `open-cluster-management-backup` namespace, where {product-title-short} is installed. When you install the cluster backup operator, the OADP Operator is also automatically installed.
+The cluster backup and restore operator is not installed automatically. Enable the backup component by setting the `cluster-backup` parameter to `true`, in the `MultiClusterHub` resource. When enabled, the cluster backup and restore operator is installed in the `open-cluster-management-backup` namespace. When you install the cluster backup operator, the OADP Operator is also automatically installed in the same namespace as the cluster backup and restore operator.
 
 *Note*: If you have previously installed and used the OADP Operator on the hub cluster, in a namespace different from the backup component namespace, uninstall this version since the backup component works now with OADP installed in the component namespace. Use the same storage location for the link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-dataprotectionapplication-custom-resource[`DataProtectionApplication`] resource owned by the OADP Operator installed with the backup component; it accesses the same backup data as the previous operator. Velero backup resources are now loaded within the new OADP Operator namespace on this hub cluster.
 
@@ -153,7 +153,7 @@ apiVersion: operator.open-cluster-management.io/v1
           name: volsync
         - enabled: true
           name: multicluster-engine
-        - enabled: true <<<<<<<< 
+        - enabled: true
           name: cluster-backup
     separateCertificateManagement: false
 ----
@@ -193,7 +193,7 @@ View the following descriptions of the `backupschedule.cluster.open-cluster-mana
 . Check the status of your `backupschedule.cluster.open-cluster-management.io` resource, which displays the definition for the three `schedule.velero.io` resources. Run the following command:
 +
 ----
-oc get bsch -n open-cluster-management-backup
+oc get BackupSchedule -n open-cluster-management-backup
 ----
 
 . As a reminder, the restore operation is run on a different hub cluster for restore scenarios. To initiate a restore operation, create a `restore.cluster.open-cluster-management.io` resource on the hub cluster where you want to restore backups.
@@ -263,7 +263,7 @@ spec:
 After you create a `backupschedule.cluster.open-cluster-management.io` resource, run the following command to get the status of the scheduled cluster backups:
 
 ----
-oc get bsch -n open-cluster-management-backup
+oc get BackupSchedule -n open-cluster-management-backup
 ----
 
 The `backupschedule.cluster.open-cluster-management.io` resource creates six `schedule.velero.io` resources, which are used to generate backups. Run the following command to view the list of the backups that are scheduled:
@@ -333,6 +333,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Restore
 metadata:
   name: restore-acm
+  namespace: open-cluster-management-backup
 spec:
   veleroManagedClustersBackupName: latest
   veleroCredentialsBackupName: latest
@@ -393,6 +394,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Restore
 metadata:
   name: restore-acm-passive-sync
+  namespace: open-cluster-management-backup
 spec:
   syncRestoreWithNewBackups: true # restore again when new backups are available
   restoreSyncInterval: 10m # check for new backups every 10 minutes
@@ -415,6 +417,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Restore
 metadata:
   name: restore-acm-passive
+  namespace: open-cluster-management-backup
 spec:
   cleanupBeforeRestore: CleanupRestored
   veleroManagedClustersBackupName: skip
@@ -433,6 +436,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Restore
 metadata:
   name: restore-acm-passive-activate
+  namespace: open-cluster-management-backup
 spec:
   cleanupBeforeRestore: CleanupRestored
   veleroManagedClustersBackupName: latest
@@ -463,6 +467,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Restore
 metadata:
   name: restore-acm
+  namespace: open-cluster-management-backup
 spec:
   cleanupBeforeRestore: CleanupRestored
   veleroManagedClustersBackupName: latest
@@ -582,6 +587,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Restore
 metadata:
   name: restore-acm
+  namespace: open-cluster-management-backup
 spec:
   veleroManagedClustersBackupSchedule: latest
   veleroCredentialsBackupSchedule: latest
@@ -596,6 +602,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Restore
 metadata:
   name: restore-acm
+  namespace: open-cluster-management-backup
 spec:
   veleroManagedClustersBackupName: latest
   veleroCredentialsBackupName: skip
@@ -610,6 +617,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Restore
 metadata:
   name: restore-acm
+  namespace: open-cluster-management-backup
 spec:
   veleroManagedClustersBackupName: acm-managed-clusters-schedule-20210902205438
   veleroCredentialsBackupName: skip
@@ -628,7 +636,7 @@ spec:
 Use the following command to get information about restore events:
 
 ----
-oc describe -n <oadp-n> <restore-name>
+oc describe -n open-cluster-management-backup <restore-name>
 ----
 
 Your list of events might resemble the following sample:
