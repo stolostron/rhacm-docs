@@ -638,7 +638,7 @@ Argo `ApplicationSet` from the console cannot be deployed on 3.x {ocp-short} man
 
 The `application-manager` add-on that is running on the managed clusters is now handled by the subscription operator, when it was previously handled by the klusterlet operator. The subscription operator is not managed the `multicluster-hub`, so changes to the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap do not take effect automatically.
 
-If the image that is used by the subscription operator is overrided by changing the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap, the `application-manager` add-on on the managed clusters does not use the new image until the subscription operator pod is restarted. You need to restart the pod.
+If the image that is used by the subscription operator is overridden by changing the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap, the `application-manager` add-on on the managed clusters does not use the new image until the subscription operator pod is restarted. You need to restart the pod.
 
 [#policy-needs-subscription-admin]
 === Policy resource not deployed unless by subscription administrator
@@ -879,6 +879,38 @@ The stale `clusterImageSet` resources that are deployed by earlier versions befo
 
 ----
 oc delete clusterimageset img4.7.0-x86-64-appsub
+----
+
+[#cannot-remove-appsub-after-hub-restore]
+=== Cannot remove application subscription after restoring hub cluster to new hub cluster
+// 2.6:26931
+
+When you restore the hub cluster data to a new hub cluster, the existing application subscription on the managed cluster is not deleted, even after the managed cluster is removed from the placement cluster decision list.
+
+You can work around the issue by completing the following steps:
+
+. Navigate to the managed cluster.
+
+. Run the following command to get the orphan `AppliedManifestWork`:
++
+----
+oc get appsub -n <appsub NS> <appsub Name> -o yaml 
+----
++
+The output might resemble the following:
++
+----
+  ownerReferences:
+  - apiVersion: work.open-cluster-management.io/v1
+    kind: AppliedManifestWork
+    name: 6e01d06846c6ca2ac4ed6c9b0841e720af2de12a171108768f42285d7f873585-test-appsub-1-ns-git-app-1
+    uid: f69fe90b-7f5f-483a-86b2-dcd5e041321a
+----
+
+. Run the following command to delete the orphan `AppliedManifestWork`, which also deletes the application subscription:
++
+----
+oc delete AppliedManifestWork  6e01d06846c6ca2ac4ed6c9b0841e720af2de12a171108768f42285d7f873585-test-appsub-1-ns-git-app-1
 ----
 
 [#governance-known-issues]
