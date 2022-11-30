@@ -1,0 +1,1113 @@
+[#known-issues]
+= Known issues
+
+////
+Please follow this format:
+
+Title of known issue, be sure to match header and make title, header unique
+
+Hidden comment: Release: #issue
+Known issue process and when to write:
+
+- Doesn't work the way it should
+- Straightforward to describe
+- Good to know before getting started
+- Quick workaround, of any
+- Applies to most, if not all, users
+- Something that is likely to be fixed next release (never preannounce)
+- Always comment with the issue number and version: //2.4:19417
+- Link to customer BugZilla ONLY if it helps; don't link to internal BZs and GH issues.
+
+Or consider a troubleshooting topic.
+////
+
+Review the known issues for {product-title}. The following list contains known issues for this release, or known issues that continued from the previous release. For your {ocp} cluster, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.9/html/release_notes/ocp-4-9-release-notes#ocp-4-9-known-issues[{ocp-short} known issues].
+
+* <<documentation-known-issues,Documentation known issues>>
+* <<installation-known-issues,Installation known issues>>
+* <<web-console-known-issues,Web console known issues>>
+** <<observability-known-issues,Observability known issues>>
+* <<cluster-management-issues,Cluster management known issues>>
+* <<application-management-known-issues,Application management known issues>>
+* <<governance-known-issues,Governance known issues>>
+* <<backup-known-issues,Backup and restore known issues>>
+* <<submariner-known-issues,Submariner known issues>>
+
+[#documentation-known-issues]
+== Documentation known issues
+
+[#links-to-higher-level]
+=== Documentation links in the Customer Portal might link to a higher-level section
+// 2.4:19417
+
+In some cases, the internal links to other sections of the {product-title-short} documentation in the Customer Portal do not link directly to the named section. In some instances, the links resolve to the highest-level section. 
+
+If this happens, you can either find the specified section manually or complete the following steps to resolve:
+
+. Copy the link that is not resolving to the correct section and paste it in your browser address bar. For example, it might be: `https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.4/html/clusters/index#volsync`.
+
+. In the link, replace `html` with `html-single`. The new URL should read: `https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.4/html-single/clusters/index#volsync`
+
+. Link to the new URL to find the specified section in the documentation.
+
+[#installation-known-issues]
+== Installation known issues
+
+[#upgrade-pod-not-up]
+=== Pods might not come back up after upgrading {product-title-short}
+// 2.5, 2.4: 23730
+
+After upgrading {product-title-short} to a new version, a few pods that belong to a `StatefulSet` might remain in a `failed` state. This infrequent event is caused by a known https://github.com/kubernetes/kubernetes/issues/60164[Kubernetes issue].
+
+As a workaround for this problem, delete the failed pod. Kubernetes automatically relaunches it with the correct settings.
+
+[#openshift-container-platform-cluster-upgrade-failed-status]
+=== OpenShift Container Platform cluster upgrade failed status
+// 2.0.0:3442
+
+When an {ocp-short} cluster is in the upgrade stage, the cluster pods are restarted and the cluster might remain in `upgrade failed` status for a variation of 1-5 minutes. This behavior is expected and resolves after a few minutes.
+
+[#create-multiclusterengine-button-not-working]
+=== Create MultiClusterEngine button not working
+//2.6:25641
+
+After installing {product-title} in the {ocp} console, a pop-up window with the following message appears:
+
+`MultiClusterEngine required`
+
+`Create a MultiClusterEngine instance to use this Operator.`
+
+The *Create MultiClusterEngine* button in the pop-up window message might not work. To work around the issue, select *Create instance* in the MultiClusterEngine tile in the Provided APIs section.
+
+[#web-console-known-issues]
+== Web console known issues
+
+[#ldap-user-names-are-case-sensitive]
+=== LDAP user names are case-sensitive
+// 1.0.0:before 1.0.0.1
+
+LDAP user names are case-sensitive.
+You must use the name exactly the way it is configured in your LDAP directory.
+
+[#console-features-might-not-display-in-firefox-earlier-versions]
+=== Console features might not display in Firefox earlier version
+// 1.0.0:before 1.0.0.1
+
+There are known issues with dark theme styling for older versions of Firefox. Upgrade to the latest version for the best console compatibility.
+
+For more information, see link:../install/requirements.adoc#supported-browsers[Supported browsers].
+
+[#restrictions-for-storage-size-in-searchcustomization]
+=== Restrictions for storage size in search customization
+//2.2:8501
+
+When you update the storage size in the `searchcustomization` CR, the PVC configuration does not change. If you need to update the storage size, update the PVC (`_<storageclassname>-search-redisgraph-0_`) with the following command:
+----
+oc edit pvc <storageclassname>-search-redisgraph-0
+----
+
+[#search-query-issue]
+=== Search query parsing error
+//2.5:22391 
+
+If an environment becomes large and requires more tests for scaling, the search queries can timeout which results in a parsing error message being displayed. This error is displayed after 30 seconds of waiting for a search query.
+
+Extend the timeout time with the following command:
+
+----
+kubectl annotate route multicloud-console haproxy.router.openshift.io/timeout=Xs
+----
+
+[#ansible-tower-credentials-need-secure-host-automation-templates]
+=== Cannot use Ansible Tower credentials with host URL containing insecure protocol
+//2.6:25265
+
+When you create an Ansible Tower automation template with the console automation flow, the Ansible Tower credential that you use must specify a host URL that uses a secure protocol (https). When you try to use an Ansible Tower credential that specifies an insecure protocol, the job list cannot be populated in the drop-down menu. To work around this issue, use a secure protocol (https) in the host URL.
+
+*Note:* While you cannot create Ansible Tower templates from credentials with a host URL that contains an insecure protocol using the console, you can still manually create or patch a resource using an insecure protocol.
+
+[#cannot-edit-namespace-bindings-for-cluster-set]
+=== Cannot edit namespace bindings for cluster set
+//2.6:25389
+
+When you edit namespace bindings for a cluster set with the `admin` role or `bind` role, you might encounter an error that resembles the following message:
+
+`ResourceError: managedclustersetbindings.cluster.open-cluster-management.io "<cluster-set>" is forbidden: User "<user>" cannot create/delete resource "managedclustersetbindings" in API group "cluster.open-cluster-management.io" in the namespace "<namespace>".`
+
+To resolve the issue, make sure you also have permission to create or delete a `ManagedClusterSetBinding` resource in the namespace you want to bind. The role bindings only allow you to bind the cluster set to the namespace.
+
+[#false-scaling-alert-cluster-details]
+=== False scaling alert in cluster details
+//2.6:25390
+
+When you view cluster details in the console, you might see the following message in the _Nodes_ or _Machine pools_ tab:
+
+`Worker nodes are currently being removed from this cluster. Click the View machines button to see the status of the scaling operations (it may take a few minutes for the changes to be reflected on this console).`
+
+If there are no machine pools present, which is the case for providers that use User Provisioned Infrastructure (UPI) installation, ignore the false alert. The alert appears when there are worker nodes that are not part of the control plane. The false alert can also appear for clusters that were provisioned by using Installer Provisioned Infrastructure (IPI) installation if worker nodes are added to the cluster directly instead of by scaling the machine pool.
+
+[#wrong-node-count-overview-page]
+=== Wrong node count on Overview page
+//2.6:25391
+
+The summary card on the console *Overview* page shows the total number of nodes across all clusters, even when you select an infrastructure provider tile. All other values are filtered according to the selected tile.
+
+To see the correct number of nodes for the selected infrastructure provider, click the total number of nodes on the summary card and check the related node count in the search results.
+
+[#observability-known-issues]
+== Observability known issues
+
+[#duplicate-local-clusters-in-kubernetes-service-level-overview-api-server-dashboard]
+=== Duplicate local-clusters on Service-level Overview dashboard
+//2.4:16885
+
+When various hub clusters deploy {product-title-short} observability using the same S3 storage, _duplicate_ `local-clusters` can be detected and displayed within the _Kubernetes/Service-Level Overview/API Server_ dashboard. The duplicate clusters affect the results within the following panels: _Top Clusters_, _Number of clusters that has exceeded the SLO_, and _Number of clusters that are meeting the SLO_. The `local-clusters` are unique clusters associated with the shared S3 storage. To prevent multiple `local-clusters` from displaying within the dashboard, it is recommended for each unique hub cluster to deploy observability with a S3 bucket specifically for the hub cluster.
+
+[#observability-endpoint-operator-fails-to-pull-image]
+=== Observability endpoint operator fails to pull image
+//2.2:9259
+
+The observability endpoint operator fails if you create a pull-secret to deploy to the MultiClusterObservability CustomResource (CR) and there is no pull-secret in the `open-cluster-management-observability` namespace. When you import a new cluster, or import a Hive cluster that is created with {product-title-short}, you need to manually create a pull-image secret on the managed cluster.
+
+For more information, see link:../observability/observability_enable.adoc#enabling-observability[Enabling observability].
+
+[#missing-data-roks]
+=== There is no data from ROKS and HyperShift clusters
+//2.2.3:12114
+
+{product-title-short} observability does not display data from an ROKS cluster and HyperShift cluster on some panels within built-in dashboards. This is because ROKS and HyperShift do not expose any API Server metrics from servers they manage. The following Grafana dashboards contain panels that do not support ROKS and HyperShift clusters: `Kubernetes/API server`, `Kubernetes/Compute Resources/Workload`, `Kubernetes/Compute Resources/Namespace(Workload)`
+
+[#missing-etcd-data-roks]
+=== There is no etcd data from ROKS and HyperShift clusters
+//2.2.3:12114
+
+For ROKS clusters and HyperShift clusters, {product-title-short} observability does not display data in the _etcd_ panel of the dashboard.
+
+[#search-high-cpu]
+=== High CPU usage by the search-collector pod
+//2.3.13897
+
+When search is disabled on a hub cluster that manages 1000 clusters, the `search-collector` pod crashes due to the out-of-memory error (OOM). Complete the following steps:
+
+. If search is disabled on the hub cluster, which means the `search-redisgraph-pod` is not deployed, reduce memory usage by scaling down the `search-collector` deployment to `0` replicas.
+
+. If search is enabled on the hub cluster, which means the `search-redisgraph-pod` is deployed, increase the allocated memory by editing the `search-collector` deployment.
+
+[#search-pods-fail-invalid-certs]
+=== Search pods fail to complete the TLS handshake due to invalid certificates
+//2.3:14859
+
+In some rare cases, the search pods are not automatically redeployed after certificates change. This causes a mismatch of certificates across the service pods, which causes the Transfer Layer Security (TLS) handshake to fail. To fix this problem, restart the search pods to reset the certificates.
+
+[#observability-annotation-query-failed]
+=== Metrics are unavailable in the Grafana console
+
+* Annotation query failed in the Grafana console: 
+// 2.1.0:5625
++
+When you search for a specific annotation in the Grafana console, you might receive the following error message due to an expired token: 
++
+`"Annotation Query Failed"`
++
+Refresh your browser and verify you are logged into your hub cluster.
+
+* Error in _rbac-query-proxy_ pod:
++
+Due to unauthorized access to the `managedcluster` resource, you might receive the following error when you query a cluster or project:
++
+`no project or cluster found`
++
+Check the role permissions and update appropriately. See link:../access_control/rbac.adoc#role-based-access-control[Role-based access control] for more information. 
+
+[#prometheus-data-loss]
+=== Prometheus data loss on managed clusters
+//2.4:17137
+
+By default, Prometheus on OpenShift uses ephemeral storage. Prometheus loses all metrics data whenever it is restarted.
+
+When observability is enabled or disabled on {ocp-short} managed clusters that are managed by {product-title-short}, the observability endpoint operator updates the `cluster-monitoring-config` `ConfigMap` by adding additional alertmanager configuration that restarts the local Prometheus automatically. 
+
+[#error-ingesting-out-of-order-samples]
+=== Error ingesting out-of-order samples
+//2.4:15666
+
+Observability `receive` pods report the following error message:
+
+----
+Error on ingesting out-of-order samples
+----
+
+The error message means that the time series data sent by a managed cluster, during a metrics collection interval is older than the time series data it sent in the previous collection interval. When this problem happens, data is discarded by the Thanos receivers and this might create a gap in the data shown in Grafana dashboards. If the error is seen frequently, it is recommended to increase the metrics collection interval to a higher value. For example, you can increase the interval to 60 seconds.
+
+The problem is only noticed when the time series interval is set to a lower value, such as 30 seconds. Note, this problem is not seen when the metrics collection interval is set to the default value of 300 seconds.
+
+[#observability-add-on-fails]
+=== Grafana deployment fails on managed clusters
+//2.6:24512
+
+The Grafana instance does not deploy to the managed cluster if the size of the manifest exceeds 50 thousand bytes. Only the `local-cluster` appears in Grafana after you deploy observability.
+
+[#grafana-dev-fails-upgrade]
+=== Grafana deployment fails after upgrade
+//2.6:25815
+
+If you have a `grafana-dev` instance deployed in earlier versions before 2.6, and you upgrade the environment to 2.6, the `grafana-dev` does not work. You must delete the existing `grafana-dev` instance by running the following command:
+
+----
+./setup-grafana-dev.sh --clean
+----
+
+Recreate the instance with the following command:
+
+----
+./setup-grafana-dev.sh --deploy
+----
+
+[#cluster-management-issues]
+== Cluster management known issues
+
+See the following known issues and limitations for cluster management:
+
+[#create-with-disconnected]
+=== Disconnected installation settings for cluster creation cannot be entered or are ignored if entered
+//2.5:22808
+
+When you create a cluster by using the bare metal provider and a disconnected installation, you must store all your settings in the credential in the _Configuration for disconnected installation_ section. You cannot enter them in the cluster create console editor.
+
+When creating a cluster by using the VMware vSphere or Red Hat OpenStack Platform providers and disconnected installation, if a certificate is required to access the mirror registry, you must enter it in the _Additional trust bundle_ field of your credential in the _Configuration for disconnected installation section_. If you enter that certificate in the cluster create console editor, it is ignored.
+
+[#create-credential-multiple]
+=== Credential with disconnected installer does not distinguish between the certificates
+//2.5:22808
+
+When creating a credential for the bare metal, VMware vSphere, or Red Hat OpenStack Platform provider, note that the _Additional trust bundle_ field in the _Proxy and Configuration for disconnected installation_ contains the same value since the installer does not distinguish between the certificates. You can still use these features independently, and you can enter multiple certificates in the field if different certificates are required for proxy and disconnected installation.
+
+[#volsync-remove-csv-managed]
+=== Manual removal of the VolSync CSV required on managed cluster when removing the add-on
+//2.5:21356
+
+When you remove the VolSync `ManagedClusterAddOn` from the hub cluster, it removes the VolSync operator subscription on the managed cluster but does not remove the cluster service version (CSV). To remove the CSV from the managed clusters, run the following command on each managed cluster from which you are removing VolSync:
+
+----
+oc delete csv -n openshift-operators volsync-product.v0.4.0
+----
+
+If you have a different version of VolSync installed, replace `v0.4.0` with your installed version. 
+
+[#clusterset-label-not-removed]
+=== Deleting a managed cluster set does not automatically remove its label
+//2.5:20727
+
+After you delete a `ManagedClusterSet`, the label that is added to each managed cluster that associates the cluster to the cluster set is not automatically removed. Manually remove the label from each of the managed clusters that were included in the deleted managed cluster set. The label resembles the following example: `cluster.open-cluster-management.io/clusterset:<ManagedClusterSet Name>`.
+
+[#hive-cluster-claim]
+=== ClusterClaim error
+//2.5:19968
+
+If you create a Hive `ClusterClaim` against a `ClusterPool` and manually set the `ClusterClaimspec` lifetime field to an invalid golang time value, {product-title-short} stops fulfilling and reconciling all `ClusterClaims`, not just the malformed claim.  
+
+If this error occurs. you see the following content in the `clusterclaim-controller` pod logs, which is a specific example with the pool name and invalid lifetime included:
+
+----
+E0203 07:10:38.266841       1 reflector.go:138] sigs.k8s.io/controller-runtime/pkg/cache/internal/informers_map.go:224: Failed to watch *v1.ClusterClaim: failed to list *v1.ClusterClaim: v1.ClusterClaimList.Items: []v1.ClusterClaim: v1.ClusterClaim.v1.ClusterClaim.Spec: v1.ClusterClaimSpec.Lifetime: unmarshalerDecoder: time: unknown unit "w" in duration "1w", error found in #10 byte of ...|time":"1w"}},{"apiVe|..., bigger context ...|clusterPoolName":"policy-aas-hubs","lifetime":"1w"}},{"apiVersion":"hive.openshift.io/v1","kind":"Cl|...
+----
+
+You can delete the invalid claim.
+
+If the malformed claim is deleted, claims begin successfully reconciling again without any further interaction.
+
+[#clusterimageset-fast-channel]
+=== The product channel out of sync with provisioned cluster
+//2.4:17790
+
+The `clusterimageset` is in `fast` channel, but the provisioned cluster is in `stable` channel. Currently the product does not sync the `channel` to the provisioned {ocp-short} cluster. 
+
+Change to the right channel in the {ocp-short} console. Click **Administration** > **Cluster Settings** > **Details Channel**.
+
+[#ca-certificate-hub-restore]
+=== Restoring the connection of a managed cluster with custom CA certificates to its restored hub cluster might fail
+//2.4:19481
+
+After you restore the backup of a hub cluster that managed a cluster with custom CA certificates, the connection between the managed cluster and the hub cluster might fail. This is because the CA certificate was not backed up on the restored hub cluster. To restore the connection, copy the custom CA certificate information that is in the namespace of your managed cluster to the `<managed_cluster>-admin-kubeconfig` secret on the restored hub cluster. 
+
+**Tip:** If you copy this CA certificate to the hub cluster before creating the backup copy, the backup copy includes the secret information. When the backup copy is used to restore in the future, the connection between the hub and managed clusters will automatically complete. 
+
+[#local-cluster-auto]
+=== The local-cluster might not be automatically recreated
+//2.4:17790
+
+If the local-cluster is deleted while `disableHubSelfManagement` is set to `false`, the local-cluster is recreated by the `MulticlusterHub` operator. After you detach a local-cluster, the local-cluster might not be automatically recreated. 
+
+- To resolve this issue, modify a resource that is watched by the `MulticlusterHub` operator. See the following example:
+
++
+----
+oc delete deployment multiclusterhub-repo -n <namespace>
+----
+
+- To properly detach the local-cluster, set the `disableHubSelfManagement` to true in the `MultiClusterHub`.  
+
+[#subnet-required-on-prem-clust-create]
+=== Selecting a subnet is required when creating an on-premises cluster
+//2.4:18387
+
+When you create an on-premises cluster using the {product-title-short} console, you must select an available subnet for your cluster. It is not marked as a required field. 
+
+[#iso-image-name-too-long]
+=== Cluster provisioning with Infrastructure Operator fails
+//2.4:17411
+
+When creating {ocp-short} clusters using the Infrastructure Operator, the file name of the ISO image might be too long. The long image name causes the image provisioning and the cluster provisioning to fail. To determine if this is the problem, complete the following steps: 
+
+. View the bare metal host information for the cluster that you are provisioning by running the following command: 
++
+----
+oc get bmh -n <cluster_provisioning_namespace>
+----
+
+. Run the `describe` command to view the error information:
++
+----
+oc describe bmh -n <cluster_provisioning_namespace> <bmh_name>
+----
+
+. An error similar to the following example indicates that the length of the filename is the problem: 
++
+----
+Status:
+  Error Count:    1
+  Error Message:  Image provisioning failed: ... [Errno 36] File name too long ...
+----
+
+If this problem occurs, it is typically on the following versions of {ocp-short}, because the infrastructure operator was not using image service:
+
+* 4.8.17 and earlier
+* 4.9.6 and earlier
+
+To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9.7 or later.
+
+[#cluster-local-offline-reimport]
+=== Local-cluster status offline after reimporting with a different name
+//2.4:16977
+
+When you accidentally try to reimport the cluster named `local-cluster` as a cluster with a different name, the status for `local-cluster` and for the reimported cluster display `offline`.
+
+To recover from this case, complete the following steps:
+
+. Run the following command on the hub cluster to edit the setting for self-management of the hub cluster temporarily:
++
+----
+oc edit mch -n open-cluster-management multiclusterhub
+----
+
+. Add the setting `spec.disableSelfManagement=true`.
+
+. Run the following command on the hub cluster to delete and redeploy the local-cluster:
++
+----
+oc delete managedcluster local-cluster
+----
+
+. Enter the following command to remove the `local-cluster` management setting: 
++
+----
+oc edit mch -n open-cluster-management multiclusterhub
+----
+
+. Remove `spec.disableSelfManagement=true` that you previously added.
+
+[#cluster-provision-fails-ansible-proxy]
+=== Cluster provision with Ansible automation fails in proxy environment
+//2.4:17659
+
+An AnsibleJob template that is configured to automatically provision a managed cluster might fail when both of the following conditions are met: 
+
+* The hub cluster has cluster-wide proxy enabled. 
+* The Ansible Tower can only be reached through the proxy.
+
+[#klusterlet-operator-version-same-as-cluster]
+=== Version of the klusterlet operator must be the same as the hub cluster
+//2.4:17219
+
+If you import a managed cluster by installing the klusterlet operator, the version of the klusterlet operator must be the same as the version of the hub cluster or the klusterlet operator will not work.
+
+[#no-delete-cluster-namespace-before-remove-cluster]
+=== Cannot delete managed cluster namespace manually
+//2.3:13474
+
+You cannot delete the namespace of a managed cluster manually. The managed cluster namespace is automatically deleted after the managed cluster is detached. If you delete the managed cluster namespace manually before the managed cluster is detached, the managed cluster shows a continuous terminating  status after you delete the managed cluster. To delete this terminating managed cluster, manually remove the finalizers from the managed cluster that you detached.
+
+[#no-change-upgrade-cred]
+=== Cannot change credentials on clusters after upgrading to version 2.3
+//2.3:14098
+
+After you upgrade {product-title-short} to version 2.3, you cannot change the credential secret for any of the managed clusters that were created and managed by {product-title-short} before the upgrade.  
+
+[#hub-managed-clusters-clock]
+=== Hub cluster and managed clusters clock not synced
+// 2.1:5636
+
+Hub cluster and manage cluster time might become out-of-sync, displaying in the console `unknown` and eventually `available` within a few minutes. Ensure that the {ocp} hub cluster time is configured correctly. See https://docs.openshift.com/container-platform/4.6/installing/install_config/installing-customizing.html[Customizing nodes].
+
+[#importing-certain-versions-of-ibm-red-hat-openshift-kubernetes-service-clusters-is-not-supported]
+=== Importing certain versions of IBM {ocp-short} Kubernetes Service clusters is not supported
+// 1.0.0:2179
+
+You cannot import IBM {ocp-short} Kubernetes Service version 3.11 clusters.
+Later versions of IBM OpenShift Kubernetes Service are supported.
+
+[#automatic-secret-updates-for-provisioned-clusters-is-not-supported]
+=== Automatic secret updates for provisioned clusters is not supported
+// 2.0.0:3702
+
+When you change your cloud provider access key on the cloud provider side, you also need to update the corresponding credential for this cloud provider on the console of {mce}. This is required when your credentials expire on the cloud provider where the managed cluster is hosted and you try to delete the managed cluster.
+
+[#node-information-from-the-managed-cluster-cannot-be-viewed-in-search]
+=== Node information from the managed cluster cannot be viewed in search
+// 2.0.2:4598
+
+Search maps RBAC for resources in the hub cluster. Depending on user RBAC settings for {product-title-short}, users might not see node data from the managed cluster. Results from search might be different from what is displayed on the _Nodes_ page for a cluster.
+
+[#cluster-might-not-be-destroyed]
+=== Process to destroy a cluster does not complete
+// 2.1.0:4748
+
+When you destroy a managed cluster, the status continues to display `Destroying` after one hour, and the cluster is not destroyed. To resolve this issue complete the following steps:
+
+. Manually ensure that there are no orphaned resources on your cloud, and that all of the provider resources that are associated with the managed cluster are cleaned up.
+
+. Open the `ClusterDeployment` information for the managed cluster that is being removed by entering the following command:
++
+----
+oc edit clusterdeployment/<mycluster> -n <namespace>
+----
++
+Replace `_mycluster_` with the name of the managed cluster that you are destroying.
++
+Replace `_namespace_` with the namespace of the managed cluster.
+
+. Remove the `hive.openshift.io/deprovision` finalizer to forcefully stop the process that is trying to clean up the cluster resources in the cloud.
+
+. Save your changes and verify that `ClusterDeployment` is gone.
+
+. Manually remove the namespace of the managed cluster by running the following command:
++
+----
+oc delete ns <namespace>
+----
++
+Replace `_namespace_` with the namespace of the managed cluster.
+
+[#no-upgrade-os-on-osd]
+=== Cannot upgrade {ocp-short} managed clusters on {ocp-short} Dedicated with the console
+// 2.2.0:8922
+
+You cannot use the {product-title-short} console to upgrade {ocp-short} managed clusters that are in the {ocp-short} Dedicated environment.
+
+[#work-manager-addon-search]
+=== Work manager add-on search details
+//2.3.0: 13715
+
+The search details page for a certain resource on a certain managed cluster might fail. You must ensure that the work-manager add-on in the managed cluster is in `Available` status before you can search.
+
+[#no-ansible-power-hub]
+=== Cannot use Ansible Tower integration with an IBM Power or IBM Z system hub cluster
+// 2.3:13523
+
+You cannot use the Ansible Tower integration when the {product-title} hub cluster is running on IBM Power or IBM Z systems because the link:https://catalog.redhat.com/software/containers/ansible-automation-platform/platform-resource-rhel7-operator/5f6a0f22592d9a52663ccab6[Ansible Automation Platform Resource Operator] does not provide `ppc64le` or `s390x` images.
+
+[#non-ocp-logs]
+=== Non-{ocp} managed clusters must have LoadBalancer enabled
+//2.4:15705
+
+Both {ocp} and non-{ocp-short} clusters support the pod log feature, however non-{ocp-short} clusters require `LoadBalancer` to be enabled to use the feature. Complete the following steps to enable `LoadBalancer`:
+
+. Cloud providers have different `LoadBalancer` configurations. Visit your cloud provider documentation for more information. 
+. Verify if `LoadBalancer` is enabled on your {product-title-short} by checking the `loggingEndpoint` in the status of `managedClusterInfo`. 
+. Run the following command to check if the `loggingEndpoint.IP` or `loggingEndpoint.Host` has a valid IP address or host name:
++
+----
+oc get managedclusterinfo <clusterName> -n <clusterNamespace> -o json | jq -r '.status.loggingEndpoint'
+----
+
+For more information about the `LoadBalancer` types, see the _Service_ page in the link:https://kubernetes.io/docs/concepts/services-networking/service[Kubernetes documentation.]
+
+[#search-placement-not-working]
+=== Cannot use Search placement in Advanced Configuration table
+// 2.5:22668
+
+You cannot use _Search placement_ in the _Advanced Configuration_ table because the feature contains an invalid API version.
+
+To work around this issue, complete the following steps:
+
+. Remove the API version from the search url.
+. Delete the preset filters and search manually.
+
+[#cluster-proxy-addon-not-starting]
+=== Cluster-proxy-addon does not start after upgrade
+// 2.5:23631
+
+After you upgrade from version 2.4.x to 2.5.0, `cluster-proxy-addon` does not start and `cluster-proxy-addon-manager` raises a nil pointer exception.
+
+To work around this issue, complete the following steps:
+
+. Disable `cluster-proxy-addon`. See link:../install/adv_config_install.adoc#clusterproxyaddon-technology-preview[Advanced configuration] to learn more.
+. Delete the `cluster-proxy-signer` secret from the `open-cluster-management` namespace.
+. Enable `cluster-proxy-addon`.
+
+[#hypershift-proxy-install-not-supported-ocp-410z]
+=== {ocp-short} 4.10.z does not support hosted control plane clusters with proxy configuration
+// 2.6:25156
+
+When you create a hosting service cluster with a cluster-wide proxy configuration on {ocp-short} 4.10.z, the `nodeip-configuration.service` service does not start on the worker nodes.
+
+[#provision-ocp-411-azure-fails]
+=== Cannot provision {ocp-short} 4.11 cluster on Azure
+
+Provisioning an {ocp-short} 4.11 cluster on Azure fails due to an authentication operator timeout error. To work around the issue, use a different worker node type in the `install-config.yaml` file or set the `vmNetworkingType` parameter to `Basic`. See the following `install-config.yaml` example:
+
+[source,yaml]
+----
+compute:
+- hyperthreading: Enabled
+  name: 'worker'
+  replicas: 3
+  platform:
+    azure:
+      type:  Standard_D2s_v3
+      osDisk:
+        diskSizeGB: 128
+      vmNetworkingType: 'Basic'
+----
+
+[#client-cannot-reach-ipxe-script]
+=== Client cannot reach iPXE script
+//2.6:25157
+
+iPXE is an open source network boot firmware. See link:https://ipxe.org/[iPXE] for more details.
+
+When booting a node, the URL length limitation in some DHCP servers cuts off the `ipxeScript` URL in the `InfraEnv` custom resource definition, resulting in the following error message in the console:
+
+`no bootable devices`
+
+To work around the issue, complete the following steps:
+
+. Apply the `InfraEnv` custom resource definition when using an assisted installation to expose the `bootArtifacts`, which might resemble the following file:
++
+----
+status:
+  agentLabelSelector:
+    matchLabels:
+      infraenvs.agent-install.openshift.io: qe2
+  bootArtifacts:
+    initrd: https://assisted-image-service-multicluster-engine.redhat.com/images/0000/pxe-initrd?api_key=0000000&arch=x86_64&version=4.11
+    ipxeScript: https://assisted-service-multicluster-engine.redhat.com/api/assisted-install/v2/infra-envs/00000/downloads/files?api_key=000000000&file_name=ipxe-script
+    kernel: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.11/latest/rhcos-live-kernel-x86_64
+    rootfs: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.11/latest/rhcos-live-rootfs.x86_64.img
+----
+
+. Create a proxy server to expose the `bootArtifacts` with short URLs.
+
+. Copy the `bootArtifacts` and add them them to the proxy by running the following commands:
++
+----
+for artifact in oc get infraenv qe2 -ojsonpath="{.status.bootArtifacts}" | jq ". | keys[]" | sed "s/\"//g"
+do curl -k oc get infraenv qe2 -ojsonpath="{.status.bootArtifacts.${artifact}}"` -o $artifact 
+----
+
+. Add the `ipxeScript` artifact proxy URL to the `bootp` parameter in `libvirt.xml`.
+
+[#application-management-known-issues]
+== Application management known issues
+
+See the following known issues for the application lifecycle component.
+
+[#object-bucket-subscription-admin]
+=== Application ObjectBucket channel type cannot use allow and deny lists
+//2.5.0: 22807
+
+You cannot specify allow and deny lists with ObjectBucket channel type in the `subscription-admin` role. In other channel types, the allow and deny lists in the subscription indicates which Kubernetes resources can be deployed, and which Kubernetes resources should not be deployed.
+[#argo-app-set-version]
+=== Argo Application cannot be deployed on 3.x {ocp-short} managed clusters
+
+Argo `ApplicationSet` from the console cannot be deployed on 3.x {ocp-short} managed clusters because the `Infrastructure.config.openshift.io` API is not available on  on 3.x.
+
+[#changes-not-automatic]
+=== Changes to the multicluster_operators_subscription image do not take effect automatically
+//2.5.0: 21446
+
+The `application-manager` add-on that is running on the managed clusters is now handled by the subscription operator, when it was previously handled by the klusterlet operator. The subscription operator is not managed the `multicluster-hub`, so changes to the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap do not take effect automatically.
+
+If the image that is used by the subscription operator is overrided by changing the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap, the `application-manager` add-on on the managed clusters does not use the new image until the subscription operator pod is restarted. You need to restart the pod.
+
+[#policy-needs-subscription-admin]
+=== Policy resource not deployed unless by subscription administrator
+//2.4.0: 17819
+
+The `policy.open-cluster-management.io/v1` resources are no longer deployed by an application subscription by default for {product-title-short} version 2.4.
+
+A subscription administrator needs to deploy the application subscription to change this default behavior.
+
+See link:../applications/allow_deny.adoc[Creating an allow and deny list as subscription administrator] for information. `policy.open-cluster-management.io/v1` resources that were deployed by existing application subscriptions in previous {product-title-short} versions remain, but are no longer reconciled with the source repository unless the application subscriptions are deployed by a subscription administrator.
+
+[#application-ansible-standalone]
+=== Application Ansible hook stand-alone mode
+// 2.2:8036
+
+Ansible hook stand-alone mode is not supported. To deploy Ansible hook on the hub cluster with a subscription, you might use the following subscription YAML:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-rhacm-gitops-demo
+  namespace: hello-openshift
+annotations:
+  apps.open-cluster-management.io/github-path: myapp
+  apps.open-cluster-management.io/github-branch: master
+spec:
+  hooksecretref:
+      name: toweraccess
+  channel: rhacm-gitops-demo/ch-rhacm-gitops-demo
+  placement:
+     local: true
+----
+
+However, this configuration might never create the Ansible instance, since the `spec.placement.local:true` has the subscription running on `standalone` mode. You need to create the subscription in hub mode. 
+
+. Create a placement rule that deploys to `local-cluster`. See the following sample:
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata: 
+  name: <towhichcluster>
+  namespace: hello-openshift
+spec:
+  clusterSelector:
+    matchLabels:
+      local-cluster: "true" #this points to your hub cluster
+----
+
+. Reference that placement rule in your subscription. See the following:
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-rhacm-gitops-demo
+  namespace: hello-openshift
+annotations:
+  apps.open-cluster-management.io/github-path: myapp
+  apps.open-cluster-management.io/github-branch: master
+spec:
+  hooksecretref:
+      name: toweraccess
+  channel: rhacm-gitops-demo/ch-rhacm-gitops-demo
+  placement:
+     placementRef:
+        name: <towhichcluster>
+        kind: PlacementRule
+----
+
+After applying both, you should see the Ansible instance created in your hub cluster.
+
+[#edit-role-for-application-error]
+=== Edit role for application error
+// 2.0.0:1681
+
+A user performing in an `Editor` role should only have `read` or `update` authority on an application, but erroneously editor can also `create` and `delete` an application. {ocp-short} Operator Lifecycle Manager default settings change the setting for the product. To workaround the issue, see the following procedure:
+
+1. Run `oc edit clusterrole applications.app.k8s.io-v1beta2-edit -o yaml` to open the application edit cluster role.
+2. Remove `create` and `delete` from the verbs list.
+3. Save the change.
+
+[#edit-role-for-placement-rule-error]
+=== Edit role for placement rule error
+// 2.0.0:3693
+
+A user performing in an `Editor` role should only have `read` or `update` authority on an placement rule, but erroneously editor can also `create` and `delete`, as well. {ocp-short} Operator Lifecycle Manager default settings change the setting for the product. To workaround the issue, see the following procedure:
+
+1. Run `oc edit clusterrole placementrules.apps.open-cluster-management.io-v1-edit` to open the application edit cluster role.
+2. Remove `create` and `delete` from the verbs list.
+3. Save the change.
+
+[#application-not-deployed-after-an-updated-placement-rule]
+=== Application not deployed after an updated placement rule
+// 1.0.0:1449
+
+If applications are not deploying after an update to a placement rule, verify that the `application-manager` pod is running.
+The `application-manager` is the subscription container that needs to run on managed clusters.
+
+You can run `oc get pods -n open-cluster-management-agent-addon |grep application-manager` to verify.
+
+You can also search for `kind:pod cluster:yourcluster` in the console and see if the `application-manager` is running.
+
+If you cannot verify, attempt to import the cluster again and verify again.
+
+[#subscription-operator-does-not-create-an-scc]
+=== Subscription operator does not create an SCC
+// 1.0.0:1764
+
+Learn about {ocp} SCC at https://docs.openshift.com/container-platform/4.8/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth[Managing Security Context Constraints (SCC)], which is an additional configuration required on the managed cluster.
+
+Different deployments have different security context and different service accounts. The subscription operator cannot create an SCC CR automatically.. Administrators control permissions for pods. A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace. To manually create an SCC CR in your namespace, complete the following steps:
+
+. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
++
+----
+nginx-ingress-52edb
+nginx-ingress-52edb-backend
+----
++
+. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example, where `kind: SecurityContextConstraints` is added:
++
+[source,yaml]
+----
+ apiVersion: security.openshift.io/v1
+ defaultAddCapabilities:
+ kind: SecurityContextConstraints
+ metadata:
+   name: ingress-nginx
+   namespace: ns-sub-1
+ priority: null
+ readOnlyRootFilesystem: false
+ requiredDropCapabilities:
+ fsGroup:
+   type: RunAsAny
+ runAsUser:
+   type: RunAsAny
+ seLinuxContext:
+   type: RunAsAny
+ users:
+ - system:serviceaccount:my-operator:nginx-ingress-52edb
+ - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
+----
+
+[#application-channels-require-unique-namespaces]
+=== Application channels require unique namespaces
+// 1.0.0:2311
+
+Creating more than one channel in the same namespace can cause errors with the hub cluster.
+
+For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. All channels need an individual namespace, except GitHub channels, which can share a namespace with another GitHub channel.
+
+[#ansible-automation-platform-fail]
+=== Ansible Automation Platform job fail
+
+Ansible jobs fail to run when you select an incompatible option. Ansible Automation Platform only works when the `-cluster-scoped` channel options are chosen. This affects all components that need to perform Ansible jobs.
+
+[#ansible-automation-operator-access]
+=== Ansible Automation Platform operator access Ansible Tower outside of a proxy
+
+The Ansible Automation Platform (AAP) operator cannot access Ansible Tower outside of a proxy-enabled {ocp-short} cluster. To resolve, you can install the Ansible tower within the proxy. See install steps that are provided by Ansible Tower.
+
+[#helm-template-argo]
+=== Template information does not show when editing a Helm Argo application in version 2.4
+// 2.4 prior to 2.4.1:17642
+
+When a Helm Argo application is created and then edited, the template information appears empty while the YAML file is correct. Upgrade to Errata 2.4.1 to fix the error.
+
+[#application-name]
+=== Application name requirements
+// 2.3:#14310
+
+An application name cannot exceed 37 characters. The application deployment displays the following error if the characters exceed this amount.
+
+[source,yaml]
+----
+status:
+  phase: PropagationFailed
+  reason: 'Deployable.apps.open-cluster-management.io "_long_lengthy_name_" is invalid: metadata.labels: Invalid value: "_long_lengthy_name_": must be no more than 63 characters/n'
+----
+
+[#application-tables]
+=== Application console table limitations
+// 2.3:12410
+
+See the following limitations to various _Application_ tables in the console:
+
+- From the _Applications_ table on the _Overview_ page and the _Subscriptions_ table on the _Advanced configuration_ page, the _Clusters_ column displays a count of clusters where application resources are deployed. Since applications are defined by resources on the local cluster, the local cluster is included in the search results, whether actual application resources are deployed on the local cluster or not.
+
+- From the _Advanced configuration_ table for _Subscriptions_, the _Applications_ column displays the total number of applications that use that subscription, but if the subscription deploys child applications, those are included in the search result, as well.
+
+- From the _Advanced configuration_ table for _Channels_, the _Subscriptions_ column displays the total number of subscriptions on the local cluster that use that channel, but this does not include subscriptions that are deployed by other subscriptions, which are included in the search result.
+
+[#app-topology]
+=== No Application console topology filtering
+
+The _Console_ and _Topology_ for _Application_ changes for the {product-version}. There is no filtering capability from the console Topology page.
+
+[#allow-deny-list-not-working-objectstorage-app]
+=== Allow and deny list does not work in Object storage applications
+// 2.6:25445
+
+The `allow` and `deny` list feature does not work in Object storage application subscriptions.
+
+[#unsupported-ocp-versions-listed-after-upgrade]
+=== Unsupported {ocp-short} versions listed after hub cluster upgrade
+// 2.6:25467
+//aware of hardcoded versions, leave as is (MJ)
+
+After you upgrade your hub cluster from versions before 2.5 to 2.6, some unsupported {ocp-short} versions are listed on the _Cluster_ page in the console.
+
+The stale `clusterImageSet` resources that are deployed by earlier versions before 2.5 subscription controller are not deleted after the upgrade. To resolve this, manually delete the `clusterImageSet` resources that have unsupported {ocp-short} versions. For example, run the following command to delete the `img4.7.0-x86-64-appsub` `clusterImageSet`:
+
+----
+oc delete clusterimageset img4.7.0-x86-64-appsub
+----
+
+[#governance-known-issues]
+== Governance known issues
+
+[#unable-to-log-out]
+=== Unable to log out from Red Hat Advanced Cluster Management
+
+When you use an external identity provider to log in to {product-title-short}, you might not be able to log out of {product-title-short}. This occurs when you use {product-title-short}, installed with IBM Cloud and Keycloak as the identity providers.
+
+You must log out of the external identity provider before you attempt to log out of {product-title-short}. 
+
+[#gatekeeper-upgrade]
+=== Gatekeeper operator installation fails
+//2.4:16673
+
+When you install the gatekeeper operator on {ocp} version 4.9, the installation fails. Before you upgrade {ocp-short} to version 4.9.0., you must upgrade the gatekeeper operator to version 0.2.0. See link:../governance/create_gatekeeper.adoc#upgrading-gatekeeper-gatekeeper-operator[Upgrading gatekeeper and the gatekeeper operator] for more information.
+
+[#config-policy-stuck]
+=== Configuration policy listed complaint when namespace is stuck in _Terminating_ state
+//2.2:20715
+
+When you have a configuration policy that is configured with `mustnothave` for the `complianceType` parameter and `enforce` for the `remediationAction` parameter, the policy is listed as compliant after a deletion request is made to the Kubernetes API. Therefore, the Kubernetes object can be stuck in a `Terminating` state while the policy is listed as compliant.
+
+[#operators-deployed-with-policies]
+=== Operators deployed with policies do not support ARM
+
+While installation into an ARM environment is supported, operators that are deployed with policies might not support ARM environments. The following policies that install operators do not support ARM environments:
+
+* link:https://github.com/stolostron/policy-collection/blob/main/stable/SI-System-and-Information-Integrity/policy-imagemanifestvuln.yaml[{product-title-short} policy for the Quay Container Security Operator]
+* link:https://github.com/stolostron/policy-collection/blob/main/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[{product-title-short} policy for the Compliance Operator]
+
+[#configurationpolicy-crd-terminating]
+=== ConfigurationPolicy CRD is stuck in terminating
+
+When you remove the `config-policy-controller` add-on from a managed cluster by disabling the policy controller in the `KlusterletAddonConfig` or by detaching the cluster, the `ConfigurationPolicy` CRD might get stuck in a terminating state. If the `ConfigurationPolicy` CRD is stuck in a terminating state, new policies might not be added to the cluster if the add-on is reinstalled later. You can also receive the following error:
+
+----
+template-error; Failed to create policy template: create not allowed while custom resource definition is terminating
+----
+
+Use the following command to check if the CRD is stuck: 
+
+----
+oc get crd configurationpolicies.policy.open-cluster-management.io -o=jsonpath='{.metadata.deletionTimestamp}'
+----
+
+If a deletion timestamp is on the resource, the CRD is stuck. To resolve the issue, remove all finalizers from configuration policies that remain on the cluster. Use the following command on the managed cluster and replace `<cluster-namespace>` with the managed cluster namespace:
+
+----
+oc get configurationpolicy -n <cluster-namespace> -o name | xargs oc patch -n <cluster-namespace> --type=merge -p '{"metadata":{"finalizers": []}}'
+----
+
+The configuration policy resources are automatically removed from the cluster and the CRD exits its terminating state. If the add-on has already been reinstalled, the CRD is recreated automatically without a deletion timestamp.
+
+[#pruneobjbeh-not-working-existing-config-policy]
+=== PruneObjectBehavior does not work when modifying existing configuration policy
+//2.6:25261
+
+When modifying an existing configuration policy, `DeleteAll` or `DeleteIfCreated` in the `pruneObjectBehavior` feature does not clean up old resources that were created before modifying. Only new resources from policy creations and policy updates are tracked and deleted when you delete the configuration policy.
+
+[#backup-known-issues]
+== Backup and restore known issues
+
+[#backup-collision]
+=== Avoid backup collision
+//2.5:19469
+
+As hub clusters change from passive to primary clusters and back, different clusters can backup data at the same storage location. This can result in backup collisions, which means that the latest backups are generated by a passive hub cluster. 
+
+The passive hub cluster produces backups because the `BackupSchedule.cluster.open-cluster-management.io` resource is enabled on the hub cluster, but it should no longer write backup data since the hub cluster is no longer a primary hub cluster. Run the following command to check if there is a backup collision:
+
+----
+oc get backupschedule -A
+----
+
+You might receive the following status:
+
+----
+NAMESPACE       NAME               PHASE             MESSAGE
+openshift-adp   schedule-hub-1   BackupCollision   Backup acm-resources-schedule-20220301234625, from cluster with id [be97a9eb-60b8-4511-805c-298e7c0898b3] is using the same storage location. This is a backup collision with current cluster [1f30bfe5-0588-441c-889e-eaf0ae55f941] backup. Review and resolve the collision then create a new BackupSchedule resource to  resume backups from this cluster.
+----
+
+The controller avoids backup collisions by setting the `BackupSchedule.cluster.open-cluster-management.io` resource `status` to `BackupCollision`. The `Schedule.velero.io` resources that are created by the `BackupSchedule` resource are automatically deleted. 
+
+The backup collision is reported by the link:https://github.com/stolostron/cluster-backup-chart/blob/main/stable/cluster-backup-chart/templates/hub-backup-pod.yaml[`hub-backup-pod`] policy. The administrator must verify which hub cluster writes data to the storage location. Then remove the `BackupSchedule.cluster.open-cluster-management.io` resource from the passive hub cluster, and recreate a new `BackupSchedule.cluster.open-cluster-management.io` resource on the primary hub cluster to resume the backup.
+
+See link:../backup_restore/backup_restore_enable.adoc#enable-backup-and-restore[Enabling the backup and restore operator] for more information. 
+
+[#restore-limitations]
+=== Velero restore limitations
+A new hub cluster can have a different configuration than the active hub cluster if the new hub cluster, where the data is restored, has user-created resources. For example, this can include an existing policy that was created on the new hub cluster before the backup data is restored on the new hub cluster.
+
+Velero skips existing resources if they are not part of the restored backup, so the policy on the new hub cluster remains unchanged, resulting in a different configuration between the new hub cluster and active hub cluster.
+
+To address this limitation, the cluster backup and restore operator runs a post restore operation to clean up the resources created by the user or a different restore operation when a `restore.cluster.open-cluster-management.io` resource is created.
+
+For more information, see _Clean the hub cluster before restore_ in the link:../backup_restore/backup_restore_enable.adoc#enable-backup-and-restore[Enabling the backup and restore operator] topic.
+
+[#imported-clusters-not-displayed]
+=== Passive configurations do not display managed clusters
+
+Managed clusters are only displayed when the activation data is restored on the passive hub cluster.
+
+[#upgrade-limitation]
+=== Cluster backup and restore upgrade limitation
+
+If you upgrade your cluster from {product-version-prev} to {product-version} with the `enableClusterBackup` parameter set to `true`, the following message appears:
+
+----
+When upgrading from version 2.4 to 2.5, cluster backup must be disabled
+----
+
+Before you upgrade your cluster, disable cluster backup and restore by setting the `enableClusterBackup` parameter to `false`. The `components` section in your `MultiClusterHub` resource might resemble the following YAML file:
+
+You can reenable the backup and restore component when the upgrade is complete. View the following sample:
+
+[source,yaml]
+----
+overrides:
+      components:
+        - enabled: true
+          name: multiclusterhub-repo
+        - enabled: true
+          name: search
+        - enabled: true
+          name: management-ingress
+        - enabled: true
+          name: console
+        - enabled: true
+          name: insights
+        - enabled: true
+          name: grc
+        - enabled: true
+          name: cluster-lifecycle
+        - enabled: true
+          name: volsync
+        - enabled: true
+          name: multicluster-engine
+        - enabled: false
+          name: cluster-proxy-addon
+        - enabled: true <<<<<<<< 
+          name: cluster-backup
+    separateCertificateManagement: false
+----
+
+If you have manually installed OADP, you must manually uninstall OADP before you upgrade. After the upgrade is successful and backup and restore is reenabled, OADP is installed automatically.
+
+[#managed-cluster-resources-not-restored]
+=== Managed cluster resource not restored
+//2.5:22402
+
+When you restore the settings for the `local-cluster` managed cluster resource and overwrite the `local-cluster` data on a new hub cluster, the settings are misconfigured. Content from the previous hub cluster `local-cluster` is not backed up because the resource contains `local-cluster` specific information, such as the cluster URL details.
+
+You must manually apply any configuration changes that are related to the `local-cluster` resource on the restored cluster. See _Prepare the new hub cluster_ in the link:../backup_restore/backup_restore_enable.adoc#enable-backup-and-restore[Enabling the backup and restore operator] topic.
+
+[#restored-hive-managed-clusters-unable-new-hub]
+=== Restored Hive managed clusters might not be able to connect with the new hub cluster
+//2.6:23930
+
+When you restore the backup of the changed or rotated certificate of authority (CA) for the Hive managed cluster, on a new hub cluster, the managed cluster fails to connect to the new hub cluster. The connection fails because the `admin` `kubeconfig` secret for this managed cluster, available with the backup, is no longer valid. 
+
+You must manually update the restored `admin` `kubeconfig` secret of the managed cluster on the new hub cluster.
+
+[#limitations-auto-import]
+=== Automatic import limitations
+//2.7:26324
+
+The following situations can prevent the managed cluster from being automatically imported when moving to a new hub cluster:
+
+- When running a hub backup without a `ManagedServiceAccount` token, for example when you create the `ManagedServiceAccount` resource while the managed cluster is not accessible, the backup does not contain a token to auto import the managed cluster.
+
+- The auto import operation fails if the `auto-import-account` secret token is valid and is backed up but the restore operation is run when the token available with the backup has already expired. The `restore.cluster.open-cluster-management.io` resource reports invalid token issues for each managed cluster.
+
+- Since the `auto-import-secret` created on restore uses the `ManagedServiceAccount` token to connect to the managed cluster, the managed cluster must also provide the kube `apiserver` information. The `apiserver` must be set on the `ManagedCluster` resource. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: managed-cluster-name
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+  managedClusterClientConfigs:
+      url: <apiserver>
+----
++
+When a cluster is imported on the hub cluster, the `apiserver` is only set up automatically on {ocp-short} clusters. You must set the `apiserver` manually on other types of managed clusters, such as EKS clusters, otherwise the automatic import feature ignores the clusters. As a result, the clusters remain in the `Pending Import` state when you move them to the restore hub cluster.
+
+- It is possible that a `ManagedServiceAccount` secret might not be included in a backup if the backup schedule runs before the backup label is set on the `ManagedServiceAccount` secret. `ManagedServiceAccount` secrets don't have the cluster `open-cluster-management.io/backup` label set on creation. For this reason, the backup controller regularly searches for `ManagedServiceAccount` secrets under the managed cluster's namespaces, and adds the backup label if not found.
+
+[#imported-managed-clusters-pending-import]
+=== Imported managed clusters show a Pending Import status
+//2.7:26797
+
+Managed clusters that are manually imported on the primary hub cluster show a `Pending Import` status when the activation data is restored on the passive hub cluster. For more information, see link:../backup_restore/manage_backup_restore.adoc#auto-connect-clusters-msa[Automatically connecting clusters by using a Managed Service Account (Technology Preview)].
+
+[#submariner-known-issues]
+== Submariner known issues
+
+[#submariner-openshiftovn-no-globalnet]
+=== Only OpenShift SDN is supported as a CNI network provider when using Globalnet
+//2.6:24246
+
+You can use both OpenShift SDN and OVN Kubernetes CNI networks with Submariner, unless you are using Globalnet. Only OpenShift SDN is supported when you use Globalnet.
+
+[#submariner-no-rhel]
+=== Some Red Hat Enterprise Linux nodes are not supported as worker nodes
+
+When deploying Submariner on a cluster that includes Red Hat Enterprise Linux worker nodes with the kernel version between 4.18.0-359.el8.x86_64 and 4.18.0-372.11.1.el8_6.x86_64, application workloads fail to communicate with remote clusters.
+
+[#not-all-infrastructure]
+=== Not all of the infrastructure providers that {product-title-short} can manage are supported
+
+Submariner is not supported with all of the infrastructure providers that {product-title-short} can manage. Refer to the https://access.redhat.com/articles/6968787[{product-title-short} support matrix] for a list of supported providers.
+
+[#openstack-ui]
+=== Preparing the Red Hat OpenStack Platform infrastructure from the {product-title-short} console is not supported
+
+Automatic cloud preparation for Red Hat OpenStack clusters is not supported for Submariner from the product-title-short} console. You can use the {product-title-short} APIs to prepare the clouds manually.
+
+[#headless-services-globalnet]
+=== Headless services with Globalnet is not supported in some cases
+//2.5:24159
+
+You can use headless services with Globalnet, except when you access the exported headless service from a client that resides in the same cluster by using the `clusterset.local` domain name. When you use the `clusterset.local` domain name to access the headless service, the `globalIP` that is associated with the headless service is not routable in the cluster and is returned to the client. 
+
+You can use the `cluster.local` domain name to access the local headless services.
+
+[#submariner-airgap]
+=== Air-gapped clusters are not supported
+
+Submariner is not validated for clusters that are provisioned in an air-gapped environment.
+
+[#gateway-limits]
+=== Numerous gateways cannot be deployed
+//2.5:23706
+
+You cannot deploy multiple gateways.
+
+[#submariner-vxlan]
+=== Deployments that use VXLAN when NAT is enabled are not supported
+//2.5:24258
+
+Only non-NAT deployments support Submariner deployments with the VXLAN cable driver.
+
+[#submariner-ovn-k8]
+=== OVN Kubernetes support limitations
+//2.6:25275
+
+Using the OVN Kubernetes CNI network provider requires Red Hat OpenShift 4.11 or later. OVN Kubernetes does not support Globalnet.
