@@ -16,42 +16,38 @@ The components of the cluster lifecycle management architecture include the foll
 [#components-hub-mce]
 == Hub cluster
 
-* The _console_ provides a web-based interface to manage the cluster lifecycle of the managed clusters.
-* The _Hive controller_ provisions the clusters that you create by using the {mce}. The Hive Controller also detaches and destroys managed clusters that were created by the {mce}.
 * The _managed cluster import controller_ deploys the klusterlet operator to the managed clusters.
-* The _klusterlet add-on controller_ deploys the klusterlet add-on operator to managed clusters.
+* The _Hive controller_ provisions the clusters that you create by using the {mce}. The Hive Controller also destroys managed clusters that were created by the {mce}.
+* The _cluster curator controller_ creates the Ansible jobs as the pre-hook or post-hook to configure the cluster infrastructure environment when creating or upgrading managed clusters.
+* When a managed cluster add-on is enabled on the hub cluster, its _add-on hub controller_ is deployed on the hub cluster. The _add-on hub controller_ deploys the _add-on agent_ to the managed clusters.
 
 [#components-managed-mce]
 == Managed cluster
 
 * The _klusterlet operator_ deploys the registration and work controllers on the managed cluster.
 
-* The _Registration Agent_ registers the managed cluster with the hub cluster. The following permissions are automatically created to allow the managed cluster to access the hub cluster:
+* The _Registration Agent_ registers the managed cluster and the managed cluster add-ons with the hub cluster. The Registration Agent also maintains the status of the managed cluster and the managed cluster add-ons. The following permissions are automatically created within the Clusterrole to allow the managed cluster to access the hub cluster:
 
-** The Clusterrole has the following characteristics:
+** Allows the agent to get or update its owned cluster that the hub cluster manages
 
-*** Allows the agent to rotate its certificate
+** Allows the agent to update the status of its owned cluster that the hub cluster manages
 
-*** Allows the agent to `get`/`list`/`update`/`watch` the clusters that the hub cluster manages
+** Allows the agent to rotate its certificate
 
-*** Allows the agent to update the status of the clusters that the hub cluster manages
+** Allows the agent to `get` or `update` the `coordination.k8s.io` lease
 
-** The Role created in the hub cluster namespace of the hub cluster has the following characteristics:
+** Allows the agent to `get` its managed cluster add-ons
 
-*** Allows the managed cluster Registration Agent to `get` or `update` the `coordination.k8s.io` lease 
+** Allows the agent to update the status of its managed cluster add-ons
 
-*** Allows the agent to `get`/`list`/`watch` the managed cluster add-on
+* The _work agent_ applies the manifest work to the managed cluster. The following permission is automatically created within the Clusterrole to allow the managed cluster to access the hub cluster:
 
-*** Allows the agent to update the status of managed cluster add-ons
+** Allows the agent to send events to the hub cluster 
 
-* The _work agent_ applies the manifest work to the managed cluster. The following permission is automatically created to allow the managed cluster to access the hub cluster:
+** Allows the agent to `get` or `update` the `manifestworks` resource
 
-** Role created in the hub cluster namespace of the hub cluster:
+** Allows the agent to update the status of `manifestworks` resource
 
-*** Allows the Work Agent to send events to the hub cluster 
-
-*** Allows the agent to `get`/`list`/`watch`/`update` the `manifestworks` resource
-
-*** Allows the agent to update the status of `manifestworks` resource 
+* When a managed cluster add-on is created in a managed cluster namespace on the hub cluster, its hub controller manifests its agent deployment resources with manifest work. The work agent then applies the manifest work to the managed cluster to deploy the add-on agent.
 
 To continue adding and managing clusters, see the xref:../multicluster_engine/cluster_lifecycle/cluster_lifecycle_intro.adoc#cluster-overview[The {mce} cluster lifecycle overview].
