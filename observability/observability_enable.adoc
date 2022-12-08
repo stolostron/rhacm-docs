@@ -3,7 +3,7 @@
 
 Monitor the health of your managed clusters with the observability service (`multicluster-observability-operator`).
 
-*Required access:* Cluster administrator or the `open-cluster-management:cluster-manager-admin` role.
+*Required access:* Cluster administrator, the `open-cluster-management:cluster-manager-admin` role, or S3 administrator.
 
 * <<prerequisites-observability,Prerequisites>>
 * <<enabling-observability,Enabling observability>>
@@ -195,13 +195,147 @@ Generating access keys using AWS Security Service require additional steps, such
 //Adding view if we used bullet points, will receive feedback in peer review
 +
 Generating access keys using AWS Security Service require the following additional steps:
+
 - Create an IAM policy that limits access to a S3 bucket
 - Create an IAM role with a trust policy to generate JWT tokens for {ocp-short} service accounts, and 
 - Specify annotations for the observability service accounts that require access to S3 bucket. You can find an example of how observability on Red Hat OpenShift Service on AWS (ROSA) cluster can be configured to work with AWS STS tokens in the _Set environment_ step. See link:https://www.rosaworkshop.io/[Red Hat OpenShift Service on AWS (ROSA)] for more details, along with link:https://www.rosaworkshop.io/rosa/15-sts_explained/[ROSA with STS explained] for an in-depth description of the requirements and setup to use STS tokens.
 
 Complete the following steps to generate access keys using AWS Security Service:
 
-. 
+. Set up the AWS environment. Run the following commands:
++
+[source,bash]
+----
+export POLICY_VERSION=$(date +"%m-%d-%y")
+export TRUST_POLICY_VERSION=$(date +"%m-%d-%y") 
+export CLUSTER_NAME=my-cluster
+export S3_BUCKET=$CLUSTER_NAME-acm-observability
+export REGION=us-east-2
+export NAMESPACE=open-cluster-management-observability
+export SA=tbd
+export SCRATCH_DIR=/tmp/scratch
+export OIDC_PROVIDER=$(oc get authentication.config.openshift.io cluster -o json | jq -r .spec.serviceAccountIssuer| sed -e "s/^https:\/\///")
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+export AWS_PAGER=""
+rm -rf $SCRATCH_DIR
+mkdir -p $SCRATCH_DIR
+----
+
+. Create an S3 bucket with the following command:
++
+[source,bash]
+----
+aws s3 mb s3://$S3_BUCKET
+----
+
+. Create a policy for access to your S3 bucket. Run the following command:
++
+[source,yaml]
+----
+cat <<EOF > $SCRATCH_DIR/s3-policy.json
+{
+    "Version": "$POLICY_VERSION",
+    "Statement": [
+        {
+            "Sid": "Statement",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:GetObject",
+                "s3:DeleteObject",
+                "s3:PutObject",
+                "s3:PutObjectAcl",
+                "s3:CreateBucket",
+                "s3:DeleteBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::$S3_BUCKET/*",
+                "arn:aws:s3:::$S3_BUCKET"
+            ]
+        }
+    ]
+ }
+ EOF
+----
+
+. Apply the policy with the following command:
++
+----
+S3_POLICY=$(aws iam create-policy --policy-name $CLUSTER_NAME-acm-obs \
+--policy-document file://$SCRATCH_DIR/s3-policy.json \
+--query 'Policy.Arn' --output text)
+echo $S3_POLICY
+----
+
+. Create a trust policy. Run the following command:
++
+[source,yaml]
+----
+cat <<EOF > $SCRATCH_DIR/TrustPolicy.json
+{
+ "Version": "$TRUST_POLICY_VERSION",
+ "Statement": [
+   {
+     "Effect": "Allow",
+     "Principal": {
+       "Federated": "arn:aws:iam::${AWS_ACCOUNT_ID}:oidc-provider/${OIDC_PROVIDER}"
+     },
+     "Action": "sts:AssumeRoleWithWebIdentity",
+     "Condition": {
+       "StringEquals": {
+         "${OIDC_PROVIDER}:sub": [
+           "system:serviceaccount:${NAMESPACE}:observability-thanos-query",
+           "system:serviceaccount:${NAMESPACE}:observability-thanos-store-shard",
+           "system:serviceaccount:${NAMESPACE}:observability-thanos-compact"
+           "system:serviceaccount:${NAMESPACE}:observability-thanos-rule",
+           "system:serviceaccount:${NAMESPACE}:observability-thanos-receive",
+         ]
+       }
+     }
+   }
+ ]
+}
+EOF
+----
+
+. Create a role for AWS Prometheus and CloudWatch with the following command:
++
+----
+S3_ROLE=$(aws iam create-role \
+  --role-name "$CLUSTER_NAME-acm-obs-s3" \
+  --assume-role-policy-document file://$SCRATCH_DIR/TrustPolicy.json \
+  --query "Role.Arn" --output text)
+echo $S3_ROLE
+----
+
+. Attach the policies to the role. Run the following command:
++
+----
+aws iam attach-role-policy \
+  --role-name "$CLUSTER_NAME-acm-obs-s3" \
+  --policy-arn $S3_POLICY
+----
++
+Your secret might resemble the following file. The `config` section specifies `signature_version2: false` and does not specify `access_key` and `secret_key`:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: thanos-object-storage
+  namespace: open-cluster-management-observability
+type: Opaque
+stringData:
+  thanos.yaml: |
+ type: s3
+ config:
+   bucket: $S3_BUCKET
+   endpoint: s3.$REGION.amazonaws.com
+   signature_version2: false
+----
+
+. Specify service account annotations when you the `MultiClusterObservability` custom resource (CR) as described in _Creating the MultiClusterObservability CR_ section. 
 
 . You can retrieve the S3 access key and secret key for your cloud providers with the following commands:
 +
@@ -217,10 +351,20 @@ echo $SECRET_KEY
 
 You must decode, edit, and encode your `base64` string in the secret.
 
+. Verify that observability is enabled by checking the pods for the following deployments and stateful sets. You might receive the following information:
++
+----
+observability-thanos-query (deployment)
+observability-thanos-compact (statefulset)
+observability-thanos-receive-default  (statefulset)
+observability-thanos-rule   (statefulset)
+observability-thanos-store-shard-x  (statefulsets)
+----
+
 [#creating-mco-cr]
 === Creating the MultiClusterObservability CR
 
-Complete the following steps to create the `MultiClusterObservability` custom resource (CR) for your managed cluster:
+Complete the following steps to create the `MultiClusterObservability` custom resource (CR) on your hub cluster:
 
 . Create the `MultiClusterObservability` custom resource YAML file named `_multiclusterobservability_cr.yaml_`. 
 +
@@ -240,7 +384,25 @@ spec:
       key: thanos.yaml
 ----
 +
-You might want to modify the value for the `retentionConfig` parameter in the `advanced` section. For more information, see https://thanos.io/v0.8/components/compact/#downsampling-resolution-and-retention[Thanos Downsampling resolution and retention]. Depending on the number of managed clusters, you might want to update the amount of storage for stateful sets, see link:../apis/observability.json.adoc#observability-api[Observability API] for more information.
+You might want to modify the value for the `retentionConfig` parameter in the `advanced` section. For more information, see https://thanos.io/v0.8/components/compact/#downsampling-resolution-and-retention[Thanos Downsampling resolution and retention]. Depending on the number of managed clusters, you might want to update the amount of storage for stateful sets. If your S3 bucket is configured to use STS tokens, annotate the service accounts to use STS with S3 role. View the following configuration:
++
+[source,yaml]
+----
+spec:
+  advanced:
+    compact:
+      eks.amazonaws.com/role-arn=$S3_ROLE
+    store:
+      eks.amazonaws.com/role-arn=$S3_ROLE
+    rule:
+      eks.amazonaws.com/role-arn=$S3_ROLE
+    receive:
+      eks.amazonaws.com/role-arn=$S3_ROLE
+    query:
+      eks.amazonaws.com/role-arn=$S3_ROLE
+----
+
+See link:../apis/observability.json.adoc#observability-api[Observability API] for more information.
 +
 . To deploy on infrastructure machine sets, you must set a label for your set by updating the `_nodeSelector_` in the `MultiClusterObservability` YAML. Your YAML might resemble the following content:
 +
@@ -263,7 +425,7 @@ All the pods in `open-cluster-management-observability` namespace for Thanos, Gr
 +
 *Note*: If you want to exclude specific managed clusters from collecting the observability data, add the following cluster label to your clusters: `observability: disabled`.
 
-The observability service is enabled. After you enable the observability service the following functionalities are initiated:
+The observability service is enabled. After you enable the observability service, the following functionalities are initiated:
 
 * All the alert managers from the managed clusters are forwarded to the {product-title-short} hub cluster.
 * All the managed clusters that are connected to the {product-title-short} hub cluster are enabled to send alerts back to the {product-title-short} observability service. You can configure the {product-title-short} Alertmanager to take care of deduplicating, grouping, and routing the alerts to the correct receiver integration such as email, PagerDuty, or OpsGenie. You can also handle silencing and inhibition of the alerts.
