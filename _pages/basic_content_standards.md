@@ -19,13 +19,14 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 
 ## Creating a file, section, or list
 
+* Guides should begin with an intro file that only has conceptual information and links to the rest of the topics. Name the file `intro.adoc`, or `overview.adoc` if it contains a few intros and guides.
 * Be sure file names increase UX and don't confuse the reader or writer. Example: `man_clu_set` changes to `manage_clusterset`, a file that is titled: _Managing ClusterSets_. This will help the entire product team better manage links in the doc and the console, and it increases expectation about the contents of the file.
 * Recognize the goal of the content: Task, reference, concept? Tasks require gerunds in the title, for example.
 * Know something about the technology. What is the purpose of the new function? If you don't understand it, you won't be able to advocate for the customer with the content.
 * Ask where the user will interact with the feature. Day 1? Day 2? During the Application lifecycle?
 * Seek guidance from the architect before creating a book or section so that the team can agree on the best placement for the new content.
 * Don't use internal terms to define a file. Example: Wizard. Name the file after what the user will hear about the product.
-* Validation steps need to be concrete.
+* Validation steps need to be concrete and produce a result. 
 * Headers: parallel, separate headers with content, etc... See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-headings
     - Choose gerunds for tasks
     - No code in headers
