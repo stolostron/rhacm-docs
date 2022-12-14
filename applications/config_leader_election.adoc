@@ -1,26 +1,41 @@
 [#config_leader_election]
 = Configuring leader election
 
-You can reduce your etcd load by configuring `leaseDuration`, `renewDeadline`, or `retryPeriod` of controllers.
+With `LeaderElection`, you can change how the controllers make requests to choose a new leader in case of a failure, which ensures only one leader instance handles the reconciliation at a time. You can increase or decrease the amount of time a controller takes to acquire `LeaderElection`. With decreased time, a new leader is chosen quicker during a failure. 
 
+*Note:* Changes to the default values for the controllers might impact system performance during that task. You can reduce your `etcd` load by changing the default values for `leaseDuration`, `renewDeadline`, or `retryPeriod` of controllers.
+
+*Required access:* Cluster administrator
 
 [#controller-change]
-== Editing the controller
+== Editing the controller flag
 
-When you configure leader election, you receive the following default values:
+To configure `LeaderElection`, you change the following default values:
 
-- leaseDuration:  137 seconds
-- renewDeadline: 107 seconds
-- retryPeriod: 26 seconds
+- `leaseDuration:  137 seconds`
+- `renewDeadline: 107 seconds`
+- `retryPeriod: 26 seconds`
 
-See the following steps to set the `multicluster-operators-application`, `multicluster-operators-channel`, `multicluster-operators-standalone-subscription`, or `multicluster-operators-hub-subscription` controllers:
+See the following steps to change the `multicluster-operators-application`, `multicluster-operators-channel`, `multicluster-operators-standalone-subscription`, or `multicluster-operators-hub-subscription` controllers:
 
-. Run `oc get csv -n open-cluster-management` to get and edit the {product-title-short} `csv` file. Use the `advanced-cluster-management` name, for example. The command resembles `oc edit csv -n open-cluster-management advanced-cluster-management.v2.7.0`.
+. Run `oc get csv -n open-cluster-management` to locate the {product-title-short} `csv` file.
 
-. Locate and specify a controller and insert a `- command:`  for a flag with a specified time in seconds. Search `name: <controller>`, for example: `name: multicluster-operators-hub-subscription`
+. Edit the `csv` file by adding the `advanced-cluster-management` name to the `oc edit` command. For example, the command resembles `oc edit csv -n open-cluster-management advanced-cluster-management.v2.7.0`.
 
-. Save the file. The controller restarts to apply the flag. 
+. Locate controller by searching for `<controller>`.
+
+. From the containers section in the controller, insert a `- command` flag. For instance, instert `RetryPeriod`.
+
+. Save the file. The controller automatically restarts to apply the flag. 
 
 . Repeat this procedure for each controller that you want to change.
 
-See the following example output of a successful flag:
+See the following example output of a successful edit to the `-command`, where the `retryPeriod` flag doubles the previously mentioned default time to `52`, which is allotted to retry acquiring `leaderElection`:
+containers:
+
+----
+command:                                                                                                                                                                 
+- /usr/local/bin/multicluster-operators-subscription
+- --sync-interval=60
+- --retry-period=52
+----
