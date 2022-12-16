@@ -11,18 +11,10 @@ You can use the {mce} console to create a {ocp} hosted cluster.
 [#hosted-prerequisites]
 == Prerequisites
 
-See the following prerequisites before creating a hosted cluster:
-
-* You must have a deployed {mce} hub cluster on {ocp-short} version 4.6 or later.
-* You need internet access for your {mce} hub cluster (connected), or a connection to an internal or mirror registry that has a connection to the internet (disconnected) to retrieve the required images for creating the cluster.
-* You must enable the hosted control plane operator. See xref:../hosted_control_planes/hosted_control_planes_intro.adoc#hosted-control-planes-intro[Hosted control planes (Technology Preview)] for more information. 
-* You need an {ocp-short} image pull secret. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/images/managing-images#using-image-pull-secrets[Using image pull secrets] for more information.
-* You need an infrastructure environment with discovered hosts.
-+
-*Note:* When you create a cluster by using a host from your inventory and a disconnected installation, you must store all your settings in the credential in the _Configuration for disconnected installation_ section. You cannot enter them in the cluster creation console editor.
+Maybe say you need to follow configure topic first
 
 [#create-hosted]
-== Creating a hosted control plane cluster
+== Creating a hosted control plane cluster with the console
 
 To create a hosted control plane cluster from the {mce} console, navigate to *Infrastructure* > *Clusters*. On the _Clusters_ page, click *Create cluster* > *Host inventory* > *Hosted* and complete the steps in the console. 
 
@@ -49,6 +41,48 @@ Proxy information that is provided in the infrastructure environment is automati
 When you review your information and optionally customize it before creating the cluster, you can select *YAML: On* to view the YAML content in the panel. You can edit the YAML file with your custom settings, if you have any updates.  
 
 *Note:* You have to run the `oc` command that is provided with the cluster details to import the cluster. When you create the cluster, it is not automatically configured with the management of {product-title-short}.
+
+[#hosted-deploy-cluster-aws]
+=== Deploying a hosted cluster on AWS
+
+After setting up the HyperShift binary and enabling your chosen cluster as the hosting service cluster, you can deploy a hosted cluster on AWS by completing the following steps:
+
+. Set environment variables as follows, replacing variables as needed with your credentials:
++
+----
+export REGION=us-east-1
+export CLUSTER_NAME=clc-name-hs1
+export INFRA_ID=clc-name-hs1
+export BASE_DOMAIN=dev09.red-chesterfield.com
+export AWS_CREDS=$HOME/name-aws
+export PULL_SECRET=/Users/username/pull-secret.txt
+export BUCKET_NAME=acmqe-hypershift
+export BUCKET_REGION=us-east-1
+----
++
+*Best practice:* Make sure `CLUSTER_NAME` and `INFRA_ID` have the same values, otherwise the cluster might not appear correctly in the {mce} console.
+
+. Make sure you are logged into your hub cluster.
+
+. Run the following command to create the hosted cluster:
++
+----
+oc hcp create cluster aws \
+    --name $CLUSTER_NAME \
+    --infra-id $INFRA_ID \
+    --aws-creds $AWS_CREDS \
+    --pull-secret $PULL_SECRET \
+    --region $REGION \
+    --generate-ssh \
+    --node-pool-replicas 3 \
+    --namespace <hypershift-hosting-service-cluster>
+----
+
+. You can check the status of your hosted cluster by running the following command:
++
+----
+oc get hostedclusters -n <hypershift-hosting-service-cluster>
+----
 
 [#importing-hosted-cluster-ui]
 == Importing a hosted control plane cluster with the console
@@ -106,7 +140,7 @@ oc get managedcluster <cluster_name>
 ----
 
 [#hosting-service-cluster-access]
-== Accessing a hosting service cluster
+== Accessing a hosting cluster
 
 The access secrets for hosted control plane clusters are stored in the `hypershift-management-cluster` namespace. Learn about the following secret name formats:
 
