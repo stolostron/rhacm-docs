@@ -1,7 +1,7 @@
 [#cluster-proxy-addon]
 = Using cluster proxy add-ons
 
-In some environments, a managed cluster is behind a firewall and cannot be accessed directly by the hub cluster. To gain access, you can set up a proxy add-on to access the `kube-api` server of the managed cluster to provide a more secure connection. 
+In some environments, a managed cluster is behind a firewall and cannot be accessed directly by the hub cluster. To gain access, you can set up a proxy add-on to access the kube-apiserver and other services of the managed cluster to provide a more secure connection. 
 
 *Required access*: Editor
 
@@ -80,4 +80,27 @@ oc get pods --kubeconfig=cluster-proxy.kubeconfig -n <default>
 +
 Replace the `default` namespace with the namespace that you want to use.
 
-Your hub cluster is now communicating with the `kube-api` of your managed cluster. 
+. Access other services on the managed cluster. Here using prometheus-k8s as an example(this feature only feasible when the managed cluster is a OCP and the service must use service-serving-certificate to generate its server certificates)
+
++
+From the managed cluster, use the following service account token:
++
+----
+export PROMETHEUS_TOKEN=$(kubectl get secret -n openshift-monitoring $(kubectl get serviceaccount -n openshift-monitoring prometheus-k8s -o=jsonpath='{.secrets[0].name}') -o=jsonpath='{.data.token}' | base64 -d)
+----
++
+From the hub cluster, convert the certificate authority to a file by using the following command:
++
+----
+oc get configmap kube-root-ca.crt -o=jsonpath='{.data.ca\.crt}' > hub-ca.crt
+----
+
+. Get prometheus metrics of the managed cluster by using the following commands:
++
+----
+export SERVICE_NAMESPACE=openshift-monitoring
+export SERVICE_NAME=prometheus-k8s
+export SERVICE_PORT=9091
+export SERVICE_PATH="api/v1/query?query=machine_cpu_sockets"
+curl --cacert hub-ca.crt $NEW_SERVER/api/v1/namespaces/$SERVICE_NAMESPACE/services/$SERVICE_NAME:$SERVICE_PORT/proxy-service/$SERVICE_PATH -H "Authorization: Bearer $PROMETHEUS_TOKEN"
+----
