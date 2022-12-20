@@ -24,6 +24,6 @@ children:
     - title: Maintaining scrum board
       permalink: /board_maintenance
     - title: divider
-    - title: Issue points
-      permalink: /issue_points
+    - title: Sizing work
+      permalink: /sizing_work
 ---

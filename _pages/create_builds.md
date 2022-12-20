@@ -11,10 +11,9 @@ Learn more about creating a build for a new version in Pantheon.
 
 You must have the following:
 
-* Minimum KCS1 access to the Customer Portal and Pantheon
+* `title-publisher` role on Pantheon
 * Connection to the VPN
-* Logged in to the Customer Portal
-* Logged in to the Pantheon UI
+* Logged in on Pantheon
 
 ## Creating a build
 

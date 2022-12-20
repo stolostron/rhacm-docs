@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Links
+title: Quick links
 permalink: /
 ---
 

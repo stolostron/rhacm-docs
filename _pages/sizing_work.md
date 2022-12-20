@@ -1,11 +1,11 @@
 ---
 layout: page
-title: GitHub issue points
-permalink: issue_points
+title: Sizing work
+permalink: sizing_work
 horizontal: false
 ---
 
-Not all issues are created equal. To help plan our anticipated workloads for each sprint and distribute issues efficiently, we assign points to GitHub issues that provide an estimate for how difficult and time-intensive each issue is. While assigning points is a subjective process, there are still some guidelines you can follow.
+Not all issues are created equal. To help plan our anticipated workloads for each sprint and distribute issues efficiently, we assign points to and Jira issues that provide an estimate for how difficult and time-intensive each issue is. While assigning points is a subjective process, there are still some guidelines you can follow.
 
 ## General rules
 

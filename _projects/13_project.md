@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Red Hat uni
-description: Training and learning materials for new hires, including courses for further development.
-img: assets/img/13-learning.png
-redirect: https://start.learning.redhat.com
+title: Jira
+description: Your main workspace on Jira where you can find an overview of your assigned issues.
+img: assets/img/13-jira.png
+redirect: https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=6387&quickFilter=101591
 importance: 13
 category: work
 ---

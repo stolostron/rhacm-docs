@@ -98,21 +98,17 @@ If you are commenting about changes that need to be made, please create an issue
 
 ## Modals
 
-Using the following modals is acceptable:
+See the following table on the use of modals:
 
-* Can: Use to indicate ability.
-* Might: Use to indicate possibility.
-* Must: Use instead of "have to" or "need to" unless it is too restrictive. Example: "You don't have to" is different than "you must not".
-
-Avoid the following modals:
-
-* Could: Don't use in present tense. Use "can" or "might" instead.
-* Should: Avoid by writing in a more direct way.
-* Would: Avoid as an auxiliary verb. Only use when referring to an unfulfilled condition ("x would have resulted in y").
-
-Use the following modals only in the manner described by the IBM style guide:
-
-* May: Indicates permission, but it is better to use "can" or "might".
+| **Modal** | | **How to use** |
+| ----------- | | ----------- | | ----------- |
+| Can | | Use to indicate ability. | 
+| Could | | Don't use in present tense. Use can or might instead. |
+| May | | Only use to indicate permission, use can or might in other instances. |
+| Might | | Use to indicate possibility. |
+| Must | | Use instead of have to or need to unless it is too restrictive. For example, xou don't have to is different than you must not.  |
+| Should | | Do not use. |
+| Would | | Do not use as an auxiliary verb. Only use when referring to an unfulfilled condition (x would have resulted in y). |
 
 ## IP addresses
 
