@@ -101,8 +101,8 @@ If you are commenting about changes that need to be made, please create an issue
 See the following table on the use of modals:
 
 | **Modal** | | **How to use** |
-| ----------- | | ----------- | | ----------- |
-| Can | | Use to indicate ability. | 
+| ----------- | | ----------- |
+| Can | | Use to indicate ability. |
 | Could | | Don't use in present tense. Use can or might instead. |
 | May | | Only use to indicate permission, use can or might in other instances. |
 | Might | | Use to indicate possibility. |
