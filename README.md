@@ -209,17 +209,17 @@ This website is already deployed with [GitHub Pages](https://pages.github.com/).
 ### Manual deployment to GitHub Pages
 
 Run the following script from the root directory of your repository:
-   ```bash
-   ./bin/deploy
-   ```
+```bash
+./bin/deploy
+```
 The previous command uses the `master` branch for the source code and deploys the webpage to `gh-pages`.
 
 ### Deployment to a different hosting server
 
 Run the following command to build your website for other hosting options besides GitHub Pages:
-   ```bash
-   bundle exec jekyll build
-   ```
+```bash
+bundle exec jekyll build
+```
 The previous command will create or update static HTML files for other hosting platforms in the `__site_` folder.
 
 **Note:** Correctly set the `url` and `baseurl` fields in `_config.yml` before building the website. If you are deploying your website to `your-domain.com/your-project/`, you must set `url: your-domain.com` and `baseurl: /your-project/`. If you are deploing directly to `your-domain.com`, leave `baseurl` blank.
