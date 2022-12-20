@@ -4,7 +4,7 @@
 
 # Building with Jekyll
 
-If you only want to maintain this website, you can skip to [Maintaining](/README.md#Maintaining-and-updating). If you want to create a new project similar to this website, you need Jekyll and Ruby. See the following topics for a complete guide on installing Jekyll and Ruby on MacOS.
+If you only want to maintain this website, you can skip to [Maintaining and updating](/README.md#Maintaining-and-updating). If you want to create a new project similar to this website, you need Jekyll and Ruby. See the following topics for a complete guide on installing Jekyll and Ruby on MacOS.
 
 ## Prerequisites
 
