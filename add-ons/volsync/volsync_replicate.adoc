@@ -79,7 +79,7 @@ A `ManagedClusterAddOn` resource should be created automatically on your hub clu
 [#volsync-install-mcaddon]
 === Installing VolSync using a ManagedClusterAddOn
 
-To install VolSync on the managed cluster by adding a `ManagedClusterSetAddOn` manually, complete the following steps:
+To install VolSync on the managed cluster by adding a `ManagedClusterAddOn` manually, complete the following steps:
 
 . On the hub cluster, create a YAML file called `volsync-mcao.yaml` that contains content that is similar to the following example: 
 +
@@ -129,7 +129,7 @@ This example provides the steps to configure an Rsync replication from a persist
 .. Run the following command on the destination cluster to create the namespace:
 +
 ----
-$ kubectl create ns <destination-ns>
+oc create ns <destination-ns>
 ----
 +
 Replace `destination-ns` with a name for the namespace that will contain your destination persistent volume claim.
@@ -138,7 +138,6 @@ Replace `destination-ns` with a name for the namespace that will contain your de
 +
 [source,yaml]
 ----
----
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
@@ -167,7 +166,7 @@ The `storageClassName` and `volumeSnapshotClassName` are optional parameters. Sp
 .. Run the following command on the destination cluster to create the `replicationdestination` resource:
 +
 ----
-$ kubectl create -n <destination-ns> -f replication_destination.yaml
+oc create -n <destination-ns> -f replication_destination.yaml
 ----
 +
 Replace `destination-ns` with the name of the namespace where your destination is located.
@@ -184,8 +183,8 @@ After the `replicationdestination` resource is created, following parameters and
 .. Run the following command to copy the value of `.status.rsync.address` to use on the source cluster:
 +
 ----
-$ ADDRESS=`kubectl get replicationdestination <destination> -n <destination-ns> --template={{.status.rsync.address}}`
-$ echo $ADDRESS
+ADDRESS=`oc get replicationdestination <destination> -n <destination-ns> --template={{.status.rsync.address}}`
+echo $ADDRESS
 ----
 +
 Replace `destination` with the name of your replication destination custom resource.
@@ -201,8 +200,8 @@ a831264645yhrjrjyer6f9e4a02eb2-5592c0b3d94dd376.elb.us-east-1.amazonaws.com
 .. Run the following command to copy the name of the secret and the contents of the secret that are provided as the value of `.status.rsync.sshKeys`.
 +
 ----
-$ SSHKEYS=`kubectl get replicationdestination <destination> -n <destination-ns> --template={{.status.rsync.sshKeys}}`
-$ echo $SSHKEYS
+SSHKEYS=`oc get replicationdestination <destination> -n <destination-ns> --template={{.status.rsync.sshKeys}}`
+echo $SSHKEYS
 ----
 +
 Replace `destination` with the name of your replication destination custom resource.
@@ -225,7 +224,6 @@ volsync-rsync-dst-src-destination-name
 +
 [source,yaml]
 ----
----
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
@@ -234,7 +232,7 @@ metadata:
 spec:
   sourcePVC: <persistent_volume_claim>
   trigger:
-    schedule: "*/3 * * * *"
+    schedule: "*/3 * * * *" #/*
   rsync:
     sshKeys: <mysshkeys>
     address: <my.host.com>
@@ -262,7 +260,7 @@ You can now set up the synchronization method of the persistent volume.
 .. Copy the SSH secret from the destination cluster by entering the following command against the destination cluster:
 +
 ----
-$ kubectl get secret -n <destination-ns> $SSHKEYS -o yaml > /tmp/secret.yaml
+oc get secret -n <destination-ns> $SSHKEYS -o yaml > /tmp/secret.yaml
 ----
 +
 Replace `destination-ns` with the namespace of the persistent volume claim where your destination is located.
@@ -270,7 +268,7 @@ Replace `destination-ns` with the namespace of the persistent volume claim where
 .. Open the secret file in the `vi` editor by entering the following command:
 +
 ----
-$ vi /tmp/secret.yaml
+vi /tmp/secret.yaml
 ----
 
 .. In the open secret file on the destination cluster, make the following changes:
@@ -281,15 +279,15 @@ $ vi /tmp/secret.yaml
 .. On the source cluster, create the secret file by entering the following command on the source cluster:
 +
 ----
-$ kubectl create -f /tmp/secret.yaml
+oc create -f /tmp/secret.yaml
 ----
 
 .. On the source cluster, modify the `replication_source.yaml` file by replacing the value of the `address` and `sshKeys` in the `ReplicationSource` object with the values that you noted from the destination cluster by entering the following commands:
 +
 ----
-$ sed -i "s/<my.host.com>/$ADDRESS/g" replication_source.yaml
-$ sed -i "s/<mysshkeys>/$SSHKEYS/g" replication_source.yaml
-$ kubectl create -n <source> -f replication_source.yaml
+sed -i "s/<my.host.com>/$ADDRESS/g" replication_source.yaml
+sed -i "s/<mysshkeys>/$SSHKEYS/g" replication_source.yaml
+oc create -n <source> -f replication_source.yaml
 ----
 +
 Replace `my.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it.
@@ -303,7 +301,7 @@ Replace `source` with the name of the persistent volume claim where your source 
 .. Verify that the replication completed by running the following command on the `ReplicationSource` object:
 +
 ----
-$ kubectl describe ReplicationSource -n <source-ns> <source>
+oc describe ReplicationSource -n <source-ns> <source>
 ----
 +
 Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
@@ -371,7 +369,6 @@ By sharing the same S3 bucket, each `ReplicationSource` has write access to the 
 +
 [source,yaml]
 ----
----
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
@@ -379,17 +376,17 @@ metadata:
 spec:
   sourcePVC: <source>
   trigger:
-    schedule: "*/30 * * * *"
-restic:
-  pruneIntervalDays: 14
-  repository: <restic-config>
-  retain:
-    hourly: 6
-    daily: 5
-    weekly: 4
-    monthly: 2
-    yearly: 1
-  copyMethod: Clone
+    schedule: "*/30 * * * *" #\*
+  restic:
+    pruneIntervalDays: 14
+    repository: <restic-config>
+    retain:
+      hourly: 6
+      daily: 5
+      weekly: 4
+      monthly: 2
+      yearly: 1
+    copyMethod: Clone
   # The StorageClass to use when creating the PiT copy (same as source PVC if omitted)
   #storageClassName: my-sc-name
   # The VSC to use if the copy method is Snapshot (default if omitted)
@@ -410,6 +407,14 @@ Best practice: Use `Clone` for the value of `CopyMethod` to ensure that a point-
 +
 For additional information about the backup options, see https://volsync.readthedocs.io/en/latest/usage/restic/index.html#backup-options[Backup options] in the VolSync documentation.
 
+*Note:* Restic movers run without root permissions by default. If you want to run restic movers as root, run the following command to add the elevated permissions annotation to your namespace.
+
+----
+oc annotate namespace <namespace> volsync.backube/privileged-movers=true
+----
+
+Replace `<namespace>` with the name of your namespace.
+
 [#restore-restic-backup]
 === Restoring a restic backup
 
@@ -424,11 +429,11 @@ apiVersion: v1
 metadata:
   name: <pvc-name>
 spec:
-accessModes:
-  - ReadWriteOnce
-resources:
-  requests:
-    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
 ----
 +
 Replace `pvc-name` with the name of the new persistent volume claim.
@@ -437,7 +442,6 @@ Replace `pvc-name` with the name of the new persistent volume claim.
 +
 [source,yaml]
 ----
----
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
@@ -470,7 +474,6 @@ Complete the following steps to configure an Rclone replication:
 +
 [source,yaml]
 ----
----
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
@@ -479,7 +482,7 @@ metadata:
 spec:
   sourcePVC: <source-pvc>
   trigger:
-    schedule: "*/6 * * * *"
+    schedule: "*/6 * * * *" #\*
   rclone:
     rcloneConfigSection: <intermediate-s3-bucket>
     rcloneDestPath: <destination-bucket>
@@ -513,7 +516,6 @@ Replace `my-vsc` with the name of the `VolumeSnapshotClass` to use, if you speci
 +
 [source,yaml]
 ----
----
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
@@ -521,7 +523,7 @@ metadata:
   namespace: dest
 spec:
   trigger:
-    schedule: "3,9,15,21,27,33,39,45,51,57 * * * *"
+    schedule: "3,9,15,21,27,33,39,45,51,57 * * * *" #/*
   rclone:
     rcloneConfigSection: <intermediate-s3-bucket>
     rcloneDestPath: <destination-bucket>
@@ -550,3 +552,11 @@ The `capacity` specifies the size of the destination volume, which must be large
 Replace `my-sc` with the name of the storage class that you want to use as the destination for your point-in-time copy. If not specified, the system storage class is used.
 +
 Replace `my-vsc` with the name of the `VolumeSnapshotClass` to use, if you specified `Snapshot` as your `copyMethod`. This is not required for other types of `copyMethod`. If not included, the system default `VolumeSnapshotClass` is used. 
+
+*Note:* Rclone movers run without root permissions by default. If you want to run Rclone movers as root, run the following command to add the elevated permissions annotation to your namespace.
+
+----
+oc annotate namespace <namespace> volsync.backube/privileged-movers=true
+----
+
+Replace `<namespace>` with the name of your namespace.
