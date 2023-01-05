@@ -98,7 +98,7 @@ If you are commenting about changes that need to be made, please create an issue
 
 ## Modals
 
-See the following table on the use of modals:
+See the IBM Style manual and Red Hat Supplementary manual regularly for guidance. For a short summary, see the following table on the use of modals:
 
 | **Modal** | | **How to use** |
 | ----------- | | ----------- |
