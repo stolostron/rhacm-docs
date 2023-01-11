@@ -1,0 +1,119 @@
+[#setting-up-ansible]
+= Configuring Ansible Tower 
+
+{product-title-short} is integrated with Ansible Tower automation so that you can create prehook and posthook AnsibleJob instances for Git subscription application management. With Ansible Tower jobs, you can automate tasks and integrate with external services, such as Slack and PagerDuty services. Your Git repository resource root path will contain `prehook` and `posthook` directories for Ansible Tower jobs that run as part of deploying the app, updating the app, or removing the app from a cluster.
+
+*Required access:* Cluster administrator
+
+* <<ansible-configuration,Ansible configuration>>
+* <<ansible-secret-reconciliation,Setting secret reconciliation>>
+* <<ansible-sample-yaml,Using Ansible sample YAML files>>
+
+
+
+[#ansible-configuration]
+== Configuring Ansible
+
+You can configure Ansible Tower configurations with the following tasks:
+
+[#ansible-secrets]
+=== Setting up Ansible secrets
+
+You must create an Ansible Tower secret CR in the same subscription namespace. The Ansible Tower secret is limited to the same subscription namespace.
+
+Create the secret from the console by filling in the `Ansible Tower secret name` section. To create the secret using terminal, edit and apply the following `yaml`:
+ 
+Run the following command to add your YAML file:
+
+----
+oc apply -f
+----
+
+See the following YAML sample:
+
+*Note:* The `namespace` is the same namespace as the subscription namespace. The `stringData:token` and `host` are from the Ansible Tower.
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: toweraccess
+  namespace: same-as-subscription
+type: Opaque
+stringData:
+  token: ansible-tower-api-token
+  host: https://ansible-tower-host-url
+----
+
+When the app subscription controller creates prehook and posthook AnsibleJobs, if the secret from subscription `spec.hooksecretref` is available, then it is sent to the AnsibleJob CR `spec.tower_auth_secret` and the AnsibleJob can access the Ansible Tower.
+
+[#ansible-secret-reconciliation]
+== Seting secret reconciliation
+
+For a main-sub subscription with prehook and posthook AnsibleJobs, the main-sub subscription should be reconciled after all prehook and posthook AnsibleJobs or main subscription are updated in the Git repository. 
+
+Prehook AnsibleJobs and the main subscription continuously reconcile and relaunch a new pre-AnsibleJob instance.
+
+. After the pre-AnsibleJob is done, re-run the main subscription. 
+. If there is any specification change in the main subscription, re-deploy the subscription. The main subscription status should be updated to align with the redeployment procedure. 
+. Reset the hub subscription status to `nil`. The subscription is refreshed along with the subscription deployment on target clusters. 
+
++
+When the deployment is finished on the target cluster, the subscription status on the target cluster is updated to `"subscribed"` or `"failed"`, and is synced to the hub cluster subscription status.
+
+. After the main subscription is done, relaunch a new post-AnsibleJob instance.
+
+. Verify that the DONE subscription is updated. See the following output:
+
+- subscription.status == `"subscribed"`
+- subscription.status == `"propagated"` with all of the target clusters `"subscribed"`
+
+When an AnsibleJob CR is created, A Kubernetes job CR is created to launch an Ansible Tower job by communicating to the target Ansible Tower. When the job is complete, the final status for the job is returned to AnsibleJob `status.ansibleJobResult`. 
+
+*Notes:* 
+
+The AnsibleJob status.conditions is reserved by the Ansible Job operator for storing the creation of Kubernetes job result. The status.conditions does not reflect the actual Ansible Tower job status. 
+
+The subscription controller checks the Ansible Tower job status by the `AnsibleJob.status.ansibleJobResult` instead of `AnsibleJob.status.conditions`.
+
+As previously mentioned in the prehook and posthook AnsibleJob workflow, when the main subscription is updated in Git repository, a new prehook and posthook AnsibleJob instance is created. As a result, one main subscription can link to multiple AnsibleJob instances. 
+
+Four fields are defined in subscription.status.ansibleJobs:
+
+- lastPrehookJobs: The most recent prehook AnsibleJobs
+- prehookJobsHistory: All the prehook AnsibleJobs history
+- lastPosthookJobs: The most recent posthook AnsibleJobs
+- posthookJobsHistory: All the posthook AnsibleJobs history
+
+
+[#ansible-sample-yaml]
+== Using Ansible sample YAML files 
+
+See the following sample of an AnsibleJob `.yaml` file in a Git prehook and posthook folder:
+
+[source,yaml]
+----
+apiVersion: tower.ansible.com/v1alpha1
+kind: AnsibleJob
+metadata:
+  name: demo-job-001
+  namespace: default
+spec:
+  tower_auth_secret: toweraccess
+  job_template_name: Demo Job Template
+  extra_vars:
+    cost: 6.88
+    ghosts: ["inky","pinky","clyde","sue"]
+    is_enable: false
+    other_variable: foo
+    pacman: mrs
+    size: 8
+    targets_list:
+    - aaa
+    - bbb
+    - ccc
+    version: 1.23.45
+  job_tags: "provision,install,configuration"
+  skip_tags: "configuration,restart"
+----
