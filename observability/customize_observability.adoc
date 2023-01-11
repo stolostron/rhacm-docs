@@ -5,25 +5,25 @@ Review the following sections to learn more about customizing, managing, and vie
 
 Collect logs about new information that is created for observability resources with the `must-gather` command. For more information, see the _Must-gather_ section in the link:../troubleshooting/troubleshooting_intro.adoc[Troubleshooting documentation].
 
-* <<creating-custom-rules,Creating custom rules>>
-* <<configuring-alertmanager,Configuring AlertManager>>
-* <<adding-custom-metrics, Adding custom metrics>>
-* <<removing-default-metrics,Removing default metrics>>
-* <<export-metrics-to-external-endpoints,Export metrics to external endpoints>>
+- <<creating-custom-rules,Creating custom rules>>
+- <<configuring-alertmanager,Configuring AlertManager>>
+- <<forward-alerts,Forwarding alerts>>
+- <<adding-custom-metrics, Adding custom metrics>>
+- <<removing-default-metrics,Removing default metrics>>
+- <<export-metrics-to-external-endpoints,Export metrics to external endpoints>>
 ** <<creating-the-kubernetes-secret-for-external-endpoint,Creating the Kubernetes secret for an external endpoint>>
 ** <<adding-user-workload-metrics,Adding user workload metrics>>
 ** <<updating-the-multiclusterobservability-cr,Updating the multiclusterobservability CR>>
 ** <<viewing-the-status-of-metrics-export,Viewing the status of metric export>>
-* <<adding-advanced-config,Adding _advanced_ configuration>>
-* <<updating-replicas,Updating the multiclusterobservability CR replicas from the console>>
-* <<forward-alerts,Forwarding alerts>>
-* <<customizing-route-cert,Customizing route certification>>
-* <<customizing-certificates-object-store,Customizing certificates for accessing the object store>>
-* <<viewing-and-exploring-data,Viewing and exploring data>>
+- <<adding-advanced-config,Adding _advanced_ configuration>>
+- <<updating-replicas,Updating the multiclusterobservability CR replicas from the console>>
+- <<customizing-route-cert,Customizing route certification>>
+- <<customizing-certificates-object-store,Customizing certificates for accessing the object store>>
+- <<viewing-and-exploring-data,Viewing and exploring data>>
 ** <<viewing-etcd-grafana,Viewing the etcd table>>
 ** <<viewing-cluster-fleet-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster fleet service-level overview for the Kubernetes API server dashboard>>
 ** <<viewing-cluster-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster service-level overview for the Kubernetes API server dashboard>>
-* <<disable-observability,Disable observability>>
+- <<disable-observability,Disable observability>>
 
 [#creating-custom-rules]
 == Creating custom rules
@@ -121,6 +121,59 @@ route:
 ----
 
 Your changes are applied immediately after it is modified. For an example of AlertManager, see https://github.com/prometheus/alertmanager/blob/master/doc/examples/simple.yml[prometheus/alertmanager].
+
+[#forward-alerts]
+== Forwarding alerts
+
+After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to the hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system. 
+
+View the following example of the `alertmanager-config` YAML file:
+
+[source,yaml]
+----
+global:
+  slack_api_url: '<slack_webhook_url>'
+
+route:
+  receiver: 'slack-notifications'
+  group_by: [alertname, datacenter, app]
+
+receivers:
+- name: 'slack-notifications'
+  slack_configs:
+  - channel: '#alerts'
+    text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
+----
+
+If you want to configure a proxy for alert forwarding, add the following `global` entry to the `alertmanager-config` YAML file:
+
+[source,yaml]
+----
+global:
+  slack_api_url: '<slack_webhook_url>'
+  http_config:
+    proxy_url: http://****
+----
+
+[#disabling-forward-alerts]
+=== Disabling forward alerts for managed clusters
+
+Disable alert forwarding for managed clusters. Add the following annotation to the `MultiClusterObservability` custom resource:
+
+[source,yaml]
+----
+metadata:
+      annotations:
+        mco-disable-alerting: "true"
+----
+
+When you set the annotation, the alert forwarding configuration on the managed clusters is reverted. Any changes made to the `ocp-monitoring-config` ConfigMap in the `openshift-monitoring` namespace are reverted. Setting the annotation ensures that the `ocp-monitoring-config` ConfigMap is no longer managed or updated by the observability operator endpoint. After you update the configuration, the Prometheus instance on your managed cluster restarts.
+
+*Important:* Metrics on your managed cluster are lost if you have a Prometheus instance with a persistent volume for metrics, and the Prometheus instance restarts. However, metrics from the hub cluster are not affected.
+
+When the changes are reverted, a ConfigMap named `cluster-monitoring-reverted` is createde in the `open-cluster-management-addon-observability` namespace. Any new, manually added alert forward configurations are not reverted from the ConfigMap. 
+
+Verify that the hub cluster alert manager is no longer propagating managed cluster alerts to third-party messaging tools. See _
 
 [#adding-custom-metrics]
 == Adding custom metrics
@@ -335,41 +388,6 @@ spec:
 
 For more information about the parameters within the `mco observability` CR, see the link:../apis/observability.json.adoc#observability-api[Observability API].
 
-[#forward-alerts]
-== Forwarding alerts
-
-After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to the hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system. 
-
-View the following example of the `alertmanager-config` YAML file:
-
-[source,yaml]
-----
-global:
-  slack_api_url: '<slack_webhook_url>'
-
-route:
-  receiver: 'slack-notifications'
-  group_by: [alertname, datacenter, app]
-
-receivers:
-- name: 'slack-notifications'
-  slack_configs:
-  - channel: '#alerts'
-    text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
-----
-
-If you want to configure a proxy for alert forwarding, add the following `global` entry to the `alertmanager-config` YAML file:
-
-[source,yaml]
-----
-global:
-  slack_api_url: '<slack_webhook_url>'
-  http_config:
-    proxy_url: http://****
-----
-
-To learn more, see the https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation].
-
 [#customizing-route-cert]
 == Customizing route certification
 
@@ -491,4 +509,4 @@ From the {product-title-short} console _Clusters_ page, add the `observability=d
 
 *Note*: When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
 
-For more information on monitoring data from the console with the observability service, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
+To learn more about alert forwarding, see the https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation]. For more information on monitoring data from the console with the observability service, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
