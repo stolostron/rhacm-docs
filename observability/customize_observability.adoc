@@ -11,10 +11,11 @@ Collect logs about new information that is created for observability resources w
 * <<removing-default-metrics,Removing default metrics>>
 * <<export-metrics-to-external-endpoints,Export metrics to external endpoints>>
 ** <<creating-the-kubernetes-secret-for-external-endpoint,Creating the Kubernetes secret for an external endpoint>>
+** <<adding-user-workload-metrics,Adding user workload metrics>>
 ** <<updating-the-multiclusterobservability-cr,Updating the multiclusterobservability CR>>
 ** <<viewing-the-status-of-metrics-export,Viewing the status of metric export>>
 * <<adding-advanced-config,Adding _advanced_ configuration>>
-* <<updating-replicas,Updating the _multiclusterobservability_ CR replicas from the console>>
+* <<updating-replicas,Updating the multiclusterobservability CR replicas from the console>>
 * <<forward-alerts,Forwarding alerts>>
 * <<customizing-route-cert,Customizing route certification>>
 * <<customizing-certificates-object-store,Customizing certificates for accessing the object store>>
@@ -292,9 +293,35 @@ spec:
 
 For descriptions of all the parameters that can added into the `advanced` configuration, see the link:../apis/observability.json.adoc[Observability API].
 
+[#adding-user-workload-metrics]
+== Adding user workload metrics
+
+You can collect {ocp-short} user-defined metrics from workloads in {ocp-short}. You must enable monitoring, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/monitoring/enabling-monitoring-for-user-defined-projects[Enabling monitoring for user-defined projects].
+
+If you have a managed cluster with monitoring for user-defined workloads enabled, the user workloads are located in the `test` namespace and generate metrics. These metrics are collected by Prometheus from the {ocp-short} user workload.
+
+Collect the metrics from the user workloads by creating a ConfigMap named, `observability-metrics-custom-allowlist` in the `test` namespace. View the following example:
+
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: observability-metrics-custom-allowlist
+  namespace: test
+data:
+  uwl_metrics_list.yaml: |
+    names:
+      - sample_metrics
+----
+
+- The `uwl_metrics_list.yaml` is the key for the ConfigMap data.
+
+- The value of the ConfigMap data is in YAML format. The `names` section includes the list of metric names, which you want to collect from the `test` namespace. After you create the ConfigMap, the specified metrics from the target namespace is collected by the observability collector and pushed to the hub cluster.
+
 
 [#updating-replicas]
-== Updating the _multiclusterobservability_ CR replicas from the console
+== Updating the multiclusterobservability CR replicas from the console
 
 If your workload increases, increase the number of replicas of your observability pods. Navigate to the {ocp} console from your hub cluster. Locate the `multiclusterobservability` custom resource (CR), and update the `replicas` parameter value for the component where you want to change the replicas. Your updated YAML might resemble the following content:
 
