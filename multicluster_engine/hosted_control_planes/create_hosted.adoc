@@ -1,0 +1,163 @@
+[#hosted-control-planes-create]
+= Creating hosted control plane clusters (Technology Preview)
+
+You can use the {mce} console to create a {ocp} hosted cluster.
+
+* <<hosted-prerequisites,Prerequisites>>
+* <<create-hosted,Creating a hosted cluster>>
+* <<importing-hosted-cluster-ui,Importing a hosted control plane cluster with the console>>
+* <<importing-hosted-cluster-cli,Importing a hosted control plane cluster with the CLI>>
+
+[#hosted-prerequisites]
+== Prerequisites
+
+You must configure hosted control planes before you can create hosted control plane clusters. See xref:../configure_hosted.adoc#hosted-control-planes-configure[Configure hosted control planes (Technology Preview)] for more information.
+
+[#create-hosted]
+== Creating a hosted control plane cluster with the console
+
+To create a hosted control plane cluster from the {mce} console, navigate to *Infrastructure* > *Clusters*. On the _Clusters_ page, click *Create cluster* > *Host inventory* > *Hosted* and complete the steps in the console. 
+
+*Important:* When you create a cluster, the {mce} controller creates a namespace for the cluster and its resources. Ensure that you include only resources for that cluster instance in that namespace. Destroying the cluster deletes the namespace and all of the resources in it.
+
+*Tip:* Select *YAML: On* to view content updates as you enter the information in the console.
+
+If you want to add your cluster to an existing cluster set, you must have the correct permissions on the cluster set to add it. If you do not have `cluster-admin` privileges when you are creating the cluster, you must select a cluster set on which you have `clusterset-admin` permissions. If you do not have the correct permissions on the specified cluster set, the cluster creation fails. Contact your cluster administrator to provide you with `clusterset-admin` permissions if you do not have any cluster set options to select.
+
+Every managed cluster must be associated with a managed cluster set. If you do not assign the managed cluster to a `ManagedClusterSet`, it is automatically added to the `default` managed cluster set.
+
+The release image identifies the version of the {ocp-short} image that is used to create the cluster. Hosted control plane clusters must use one of the provided release images.
+
+Proxy information that is provided in the infrastructure environment is automatically added to the proxy fields. You can use the existing information, overwrite it, or add the information if you want to enable a proxy. The following list contains the required information for creating a proxy: 
+
+* HTTP proxy URL: The URL that should be used as a proxy for `HTTP` traffic. 
+
+* HTTPS proxy URL: The secure proxy URL that should be used for `HTTPS` traffic. If no value is provided, the same value as the `HTTP Proxy URL` is used for both `HTTP` and `HTTPS`.
+
+* No proxy domains: A comma-separated list of domains that should bypass the proxy. Begin a domain name with a period `.` to include all of the subdomains that are in that domain. Add an asterisk `*` to bypass the proxy for all destinations. 
+
+* Additional trust bundle: The contents of the certificate file that is required to access the mirror registry.
+  
+When you review your information and optionally customize it before creating the cluster, you can select *YAML: On* to view the YAML content in the panel. You can edit the YAML file with your custom settings, if you have any updates.  
+
+*Note:* You have to run the `oc` command that is provided with the cluster details to import the cluster. When you create the cluster, it is not automatically configured with the management of {product-title-short}.
+
+[#hosted-deploy-cluster-aws]
+=== Deploying a hosted cluster on AWS
+
+After setting up the HyperShift command line interface and enabling the `local-cluster` as the hosting cluster, you can deploy a hosted cluster on AWS by completing the following steps:
+
+. Set environment variables as follows, replacing variables as needed with your credentials:
++
+----
+export REGION=us-east-1
+export CLUSTER_NAME=clc-name-hs1
+export INFRA_ID=clc-name-hs1
+export BASE_DOMAIN=dev09.red-chesterfield.com
+export AWS_CREDS=$HOME/name-aws
+export PULL_SECRET=/Users/username/pull-secret.txt
+export BUCKET_NAME=acmqe-hypershift
+export BUCKET_REGION=us-east-1
+----
++
+*Best practice:* Make sure `CLUSTER_NAME` and `INFRA_ID` have the same values, otherwise the cluster might not appear correctly in the {mce} console.
++
+*Tip:* To see descriptions for each variable, run the following command:
+----
+hypershift create cluster aws --help
+----
+
+. Make sure you are logged into your hub cluster.
+
+. Run the following command to create the hosted cluster:
++
+----
+hypershift create cluster aws \
+    --name $CLUSTER_NAME \
+    --infra-id $INFRA_ID \
+    --aws-creds $AWS_CREDS \
+    --pull-secret $PULL_SECRET \
+    --region $REGION \
+    --generate-ssh \
+    --node-pool-replicas 3 \
+    --namespace <hypershift-hosting-service-cluster>
+----
++
+*Note:* By default, all `HostedCluster` and `NodePool` custom resources are created in the `clusters` namespace. If you specify the `--namespace <namespace>` parameter, `HostedCluster` and `NodePool` custom resources are created in the namespace you chose.
+
+. You can check the status of your hosted cluster by running the following command:
++
+----
+oc get hostedclusters -n <hypershift-hosting-service-cluster>
+----
+
+[#importing-hosted-cluster-ui]
+== Importing a hosted control plane cluster with the console
+
+You can import a hosted control plane cluster with the console by navigating to *Infrastructure* > *Clusters* and selecting the hosted cluster you want to import. Then, click *Import hosted cluster*.
+
+[#importing-hosted-cluster-cli]
+== Importing a hosted control plane cluster with the CLI
+
+You can import a hosted control cluster with the CLI by completing the following steps:
+
+. Add an annotation to the `HostedCluster` custom resource by running the following command:
++
+----
+oc edit hostedcluster <cluster_name> -n clusters
+----
++
+Replace `<cluster_name>` with the name of your hosted cluster.
+
+. Run the following command to add the annotations to the `HostedCluster` custom resource:
++
+----
+cluster.open-cluster-management.io/hypershiftdeployment: local-cluster/<cluster_name>
+cluster.open-cluster-management.io/managedcluster-name: <cluster_name>
+----
++
+Replace `<cluster_name>` with the name of your hosted cluster.
+
+. Create your `ManagedCluster` resource by using the following sample YAML file:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:  
+  annotations:    
+    import.open-cluster-management.io/hosting-cluster-name: local-cluster    
+    import.open-cluster-management.io/klusterlet-deploy-mode: Hosted
+    open-cluster-management/created-via: other  
+  labels:    
+    cloud: auto-detect    
+    cluster.open-cluster-management.io/clusterset: default    
+    name: <cluster_name>  
+    vendor: OpenShift  
+  name: <cluster_name>
+spec:  
+  hubAcceptsClient: true  
+  leaseDurationSeconds: 60
+----
++
+Replace `<cluster_name>` with the name of your hosted cluster.
+
+. Run the following command to apply the resource:
++
+----
+oc apply
+----
+
+. After the import process is complete, your hosted cluster becomes visible in the console. You can also check the status of your hosted cluster by running the following command:
++
+----
+oc get managedcluster <cluster_name>
+----
+
+[#hosting-service-cluster-access]
+== Accessing a hosting cluster
+
+The access secrets for hosted control plane clusters are stored in the `hypershift-management-cluster` namespace. Learn about the following secret name formats:
+
+- `kubeconfig` secret: `<hostingNamespace>-<name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
+- `kubeadmin` password secret: `<hostingNamespace>-<name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
