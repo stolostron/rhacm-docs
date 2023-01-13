@@ -1,13 +1,16 @@
 [#configuring-ansible]
 = Configuring {aap-short}  
  
- With {aap-short} jobs, you can automate tasks and integrate with external services, such as Slack and PagerDuty services. Your Git repository resource root path will contain `prehook` and `posthook` directories for {aap-short} jobs that run as part of deploying the app, updating the app, or removing the app from a cluster.
+ With {aap-short} jobs, you can automate tasks and integrate with external services, such as Slack and PagerDuty services. Your Git repository resource root path will contain `prehook` and `posthook` directories for {aap-short} jobs that run as part of deploying the app, updating the application, or removing the application from a cluster.
 
 *Required access:* Cluster administrator
 
 * <<ansible-secrets,Setting up {aap-short} secrets>>
 * <<ansible-secret-reconciliation,Setting secret reconciliation>>
 * <<ansible-sample-yaml,Using {aap-short} sample YAML files>>
+* <<launch-workflow,Launching workflow>>
+
+
 
 You can configure {aap-short} configurations with the following tasks:
 
@@ -16,18 +19,12 @@ You can configure {aap-short} configurations with the following tasks:
 
 You must create an {aap-short} secret custom resources in the same subscription namespace. The {aap-short} secret is limited to the same subscription namespace.
 
-Create the secret from the console by filling in the `{aap-short} secret name` section. To create the secret using terminal, edit and apply the following `yaml`:
- 
-Run the following command to add your YAML file:
+. Create the secret from the console by filling in the `{aap-short} secret name` section. To create the secret using terminal, edit and apply the sample `yaml` file: 
 
-----
-oc apply -f
-----
-
-See the following YAML sample:
-
++
 *Note:* The `namespace` is the same namespace as the subscription namespace. The `stringData:token` and `host` are from the {aap-short}.
 
++
 [source,yaml]
 ----
 apiVersion: v1
@@ -41,56 +38,62 @@ stringData:
   host: https://ansible-tower-host-url
 ----
 
-When the app subscription controller creates prehook and posthook AnsibleJobs, if the secret from subscription `spec.hooksecretref` is available, then it is sent to the AnsibleJob custom resources `spec.tower_auth_secret` and the AnsibleJob can access the {aap-short}.
+. Run the following command to add your YAML file:
+
++
+----
+oc apply -f
+----
+
+When the app subscription controller creates prehook and posthook AnsibleJobs, if the secret from subscription `spec.hooksecretref` is available, then it is sent to the `AnsibleJob` custom resources `spec.tower_auth_secret` and the `AnsibleJob` can access the {aap-short}.
 
 [#ansible-secret-reconciliation]
 == Setting secret reconciliation
 
-For a main-sub subscription with prehook and posthook AnsibleJobs, the main-sub subscription should be reconciled after all prehook and posthook AnsibleJobs or main subscription are updated in the Git repository. 
+For a main-sub subscription with prehook and posthook `AnsibleJob`s, the main-sub subscription should be reconciled after all prehook and posthook `AnsibleJob`s or main subscription are updated in the Git repository. 
 
-Prehook AnsibleJobs and the main subscription continuously reconcile and relaunch a new pre-AnsibleJob instance.
+Prehook `AnsibleJob`s and the main subscription continuously reconcile and relaunch a new pre-`AnsibleJob` instance.
 
-. After the pre-AnsibleJob is done, re-run the main subscription. 
-. If there is any specification change in the main subscription, re-deploy the subscription. The main subscription status should be updated to align with the redeployment procedure. 
-. Reset the hub subscription status to `nil`. The subscription is refreshed along with the subscription deployment on target clusters. 
+. After the pre-`AnsibleJob` is complete, re-run the main subscription. 
+. If there is any specification change in the main subscription, redeploy the subscription. The main subscription status should be updated to align with the redeployment procedure. 
+. Reset the hub cluster subscription status to `nil`. The subscription is refreshed along with the subscription deployment on target clusters. 
 
 +
 When the deployment is finished on the target cluster, the subscription status on the target cluster is updated to `"subscribed"` or `"failed"`, and is synced to the hub cluster subscription status.
 
-. After the main subscription is done, relaunch a new post-AnsibleJob instance.
+. After the main subscription is complete, relaunch a new post-`AnsibleJob` instance.
 
 . Verify that the DONE subscription is updated. See the following output:
 
 - subscription.status == `"subscribed"`
 - subscription.status == `"propagated"` with all of the target clusters `"subscribed"`
 
-When an AnsibleJob custom resources is created, A Kubernetes job custom resources is created to launch an {aap-short} job by communicating to the target {aap-short}. When the job is complete, the final status for the job is returned to AnsibleJob `status.ansibleJobResult`. 
+When an `AnsibleJob` custom resources is created, A Kubernetes job custom resources is created to launch an {aap-short} job by communicating to the target {aap-short}. When the job is complete, the final status for the job is returned to `AnsibleJob` `status.`AnsibleJob`Result`. 
 
 *Notes:* 
 
-The AnsibleJob status.conditions is reserved by the {aap-short} Job operator for storing the creation of Kubernetes job result. The status.conditions does not reflect the actual {aap-short} job status. 
+The `AnsibleJob` `status.conditions` is reserved by the {aap-short} Job operator for storing the creation of Kubernetes job result. The `status.conditions` does not reflect the actual {aap-short} job status. 
 
-The subscription controller checks the {aap-short} job status by the `AnsibleJob.status.ansibleJobResult` instead of `AnsibleJob.status.conditions`.
+The subscription controller checks the {aap-short} job status by the ``AnsibleJob`.status.`AnsibleJob`Result` instead of ``AnsibleJob`.status.conditions`.
 
-As previously mentioned in the prehook and posthook AnsibleJob workflow, when the main subscription is updated in Git repository, a new prehook and posthook AnsibleJob instance is created. As a result, one main subscription can link to multiple AnsibleJob instances. 
+As previously mentioned in the prehook and posthook `AnsibleJob` workflow, when the main subscription is updated in Git repository, a new prehook and posthook `AnsibleJob` instance is created. As a result, one main subscription can link to multiple `AnsibleJob` instances. 
 
-Four fields are defined in subscription.status.ansibleJobs:
+Four fields are defined in `subscription.status.ansibleJobs`:
 
-- lastPrehookJobs: The most recent prehook AnsibleJobs
-- prehookJobsHistory: All the prehook AnsibleJobs history
-- lastPosthookJobs: The most recent posthook AnsibleJobs
-- posthookJobsHistory: All the posthook AnsibleJobs history
-
+- `lastPrehookJobs`: The most recent prehook AnsibleJobs
+- `prehookJobsHistory`: All the prehook AnsibleJobs history
+- `lastPosthookJobs`: The most recent posthook AnsibleJobs
+- `posthookJobsHistory`: All the posthook AnsibleJobs history
 
 [#ansible-sample-yaml]
 == Using {aap-short} sample YAML files 
 
-See the following sample of an AnsibleJob `.yaml` file in a Git prehook and posthook folder:
+See the following sample of an `AnsibleJob` `.yaml` file in a Git prehook and posthook folder:
 
 [source,yaml]
 ----
 apiVersion: tower.ansible.com/v1alpha1
-kind: AnsibleJob
+kind: `AnsibleJob`
 metadata:
   name: demo-job-001
   namespace: default
@@ -111,4 +114,40 @@ spec:
     version: 1.23.45
   job_tags: "provision,install,configuration"
   skip_tags: "configuration,restart"
+----
+
+[#launch-workflow]
+== Launching workflow 
+
+To launch an {aap-short} workflow by using the `AnsibleJob` custom resource, replace the `job_template_name` field with the `workflow_template_name`. 
+
+See the [Workflows](https://docs.ansible.com/ansible-tower/latest/html/userguide/workflows.html) to learn more about Ansible Workflow.
+
+[#workflow-sample-yaml]
+== Using {aap-short} sample YAML Workflow
+
+See the following sample of a Workflow `AnsibleJob` `.yaml` file in a Git prehook and Git posthook folder:
+
+[source,yaml]
+----
+apiVersion: tower.ansible.com/v1alpha1
+kind: `AnsibleJob`
+metadata:
+  name: demo-job-001
+  namespace: default
+spec:
+  tower_auth_secret: toweraccess
+  workflow_template_name: Demo Workflow Template
+  extra_vars:
+    cost: 6.88
+    ghosts: ["inky","pinky","clyde","sue"]
+    is_enable: false
+    other_variable: foo
+    pacman: mrs
+    size: 8
+    targets_list:
+    - aaa
+    - bbb
+    - ccc
+    version: 1.23.45
 ----
