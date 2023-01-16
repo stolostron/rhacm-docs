@@ -35,17 +35,35 @@ E0917 02:58:27.613963       1 reflector.go:127] k8s.io/client-go@v0.19.0/tools/c
 [#resolving-clusters-offline-after-certificate-change]
 == Resolving the problem: Clusters offline after certificate change
 
-To manually restore your clusters after updating your certificate information, complete the following steps for each managed cluster:
+If your managed cluster is `local-cluster`, or your managed cluster was created by using {product-title}, your cluster resynchronizes every 10 minutes and you must 10 minutes or longer for your managed cluster to reimport.
 
-. Manually import the cluster again. {ocp} clusters that were created from {product-title-short} will resynchronize every 2 hours, so you can skip this step for those clusters.
-.. On the hub cluster, display the import command by entering the following command:
-+ 
+To reimport your managed cluster immediately, you can delete your managed cluster import secret on the hub cluster and reimport it by using {product-title-short} by running the following command:
+
 ----
-oc get secret -n ${CLUSTER_NAME} ${CLUSTER_NAME}-import -ojsonpath='{.data.import\.yaml}' | base64 --decode  > import.yaml
+oc delete secret -n <cluster_name> <cluster_name>-import
 ----
 +
-Replace _CLUSTER_NAME_ with the name of the managed cluster that you are importing.
-.. On the managed cluster, apply the `import.yaml` file:
+Replace `<cluster_name>` with the name of the managed cluster that you want to import.
+
+If you want to reimport a managed cluster that was imported by using {product-title-short}, run the following command to import the managed cluster again:
+
+. On the hub cluster, recreate the managed cluster import secret by running the following command:
++
+----
+oc create secret -n <cluster_name> <cluster_name>-import
+----
++
+Replace `<cluster_name>` with the name of the managed cluster that you want to import.
+
+. On the hub cluster, expose the managed cluster import secret to a YAML file by running the following command:
++
+----
+oc get secret -n <cluster_name> <cluster_name>-import -ojsonpath='{.data.import\.yaml}' | base64 --decode  > import.yaml
+----
++
+Replace `<cluster_name>` with the name of the managed cluster that you want to import.
+
+. On the managed cluster, apply the `import.yaml` fileby running the following command:
 +
 ----
 oc apply -f import.yaml
