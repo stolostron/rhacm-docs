@@ -1,0 +1,255 @@
+[#deploying-submariner-manually]
+= Deploying Submariner manually
+
+Before you deploy Submariner with {product-title}, you must prepare the clusters on the hosting environment for the connection. See xref:../submariner/submariner_prepare_hosts.adoc#deploying-submariner-console[Deploying Submariner by using the console] to learn how to automatically deploy Submariner on supported clusters by using the console.
+
+If your cluster is hosted on a provider that does not support automatic Submariner deployment, see the following sections to prepare the infrastructure manually. Each provider has unique steps for preparation, so make sure to select the correct provider.
+
+[#preparing-ibm-submariner]
+== Preparing IBM Cloud for Submariner
+
+There are two kinds of Red Hat OpenShift Kubernetes Service (ROKS) on IBM Cloud: the classic cluster and the second generation of compute infrastructure in a virtual private cloud (VPC). Submariner cannot run on the classic ROKS cluster since it cannot configure the IPsec ports for the classic cluster.
+
+To configure the ROKS clusters on a VPC to use Submariner, complete the following steps:
+
+. If you plan to install Submariner without Globalnet, make sure that pod and service CIDRs do not overlap between clusters in the clusterSet. See https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics[VPC Subnets] for the procedure. For clusters with overlapping CIDRs, Globalnet can be enabled while installing Submariner.
+
+. Attach a public gateway to subnets used in the cluster. See https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-subnets#vpc_basics_pgw[Public Gateway] for the procedure.
+
+. Create inbound rules for the default security group of the cluster by completing the steps in https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-network-policy#security_groups_ui[Security Group]. Ensure that the firewall allows inbound/outbound traffic for external clients on 4500/UDP, 4490/UDP ports for the Gateway nodes, and allows inbound/outbound UDP/4800 traffic within the local cluster nodes.
+
+. Label the node selected as Gateway node in the previous step with the `submariner.io/gateway=true` label.
+
+. Refer to https://submariner.io/operations/deployment/calico/[Calico] to configure Calico CNI by creating IPPools in the cluster.
+
+[#preparing-bare-metal-submariner]
+== Preparing bare metal for Submariner
+
+To prepare bare metal clusters for deploying Submariner, complete the following steps:
+
+. Ensure that the firewall allows inbound/outbound traffic for external clients on the 4500/UDP and 4490/UDP ports for the Gateway nodes and allows inbound/outbound UDP/4800 traffic within the local cluster nodes.
+
+. Customize and apply YAML content that is similar to the following example:
+
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:{}
+----
++
+Replace `managed-cluster-namespace` with the name of your managed cluster. The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
++
+This configuration labels one of the worker nodes as the Submariner gateway on your bare metal cluster.
++
+By default, Submariner uses IP security (IPsec) to establish the secure tunnels between the clusters on the gateway nodes. You can either use the default IPsec NATT port, or you can specify a different port that you configured. When you run this procedure without specifying an IPsec NATT port, 4500/UDP is used for the connections.
+
+. Identify the Gateway node configured by Submariner and enable firewall configurations to allow the IPsec NATT (UDP/4500) and NatDiscovery (UDP/4490) ports for external traffic.
+
+See xref:../submariner/submariner_customizations.adoc#customizing-submariner[Customizing Submariner deployments] for information about the customization options. 
+
+[#preparing-aro-subariner]
+== Preparing Microsoft Azure Red Hat OpenShift for Submariner (Technology Preview)
+
+The Microsoft Azure Red Hat OpenShift service combines various tools and resources to help simplify the process of building container-based applications. To prepare Azure Red Hat OpenShift clusters for deploying Submariner, complete the following steps:
+
+. Download the link:https://aka.ms/az-aroext-latest.whl[Python wheel and CLI extension].
+
+. From the Azure CLI, run the following command to install the extension:
++
+----
+az extension add --upgrade -s <path-to-extension>
+----
++
+Replace `path-to-extension` with the path to where you downloaded the `.whl` extension file.
+
+. Run the following command to verify that the CLI extension is being used:
++
+----
+az extension list
+----
++
+If the extension is being used, the output might resemble the following example:
++
+----
+"experimental": false,
+"extensionType": "whl",
+"name": "aro",
+"path": "<path-to-extension>",
+"preview": true,
+"version": "1.0.x"
+----
+
+. From the Azure CLI, register the preview feature by running the following command:
++
+----
+az feature registration create --namespace Microsoft.RedHatOpenShift --name AdminKubeconfig
+----
+
+. Retrieve the administrator `kubeconfig` by running the following command:
++
+----
+az aro get-admin-kubeconfig -g <resource group> -n <cluster resource name>
+----
++
+*Note:* The `az aro` command saves the `kubeconfig` to the local directory and uses the name `kubeconfig`. To use it, set the environment variable `KUBECONFIG` to match the path of the file. See the following example:
++
+----
+export KUBECONFIG=<path-to-kubeconfig>
+oc get nodes
+----
+
+. Import your Azure Red Hat OpenShift cluster to your cluster list by selecting *Infrastructure* > *Clusters* > *Import cluster* from the {product-title-short} console.
+
+. Select the `Kubeconfig` *Import mode* and enter the content from your `kubeconfig` file in the *Kubeconfig* window. Follow the instructions in the console to complete the import.
++
+You can verify that your Azure Red Hat OpenShift cluster was imported successfully by navigating to *Infrastructure* > *Clusters*.
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* and select the name of the cluster set that you want to add. Then, click the *Submariner add-ons* tab. 
+
+. Click the *Install Submariner add-ons* button and set your Azure Red Hat OpenShift cluster as your *Target clusters*. Follow the instructions in the console to complete the install.
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* > *Submariner add-ons* to verify that your Azure Red Hat OpenShift cluster *Connection status* is `Healthy`.
+
+[#preparing-rosa-submariner]
+== Deploying Red Hat OpenShift Service on AWS for Submariner (Technology Preview)
+
+Red Hat OpenShift Service on AWS provides a stable and flexible platform for application development and modernization. To prepare OpenShift Service on AWS clusters for deploying Submariner, complete the following steps:
+
+. Create a new node to run Submariner gateway by running the following command:
++
+----
+rosa create machinepool --cluster=<cluster_name> --name=sm-gw-mp --replicas=<number of Submariner gateway > --labels='submariner.io/gateway=true'
+----
+
+. Log in to OpenShift Service on AWS by running the following commands:
++
+----
+rosa login
+oc login <rosa-cluster-url>:6443 --username cluster-admin --password <password>
+----
+
+. Create a `kubeconfig` for your OpenShift Service on AWS cluster by running the following command:
++
+----
+oc config view --flatten=true > rosa_kube/kubeconfig
+----
+
+. Import your OpenShift Service on AWS cluster to your cluster list by selecting *Infrastructure* > *Clusters* > *Import cluster* from the {product-title-short} console.
+
+. Select the `Kubeconfig` *Import mode* and enter the content from your `kubeconfig` file in the *Kubeconfig* window. Follow the instructions in the console to complete the import.
++
+You can verify that your OpenShift Service on AWS cluster was imported successfully by navigating to *Infrastructure* > *Clusters*.
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* and select the name of the cluster set that you want to add. Then, click the *Submariner add-ons* tab. 
+
+. Click the *Install Submariner add-ons* button and set your OpenShift Service on AWS cluster as your *Target clusters*. Follow the instructions in the console to complete the installation.
+
+. Navigate to *Infrastructure* > *Clusters* > *Cluster sets* > *Submariner add-ons* to verify that your OpenShift Service on AWS cluster *Connection status* is `Healthy`.
+
+[#deploying-submariner-mcaddon-api]
+== Deploy Submariner with the ManagedClusterAddOn API
+
+After manually preparing your selected hosting environment, you can deploy Submariner with the `ManagedClusterAddOn` API by completing the following steps:
+
+. Create a `ManagedClusterSet` resource on the hub cluster by using the instructions provided in the _Creating and managing ManagedClusterSets_ topic of the link:../../multicluster_engine/cluster_lifecycle/managedclustersets_intro.adoc#managedclustersets_intro[Creating and managing ManagedClusterSets] documentation. Make sure your entry for the `ManagedClusterSet` resembles the following content:
++
+[source,yaml]
+----   
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSet
+metadata:
+  name: <managed-cluster-set-name>
+----
++
+Replace `managed-cluster-set-name` with a name for the `ManagedClusterSet` that you are creating.
++
+*Important:* The maximum character length of a Kubernetes namespace is 63 characters. The maximum character length you can use for the `<managed-cluster-set-name>` is 56 characters. If the character length of `<managed-cluster-set-name>` exceeds 56 characters, the `<managed-cluster-set-name>` is cut off from the head.
++
+After the `ManagedClusterSet` is created, the `submariner-addon` creates a namespace called `<managed-cluster-set-name>-broker` and deploys the Submariner broker to it.
+
+. Create the `Broker` configuration on the hub cluster in the `<managed-cluster-set-name>-broker` namespace by customizing and applying YAML content that is similar to the following example:
++
+[source,yaml]
+----
+apiVersion: submariner.io/v1alpha1
+kind: Broker
+metadata:
+     name: submariner-broker
+     namespace: <managed-cluster-set-name>-broker
+     labels:
+         cluster.open-cluster-management.io/backup: submariner
+spec:
+     globalnetEnabled: <true-or-false>
+----
++
+Replace `managed-cluster-set-name` with the name of the managed cluster. 
++
+Set the the value of `globalnetEnabled` to `true` if you want to enable Submariner Globalnet in the `ManagedClusterSet`.
+
+. Add one managed cluster to the `ManagedClusterSet` by running the following command:
++
+----
+oc label managedclusters <managed-cluster-name> "cluster.open-cluster-management.io/clusterset=<managed-cluster-set-name>" --overwrite
+----
++
+Replace `<managed-cluster-name>` with the name of the managed cluster that you want to add to the `ManagedClusterSet`.
++
+Replace `<managed-cluster-set-name>` with the name of the `ManagedClusterSet` to which you want to add the managed cluster. 
+
+. Customize and apply YAML content that is similar to the following example:
++
+[source,yaml]
+----
+apiVersion: submarineraddon.open-cluster-management.io/v1alpha1
+kind: SubmarinerConfig
+metadata:
+    name: submariner
+    namespace: <managed-cluster-namespace>
+spec:{}
+----
++
+Replace `managed-cluster-namespace` with the namespace of your managed cluster.
++
+*Note:* The name of the `SubmarinerConfig` must be `submariner`, as shown in the example.
+
+. Deploy Submariner on the managed cluster by customizing and applying YAML content that is similar to the following example:
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+     name: submariner
+     namespace: <managed-cluster-name>
+spec:
+     installNamespace: submariner-operator
+----
++
+Replace `managed-cluster-name` with the name of the managed cluster that you want to use with Submariner. 
++
+The `installNamespace` field in the spec of the `ManagedClusterAddOn` is the namespace on the managed cluster where it installs Submariner. Currently, Submariner must be installed in the `submariner-operator` namespace.
++
+After the `ManagedClusterAddOn` is created, the `submariner-addon` deploys Submariner to the `submariner-operator` namespace on the managed cluster. You can view the deployment status of Submariner from the status of this `ManagedClusterAddOn`.
++
+*Note:* The name of `ManagedClusterAddOn` must be `submariner`.
+
+. Repeat steps three, four, and five for all of the managed clusters that you want to enable Submariner on.
+
+. After Submariner is deployed on the managed cluster, you can verify the Submariner deployment status by checking the status of submariner `ManagedClusterAddOn` by running the following command: 
++
+----
+oc -n <managed-cluster-name> get managedclusteraddons submariner -oyaml
+----
++
+Replace `managed-cluster-name` with the name of the managed cluster.
++
+In the status of the Submariner `ManagedClusterAddOn`, three conditions indicate the  deployment status of Submariner:
++
+* `SubmarinerGatewayNodesLabeled` condition indicates whether there are labeled Submariner gateway nodes on the managed cluster.
+* `SubmarinerAgentDegraded` condition indicates whether the Submariner is successfully deployed on the managed cluster.
+* `SubmarinerConnectionDegraded` condition indicates how many connections are established on the managed cluster with Submariner.

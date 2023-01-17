@@ -18,64 +18,21 @@ See the following information about how placement with managed clusters works:
 
 * The namespace-scoped `Placements` specify a portion of `ManagedClusterSets` that select a working set of the potential `ManagedClusters`.
 
-* `Placements` select from that working set by using label and claim selectors.
-+
-*Important:* `Placement` does not select a `ManagedCluster` if there is no `ManagedClusterSet` bound to the placement namespace.
+* `Placements` filter `ManagedClusters` from the managed cluster set by using label and claim selectors.
 
 * The placement of `ManagedClusters` can be controlled by using taints and tolerations. See xref:../cluster_lifecycle/taints_tolerations.adoc#taints-tolerations-managed[Using taints and tolerations to place managed clusters] for more information.
 
-The `Placement` specification includes the following fields:
+* `Placements` rank the clusters by the requirements and select a subset of clusters from them.
 
-* `ClusterSets` represents the `ManagedClusterSets` from which the `ManagedClusters` are selected. 
+*Notes:* 
 
-  ** If not specified, `ManagedClusters` is selected from the `ManagedClusterSets` that are bound to the placement namespace. 
+* You need to bind at least one `ManagedClusterSet` to a namespace by creating a `ManagedClusterSetBinding` in that namespace. 
+* You need role-based access to `CREATE` on the virtual sub-resource of `managedclustersets/bind`.
 
-  ** If specified, `ManagedClusters` is selected from the intersection of this set and the `ManagedClusterSets` that are bound to the placement namespace.
+See xref:../api/placement.json.adoc[Placements API] to know more details about the API.
 
-* `NumberOfClusters` represents the desired number of `ManagedClusters` to be selected, which meet the placement requirements. 
-+
-If not specified, all `ManagedClusters` that meet the placement requirements are selected.
-
-* `Predicates` represents a slice of predicates to select `ManagedClusters` with label and claim selector. The predicates are ORed.
-
-* `prioritizerPolicy` represents the policy of prioritizers. 
-  
-  ** `mode` is either `Exact`, `Additive`, or `""` where `""` is `Additive` by default.
-    
-    *** In `Additive` mode, any prioritizer that is not specifically provided with configuration values is enabled with its default configurations. In the current default configuration, the _Steady_ and _Balance_ prioritizers have the weight of 1, while the other prioritizers have the weight of 0. The default configurations might change in the future, which might change the prioritization. `Additive` mode does not require that you configure all of the prioritizers. 
-
-    *** In `Exact` mode, any prioritizer that is not specifically provided with configuration values has the weight of zero. `Exact` mode requires that you input the full set of prioritizers that you want, but avoids behavior changes between releases.
-
-  ** `configurations` represents the configuration of prioritizers.
-
-    *** scoreCoordinate represents the configuration of the prioritizer and score source.
-
-      **** `type` defines the type of the prioritizer score. Type is either `BuiltIn`, `AddOn`, or `" "`, where `" "` is `BuiltIn` by default. When the type is `BuiltIn`, the built in prioritizer name must be specified. When the type is `AddOn`, you need to configure the score source in `AddOn`.
-      
-      **** `builtIn` defines the name of a BuiltIn prioritizer. The following list includes the valid `BuiltIn` prioritizer names:
-         
-        ***** Balance: Balance the decisions among the clusters.
-
-        ***** Steady: Ensure the existing decision is stabilized.
-
-        ***** ResourceAllocatableCPU & ResourceAllocatableMemory: Sort clusters based on the allocatable resources.
-
-      **** `addOn` defines the resource name and score name. `AddOnPlacementScore` is introduced to describe addon scores. See <<extensible-scheduling,Extensible scheduling>> to learn more about it.
-
-      ***** `resourceName` defines the resource name of the `AddOnPlacementScore`. The placement prioritizer selects the `AddOnPlacementScore` custom resource by this name.
-
-      ***** `scoreName` defines the score name inside of the `AddOnPlacementScore`. `AddOnPlacementScore` contains a list of the score name and the score value. The `scoreName`, specifies the score to be used by the prioritizer.
-
-    *** `weight` defines the weight of prioritizer. The value must be in the range of [-10,10].
-      Each prioritizer calculates an integer score of a cluster in the range of [-100, 100]. The final score of a cluster is determined by the following formula `sum(weight * prioritizer_score)`.
-      A higher weight indicates that the prioritizer receives a higher weight in the cluster selection, while 0 weight indicates that the prioritizer is disabled. A negative weight indicates that it is one of the last ones selected.
-
-**Note:** The `configurations.name` file will be removed in v1beta1 and replaced by the `scoreCoordinate.builtIn` file. If both `name` and `scoreCoordinate.builtIn` are defined, the value in `scoreCoordinate.builtIn` is used to determine the selection.
-
-[#placement-binding]
-== Placement examples
-
-You need to bind at least one `ManagedClusterSet` to a namespace by creating a `ManagedClusterSetBinding` in that namespace. *Note:* You need role-based access to `CREATE` on the virtual sub-resource of `managedclustersets/bind`. See the following examples:
+[#placement-labelselector-claimSelector]
+== Placement LabelSelector and ClaimSelector
 
 - You can select `ManagedClusters` with the `labelSelector`. See the following sample where the `labelSelector` only matches clusters with label `vendor: OpenShift`:
 +
@@ -84,7 +41,7 @@ You need to bind at least one `ManagedClusterSet` to a namespace by creating a `
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: placement1
+  name: placement
   namespace: ns1
 spec:
   predicates:
@@ -102,7 +59,7 @@ spec:
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: placement2
+  name: placement
   namespace: ns1
 spec:
   predicates:
@@ -122,7 +79,7 @@ spec:
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: placement3
+  name: placement
   namespace: ns1
 spec:
   clusterSets:
@@ -145,7 +102,7 @@ spec:
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: placement4
+  name: placement
   namespace: ns1
 spec:
   numberOfClusters: 3
@@ -162,6 +119,83 @@ spec:
                 - us-west-1
 ----
 
+[#placement-tolerations]
+== Placement Tolerations
+
+- Select `ManagedClusters` with matching taints. 
+
+Suppose your managed cluster has a taint as shown in the following example:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: gpu
+      value: "true"
+      timeAdded: '2022-02-21T08:11:06Z'
+----
+
+By default, the placement cannot select this cluster unless you define tolerations, as shown in the following example:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  tolerations:
+    - key: gpu
+      value: "true"
+      operator: Equal
+----
+
+- Select `ManagedClusters` with matching taints for a specified period of time.
+
+The value of `TolerationSeconds` represents the length of time that the toleration tolerates the taint, is useful when a managed cluster is offline, users can make applications deployed on this cluster to be transferred to another available managed cluster after a tolerated time. The `TolerationSeconds` can automatically transfer applications that are deployed on a cluster that goes offline to another managed cluster after a specified length of time.
+
+For example, the managed cluster that is defined by the following example content becomes unreachable:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: cluster.open-cluster-management.io/unreachable
+      timeAdded: '2022-02-21T08:11:06Z'
+----
+
+If you define a placement with `TolerationSeconds` as shown in the following example, the workload is transferred to another available managed cluster after 5 minutes.
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1alpha1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+----
+
+[#placement-prioritizerpolicy]
+== Placement PrioritizerPolicy
+
 - Select a cluster with the largest allocatable memory.
 +
 *Note:* Similar to Kubernetes https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#node-allocatable[Node Allocatable], 'allocatable' is defined as the amount of compute resources that are available for pods on each cluster.
@@ -171,7 +205,7 @@ spec:
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: placement6
+  name: placement
   namespace: ns1
 spec:
   numberOfClusters: 1
@@ -188,7 +222,7 @@ spec:
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: placement7
+  name: placement
   namespace: ns1
 spec:
   numberOfClusters: 1
@@ -202,22 +236,20 @@ spec:
         weight: 2
 ----
 
-- Select two clusters with the largest allocatable memory and the largest add-on score cpu ratio, and pin the placement decisions. 
+- Select two clusters with the largest `addOn` score CPU ratio, and pin the placement decisions. 
 +
 [source,yaml]
 ----
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: placement8
+  name: placement
   namespace: ns1
 spec:
   numberOfClusters: 2
   prioritizerPolicy:
     mode: Exact
     configurations:
-      - scoreCoordinate:
-          builtIn: ResourceAllocatableMemory
       - scoreCoordinate:
           builtIn: Steady
         weight: 3
@@ -233,7 +265,9 @@ spec:
 
 One or multiple `PlacementDecisions` with label `cluster.open-cluster-management.io/placement={placement name}` are created to represent the `ManagedClusters` selected by a `Placement`.
 
-If a `ManagedCluster` is selected and added to a `PlacementDecision`, components that consume this `Placement` might apply the workload on this `ManagedCluster`. After the `ManagedCluster` is no longer selected and it is removed from the `PlacementDecisions`, the workload that is applied on this `ManagedCluster` should be removed accordingly.
+If a `ManagedCluster` is selected and added to a `PlacementDecision`, components that consume this `Placement` might apply the workload on this `ManagedCluster`. After the `ManagedCluster` is no longer selected and is removed from the `PlacementDecisions`, the workload that is applied on this `ManagedCluster` should be removed.
+
+See xref:../api/placementdecision.json.adoc[PlacementDecisions API] to know more details about the API.
 
 See the following `PlacementDecision` sample:
 
@@ -268,7 +302,7 @@ status:
 
 You might want to select managed clusters for your placements according to the status of the add-ons that are deployed on them. For example, you want to select a managed cluster for your placement only if there is a specific add-on that is enabled on the cluster. 
 
-You can do this by specifying the label for the add-on, as well as its status, if necessary, when you create the Placement. A label is automatically created on a `ManagedCluster` resource if an add-on is enabled on the cluster. The label is automatically removed if the add-on is disabled.
+Specify the label for the add-on, as well as its status, when you create the Placement. A label is automatically created on a `ManagedCluster` resource if an add-on is enabled on the cluster. The label is automatically removed if the add-on is disabled.
 
 Each add-on is represented by a label in the format of `feature.open-cluster-management.io/addon-<addon_name>=<status_of_addon>`. 
 
@@ -340,15 +374,3 @@ spec:
             - key: feature.open-cluster-management.io/addon-application-manager
               operator: DoesNotExist
 ----
-
-[#extensible-scheduling]
-== Extensible scheduling
-
-In placement resource-based scheduling, sometimes the prioritizer needs more data than the default value provided by the `MananagedCluster` resource to calculate the score of the managed cluster. For example, schedule the clusters based on CPU or memory usage data of the clusters that are fetched obtained through a monitoring system.
-
-The API `AddOnPlacementScore` supports a more extensible way to schedule based on customized scores.
-
-* You can specify the score in the `placement.yaml` file to select clusters.
-* As a  score provider, a 3rd party controller can run on either the hub cluster or the managed cluster, to maintain the lifecycle of `AddOnPlacementScore` and update score into it.
-
-Refer to https://github.com/open-cluster-management-io/enhancements/blob/main/enhancements/sig-architecture/32-extensiblescheduling/32-extensiblescheduling.md[placement extensible scheduling enhancement] in the `open-cluster-management` repository to learn more.
