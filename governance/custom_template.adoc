@@ -167,7 +167,11 @@ spec:
 [#lookup-func]
 === lookup function
 
-The `lookup` function returns the Kubernetes resource as a JSON compatible map. Note that if the requested resource does not exist, an empty map is returned. View the following syntax for the function:
+The `lookup` function returns the Kubernetes resource as a JSON compatible map. If the requested resource does not exist, an empty map is returned. If the resource does not exist and the value is provided to another template function, you might get the following error: `invalid value; expected string`.
+
+*Note:* Use the `default` template function, so the correct type is provided to later template functions. See the _Open source community functions_ section.
+
+View the following syntax for the function:
 
 ----
 func lookup (apiversion string, kind string, namespace string, name string) (value string, err Error)
@@ -422,7 +426,7 @@ spec:
     ...
     spec:
       enabled:  |
-        {{hub "(lookup "v1" "Secret" "default" "my-hub-secret").data.message | protect hub}}
+        {{hub (lookup "v1" "Secret" "default" "my-hub-secret").data.message | protect hub}}
 ----
 
 In the previous YAML example, there is an existing hub cluster policy template that is defined to use the `lookup` function. On the replicated policy in the managed cluster namespace, the value might resemble the following syntax: `$ocm_encrypted:okrrBqt72oI+3WT/0vxeI3vGa+wpLD7Z0ZxFMLvL204=`
@@ -482,9 +486,9 @@ A configuration policy definition can contain both hub cluster and managed clust
 [#special-annotation-processing]
 === Special annotation for reprocessing
 
-Policies are processed on the hub cluster only upon creation or after an update. Therefore, hub cluster templates are only resolved to the data in the referenced resources upon policy creation or update. Any changes to the referenced resources are not automatically synced to the policies. 
+Hub cluster templates are resolved to the data in the referenced resources during policy creation, or when the referenced resources are updated.
 
-A special annotation, `policy.open-cluster-management.io/trigger-update` can be used to indicate changes to the data referenced by the templates. Any change to the special annotation value initiates template processing, and the latest contents of the referenced resource are read and updated in the policy definition that is the propagator for processing on managed clusters. A typical way to use this annotation is to increment the value by one each time.
+If you need to manually initiate an update, use the special annotation, `policy.open-cluster-management.io/trigger-update`, to indicate changes for the data referenced by the templates. Any change to the special annotation value automatically initiates template processing. Additionally, the latest contents of the referenced resource are read and updated in the policy definition that is propagated for processing on managed clusters. A way to use this annotation is to increment the value by one each time.
 
 [#bypass-template-processing]
 === Bypass template processing
