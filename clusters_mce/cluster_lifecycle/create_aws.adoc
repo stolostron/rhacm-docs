@@ -53,7 +53,34 @@ As listed in the prerequisites, two VPCs are required in addition to the VPC tha
 
 . Create a VPC for the managed cluster with private subnets. For this example, this VPC is named `managed01-vpc`.
 
-. Create one or more VPCs for the managed cluster service endpoints with private subnets. For this example, this VPC is named `managed01-endpoint-vpc`.
+. Create one or more VPCs for the managed cluster service endpoints with private subnets.
++
+*Note:* Each VPC in a region has a limit of 255 VPC endpoints, so you need multiple VPCs support more clusters in that region.
+
+. For each VPC, create subnets in all of the supported availability zones of the region. Each subnet must have at least 255 usuable IPs because of the controller requirements.
++
+The following example shows how to complete subnets for VPCs that have 6 availability zones in the `us-east-1` region:
+----
+vpc-1 (us-east-1) : 10.0.0.0/20
+  subnet-11 (us-east-1a): 10.0.0.0/23
+  subnet-12 (us-east-1b): 10.0.2.0/23
+  subnet-13 (us-east-1c): 10.0.4.0/23
+  subnet-12 (us-east-1d): 10.0.8.0/23
+  subnet-12 (us-east-1e): 10.0.10.0/23
+  subnet-12 (us-east-1f): 10.0.12.0/2
+
+vpc-2 (us-east-1) : 10.0.16.0/20
+  subnet-21 (us-east-1a): 10.0.16.0/23
+  subnet-22 (us-east-1b): 10.0.18.0/23
+  subnet-23 (us-east-1c): 10.0.20.0/23
+  subnet-24 (us-east-1d): 10.0.22.0/23
+  subnet-25 (us-east-1e): 10.0.24.0/23
+  subnet-26 (us-east-1f): 10.0.28.0/23
+----
+
+. Make sure all of the {mce} hub environments ({mce} hub cluster VPCs) have network reachability to the VPCs that you created for VPC endpoints that use peering, transit gateways, and so on.
+
+. Create a list of VPCs that need to resolve the DNS setup for the private link. This includes at least the VPC of the {mce} being configured, and can include the list of all of the VPCs where various Hive controllers exist.
 
 [#configure-vpcs-aws-govcloud]
 === Configure the VPCs for resources and endpoints
@@ -91,20 +118,60 @@ Configure the peer connections, route tables, and security groups for the VPCs t
 ... Add an entry with destination of `managed01-vpc` CIDR to peer connection `px-s01-h01`.
 
 . Configure the security groups.
++ 
+Each VPC endpoint in AWS has a security group attached to control access to the endpoint. When Hive creates a VPC endpoint, it does not specify a security group. The default security group of the VPC is attached to the VPC endpoint. The default security group of the VPC must have rules to allow traffic where VPC endpoints are created from the Hive installer pods. See the [docs][control-access-vpc-endpoint] for details.
 
-.. Obtain the IDs of the main and worker security groups for the `hub01-vpc` cluster. 
+For example, if Hive is running in `hive-vpc(10.1.0.0/16)`, there must be a rule in the default
+security group of the VPC where the VPC endpoint is created that allows ingress from `10.1.0.0/16`.
 
-.. Update the default security group of `managed01-vpc` to create an inbound rule that accepts all traffic from the main and worker security groups of the hub cluster.
+[#set-permissions-for-aws-private-link]
+=== Set permissions for the AWS private link
 
-.. Update the default security group of `managed01-e-vpc` to create an inbound rule that accepts all traffic from the main and worker security groups of the hub cluster. 
+You need multiple credentials to configure the AWS private link. The required permissions for these credentials depends on the type of credential.
 
-.. Update the `hub01-vpc` main security group to create an inbound rule that accepts all traffic from the CIDR of the `managed01-vpc` cluster.
+* The credentials for ClusterDeployment require the following permissions:
++
+----
+ec2:CreateVpcEndpointServiceConfiguration
+ec2:DescribeVpcEndpointServiceConfigurations
+ec2:ModifyVpcEndpointServiceConfiguration
+ec2:DescribeVpcEndpointServicePermissions
+ec2:ModifyVpcEndpointServicePermissions
+ec2:DeleteVpcEndpointServiceConfigurations
+----
 
-.. Update the `hub01-vpc` main security group to create an inbound rule that accepts all traffic from the CIDR of the `managed01-e-vpc` cluster.
+* The credentials for HiveConfig for endpoint VPCs account `.spec.awsPrivateLink.credentialsSecretRef` require the following permissions: 
+---- 
+ec2:DescribeVpcEndpointServices
+ec2:DescribeVpcEndpoints
+ec2:CreateVpcEndpoint
+ec2:CreateTags
+ec2:DescribeNetworkInterfaces
+ec2:DescribeVPCs
 
-.. Update the `hub01-vpc` worker security group to create an inbound rule that accepts all traffic from the CIDR of `managed01-vpc`.
+ec2:DeleteVpcEndpoints
 
-.. Update the `hub01-vpc` worker security group to create an inbound rule that accepts all traffic from the CIDR of `managed01-e-vpc`.
+route53:CreateHostedZone
+route53:GetHostedZone
+route53:ListHostedZonesByVPC
+route53:AssociateVPCWithHostedZone
+route53:DisassociateVPCFromHostedZone
+route53:CreateVPCAssociationAuthorization
+route53:DeleteVPCAssociationAuthorization
+route53:ListResourceRecordSets
+route53:ChangeResourceRecordSets
+
+route53:DeleteHostedZone
+----
+
+* The credentials specified in HiveConfig for associating VPCs to the private hosted zone
+  (`.spec.awsPrivateLink.associatedVPCs[$idx].credentialsSecretRef`). The account where the VPC is located requires the following permissions:
++
+----
+route53:AssociateVPCWithHostedZone
+route53:DisassociateVPCFromHostedZone
+ec2:DescribeVPCs
+----
 
 . Ensure that there is a credential secret within the Hive namespace
 +
@@ -122,26 +189,58 @@ The following example shows the credential content:
 ----
 spec:
   awsPrivateLink:
-    associatedVPCs:
-    - credentialsSecretRef:
-        name: clc-aws-cred
-      region: us-gov-east-1
-      vpcID: vpc-0d0db3e664ee45657
-    credentialsSecretRef:
-      name: clc-aws-cred
-    dnsRecordType: ARecord
+    ## this this is list if inventory of VPCs that can be used to create VPC
+    ## endpoints by the controller
     endpointVPCInventory:
-    - region: us-gov-east-1
+    - region: us-east-1
+      vpcID: vpc-1
       subnets:
-      - availabilityZone: us-gov-east-1a
-        subnetID: subnet-00bf8fcc779ac848a
-      - availabilityZone: us-gov-east-1b
-        subnetID: subnet-05ee95537be0a8e71
-      - availabilityZone: us-gov-east-1c
-        subnetID: subnet-0de5d0193103a0683
-      vpcID: vpc-05ac209956ba057c5
-----
+      - availabilityZone: us-east-1a
+        subnetID: subnet-11
+      - availabilityZone: us-east-1b
+        subnetID: subnet-12
+      - availabilityZone: us-east-1c
+        subnetID: subnet-13
+      - availabilityZone: us-east-1d
+        subnetID: subnet-14
+      - availabilityZone: us-east-1e
+        subnetID: subnet-15
+      - availabilityZone: us-east-1f
+        subnetID: subnet-16
+    - region: us-east-1
+      vpcID: vpc-2
+      subnets:
+      - availabilityZone: us-east-1a
+        subnetID: subnet-21
+      - availabilityZone: us-east-1b
+        subnetID: subnet-22
+      - availabilityZone: us-east-1c
+        subnetID: subnet-23
+      - availabilityZone: us-east-1d
+        subnetID: subnet-24
+      - availabilityZone: us-east-1e
+        subnetID: subnet-25
+      - availabilityZone: us-east-1f
+        subnetID: subnet-26
+    ## credentialsSecretRef points to a secret with permissions to create
+    ## resources in account where the inventory of VPCs exist.
+    credentialsSecretRef:
+      name: <hub-account-credentials-secret-name>
 
+    ## this is a list of VPC where various MCE clusters exists.
+    associatedVPCs:
+    - region: region-mce1
+      vpcID: vpc-mce1
+      credentialsSecretRef:
+        name: <credentials-that-have-access-to-account-where-MCE1-VPC-exists>
+    - region: region-mce2
+      vpcID: vpc-mce2
+      credentialsSecretRef:
+        name: <credentials-that-have-access-to-account-where-MCE2-VPC-exists>
+----
++
+You can include VPC from all the regions where a private link is supported in the `endpointVPCInventory` list. The controller selects a VPC that meets the requirements for the ClusterDeployment.
++
 For more information, refer to the https://github.com/openshift/hive/blob/master/docs/awsprivatelink.md#configuring-hive-to-enable-aws-private-link[Hive documentation].
 
 [#aws-creating-your-cluster-with-the-console]
