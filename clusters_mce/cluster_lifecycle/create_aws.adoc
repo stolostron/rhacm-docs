@@ -3,7 +3,7 @@
 
 You can use the {mce} console to create a {ocp} cluster on Amazon Web Services (AWS) or on AWS GovCloud. The few differences are identified in the procedure.  
 
-AWS GovCloud provides cloud services that meet additional requirements that are required to store government documents on the cloud. When you create a cluster for AWS GovCloud, there are some additional steps to prepare your environment.
+AWS GovCloud provides cloud services that meet additional requirements that are required to store government documents on the cloud. When you create a cluster on AWS GovCloud, you must complete additional steps to prepare your environment.
 
 When you create a cluster, the creation process uses the {ocp-short} installer with the Hive resource. If you have questions about cluster creation after completing this procedure, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/installing/installing-on-aws[Installing on AWS] in the {ocp-short} documentation for more information about the process.  
 
@@ -13,38 +13,38 @@ When you create a cluster, the creation process uses the {ocp-short} installer w
 [#aws_prerequisites]
 == Prerequisites
 
-See the following prerequisites before creating a cluster on AWS or AWS GovCloud:
+The following prerequisites are separated into general prerequisites for both AWS and AWS GovCloud. The general prerequisites apply to both cases.
 
-Standard AWS cluster creation prerequisites:
+* Standard AWS cluster creation prerequisites:
 
-* You need Internet access for your {mce} hub cluster so it can create the Kubernetes cluster on Amazon Web Services.
+** You need Internet access for your {mce} hub cluster so it can create the Kubernetes cluster on Amazon Web Services.
 
-* You need an AWS credential. See xref:../credentials/credential_aws.adoc#creating-a-credential-for-amazon-web-services[Creating a credential for Amazon Web Services] for more information.
+** You need an AWS credential. See xref:../credentials/credential_aws.adoc#creating-a-credential-for-amazon-web-services[Creating a credential for Amazon Web Services] for more information.
 
-* You need a configured domain in AWS. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/installing/installing-on-aws#installing-aws-account[Configuring an AWS account] for instructions on how to configure a domain.
+** You need a configured domain in AWS. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/installing/installing-on-aws#installing-aws-account[Configuring an AWS account] for instructions on how to configure a domain.
 
-* You must have Amazon Web Services (AWS) login credentials, which include user name, password, access key ID, and secret access key. See https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html[Understanding and Getting Your Security Credentials].
+** You must have Amazon Web Services (AWS) login credentials, which include user name, password, access key ID, and secret access key. See https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html[Understanding and Getting Your Security Credentials].
 
-* You must have an {ocp-short} image pull secret. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/images/managing-images#using-image-pull-secrets[Using image pull secrets].
+** You must have an {ocp-short} image pull secret. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/images/managing-images#using-image-pull-secrets[Using image pull secrets].
 
-AWS GovCloud specific prerequisites:
+* AWS GovCloud specific prerequisites:
 
-* You must have an Amazon Virtual Private Cloud (VPC) with an existing {ocp} cluster for the hub cluster. The hub cluster name for this example is `hub-vpc` and uses {ocp-short} 4.11.13 with {mce} version 2.2 or {product-title} version 2.7 installed. This VPC must be different from the VPCs that are used for the managed cluster resources or the managed cluster service endpoints.
+** You must have an Amazon Virtual Private Cloud (VPC) with an existing {ocp} cluster for the hub cluster. The hub cluster name for this example is `hub-vpc` and uses {ocp-short} 4.11.13 with {mce} version 2.2 or {product-title} version 2.7 installed. This VPC must be different from the VPCs that are used for the managed cluster resources or the managed cluster service endpoints.
 
-* You need a VPC where the managed cluster resources are deployed. This cannot be the same as the VPCs that are used for the hub cluster or the managed cluster service endpoints. 
+** You need a VPC where the managed cluster resources are deployed. This cannot be the same as the VPCs that are used for the hub cluster or the managed cluster service endpoints. 
 
-* You need one or more VPCs that provide the managed cluster service endpoints. This cannot be the same as the VPCs that are used for the hub cluster or the ACM managed cluster resources.
+** You need one or more VPCs that provide the managed cluster service endpoints. This cannot be the same as the VPCs that are used for the hub cluster or the ACM managed cluster resources.
 
-* Ensure that the IP addresses of the VPCs that are specified by the Classless Inter-Domain Routing (CIDR) for the required VPCs do not overlap.
+** Ensure that the IP addresses of the VPCs that are specified by the Classless Inter-Domain Routing (CIDR) for the required VPCs do not overlap.
 
-* You need a `HiveConfig` file that references a credential within the Hive namespace that has access to create resources on the VPC that you created for the ACM managed cluster resources.
+** You need a `HiveConfig` file that references a credential within the Hive namespace that has access to create resources on the VPC that you created for the ACM managed cluster resources.
 
 *Note:* If you change your cloud provider access key on the cloud provider, you also need to manually update the corresponding credential for the cloud provider on the console of {mce}. This is required when your credentials expire on the cloud provider where the managed cluster is hosted and you try to delete the managed cluster.
 
 [#preparing-to-create-a-cluster-on-aws-gov]
-== Preparing to create an AWS GovCloud cluster
+== Preparing to create a cluster on AWS GovCloud
 
-While creating an AWS GovCloud cluster is almost identical to creating a standard AWS cluster, you have to complete some additional procedures to your environment to prepare them for the AWS GovCloud cluster.
+While creating a cluster on AWS GovCloud is almost identical to creating a cluster on standard AWS, you have to complete some additional steps to prepare for the cluster on AWS GovCloud.
 
 [#create-vpcs-aws-govcloud]
 === Create the VPCs for resources and endpoints
@@ -60,63 +60,61 @@ As listed in the prerequisites, two VPCs are required in addition to the VPC tha
 
 Configure the peer connections, route tables, and security groups for the VPCs that you created. 
 
-. Configure the peer connections. 
-+
-.. Create a peer connection named `px-s01-h01` between `managed01-vpc` and `hub01-vpc`.
+. Configure the peer connections and ensure that each peer connection is successfully accepted by both clusters in the connection. 
 
-.. Create a peer connection named `px-s01e-h01` between `managed01-e-vpc` and `hub01-vpc`.
+.. Create a peer connection named `px-s01-h01` that connects `managed01-vpc` and `hub01-vpc`.
 
-.. Create a peer connection named `px-s01-s01e` between `managed01-vpc` and `managed01-e-vpc`.
+.. Create a peer connection named `px-s01e-h01` that connects `managed01-e-vpc` and `hub01-vpc`.
 
-. For each peer connection that you created, ensure that the peer connection is successfully accepted by both clusters.
+.. Create a peer connection named `px-s01-s01e` that connects `managed01-vpc` and `managed01-e-vpc`.
 
 . Ensure that all DNS settings are enabled.
 
 . Configure the route tables by completing the following steps:
-+
-.. Update all `*-private` route tables for `managed01-vpc`.
+
+.. Update all of the `*-private` route tables for `managed01-vpc`.
 
 ... Add an entry with the destination of `hub01-vpc` CIDR to peer connection `px-s01-h01`.
 
 ... Add an entry with the destination of `managed01-e-vpc` CIDR to peer connection `px-s01-s01e`.
 
-.. Update all `*-private` route tables for `managed01-e-vpc`.
+.. Update all of the `*-private` route tables for `managed01-e-vpc`.
 
 ... Add an entry with the destination of `hub01-vpc` CIDR to peer connection `px-s01e-h01`.
 
 ... Add an entry with destination of `managed01-vpc` CIDR to peer connection `px-s01-s01e`.
 
-.. Update all `*-private` route tables for `hub01-vpc`.
+.. Update all of the `*-private` route tables for `hub01-vpc`.
 
 ... Add an entry with the destination of `managed01-e-vpc` CIDR to peer connection `px-s01e-h01`.
 
 ... Add an entry with destination of `managed01-vpc` CIDR to peer connection `px-s01-h01`.
 
-.. Configure the security groups.
+. Configure the security groups.
 
-... Obtain the IDs of the main and worker security groups for the `hub01-vpc` cluster. 
+.. Obtain the IDs of the main and worker security groups for the `hub01-vpc` cluster. 
 
-... Update the default security group of `managed01-vpc` to create an inbound rule that accepts all traffic from the main and worker security groups of the hub cluster.
+.. Update the default security group of `managed01-vpc` to create an inbound rule that accepts all traffic from the main and worker security groups of the hub cluster.
 
-... Update the default security group of `managed01-e-vpc` to create an inbound rule that accepts all traffic from the main and worker security groups of the hub cluster. 
+.. Update the default security group of `managed01-e-vpc` to create an inbound rule that accepts all traffic from the main and worker security groups of the hub cluster. 
 
-... Update the `hub01-vpc` main security group to create an inbound rule that accepts all traffic from the CIDR of the `managed01-vpc` cluster.
+.. Update the `hub01-vpc` main security group to create an inbound rule that accepts all traffic from the CIDR of the `managed01-vpc` cluster.
 
-... Update the `hub01-vpc` main security group to create an inbound rule that accepts all traffic from the CIDR of the `managed01-e-vpc` cluster.
+.. Update the `hub01-vpc` main security group to create an inbound rule that accepts all traffic from the CIDR of the `managed01-e-vpc` cluster.
 
-... Update the `hub01-vpc` worker security group to create an inbound rule that accepts all traffic from the CIDR of `managed01-vpc`.
+.. Update the `hub01-vpc` worker security group to create an inbound rule that accepts all traffic from the CIDR of `managed01-vpc`.
 
-... Update the `hub01-vpc` worker security group to create an inbound rule that accepts all traffic from the CIDR of `managed01-e-vpc`.
+.. Update the `hub01-vpc` worker security group to create an inbound rule that accepts all traffic from the CIDR of `managed01-e-vpc`.
 
-.. Ensure that there is a credential secret within the Hive namespace
+. Ensure that there is a credential secret within the Hive namespace
 +
 The `HiveConfig` file needs to reference a credential within the Hive namespace that has permissions to create resources in a specific provided VPC. If the credential you are using to provision an AWS cluster in AWS Government is already in the Hive namespace, then you do not need to create another one. If the credential that you are using to provision an AWS cluster in AWS Government is not already in the Hive namespace, you can either replace your current credential or create an additional credential in the Hive namespace.
 +
 The `HiveConfig` file needs to be updated to include the following content:
 +
-* An AWS Government credential that has the required permissions to provision resources for the given VPC.
+* An AWS GovCloud credential that has the required permissions to provision resources for the given VPC.
 
-* The addresses of the VPCs for the Red Hat OpenShift cluster installation, as well as the service endpoints for the managed cluster. *Best practice:* Use different VPCs for the {ocp-short} cluster installation and the service endpoints.
+* The addresses of the VPCs for the {ocp-short} cluster installation, as well as the service endpoints for the managed cluster. *Best practice:* Use different VPCs for the {ocp-short} cluster installation and the service endpoints.
 +
 The following example shows the credential content:
 +
