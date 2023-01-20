@@ -1,7 +1,7 @@
 [#cluster-proxy-addon]
 = Using cluster proxy add-ons
 
-In some environments, a managed cluster is behind a firewall and cannot be accessed directly by the hub cluster. To gain access, you can set up a proxy add-on to access the `kube-api` server of the managed cluster to provide a more secure connection. 
+In some environments, a managed cluster is behind a firewall and cannot be accessed directly by the hub cluster. To gain access, you can set up a proxy add-on to access the `kube-apiserver` of the managed cluster to provide a more secure connection. 
 
 *Required access*: Editor
 
@@ -9,27 +9,35 @@ To configure a cluster proxy add-on for a hub cluster and a managed cluster, com
 
 . Configure the `kubeconfig` file to access the managed cluster `kube-apiserver` by completing the following steps:
 
-.. Provide a valid access token for the managed cluster. You can use the corresponding token of the service account, assuming the default service account is in the default namespace.
+.. Provide a valid access token for the managed cluster. 
++
+*Note:* : You can use the corresponding token of the service account. You can also use the default service account that is in the default namespace.
 
-... Make sure that you are using the context of the managed cluster. Assume the file named `managed-cluster.kubeconfig` is the `kubeconfig` file of the managed cluster. *Tip:* Commands with `--kubeconfig=managed-cluster.kubeconfig` run on the managed cluster, and all of the commands in this procedure should run in the same console. Do not run commands in different consoles.
+... Export the `kubeconfig` file of the managed cluster by running the following command:
++
+----
+export KUBECONFIG=<managed-cluster-kubeconfig>
+----
 
 ... Add a role to your service account that allows it to access pods by running the following commands:
 +
 ----
-oc create role -n default test-role --verb=list,get --resource=pods --kubeconfig=managed-cluster.kubeconfig
-oc create rolebinding -n default test-rolebinding --serviceaccount=default:default --role=test-role --kubeconfig=managed-cluster.kubeconfig
+oc create role -n default test-role --verb=list,get --resource=pods 
+oc create rolebinding -n default test-rolebinding --serviceaccount=default:default --role=test-role
 ----
 
 ... Run the following command to locate the secret of the service account token:
 +
 ----
-oc get secret -n default --kubeconfig=managed-cluster.kubeconfig | grep default-token
+oc get secret -n default | grep <default-token>
 ----
++
+Replace `default-token` with the name of your secret.
 
 ... Run the following command to copy the token:
 +
 ----
-export MANAGED_CLUSTER_TOKEN=$(kubectl --kubeconfig=managed-cluster.kubeconfig -n default get secret <default-token> -o jsonpath={.data.token} | base64 -d) 
+export MANAGED_CLUSTER_TOKEN=$(kubectl -n default get secret <default-token> -o jsonpath={.data.token} | base64 -d)
 ----
 +
 Replace `default-token` with the name of your secret.
@@ -45,9 +53,9 @@ oc config view --minify --raw=true > cluster-proxy.kubeconfig
 ... Modify the `server` file with your editor. This example uses commands when using `sed`. Run `alias sed=gsed`, if you are using OSX.
 +
 ----
-export TARGET_MANAGE_CLUSTER=<cluster1> 
+export TARGET_MANAGED_CLUSTER=<managed-cluster-name> 
 
-export NEW_SERVER=https://$(oc get route -n multicluster-engine cluster-proxy-addon-user -o=jsonpath='{.spec.host}')/$TARGET_MANAGE_CLUSTER
+export NEW_SERVER=https://$(oc get route -n multicluster-engine cluster-proxy-addon-user -o=jsonpath='{.spec.host}')/$TARGET_MANAGED_CLUSTER
 
 sed -i'' -e '/server:/c\    server: '"$NEW_SERVER"'' cluster-proxy.kubeconfig
 
@@ -79,5 +87,18 @@ oc get pods --kubeconfig=cluster-proxy.kubeconfig -n <default>
 ----
 +
 Replace the `default` namespace with the namespace that you want to use.
+. Access other services on the managed cluster. This feature is available when the managed cluster is a {ocp} cluster. The service must use `service-serving-certificate` to generate server certificates:
 
-Your hub cluster is now communicating with the `kube-api` of your managed cluster. 
++
+* From the managed cluster, use the following service account token:
++
+----
+export PROMETHEUS_TOKEN=$(kubectl get secret -n openshift-monitoring $(kubectl get serviceaccount -n openshift-monitoring prometheus-k8s -o=jsonpath='{.secrets[0].name}') -o=jsonpath='{.data.token}' | base64 -d)
+----
+
+. From the hub cluster, convert the certificate authority to a file by running the following command:
++
+----
+oc get configmap kube-root-ca.crt -o=jsonpath='{.data.ca\.crt}' > hub-ca.crt
+----
+	
