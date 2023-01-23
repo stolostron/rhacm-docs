@@ -9,7 +9,7 @@ Collect logs about new information that is created for observability resources w
 * <<configuring-alertmanager,Configuring AlertManager>>
 * <<adding-custom-metrics, Adding custom metrics>>
 * <<removing-default-metrics,Removing default metrics>>
-* <<export-metrics-to-external-endpoints,Export metrics to external endpoints>>
+* <<exporting-metrics-to-external-endpoints,Exporting metrics to external endpoints>>
 ** <<creating-the-kubernetes-secret-for-external-endpoint,Creating the Kubernetes secret for an external endpoint>>
 ** <<updating-the-multiclusterobservability-cr,Updating the multiclusterobservability CR>>
 ** <<viewing-the-status-of-metrics-export,Viewing the status of metric export>>
@@ -22,7 +22,7 @@ Collect logs about new information that is created for observability resources w
 ** <<viewing-etcd-grafana,Viewing the etcd table>>
 ** <<viewing-cluster-fleet-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster fleet service-level overview for the Kubernetes API server dashboard>>
 ** <<viewing-cluster-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster service-level overview for the Kubernetes API server dashboard>>
-* <<disable-observability,Disable observability>>
+* <<disabling-observability,Disabling observability>>
 
 [#creating-custom-rules]
 == Creating custom rules
@@ -166,8 +166,8 @@ Create the `observability-metrics-custom-allowlist` ConfigMap in the
 
 Verify that the specific metric is not being collected from your managed clusters. When you query the metric from the Grafana dashboard, the metric is not displayed.
 
-[#export-metrics-to-external-endpoints]
-== Export metrics to external endpoints
+[#exporting-metrics-to-external-endpoints]
+== Exporting metrics to external endpoints
 
 You can customize observability to export the metrics to external endpoints, which support Prometheus Remote Write protocol in real time. For more information, see link:https://docs.google.com/document/d/1LPhVRSFkGNSuU1fBd81ulhsCPR4hkSZyyBj1SZ8fWOM/edit#heading=h.3p42p5s8n0ui[Prometheus Remote Write protocol].
 
@@ -343,6 +343,26 @@ global:
 
 To learn more, see the https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation].
 
+[#disabling-forward-alerts]
+=== Disabling forward alerts for managed clusters
+
+Disable alert forwarding for managed clusters. Add the following annotation to the `MultiClusterObservability` custom resource:
+
+[source,yaml]
+----
+metadata:
+      annotations:
+        mco-disable-alerting: "true"
+----
+
+When you set the annotation, the alert forwarding configuration on the managed clusters is reverted. Any changes made to the `ocp-monitoring-config` ConfigMap in the `openshift-monitoring` namespace are reverted. Setting the annotation ensures that the `ocp-monitoring-config` ConfigMap is no longer managed or updated by the observability operator endpoint. After you update the configuration, the Prometheus instance on your managed cluster restarts.
+
+*Important:* Metrics on your managed cluster are lost if you have a Prometheus instance with a persistent volume for metrics, and the Prometheus instance restarts. However, metrics from the hub cluster are not affected.
+
+When the changes are reverted, a ConfigMap named `cluster-monitoring-reverted` is createde in the `open-cluster-management-addon-observability` namespace. Any new, manually added alert forward configurations are not reverted from the ConfigMap. 
+
+Verify that the hub cluster alert manager is no longer propagating managed cluster alerts to third-party messaging tools. See the previous section, _Configuring AlertManager_. 
+
 [#customizing-route-cert]
 == Customizing route certification
 
@@ -434,13 +454,13 @@ After you navigate to the Grafana dashboard, access the managed dashboard menu b
 
 View the error budget for the past seven or 30-day period, the remaining downtime, and trend.
 
-[#disable-observability]
-== Disable observability
+[#disabling-observability]
+== Disabling observability
 
 You can disable observability, which stops data collection on the {product-title-short} hub cluster.
 
-[#disable-observability-on-all-clusters]
-=== Disable observability on all clusters
+[#disabling-observability-on-all-clusters]
+=== Disabling observability on all clusters
 
 Disable observability by removing observability components on all managed clusters.
 
@@ -455,8 +475,8 @@ spec:
     enableMetrics: false #indicates the observability addon push metrics to hub server
 ----
 
-[#disable-observability-on-a-single-cluster]
-=== Disable observability on a single cluster
+[#disabling-observability-on-a-single-cluster]
+=== Disabling observability on a single cluster
 
 Disable observability by removing observability components on specific managed clusters. Add the `observability: disabled` label to the `managedclusters.cluster.open-cluster-management.io` custom resource.
 
