@@ -1,0 +1,46 @@
+[#search-in-the-console]
+= Search in the console
+
+For {product-title}, search provides visibility into your Kubernetes resources across all of your clusters. Search indexes the Kubernetes resources and the relationships to other resources. You can use the `searchcustomization` custom resource (CR) to define the storage settings for search persistence if you want to change the storage class and storage size. 
+
+* <<search-components,Search components>>
+* <<search-customization,Search customization>>
+
+[#search-components]
+== Search components
+
+The search architecture is composed of the following components:
+//is there a specific name for the REST API?
+- `search-collector`: Watches the Kubernetes resources, collects the resource metadata, and sends the collected data to the `search-indexer` process using the REST API. The `search-collector` also computes relationships for resources within the managed cluster and sends it to the `search-indexer`.
+
+- `search-indexer`: Receives data from the collectors through the REST API and writes to PostgreSQL database. The `search-aggregator` also watches resources in the hub cluster, to keep track of active managed clusters.
+
+- `search-api`: Provides access to the data in the `search-index` through GraphQL and enforces role-based access control.
+
+- `search-postgress`: Stores collected data from all managed clusters in an instance of the PostgresQL database.
+
+Search is enabled by default. Search is also enabled when you provision, or manually import a managed cluster. If you want to disable search on your managed cluster, see link:../clusters/modify_endpoint.adoc#modifying-the-klusterlet-add-ons-settings-of-your-cluster[Modifying the klusterlet add-ons settings of your cluster] for more information.
+
+[#search-customization]
+== Search customization
+
+When you install {product-title-short}, the product is configured to persist the data in-memory to a file system. The `StatefulSet` `search-redisgraph` deploys the Redisgraph pod, which mounts the persistent volume named `persist`. If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10Gi on the default storage class. If a default storage class does not exist in your cluster, search saves the index in an empty directory (`emptyDir`).
+
+You can customize the storage settings for search by creating the `searchcustomization` CR. Search customization is namespace-scoped and located where search is installed in the hub cluster. View the following example of the search customization CR:
+
+[source,yaml]
+----
+apiVersion: search.open-cluster-management.io/v1alpha1
+kind: SearchCustomization
+metadata:
+  name: searchcustomization
+  namespace: open-cluster-management
+  labels:
+    cluster.open-cluster-management.io/backup: ""
+spec:
+  persistence: true
+  storageClass: gp2
+  storageSize: 12Gi
+----
+
+Learn how to manage search, see xref:../observability/manage_search.adoc#managing-search[Managing search]. For more topics about the {product-title} console, see link:../console/console_intro.adoc#web-console[Web console].
