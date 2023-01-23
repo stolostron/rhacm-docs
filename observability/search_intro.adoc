@@ -1,11 +1,10 @@
-[#search-in-the-console]
-= Search in the console
+[#search-in-the-console-intro]
+= Search in the console introduction
 
 For {product-title}, search provides visibility into your Kubernetes resources across all of your clusters. Search indexes the Kubernetes resources and the relationships to other resources. You can use the `searchcustomization` custom resource (CR) to define the storage settings for search persistence if you want to change the storage class and storage size. 
 
 * <<search-components,Search components>>
 * <<search-customization,Search customization and configurations>>
-* <<search-configurations,Search configurations>>
 
 [#search-components]
 == Search components
@@ -35,7 +34,7 @@ The search operator watches the watches the `Search` custom resource, reconciles
 
 - PostGres database storage: 
 +
-When you install {product-title-short}, the PostGres database is configured to persist the ssearch data in an empty directory (`emptyDir`) volume. Back up the PostGres data on a Persistent Volume Claim (PVC). If you select a storage class from your {product-title-short} hub cluster, your configuration might resemble the following information:
+When you install {product-title-short}, the PostGres database is configured to persist the search data in an empty directory (`emptyDir`) volume. Back up the PostGres data on a Persistent Volume Claim (PVC). If you select a storage class from your {product-title-short} hub cluster, your configuration might resemble the following information:
 +
 [source,yaml]
 ----
@@ -53,7 +52,7 @@ spec:
 ----
 +
 This confirguration creates a PVC named `gp2-search` and is mounted to the `search-postgres` pod. By default, the storage size is `10Gi`. You can modify the storage size. For example, `20Gi` might be sufficient for about 200 managed clusters.
-
+//Should the api value be updated in this example (and others)?
 - PostGres database configuration:
 +
 Use the `tuning-config` to optimize your database performance. This ConfigMap contains the name-value pairs for the supported tuning parameters. See the following example command:
@@ -63,7 +62,7 @@ oc create configmap tuning-config --from-literal POSTGRESQL_SHARED_BUFFERS=128MB
 ----
 +
 - Optimize PostGres database configuration by updating the `dbConfig` parameter. Add `tuning-config` as the parameter value. 
-
++
 [source,yaml]
 ----
 apiVersion: search.open-cluster-management.io/v1alpha1
@@ -79,9 +78,9 @@ spec:
   size: 10Gi
   storageClassName: gp2-search
 ----
-
++
 - Optimize cost by tuning the pod memory requirements, replica count, and update log levels for active pods. Update the `deployment` section of the `Search` custom resource. There are four deployments managed by the `search-operator`, which can be updated individually. Your `Search` custom resource might resemble the following file:
-
++
 [source,yaml]
 ----
 deployments:
@@ -96,17 +95,11 @@ deployments:
   indexer:
   replicaCount: 3
 ----
-
-
-
-
-
-
-
-memory to a file system. The `StatefulSet` `search-redisgraph` deploys the Redisgraph pod, which mounts the persistent volume named `persist`. If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10Gi on the default storage class. If a default storage class does not exist in your cluster, search saves the index in an empty directory (`emptyDir`).
-
-You can customize the storage settings for search by creating the `searchcustomization` CR. Search customization is namespace-scoped and located where search is installed in the hub cluster. View the following example of the search customization CR:
-
+//need help with yaml snippets^
+- Node placement for search pods:
++
+You can update the `Placement` of search pods by using the `nodeSelector` parameter, or the `tolerations` parameter. View the following example configuration:
++
 [source,yaml]
 ----
 apiVersion: search.open-cluster-management.io/v1alpha1
@@ -117,27 +110,16 @@ metadata:
   labels:
     cluster.open-cluster-management.io/backup: ""
 spec:
-  persistence: true
-  storageClass: gp2
-  storageSize: 12Gi
+  dbConfig: tuning-config
+  dbStorage:
+  size: 10Gi
+  storageClassName: gp2-search
+  tolerations:
+  effect: NoSchedule
+  key: node-role.kubernetes.io/infra
+  operator: Exists
+  nodeSelector:
+  nodeLabel: search
 ----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Learn how to manage search, see xref:../observability/manage_search.adoc#managing-search[Managing search]. For more topics about the {product-title} console, see link:../console/console_intro.adoc#web-console[Web console].
