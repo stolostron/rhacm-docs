@@ -8,9 +8,9 @@ Use search to query resource data from your clusters.
 Continue reading the following topics:
 
 - <<creating-search-configurable-collection,Creating search configurable collection>>
-- <<updating-search-limit,Updating the search limit>>
+- <<updating-saved-search-limit,Updating saved search limit>>
 - <<querying-in-the-console,Querying in the console>>
-** <<querying-argo-app,Querying ArgoCD applications>>
+** <<querying-argo-apps,Querying ArgoCD applications>>
 - <<increasing-redisgraph-memory,Increasing the RedisGraph memory>>
 - <<updating-klusterlet-addons-managed,Updating klusterlet-addon-search deployments on managed clusters>>
 
@@ -20,7 +20,7 @@ Continue reading the following topics:
 Create the `search-collector-config` ConfigMap to define which Kubernetes resources get collected from the cluster by listing the resources in the allow and deny list section. List the resources in the `data.AllowedResources` and `data.DeniedResources` sections within the ConfigMap. Run the following command to create the resource:
 
 ----
-oc apply -f configMapFile.yaml
+oc apply -f yourconfigMapFile.yaml
 ----
 
 Your ConfigMap might resemble the following YAML file: 
@@ -57,20 +57,20 @@ data:
        - certificatepolicies
 ----
 
-[#updating-search-limit]
-== Updating the search limit
+[#updating-saved-search-limit]
+== Updating saved search limit
 
-By default, there is a limit of ten saved searches for each user. Only a user with the `administrator` role can update the limit.
+By default, there is a limit of ten saved searches for each user. To update the limit, add the following key value to the `console-config` ConfigMap, `key:value: SAVED_SEARCH_LIMIT: x`.
 
-Add the following key value to the `console-config` ConfigMap, `key:value: SAVED_SEARCH_LIMIT: x`.
-
-//is the console-config in the search customization CRD? Should the user view the search customization first to check the search limit? 
 Run the following command to view search customization CRD: 
 
 ----
 oc get crd searchcustomizations.search.open-cluster-management.io -o yaml
 ----
 
+[#disabling-persistence]
+== Disabling persistence
+//Xavier please review
 You can disable persistence by updating the `persistence` flag to `false` in the customization CR, which turns off saving search index to the file system. A status for persistence can be retrieved from the search operator (`searchoperator`) CR. Run the following command to view search operator CR:
 
 ----
@@ -78,11 +78,11 @@ oc get searchoperator searchoperator -o yaml
 ---- 
 
 [#increasing-redisgraph-memory]
-=== Increasing the RedisGraph memory
+== Increasing the RedisGraph memory
 
 RedisGraph is an in-memory database that needs linear growth of memory as the number of objects are cached. A {product-title-short} cluster with many managed clusters, or with a large number of Kubernetes objects require limit memory updates for the redisgraph pod (`search-redisgraph-0`).
 
-By default, the RedisGraph pod (`search-redisgraph-0`) is deployed with a memory limit of `4Gi`. If you are managing larger clusters, you might need to increase this limit by editing the `redisgraph_resource.limit_memory` for the `searchoperator` in the hub cluster namespace. For example, you can update the limit to `8Gi` with the following command:
+By default, the RedisGraph pod (`search-redisgraph-0`) is deployed with a memory limit of `4Gi`. If you are managing larger clusters, you might need to increase this limit by editing the `redisgraph_resource.limit_memory` for the `searchoperator` in the hub cluster. For example, you can update the limit to `8Gi` with the following command:
 
 ----
 oc patch searchoperator searchoperator --type='merge' -p '{"spec":{"redisgraph_resource":{"limit_memory":"8Gi"}}}'
@@ -90,10 +90,9 @@ oc patch searchoperator searchoperator --type='merge' -p '{"spec":{"redisgraph_r
 
 After the change is made, the `search-redisgraph` pod automatically restarts with the updated configuration.
 
-
 [#querying-in-the-console]
 == Querying in the console
-
+//Anxhela checking if empty query is allowed
 You can type any text value in the _Search box_ and results include anything with that value from any property, such as a name or namespace. Users are unable to search for values that contain an empty space.
 
 For more specific search results, include the property selector in your search. You can combine related values for the property, for a more precise scope of your search. For example, search for `cluster:dev red` to receive results that match the string "red" in the `dev` cluster. 
@@ -137,10 +136,9 @@ When you search for an ArgoCD application, you are directed to the _Applications
 [#updating-klusterlet-addons-managed]
 == Updating klusterlet-addon-search deployments on managed clusters
 
-To collect the Kubernetes objects from the managed clusters, the `search-collector` process is run on all the managed clusters where search is enabled. The deployment ran is the `klusterlet-addon-search` deployment in the `open-cluster-management-agent-addon` namespace. A managed cluster with high number of resources might require more memory requirements for the `klusterlet-addon-search` deployment to function. 
+To collect the Kubernetes objects from the managed clusters, the `search-collector` process is run on all the managed clusters where search is enabled. The active deployment is the `klusterlet-addon-search` deployment in the `open-cluster-management-agent-addon` namespace. A managed cluster with a high number of resources might require more memory requirements for the `klusterlet-addon-search` deployment to function. 
 
-You can tune the resource requirements for the deployment.
-Resource requirements for the `klusterlet-addon-search`  deployment in a managed cluster can be specified in the `ManagedclusterAddon` custom resource. Edit the `ManagedclusterAddon` custom resource with the following command:
+You can tune the resource requirements for the deployment. Resource requirements for the `klusterlet-addon-search`  deployment in a managed cluster can be specified in the `ManagedclusterAddon` custom resource. Edit the `ManagedclusterAddon` custom resource with the following command:
 
 ----
 oc edit managedclusteraddon search-collector -n xyz
