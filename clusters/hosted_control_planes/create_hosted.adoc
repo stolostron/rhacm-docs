@@ -11,9 +11,6 @@ You can use the {mce} console to create an {ocp} hosted cluster. Hosted control 
 
 If you use hosted control planes on AWS, you can create a hosted cluster by using the console, or you can import a hosted cluster by using either the console or the CLI.
 
-[#create-hosted]
-== Creating a hosted control plane cluster with the console on bare metal
-=======
 * <<hosted-prerequisites-aws,Prerequisites>>
 * <<create-hosted-aws,Creating a hosted cluster on AWS with the console>>
 * <<importing-hosted-cluster-ui-aws,Importing a hosted control plane cluster on AWS with the console>>
@@ -219,7 +216,9 @@ The access secrets for hosted control plane clusters are stored in the `hypershi
 If you use hosted control planes on bare metal...
 
 * <<hosted-prerequisites-bm,Prerequisites>>
-* 
+* <<creating-a-hosted-cluster-bm,Creating a hosted cluster on bare metal>>
+* <<create-an-infraenv,Creating an InfraEnv>>
+* <<adding-agents,Adding agents>>
 
 [#hosted-prerequisites-bm]
 === Prerequisites
@@ -318,70 +317,68 @@ oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get InfraEnv ${HOSTED_CLUSTER_NAME} -ojs
 ----
 
 [#add-agents]
-=== Adding agents
+=== Adding Agents
 
-You can add Agents by manually configuring the machine to boot with the live ISO or by using Metal3.
+You can add Agents by manually configuring the machine to start with the live ISO or by using Metal3.
 
-### Manual
+* To manually add Agents, follow these steps:
 
-The live ISO may be downloaded and used to boot a node (bare-metal or VM). 
+. Download the live ISO and use it to start a node (bare metal or VM). At startup, the node communicates with the Assisted Service and registers as an Agent in the same namespace as the InfraEnv.
 
-On boot, the node will communicate with the assisted-service and register as an Agent in the same namespace as the InfraEnv.
-
-Once each Agent is created, optionally set its installation_disk_id and hostname in the Spec. Then approve it to indicate that the Agent is ready for use.
-
-~~~sh
+. After each Agent is created, you can optionally set its `installation_disk_id` and `hostname` in the spec. Then, approve it to indicate that the Agent is ready for use.
++
+----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agents
 
 NAME                                   CLUSTER   APPROVED   ROLE          STAGE
 86f7ac75-4fc4-4b36-8130-40fa12602218                        auto-assign
 e57a637f-745b-496e-971d-1abbf03341ba                        auto-assign
-~~~
+----
 
-~~~sh
+----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} patch agent 86f7ac75-4fc4-4b36-8130-40fa12602218 -p '{"spec":{"installation_disk_id":"/dev/sda","approved":true,"hostname":"worker-0.example.krnl.es"}}' --type merge
 
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} patch agent 23d0c614-2caa-43f5-b7d3-0b3564688baa -p '{"spec":{"installation_disk_id":"/dev/sda","approved":true,"hostname":"worker-1.example.krnl.es"}}' --type merge
-~~~
+----
 
-~~~sh
+----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agents
 
 NAME                                   CLUSTER   APPROVED   ROLE          STAGE
 86f7ac75-4fc4-4b36-8130-40fa12602218             true       auto-assign
 e57a637f-745b-496e-971d-1abbf03341ba             true       auto-assign
-~~~
+----
 
-### Metal3
+* To add agents by using Metal3, follow these instructions:
 
-We will leverage the Assisted Service and Hive to create the custom ISO as well as the Baremetal Operator to perform the installation.
-
-> **WARN:** Since the `BaremetalHost` objects will be created outside the baremetal-operator namespace we need to configure the operator to watch all namespaces.
-
-~~~sh
+. Use the Assisted Service and Hive to create the custom ISO and the Baremetal Operator to perform the installation.
++
+**Important:** Because the `BaremetalHost` objects are created outside the baremetal-operator namespace, you must configure the operator to watch all namespaces.
++
+----
 oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
-~~~
+----
++
+The `metal3` pod is restarted in the `openshift-machine-api` namespace.
 
-> **INFO:** This will trigger a restart of the `metal3` pod in the `openshift-machine-api` namespace.
-
-* Wait until the `metal3` pod is ready again:
-
-~~~sh
+. Wait until the `metal3` pod is ready again:
++
+----
 until oc wait -n openshift-machine-api $(oc get pods -n openshift-machine-api -l baremetal.openshift.io/cluster-baremetal-operator=metal3-state -o name) --for condition=containersready --timeout 10s >/dev/null 2>&1 ; do sleep 1 ; done
-~~~
+----
 
-Now we can go ahead and create our BaremetalHost objects. We will need to configure some variables required to be able to boot our bare-metal nodes.
+. Create your BaremetalHost objects. You need to configure a few variables that are required in order to start your bare-metal nodes.
 
-* `BMC_USERNAME`: Username to be used for connecting to the BMC.
-* `BMC_PASSWORD`: Password to be used for connecting to the BMC.
-* `BMC_IP`: IP used by Metal3 to connect to the BMC.
-* `WORKER_NAME`: Name of the BaremetalHost object (this will be used as hostname as well)
-* `BOOT_MAC_ADDRESS`: MAC address of the NIC connected to the MachineNetwork.
-* `UUID`: Redfish UUID, this is usually `1`. If using sushy-tools this will be a long UUID. If using iDrac this will be `System.Embedded.1`. You may need to check with the vendor.
-* `REDFISH_SCHEME`: The Redfish provider to use. If using hardware that uses a standard Redfish implementation you can set this to `redfish-virtualmedia`. iDRAC will use `idrac-virtualmedia`. iLO5 will use `ilo5-virtualmedia`. You may need to check with the vendor.
-* `REDFISH`: Redfish connection endpoint.
-
-~~~sh
+** `BMC_USERNAME`: Username to connect to the BMC.
+** `BMC_PASSWORD`: Password to connect to the BMC.
+** `BMC_IP`: IP used by Metal3 to connect to the BMC.
+** `WORKER_NAME`: Name of the BaremetalHost object (this value is also used as the hostname)
+** `BOOT_MAC_ADDRESS`: MAC address of the NIC that is connected to the MachineNetwork.
+** `UUID`: Redfish UUID, this is usually `1`. If you are using sushy-tools, this value is a long UUID. If you are using iDrac, this value is `System.Embedded.1`. You might need to check with the vendor.
+** `REDFISH_SCHEME`: The Redfish provider to use. If you are using hardware that uses a standard Redfish implementation, you can set this value to `redfish-virtualmedia`. iDRAC uses `idrac-virtualmedia`. iLO5 uses `ilo5-virtualmedia`. You might need to check with the vendor.
+** `REDFISH`: Redfish connection endpoint.
++
+----
 export BMC_USERNAME=$(echo -n "root" | base64 -w0)
 export BMC_PASSWORD=$(echo -n "calvin" | base64 -w0)
 export BMC_IP="192.168.124.228"
@@ -390,11 +387,13 @@ export BOOT_MAC_ADDRESS="aa:bb:cc:dd:ee:ff"
 export UUID="1"
 export REDFISH_SCHEME="redfish-virtualmedia"
 export REDFISH="${REDFISH_SCHEME}://${BMC_IP}/redfish/v1/Systems/${UUID}"
-~~~
+----
 
-With the required information ready, let's create the BaremetalHost. First we will create the BMC Secret:
+. Create the BaremetalHost by following these steps:
 
-~~~sh
+.. Create the BMC Secret:
++
+----
 envsubst <<"EOF" | oc apply -f -
 apiVersion: v1
 data:
@@ -406,15 +405,15 @@ metadata:
   namespace: ${HOSTED_CONTROL_PLANE_NAMESPACE}
 type: Opaque
 EOF
-~~~
+----
 
-Second, we will create the BMH:
-
-> **INFO:** `infraenvs.agent-install.openshift.io` label is used to specify which InfraEnv is used to boot the BMH. `bmac.agent-install.openshift.io/hostname` is used to manually set a hostname.
-
-In case you want to manually specify the installation disk you can make use of the [rootDeviceHints](https://github.com/metal3-io/baremetal-operator/blob/main/docs/api.md#rootdevicehints) in the BMH Spec. If rootDeviceHints are not provided, the agent will pick the installation disk that better suits the installation requirements.
-
-~~~sh
+.. Create the BMH:
++
+**Note:** The `infraenvs.agent-install.openshift.io` label is used to specify which InfraEnv is used to start the BMH. The `bmac.agent-install.openshift.io/hostname` label is used to manually set a hostname.
++
+If you want to manually specify the installation disk, you can use the https://github.com/metal3-io/baremetal-operator/blob/main/docs/api.md#rootdevicehints[rootDeviceHints] in the BMH Spec. If rootDeviceHints are not provided, the agent picks the installation disk that better suits the installation requirements.
++
+----
 envsubst <<"EOF" | oc apply -f -
 apiVersion: metal3.io/v1alpha1
 kind: BareMetalHost
@@ -435,81 +434,85 @@ spec:
   bootMACAddress: ${BOOT_MAC_ADDRESS}
   online: true
 EOF
-~~~
-
-The Agent should be automatically approved, if not, make sure the `bootMACAddress` is correct.
-
-The BMH will be provisioned:
-
-~~~sh
+----
++
+The Agent is automatically approved. If it is not approved, confirm that the `bootMACAddress` is correct.
++
+The BMH is provisioned:
++
+----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get bmh
 
 NAME           STATE          CONSUMER   ONLINE   ERROR   AGE
 ocp-worker-0   provisioning              true             2m50s
-~~~
-
-BMH will reach `provisioned` state eventually.
-
-~~~sh
+----
++
+The BMH eventually reaches the `provisioned` state:
++
+----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get bmh
 NAME           STATE          CONSUMER   ONLINE   ERROR   AGE
 ocp-worker-0   provisioned               true             72s
-~~~
-
-Provisioned means that the node was configured to boot from the virtualCD properly. It will take a few moments for the Agent to show up:
-
-~~~sh
+----
++
+_Provisioned_ means that the node was configured to start from the virtualCD properly. It takes a few moments for the Agent to be displayed:
++
+----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent
 
 NAME                                   CLUSTER   APPROVED   ROLE          STAGE
 4dac1ab2-7dd5-4894-a220-6a3473b67ee6             true       auto-assign  
-~~~
+----
++
+The agent is auto-approved. 
 
-As you can see it was auto-approved. We will repeat this with another two nodes.
-
-~~~sh
+.. Repeat this process with the other two nodes:
++
+----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent
 
 NAME                                   CLUSTER   APPROVED   ROLE          STAGE
 4dac1ab2-7dd5-4894-a220-6a3473b67ee6             true       auto-assign   
 d9198891-39f4-4930-a679-65fb142b108b             true       auto-assign 
 da503cf1-a347-44f2-875c-4960ddb04091             true       auto-assign 
-~~~
+----
 
-## Accessing the HostedCluster
+[#access-hosted-cluster]
+=== Accessing the HostedCluster
 
-We have the HostedControlPlane running and the Agents ready to join the HostedCluster. Before we join the Agents let's access the HostedCluster.
+The HostedControlPlane is running and the Agents are ready to join the HostedCluster. Before the Agents join the hosted cluster, you need to access the HostedCluster.
 
-First, we need to generate the kubeconfig:
-
-~~~sh
+. Generate the kubeconfig:
++
+----
 hypershift create kubeconfig --namespace ${CLUSTERS_NAMESPACE} --name ${HOSTED_CLUSTER_NAME} > ${HOSTED_CLUSTER_NAME}.kubeconfig
-~~~
-
-If we access the cluster we will see that we don't have any nodes and that the ClusterVersion is trying to reconcile the OCP release:
-
-~~~sh
+----
++
+If you access the cluster, you can see that you do not have any nodes and that the ClusterVersion is trying to reconcile the {ocp} release:
++
+----
 oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get clusterversion,nodes
 
 NAME                                         VERSION   AVAILABLE   PROGRESSING   SINCE   STATUS
 clusterversion.config.openshift.io/version             False       True          8m6s    Unable to apply 4.11.5: some cluster operators have not yet rolled out
-~~~
+----
++
+To get the cluster running, you need to add nodes to it.
 
-In order to get the cluster in a running state we need to add some nodes to it. Let's do it.
+[#scaling-the-nodepool]
+=== Scaling the NodePool
 
-## Scale the NodePool
+You add nodes to your HostedCluster by scaling the NodePool object.  
 
-We add nodes to our HostedCluster by scaling the NodePool object. In this case we will start by scaling the NodePool object to two nodes:
-
-~~~sh
+. Scale the NodePool object to two nodes:
++
+----
 oc -n ${CLUSTERS_NAMESPACE} scale nodepool ${NODEPOOL_NAME} --replicas 2
-~~~
-
-The ClusterAPI Agent provider will pick two agents randomly that will get assigned to the HostedCluster. These agents will go over different states and will finally join the HostedCluster as OpenShift nodes.
-
-> **INFO:** States will be `binding` -> `discoverying` -> `insufficient` -> `installing` -> `installing-in-progress` -> `added-to-existing-cluster`
-
-~~~sh
+----
++
+The ClusterAPI Agent provider randomly picks two agents that are then assigned to the HostedCluster. Those agents go through different states and finally join the HostedCluster as {ocp-short} nodes. The states pass from `binding` to `discoverying` to `insufficient` to `installing` to `installing-in-progress` to `added-to-existing-cluster`.
++
+----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent
 
 NAME                                   CLUSTER         APPROVED   ROLE          STAGE
@@ -522,33 +525,31 @@ oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent -o jsonpath='{range .items[*]}
 BMH: ocp-worker-2 Agent: 4dac1ab2-7dd5-4894-a220-6a3473b67ee6 State: binding
 BMH: ocp-worker-0 Agent: d9198891-39f4-4930-a679-65fb142b108b State: known-unbound
 BMH: ocp-worker-1 Agent: da503cf1-a347-44f2-875c-4960ddb04091 State: insufficient
-~~~
-
-Once the agents have reached the `added-to-existing-cluster` state, we should see the OpenShift nodes after a few moments:
-
-~~~sh
+----
++
+. After the agents reach the `added-to-existing-cluster` state, verify that you can see the {ocp-short} nodes:
++
+----
 oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
 
 NAME           STATUS   ROLES    AGE     VERSION
 ocp-worker-1   Ready    worker   5m41s   v1.24.0+3882f8f
 ocp-worker-2   Ready    worker   6m3s    v1.24.0+3882f8f
-~~~
-
-At this point some ClusterOperators will start to reconcile by adding workloads to the nodes.
-
-We can also see that two Machines were created when we scaled up the NodePool:
-
-~~~sh
+----
++
+ClusterOperators start to reconcile by adding workloads to the nodes. You can also see that two machines were created when you scaled up the NodePool:
++
+----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get machines
 
 NAME                            CLUSTER               NODENAME       PROVIDERID                                     PHASE     AGE   VERSION
 hypercluster1-c96b6f675-m5vch   hypercluster1-b2qhl   ocp-worker-1   agent://da503cf1-a347-44f2-875c-4960ddb04091   Running   15m   4.11.5
 hypercluster1-c96b6f675-tl42p   hypercluster1-b2qhl   ocp-worker-2   agent://4dac1ab2-7dd5-4894-a220-6a3473b67ee6   Running   15m   4.11.5
-~~~
-
-At some point the clusterversion reconcile will reach a point where only Ingress and Console cluster operators will be missing:
-
-~~~sh
+----
++
+The clusterversion reconcile eventually reaches a point where only Ingress and Console cluster operators are missing:
++
+----
 oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get clusterversion,co
 
 NAME                                         VERSION   AVAILABLE   PROGRESSING   SINCE   STATUS
@@ -575,28 +576,19 @@ clusteroperator.config.openshift.io/operator-lifecycle-manager-catalog         4
 clusteroperator.config.openshift.io/operator-lifecycle-manager-packageserver   4.11.5    True        False         False      40m     
 clusteroperator.config.openshift.io/service-ca                                 4.11.5    True        False         False      11m     
 clusteroperator.config.openshift.io/storage                                    4.11.5    True        False         False      11m 
-~~~
+----
 
-Let's fix the Ingress.
+[#handling-ingress]
+=== Handling Ingress
 
-## Handling Ingress
+Every {ocp-short} cluster comes set up with a default application ingress controller that is expected have an external DNS record associated with it. For example, if you create a HyperShift cluster named `example` with the base domain `krnl.es`, you can expect the wildcard domain
+`*.apps.example.krnl.es` to be routable.
 
-Every OpenShift cluster comes set up with a default application ingress
-controller, which is expected have an external DNS record associated with it.
+You can set up a load balancer and wildcard DNS record for the `*.apps`. This process requires deploying MetalLB, configuring a new load balancer service that routes to the ingress deployment, and assigning a wildcard DNS entry to the load balancer IP address.
 
-For example, if a HyperShift cluster named `example` with the base domain
-`krnl.es` is created, then the wildcard domain
-`*.apps.example.krnl.es` is expected to be routable.
-
-### Set up a LoadBalancer and wildcard DNS record for the `*.apps`.
-
-This option requires deploying MetalLB, configuring a new LoadBalancer service that routes to the ingress deployment, as well as assigning a wildcard DNS entry to the LoadBalancer's IP address.
-
-#### Step 1 - Get the MetalLB Operator Deployed
-
-Set up [MetalLB](https://docs.openshift.com/container-platform/4.10/networking/metallb/about-metallb.html) so that when you create a service of type LoadBalancer, MetalLB will add an external IP address for the service.
-
-~~~sh
+. Set up https://docs.openshift.com/container-platform/4.10/networking/metallb/about-metallb.html[MetalLB] so that when you create a service of the LoadBalancer type, MetalLB adds an external IP address for the service.
++
+----
 cat <<"EOF" | oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig apply -f -
 ---
 apiVersion: v1
@@ -624,11 +616,11 @@ spec:
   name: metallb-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-~~~
+----
 
-Once the operator is up and running, create the MetalLB instance:
-
-~~~sh
+. After the operator is running, create the MetalLB instance:
++
+----
 cat <<"EOF" | oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig apply -f -
 apiVersion: metallb.io/v1beta1
 kind: MetalLB
@@ -636,16 +628,13 @@ metadata:
   name: metallb
   namespace: metallb
 EOF
-~~~
+----
 
-#### Step 2 - Get the MetalLB Operator Configured
-
-We will create an `IPAddressPool` with a single IP address. This IP address must be on the same subnet as the network used by the cluster nodes.
-
-
-> **WARN:** Change `INGRESS_IP` env var to match your environments addressing.
-
-~~~sh
+. Configure the MetalLB Operator by creating an `IPAddressPool` with a single IP address. This IP address must be on the same subnet as the network that the cluster nodes use.
++
+**Important:** Change the `INGRESS_IP` environment variable to match your environment's address.
++
+----
 export INGRESS_IP=192.168.122.23
 
 envsubst <<"EOF" | oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig apply -f -
@@ -660,13 +649,13 @@ spec:
   addresses:
     - ${INGRESS_IP}-${INGRESS_IP}
 EOF
-~~~
+----
 
-#### Step 3 - Get the OpenShift Router exposed via MetalLB
+. Expose the {ocp-short} Router via MetalLB by following these steps:
 
-Set up the LoadBalancer Service that routes ingress traffic to the ingress deployment.
-
-~~~sh
+.. Set up the LoadBalancer Service that routes ingress traffic to the ingress deployment.
++
+----
 cat <<"EOF" | oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig apply -f -
 kind: Service
 apiVersion: v1
@@ -689,24 +678,18 @@ spec:
     ingresscontroller.operator.openshift.io/deployment-ingresscontroller: default
   type: LoadBalancer
 EOF
-~~~
+----
 
-We already configured the wildcard record in our example DNS config:
-
-~~~config
-*.apps.example.krnl.es. IN A 192.168.122.23
-~~~
-
-So we should be able to reach the OCP Console now:
-
-~~~sh
+.. Reach the {ocp-short} console:
++
+----
 curl -kI https://console-openshift-console.apps.example.krnl.es
 
 HTTP/1.1 200 OK
-~~~
+----
 
-And if we check the clusterversion and clusteroperator we should have everything up and running now:
-
+.. Check the `clusterversion` and `clusteroperator` values to verify that everything is running:
++
 ----
 oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get clusterversion,co
 
@@ -737,97 +720,93 @@ clusteroperator.config.openshift.io/storage                                    4
 ----
 
 [#enable-node-auto-scaling-hosted-cluster]
-=== Enabling Node Auto-Scaling for the Hosted Cluster
+=== Enabling node auto-scaling for the hosted cluster
 
-Auto-scaling can be enabled, if we choose to enable auto-scaling, when more capacity is require in our Hosted Cluster a new Agent will be installed (providing that we have spare agents). In order to enable auto-scaling we can run the following command:
+When you need more capacity in your hosted cluster and spare agents are available, you can enable auto-scaling to install new Agents. 
 
-> **INFO:** In this case the minimum nodes will be 2 and the maximum 5.
-
-~~~sh
+. To enable auto-scaling, enter the following command. In this case, the minimum nodes are 2 and the maximuma re 5.
++
+----
 oc -n ${CLUSTERS_NAMESPACE} patch nodepool ${HOSTED_CLUSTER_NAME} --type=json -p '[{"op": "remove", "path": "/spec/replicas"},{"op":"add", "path": "/spec/autoScaling", "value": { "max": 5, "min": 2 }}]'
-~~~
-
-If 10 minutes passes without requiring the additional capacity the agent will be decommissioned and placed in the spare queue again.
+----
++
+If 10 minutes pass without requiring the additional capacity, the Agent is decommissioned and placed in the spare queue again.
 
 . Create a workload that requires a new node.
-
-    ~~~sh
-    cat <<EOF | oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig apply -f -
-    apiVersion: apps/v1
-    kind: Deployment
++
+----
+cat <<EOF | oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: reversewords
+  name: reversewords
+  namespace: default
+spec:
+  replicas: 40
+  selector:
+    matchLabels:
+      app: reversewords
+  strategy: {}
+  template:
     metadata:
       creationTimestamp: null
       labels:
         app: reversewords
+  spec:
+    containers:
+    - image: quay.io/mavazque/reversewords:latest
       name: reversewords
-      namespace: default
-    spec:
-      replicas: 40
-      selector:
-        matchLabels:
-          app: reversewords
-      strategy: {}
-      template:
-        metadata:
-          creationTimestamp: null
-          labels:
-            app: reversewords
-        spec:
-          containers:
-          - image: quay.io/mavazque/reversewords:latest
-            name: reversewords
-            resources:
-              requests:
-                memory: 2Gi
-    status: {}
-    EOF
-    ~~~
+      resources:
+        requests:
+          memory: 2Gi
+status: {}
+EOF
+----
 
-2. We will see the remaining agent starts getting deployed.
+. Verify that the remaining Agents are deployed. In this example, the spare agent, `d9198891-39f4-4930-a679-65fb142b108b`, is provisioned.
++
+----
+oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent -o jsonpath='{range .items[*]}BMH: {@.metadata.labels.agent-install\.openshift\.io/bmh} Agent: {@.metadata.name} State: {@.status.debugInfo.state}{"\n"}{end}'
 
-    > **INFO:** The spare agent `d9198891-39f4-4930-a679-65fb142b108b` started getting provisioned.
+BMH: ocp-worker-2 Agent: 4dac1ab2-7dd5-4894-a220-6a3473b67ee6 State: added-to-existing-cluster
+BMH: ocp-worker-0 Agent: d9198891-39f4-4930-a679-65fb142b108b State: installing-in-progress
+BMH: ocp-worker-1 Agent: da503cf1-a347-44f2-875c-4960ddb04091 State: added-to-existing-cluster
+----
 
-    ~~~sh
-    oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent -o jsonpath='{range .items[*]}BMH: {@.metadata.labels.agent-install\.openshift\.io/bmh} Agent: {@.metadata.name} State: {@.status.debugInfo.state}{"\n"}{end}'
+. If you check the nodes, you can see a new node in the cluster. In this example, `ocp-worker-0` is added to the cluster.
++
+----
+oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
 
-    BMH: ocp-worker-2 Agent: 4dac1ab2-7dd5-4894-a220-6a3473b67ee6 State: added-to-existing-cluster
-    BMH: ocp-worker-0 Agent: d9198891-39f4-4930-a679-65fb142b108b State: installing-in-progress
-    BMH: ocp-worker-1 Agent: da503cf1-a347-44f2-875c-4960ddb04091 State: added-to-existing-cluster
-    ~~~
+NAME           STATUS   ROLES    AGE   VERSION
+ocp-worker-0   Ready    worker   35s   v1.24.0+3882f8f
+ocp-worker-1   Ready    worker   40m   v1.24.0+3882f8f
+ocp-worker-2   Ready    worker   41m   v1.24.0+3882f8f
+----
 
-3. If we check the nodes we will see a new one joined the cluster.
+. To remove the node, delete the workload by entering this command:
++
+----
+oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig -n default delete deployment reversewords
+----
 
-    > **INFO:** We got ocp-worker-0 added to the cluster
+. Wait 10 minutes and confirm that the node was removed:
++
+----
+oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
 
-    ~~~sh
-    oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
+NAME           STATUS   ROLES    AGE   VERSION
+ocp-worker-1   Ready    worker   51m   v1.24.0+3882f8f
+ocp-worker-2   Ready    worker   52m   v1.24.0+3882f8f
+----
++
+----
+oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent -o jsonpath='{range .items[*]}BMH: {@.metadata.labels.agent-install\.openshift\.io/bmh} Agent: {@.metadata.name} State: {@.status.debugInfo.state}{"\n"}{end}'
 
-    NAME           STATUS   ROLES    AGE   VERSION
-    ocp-worker-0   Ready    worker   35s   v1.24.0+3882f8f
-    ocp-worker-1   Ready    worker   40m   v1.24.0+3882f8f
-    ocp-worker-2   Ready    worker   41m   v1.24.0+3882f8f
-    ~~~
-
-4. If we delete the workload and wait 10 minutes the node will be removed.
-
-    ~~~sh
-    oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig -n default delete deployment reversewords
-    ~~~
-
-5. After 10 minutes.
-
-    ~~~sh
-    oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
-
-    NAME           STATUS   ROLES    AGE   VERSION
-    ocp-worker-1   Ready    worker   51m   v1.24.0+3882f8f
-    ocp-worker-2   Ready    worker   52m   v1.24.0+3882f8f
-    ~~~
-
-    ~~~sh
-    oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent -o jsonpath='{range .items[*]}BMH: {@.metadata.labels.agent-install\.openshift\.io/bmh} Agent: {@.metadata.name} State: {@.status.debugInfo.state}{"\n"}{end}'
-
-    BMH: ocp-worker-2 Agent: 4dac1ab2-7dd5-4894-a220-6a3473b67ee6 State: added-to-existing-cluster
-    BMH: ocp-worker-0 Agent: d9198891-39f4-4930-a679-65fb142b108b State: known-unbound
-    BMH: ocp-worker-1 Agent: da503cf1-a347-44f2-875c-4960ddb04091 State: added-to-existing-cluster
-    ~~~
+BMH: ocp-worker-2 Agent: 4dac1ab2-7dd5-4894-a220-6a3473b67ee6 State: added-to-existing-cluster
+BMH: ocp-worker-0 Agent: d9198891-39f4-4930-a679-65fb142b108b State: known-unbound
+BMH: ocp-worker-1 Agent: da503cf1-a347-44f2-875c-4960ddb04091 State: added-to-existing-cluster
+----
