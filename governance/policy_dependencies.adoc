@@ -1,0 +1,59 @@
+[#policy-dependencies]
+= Policy dependencies
+
+Dependencies can be used to activate policy or policy template tasks when another policy is in a certain state. The following fields are checked on the managed cluster, `dependencies` and `extraDependencies`. When a dependency is not met, the template status of the replicated policy template displays more details.
+
+*Required access:* Policy administrator
+
+View the following policy dependency example, where the `ScanSettingBinding` is only created if the `upstream-compliance-operator` policy is already compliant on the managed cluster:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  name: moderate-compliance-scan
+  namespace: default
+spec:
+  dependencies:
+  - apiVersion: policy.open-cluster-management.io/v1
+    compliance: Compliant
+    kind: Policy
+    name: upstream-compliance-operator
+    namespace: default
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: moderate-compliance-scan
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: compliance.openshift.io/v1alpha1
+            kind: ScanSettingBinding
+            metadata:
+              name: moderate
+              namespace: openshift-compliance
+            profiles:
+            - apiGroup: compliance.openshift.io/v1alpha1
+              kind: Profile
+              name: ocp4-moderate
+            - apiGroup: compliance.openshift.io/v1alpha1
+              kind: Profile
+              name: ocp4-moderate-node
+            settingsRef:
+              apiGroup: compliance.openshift.io/v1alpha1
+              kind: ScanSetting
+              name: default
+        remediationAction: enforce
+        severity: low
+----
+
+*Note:* A dependency cannot be used to apply a policy on one cluster based on the status of another. 
