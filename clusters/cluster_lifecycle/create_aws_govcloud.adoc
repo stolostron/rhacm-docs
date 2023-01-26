@@ -8,6 +8,7 @@ AWS GovCloud provides cloud services that meet additional requirements that are 
 When you create a cluster, the creation process uses the {ocp-short} installer with the Hive resource. If you have questions about cluster creation after completing this procedure, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/installing/installing-on-aws[Installing on AWS] in the {ocp-short} documentation for more information about the process.  
 
 * <<aws-govcloud-prerequisites,Prerequisites>>
+* <<configure-hive-to-deploy-on-aws-govcloud,Configure Hive to deploy on AWS GovCloud>>
 * <<aws-govcloud-creating-your-cluster-with-the-console,Creating your cluster with the console>>
 
 [#aws-govcloud-prerequisites]
@@ -23,37 +24,35 @@ You must have the following prerequisites before creating an AWS GovCloud cluste
 
 * You must have an {ocp-short} image pull secret. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/images/managing-images#using-image-pull-secrets[Using image pull secrets].
 
-* You must have an Amazon Virtual Private Cloud (VPC) with an existing {ocp} cluster for the hub cluster. The hub cluster name for this example is `hub-vpc` and uses {ocp-short} 4.11.13 with {mce} version 2.2 or {product-title} version 2.7 installed. This VPC must be different from the VPCs that are used for the managed cluster resources or the managed cluster service endpoints.
+* You must have an Amazon Virtual Private Cloud (VPC) with an existing {ocp} cluster for the hub cluster. This VPC must be different from the VPCs that are used for the managed cluster resources or the managed cluster service endpoints.
 
 * You need a VPC where the managed cluster resources are deployed. This cannot be the same as the VPCs that are used for the hub cluster or the managed cluster service endpoints. 
 
-* You need one or more VPCs that provide the managed cluster service endpoints. This cannot be the same as the VPCs that are used for the hub cluster or the ACM managed cluster resources.
+* You need one or more VPCs that provide the managed cluster service endpoints. This cannot be the same as the VPCs that are used for the hub cluster or the managed cluster resources.
 
-* Ensure that the IP addresses of the VPCs that are specified by the Classless Inter-Domain Routing (CIDR) for the required VPCs do not overlap.
+* Ensure that the IP addresses of the VPCs that are specified by Classless Inter-Domain Routing (CIDR) do not overlap.
 
-* You need a `HiveConfig` file that references a credential within the Hive namespace that has access to create resources on the VPC that you created for the ACM managed cluster resources.
+* You need a `HiveConfig` file that references a credential within the Hive namespace that has access to create resources on the VPC that you created for the managed cluster resources.
 
 *Note:* If you change your cloud provider access key on the cloud provider, you also need to manually update the corresponding credential for the cloud provider on the console of {mce}. This is required when your credentials expire on the cloud provider where the managed cluster is hosted and you try to delete the managed cluster.
 
-[#configuring-hive-to-deploy-on-aws-govcloud]
-== Configuring Hive to deploy on AWS GovCloud
+[#configure-hive-to-deploy-on-aws-govcloud]
+== Configure Hive to deploy on AWS GovCloud
 
 While creating a cluster on AWS GovCloud is almost identical to creating a cluster on standard AWS, you have to complete some additional steps to prepare an AWS PrivateLink for the cluster on AWS GovCloud.
 
 [#create-vpcs-aws-govcloud]
 === Create the VPCs for resources and endpoints
 
-As listed in the prerequisites, two VPCs are required in addition to the VPC that contains the hub cluster. See https://docs.aws.amazon.com/vpc/latest/userguide/working-with-vpcs.html#Create-VPC[Create a VPC] in the Amazon Web Services documentation for specific steps for creating a VPC.
+As listed in the prerequisites, two VPCs are required in addition to the VPC that contains the hub cluster. See https://docs.aws.amazon.com/vpc/latest/userguide/working-with-vpcs.html#Create-VPC[Create a VPC] in the Amazon Web Services documentation for specific steps to create a VPC.
 
-. Create a VPC for the managed cluster with private subnets. For this example, this VPC is named `managed01-vpc`.
+. Create a VPC for the managed cluster with private subnets.
 
-. Create one or more VPCs for the managed cluster service endpoints with private subnets.
+. Create one or more VPCs for the managed cluster service endpoints with private subnets. Each VPC in a region has a limit of 255 VPC endpoints, so you need multiple VPCs to support more than 255 clusters in that region.
+
+. For each VPC, create subnets in all of the supported availability zones of the region. Each subnet must have at least 255 usuable IP addresses because of the controller requirements.
 +
-*Note:* Each VPC in a region has a limit of 255 VPC endpoints, so you need multiple VPCs support more clusters in that region.
-
-. For each VPC, create subnets in all of the supported availability zones of the region. Each subnet must have at least 255 usuable IPs because of the controller requirements.
-+
-The following example shows how to complete subnets for VPCs that have 6 availability zones in the `us-east-1` region:
+The following example shows how to you might subnets for VPCs that have 6 availability zones in the `us-east-1` region:
 ----
 vpc-1 (us-east-1) : 10.0.0.0/20
   subnet-11 (us-east-1a): 10.0.0.0/23
@@ -72,47 +71,13 @@ vpc-2 (us-east-1) : 10.0.16.0/20
   subnet-26 (us-east-1f): 10.0.28.0/23
 ----
 
-. Make sure all of the {mce} hub environments ({mce} hub cluster VPCs) have network connectivity to the VPCs that you created for VPC endpoints that use peering, transit gateways, and so on.
+. Ensure that all of the hub environments (hub cluster VPCs) have network connectivity to the VPCs that you created for VPC endpoints that use peering, transit gateways, and that all DNS settings are enabled. 
 
-. Create a list of VPCs that need to resolve the DNS setup for the private link. This includes at least the VPC of the {mce} being configured, and can include the list of all of the VPCs where various Hive controllers exist.
+. Collect a list of VPCs that are needed to resolve the DNS setup for the AWS PrivateLink, which is required for the AWS GovCloud connectivity. This includes at least the VPC of the {mce} instance that you are configuring, and can include the list of all of the VPCs where various Hive controllers exist.
 
-[#configure-vpcs-aws-govcloud]
-=== Configure the VPCs for resources and endpoints
+[#configure-security-groups-vpc-endpoints]
+=== Configure the security groups for the VPC endpoints
 
-Configure the peer connections, route tables, and security groups for the VPCs that you created. 
-
-. Configure the peer connections and ensure that each peer connection is successfully accepted by both clusters in the connection. 
-
-.. Create a peer connection named `px-s01-h01` that connects `managed01-vpc` and `hub01-vpc`.
-
-.. Create a peer connection named `px-s01e-h01` that connects `managed01-e-vpc` and `hub01-vpc`.
-
-.. Create a peer connection named `px-s01-s01e` that connects `managed01-vpc` and `managed01-e-vpc`.
-
-. Ensure that all DNS settings are enabled.
-
-. Configure the route tables by completing the following steps:
-
-.. Update all of the `*-private` route tables for `managed01-vpc`.
-
-... Add an entry with the destination of `hub01-vpc` CIDR to peer connection `px-s01-h01`.
-
-... Add an entry with the destination of `managed01-e-vpc` CIDR to peer connection `px-s01-s01e`.
-
-.. Update all of the `*-private` route tables for `managed01-e-vpc`.
-
-... Add an entry with the destination of `hub01-vpc` CIDR to peer connection `px-s01e-h01`.
-
-... Add an entry with destination of `managed01-vpc` CIDR to peer connection `px-s01-s01e`.
-
-.. Update all of the `*-private` route tables for `hub01-vpc`.
-
-... Add an entry with the destination of `managed01-e-vpc` CIDR to peer connection `px-s01e-h01`.
-
-... Add an entry with destination of `managed01-vpc` CIDR to peer connection `px-s01-h01`.
-
-. Configure the security groups.
-+ 
 Each VPC endpoint in AWS has a security group attached to control access to the endpoint. When Hive creates a VPC endpoint, it does not specify a security group. The default security group of the VPC is attached to the VPC endpoint. The default security group of the VPC must have rules to allow traffic where VPC endpoints are created from the Hive installer pods. See the [docs][control-access-vpc-endpoint] for details.
 
 For example, if Hive is running in `hive-vpc(10.1.0.0/16)`, there must be a rule in the default
@@ -166,15 +131,17 @@ route53:DisassociateVPCFromHostedZone
 ec2:DescribeVPCs
 ----
 
-. Ensure that there is a credential secret within the Hive namespace
+. Ensure that there is a credential secret within the Hive namespace on the hub cluster.
 +
-The `HiveConfig` file needs to reference a credential within the Hive namespace that has permissions to create resources in a specific provided VPC. If the credential you are using to provision an AWS cluster in AWS Government is already in the Hive namespace, then you do not need to create another one. If the credential that you are using to provision an AWS cluster in AWS Government is not already in the Hive namespace, you can either replace your current credential or create an additional credential in the Hive namespace.
+The `HiveConfig` file needs to reference a credential within the Hive namespace that has permissions to create resources in a specific provided VPC. If the credential you are using to provision an AWS cluster in AWS GovCloud is already in the Hive namespace, then you do not need to create another one. If the credential that you are using to provision an AWS cluster in AWS GovCloud is not already in the Hive namespace, you can either replace your current credential or create an additional credential in the Hive namespace.
 +
-The `HiveConfig` file needs to be updated to include the following content:
+The `HiveConfig` file needs to include the following content:
 +
 * An AWS GovCloud credential that has the required permissions to provision resources for the given VPC.
 
-* The addresses of the VPCs for the {ocp-short} cluster installation, as well as the service endpoints for the managed cluster. *Best practice:* Use different VPCs for the {ocp-short} cluster installation and the service endpoints.
+* The addresses of the VPCs for the {ocp-short} cluster installation, as well as the service endpoints for the managed cluster. 
++
+*Best practice:* Use different VPCs for the {ocp-short} cluster installation and the service endpoints.
 +
 The following example shows the credential content:
 +
