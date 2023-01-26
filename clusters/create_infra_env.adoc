@@ -44,7 +44,36 @@ To enable the CIM service, complete the following steps:
 oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
 ----
 
-. Create the `AgentServiceConfig` CR by completing the following steps:
+. For disconnected environments, create a `ConfigMap` in the same namespace as your infrastructure operator to specify the values for `ca-bundle.crt` and `registries.conf` for your mirror registry. Your file `ConfigMap` should resemble the following example: 
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: <mirror-config>
+  namespace: "<infrastructure-operator-namespace>"
+  labels:
+    app: assisted-service
+data:
+  ca-bundle.crt: |
+    -----BEGIN CERTIFICATE-----
+    certificate contents
+    -----END CERTIFICATE-----
+
+  registries.conf: |
+    unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
+
+    [[registry]]
+       prefix = ""
+       location = "quay.io/edge-infrastructure"
+       mirror-by-digest-only = false
+
+       [[registry.mirror]]
+       location = "mirror1.registry.corp.com:5000/edge-infrastructure"
+----
+
+. Create the `AgentServiceConfig` custom resource by completing the following steps:
 
 .. For disconnected environments only, save the following `YAML` content in the `agent_service_config.yaml` file:
 +
@@ -67,6 +96,10 @@ spec:
     resources:
       requests:
         storage: <fs_volume_size>
+  mirrorRegistryRef:
+    name: <mirror_config>
+  unauthenticatedRegistries:
+    - <unauthenticated_registry>
   imageStorage:
     accessModes:
     - ReadWriteOnce
@@ -80,6 +113,11 @@ spec:
       rootFSUrl: "<root_fs_url>" 
       cpuArchitecture: "x86_64"
 ----
++
+Replace `mirror_config` with the name of the `ConfigMap` that contains your mirror registry configuration details. 
++
+Include the optional `unauthenticated_registry` parameter if you are using a mirror registry that does not require authentication. Entries on this list are not validated or required to have an entry in the pull secret.
+
 .. For connected environments only, save the following `YAML` content in the `agent_service_config.yaml` file:
 +
 [source,yaml]
