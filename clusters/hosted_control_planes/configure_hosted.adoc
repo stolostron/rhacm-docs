@@ -1,18 +1,21 @@
 [#hosted-control-planes-configure]
 = Configuring hosted control planes (Technology Preview)
 
-To configure hosted control planes, you need a hosting cluster and a hosted cluster. By deploying the HyperShift operator on an existing managed cluster by using the `hypershift-addon` managed cluster add-on, you can make that cluster into a hosting cluster and start the creation of the hosted cluster. The {mce} 2.2 only supports the default `local-cluster` and the hub cluster as the hosting cluster.
+To configure hosted control planes, you need a hosting cluster and a hosted cluster. By deploying the HyperShift operator on a managed cluster by using the `hypershift-addon`, you can make that cluster into a hosting cluster and start the creation of the hosted cluster. The {mce} 2.2 only supports the default `local-cluster` and the hub cluster as the hosting cluster.
 
-Hosted control planes is a Technology Preview feature, so the related components are disabled by default. See the following topics to learn more about how to enable hosted control planes.
+Hosted control planes is a Technology Preview feature, so the related components are disabled by default. See the following topics to learn more about how to enable hosted control planes on Amazon Web Services (AWS) or bare metal:
 
-[#hosting-service-cluster-configure]
-== Configuring the hosting cluster
+* <<hosting-service-cluster-configure-aws,Configuring the hosting cluster on AWS>>
+* <<hosting-service-cluster-configure-bm,Configuring the hosting cluster on bare metal>>
+
+[#hosting-service-cluster-configure-aws]
+== Configuring the hosting cluster on AWS
 
 You can deploy hosted control planes by configuring an existing cluster to function as a hosting cluster. The hosting cluster is the {ocp} cluster where the control planes are hosted. {product-title-short} 2.7 can use the hub cluster, also known as the `local-cluster`, as the hosting cluster. See the following topics to learn how to configure the `local-cluster` as the hosting cluster.
 
 *Best practice:* Be sure to run the hub cluster and workers on the same platform for hosted control planes.
 
-[#hosting-service-cluster-configure-prereq]
+[#hosting-service-cluster-configure-prereq-aws]
 === Prerequisites
 
 You must have the following prerequisites to configure a hosting cluster: 
@@ -36,7 +39,7 @@ If you plan to create and manage hosted clusters on AWS, complete the following 
 
 . Save the secret in the `local-cluster` namespace.
 
-. See the following table to make sure that the secret contains the following fields:
+. See the following table to verify that the secret contains the following fields:
 +
 |===
 | Field name | Description
@@ -64,7 +67,7 @@ oc label secret hypershift-operator-oidc-provider-s3-credentials -n local-cluste
 ----
 +
 
-[#hosted-create-public-zone]
+[#hosted-create-public-zone-aws]
 === Creating a routable public zone
 
 To access applications in your guest clusters, the public zone must be routable. If the public zone exists, skip this step. Otherwise, the public zone will affect the existing functions.
@@ -76,14 +79,14 @@ BASE_DOMAIN=www.example.com
 aws route53 create-hosted-zone --name $BASE_DOMAIN --caller-reference $(whoami)-$(date --rfc-3339=date)
 ----
 
-[#hosted-enable-ext-dns]
+[#hosted-enable-ext-dns-aws]
 === Enabling external DNS
 
 If you plan to provision hosted control plane clusters with service-level DNS (external DNS), complete the following steps:
 
 . Create an AWS credential secret for the HyperShift Operator and name it `hypershift-operator-external-dns-credentials` in the `local-cluster` namespace.
 
-. See the following table to make sure that the secret contains the required fields:
+. See the following table to verify that the secret contains the required fields:
 +
 |===
 | Field name | Description | Optional or required
@@ -159,7 +162,7 @@ oc create secret generic hypershift-operator-private-link-credentials --from-lit
 oc label secret hypershift-operator-private-link-credentials -n local-cluster cluster.open-cluster-management.io/backup=""
 ----
 
-[#hosted-enable-feature]
+[#hosted-enable-feature-aws]
 === Enabling the hosted control planes feature
 
 The hosted control planes features is disabled by default. Enabling the feature automatically enables the `hypershift-addon` managed cluster add-on as well. You can run the following command to enable the feature:
@@ -190,8 +193,7 @@ spec:
       enabled: true
 ----
 
-
-[#hosted-enable-hypershift-add-on]
+[#hosted-enable-hypershift-add-on-aws]
 ==== Manually enabling the _hypershift-addon_ managed cluster add-on for _local-cluster_
 
 Enabling the hosted control planes feature automatically enables the `hypershift-addon` managed cluster add-on. If you need to enable the `hypershift-addon` managed cluster add-on manually, complete the following steps to use the `hypershift-addon` to install the HyperShift Operator on `local-cluster`:
@@ -232,6 +234,7 @@ hypershift-addon   True
 
 Your HyperShift add-on is installed and the hosting cluster is available to create and manage HyperShift clusters.
 
+<<<<<<< HEAD
 [#hosted-install-cli]
 === Installing the hosted control planes CLI
 
@@ -265,6 +268,166 @@ You can now use the `hypershift create cluster` command to create and manage hos
 
 ----
 hypershift create cluster aws --help
+----
+
+[#hosting-service-cluster-configure-bm]
+== Configuring the hosting cluster on bare metal
+
+To provision hosted control planes on bare metal, you can use the Agent platform. The Agent platform uses the Infrastructure Operator, which is also known as the Assisted Installer, to add worker nodes to a hosted cluster. For an introduction to the Infrastructure Operator, see https://github.com/openshift/assisted-service/blob/master/docs/hive-integration/kube-api-getting-started.md[Kube API - Getting Started Guide]. Each bare metal host must be started with a Discovery Image that the Infrastructure Operator provides. You can start the hosts manually or through automation by using the Cluster-Baremetal-Operator. After each host starts, it runs an agent process to discover the host details and its installation. Each host is represented by an Agent custom resource.
+
+When you create a hosted cluster with the Agent platform, HyperShift installs the Agent CAPI provider in the Hosted Control Plane (HCP) namespace.
+
+When you scale up a node pool, a machine is created, and the CAPI provider finds an Agent that is approved, is passing validations, is not currently in use, and meets the requirements that are specified in the node pool spec. You can monitor the installation of an Agent by checking its status and conditions.
+
+When you scale down a node pool, Agents are unbound from the corresponding cluster. However, before you re-use them, you must boot them with the Discovery Image again.
+
+[#hosting-service-cluster-configure-prereq-bm]
+=== Prerequisites
+
+You must have the following prerequisites to configure a hosting cluster: 
+
+* The {mce} 2.2 and later installed on an {ocp-short} cluster. The {mce} is automatically installed when you install {product-title-short}. The {mce} can also be installed without {product-title-short} as an operator from the {ocp-short} OperatorHub.
+
+* The hosted control planes command line interface as a plugin for `oc` to create and manage the hosted cluster in {mce}. Use one of the following methods to install the command line interface:
+** Navigate to your {ocp-short} console command line tools page. Select the *Hosted Control Plane CLI* tool and follow the instructions to set up the plugin.
+** See https://github.com/stolostron/hypershift-addon-operator/blob/main/docs/installing_hypershift_cli.md[Getting started with Hypershift Hosted Control Plane CLI] and follow the instructions.
+** Clone and build the binary file from the https://github.com/openshift/hypershift[HyperShift repository].
+
+* {mce} must have at least one managed {ocp-short} cluster. The `local-cluster` is automatically imported in {mce} 2.2 and later. See xref:../install_upgrade/adv_config_install.adoc#advanced-config-engine[Advanced configuration] for more information about the `local-cluster`. You can check the status of your hub cluster by running the following command:
++
+----
+oc get managedclusters local-cluster
+----
+
+[#install-hypershift-operator]
+=== Install the HyperShift Operator
+
+. Install the HyperShift CLI either by building it or extracting it from the Operator image.
+
+* To build the CLI, enter the following commands by using Go 1.18:
++
+----   
+shell linenums="1"
+git clone https://github.com/openshift/hypershift.git
+cd hypershift
+make build
+sudo install -m 0755 bin/hypershift /usr/local/bin/hypershift
+----
+
+* To extract the CLI from an Operator image, enter commands that are like the commands in the following example. This example uses Podman.       
++
+----
+export HYPERSHIFT_RELEASE=4.11
+  
+podman cp $(podman create --name hypershift --rm --pull always quay.io/hypershift/hypershift-operator:${HYPERSHIFT_RELEASE}):/usr/bin/hypershift /tmp/hypershift && podman rm -f hypershift
+  
+sudo install -m 0755 -o root -g root /tmp/hypershift /usr/local/bin/hypershift
+----
+
+. Deploy the HyperShift Operator.
++
+**Important:** If you do not define the HyperShift image that you want to use, by default, the CLI deploys the latest image. Typically, you want to deploy the image that matches the release of the {ocp-short} cluster where you plan to run HyperShift.
+
+** To install the latest image, enter the following command:
++
+----
+hypershift install
+----
+
+** To deploy the image that matches the release of the cluster where you plan to run HyperShift, enter the following command:
++
+----
+hypershift install --hypershift-image quay.io/hypershift/hypershift-operator:4.11
+----
+
+. Verify that you see the operator running in the `hypershift` namespace:
++
+----
+oc -n hypershift get pods
+
+NAME                      READY   STATUS    RESTARTS   AGE
+operator-55fffbd6-whkxs   1/1     Running   0          61s
+----
+
+[#install-assisted-service-and-hive]
+=== Install the Assisted Service and Hive Operators
+
+If {product-title} is installed, you can skip this step because the Infrastructure Operator and Hive Operator are included in that product.
+
+To deploy the Operators, you can use https://github.com/karmab/tasty[tasty].
+
+. Install tasty by entering the following command:
++
+----
+curl -s -L https://github.com/karmab/tasty/releases/download/v0.4.0/tasty-linux-amd64 > ./tasty
+sudo install -m 0755 -o root -g root ./tasty /usr/local/bin/tasty
+----
+
+. Install the operators by entering the following command:
++
+----
+tasty install assisted-service-operator hive-operator
+----
+
+[#configure-agent-service]
+=== Configure the Agent Service
+
+Create the `AgentServiceConfig` resource as follows:
+----
+export DB_VOLUME_SIZE="10Gi"
+export FS_VOLUME_SIZE="10Gi"
+export OCP_VERSION="4.11.5"
+export OCP_MAJMIN=${OCP_VERSION%.*}
+export ARCH="x86_64"
+export OCP_RELEASE_VERSION=$(curl -s https://mirror.openshift.com/pub/openshift-v4/${ARCH}/clients/ocp/${OCP_VERSION}/release.txt | awk '/machine-os / { print $2 }')
+export ISO_URL="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/${OCP_MAJMIN}/${OCP_VERSION}/rhcos-${OCP_VERSION}-${ARCH}-live.${ARCH}.iso"
+export ROOT_FS_URL="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/${OCP_MAJMIN}/${OCP_VERSION}/rhcos-${OCP_VERSION}-${ARCH}-live-rootfs.${ARCH}.img"
+
+envsubst <<"EOF" | oc apply -f -
+apiVersion: agent-install.openshift.io/v1beta1
+kind: AgentServiceConfig
+metadata:
+ name: agent
+spec:
+  databaseStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${DB_VOLUME_SIZE}
+  filesystemStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${FS_VOLUME_SIZE}
+  osImages:
+    - openshiftVersion: "${OCP_VERSION}"
+      version: "${OCP_RELEASE_VERSION}"
+      url: "${ISO_URL}"
+      rootFSUrl: "${ROOT_FS_URL}"
+      cpuArchitecture: "${ARCH}"
+EOF
+----
+
+//Where does the user create the resource?
+
+[#configure-dns-bm]
+=== Configure DNS
+
+The API Server for the hosted cluster is exposed a `NodePort` service. A DNS entry must exist for `api.${HOSTED_CLUSTER_NAME}.${BASEDOMAIN}` that points to destination where the API Server can be reached.
+
+The DNS entry can be as simple as a record that points to one of the nodes in the management cluster that is running the hosted control plane. The entry can also point to a https://docs.openshift.com/container-platform/4.11/installing/installing_platform_agnostic/installing-platform-agnostic.html#installation-load-balancing-user-infra-example_installing-platform-agnostic[load balancer] that is deployed to redirect incoming traffic to the ingress pods.
+
+.Example DNS configuration
+----
+api.example.krnl.es.    IN A 192.168.122.20
+api.example.krnl.es.    IN A 192.168.122.21
+api.example.krnl.es.    IN A 192.168.122.22
+api-int.example.krnl.es.    IN A 192.168.122.20
+api-int.example.krnl.es.    IN A 192.168.122.21
+api-int.example.krnl.es.    IN A 192.168.122.22
+*.apps.example.krnl.es. IN A 192.168.122.23
 ----
 
 [#deploying-sr-iov]
