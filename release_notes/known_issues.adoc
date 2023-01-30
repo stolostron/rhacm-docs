@@ -988,10 +988,45 @@ When a cluster is imported on the hub cluster, the `apiserver` is only set up au
 - It is possible that a `ManagedServiceAccount` secret might not be included in a backup if the backup schedule runs before the backup label is set on the `ManagedServiceAccount` secret. `ManagedServiceAccount` secrets don't have the cluster `open-cluster-management.io/backup` label set on creation. For this reason, the backup controller regularly searches for `ManagedServiceAccount` secrets under the managed cluster's namespaces, and adds the backup label if not found.
 
 [#imported-managed-clusters-pending-import]
-=== Imported managed clusters show a Pending Import status
+=== Imported managed clusters show a _Pending Import_ status
 //2.7:26797
 
 Managed clusters that are manually imported on the primary hub cluster show a `Pending Import` status when the activation data is restored on the passive hub cluster. For more information, see link:../backup_restore/manage_backup_restore.adoc#auto-connect-clusters-msa[Automatically connecting clusters by using a Managed Service Account (Technology Preview)].
+
+[#appliedmanifestwork-not-removed]
+=== The _appliedmanifestwork_ is not removed from managed clusters after restoring the hub cluster
+//2.7:27129
+
+When the hub cluster data is restored on the new hub cluster, the `appliedmanifestwork` is not removed from managed clusters that have a placement rule for an application subscription that is not a fixed cluster set.
+
+See the following example of a placement rule for an application subscription that is not a fixed cluster set:
+
+[source,yaml]
+----
+spec:
+  clusterReplicas: 1
+  clusterSelector:
+    matchLabels:
+      environment: dev
+----
+
+As a result, the application is orphaned when the managed cluster is detached from the restored hub cluster.
+
+To avoid the issue, specify a fixed cluster set in the placement rule. See the following example:
+
+[source,yaml]
+----
+spec:
+  clusterSelector:
+    matchLabels:
+      environment: dev
+----
+
+You can also delete the remaining `appliedmanifestwork` manually by running the folowing command:
+
+----
+oc delete appliedmanifestwork <the-left-appliedmanifestwork-name>
+----
 
 [#submariner-known-issues]
 == Submariner known issues
