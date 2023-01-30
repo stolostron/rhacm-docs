@@ -7,6 +7,27 @@ You can group managed clusters together in a managed cluster set to limit the us
 
 A `ManagedClusterSet` is a cluster-scoped resource, so you must have cluster administration permissions for the cluster where you are creating the `ManagedClusterSet`. A managed cluster cannot be included in more than one `ManagedClusterSet`. You can create a managed cluster set from either the {mce} console or from the CLI.
 
+*Note:* Cluster pools that are not added to a managed cluster set are not added to the default `ManagedClusterSet` resource. After a cluster is claimed from the cluster pool, the cluster is added to the default `ManagedClusterSet`.
+
+When you create a managed cluster, the following are automatically created to ease management:
+
+- A `ManagedClusterSet` called `global`.
+- The namespace called `open-cluster-management-global-set`.
+- A `ManagedClusterSetBinding` called `global` to bind the `global` `ManagedClusterSet` to the `open-cluster-management-global-set` namespace.
++
+*Important:* You cannot delete, update, or edit the `global` managed cluster set. The `global` managed cluster set includes all managed clusters. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: global
+  namespace: open-cluster-management-global-set
+spec:
+  clusterSet: global
+----
+
 [#creating-managedclusterset-cli]
 == Creating a ManagedClusterSet by using the CLI
 
@@ -20,4 +41,61 @@ metadata:
   name: <cluster_set>
 ----
 
-Replace `<cluster_set>` with the name of your managed cluster set. 
+Replace `<cluster_set>` with the name of your managed cluster set.
+
+[#adding-cluster-managedclusterset]
+== Adding a cluster to a _ManagedClusterSet_
+
+After you create your `ManagedClusterSet`, you can add clusters to your managed cluster set by either following the instructions in the console or by using the CLI.
+
+[#adding-clusters-managedclusterset-cli]
+== Adding clusters to a _ManagedClusterSet_ by using the CLI
+
+Complete the following steps to add a cluster to a managed cluster set by using the CLI:
+
+. Ensure that there is an RBAC `ClusterRole` entry that allows you to create on a virtual subresource of `managedclustersets/join`.
++
+*Note:* Without this permission, you cannot assign a managed cluster to a `ManagedClusterSet`. If this entry does not exist, add it to your YAML file. See the following example:
++
+[source,yaml]
+----
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: clusterrole1
+rules:
+  - apiGroups: ["cluster.open-cluster-management.io"]
+    resources: ["managedclustersets/join"]
+    resourceNames: ["<cluster_set>"]
+    verbs: ["create"]
+----
++
+Replace `<cluster_set>` with the name of your `ManagedClusterSet`.
++
+*Note:* If you are moving a managed cluster from one `ManagedClusterSet` to another, you must have that permission available on both managed cluster sets. 
+
+. Find the definition of the managed cluster in the YAML file. See the following example definition:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: <cluster_name>
+spec:
+  hubAcceptsClient: true 
+----
+
+. Add the `cluster.open-cluster-management.io/clusterset` paremeter and specify the name of the `ManagedClusterSet`. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: <cluster_name>
+  labels:
+    cluster.open-cluster-management.io/clusterset: <cluster_set>
+spec:
+  hubAcceptsClient: true
+----
