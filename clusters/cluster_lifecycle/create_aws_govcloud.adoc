@@ -1,11 +1,11 @@
 [#creating-a-cluster-on-amazon-web-services-govcloud]
 = Creating a cluster on Amazon Web Services GovCloud
 
-You can use the {mce} console to create a {ocp} cluster on Amazon Web Services (AWS) or on AWS GovCloud. This procedure explains how to create a cluster on AWS GovCloud. See xref:../cluster_lifecycle/create_ocp_aws.adoc#creating-a-cluster-on-amazon-web-services[Creating a cluster on Amazon Web Services] for the instructions for creating on AWS.  
+You can use the console to create a {ocp} cluster on Amazon Web Services (AWS) or on AWS GovCloud. This procedure explains how to create a cluster on AWS GovCloud. See xref:../cluster_lifecycle/create_ocp_aws.adoc#creating-a-cluster-on-amazon-web-services[Creating a cluster on Amazon Web Services] for the instructions for creating a cluster on AWS.  
 
 AWS GovCloud provides cloud services that meet additional requirements that are necessary to store government documents on the cloud. When you create a cluster on AWS GovCloud, you must complete additional steps to prepare your environment.
 
-When you create a cluster, the creation process uses the {ocp-short} installer with the Hive resource. If you have questions about cluster creation after completing this procedure, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/installing/installing-on-aws[Installing on AWS] in the {ocp-short} documentation for more information about the process.  
+When you create a cluster, the creation process uses the {ocp-short} installer with the Hive resource. If you have questions about cluster creation after completing this procedure, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/installing/installing-on-aws#installing-aws-government-region[Installing a cluster on AWS into a government region] in the {ocp-short} documentation for more information about the process.  
 
 * <<aws-govcloud-prerequisites,Prerequisites>>
 * <<configure-hive-to-deploy-on-aws-govcloud,Configure Hive to deploy on AWS GovCloud>>
@@ -44,15 +44,16 @@ While creating a cluster on AWS GovCloud is almost identical to creating a clust
 [#create-vpcs-aws-govcloud]
 === Create the VPCs for resources and endpoints
 
-As listed in the prerequisites, two VPCs are required in addition to the VPC that contains the hub cluster. See https://docs.aws.amazon.com/vpc/latest/userguide/working-with-vpcs.html#Create-VPC[Create a VPC] in the Amazon Web Services documentation for specific steps to create a VPC.
+As listed in the prerequisites, two VPCs are required in addition to the VPC that contains the hub cluster. See https://docs.aws.amazon.com/vpc/latest/userguide/working-with-vpcs.html#Create-VPC[Create a VPC] in the Amazon Web Services documentation for specific steps for creating a VPC.
 
 . Create a VPC for the managed cluster with private subnets.
 
 . Create one or more VPCs for the managed cluster service endpoints with private subnets. Each VPC in a region has a limit of 255 VPC endpoints, so you need multiple VPCs to support more than 255 clusters in that region.
 
-. For each VPC, create subnets in all of the supported availability zones of the region. Each subnet must have at least 255 usuable IP addresses because of the controller requirements.
+. For each VPC, create subnets in all of the supported availability zones of the region. Each subnet must have at least 255 usable IP addresses because of the controller requirements.
 +
 The following example shows how you might structure subnets for VPCs that have 6 availability zones in the `us-gov-east-1` region:
++
 ----
 vpc-1 (us-gov-east-1) : 10.0.0.0/20
   subnet-11 (us-gov-east-1a): 10.0.0.0/23
@@ -61,7 +62,9 @@ vpc-1 (us-gov-east-1) : 10.0.0.0/20
   subnet-12 (us-gov-east-1d): 10.0.8.0/23
   subnet-12 (us-gov-east-1e): 10.0.10.0/23
   subnet-12 (us-gov-east-1f): 10.0.12.0/2
-
+----
++
+----
 vpc-2 (us-gov-east-1) : 10.0.16.0/20
   subnet-21 (us-gov-east-1a): 10.0.16.0/23
   subnet-22 (us-gov-east-1b): 10.0.18.0/23
@@ -78,7 +81,7 @@ vpc-2 (us-gov-east-1) : 10.0.16.0/20
 [#configure-security-groups-vpc-endpoints]
 === Configure the security groups for the VPC endpoints
 
-Each VPC endpoint in AWS has a security group attached to control access to the endpoint. When Hive creates a VPC endpoint, it does not specify a security group. The default security group of the VPC is attached to the VPC endpoint. The default security group of the VPC must have rules to allow traffic where VPC endpoints are created from the Hive installer pods. See the [docs][control-access-vpc-endpoint] for details.
+Each VPC endpoint in AWS has a security group attached to control access to the endpoint. When Hive creates a VPC endpoint, it does not specify a security group. The default security group of the VPC is attached to the VPC endpoint. The default security group of the VPC must have rules to allow traffic where VPC endpoints are created from the Hive installer pods. See link://https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-access.html[Control access to VPC endpoints using endpoint policies] in the AWS documentation for details.
 
 For example, if Hive is running in `hive-vpc(10.1.0.0/16)`, there must be a rule in the default
 security group of the VPC where the VPC endpoint is created that allows ingress from `10.1.0.0/16`.
@@ -133,19 +136,19 @@ ec2:DescribeVPCs
 ----
 
 Ensure that there is a credential secret within the Hive namespace on the hub cluster.
-+
-The `HiveConfig` custom resource needs to reference a credential within the Hive namespace that has permissions to create resources in a specific provided VPC. If the credential you are using to provision an AWS cluster in AWS GovCloud is already in the Hive namespace, then you do not need to create another one. If the credential that you are using to provision an AWS cluster in AWS GovCloud is not already in the Hive namespace, you can either replace your current credential or create an additional credential in the Hive namespace.
-+
+
+The `HiveConfig` custom resource needs to reference a credential within the Hive namespace that has permissions to create resources in a specific provided VPC. If the credential that you are using to provision an AWS cluster in AWS GovCloud is already in the Hive namespace, then you do not need to create another one. If the credential that you are using to provision an AWS cluster in AWS GovCloud is not already in the Hive namespace, you can either replace your current credential or create an additional credential in the Hive namespace.
+
 The `HiveConfig` custom resource needs to include the following content:
-+
+
 * An AWS GovCloud credential that has the required permissions to provision resources for the given VPC.
 
 * The addresses of the VPCs for the {ocp-short} cluster installation, as well as the service endpoints for the managed cluster. 
 +
 *Best practice:* Use different VPCs for the {ocp-short} cluster installation and the service endpoints.
-+
+
 The following example shows the credential content:
-+
+
 [source,yaml]
 ----
 spec:
@@ -199,9 +202,9 @@ spec:
       credentialsSecretRef:
         name: <credentials-that-have-access-to-account-where-MCE2-VPC-exists>
 ----
-+
+
 You can include a VPC from all the regions where AWS PrivateLink is supported in the `endpointVPCInventory` list. The controller selects a VPC that meets the requirements for the ClusterDeployment.
-+
+
 For more information, refer to the https://github.com/openshift/hive/blob/master/docs/awsprivatelink.md#configuring-hive-to-enable-aws-private-link[Hive documentation].
 
 [#aws-govcloud-creating-your-cluster-with-the-console]
