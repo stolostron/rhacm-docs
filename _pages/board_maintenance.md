@@ -64,6 +64,7 @@ Starting in 2.7, the documentation team accepts bugs in Jira.
   - Sprint planning requires looking at both scrum boards, GH and Jira.
   - The Jira board is configured using status and component first.
   - This is a WIP for 2.7.
+  - https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=6387&projectKey=ACM&view=detail&selectedIssue=ACM-2921&quickFilter=101591
   
 
   
