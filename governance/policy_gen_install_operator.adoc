@@ -1,18 +1,18 @@
 [#policy-gen-install-operator]
 = Generating a policy to install an Operator
 
-A common use of {product-title-short} policies is to install an Operator on one or more managed {ocp} clusters. Continue reading to learn how to install Operators with OpenShift GitOps installation modes:
+A common use of {product-title-short} policies is to install an Operator on one or more managed {ocp} clusters. Continue reading to learn how to generate policies using the policy generator, and to install OpenShift GitOps Operator:
 
-* <<policy-install-ocp-gitops,Installing OpenShift GitOps by using a policy>>
-* <<policy-gen-install-compliance-operator,Installing the Compliance Operator by using a policy>>
-* <<policy-gen-install-on-openshift-gitops,Installing the policy generator on OpenShift GitOps (ArgoCD)>>
+* <<policy-install-ocp-gitops,Generating a policy that installs the OpenShift GitOps>>
+* <<policy-gen-install-compliance-operator,Generating a policy that installs the Compliance Operator>>
+* <<policy-gen-install-on-openshift-gitops,Generating a policy that installs the Policy Generator on OpenShift GitOps (ArgoCD)>>
 - <<manage-policy-definitions,Managing policy definitions with OpenShift GitOps (Argo CD)>>
 * <<related-resource-grc-gitops,Related resources>>
 
 [#policy-install-ocp-gitops]
-== Installing OpenShift GitOps using a policy
+== Generating a policy that installs the OpenShift GitOps
 
-Apply a policy that installs OpenShift GitOps by using the policy generator. The OpenShift GitOps operator offers the _all namespaces_ installation mode. Create a `Subscription` manifest file called `openshift-gitops-subscription.yaml`, similar to the following example:
+Generate a policy that installs OpenShift GitOps by using the policy generator. The OpenShift GitOps operator offers the _all namespaces_ installation mode. Create a `Subscription` manifest file called `openshift-gitops-subscription.yaml`, similar to the following example:
 
 [source,yaml]
 ----
@@ -30,7 +30,7 @@ spec:
 
 To pin to a specific version of the operator, add the following parameter and value: `spec.startingCSV: openshift-gitops-operator.v<version>`. Replace `<version>` with your preferred version.
 
-A policy generator configuration file called `policy-generator-config.yaml` is required. Use the following policy to install OpenShift GitOps on all {ocp-short} managed clusters:
+A `PolicyGenerator` configuration file is required. Use the following policy to install OpenShift GitOps on all {ocp-short} managed clusters:
 
 [source,yaml]
 ----
@@ -130,7 +130,7 @@ spec:
 {ocp-short} supports all generated policies.
 
 [#policy-gen-install-compliance-operator]
-== Installing the Compliance Operator by using a policy
+== Generating a policy that installs the Compliance Operator
 
 For an operator that uses the _namespaced_ installation mode, such as the Compliance Operator, an `OperatorGroup` manifest is also required. 
 
@@ -164,7 +164,7 @@ spec:
     - compliance-operator
 ----
 
-A policy generator configuration file called `policy-generator-config.yaml` is also required. View the following `PolicyGenerator` policy example that installs the Compliance Operator on all OpenShift managed clusters:
+A `PolicyGenerator` configuration file is required. View the following `PolicyGenerator` policy example that installs the Compliance Operator on all {ocp-short} managed clusters:
 
 [source,yaml]
 ----
@@ -278,19 +278,18 @@ spec:
 ----
 
 [#policy-gen-install-on-openshift-gitops]
-== Installing the policy generator on OpenShift GitOps (ArgoCD)
+== Generating a policy that installs the Policy Generator on OpenShift GitOps (ArgoCD)
 
-OpenShift GitOps, based on link:https://argoproj.github.io/argo-cd/[ArgoCD], can also be used to generate policies by using the policy generator through GitOps. Since the policy generator does not come preinstalled in the OpenShift GitOps container image, some customization must take place. In order to follow along, you must have the OpenShift GitOps Operator installed on the {product-title-short} hub cluster and be sure to log into the hub cluster.
+OpenShift GitOps, based on link:https://argoproj.github.io/argo-cd/[ArgoCD], can also be used to generate policies by using the Policy Generator through GitOps. Since the Policy Generator does not come preinstalled in the OpenShift GitOps container image, some customization must take place. In order to follow along, you must have the OpenShift GitOps Operator installed on the {product-title-short} hub cluster and be sure to log into the hub cluster.
 
-In order for OpenShift GitOps to have access to the policy generator when you run Kustomize, an Init Container is required to copy the policy generator binary from the {product-title-short} Application Subscription container image to the OpenShift GitOps container. Additionally, OpenShift GitOps must be configured to provide the `--enable-alpha-plugins` flag when you run Kustomize. Start editing the OpenShift GitOps `argocd` object with the following command:
+In order for OpenShift GitOps to have access to the Policy Generator when you run Kustomize, an Init Container is required to copy the Policy Generator binary from the {product-title-short} Application Subscription container image to the OpenShift GitOps container. Additionally, OpenShift GitOps must be configured to provide the `--enable-alpha-plugins` flag when it runs Kustomize. Start editing the OpenShift GitOps `argocd` object with the following command:
 
 [source,bash]
 ----
 oc -n openshift-gitops edit argocd openshift-gitops
 ----
 
-
-Then modify the OpenShift GitOps `argocd` object to contain the following additional YAML content. When a new major version of {product-title-short} is released and you want to update the policy generator to a newer version, you need to update the `registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel8` image used by the Init Container to a newer tag. View the following example and replace `<version>` with {product-version} or your desired {product-title-short} version:
+Then modify the OpenShift GitOps `argocd` object to contain the following additional YAML content. When a new major version of {product-title-short} is released and you want to update the Policy Generator to a newer version, you need to update the `registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel8` image used by the Init Container to a newer tag. View the following example and replace `<version>` with {product-version} or your desired {product-title-short} version:
 
 [source,yaml]
 ----
@@ -466,7 +465,7 @@ roleRef:
   name: openshift-gitops-policy-admin
 ----
 
-When a {product-title-short} policy definition is deployed with OpenShift GitOps, a copy of the policy is created in each managed cluster namespace. These copies are called replicated policies. For OpenShift GitOps to not constantly delete this replicated policy or show that the ArgoCD `Application` is out of sync, the `argocd.argoproj.io/compare-options: IgnoreExtraneous` annotation must be set on each {product-title-short} policy definition deployed using OpenShift GitOps.
+When a {product-title-short} policy definition is deployed with OpenShift GitOps, a copy of the policy is created in each managed cluster namespace. These copies are called replicated policies. To prevent OpenShift GitOps from repeatedly deleting this replicated policy or show that the ArgoCD `Application` is out of sync, the `argocd.argoproj.io/compare-options: IgnoreExtraneous` annotation must be set on each {product-title-short} policy definition deployed using OpenShift GitOps.
 
 [#related-resource-grc-gitops]
 == Related resources
