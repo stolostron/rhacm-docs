@@ -157,6 +157,14 @@ When you edit namespace bindings for a cluster set with the `admin` role or `bin
 
 To resolve the issue, make sure you also have permission to create or delete a `ManagedClusterSetBinding` resource in the namespace you want to bind. The role bindings only allow you to bind the cluster set to the namespace.
 
+[#scrolling-hosted]
+=== Horizontal scrolling does not work after provisioning hosted control plane cluster
+//2.7:27107
+
+After provisioning a hosted control plane cluster, you might not be able to scroll horizontally in the cluster overview of the {product-title-short} console if the `ClusterVersionUpgradeable` parameter is too long. You cannot view the hidden data as a result.
+
+To work around the issue, zoom out by using your browser zoom controls, increase your {product-title-short} console window size, or copy and paste the text to a different location.
+
 [#observability-known-issues]
 == Observability known issues
 
@@ -427,7 +435,7 @@ Later versions of IBM OpenShift Kubernetes Service are supported.
 === Automatic secret updates for provisioned clusters is not supported
 // 2.0.0:3702
 
-When you change your cloud provider access key on the cloud provider side, you also need to update the corresponding credential for this cloud provider on the console of {mce}. This is required when your credentials expire on the cloud provider where the managed cluster is hosted and you try to delete the managed cluster.
+When you change your cloud provider access key on the cloud provider side, you also need to update the corresponding credential for this cloud provider on the console of {mce-short}. This is required when your credentials expire on the cloud provider where the managed cluster is hosted and you try to delete the managed cluster.
 
 [#node-information-from-the-managed-cluster-cannot-be-viewed-in-search]
 === Node information from the managed cluster cannot be viewed in search
@@ -855,6 +863,19 @@ The configuration policy resources are automatically removed from the cluster an
 
 When modifying an existing configuration policy, `DeleteAll` or `DeleteIfCreated` in the `pruneObjectBehavior` feature does not clean up old resources that were created before modifying. Only new resources from policy creations and policy updates are tracked and deleted when you delete the configuration policy.
 
+[#policy-status-repeated-updates]
+=== Policy status shows repeated updates when enforced
+
+If a policy is set to `remediationAction: enforce` and is repeatedly updated, the {product-title-short} console shows repeated violations with successful updates. This might happen in the following two cases:
+
+- Another controller or process is also updating the object with different values.
++
+To resolve the issue, disable the policy and compare the differences between `objectDefinition` in the policy and the object on the managed cluster. If the values are different, another controller or process might be updating them. Check the `metadata` of the object to help identify why the values are different.
+
+- The `objectDefinition` in the `ConfigurationPolicy` does not match because Kubernetes processing the object when the policy is applied.
++
+To resolve the issue, disable the policy and compare the differences between `objectDefinition` in the policy and the object on the managed cluster. If the keys are different or missing, Kubernetes might have processed the keys before applying them to the object. For `PodSecurityPolicy`, for example, Kubernetes removes keys with values set to `false`, which you can see in the resulting object on the managed cluster. In this case, remove the keys from the `objectDefinition` in the policy.
+
 [#backup-known-issues]
 == Backup and restore known issues
 
@@ -1042,12 +1063,6 @@ Submariner is not supported with all of the infrastructure providers that {produ
 
 Service discovery is not supported for headless services without selectors when using Globalnet.
 
-[#gateway-limits]
-=== Numerous gateways cannot be deployed
-//2.5:23706
-
-You cannot deploy multiple gateways.
-
 [#submariner-vxlan]
 === Deployments that use VXLAN when NAT is enabled are not supported
 //2.5:24258
@@ -1055,22 +1070,16 @@ You cannot deploy multiple gateways.
 Only non-NAT deployments support Submariner deployments with the VXLAN cable driver.
 
 [#submariner-ovn-k8]
-=== OVN Kubernetes support limitations
+=== OVN Kubernetes requires OCP 4.11 and later
 //2.6:25275
 
-Using the OVN Kubernetes CNI network provider requires Red Hat OpenShift 4.11 or later. OVN Kubernetes does not support Globalnet.
+If you are using the OVN Kubernetes CNI network, you need Red Hat OpenShift 4.11 or later.
 
 [#globalnet-limitations]
 === Globalnet limitations
 //2.5:26901
 
 Globalnet is not supported with Red Hat OpenShift Data Foundation disaster recovery solutions. Make sure to use a non-overlapping range of private IP addresses for the cluster and service networks in each cluster for regional disaster recovery scenarios.
-
-[#azure-cluster-name-limitations]
-=== Azure cluster name length limitations
-//2.7:26928
-
-The length of cluster names for Azure deployments cannot exceed 13 characters.
 
 [#certificates-prevent-connection-broker]
 === Self-signed certificates might prevent connection to broker
@@ -1088,3 +1097,9 @@ metadata:
 spec:
    insecureBrokerConnection: true
 ----
+
+[#azure-cluster-name-limit]
+=== Microsoft Azure cluster name length limitation
+//2.7:27154 & 2.7:26928
+
+The length of cluster names for Microsoft Azure deployments must be 13 characters or fewer.
