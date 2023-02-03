@@ -47,6 +47,50 @@ oc delete clusterclaims.cluster.open-cluster-management.io  id.k8s.io
 
 The cluster claim is re-created automatically.
 
+[#discon-disc-iso-cluster-no-install]
+=== A cluster that is deployed in a disconnected environment by using the Central Infrastructure Management service might not install
+//2.7:ACM3209
+
+When you deploy a cluster in a disconnected environment using the Central Infrastructure Management service, the cluster nodes might not start installing. This issue occurs when the cluster uses a discovery ISO image that is derived from the Red Hat Enterprise Linux CoreOS live ISO image that is shipped with {ocp-short} 4.12.0/4.12.1.
+
+The issue is that the Red Hat Enterprise Linux CoreOS live ISO image that is shipped with {ocp-short} 4.12.0/4.12.1 contains a restrictive `/etc/containers/policy.json` file that requires signatures for images sourcing from `registry.redhat.io` and `registry.access.redhat.com`. In a disconnected environment, the images that are mirrored might not have the signatures mirrored, which results in the image pull failing for cluster nodes at discovery. Specifically, the Agent image fails to connect with the cluster nodes, which causes communication with the assisted service to fail.
+
+To work around this issue, apply an ignition override to the cluster that sets the `/etc/containers/policy.json` file to unrestrictive. The ignition override can be set in the `InfraEnv` custom resource definition. The following example shows an `InfraEnv` custom resource definition:
+
+[source.yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: cluster
+  namespace: cluster
+spec:
+  ignitionConfigOverride: '{"ignition":{"version":"3.2.0"},"storage":{"files":[{"path":"/etc/containers/policy.json","mode":420,"overwrite":true,"contents":{"source":"data:text/plain;charset=utf-8;base64,ewogICAgImRlZmF1bHQiOiBbCiAgIrhrthrthwogICAgICAgICAgICAidHlwZSI6ICJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIgogICAgICAgIH0KICAgIF0sCiAgICAidHJhbnNwb3J0cyI6CiAgICAgICAgewogICAgICAgICAgICAiZG9ja2VyLWRhZW1vbiI6CiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgIiI6IFt7InR5cGUiOiJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIn1dCiAgICAgICAgICAgICAgICB9CiAgICAgICAgfQp9"}}]}}' 
+----
+
+The following example shows the unrestrictive file that is created:
+----
+
+{
+    "default": [
+        {
+            "type": "insecureAcceptAnything"
+        }
+    ],
+    "transports": {
+        "docker-daemon": {
+        "": [
+        {
+            "type": "insecureAcceptAnything"
+        }
+        ]
+    }
+    }
+}
+----
+ 
+After this setting is changed, the clusters should 
+ 
 [#hosted-control-plane-mce]
 == Hosted control plane
 
