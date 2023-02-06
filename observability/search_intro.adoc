@@ -1,0 +1,129 @@
+[#searching-in-the-console-intro]
+= Searching in the console introduction
+
+For {product-title}, search provides visibility into your Kubernetes resources across all of your clusters. Search also indexes the Kubernetes resources and the relationships to other resources.
+
+* <<search-components,Search components>>
+* <<search-customization,Search customization and configurations>>
+
+[#search-components]
+== Search components
+
+The search architecture is composed of the following components:
+
+- `search-collector`: Watches the Kubernetes resources, collects the resource metadata, computes relationships for resources across all of your managed clusters, and sends the collected data to the `search-indexer`. The `search-collector` on your managed cluster runs as a pod named, `klusterlet-addon-search`. 
+
+- `search-indexer`: Receives resource metadata from the collectors and writes to PostgreSQL database. The `search-indexer` also watches resources in the hub cluster to keep track of active managed clusters.
+
+- `search-api`: Provides access to all cluster data in the `search-indexer` through GraphQL and enforces role-based access control (RBAC).
+
+- `search-postgres`: Stores collected data from all managed clusters in an instance of the PostgreSQL database.
+
+Search is configured by default on the hub cluster. When you provision or manually import a managed cluster, the `klusterlet-addon-search` is enabled. If you want to disable search on your managed cluster, see link:../add-ons/modify_endpoint.adoc#modifying-the-klusterlet-add-ons-settings-of-your-cluster[Modifying the klusterlet add-ons settings of your cluster] for more information.
+
+[#search-customization]
+== Search customization and configurations
+
+You can modify the default values in the `search-v2-operator` custom resource. To view details of the custom resource, run the following command:
+
+----
+oc get search search-v2-operator -o yaml
+----
+
+The search operator watches the `search-v2-operator` custom resource, reconciles the changes and updates active pods. View the following descriptions of the configurations:
+
+- PostgreSQL database storage: 
++
+When you install {product-title-short}, the PostgreSQL database is configured to save the PostgreSQL data in an empty directory (`emptyDir`) volume. If the empty directory size is limited, you can save the PostgreSQL data on a Persistent Volume Claim (PVC) to improve search performance. You can select a storageclass from your {product-title-short} hub cluster to back up your search data. For example, if you select the `gp2` storageclass your configuration might resemble the following example:
++
+[source,yaml]
+----
+apiVersion: search.open-cluster-management.io/v1alpha1
+kind: Search
+metadata:
+  name: search-v2-operator
+  namespace: open-cluster-management
+  labels:
+    cluster.open-cluster-management.io/backup: ""
+spec:
+  dbStorage:
+  size: 10Gi
+  storageClassName: gp2
+----
++
+This confirguration creates a PVC named `gp2-search` and is mounted to the `search-postgres` pod. By default, the storage size is `10Gi`. You can modify the storage size. For example, `20Gi` might be sufficient for about 200 managed clusters.
+
+- PostgreSQL database configuration:
++
+PostgreSQL supports database tuning to optimize your database performance. The tuning configurations can be specified using a ConfigMap. This ConfigMap contains the name-value pairs for the supported tuning parameters. See the following example command to create a ConfigMap with tuning parameters:
++
+----
+oc create configmap tuning-config --from-literal POSTGRESQL_SHARED_BUFFERS=128MB --from-literal POSTGRESQL_EFFECTIVE_CACHE_SIZE=128MB --from-literal WORK_MEM=64MB
+----
++
+Optimize PostgreSQL database configuration by using the previous ConfigMap. For example, add `tuning-config` as the parameter value: 
++
+[source,yaml]
+----
+apiVersion: search.open-cluster-management.io/v1alpha1
+kind: Search
+metadata:
+  name: search-v2-operator
+  namespace: open-cluster-management
+  labels:
+    cluster.open-cluster-management.io/backup: ""
+spec:
+  dbConfig: tuning-config
+  dbStorage:
+  size: 10Gi
+  storageClassName: gp2-search
+----
++
+- Optimize cost by tuning the pod memory requirements, replica count, and update log levels for active pods. Update the `deployment` section of the `search-v2-operator` custom resource. There are four deployments managed by the `search-v2-operator`, which can be updated individually. Your `search-v2-operator` custom resource might resemble the following file:
++
+[source,yaml]
+----
+apiVersion: search.open-cluster-management.io/v1alpha1
+kind: Search
+metadata:
+  name: search-v2-operator
+  namespace: open-cluster-management
+spec:
+  dbConfig: tuning-config
+    deployments:
+      collector:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 128Mi
+        requests:
+          cpu: 250m
+          memory: 64Mi
+        indexer:
+        replicaCount: 3
+----
+
+- Node placement for search pods:
++
+You can update the `Placement` of search pods by using the `nodeSelector` parameter, or the `tolerations` parameter. View the following example configuration:
++
+[source,yaml]
+----
+spec:
+ dbStorage:
+  size: 10Gi
+ deployments:
+  collector: {}
+  database: {}
+  indexer: {}
+  queryapi: {}
+ nodeSelector:
+  node-role.kubernetes.io/infra: ""
+ tolerations:
+ - effect: NoSchedule
+  key: node-role.kubernetes.io/infra
+  operator: Exists
+----
+
+- For instruction about how to manage search, see xref:../observability/manage_search.adoc#managing-search[Managing search]. 
+- For more topics about the {product-title} console, see link:../console/console_intro.adoc#web-console[Web console].

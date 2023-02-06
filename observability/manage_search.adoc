@@ -1,0 +1,131 @@
+[#managing-search]
+= Managing search
+
+Use search to query resource data from your clusters. 
+
+*Required access:* Cluster administrator
+
+Continue reading the following topics:
+
+- <<creating-search-configurable-collection,Creating search configurable collection>>
+- <<updating-saved-search-limit,Updating saved search limit>>
+- <<querying-in-the-console,Querying in the console>>
+** <<querying-argo-apps,Querying ArgoCD applications>>
+- <<updating-klusterlet-addons-managed,Updating klusterlet-addon-search deployments on managed clusters>>
+
+[#creating-search-configurable-collection]
+== Creating search configurable collection
+
+Create the `search-collector-config` ConfigMap to define which Kubernetes resources get collected from the cluster by listing the resources in the allow and deny list section. List the resources in the `data.AllowedResources` and `data.DeniedResources` sections within the ConfigMap. Run the following command to create the resource:
+
+----
+oc apply -f yourconfigMapFile.yaml
+----
+
+Your ConfigMap might resemble the following YAML file: 
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: search-collector-config
+ namespace: <namespace where search-collector add-on is deployed>
+data:
+ AllowedResources: |-
+   - apiGroups:
+       - "*"
+     resources:
+       - services
+       - pods
+   - apiGroups:
+       - admission.k8s.io
+       - authentication.k8s.io
+     resources:
+       - "*"
+ DeniedResources: |-
+   - apiGroups:
+       - "*"
+     resources:
+       - secrets
+   - apiGroups:
+       - admission.k8s.io
+     resources:
+       - policies
+       - iampolicies
+       - certificatepolicies
+----
+
+[#updating-saved-search-limit]
+== Updating saved search limit
+
+By default, there is a limit of ten saved searches for each user. To update the limit, add the following key value to the `console-config` ConfigMap, `key:value: SAVED_SEARCH_LIMIT: x`.
+
+[#querying-in-the-console]
+== Querying in the console
+
+You can type any text value in the _Search box_ and results include anything with that value from any property, such as a name or namespace. Users are unable to search for values that contain an empty space.
+
+For more specific search results, include the property selector in your search. You can combine related values for the property for a more precise scope of your search. For example, search for `cluster:dev red` to receive results that match the string "red" in the `dev` cluster. 
+
+Complete the following steps to make queries with search:
+
+. Click *Search* in the navigation menu.
+. Type a word in the _Search box_, then Search finds your resources that contain that value.
+- As you search for resources, you receive other resources that are related to your original search result, which help you visualize how the resources interact with other resources in the system.
+- Search returns and lists each cluster with the resource that you search.
+For resources in the _hub_ cluster, the cluster name is displayed as _local-cluster_.
+- Your search results are grouped by `kind`, and each resource `kind` is grouped in a table.
+- Your search options depend on your cluster objects.
+- You can refine your results with specific labels.
+Search is case-sensitive when you query labels.
+See the following examples that you can select for filtering: `name`, `namespace`, `status`, and other resource fields. Auto-complete provides suggestions to refine your search. See the following example:
++
+- Search for a single field, such as `kind:pod` to find all pod resources.
+- Search for multiple fields, such as `kind:pod namespace:default` to find the pods in the default namespace.
++
+*Notes:*
++
+** You can also search with conditions by using characters, such as `+>, >=, <, <=, !=+`.
+** When you search for more than one property selector with multiple values, the search returns either of the values that were queried. View the following examples:
+** When you search for `kind:pod name:a`, any pod named `a` is returned.
+** When you search for `kind:pod name:a,b`, any pod named `a` or `b` are returned.
+** Search for `kind:pod status:!Running` to find all pod resources where the status is not `Running`.
+** Search for `kind:pod restarts:>1` to find all pods that restarted at least twice.
+. If you want to save your search, click the *Save search* icon.
+
+[#querying-argo-apps]
+=== Querying ArgoCD applications
+
+When you search for an ArgoCD application, you are directed to the _Applications_ page. Complete the following steps to access the ArgoCD application from the _Search_ page:
+
+. Log in to your {product-title-short} hub cluster.
+. From the console header, select the _Search_ icon.
+. Filter your query with the following values: `kind:application` and `apigroup:argoproj.io`.
+. Select an application to view. The _Application_ page displays an overview of information for the application.
+
+[#updating-klusterlet-addons-managed]
+== Updating klusterlet-addon-search deployments on managed clusters
+
+To collect the Kubernetes objects from the managed clusters, the `klusterlet-addon-search` pod is run on all the managed clusters where search is enabled. This deployment is run in the `open-cluster-management-agent-addon` namespace. A managed cluster with a high number of resources might require more memory for the `klusterlet-addon-search` deployment to function.
+
+Resource requirements for the `klusterlet-addon-search` pod in a managed cluster can be specified in the `ManagedClusterAddon` custom resource in your {product-title-short} hub cluster. There is a namespace for each managed cluster with the managed cluster name. Edit the `ManagedClusterAddon` custom resource from the namespace matching the managed cluster name. Run the following command to update the resource requirement in `xyz` managed cluster:
+
+----
+oc edit managedclusteraddon search-collector -n xyz
+----
+
+Append the resource requirements as annotations. View the following example:
+
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  annotations: addon.open-cluster-management.io/search_memory_limit: 2048Mi
+  addon.open-cluster-management.io/search_memory_request: 512Mi
+----
+
+The annotation overrides the resource requirements on the managed clusters and automatically restarts the pod with new resource requirements.
+
+Return to xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
