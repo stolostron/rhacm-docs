@@ -6,52 +6,128 @@ For {product-title}, search provides visibility into your Kubernetes resources a
 * <<search-components,Search components>>
 * <<search-customization,Search customization>>
 ** <<options-increase-memory,Options to increase the redisgraph memory>>
-** <<update-search-limit,Update the search limit>>
-* <<queries-in-the-console,Queries in the console>>
-** <<search-argo,Query ArgoCD applications>>
+** <<update-search-limit,Updating saved search limit>>
+* <<queries-in-the-console,Querying in the console>>
+** <<search-argo,Querying ArgoCD applications>>
+* <<updating-klusterlet-addons-managed,Updating klusterlet-addon-search deployments on managed clusters>>
 
 [#search-components]
 == Search components
 
 The search architecture is composed of the following components:
 
-* *Collector*: Watches the Kubernetes resources and creates an index. The `search-collector` computes relationships for resources within the managed cluster.
+- `search-collector`: Watches the Kubernetes resources, collects the resource metadata, computes relationships for resources across all of your managed clusters, and sends the collected data to the `search-indexer`. The `search-collector` on your managed cluster runs as a pod named, `klusterlet-addon-search`. 
 
-* *Aggregator*: Receives data from the collector and writes to a database. The `search-aggregator` watches resources in the hub cluster, computes multicluster relationships, and tracks the activity from connected collectors.
+- `search-indexer`: Receives resource metadata from the collectors and writes to PostgreSQL database. The `search-indexer` also watches resources in the hub cluster to keep track of active managed clusters.
 
-* *Search API*: Provides access to the data in the search index and enforces role-based access control. 
+- `search-api`: Provides access to all cluster data in the `search-indexer` through GraphQL and enforces role-based access control (RBAC).
 
-Search is enabled by default. Search is also enabled when you provision or manually import a managed cluster. If you want to disable search on your managed cluster, see link:../clusters/modify_endpoint.adoc#modifying-the-klusterlet-add-ons-settings-of-your-cluster[Modifying the klusterlet add-ons settings of your cluster] for more information.
+- `search-postgres`: Stores collected data from all managed clusters in an instance of the PostgreSQL database.
+Search is configured by default on the hub cluster. When you provision or manually import a managed cluster, the `klusterlet-addon-search` is enabled. If you want to disable search on your managed cluster, see link:../add-ons/modify_endpoint.adoc#modifying-the-klusterlet-add-ons-settings-of-your-cluster[Modifying the klusterlet add-ons settings of your cluster] for more information.
 
 [#search-customization]
 == Search customization
 
-When you install {product-title-short}, the product is configured to persist the data in-memory to a file system. The StatefulSet `search-redisgraph` deploys the Redisgraph pod, which mounts the persistent volume named `persist`. If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10Gi on the default storage class. If a default storage class does not exist in your cluster, search saves the index in an empty directory (`emptyDir`).
+You can modify the default values in the `search-v2-operator` custom resource. To view details of the custom resource, run the following command:
 
-You can customize the storage settings for search by creating the `searchcustomization` CR. Search customization is namespace-scoped and located where search is installed in the hub cluster. View the following example of the search customization CR:
+----
+oc get search search-v2-operator -o yaml
+----
 
+The search operator watches the `search-v2-operator` custom resource, reconciles the changes and updates active pods. View the following descriptions of the configurations:
+
+- PostgreSQL database storage: 
++
+When you install {product-title-short}, the PostgreSQL database is configured to save the PostgreSQL data in an empty directory (`emptyDir`) volume. If the empty directory size is limited, you can save the PostgreSQL data on a Persistent Volume Claim (PVC) to improve search performance. You can select a storageclass from your {product-title-short} hub cluster to back up your search data. For example, if you select the `gp2` storageclass your configuration might resemble the following example:
++
 [source,yaml]
 ----
 apiVersion: search.open-cluster-management.io/v1alpha1
-kind: SearchCustomization
+kind: Search
 metadata:
-  name: searchcustomization
+  name: search-v2-operator
   namespace: open-cluster-management
   labels:
     cluster.open-cluster-management.io/backup: ""
 spec:
-  persistence: true
-  storageClass: gp2
-  storageSize: 12Gi
+  dbStorage:
+  size: 10Gi
+  storageClassName: gp2
+----
++
+This confirguration creates a PVC named `gp2-search` and is mounted to the `search-postgres` pod. By default, the storage size is `10Gi`. You can modify the storage size. For example, `20Gi` might be sufficient for about 200 managed clusters.
+
+- PostgreSQL database configuration:
++
+PostgreSQL supports database tuning to optimize your database performance. The tuning configurations can be specified using a ConfigMap. This ConfigMap contains the name-value pairs for the supported tuning parameters. See the following example command to create a ConfigMap with tuning parameters:
++
+----
+oc create configmap tuning-config --from-literal POSTGRESQL_SHARED_BUFFERS=128MB --from-literal POSTGRESQL_EFFECTIVE_CACHE_SIZE=128MB --from-literal WORK_MEM=64MB
+----
++
+Optimize PostgreSQL database configuration by using the previous ConfigMap. For example, add `tuning-config` as the parameter value: 
++
+[source,yaml]
+----
+apiVersion: search.open-cluster-management.io/v1alpha1
+kind: Search
+metadata:
+  name: search-v2-operator
+  namespace: open-cluster-management
+  labels:
+    cluster.open-cluster-management.io/backup: ""
+spec:
+  dbConfig: tuning-config
+  dbStorage:
+  size: 10Gi
+  storageClassName: gp2-search
+----
++
+- Optimize cost by tuning the pod memory requirements, replica count, and update log levels for active pods. Update the `deployment` section of the `search-v2-operator` custom resource. There are four deployments managed by the `search-v2-operator`, which can be updated individually. Your `search-v2-operator` custom resource might resemble the following file:
++
+[source,yaml]
+----
+apiVersion: search.open-cluster-management.io/v1alpha1
+kind: Search
+metadata:
+  name: search-v2-operator
+  namespace: open-cluster-management
+spec:
+  dbConfig: tuning-config
+    deployments:
+      collector:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 128Mi
+        requests:
+          cpu: 250m
+          memory: 64Mi
+        indexer:
+        replicaCount: 3
 ----
 
-Run the following command to view search customization CRD: 
-
+- Node placement for search pods:
++
+You can update the `Placement` of search pods by using the `nodeSelector` parameter, or the `tolerations` parameter. View the following example configuration:
++
+[source,yaml]
 ----
-oc get crd searchcustomizations.search.open-cluster-management.io -o yaml
+spec:
+ dbStorage:
+  size: 10Gi
+ deployments:
+  collector: {}
+  database: {}
+  indexer: {}
+  queryapi: {}
+ nodeSelector:
+  node-role.kubernetes.io/infra: ""
+ tolerations:
+ - effect: NoSchedule
+  key: node-role.kubernetes.io/infra
+  operator: Exists
 ----
-
-You can disable persistence by updating the `persistence` flag to `false` in the customization CR, which turns off saving search index to the file system. A status for persistence can be retrieved from the search operator (`searchoperator`) CR. Run the following command to view search operator CR: `oc get searchoperator searchoperator -o yaml`. 
 
 [#options-increase-memory]
 === Options to increase the redisgraph memory
@@ -67,12 +143,12 @@ oc patch searchoperator searchoperator --type='merge' -p '{"spec":{"redisgraph_r
 After the change is made, the `search-redisgraph` pod automatically restarts with the updated configuration.
 
 [#update-search-limit]
-=== Update the search limit
+=== Updating saved search limit
 
 By default, there is a limit of ten saved searches for eacch user. Only a user with the `administrator` role can update the limit by adding the following key value to the `console-config` ConfigMap, `key:value: SAVED_SEARCH_LIMIT: x`.
 
 [#queries-in-the-console]
-== Queries in the console
+== Querying in the console
 
 You can type any text value in the _Search box_ and results include anything with that value from any property, such as a name or namespace. Users are unable to search for values that contain an empty space.
 
@@ -107,7 +183,7 @@ See the following example:
 . If you want to save your search, click the *Save search* icon.
 
 [#search-argo]
-=== Query ArgoCD applications
+=== Querying ArgoCD applications
 
 When you search for an ArgoCD application, you are directed to the _Applications_ page. Complete the following steps to access the ArgoCD application from the _Search_ page:
 
@@ -115,5 +191,29 @@ When you search for an ArgoCD application, you are directed to the _Applications
 . From the console header, select the _Search_ icon.
 . Filter your query with the following values: `kind:application` and `apigroup:argoproj.io`
 . Select an application to view. The _Application_ page displays an overview of information for the application.
+
+[#updating-klusterlet-addons-managed]
+== Updating _klusterlet-addon-search_ deployments on managed clusters
+
+To collect the Kubernetes objects from the managed clusters, the `klusterlet-addon-search` pod is run on all the managed clusters where search is enabled. This deployment is run in the `open-cluster-management-agent-addon` namespace. A managed cluster with a high number of resources might require more memory for the `klusterlet-addon-search` deployment to function.
+
+Resource requirements for the `klusterlet-addon-search` pod in a managed cluster can be specified in the `ManagedClusterAddon` custom resource in your {product-title-short} hub cluster. There is a namespace for each managed cluster with the managed cluster name. Edit the `ManagedClusterAddon` custom resource from the namespace matching the managed cluster name. Run the following command to update the resource requirement in `xyz` managed cluster:
+
+----
+oc edit managedclusteraddon search-collector -n xyz
+----
+
+Append the resource requirements as annotations. View the following example:
+
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  annotations: addon.open-cluster-management.io/search_memory_limit: 2048Mi
+  addon.open-cluster-management.io/search_memory_request: 512Mi
+----
+
+The annotation overrides the resource requirements on the managed clusters and automatically restarts the pod with new resource requirements.
 
 Learn more about the {product-title} console, see link:../console/console_intro.adoc#web-console[Web console].
