@@ -1,36 +1,31 @@
 [#policy-generator]
-= Policy generator
+= Policy Generator
 
-The policy generator is a part of the {product-title} application lifecycle subscription GitOps workflow that generates {product-title-short} policies using Kustomize. The policy generator builds {product-title-short} policies from Kubernetes manifest YAML files, which are provided through a `PolicyGenerator` manifest YAML file that is used to configure it. The policy generator is implemented as a Kustomize generator plug-in. For more information on Kustomize, see the link:https://kustomize.io/[Kustomize documentation]. 
+The Policy Generator is a part of the {product-title} application lifecycle subscription GitOps workflow that generates {product-title-short} policies using Kustomize. The Policy Generator builds {product-title-short} policies from Kubernetes manifest YAML files, which are provided through a `PolicyGenerator` manifest YAML file that is used to configure it. The Policy Generator is implemented as a Kustomize generator plug-in. For more information on Kustomize, see the link:https://kustomize.io/[Kustomize documentation]. 
 
-The policy generator version bundled in this version of {product-title-short} is v1.10.0.
+The Policy Generator version bundled in this version of {product-title-short} is v1.10.0. View the following topics to for more information:
+
+* <<policy-generator-capabilities,Policy Generator capabilities>>
+* <<policy-generator-configuration,Policy Generator configuration structure>>
+* <<policy-gen-yaml-table,Policy Generator configuration reference table>>
+* <<related-resources-pol-gen,Related resources>>
 
 [#policy-generator-capabilities]
-== Policy generator capabilities
+== Policy Generator capabilities
 
-The policy generator and its integration with the {product-title-short} application lifecycle link:../applications/subscription_sample.adoc#applying-kustomize[subscription] GitOps workflow simplifies the distribution of Kubernetes resource objects to managed OpenShift clusters, and Kubernetes clusters through {product-title-short} policies. In particular, use the policy generator to complete the following actions:
+The Policy Generator and its integration with the {product-title-short} application lifecycle subscription GitOps workflow simplifies the distribution of Kubernetes resource objects to managed {ocp-short} clusters, and Kubernetes clusters through {product-title-short} policies. In particular, use the Policy Generator to complete the following actions:
 
-- Convert any Kubernetes manifest files to {product-title-short} link:../governance/config_policy_ctrl.adoc#kubernetes-configuration-policy-controller[configuration policies], including manifests created from a Kustomize directory.
+- Convert any Kubernetes manifest files to {product-title-short} configuration policies, including manifests created from a Kustomize directory.
 - Patch the input Kubernetes manifests before they are inserted into a generated {product-title-short} policy.
-- Generate additional configuration policies to be able to report on link:https://open-policy-agent.github.io/gatekeeper/website/docs/[Gatekeeper] and link:https://kyverno.io/[Kyverno] policy violations through {product-title}.
-- Generate policy sets on the hub cluster. See xref:../governance/policy_set_ctrl.adoc#policy-set-controller[Policy set controller] for more details.
-
-View the following topics to for more information:
-
-* <<policy-generator-configuration,Policy generator configuration structure>>
-* <<policy-gen-install-operator,Generating a policy to install an Operator>>
-** <<policy-install-ocp-gitops,A policy to install OpenShift GitOps>>
-** <<policy-gen-install-compliance-operator,A policy to install the Compliance Operator>>
-* <<policy-gen-install-on-openshift-gitops,Install the policy generator on OpenShift GitOps (ArgoCD)>>
-* <<policy-gen-yaml-table,Policy generator configuration reference table>>
-
+- Generate additional configuration policies to be able to report on Gatekeeper and Kyverno policy violations through {product-title}.
+- Generate policy sets on the hub cluster.
 
 [#policy-generator-configuration]
-== Policy generator configuration structure
+== Policy Generator configuration structure
 
-The policy generator is a Kustomize generator plug-in that is configured with a manifest of the `PolicyGenerator` kind and `policy.open-cluster-management.io/v1` API version. 
+The Policy Generator is a Kustomize generator plug-in that is configured with a manifest of the `PolicyGenerator` kind and `policy.open-cluster-management.io/v1` API version. 
 
-To use the plug-in, start by adding a `generators` section in a link:https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/[`kustomization.yaml`] file. View the following example:
+To use the plug-in, start by adding a `generators` section in a `kustomization.yaml` file. View the following example:
 
 [source,yaml]
 ----
@@ -38,7 +33,7 @@ generators:
   - policy-generator-config.yaml
 ----
 
-The `policy-generator-config.yaml` file referenced in the previous example is a YAML file with the instructions of the policies to generate. A simple policy generator configuration file might resemble the following example:
+The `policy-generator-config.yaml` file referenced in the previous example is a YAML file with the instructions of the policies to generate. A simple `PolicyGenerator` configuration file might resemble the following example:
 
 [source,yaml]
 ----
@@ -132,408 +127,8 @@ spec:
         severity: low
 ----
 
-See the link:https://github.com/stolostron/policy-generator-plugin[`policy-generator-plugin`] repository for more details.
-
-[#policy-gen-install-operator]
-== Generating a policy to install an Operator
-
-A common use of {product-title-short} policies is to link:hhttps://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html/operators/administrator-tasks#olm-installing-operator-from-operatorhub-using-cli_olm-adding-operators-to-a-cluster[install an Operator] on one or more managed OpenShift clusters. View the following examples of the different installation modes and the required resources. 
-
-[#policy-install-ocp-gitops]
-=== A policy to install OpenShift GitOps
-
-This example shows how to generate a policy that installs OpenShift GitOps using the policy generator. The OpenShift GitOps operator offers the link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html/operators/administrator-tasks#olm-installing-operators-from-operatorhub_olm-adding-operators-to-a-cluster[_all namespaces_ installation mode]. First, a `Subscription` manifest file called `openshift-gitops-subscription.yaml` needs to be created like the following example.
-
-[source,yaml]
-----
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: openshift-gitops-operator
-  namespace: openshift-operators
-spec:
-  channel: stable
-  name: openshift-gitops-operator
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
-----
-
-To pin to a specific version of the operator, you can add the following parameter and value: `spec.startingCSV: openshift-gitops-operator.v<version>`. Replace `<version>` with your preferred version.
-
-Next, a policy generator configuration file called `policy-generator-config.yaml` is required. The following example shows a single policy that installs OpenShift GitOps on all OpenShift managed clusters:
-
-[source,yaml]
-----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PolicyGenerator
-metadata:
-  name: install-openshift-gitops
-policyDefaults:
-  namespace: policies
-  placement:
-    clusterSelectors:
-      vendor: "OpenShift"
-  remediationAction: enforce
-policies:
-  - name: install-openshift-gitops
-    manifests:
-      - path: openshift-gitops-subscription.yaml
-----
-
-The last file that is required is the `kustomization.yaml` file. The `kustomization.yaml` file requires the following configuration:
-
-[source,yaml]
-----
-generators:
-  - policy-generator-config.yaml
-----
-
-The generated policy might resemble the following file:
-
-[source,yaml]
-----
-apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
-metadata:
-  name: placement-install-openshift-gitops
-  namespace: policies
-spec:
-  clusterConditions:
-    - status: "True"
-      type: ManagedClusterConditionAvailable
-  clusterSelector:
-    matchExpressions:
-      - key: vendor
-        operator: In
-        values:
-          - OpenShift
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  name: binding-install-openshift-gitops
-  namespace: policies
-placementRef:
-  apiGroup: apps.open-cluster-management.io
-  kind: PlacementRule
-  name: placement-install-openshift-gitops
-subjects:
-  - apiGroup: policy.open-cluster-management.io
-    kind: Policy
-    name: install-openshift-gitops
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: Policy
-metadata:
-  annotations:
-    policy.open-cluster-management.io/categories: CM Configuration Management
-    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
-    policy.open-cluster-management.io/standards: NIST SP 800-53
-  name: install-openshift-gitops
-  namespace: policies
-spec:
-  disabled: false
-  policy-templates:
-    - objectDefinition:
-        apiVersion: policy.open-cluster-management.io/v1
-        kind: ConfigurationPolicy
-        metadata:
-          name: install-openshift-gitops
-        spec:
-          object-templates:
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: operators.coreos.com/v1alpha1
-                kind: Subscription
-                metadata:
-                  name: openshift-gitops-operator
-                  namespace: openshift-operators
-                spec:
-                  channel: stable
-                  name: openshift-gitops-operator
-                  source: redhat-operators
-                  sourceNamespace: openshift-marketplace
-          remediationAction: enforce
-          severity: low
-----
-
-All policies where the input is from the {ocp-short} documentation and are generated by the policy generator are fully supported. View the following examples of YAML input that is supported in the {ocp-short} documentation:
-
-* link:https://docs.openshift.com/container-platform/4.10/post_installation_configuration/cluster-tasks.html[Post-installation cluster tasks]
-* link:https://docs.openshift.com/container-platform/4.10/security/audit-log-policy-config.html[Configuring the audit log policy]
-* link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html/logging/cluster-logging-external#cluster-logging-collector-log-forwarding-about_cluster-logging-external[About forwarding logs to third-party systems]
-
-See link:https://docs.openshift.com/container-platform/4.11/cicd/gitops/understanding-openshift-gitops.html[Understanding OpenShift GitOps] and the link:https://cloud.redhat.com/learn/topics/operators[Operator] documentation for more details.
-
-[#policy-gen-install-compliance-operator]
-=== A policy to install the Compliance Operator
-
-For an operator that uses the link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html/operators/administrator-tasks#olm-installing-operators-from-operatorhub_olm-adding-operators-to-a-cluster[_namespaced_ installation mode], such as the Compliance Operator, an `OperatorGroup` manifest is also required. This example shows a generated policy to install the Compliance Operator.
-
-First, a YAML file with a `Namespace`, a `Subscription`, and an `OperatorGroup` manifest called `compliance-operator.yaml` must be created. The following example installs these manifests in the `compliance-operator` namespace:
-
-[source,yaml]
-----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: openshift-compliance
----
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: compliance-operator
-  namespace: openshift-compliance
-spec:
-  channel: release-0.1
-  name: compliance-operator
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
----
-apiVersion: operators.coreos.com/v1
-kind: OperatorGroup
-metadata:
-  name: compliance-operator
-  namespace: openshift-compliance
-spec:
-  targetNamespaces:
-    - compliance-operator
-----
-
-Next, a policy generator configuration file called `policy-generator-config.yaml` is required. The following example shows a single policy that installs the Compliance Operator on all OpenShift managed clusters:
-
-[source,yaml]
-----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PolicyGenerator
-metadata:
-  name: install-compliance-operator
-policyDefaults:
-  namespace: policies
-  placement:
-    clusterSelectors:
-      vendor: "OpenShift"
-  remediationAction: enforce
-policies:
-  - name: install-compliance-operator
-    manifests:
-      - path: compliance-operator.yaml
-----
-
-The last file that is required is the `kustomization.yaml` file. The following configuration is required in the `kustomization.yaml` file:
-
-[source,yaml]
-----
-generators:
-  - policy-generator-config.yaml
-----
-
-As a result, the generated policy resembles the following file:
-
-[source,yaml]
-----
-apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
-metadata:
-  name: placement-install-compliance-operator
-  namespace: policies
-spec:
-  clusterConditions:
-    - status: "True"
-      type: ManagedClusterConditionAvailable
-  clusterSelector:
-    matchExpressions:
-      - key: vendor
-        operator: In
-        values:
-          - OpenShift
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  name: binding-install-compliance-operator
-  namespace: policies
-placementRef:
-  apiGroup: apps.open-cluster-management.io
-  kind: PlacementRule
-  name: placement-install-compliance-operator
-subjects:
-  - apiGroup: policy.open-cluster-management.io
-    kind: Policy
-    name: install-compliance-operator
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: Policy
-metadata:
-  annotations:
-    policy.open-cluster-management.io/categories: CM Configuration Management
-    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
-    policy.open-cluster-management.io/standards: NIST SP 800-53
-  name: install-compliance-operator
-  namespace: policies
-spec:
-  disabled: false
-  policy-templates:
-    - objectDefinition:
-        apiVersion: policy.open-cluster-management.io/v1
-        kind: ConfigurationPolicy
-        metadata:
-          name: install-compliance-operator
-        spec:
-          object-templates:
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: v1
-                kind: Namespace
-                metadata:
-                  name: openshift-compliance
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: operators.coreos.com/v1alpha1
-                kind: Subscription
-                metadata:
-                  name: compliance-operator
-                  namespace: openshift-compliance
-                spec:
-                  channel: release-0.1
-                  name: compliance-operator
-                  source: redhat-operators
-                  sourceNamespace: openshift-marketplace
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: operators.coreos.com/v1
-                kind: OperatorGroup
-                metadata:
-                  name: compliance-operator
-                  namespace: openshift-compliance
-                spec:
-                  targetNamespaces:
-                    - compliance-operator
-          remediationAction: enforce
-          severity: low
-----
-
-See the link:https://docs.openshift.com/container-platform/4.11/security/compliance_operator/compliance-operator-understanding.html[Compliance Operator documentation] for more details. 
-
-[#policy-gen-install-on-openshift-gitops]
-== Install the policy generator on OpenShift GitOps (ArgoCD)
-
-OpenShift GitOps, based on link:https://argoproj.github.io/argo-cd/[ArgoCD], can also be used to generate policies using the policy generator through GitOps. Since the policy generator does not come preinstalled in the OpenShift GitOps container image, some customization must take place. In order to follow along, it is expected that you have the link:https://docs.openshift.com/container-platform/4.10/cicd/gitops/installing-openshift-gitops.html[OpenShift GitOps Operator] installed on the {product-title-short} hub cluster and be sure to log into the hub cluster.
-
-In order for OpenShift GitOps to have access to the policy generator when you run Kustomize, an Init Container is required to copy the policy generator binary from the {product-title-short} Application Subscription container image to the OpenShift GitOps container, that runs Kustomize. For more details, see link:https://docs.openshift.com/container-platform/4.10/nodes/containers/nodes-containers-init.html[Using Init Containers to perform tasks before a pod is deployed]. Additionally, OpenShift GitOps must be configured to provide the `--enable-alpha-plugins` flag when you run Kustomize. Start editing the OpenShift GitOps `argocd` object with the following command:
-
-[source,bash]
-----
-oc -n openshift-gitops edit argocd openshift-gitops
-----
-
-
-Then modify the OpenShift GitOps `argocd` object to contain the following additional YAML content. When a new major version of {product-title-short} is released and you want to update the policy generator to a newer version, you need to update the `registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel8` image used by the Init Container to a newer tag. View the following example and replace `<version>` with {product-version} or your desired {product-title-short} version:
-
-[source,yaml]
-----
-apiVersion: argoproj.io/v1alpha1
-kind: ArgoCD
-metadata:
-  name: openshift-gitops
-  namespace: openshift-gitops
-spec:
-  kustomizeBuildOptions: --enable-alpha-plugins
-  repo:
-    env:
-    - name: KUSTOMIZE_PLUGIN_HOME
-      value: /etc/kustomize/plugin
-    initContainers:
-    - args:
-      - -c
-      - cp /etc/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator/PolicyGenerator
-        /policy-generator/PolicyGenerator
-      command:
-      - /bin/bash
-      image: registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel8:v<version>
-      name: policy-generator-install
-      volumeMounts:
-      - mountPath: /policy-generator
-        name: policy-generator
-    volumeMounts:
-    - mountPath: /etc/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator
-      name: policy-generator
-    volumes:
-    - emptyDir: {}
-      name: policy-generator
-----
-
-Now that OpenShift GitOps can use the policy generator, OpenShift GitOps must be granted access to create policies on the {product-title-short} hub cluster. Create the following `ClusterRole` resource called `openshift-gitops-policy-admin`, with access to create, read, update, and delete policies and placements. Your `ClusterRole` might resemble the following example:
-
-[source,yaml]
-----
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: openshift-gitops-policy-admin
-rules:
-  - verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-    apiGroups:
-      - policy.open-cluster-management.io
-    resources:
-      - policies
-      - placementbindings
-  - verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-    apiGroups:
-      - apps.open-cluster-management.io
-    resources:
-      - placementrules
-  - verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-    apiGroups:
-      - cluster.open-cluster-management.io
-    resources:
-      - placements
-      - placements/status
-      - placementdecisions
-      - placementdecisions/status
-----
-
-Additionally, create a `ClusterRoleBinding` object to grant the OpenShift GitOps service account access to the `openshift-gitops-policy-admin` `ClusterRole`. Your `ClusterRoleBinding` might resemble the following resource:
-
-[source,yaml]
-----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: openshift-gitops-policy-admin
-subjects:
-  - kind: ServiceAccount
-    name: openshift-gitops-argocd-application-controller
-    namespace: openshift-gitops
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: openshift-gitops-policy-admin
-----
-
 [#policy-gen-yaml-table]
-== Policy generator configuration reference table
+== Policy Generator configuration reference table
 
 Note that all the fields in the `policyDefaults` section except for `namespace` can be overridden for each policy.
 
@@ -623,7 +218,7 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | `policyDefaults.dependencies[].namespace`
 | Optional
-| The namespace of the object being depended on. The default is the namespace of policies set for the policy generator.
+| The namespace of the object being depended on. The default is the namespace of policies set for the Policy Generator.
 
 | `policyDefaults.dependencies[].compliance`
 | Optional
@@ -647,7 +242,7 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | `policyDefaults.extraDependencies[].namespace`
 | Optional
-| The namespace of the object being depended on. By default, the value is set to the namespace of policies set for the policy generator.
+| The namespace of the object being depended on. By default, the value is set to the namespace of policies set for the Policy Generator.
 
 | `policyDefaults.extraDependencies[].compliance`
 | Optional
@@ -663,7 +258,7 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | `policyDefaults.ignorePending`
 | Optional
-| Bypass compliance status checks when the policy generator is waiting for its dependencies to reach their desired states. The default value is `false`.
+| Bypass compliance status checks when the Policy Generator is waiting for its dependencies to reach their desired states. The default value is `false`.
 
 | `policyDefaults.orderPolicies`
 | Optional
@@ -766,5 +361,16 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | The placement configuration for the policy set. This defaults to a placement configuration that matches all clusters. See `policyDefaults.placement` for placement documentation, however `policyDefaults.placement` settings do not apply to policy sets.
 |===
 
-Return to the xref:../governance/third_party_policy.adoc#integrate-third-party-policy-controllers[Integrate third-party policy controllers] documentation, or refer to the xref:../governance/grc_intro.adoc#governance[Governance] documentation for more topics.
+[#related-resources-pol-gen]
+== Related resources
+
+* See xref:../governance/policy_gen_install_operator.adoc#policy-gen-install-operator[Generating a policy to install an Operator]
+* See the link:https://github.com/stolostron/policy-generator-plugin[`policy-generator-plugin`] repository for more details.
+* See xref:../governance/policy_set_ctrl.adoc#policy-set-controller[Policy set controller] for more details.
+* Return to the xref:../governance/third_party_policy.adoc#integrate-third-party-policy-controllers[Integrate third-party policy controllers] documentation.
+* Refer to the xref:../governance/grc_intro.adoc#governance[Governance] documentation for more topics.
+* See link:../applications/subscription_sample.adoc#applying-kustomize[Applying Kustomize] for more information.
+* See an example of a link:https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/[`kustomization.yaml`] file.
+* See link:https://open-policy-agent.github.io/gatekeeper/website/docs/[Gatekeeper] for more details.
+* See link:https://kyverno.io/[Kyverno] for more details.
 
