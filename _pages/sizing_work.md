@@ -173,7 +173,7 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 &nbsp;
 
-## Jira Examples
+## Jira examples
 
 ### `1` point
 
@@ -216,7 +216,7 @@ An extremely complex issue that requires massive work on all fronts and input fr
 - []()
 
 <details>
-  <summary>## GitHub Examples</summary>
+  <summary>Legacy GitHub examples</summary>
 
 ### `1` point
 
