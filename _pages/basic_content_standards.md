@@ -30,6 +30,7 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 * Headers: parallel, separate headers with content, etc... See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-headings
     - Choose gerunds for tasks
     - No code in headers
+    - Use conrefs as necessary
     - Make headers and anchors unique but intuitive (think about search engine optimization)
 * List: avoiding nesting more than 2, parallelism, etc... See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-lists
     - Definition lists are built with term in bold and colon.

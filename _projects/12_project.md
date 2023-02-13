@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Report issue
-description: List of issue templates to report an issue. Choose the correct template for your issue.
-img: assets/img/12-templates.png
-redirect: https://github.com/stolostron/backlog/issues/new/choose
+title: ACM release board
+description: Overview of the ACM release evel scrum board with access to assign issue points.
+img: assets/img/12-releaseboard.png
+redirect:  https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=16729&view=planning
 importance: 12
 category: work
 ---
