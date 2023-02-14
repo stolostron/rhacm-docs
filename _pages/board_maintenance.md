@@ -7,7 +7,7 @@ horizontal: false
 
 As the primary board focal, the lead needs to know everyone's commitment in order to speak truthfully about the team's effort, priorities, and sprint planning. Everyone helps maintain Jira issues with the following guidance:
 
-## New issues (Brandi to update this for Jira)
+## New issues (Brandi to update this for Jira and trains)
 
   - Unassigned and untriaged issues remain in `untriaged` column until acknowledged within a day or so, or if they cannot be worked due to insufficient info. Lead or doc focal will request more info in these cases.
   - Issues need to be labeled properly (dev squad label if it is release work, requires dev team validations, or is a cross squad issue).
