@@ -195,7 +195,7 @@ This website is already deployed with [GitHub Pages](https://pages.github.com/).
 
 1. Rename your repository to `<your-github-username>.github.io` or `<your-github-orgname>.github.io`.
 2. In `_config.yml`, set `url` to `https://<your-github-username>.github.io` and leave `baseurl` empty.
-3. Set up [automatic deployment of your webpage](/README.md#Enable-automatic-deployment).
+3. Set up [automatic deployment of your webpage](/README.md#Enabling-automatic-deployment).
 4. Make your changes, commit, and push.
 5. After deployment, the website becomes available at `<your-github-username>.github.io`.
 
