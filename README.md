@@ -95,7 +95,7 @@ To publish the website, see [Deployment](/README.md#Deployment) for more details
 
 # Maintaining and updating
 
-You can make changes to the content on the website by editing the Markdown files in `__pages_`. You can also add new topics, tabs, and cards to the website using Markdown files. GitHub Pages will automatically update the site when changes are detected in the repository.
+You can make changes to the content on the website by editing the Markdown files in `__pages_`. You can also add new topics, tabs, and cards to the website by using Markdown files. GitHub Pages will automatically update the site when changes are detected in the repository.
 
 ## Add new topic
 
