@@ -178,7 +178,7 @@ You can make changes to the content on the website by editing the Markdown files
 ## Screenshot requirements
 
 - Screenshot size must be 400x300 pixels.
-- Save screenshot as a `.png` file in /assets/img/.
+- Save screenshot as a `.png` file in `/assets/img/`.
 - Only screenshot website content. No user interface elements must be visible that are not part of the HTML code of the website.
 - Remove sensitive information from the screenshot by painting over it. Do not use blur.
 - The naming convention of the file must follow `##-name`.
@@ -187,9 +187,9 @@ You can make changes to the content on the website by editing the Markdown files
 
 Easter eggs must be squirrel-themed.
 
-# Deployment
+# Deploying
 
-This website is already deployed with [GitHub Pages](https://pages.github.com/). Some themes don't automatically update when changes are made to the repository but[`al-folio`](https://github.com/alshedivat/al-folio) supports this feature. No further deployment is needed. If you do need to deploy the website again, see the following instructions:
+This website is already deployed with [GitHub Pages](https://pages.github.com/). Some themes don't automatically update when changes are made to the repository but [`al-folio`](https://github.com/alshedivat/al-folio) supports this feature. No further deployment is needed. If you do need to deploy the website again, see the following instructions:
 
 ## Website
 
@@ -199,14 +199,14 @@ This website is already deployed with [GitHub Pages](https://pages.github.com/).
 4. Make your changes, commit, and push.
 5. After deployment, the website becomes available at `<your-github-username>.github.io`.
 
-## Enable automatic deployment
+## Enabling automatic deployment
 
 1. Click on **Actions** tab and **Enable GitHub Actions**.
 2. Make changes to your websit, commit, and push. This automatically triggers the **Deploy** action.
 3. Wait a few minutes and let the action complete. You can see the progress in the **Actions** tab. If completed successfully, in addition to the `master` branch, your repository should now have a newly built `gh-pages` branch.
 4. In the **Settings** of your repository, set the branch to `gh-pages`. For more details, see [Configuring a publishing source for your GitHub Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#choosing-a-publishing-source).
 
-### Manual deployment to GitHub Pages
+### Deploying manually to GitHub Pages
 
 Run the following script from the root directory of your repository:
 ```bash
@@ -214,7 +214,7 @@ Run the following script from the root directory of your repository:
 ```
 The previous command uses the `master` branch for the source code and deploys the webpage to `gh-pages`.
 
-### Deployment to a different hosting server
+### Deploying to a different hosting server
 
 Run the following command to build your website for other hosting options besides GitHub Pages:
 ```bash
