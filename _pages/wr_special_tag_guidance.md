@@ -7,7 +7,7 @@ horizontal: false
 
 Special tags can be used to draw attention to content where necessary. Limit special tagging and make sure to use bold text for all special tags, including the colon.
 
-# Table of special tags
+## Table of special tags
 
 | **Special tag** | | **How and when to use** |
 | ----------- | | ----------- |
@@ -19,7 +19,7 @@ Special tags can be used to draw attention to content where necessary. Limit spe
 
 &nbsp;
 
-# APIs
+## APIs
 
 Use a plug in to change an API draft from YAML to JSON. You can use, for instance, the VS Code plugin: YAML to JSON.
 
