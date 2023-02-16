@@ -17,6 +17,8 @@ Special tags can be used to draw attention to content where necessary. Limit spe
 | **Best practice:** | | Use with caution. Avoid when possible by writing more descriptive text to guide the user. |
 | **(Technology preview)** | | Place at the highest level of the component that is tech preview on the title (to get this in the navigation). Include a special tag on the What's new entry. |
 
+&nbsp;
+
 # APIs
 
 Use a plug in to change an API draft from YAML to JSON. You can use, for instance, the VS Code plugin: YAML to JSON.
