@@ -5,7 +5,9 @@ permalink: sizing_work
 horizontal: false
 ---
 
-Not all issues are created equal. To help plan our anticipated workloads for each sprint and distribute issues efficiently, we assign points to GitHub and Jira issues that provide an estimate for how difficult and time-intensive each issue is. While assigning points is a subjective process, there are still some guidelines you can follow.
+Not all issues are created equal. To help plan our anticipated workloads for each sprint and distribute issues efficiently, we assign points to issues that provide an estimate for how difficult and time-intensive each issue is. While assigning points is a subjective process, there are still some guidelines you can follow.
+
+- [Access the Jira release board to assign points](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=16729&view=planning)
 
 ## General rules
 
@@ -171,7 +173,50 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 &nbsp;
 
-## Examples
+## Jira examples
+
+### `1` point
+
+- [ACM-]()
+
+### `2` points
+
+- []()
+
+### `3` points
+
+- []()
+
+### `4` points
+
+- []()
+
+### `5` points
+
+- []()
+
+### `6` points
+
+- []()
+
+### `7` points
+
+- []()
+
+### `8` points
+
+- []()
+
+### `9` points
+
+- []()
+
+### `10` points
+
+- []()
+
+<details>
+  <summary>Legacy GitHub examples</summary>
 
 ### `1` point
 
@@ -221,3 +266,5 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 - [24960](https://github.com/stolostron/backlog/issues/24960)
 - [24307](https://github.com/stolostron/backlog/issues/24307)
+
+</details>

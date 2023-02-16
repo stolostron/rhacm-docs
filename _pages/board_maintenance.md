@@ -5,7 +5,7 @@ permalink: board_maintenance
 horizontal: false
 ---
 
-As the primary board focal, the lead needs to know everyone's commitment in order to speak truthfully about the team's effort, priorities, and sprint planning. Everyone helps maintain their issues or Jira bugs with the following guidance:
+As the primary board focal, the lead needs to know everyone's commitment in order to speak truthfully about the team's effort, priorities, and sprint planning. Everyone helps maintain Jira issues with the following guidance:
 
 ## New issues (Jira)
 
@@ -57,4 +57,3 @@ As the primary board focal, the lead needs to know everyone's commitment in orde
   - Add the `Learning/Discovery' and 'squad-doc' label.
   - Assign the next two sprints to the learning issue.
   - Use the learning issue for many purposes, including learning, development, training, experimentation, and other work that you would like to complete but feel like you don't get time to. 
-  
