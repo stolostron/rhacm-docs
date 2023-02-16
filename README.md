@@ -178,7 +178,7 @@ You can make changes to the content on the website by editing the Markdown files
 ## Screenshot requirements
 
 - Screenshot size must be 400x300 pixels.
-- Save screenshot as a `.png` file in /assets/img/
+- Save screenshot as a `.png` file in /assets/img/.
 - Only screenshot website content. No user interface elements must be visible that are not part of the HTML code of the website.
 - Remove sensitive information from the screenshot by painting over it. Do not use blur.
 - The naming convention of the file must follow `##-name`.
