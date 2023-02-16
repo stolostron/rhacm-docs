@@ -1,7 +1,7 @@
 [#search-in-the-console]
 = Search in the console
 
-For {product-title}, search provides visibility into your Kubernetes resources across all of your clusters. Search indexes the Kubernetes resources and the relationships to other resources. You can create a `searchcustomization` custom resource (CR) to define the storage settings for search persistence if you want to change the storage class and storage size. 
+For {product-title}, search provides visibility into your Kubernetes resources across all of your clusters. Search indexes the Kubernetes resources and the relationships to other resources. You can create a `searchcustomization` custom resource to define the storage settings for search persistence if you want to change the storage class and storage size. 
 
 * <<search-components,Search components>>
 * <<search-customization,Search customization>>
@@ -16,20 +16,43 @@ For {product-title}, search provides visibility into your Kubernetes resources a
 
 The search architecture is composed of the following components:
 
-- `search-collector`: Watches the Kubernetes resources, collects the resource metadata, computes relationships for resources across all of your managed clusters, and sends the collected data to the `search-indexer`. The `search-collector` on your managed cluster runs as a pod named, `klusterlet-addon-search`. 
+- *Collector*: Watches the Kubernetes resources and creates an index. The `search-collector` computes relationships for resources within the managed cluster.
 
-- `search-indexer`: Receives resource metadata from the collectors and writes to PostgreSQL database. The `search-indexer` also watches resources in the hub cluster to keep track of active managed clusters.
+- *Aggregator*: Receives data from the collector and writes to a database. The `search-aggregator` watches resources in the hub cluster, computes multicluster relationships, and tracks the activity from connected collectors.
 
-- `search-api`: Provides access to all cluster data in the `search-indexer` through GraphQL and enforces role-based access control (RBAC).
+- *Search API*: Provides access to the data in the search index and enforces role-based access control.
+
+Search is enabled by default. Search is also enabled when you provision or manually import a managed cluster. If you want to disable search on your managed cluster, see link:../clusters/modify_endpoint.adoc#modifying-the-klusterlet-add-ons-settings-of-your-cluster[Modifying the klusterlet add-ons settings of your cluster] for more information.
 
 [#search-customization]
 == Search customization
 
-You can modify the default values in the `searchcustomization` custom resource. To view details of the custom resource, run the following command:
+When you install {product-title-short}, the product is configured to persist the data in-memory to a file system. The StatefulSet `search-redisgraph` deploys the Redisgraph pod, which mounts the persistent volume named `persist`. If your cluster has a defined default storage class, the search component creates a Persistent Volume Claim (PVC) of 10Gi on the default storage class. If a default storage class does not exist in your cluster, search saves the index in an empty directory (`emptyDir`).
+
+You can customize the storage settings for search by creating the `searchcustomization` custom resource. Search customization is namespace-scoped and located where search is installed in the hub cluster. View the following example of the search customization custom resource:
+
+[source,yaml]
+----
+apiVersion: search.open-cluster-management.io/v1alpha1
+kind: SearchCustomization
+metadata:
+  name: searchcustomization
+  namespace: open-cluster-management
+  labels:
+    cluster.open-cluster-management.io/backup: ""
+spec:
+  persistence: true
+  storageClass: gp2
+  storageSize: 12Gi
+----
+
+Run the following command to view search customization custom resource definition: 
 
 ----
-oc get search searchcustomization -o yaml
+oc get crd searchcustomizations.search.open-cluster-management.io -o yaml
 ----
+
+You can disable persistence by updating the `persistence` flag to `false` in the customization custom resource, which turns off saving search index to the file system. A status for persistence can be retrieved from the search operator (`searchoperator`) custom resource. Run the following command to view search operator custom resource: `oc get searchoperator searchoperator -o yaml`. 
 
 [#options-increase-memory]
 === Options to increase the redisgraph memory
