@@ -97,7 +97,7 @@ To publish the website, see [Deployment](/README.md#Deployment) for more details
 
 You can make changes to the content on the website by editing the Markdown files in `__pages_`. You can also add new topics, tabs, and cards to the website by using Markdown files. GitHub Pages will automatically update the site when changes are detected in the repository.
 
-## Add new topic
+## Adding a new topic
 
 1. Create a new Markdown file in the `__pages_` folder.
 2. Add the following template:
@@ -112,7 +112,7 @@ You can make changes to the content on the website by editing the Markdown files
 3. Add a title for your topic after `title:`.
 4. Add the link to the file you just created after `permalink:`.
 
-## Add new tab
+## Adding a new tab
 
 1. Create a new Markdown file in the `__pages_` folder.
 2. Name the file `tab#.md`. Replace `#` with an integer.
@@ -131,7 +131,7 @@ You can make changes to the content on the website by editing the Markdown files
 5. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:`. See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
 6. Add an integer after `nav_order:` to choose where the tab appears on the website.
 
-## Add new dropdown tab
+## Adding a new dropdown tab
 
 1. Create a new Markdown file in the `__pages_` folder.
 2. Name the file `dropdown#.md`. Replace `#` with an integer.
@@ -154,7 +154,7 @@ You can make changes to the content on the website by editing the Markdown files
 5. Add an integer after `nav_order:` to choose where the tab appears on the website.
 6. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:` below `children:` See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
 
-## Add new link card
+## Adding a new `Quick links` card
 
 1. Create a new Markdown file in the `__projects_` folder.
 2. Add the following template:
