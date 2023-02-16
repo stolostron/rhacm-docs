@@ -128,7 +128,7 @@ You can make changes to the content on the website by editing the Markdown files
    ---
    ```
 4. Add a title for your tab  after `title:`.
-5. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:`. See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
+5. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:`. See [Adding a new topic](/README.md#Adding-a-new-topic) for more details on how to add topics.
 6. Add an integer after `nav_order:` to choose where the tab appears on the website.
 
 ## Adding a new dropdown tab
@@ -152,7 +152,7 @@ You can make changes to the content on the website by editing the Markdown files
    ```
 4. Add a title for your tab  after `title:`.
 5. Add an integer after `nav_order:` to choose where the tab appears on the website.
-6. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:` below `children:` See [Add new topic](/README.md#Add-new-topic) for more details on how to add topics.
+6. Add the link to the Markdown file (topic) you want your tab to link to after `permalink:` below `children:` See [Adding a new topic](/README.md#Adding-a-new-topic) for more details on how to add topics.
 
 ## Adding a new `Quick links` card
 
