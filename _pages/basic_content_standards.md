@@ -97,7 +97,7 @@ When commenting in the source, avoid miscommunications by being specific about t
 
 Comments should be temporary. Use the date when the comment was signed along with its purpose to determine if the comment is worth removing. If you need additional information, consider reaching out to the person who signed the comment.
 
-If you are commenting about changes that need to be made, please create an issue and remove the comments as soon as possible as not to clutter the source. The source is open and should be as close to the product documentation as possible to follow `dev>test>prod` priciple.
+If you are commenting about changes that need to be made, please create an issue and remove the comments as soon as possible as not to clutter the source. The source is open and should be as close to the product documentation as possible to follow `dev>test>prod` principle.
 
 ## Modals
 
