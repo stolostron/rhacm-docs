@@ -35,6 +35,8 @@ As the primary board focal, the lead needs to know everyone's commitment in orde
   - Bring up any `unplanned` work that got in the way on progress; use the `unplanned` label.
   - The `DONE` column will contain closed items for a certain amount of time.
   - Doc issues must be placed a minimum of 2 sprints ahead of the related dev issue. For example, if the dev issue is placed in _Sprint 1_, then the doc issue is to be placed in the _Sprint 3_ realistically. (this is realistic, but trying to work in trains and sprints; let's revisit when we catch up from 2.7)
+  
+   ![Pipeline status indicators](../assets/img/pipeline_jira_2.8.jpg)
 
 ## Board review in scrums
 
