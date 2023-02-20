@@ -12,20 +12,22 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 ## Team requirements for each PR
 
 * Request peer reviews for all new topics and other changes that result in more than a couple of lines.
-* Request technical review for any changes other than typos or broken links. (BZ or DDF are not usually opened by SMEs; seek engineer approval before making changes.)
+* Request PRs when developers make changes with PRs
+* Request technical review for any changes other than typos or broken links. 
 * Check broken links as you build content. Use the easy _Check my links_ plug-in on each PR in preview mode.
-* Check your PR requests from team members. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
+* Check your PR _requests_ from team members. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
 * Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`.
+* Ensure your peer reviews and contributions are in your goals.
 
 ## Creating a file, section, or list
 
-* Guides should begin with an intro file that only has conceptual information and links to the rest of the topics. Name the file `intro.adoc`, or `overview.adoc` if it contains a few intros and guides.
+* Guides should begin with an `intro.adoc` file that only has conceptual information and links to the rest of the topics. This is a _container_ topic that will be the entry to the guide collectio. Name the file `intro.adoc`, or `overview.adoc` if it contains a few intros and guides.
 * Be sure file names increase UX and don't confuse the reader or writer. Example: `man_clu_set` changes to `manage_clusterset`, a file that is titled: _Managing ClusterSets_. This will help the entire product team better manage links in the doc and the console, and it increases expectation about the contents of the file.
 * Recognize the goal of the content: Task, reference, concept? Tasks require gerunds in the title, for example.
 * Know something about the technology. What is the purpose of the new function? If you don't understand it, you won't be able to advocate for the customer with the content.
 * Ask where the user will interact with the feature. Day 1? Day 2? During the Application lifecycle?
-* Seek guidance from the architect before creating a book or section so that the team can agree on the best placement for the new content.
-* Don't use internal terms to define a file. Example: Wizard. Name the file after what the user will hear about the product.
+* Seek guidance from the architect before creating a new book or section so that the team can agree on the best placement for the new content.
+* Don't use internal terms to define a file. Name the file after what the user will hear about the product.
 * Validation steps need to be concrete and produce a result. 
 * Headers: parallel, separate headers with content, etc... See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-headings
     - Choose gerunds for tasks
@@ -95,7 +97,7 @@ When commenting in the source, avoid miscommunications by being specific about t
 
 Comments should be temporary. Use the date when the comment was signed along with its purpose to determine if the comment is worth removing. If you need additional information, consider reaching out to the person who signed the comment.
 
-If you are commenting about changes that need to be made, please create an issue and remove the comments as soon as possible as not to clutter the source.
+If you are commenting about changes that need to be made, please create an issue and remove the comments as soon as possible as not to clutter the source. The source is open and should be as close to the product documentation as possible to follow `dev>test>prod` priciple.
 
 ## Modals
 
