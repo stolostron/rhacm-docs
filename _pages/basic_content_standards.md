@@ -11,8 +11,8 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 
 ## Team requirements for each PR
 
-* Request peer reviews for all new topics and other changes that result in more than a couple of lines.
-* Request PRs when developers make changes with PRs
+* Request peer reviews for all new topics and other changes that result in more than a typo or small correction.
+* Request peer reviews when developers make changes with PRs.
 * Request technical review for any changes other than typos or broken links. 
 * Check broken links as you build content. Use the easy _Check my links_ plug-in on each PR in preview mode.
 * Check your PR _requests_ from team members. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
@@ -84,7 +84,7 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 
 "Embedded links are links that appear mid-sentence or mid-paragraph. Such links are disruptive because the user must decide whether to go immediately to the information..." (263)
 
-* Careful with inline links-- do not overuse. If user needs lots of links, consider a section for references within the topic.
+* Careful with inline links-- do not overuse. If user needs lots of links, consider a section within the topic named: Additional Resources.
 * Name the link so that the user sees value in the title and can better decide whether to click or come back later. Don't name the link [here].
 * URLs to GitHub issues are usually long and uninformative. Take the extra step to define the link with a good link title. 
 * Never link to internal materials like internal GitHub issues, files, other internal-only docs like scripts. Have the developer replace a script with steps. Some initial drafts can require this removal. Ensure linked materials are from public spaces.
