@@ -7,17 +7,16 @@ horizontal: false
 
 Not all issues are created equal. To help plan our anticipated workloads for each sprint and distribute issues efficiently, we assign points to issues that provide an estimate for how difficult and time-intensive each issue is. While assigning points is a subjective process, there are still some guidelines you can follow.
 
-- [Access the Jira release board to assign points](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=16729&view=planning)
-
 ## General rules
 
-- The range of points consists of integers from `1` to `10`, with `1` being "I can knock this out in 5 minutes" and `10` being "I'm sending UNSUBSQUIRREL as reply all to memo-list" Do not use fractions or integers above 10.
+- The range of points consists of integers from `1` to `10`, with `1` being "I can knock this out in 5 minutes" and `10` being "I'm sending UNSUBSQUIRREL as reply all to memo-list". Do not use fractions or integers above 10.
 - Estimate points when triaging issues, but feel free to change them any time during your work process, including after you have already closed the issue.
 - With all issues, including `1` point issues, it's important to take a step back and consider the purpose and necessity of the change.
+- Points are assigned in each Jira issue by using labels.
 
 ## Rubrics
 
-Consider the following rubrics when assinging points to GitHub issues:
+Consider the following rubrics when assigning points to Jira issues:
 
 | **Rubric** | | **Description** |
 | ----------- | | ----------- |
@@ -173,65 +172,19 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 &nbsp;
 
-## Jira examples
+## Examples
 
 ### `1` point
 
-- [ACM-]()
+- [ACM-3335](https://issues.redhat.com/browse/ACM-3335)
 
 ### `2` points
 
-- []()
+- [ACM-3501](https://issues.redhat.com/browse/ACM-3501)
 
 ### `3` points
 
-- []()
-
-### `4` points
-
-- []()
-
-### `5` points
-
-- []()
-
-### `6` points
-
-- []()
-
-### `7` points
-
-- []()
-
-### `8` points
-
-- []()
-
-### `9` points
-
-- []()
-
-### `10` points
-
-- []()
-
-<details>
-  <summary>Legacy GitHub examples</summary>
-
-### `1` point
-
-- [25677](https://github.com/stolostron/backlog/issues/25677)
-- [25092](https://github.com/stolostron/backlog/issues/25092)
-
-### `2` points
-
-- [25641](https://github.com/stolostron/backlog/issues/25641)
-- [11423](https://github.com/stolostron/backlog/issues/11423)
-
-### `3` points
-
-- [24059](https://github.com/stolostron/backlog/issues/24059)
-- [25389](https://github.com/stolostron/backlog/issues/25389)
+- [ACM-3005](https://issues.redhat.com/browse/ACM-3005)
 
 ### `4` points
 
@@ -266,5 +219,3 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 - [24960](https://github.com/stolostron/backlog/issues/24960)
 - [24307](https://github.com/stolostron/backlog/issues/24307)
-
-</details>
