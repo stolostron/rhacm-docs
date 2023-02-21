@@ -27,7 +27,7 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 * Know something about the technology. What is the purpose of the new function? If you don't understand it, you won't be able to advocate for the customer with the content.
 * Ask where the user will interact with the feature. Day 1? Day 2? During the Application lifecycle?
 * Seek guidance from the architect before creating a new book or section so that the team can agree on the best placement for the new content.
-* Don't use internal terms to define a file. Name the file after what the user will hear about the product.
+* Don't use internal terms to define a file. Name the file after what the user will read about the product in announcements and in the console.
 * Validation steps need to be concrete and produce a result. 
 * Headers: parallel, separate headers with content, etc... See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-headings
     - Choose gerunds for tasks
@@ -84,7 +84,7 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 
 "Embedded links are links that appear mid-sentence or mid-paragraph. Such links are disruptive because the user must decide whether to go immediately to the information..." (263)
 
-* Careful with inline links-- do not overuse. If user needs lots of links, consider a section within the topic named: Additional Resources.
+* Careful with inline links-- do not overuse. If user needs lots of links, consider a section within the topic named: Additional resources.
 * Name the link so that the user sees value in the title and can better decide whether to click or come back later. Don't name the link [here].
 * URLs to GitHub issues are usually long and uninformative. Take the extra step to define the link with a good link title. 
 * Never link to internal materials like internal GitHub issues, files, other internal-only docs like scripts. Have the developer replace a script with steps. Some initial drafts can require this removal. Ensure linked materials are from public spaces.
