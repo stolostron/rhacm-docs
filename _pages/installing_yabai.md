@@ -37,7 +37,7 @@ You can install yabai by completing the following steps:
     killall Dock
     ```
     
-7. Configure the scripting addition by creating a new `yaba` file in _sudoers.d_:
+7. Configure the scripting addition by creating a new `yabai` file in _sudoers.d_:
 
     ```
     sudo visudo -f /private/etc/sudoers.d/yabai
