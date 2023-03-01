@@ -48,7 +48,7 @@ You must meet the following prerequisites to enable and use the backup and resto
 ** Before you run the restore operation on the passive hub cluster, you must manually configure the hub cluster and install all operators on the active hub cluster, and in the same namespace as the active hub cluster.
 
 ** Ensure that the {product-title-short} operator is installed in the same namespace as the initial hub cluster. Then create the `DataProtectionApplication` resource and connect to the same storage location where the initial hub cluster backed up data. 
-+
+
 - Use the created secret when you create a `DataProtectionApplication` resource.
 +
 Complete the following steps to create an instance of the `DataProtectionApplication` resource:
@@ -100,12 +100,39 @@ spec:
 +
 See an example to create the link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-dataprotectionapplication-custom-resource[`DataProtectionApplication` resource].
 
-//locate a link for product doc for data protection application. this is the only doc for now | MJ + VB | 10/20
-
 ** Before you run the restore operation, verify that other operators, such as {aap-short}, {ocp} GitOps, or certificate manager are installed. This ensures that the new hub cluster is configured the same way as the initial hub cluster.
 
 ** The passive hub cluster must use the same namespace names as the initial hub cluster when you install the backup and restore operator, and any other operators that are configured on the previous hub cluster.
 
+- *For disconnected environments*:
++
+Complete the following additional steps when you enable the backup and restore component with {ocp} in a disconnected environment:
++
+. Update the `MultiClusterHub` resource with the follwing annotation to override the source from which the OADP operator is installed. Create the annotation before the `cluster-backup` component is enabled on the `MultiClusterHub` resource:
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  annotations:
+    installer.open-cluster-management.io/oadp-subscription-spec: '{"source": "redhat-operator-index"}'
+----
++
+The `redhat-operator-index` is a custom name and represents the name of the `CatalogSource` resource that you define and use to access Red Hat OpenShift Operators in the disconnected environment. Run the following command to retrieve the `catalogsource`:
++
+----
+oc get catalogsource -A
+----
++
+The output might resemble the following:
++
+----
+NAMESPACE               NAME                         DISPLAY                       TYPE   PUBLISHER   AGE
+openshift-marketplace   acm-custom-registry          Advanced Cluster Management   grpc   Red Hat     42h
+openshift-marketplace   multiclusterengine-catalog   MultiCluster Engine           grpc   Red Hat     42h
+openshift-marketplace   redhat-operator-index                                      grpc               42h
+----
 
 [#enabling-backup-restore]
 == Enabling the backup and restore operator
@@ -530,7 +557,7 @@ spec:
   useManagedServiceAccount: true
 ----
 +
-*Optional:* The default token validity duration is set to twice the value of `veleroTtl` to increase the chance of the token being valid. You can change this value by setting a value for `managedServiceAccountTTL`. See the following example, which uses a two hour duration:
+*Optional:* The default token validity duration is set to twice the value of `veleroTtl` to increase the chance of the token being valid for all backups storing the token for their entire lifecycle. You can change this value to control how long a token is valid by setting a value for `managedServiceAccountTTL`. Changing this value can result in producing backups with tokens that expire during the lifecylce of the backup. See the following example, which uses a two hour duration:
 +
 [source,yaml]
 ----
@@ -552,7 +579,7 @@ After you enable the automatic import feature, the backup component starts proce
 - A `ManagedServiceAccount` named `auto-import-account`.
 - A `ManifestWork` for each `ManagedServiceAccount` to set up a `klusterlet-bootstrap-kubeconfig` `RoleBinding` for the `ManagedServiceAccount` token on the managed cluster.
 
-The token is only created if the managed cluster is accessible when you create the Managed Service Account, otherwise it is created later once the the managed cluster becomes available.
+The token is only created if the managed cluster is accessible when you create the Managed Service Account, otherwise it is created later once the managed cluster becomes available.
 
 [#disabling-auto-import]
 ===== Disabling automatic import

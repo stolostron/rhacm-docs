@@ -1,0 +1,77 @@
+[#enable-cluster-wide-proxy-addon]
+= Enabling cluster-wide proxy on existing cluster add-ons
+
+You can configure the `KlusterletAddonConfig` in the cluster namespace to add the proxy environment variables to all the klusterlet add-on pods of the managed {ocp} clusters. Complete the following steps to configure the `KlusterletAddonConfig` to add the three environment variables to the pods of the klusterlet add-ons:
+
+. Edit the `KlusterletAddonConfig` file that is in the namespace of the cluster that needs the proxy. You can use the console to find the resource, or you can edit from the terminal with the following command:
+
++
+----
+oc -n <my-cluster-name> edit klusterletaddonconfig <my-cluster-name>
+----
+
++
+**Note:** If you are working with only one cluster, you do not need `<my-cluster-name>` at the end of your command. See the following command:
+
++
+----
+oc -n <my-cluster-name> edit klusterletaddonconfig
+----
+
+. Edit the `.spec.proxyConfig` section of the file so it resembles the following example. The `spec.proxyConfig` is an optional section:
++
+[source,yaml]
+----
+spec
+  proxyConfig:
+    httpProxy: "<proxy_not_secure>"
+    httpsProxy: "<proxy_secure>" 
+    noProxy: "<no_proxy>" 
+----
++
+Replace `proxy_not_secure` with the address of the proxy server for `http` requests. For example, use `http://192.168.123.145:3128`.
++
+Replace `proxy_secure` with the address of the proxy server for `https` requests. For example, use `https://192.168.123.145:3128`. 
++
+Replace `no_proxy` with a comma delimited list of IP addresses, hostnames, and domain names where traffic will not be routed through the proxy. For example, use `.cluster.local,.svc,10.128.0.0/14,example.com`.
++
+If the {ocp-short} cluster is created with cluster wide proxy configured on the hub cluster, the cluster wide proxy configuration values are added to the pods of the klusterlet add-ons as environment variables when the following conditions are met:
++
+* The `.spec.policyController.proxyPolicy` in the `addon` section is enabled and set to `OCPGlobalProxy`.
+
+* The `.spec.applicationManager.proxyPolocy` is enabled and set to `CustomProxy`.
++
+**Note:** The default value of `proxyPolicy` in the `addon` section is `Disabled`.
++
+See the following examples of `proxyPolicy` entries:
++
+[source,yaml]
+----
+apiVersion: agent.open-cluster-management.io/v1
+    kind: KlusterletAddonConfig
+    metadata:
+      name: clusterName
+      namespace: clusterName
+    spec:
+      proxyConfig:
+        httpProxy: http://pxuser:12345@10.0.81.15:3128
+        httpsProxy: http://pxuser:12345@10.0.81.15:3128
+        noProxy: .cluster.local,.svc,10.128.0.0/14, example.com
+      applicationManager:
+        enabled: true
+        proxyPolicy: CustomProxy
+      policyController:
+        enabled: true
+        proxyPolicy: OCPGlobalProxy
+      searchCollector:
+        enabled: true
+        proxyPolicy: Disabled
+      certPolicyController:
+        enabled: true
+        proxyPolicy: Disabled
+      iamPolicyController:
+        enabled: true
+        proxyPolicy: Disabled
+----
+
+*Important:* Global proxy settings do not impact alert forwarding. To set up alert forwarding for {product-title-short} hub clusters with a cluster-wide proxy, see link:../observability/customize_observability.adoc#forward-alerts[Forwarding alerts] for more details.
