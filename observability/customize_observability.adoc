@@ -8,15 +8,16 @@ Collect logs about new information that is created for observability resources w
 - <<creating-custom-rules,Creating custom rules>>
 - <<configuring-alertmanager,Configuring AlertManager>>
 - <<forward-alerts,Forwarding alerts>>
+** <<disabling-forward-alerts,Disabling forward alerts for managed clusters>>
 - <<adding-custom-metrics, Adding custom metrics>>
 ** <<adding-user-workload-metrics,Adding user workload metrics>>
-** <<removing-default-metrics,Removing default metrics>>
 ** <<exporting-metrics-to-external-endpoints,Exporting metrics to external endpoints>>
+** <<removing-default-metrics,Removing default metrics>>
 - <<creating-the-kubernetes-secret-for-external-endpoint,Creating the Kubernetes secret for an external endpoint>>
-** <<updating-the-multiclusterobservability-cr,Updating the multiclusterobservability CR>>
+** <<updating-the-multiclusterobservability-cr,Updating the multiclusterobservability custom resource>>
 ** <<viewing-the-status-of-metrics-export,Viewing the status of metric export>>
 - <<adding-advanced-config,Adding _advanced_ configuration>>
-- <<updating-replicas,Updating the multiclusterobservability CR replicas from the console>>
+- <<updating-replicas,Updating the multiclusterobservability custom resource replicas from the console>>
 - <<customizing-route-cert,Customizing route certification>>
 - <<customizing-certificates-object-store,Customizing certificates for accessing the object store>>
 - <<viewing-and-exploring-data,Viewing and exploring data>>
@@ -212,8 +213,34 @@ Create the `observability-metrics-custom-allowlist` ConfigMap in the `open-clust
 
 Verify that data from your custom metric is being collected by querying the metric from the *Explore* page, from the Grafana dashboard. You can also use the custom metrics in your own dashboard. For more information about viewing the dashboard, see xref:../observability/design_grafana.adoc#designing-your-grafana-dashboard[Designing your Grafana dashboard].
 
+[#adding-user-workload-metrics]
+=== Adding user workload metrics
+
+You can collect {ocp-short} user-defined metrics from workloads in {ocp-short}. You must enable monitoring, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/monitoring/enabling-monitoring-for-user-defined-projects[Enabling monitoring for user-defined projects].
+
+If you have a managed cluster with monitoring for user-defined workloads enabled, the user workloads are located in the `test` namespace and generate metrics. These metrics are collected by Prometheus from the {ocp-short} user workload.
+
+Collect the metrics from the user workloads by creating a ConfigMap named, `observability-metrics-custom-allowlist` in the `test` namespace. View the following example:
+
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: observability-metrics-custom-allowlist
+  namespace: test
+data:
+  uwl_metrics_list.yaml: |
+    names:
+      - sample_metrics
+----
+
+- The `uwl_metrics_list.yaml` is the key for the ConfigMap data.
+
+- The value of the ConfigMap data is in YAML format. The `names` section includes the list of metric names, which you want to collect from the `test` namespace. After you create the ConfigMap, the specified metrics from the target namespace is collected by the observability collector and pushed to the hub cluster.
+
 [#removing-default-metrics]
-== Removing default metrics
+=== Removing default metrics
 
 If you want data to not be collected in your managed cluster for a specific metric, remove the metric from the `observability-metrics-custom-allowlist.yaml` file. When you remove a metric, the metric data is not collected in your managed clusters. As mentioned previously, first verify that `mco observability` is enabled.
 
@@ -225,12 +252,12 @@ Create the `observability-metrics-custom-allowlist` ConfigMap in the
 Verify that the specific metric is not being collected from your managed clusters. When you query the metric from the Grafana dashboard, the metric is not displayed.
 
 [#exporting-metrics-to-external-endpoints]
-== Exporting metrics to external endpoints
+=== Exporting metrics to external endpoints
 
 You can customize observability to export the metrics to external endpoints, which support Prometheus Remote Write protocol in real time. For more information, see link:https://docs.google.com/document/d/1LPhVRSFkGNSuU1fBd81ulhsCPR4hkSZyyBj1SZ8fWOM/edit#heading=h.3p42p5s8n0ui[Prometheus Remote Write protocol].
 
 [#creating-the-kubernetes-secret-for-external-endpoint]
-=== Creating the Kubernetes secret for an external endpoint
+== Creating the Kubernetes secret for an external endpoint
 
 You must create a Kubernetes secret with the access information of the external endpoint in the `open-cluster-management-observability` namespace. View the following example secret:
 
@@ -301,9 +328,9 @@ _optional_|Parameter to skip the verification for target certificate.|bool
 |===
 
 [#updating-the-multiclusterobservability-cr]
-=== Updating the _multiclusterobservability_ CR
+=== Updating the _multiclusterobservability_ custom resource
 
-After you create the Kubernetes secret, you must update the `multiclusterobservability` CR to add `writeStorage` in  the `spec.storageConfig` parameter. View the following example:
+After you create the Kubernetes secret, you must update the `multiclusterobservability` custom resource to add `writeStorage` in  the `spec.storageConfig` parameter. View the following example:
 
 [source,yaml]
 ----
@@ -350,37 +377,10 @@ spec:
 
 For descriptions of all the parameters that can added into the `advanced` configuration, see the link:../apis/observability.json.adoc[Observability API].
 
-[#adding-user-workload-metrics]
-== Adding user workload metrics
-
-You can collect {ocp-short} user-defined metrics from workloads in {ocp-short}. You must enable monitoring, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/monitoring/enabling-monitoring-for-user-defined-projects[Enabling monitoring for user-defined projects].
-
-If you have a managed cluster with monitoring for user-defined workloads enabled, the user workloads are located in the `test` namespace and generate metrics. These metrics are collected by Prometheus from the {ocp-short} user workload.
-
-Collect the metrics from the user workloads by creating a ConfigMap named, `observability-metrics-custom-allowlist` in the `test` namespace. View the following example:
-
-[source,yaml]
-----
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: observability-metrics-custom-allowlist
-  namespace: test
-data:
-  uwl_metrics_list.yaml: |
-    names:
-      - sample_metrics
-----
-
-- The `uwl_metrics_list.yaml` is the key for the ConfigMap data.
-
-- The value of the ConfigMap data is in YAML format. The `names` section includes the list of metric names, which you want to collect from the `test` namespace. After you create the ConfigMap, the specified metrics from the target namespace is collected by the observability collector and pushed to the hub cluster.
-
-
 [#updating-replicas]
-== Updating the multiclusterobservability CR replicas from the console
+== Updating the multiclusterobservability custom resource replicas from the console
 
-If your workload increases, increase the number of replicas of your observability pods. Navigate to the {ocp} console from your hub cluster. Locate the `multiclusterobservability` custom resource (CR), and update the `replicas` parameter value for the component where you want to change the replicas. Your updated YAML might resemble the following content:
+If your workload increases, increase the number of replicas of your observability pods. Navigate to the {ocp} console from your hub cluster. Locate the `multiclusterobservability` custom resource, and update the `replicas` parameter value for the component where you want to change the replicas. Your updated YAML might resemble the following content:
 
 [source,yaml]
 ----
@@ -390,7 +390,7 @@ spec:
          replicas: 6
 ----
 
-For more information about the parameters within the `mco observability` CR, see the link:../apis/observability.json.adoc#observability-api[Observability API].
+For more information about the parameters within the `mco observability` custom resource, see the link:../apis/observability.json.adoc#observability-api[Observability API].
 
 [#customizing-route-cert]
 == Customizing route certification
@@ -437,7 +437,7 @@ If you want to enable Mutual TLS, you need to provide `public.crt`, and `private
           insecure_skip_verify: false
 ----
 
-You can also configure the secret name, the `TLSSecretName` parameter in the `MultiClusterObservability` CR. View the following example where the secret name is `tls-certs-secret`:
+You can also configure the secret name, the `TLSSecretName` parameter in the `MultiClusterObservability` custom resource. View the following example where the secret name is `tls-certs-secret`:
 
 [source,yaml]
 ----
