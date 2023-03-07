@@ -9,6 +9,10 @@ Not all issues are created equal. To help plan our anticipated workloads for eac
 
 ## Access dashboard
 
+Use the dashboard to see an overview of issues and story points. You can use the dashboard to quickly assign story points to multiple issue. You can also assign story points to issues by selecting individual issues on the Kanban board.
+
+**Note:** Story points are only visible at a glance on the dashboard.
+
 - [Documentation story points dashboard](https://issues.redhat.com/secure/Dashboard.jspa?selectPageId=12350324)
 
 ## General rules
@@ -19,7 +23,7 @@ Not all issues are created equal. To help plan our anticipated workloads for eac
 
 ## Rubrics
 
-Consider the following rubrics when assigning points to Jira issues:
+Consider the following rubrics when assigning story points to Jira issues:
 
 | **Rubric** | | **Description** |
 | ----------- | | ----------- |
