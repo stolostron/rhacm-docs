@@ -1,0 +1,274 @@
+[#hosted-control-planes-manage-kubevirt]
+= Creating hosted control plane clusters on KubeVirt (Technology Preview)
+
+You can install a nested {ocp} cluster that runs on KubeVirt virtual machines within a management cluster.
+
+* <<create-hosted-clusters-prereqs-kubevirt,Prerequisites>>
+* <<creating-a-hosted-cluster-kubevirt,Creating a hosted cluster on KubeVirt>>
+* <<hosting-service-cluster-configure-metallb-config,Configuring a load balancer>>
+* <<create-hosted-clusters-kubevirt-default-ingress-dns,Default Ingress and DNS behavior>>
+* <<create-hosted-clusters-kubevirt-customized-ingress-dns,Customized Ingress and DNS behavior>>
+* <<create-hosted-clusters-kubevirt-scaling-node-pool,Scaling a node pool>>
+* <<create-hosted-clusters-kubevirt-adding-node-pool,Adding node pools>>
+//* <<verifying-cluster-creation-kubevirt,Verifying hosted cluster creation on KubeVirt>>
+* <<hypershift-cluster-destroy-kubevirt,Destroying a hosted cluster on KubeVirt>>
+
+[#create-hosted-clusters-prereqs-kubevirt]
+== Prerequisites
+
+You must meet the following prerequisites to create a hosting cluster on KubeVirt:
+
+- Administrator access to an {ocp-short} cluster, version 4.12 or later, specified by the `KUBECONFIG` environment variable.
+- The management {ocp-short} cluster must have wildcard DNS routes enabled:
++
+----
+oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p '[{ "op": "add", "path": "/spec/routeAdmission", "value": {wildcardPolicy: "WildcardsAllowed"}}]'
+----
+- The management {ocp-short} cluster must have Red Hat OpenShift Virtualization installed on it. For more information, see link:https://docs.openshift.com/container-platform/4.12/virt/install/installing-virt-web.html[Installing OpenShift Virtualization using the web console].
+- The management {ocp-short} cluster must be configured with OVNKubernetes as the default pod network CNI.
+- The management {ocp-short} cluster must have a default storage class. For more information, see link:https://docs.openshift.com/container-platform/4.12/post_installation_configuration/storage-configuration.html[Post-installation storage configuration]. This example shows how to set a default storage class:
++
+----
+oc patch storageclass ocs-storagecluster-ceph-rbd -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+----
+- The {ocp-short} CLI (`oc`) or the Kubernetes CLI (`kubectl`).
+- A valid pull secret file for the `quay.io/openshift-release-dev` repository. For more information, see link:https://console.redhat.com/openshift/install/platform-agnostic/user-provisioned[Install OpenShift on any x86_64 platform with user-provisioned infrastructure].
+- The HyperShift Operator and `hypershift` CLI tool must be installed. To build the latest `hypershift` CLI tool and place it in the `/usr/local/bin` directory, enter the following command:
++
+----
+podman run --rm --privileged -it -v \
+$PWD:/output docker.io/library/golang:1.18 /bin/bash -c \
+'git clone https://github.com/openshift/hypershift.git && \
+cd hypershift/ && \
+make hypershift && \
+mv bin/hypershift /output/hypershift'
+
+sudo mv $PWD/hypershift /usr/local/bin
+----
++
+After the `hypershift` CLI tool is installed, enter the following command to install the HyperShift Operator:
++
+----
+hypershift install
+----
+
+[#creating-a-hosted-cluster-kubevirt]
+=== Creating a hosted cluster on KubeVirt
+
+. To create a guest cluster, use environment variables and the `hypershift` CLI tool:
++
+----
+shell linenums="1"
+export CLUSTER_NAME=example
+export PULL_SECRET="$HOME/pull-secret"
+export MEM="6Gi"
+export CPU="2"
+export WORKER_COUNT="2"
+
+hypershift create cluster kubevirt \
+--name $CLUSTER_NAME \
+--node-pool-replicas=$WORKER_COUNT \
+--pull-secret $PULL_SECRET \
+--memory $MEM \
+--cores $CPU
+----
++
+Replace values as necessary.
++
+A default node pool is created for the cluster with two virtual machine worker replicas per the `--node-pool-replicas` flag.
++
+A guest cluster that is backed by KubeVirt virtual machines typically takes 10-15 minutes to be fully provisioned. 
+
+. To check the status of the guest cluster, see the corresponding HostedCluster resource. The following example output illustrates a fully provisioned HostedCluster object:
++
+.Example output
+----
+shell linenums="1"
+oc get --namespace clusters hostedclusters
+NAMESPACE   NAME      VERSION   KUBECONFIG                 PROGRESS    AVAILABLE   PROGRESSING   MESSAGE
+clusters    example   4.12.2    example-admin-kubeconfig   Completed   True        False         The hosted control plane is available
+----
+
+. To gain CLI access to the guest cluster, retrieve the guest cluster's kubeconfig environment variable. The following example shows how to retrieve the guest cluster's kubeconfig environment variable by using the `hypershift` CLI:
++
+----
+shell
+hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
+----
+
+[#hosting-service-cluster-configure-metallb-config]
+=== Configuring a load balancer
+
+You must use a load balancer, such as MetalLB. The following example shows the steps you can take to configure MetalLB after you install it. For more information about installing MetalLB, see link:https://docs.openshift.com/container-platform/4.12/networking/metallb/metallb-operator-install.html[Installing the MetalLB Operator].
+
+. Create a MetalLB instance:
++
+----
+oc create -f - <<EOF
+apiVersion: metallb.io/v1beta1
+kind: MetalLB
+metadata:
+  name: metallb
+  namespace: metallb-system
+EOF
+----
+
+. Create an address pool with an available range of IP addresses within the node network:
++
+----
+oc create -f - <<EOF
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: metallb
+  namespace: metallb-system
+spec:
+  addresses:
+  - 192.168.216.32-192.168.216.122
+EOF
+----
+
+. Advertise the address pool by using L2 protocol:
++
+----
+oc create -f - <<EOF
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: l2advertisement
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+   - metallb
+EOF
+----
+
+[#create-hosted-clusters-kubevirt-default-ingress-dns]
+=== Default Ingress and DNS behavior
+
+Every {ocp-short} cluster includes a default application Ingress controller, which must have an wildcard DNS record associated with it. By default, guest clusters that are created by using the Hypershift KubeVirt provider automatically become a subdomain of the underlying {ocp-short} cluster that the KubeVirt virtual machines run on.
+
+For example, imagine that your {ocp-short} cluster has a default Ingress DNS entry of `*.apps.mgmt-cluster.example.com`. The default Ingress of a KubeVirt guest cluster that is named `guest` and that runs on that underlying {ocp-short} cluster is `*.apps.guest.apps.mgmt-cluster.example.com`.
+
+**Note:** For the default Ingress DNS to work properly, the underlying cluster that hosts the KubeVirt virtual machines must allow wildcard DNS routes. You can configure this behavior by entering the following CLI command: `oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p '[{ "op": "add", "path": "/spec/routeAdmission", "value": {wildcardPolicy: "WildcardsAllowed"}}]'`
+
+[#create-hosted-clusters-kubevirt-customized-ingress-dns]
+=== Customized Ingress and DNS behavior
+
+If you do not want to use the default Ingress and DNS behavior, you can configure a KubeVirt guest cluster with a unique base domain at creation time. This option requires manual configuration steps during creation, and it involves three steps.
+
+. Create a KubeVirt cluster with a custom base domain that you control. During cluster creation, use the `--base-domain` CLI argument, as shown in the following example:
++
+----
+export CLUSTER_NAME=example
+export PULL_SECRET="$HOME/pull-secret"
+export BASE_DOMAIN="example.com"
+
+hypershift create cluster kubevirt \
+--name $CLUSTER_NAME \
+--node-pool-replicas=2 \
+--pull-secret $PULL_SECRET \
+--base-domain $BASE_DOMAIN
+----
+
+. Create a load balancer service to route Ingress traffic to the KubeVirt virtual machines that are acting as nodes for the guest cluster.
++
+.. Inspect the guest cluster to learn what port to use as the target port when routing to the KubeVirt virtual machines. You can discover the target port by using the kubeconfig for the new KubeVirt cluster to retrieve the default router's NodePort service. The following CLI commands can automatically detect the target port of the guest cluster and store it in an environment variable:
++
+----
+hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
+export EXTERNAL_IP=$(oc --kubeconfig $CLUSTER_NAME-kubeconfig get services -n openshift-ingress router-nodeport-default -o wide --no-headers | sed -E 's|.*443:(.....).*$|\1|' |  tr -d '[:space:])
+----
++
+.. After you discover the target port, create a load balancer service to route traffic to the guest cluster's KubeVirt virtual machines:
++
+----
+export CLUSTER_NAME=example
+export CLUSTER_NAMESPACE=clusters-${CLUSTER_NAME}
+
+cat << EOF > apps-LB-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ${CLUSTER_NAME}
+  name: ${CLUSTER_NAME}
+  namespace: ${CLUSTER_NAMESPACE}
+spec:
+  ports:
+  - name: https-443
+    port: 443
+    protocol: TCP
+    targetPort: ${HTTPS_NODEPORT}
+  selector:
+    kubevirt.io: virt-launcher
+  type: LoadBalancer
+EOF
+
+oc create -f apps-LB-service.yaml
+----
+
+. Configure a wildcard DNS, a record, or CNAME that references external IP of the load balancer service. 
+
+.. To get the external IP of the load balancer, enter this command:
++
+----
+export EXTERNAL_IP=$(oc get service -n $KUBEVIRT_CLUSTER_NAMESPACE $KUBEVIRT_CLUSTER_NAME  | grep $KUBEVIRT_CLUSTER_NAME| awk '{ print $4 }' | tr -d '[:space:]')
+----
+
+.. Configure a `*.apps.<cluster_name>.<base_domain>.` wildcard DNS entry that references the IP that is stored in the $EXTERNAL_IP environment variable that is routable both internally and externally in the cluster.
+
+[#create-hosted-clusters-kubevirt-scaling-node-pool]
+=== Scaling a node pool
+
+You can manually scale a NodePool by using the `oc scale` command:
+
+----
+NODEPOOL_NAME=${CLUSTER_NAME}-work
+NODEPOOL_REPLICAS=5
+
+oc scale nodepool/$NODEPOOL_NAME --namespace clusters --replicas=$NODEPOOL_REPLICAS
+----
+
+[#create-hosted-clusters-kubevirt-adding-node-pool]
+=== Adding node pools
+
+You can create node pools for a guest cluster by specifying a name, number of replicas, and any additional information, such as memory and CPU requirements.
+
+. To create a node pool, enter the following information:
++
+----
+export NODEPOOL_NAME=${CLUSTER_NAME}-workers
+export WORKER_COUNT="2"
+export MEM="6Gi"
+export CPU="2"
+
+hypershift create nodepool kubevirt \
+  --cluster-name $CLUSTER_NAME \
+  --name $NODEPOOL_NAME \
+  --node-count $WORKER_COUNT \
+  --memory $MEM \
+  --cores $CPU
+----
+
+. Check the status of the node pool by listing `nodepool` resources in the `clusters` namespace:
++
+----
+oc get nodepools --namespace clusters
+----
+
+//[#verifying-cluster-creation-kubevirt]
+//== Verifying hosted cluster creation on KubeVirt
+
+//How do we verify cluster creation on KubeVirt?
+
+[#hypershift-cluster-destroy-kubevirt]
+== Destroying a hosted cluster on KubeVirt
+
+To destroy a hosted cluster on KubeVirt, enter the following command on a command line:
+
+----
+hypershift destroy cluster kubevirt --name $CLUSTER_NAME
+----
+
+Replace names where necessary.
