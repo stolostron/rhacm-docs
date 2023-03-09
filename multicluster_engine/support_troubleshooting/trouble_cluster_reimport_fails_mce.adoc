@@ -62,19 +62,38 @@ The managed cluster administrator must create a new valid `kubeconfig` file for 
 
 After creating a new `kubeconfig`, complete the following steps to update the new `kubeconfig` for your managed cluster:
 
-. Run the following command to specify your managed cluster name by replacing `your-managed-cluster-name` with the name of your managed cluster:
+. Run the following commands to set your `kubeconfig` file path and cluster name. Replace `<path_to_kubeconfig>` with the path to your new `kubeconfig` file. Replace `<managed_cluster_name>` with the name of your managed cluster:
 +
 ----
-cluster_name=<your-managed-cluster-name>
+cluster_name=<managed_cluster_name>
+kubeconfig_file=<path_to_kubeconfig>
 ----
 
-. Run the following commands to update the new `kubeconfig` for your managed cluster:
+. Run the following command to encode your new `kubeconfig`:
 +
 ----
-kubeconfig=$(cat <your-new-valid-kubeconfig-file-path> | base64 -w0)
+kubeconfig=$(cat ${kubeconfig_file} | base64 -w0)
+----
++
+*Note:* On macOS, run the following command instead:
++
+----
+kubeconfig=$(cat ${kubeconfig_file} | base64)
+----
+
+. Run the following command to define the `kubeconfig` json patch:
++
+----
 kubeconfig_patch="[{\"op\":\"replace\", \"path\":\"/data/kubeconfig\", \"value\":\"${kubeconfig}\"}]"
+----
+
+. Retrieve your administrator `kubeconfig` secret name from your managed cluster by running the following command:
++
+----
 kubeconfig_secret_name=$(oc -n ${cluster_name} get clusterdeployments ${cluster_name} -ojsonpath='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}')
 ----
+
+. Patch your administrator `kubeconfig` secret with your new `kubeconfig` by running the following command:
 +
 ----
 oc -n ${cluster_name} patch secrets ${kubeconfig_secret_name} --type='json' -p=${kubeconfig_patch}
