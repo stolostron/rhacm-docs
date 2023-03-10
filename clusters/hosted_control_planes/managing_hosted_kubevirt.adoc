@@ -1,22 +1,22 @@
 [#hosted-control-planes-manage-kubevirt]
-= Creating hosted control plane clusters on KubeVirt (Technology Preview)
+= Creating hosted control plane clusters on {ocp-virt-short} (Technology Preview)
 
-You can install a nested {ocp} cluster that runs on KubeVirt virtual machines within a management cluster.
+With hosted control planes and {ocp-virt}, you can create {ocp-short} clusters with worker nodes that are hosted by KubeVirt virtual machines.
 
 * <<create-hosted-clusters-prereqs-kubevirt,Prerequisites>>
-* <<creating-a-hosted-cluster-kubevirt,Creating a hosted cluster on KubeVirt>>
+* <<creating-a-hosted-cluster-kubevirt,Creating a hosted cluster with the KubeVirt platform>>
 * <<hosting-service-cluster-configure-metallb-config,Configuring a load balancer>>
 * <<create-hosted-clusters-kubevirt-default-ingress-dns,Default Ingress and DNS behavior>>
 * <<create-hosted-clusters-kubevirt-customized-ingress-dns,Customized Ingress and DNS behavior>>
 * <<create-hosted-clusters-kubevirt-scaling-node-pool,Scaling a node pool>>
 * <<create-hosted-clusters-kubevirt-adding-node-pool,Adding node pools>>
-* <<verifying-cluster-creation-kubevirt,Verifying hosted cluster creation on KubeVirt>>
-* <<hypershift-cluster-destroy-kubevirt,Destroying a hosted cluster on KubeVirt>>
+* <<verifying-cluster-creation-kubevirt,Verifying hosted cluster creation on {ocp-virt-short}>>
+* <<hypershift-cluster-destroy-kubevirt,Destroying a hosted cluster on {ocp-virt-short}>>
 
 [#create-hosted-clusters-prereqs-kubevirt]
 == Prerequisites
 
-You must meet the following prerequisites to create a hosting cluster on KubeVirt:
+You must meet the following prerequisites to create an {ocp-short} cluster on {ocp-virt-short}:
 
 - Administrator access to an {ocp-short} cluster, version 4.12 or later, specified by the `KUBECONFIG` environment variable.
 - The management {ocp-short} cluster must have wildcard DNS routes enabled:
@@ -24,7 +24,7 @@ You must meet the following prerequisites to create a hosting cluster on KubeVir
 ----
 oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p '[{ "op": "add", "path": "/spec/routeAdmission", "value": {wildcardPolicy: "WildcardsAllowed"}}]'
 ----
-- The management {ocp-short} cluster must have Red Hat OpenShift Virtualization installed on it. For more information, see link:https://docs.openshift.com/container-platform/4.12/virt/install/installing-virt-web.html[Installing OpenShift Virtualization using the web console].
+- The management {ocp-short} cluster must have {ocp-virt-short} installed on it. For more information, see link:https://docs.openshift.com/container-platform/4.12/virt/install/installing-virt-web.html[Installing OpenShift Virtualization using the web console].
 - The management {ocp-short} cluster must be configured with OVNKubernetes as the default pod network CNI.
 - The management {ocp-short} cluster must have a default storage class. For more information, see link:https://docs.openshift.com/container-platform/4.12/post_installation_configuration/storage-configuration.html[Post-installation storage configuration]. This example shows how to set a default storage class:
 +
@@ -33,27 +33,17 @@ oc patch storageclass ocs-storagecluster-ceph-rbd -p '{"metadata": {"annotations
 ----
 - The {ocp-short} CLI (`oc`) or the Kubernetes CLI (`kubectl`).
 - A valid pull secret file for the `quay.io/openshift-release-dev` repository. For more information, see link:https://console.redhat.com/openshift/install/platform-agnostic/user-provisioned[Install OpenShift on any x86_64 platform with user-provisioned infrastructure].
-- The HyperShift Operator and `hypershift` CLI tool must be installed. To build the latest `hypershift` CLI tool and place it in the `/usr/local/bin` directory, enter the following command:
+- The HyperShift Operator and `hypershift` CLI tool must be installed. To download and install the CLI, see xref:../../clusters/hosted_control_planes/configure_hosted_aws.adoc#installing-the-hosted-control-planes-cli[Installing the hosted control planes CLI].
 +
-----
-podman run --rm --privileged -it -v \
-$PWD:/output docker.io/library/golang:1.18 /bin/bash -c \
-'git clone https://github.com/openshift/hypershift.git && \
-cd hypershift/ && \
-make hypershift && \
-mv bin/hypershift /output/hypershift'
-
-sudo mv $PWD/hypershift /usr/local/bin
-----
-+
-After the `hypershift` CLI tool is installed, enter the following command to install the HyperShift Operator:
+After you install the CLI, install the HyperShift Operator by entering the following command:
 +
 ----
 hypershift install
 ----
+- For your cluster to be provisioned correctly, you need to configure a load balancer. For more information, see <<hosting-service-cluster-configure-metallb-config,Configuring a load balancer>>.
 
 [#creating-a-hosted-cluster-kubevirt]
-=== Creating a hosted cluster on KubeVirt
+=== Creating a hosted cluster with the KubeVirt platform
 
 . To create a guest cluster, use environment variables and the `hypershift` CLI tool:
 +
@@ -77,7 +67,7 @@ Replace values as necessary.
 +
 A default node pool is created for the cluster with two virtual machine worker replicas per the `--node-pool-replicas` flag.
 +
-A guest cluster that is backed by KubeVirt virtual machines typically takes 10-15 minutes to be fully provisioned. 
+A guest cluster that has worker nodes that are backed by KubeVirt virtual machines typically takes 10-15 minutes to be fully provisioned. 
 
 . To check the status of the guest cluster, see the corresponding HostedCluster resource. The following example output illustrates a fully provisioned HostedCluster object:
 +
@@ -258,9 +248,9 @@ oc get nodepools --namespace clusters
 ----
 
 [#verifying-cluster-creation-kubevirt]
-== Verifying hosted cluster creation on KubeVirt
+== Verifying hosted cluster creation on {ocp-virt-short}
 
-To verify that your hosted cluster was successfully created on KubeVirt, take the following steps.
+To verify that your hosted cluster was successfully created, take the following steps.
 
 . Verify that the `HostedCluster` resource transitioned to the `completed` state, as shown in the following example:
 +
@@ -278,32 +268,32 @@ hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
 
 oc get co --kubeconfig=$CLUSTER_NAME-kubeconfig
 NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE   MESSAGE
-console                                    4.10.26   True        False         False      2m38s
-csi-snapshot-controller                    4.10.26   True        False         False      4m3s
-dns                                        4.10.26   True        False         False      2m52s
-image-registry                             4.10.26   True        False         False      2m8s
-ingress                                    4.10.26   True        False         False      22m
-kube-apiserver                             4.10.26   True        False         False      23m
-kube-controller-manager                    4.10.26   True        False         False      23m
-kube-scheduler                             4.10.26   True        False         False      23m
-kube-storage-version-migrator              4.10.26   True        False         False      4m52s
-monitoring                                 4.10.26   True        False         False      69s
-network                                    4.10.26   True        False         False      4m3s
-node-tuning                                4.10.26   True        False         False      2m22s
-openshift-apiserver                        4.10.26   True        False         False      23m
-openshift-controller-manager               4.10.26   True        False         False      23m
-openshift-samples                          4.10.26   True        False         False      2m15s
-operator-lifecycle-manager                 4.10.26   True        False         False      22m
-operator-lifecycle-manager-catalog         4.10.26   True        False         False      23m
-operator-lifecycle-manager-packageserver   4.10.26   True        False         False      23m
-service-ca                                 4.10.26   True        False         False      4m41s
-storage                                    4.10.26   True        False         False      4m43s
+console                                    4.12.2   True        False         False      2m38s
+csi-snapshot-controller                    4.12.2   True        False         False      4m3s
+dns                                        4.12.2   True        False         False      2m52s
+image-registry                             4.12.2   True        False         False      2m8s
+ingress                                    4.12.2   True        False         False      22m
+kube-apiserver                             4.12.2   True        False         False      23m
+kube-controller-manager                    4.12.2   True        False         False      23m
+kube-scheduler                             4.12.2   True        False         False      23m
+kube-storage-version-migrator              4.12.2   True        False         False      4m52s
+monitoring                                 4.12.2   True        False         False      69s
+network                                    4.12.2   True        False         False      4m3s
+node-tuning                                4.12.2   True        False         False      2m22s
+openshift-apiserver                        4.12.2   True        False         False      23m
+openshift-controller-manager               4.12.2   True        False         False      23m
+openshift-samples                          4.12.2   True        False         False      2m15s
+operator-lifecycle-manager                 4.12.2   True        False         False      22m
+operator-lifecycle-manager-catalog         4.12.2   True        False         False      23m
+operator-lifecycle-manager-packageserver   4.12.2   True        False         False      23m
+service-ca                                 4.12.2   True        False         False      4m41s
+storage                                    4.12.2   True        False         False      4m43s
 ----
 
 [#hypershift-cluster-destroy-kubevirt]
-== Destroying a hosted cluster on KubeVirt
+== Destroying a hosted cluster on {ocp-virt-short}
 
-To destroy a hosted cluster on KubeVirt, enter the following command on a command line:
+To destroy a hosted cluster on {ocp-virt-short}, enter the following command on a command line:
 
 ----
 hypershift destroy cluster kubevirt --name $CLUSTER_NAME
