@@ -7,9 +7,9 @@ horizontal: false
 
 Not all issues are created equal. To help plan our anticipated workloads for each sprint and distribute issues efficiently, we assign story points to issues that provide an estimate for how difficult and time-intensive each issue is. While assigning story points is a subjective process, there are still some guidelines you can follow.
 
-## Access dashboard
+## Dashboard
 
-Use the dashboard to see an overview of issues and story points. You can use the dashboard to quickly assign story points to multiple issue. You can also assign story points to issues by selecting individual issues on the Kanban board.
+Use the Jira dashboard to see an overview of issues and story points. You can use the dashboard to quickly assign story points to multiple issue. You can also assign story points to issues by selecting individual issues on the Kanban board.
 
 **Note:** Story points are only visible at a glance on the dashboard.
 
@@ -195,8 +195,8 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 ### `4` points
 
-- [25514](https://github.com/stolostron/backlog/issues/25514)
-- [25157](https://github.com/stolostron/backlog/issues/25157)
+- [ACM-2921](https://issues.redhat.com/browse/ACM-2921)
+- [ACM-4060](https://issues.redhat.com/browse/ACM-4060)
 
 ### `5` points
 
@@ -210,8 +210,7 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 ### `7` points
 
-- [24809](https://github.com/stolostron/backlog/issues/24809)
-- [18194](https://github.com/stolostron/backlog/issues/18194)
+- [ACM-4427](https://issues.redhat.com/browse/ACM-4427)
 
 ### `8` points
 
