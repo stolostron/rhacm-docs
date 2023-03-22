@@ -24,19 +24,18 @@ With hosted control planes and {ocp-virt}, you can create {ocp-short} clusters w
 You must meet the following prerequisites to create an {ocp-short} cluster on {ocp-virt-short}:
 
 - You need administrator access to an {ocp-short} cluster, version 4.12 or later, specified by the `KUBECONFIG` environment variable.
-- The management {ocp-short} cluster must have wildcard DNS routes enabled:
+- The management {ocp-short} cluster must have wildcard DNS routes enabled, as shown in the following DNS:
 +
 ----
 oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p '[{ "op": "add", "path": "/spec/routeAdmission", "value": {wildcardPolicy: "WildcardsAllowed"}}]'
 ----
 - The management {ocp-short} cluster must have {ocp-virt-short} installed on it. For more information, see link:https://docs.openshift.com/container-platform/4.12/virt/install/installing-virt-web.html[Installing OpenShift Virtualization using the web console].
 - The management {ocp-short} cluster must be configured with OVNKubernetes as the default pod network CNI.
-- The management {ocp-short} cluster must have a default storage class. For more information, see link:https://docs.openshift.com/container-platform/4.12/post_installation_configuration/storage-configuration.html[Post-installation storage configuration]. This example shows how to set a default storage class:
+- The management {ocp-short} cluster must have a default storage class. For more information, see link:https://docs.openshift.com/container-platform/4.12/post_installation_configuration/storage-configuration.html[Post-installation storage configuration]. The following example shows how to set a default storage class:
 +
 ----
 oc patch storageclass ocs-storagecluster-ceph-rbd -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ----
-- You need the {ocp-short} CLI (`oc`) or the Kubernetes CLI (`kubectl`).
 - You need a valid pull secret file for the `quay.io/openshift-release-dev` repository. For more information, see link:https://console.redhat.com/openshift/install/platform-agnostic/user-provisioned[Install OpenShift on any x86_64 platform with user-provisioned infrastructure].
 - You need to enable the hosted control planes feature. For information, see xref:../..//clusters/hosted_control_planes/configure_hosted_aws.adoc#enabling-the-hosted-control-planes-feature[Enabling the hosted control planes feature].
 - After you enable the hosted control planes feature, you need to xref:../../clusters/hosted_control_planes/configure_hosted_aws.adoc#installing-the-hosted-control-planes-cli[install the hosted control planes (`hypershift`) CLI binary].
@@ -69,7 +68,7 @@ A default node pool is created for the cluster with two virtual machine worker r
 +
 A guest cluster that has worker nodes that are backed by KubeVirt virtual machines typically takes 10-15 minutes to be fully provisioned. 
 
-. To check the status of the guest cluster, see the corresponding HostedCluster resource. The following example output illustrates a fully provisioned HostedCluster object:
+. To check the status of the guest cluster, see the corresponding `HostedCluster` resource. The following example output illustrates a fully provisioned `HostedCluster` object:
 +
 .Example output
 ----
@@ -79,7 +78,7 @@ NAMESPACE   NAME      VERSION   KUBECONFIG                 PROGRESS    AVAILABLE
 clusters    example   4.12.2    example-admin-kubeconfig   Completed   True        False         The hosted control plane is available
 ----
 
-. To gain CLI access to the guest cluster, retrieve the guest cluster's kubeconfig environment variable. The following example shows how to retrieve the guest cluster's kubeconfig environment variable by using the `hypershift` CLI:
+. To gain CLI access to the guest cluster, retrieve the guest cluster kubeconfig environment variable. The following example shows how to retrieve the guest cluster kubeconfig environment variable by using the `hypershift` CLI:
 +
 ----
 shell
@@ -140,7 +139,7 @@ Every {ocp-short} cluster includes a default application Ingress controller, whi
 
 For example, imagine that your {ocp-short} cluster has a default Ingress DNS entry of `*.apps.mgmt-cluster.example.com`. The default Ingress of a KubeVirt guest cluster that is named `guest` and that runs on that underlying {ocp-short} cluster is `*.apps.guest.apps.mgmt-cluster.example.com`.
 
-**Note:** For the default Ingress DNS to work properly, the underlying cluster that hosts the KubeVirt virtual machines must allow wildcard DNS routes. You can configure this behavior by entering the following CLI command: `oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p '[{ "op": "add", "path": "/spec/routeAdmission", "value": {wildcardPolicy: "WildcardsAllowed"}}]'`
+*Note:* For the default Ingress DNS to work properly, the underlying cluster that hosts the KubeVirt virtual machines must allow wildcard DNS routes. You can configure this behavior by entering the following CLI command: `oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p '[{ "op": "add", "path": "/spec/routeAdmission", "value": {wildcardPolicy: "WildcardsAllowed"}}]'`
 
 [#create-hosted-clusters-kubevirt-customized-ingress-dns]
 === Customized Ingress and DNS behavior
@@ -162,15 +161,15 @@ hypershift create cluster kubevirt \
 ----
 
 . Create a load balancer service to route Ingress traffic to the KubeVirt virtual machines that are acting as nodes for the guest cluster.
-+
+
 .. Inspect the guest cluster to learn what port to use as the target port when routing to the KubeVirt virtual machines. You can discover the target port by using the kubeconfig for the new KubeVirt cluster to retrieve the default router's NodePort service. The following CLI commands can automatically detect the target port of the guest cluster and store it in an environment variable:
 +
 ----
 hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
 export EXTERNAL_IP=$(oc --kubeconfig $CLUSTER_NAME-kubeconfig get services -n openshift-ingress router-nodeport-default -o wide --no-headers | sed -E 's|.*443:(.....).*$|\1|' |  tr -d '[:space:])
 ----
-+
-.. After you discover the target port, create a load balancer service to route traffic to the guest cluster's KubeVirt virtual machines:
+
+.. After you discover the target port, create a load balancer service to route traffic to the guest cluster KubeVirt virtual machines:
 +
 ----
 export CLUSTER_NAME=example
