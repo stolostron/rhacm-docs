@@ -9,13 +9,13 @@ Special tags can be used to draw attention to content where necessary. Limit spe
 
 ## Table of special tags
 
-| **Special tag** | | **How and when to use** |
-| ----------- | | ----------- |
-| **Note:** | |  Use for extra information that is helpful. |
-| **Important:** | |  A little stronger than a note. |
-| **Optional:**  | | For any step not required, but user may want to take or needs to take in certain cases. |
-| **Best practice:** | | Use with caution. Avoid when possible by writing more descriptive text to guide the user. |
-| **(Technology preview)** | | Place at the highest level of the component that is tech preview on the title (to get this in the navigation). Include a special tag on the What's new entry. |
+| **Special tag** | **How and when to use** |
+| ----------- | ----------- |
+| **Note:** | Use for extra information that is helpful. |
+| **Important:** | A little stronger than a note. |
+| **Optional:**  | For any step not required, but user may want to take or needs to take in certain cases. |
+| **Best practice:** | Use with caution. Avoid when possible by writing more descriptive text to guide the user. |
+| **(Technology preview)** | Place at the highest level of the component that is tech preview on the title (to get this in the navigation). Include a special tag on the What's new entry. |
 
 &nbsp;
 
