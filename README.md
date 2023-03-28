@@ -175,13 +175,16 @@ You can make changes to the content on the website by editing the Markdown files
 6. Add the link to the website you want to link to after `redirect:`
 7. Add an integer after `importance:` to set where the card appears in the list.
 
-## Screenshot requirements
+## Image and screenshot requirements
 
-- Screenshot size must be 400x300 pixels.
-- Save screenshot as a `.png` file in `/assets/img/`.
-- Only screenshot website content. No user interface elements must be visible that are not part of the HTML code of the website.
+Use images and screenshots sparingly and adhere to the following rules when using them:
+
+- For quick link cards:
+  - Screenshot size must be 400x300 pixels.
+  - The naming convention for the file must follow `##-name`.
+- Save screenshots as a `.png` file in `/assets/img/`.
+- Only screenshots website content. No user interface elements must be visible.
 - Remove sensitive information from the screenshot by painting over it. Do not use blur.
-- The naming convention of the file must follow `##-name`.
 
 ## Easter eggs
 
