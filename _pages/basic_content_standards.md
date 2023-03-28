@@ -103,15 +103,15 @@ If you are commenting about changes that need to be made, please create an issue
 
 See the IBM Style manual and Red Hat Supplementary manual regularly for guidance. For a short summary, see the following table on the use of modals:
 
-| **Modal** | | **How to use** |
-| ----------- | | ----------- |
-| Can | | Use to indicate ability. |
-| Could | | Don't use in present tense. Use can or might instead. |
-| May | | Only use to indicate permission, use can or might in other instances. |
-| Might | | Use to indicate possibility. |
-| Must | | Use instead of have to or need to unless it is too restrictive. For example, xou don't have to is different than you must not.  |
-| Should | | Do not use. |
-| Would | | Do not use as an auxiliary verb. Only use when referring to an unfulfilled condition (x would have resulted in y). |
+| **Modal** | **How to use** |
+| ----------- | ----------- |
+| Can | Use to indicate ability. |
+| Could | Don't use in present tense. Use can or might instead. |
+| May | Only use to indicate permission, use can or might in other instances. |
+| Might | Use to indicate possibility. |
+| Must | Use instead of have to or need to unless it is too restrictive. For example, xou don't have to is different than you must not.  |
+| Should | Do not use. |
+| Would | Do not use as an auxiliary verb. Only use when referring to an unfulfilled condition (x would have resulted in y). |
 
 ## IP addresses
 
@@ -119,6 +119,6 @@ Do not include public IP addresses from test clusters in the documentation. You 
 
 ## Supplemental resources
 
-* https://www.namingthings.co/naming-things-principles
-* https://techwhirl.com/whats-in-a-name-guidelines-for-naming-files/
+* [The 7 principles of naming](https://www.namingthings.co/naming-things-principles)
+* [What’s in a Name? Guidelines for Naming Files](https://techwhirl.com/whats-in-a-name-guidelines-for-naming-files/)
 
