@@ -21,7 +21,7 @@ If you are new to Red Hat, the technical writing field, or you just need a revie
 
 ### Style resources
 
-The IBM Style guide is the main authority on style issues, but there are supplementary Red Hat style guides you want to take a look at as well.
+IBM Style is the main authority on style issues, but there are supplementary Red Hat style guides you want to take a look at as well.
 
 **Note:** Enter your Red Hat email account. When the Red Hat SSO appears, enter your credentials. Your IBMiD is automatically created after you read the *Important Notice* and proceed to log in.
 
