@@ -113,13 +113,38 @@ A `ManagedClusterAddOn` resource should be created automatically on your hub clu
 You can create a 1:1 asynchronous replication of persistent volumes by using an Rsync-TLS replication. You can use Rsync-TLS-based replication for disaster recovery or sending data to a remote site. When using Rsync-TLS, VolSync synchronizes data by using Rsync across a TLS-protected tunnel provided by stunnel. See the https://www.stunnel.org/docs.html[stunnel documentation] for more information.
 
 The following example shows how to configure by using the Rsync-TLS method. For additional information about Rsync-TLS, see https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation.
- 
+
+[#volsync-rsync-tls-clusters]
+=== Creating a secret for Rsync-TLS replication 
+
+The source and destination must have access to the shared key for the TLS connection. You can find the key location in the `keySecret` field. If you do not provide a secret name in `.spec.rsyncTLS.keySecret`, the secret name is automatically generated and added to `.status.rsyncTLS.keySecret`.
+
+If you want to create your own secret, use the following format:
+
+`<id>:<at_least_32_hex_digits>`
+
+See the following example:
+
+`1:23b7395fafc3e842bd8ac0fe142e6ad1`
+
+See the following secret.yaml example which corresponds to the previous example:
+
+[source,yaml]
+----
+apiVersion: v1
+data:
+  # echo -n 1:23b7395fafc3e842bd8ac0fe142e6ad1 | base64
+  psk.txt: MToyM2I3Mzk1ZmFmYzNlODQyYmQ4YWMwZmUxNDJlNmFkMQ==
+kind: Secret
+metadata:
+  name: tls-key-secret
+type: Opaque
+----
+
 [#volsync-rsync-tls-clusters]
 === Configuring Rsync-TLS replication across managed clusters
 
 For Rsync-TLS-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and a TLS-protected tunnel provided by stunnel to ensure that the transferred data is secure.
-
-*Note:* The source and destination must have access to the shared key for the TLS connection. You can find the key location in the `keySecret` field. If you do not provide a secret name in `.spec.rsyncTLS.keySecret`, the secret name is automatically generated and added to `.status.rsyncTLS.keySecret`.
 
 See the following and examples to configure an Rsync-TLS replication from a persistent volume claim on the `source` cluster in the `source-ns` namespace to a persistent volume claim on a `destination` cluster in the `destination-ns` namespace. Replace the values where necessary:
 
@@ -202,51 +227,8 @@ Replace `destination-ns` with the name of the namespace where your destination i
 You will have to enter it on the source cluster when you configure the source. The output should be the name of your SSH keys secret file, which might resemble the following name:
 +
 ----
-volsync-rsync-dst-src-destination-name
+volsync-rsync-tls-destination-name
 ----
-
-. Identify the source persistent volume claim that you want to replicate.
-+
-*Note:* The source persistent volume claim must be on a CSI storage class.
-
-. Create the `ReplicationSource` items.
-+
-.. Create a new YAML file called `replication_source` on the source cluster and copy the following content: 
-+
-[source,yaml]
-----
-apiVersion: volsync.backube/v1alpha1
-kind: ReplicationSource
-metadata:
-  name: <source>
-  namespace: <source-ns>
-spec:
-  sourcePVC: <persistent_volume_claim>
-  trigger:
-    schedule: "*/3 * * * *" #/*
-  rsync:
-    keySecret: <mykeysecret>
-    address: <my.host.com>
-    copyMethod: Snapshot
-    storageClassName: gp2-csi
-    volumeSnapshotClassName: gp2-csi
-----
-+
-Replace `source` with the name for your replication source custom resource. See step _3-vi_ of this procedure for instructions on how to replace this automatically.
-+
-Replace `source-ns` with the namespace of the persistent volume claim where your source is located. See step _3-vi_ of this procedure for instructions on how to replace this automatically. 
-+
-Replace `persistent_volume_claim` with the name of your source persistent volume claim.
-+
-Replace `mykeysecret` with the keys that you copied from the `.status.rsyncTLS.keySecret` field of the `ReplicationDestination` when you configured it. 
-+
-Replace `my.host.com` with the host address that you copied from the `.status.rsyncTLS.address` field of the `ReplicationDestination` when you configured it. 
-+
-If your storage driver supports cloning, using `Clone` as the value for `copyMethod` might be a more streamlined process for the replication.
-+ 
-*Optional:* Specify the values of the `storageClassName` and `volumeSnapshotClassName` parameters if you are using a storage class and volume snapshot class name that are different than the default values for your environment. 
-+
-You can now set up the synchronization method of the persistent volume.
 
 .. Copy the key secret from the destination cluster by entering the following command against the destination cluster:
 +
@@ -272,6 +254,50 @@ vi /tmp/secret.yaml
 ----
 oc create -f /tmp/secret.yaml
 ----
+
+. Identify the source persistent volume claim that you want to replicate.
++
+*Note:* The source persistent volume claim must be on a CSI storage class.
+
+. Create the `ReplicationSource` items.
++
+.. Create a new YAML file called `replication_source` on the source cluster and copy the following content: 
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: <source>
+  namespace: <source-ns>
+spec:
+  sourcePVC: <persistent_volume_claim>
+  trigger:
+    schedule: "*/3 * * * *" #/*
+  rsyncTLS:
+    keySecret: <mykeysecret>
+    address: <my.host.com>
+    copyMethod: Snapshot
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: gp2-csi
+----
++
+Replace `source` with the name for your replication source custom resource. See step _3-vi_ of this procedure for instructions on how to replace this automatically.
++
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located. See step _3-vi_ of this procedure for instructions on how to replace this automatically. 
++
+Replace `persistent_volume_claim` with the name of your source persistent volume claim.
++
+Replace `mykeysecret` with the keys that you copied from the `.status.rsyncTLS.keySecret` field of the `ReplicationDestination` when you configured it. 
++
+Replace `my.host.com` with the host address that you copied from the `.status.rsyncTLS.address` field of the `ReplicationDestination` when you configured it. 
++
+If your storage driver supports cloning, using `Clone` as the value for `copyMethod` might be a more streamlined process for the replication.
++ 
+*Optional:* Specify the values of the `storageClassName` and `volumeSnapshotClassName` parameters if you are using a storage class and volume snapshot class name that are different than the default values for your environment. 
++
+You can now set up the synchronization method of the persistent volume.
+
 
 .. On the source cluster, modify the `replication_source.yaml` file by replacing the value of the `address` and `keySecret` in the `ReplicationSource` object with the values that you noted from the destination cluster by entering the following commands:
 +
