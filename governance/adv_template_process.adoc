@@ -9,7 +9,7 @@ Continue reading for advanced template use-cases:
 
 * <<special-annotation-processing,Special annotation for reprocessing>>
 * <<bypass-template-processing,Bypass template processing>>
-* <<template-comparison-table,Comparison of hub cluster and managed cluster templates>>
+* <<additional-resources-hub-temp,Additional resources>>
 
 [#special-annotation-processing]
 == Special annotation for reprocessing
@@ -27,54 +27,7 @@ To bypass template processing for your hub cluster, you must change `{{ template
 
 Alternatively, you can add the following annotation in the `ConfigurationPolicy` section of your `Policy`: `policy.open-cluster-management.io/disable-templates: "true"`. When this annotation is included, the previous workaround is not necessary. Template processing is bypassed for the `ConfigurationPolicy`.
 
-See the following table for a comparison of hub cluster and managed cluster templates:
-
-[#template-comparison-table]
-== Comparison of hub cluster and managed cluster templates
-//Would it be best to move this table to the Template functions file?
-.Comparison table
-|===
-| Templates | Hub cluster | Managed cluster 
-
-| Syntax
-| Golang text template specification
-| Golang text template specification
-
-| Delimiter
-| {{hub … hub}}
-| {{ … }}
-
-| Context
-| A `.ManagedClusterName` variable is available, which at runtime, resolves to the name of the target cluster where the policy is propagated.
-| No context variables
-
-| Access control
-| You can only reference namespaced Kubernetes objects that are in the same namespace as the `Policy` resource.
-| You can reference any resource on the cluster.
-
-| Functions
-| A set of template functions that support dynamic access to Kubernetes resources and string manipulation. See _Template functions_ for more information. See the Access control row for lookup restrictions.
-
-The `fromSecret` template function on the hub cluster stores the resulting value as an encrypted string on the replicated policy, in the managed cluster namespace. 
-
-The equivalent call might use the following syntax: `{{hub "(lookup "v1" "Secret" "default" "my-hub-secret").data.message \| protect hub}}`
-| A set of template functions support dynamic access to Kubernetes resources and string manipulation. See _Template functions_ for more information.
-
-| Function output storage
-| The output of template functions are stored in `Policy` resource objects in each applicable managed cluster namespace on the hub cluster, before it is synced to the managed cluster. This means that any sensitive results from template functions are readable by anyone with read access to the `Policy` resource objects on the hub cluster, and read access with `ConfigurationPolicy` resource objects on the managed clusters. Additionally, if etcd encryption is enabled, the `Policy` and `ConfigurationPolicy` resource objects are not encrypted. It is best to carefully consider this when using template functions that return sensitive output (e.g. from a secret).
-| The output of template functions are not stored in policy related resource objects.
-
-| Processing
-| Processing occurs at runtime on the hub cluster during propagation of replicated policies to clusters. Policies and the hub cluster templates within the policies are processed on the hub cluster only when templates are created or updated.
-| Processing occurs in the `ConfigurationPolicyController` on the managed cluster. Policies are processed periodically, which automatically updates the resolved object definition with data in the referenced resources.
-
-| Processing errors
-| Errors from the hub cluster templates are displayed as violations on the managed clusters the policy applies to.
-| Errors from the managed cluster templates are displayed as violations on the specific target cluster where the violation occurred.
-|===
-
 [#additional-resources-hub-temp]
-
 == Additional resources
 
 * xref:../governance/template_support_intro.adoc#template-processing[Template processing]
