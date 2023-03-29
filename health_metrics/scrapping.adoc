@@ -1,0 +1,334 @@
+== Scrapping with Prometheus
+
+=== Hub Cluster Scrapping
+
+==== Hub Cluster ServiceMonitor
+
+Create a _ServiceMonitor_ for collecting services exposing metrics:
+
+____
+Note: for _OCP_ _metadata.namespace_ should be `+openshift-monitoring+`.
+____
+
+[source,shell]
+----
+cat << EOF | oc apply -f -
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hub-subscription-metrics
+  namespace: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  namespaceSelector:
+    matchNames:
+    - open-cluster-management
+  selector:
+    matchLabels:
+      app: hub-subscription-metrics
+EOF
+----
+
+==== Hub Cluster Role
+
+Create a _Role_ for setting the permissions for monitoring:
+
+[source,shell]
+----
+cat << EOF | oc apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-k8s-monitoring
+  namespace: open-cluster-management
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+EOF
+----
+
+==== Hub Cluster RoleBinding
+
+Create a _RoleBinding_ for Binding the _Role_ to Prometheus’ monitoring
+_ServiceAccount_:
+
+____
+Note: for _OCP_ _subjects[0].namespace_ should be
+`+openshift-monitoring+`.
+____
+
+[source,shell]
+----
+cat << EOF | oc apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-k8s-monitoring-binding
+  namespace: open-cluster-management
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-k8s-monitoring
+subjects:
+- kind: ServiceAccount
+  name: prometheus-k8s
+  namespace: monitoring
+EOF
+----
+
+==== Hub Cluster Scrapping Verification
+
+In `+Prometheus+`’s dashboard, run the following query to look up
+metrics reported by the Subscription Operator Metrics Service:
+
+[source,text]
+----
+{service="hub-subscription-metrics"}
+----
+
+=== Managed Cluster Scrapping
+
+==== Managed Cluster ServiceMonitor
+
+Create a _ServiceMonitor_ for collecting services exposing metrics:
+
+____
+Note: for _OCP_ _metadata.namespace_ should be `+openshift-monitoring+`.
+____
+
+[source,shell]
+----
+cat << EOF | oc apply -f -
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mc-subscription-metrics
+  namespace: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  namespaceSelector:
+    matchNames:
+    - open-cluster-management-agent-addon
+  selector:
+    matchLabels:
+      app: mc-subscription-metrics
+EOF
+----
+
+==== Managed Cluster Role
+
+Create a _Role_ for setting the permissions for monitoring:
+
+[source,shell]
+----
+cat << EOF | oc apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-k8s-monitoring
+  namespace: open-cluster-management-agent-addon
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+EOF
+----
+
+==== Managed Cluster RoleBinding
+
+Create a _RoleBinding_ for Binding the _Role_ to Prometheus’ monitoring
+_ServiceAccount_:
+
+____
+Note: for _OCP_ _subjects[0].namespace_ should be
+`+openshift-monitoring+`.
+____
+
+[source,shell]
+----
+cat << EOF | oc apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-k8s-monitoring-binding
+  namespace: open-cluster-management-agent-addon
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-k8s-monitoring
+subjects:
+- kind: ServiceAccount
+  name: prometheus-k8s
+  namespace: monitoring
+EOF
+----
+
+==== Managed Cluster Scrapping Verification
+
+In `+Prometheus+`’s dashboard, run the following query to look up
+metrics reported by the Subscription Operator Metrics Service:
+
+[source,text]
+----
+{service="mc-subscription-metrics"}
+----
+
+=== Standalone Cluster Scrapping
+
+==== Standalone Cluster ServiceMonitor
+
+Create a _ServiceMonitor_ for collecting services exposing metrics:
+
+____
+Note: for _OCP_ _metadata.namespace_ should be `+openshift-monitoring+`.
+____
+
+[source,shell]
+----
+cat << EOF | oc apply -f -
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: standalone-subscription-metrics
+  namespace: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  namespaceSelector:
+    matchNames:
+    - open-cluster-management
+  selector:
+    matchLabels:
+      app: standalone-subscription-metrics
+EOF
+----
+
+==== Standalone Cluster Role
+
+Create a _Role_ for setting the permissions for monitoring:
+
+[source,shell]
+----
+cat << EOF | oc apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-k8s-monitoring
+  namespace: open-cluster-management
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+EOF
+----
+
+==== Standalone Cluster RoleBinding
+
+Create a _RoleBinding_ for Binding the _Role_ to Prometheus’ monitoring
+_ServiceAccount_:
+
+____
+Note: for _OCP_ _subjects[0].namespace_ should be
+`+openshift-monitoring+`.
+____
+
+[source,shell]
+----
+cat << EOF | oc apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-k8s-monitoring-binding
+  namespace: open-cluster-management
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-k8s-monitoring
+subjects:
+- kind: ServiceAccount
+  name: prometheus-k8s
+  namespace: monitoring
+EOF
+----
+
+==== Standalone Cluster Scrapping Verification
+
+In `+Prometheus+`’s dashboard, run the following query to look up
+metrics reported by the Subscription Operator Metrics Service:
+
+[source,text]
+----
+{service="standalone-subscription-metrics"}
+----
