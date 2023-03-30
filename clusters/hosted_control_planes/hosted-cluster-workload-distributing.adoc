@@ -1,0 +1,41 @@
+[#hosted-cluster-workload-distributing]
+= Distributing hosted cluster workloads (Technology Preview)
+
+If you are the administrator of a management cluster, you can colocate and isolate pods for hosted clusters.
+//Do we need to say more about why this is needed, or will the intended audience understand the importance of colocating and isolating pods?
+
+. To distribute hosted cluster workloads, you can use the following node labels and taints:
++
+* `hypershift.openshift.io/control-plane: true`
+* `hypershift.openshift.io/cluster: ${HostedControlPlane Namespace}`
+//Is this enough information? Where does the admin use the node labels and taints?
+
+. If the `ControllerAvailabilityPolicy` is `HighlyAvailable`, schedule pods for each deployment within a hosted cluster across different failure domains. To do so, set `topology.kubernetes.io/zone` as the topology key.
+
+. To enable a hosted cluster to require its pods to be scheduled into particular nodes, set `HostedCluster.spec.nodeSelector`, as shown in the following example:
++
+----
+  spec:
+    nodeSelector:
+      role.kubernetes.io/infra: "" 
+----
+
+[#hosted-cluster-workload-distributing-topology]
+== Topology
+
+Pods for a hosted cluster can work with taints for `control-plane` and `cluster`. However, pods for a hosted cluster work best when you schedule them into `control-plane` nodes and into their own `cluster` nodes.
+
+In addition, pods for a hosted cluster work best when you schedule them into the same node.
+
+
+[#hosted-cluster-workload-distributing-priority]
+== Priority classes
+
+Hosted control planes use `PriorityClass` resources to drive priority and preemption of managed pods. It installs four priority classes in a management cluster in the following order of priorty from highest to lowest:
+// In the previous sentence, what does "It" refer to? Does it mean "Hosted control planes installs four priority classes..."?
+
+* `hypershift-operator`: HyperShift Operator pods.
+* `hypershift-etcd`: Pods for etcd.
+* `hypershift-api-critical`: Pods that are required for API calls and resource admission to succeed. These pods include pods such as `kube-apiserver`, aggregated API servers, and web hooks.
+* `hypershift-control-plane`: Pods in the control plane that are not API-critical but still need elevated priority, such as the cluster version Operator.
+
