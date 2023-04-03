@@ -196,7 +196,6 @@ An extremely complex issue that requires massive work on all fronts and input fr
 ### `4` points
 
 - [ACM-2921](https://issues.redhat.com/browse/ACM-2921)
-- [ACM-4060](https://issues.redhat.com/browse/ACM-4060)
 
 ### `5` points
 
