@@ -200,8 +200,7 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 ### `5` points
 
-- [24510](https://github.com/stolostron/backlog/issues/24510)
-- [26428](https://github.com/stolostron/backlog/issues/26428)
+- [ACM-4060](https://issues.redhat.com/browse/ACM-4060)
 
 ### `6` points
 
