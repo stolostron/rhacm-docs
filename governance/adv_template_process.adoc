@@ -1,0 +1,35 @@
+[#adv-template-processing]
+= Advanced template processing in configuration policies
+
+Use both managed cluster and hub cluster templates to reduce the need to create separate policies for each target cluster or hardcode configuration values in the policy definitions. For security, both resource-specific and the generic lookup functions in hub cluster templates are restricted to the namespace of the policy on the hub cluster.
+
+*Important:* If you use hub cluster templates to propagate secrets or other sensitive data, that causes sensitive data exposure in the managed cluster namespace on the hub cluster and on the managed clusters where that policy is distributed. The template content is expanded in the policy, and policies are not encrypted by the {ocp-short} ETCD encryption support. To address this, use `fromSecret` or `copySecretData`, which automatically encrypts the values from the secret, or `protect` to encrypt other values.
+
+Continue reading for advanced template use-cases:
+
+* <<special-annotation-processing,Special annotation for reprocessing>>
+* <<bypass-template-processing,Bypass template processing>>
+* <<additional-resources-hub-temp,Additional resources>>
+
+[#special-annotation-processing]
+== Special annotation for reprocessing
+
+Hub cluster templates are resolved to the data in the referenced resources during policy creation, or when the referenced resources are updated.
+
+If you need to manually initiate an update, use the special annotation, `policy.open-cluster-management.io/trigger-update`, to indicate changes for the data referenced by the templates. Any change to the special annotation value automatically initiates template processing. Additionally, the latest contents of the referenced resource are read and updated in the policy definition that is propagated for processing on managed clusters. A way to use this annotation is to increment the value by one each time.
+
+[#bypass-template-processing]
+== Bypass template processing
+
+You might create a policy that contains a template that is not intended to be processed by {product-title-short}. By default, {product-title-short} processes all templates. 
+
+To bypass template processing for your hub cluster, you must change `{{ template content }}` to `{{ `{{ template content }}`` `}}`.
+
+Alternatively, you can add the following annotation in the `ConfigurationPolicy` section of your `Policy`: `policy.open-cluster-management.io/disable-templates: "true"`. When this annotation is included, the previous workaround is not necessary. Template processing is bypassed for the `ConfigurationPolicy`.
+
+[#additional-resources-hub-temp]
+== Additional resources
+
+* xref:../governance/template_support_intro.adoc#template-processing[Template processing]
+* xref:../governance/template_functions.adoc#template-functions[Template functions]
+* Also refer to the link:https://docs.openshift.com/container-platform/4.11/security/encrypting-etcd.html[{ocp} etcd encryption documentation].
