@@ -49,9 +49,9 @@ You can install yabai by completing the following steps:
     <user> ALL = (root) NOPASSWD: sha256:<hash> <yabai> --load-sa
     ```
 
-    - Replace <yabai> with the path to the yabai binary (echo `which yabai`).
-    - Replace <user> with your username (echo `whoami`). 
-    - Replace <hash> with the sha256 hash of the yabai binary (echo `shasum -a 256 $(which yabai)`). You must update this hash manually again after running `brew upgrade`.
+    - Replace `<yabai>` with the path to the yabai binary (echo `which yabai`).
+    - Replace `<user>` with your username (echo `whoami`). 
+    - Replace `<hash>` with the sha256 hash of the yabai binary (echo `shasum -a 256 $(which yabai)`). You must update this hash manually again after running `brew upgrade`.
 
 9. Add the following loading script to the top of your `.yabairc` file (located in your home directory), if you are setting up your own configuration:
 
