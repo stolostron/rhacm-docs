@@ -109,7 +109,7 @@ See the IBM Style manual and Red Hat Supplementary manual regularly for guidance
 | Could | Don't use in present tense. Use can or might instead. |
 | May | Only use to indicate permission, use can or might in other instances. |
 | Might | Use to indicate possibility. |
-| Must | Use instead of have to or need to unless it is too restrictive. For example, xou don't have to is different than you must not.  |
+| Must | Use instead of have to or need to unless it is too restrictive. For example, you don't have to is different than you must not.  |
 | Should | Do not use. |
 | Would | Do not use as an auxiliary verb. Only use when referring to an unfulfilled condition (x would have resulted in y). |
 
