@@ -55,15 +55,17 @@ You can install yabai by completing the following steps:
 
 9. Add the following loading script to the top of your `.yabairc` file (located in your home directory), if you are setting up your own configuration:
 
-    ```
-    yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
-sudo yabai --load-sa
-    ```
+
+    ```yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa" sudo yabai --load-sa```
+    
     Alternatively, you can use the official example at the following link:
+    
     ```
     https://github.com/koekeishiya/yabai/blob/master/examples/yabairc
     ```
+    
     Or you can use one of our configurations at the following link:
+    
     ```
     https://github.com/oafischer/dotfiles/blob/main/yabai/yabairc
     ```
