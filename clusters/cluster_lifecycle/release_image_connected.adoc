@@ -3,47 +3,35 @@
 
 You might want to use the same release image for all of your clusters. To simplify, you can create your own custom list of release images that are available when creating a cluster. Complete the following steps to manage your available release images:
 
-. If the installer-managed `acm-hive-openshift-releases` subscription is enabled, disable it by setting the value of `disableUpdateClusterImageSets` to `true` in the `multiclusterhub` resource.
+. Fork the https://github.com/stolostron/acm-hive-openshift-releases/tree/backplane-2.2[acm-hive-openshift-releases GitHub repository 2.7 branch].
 
-. Fork the https://github.com/stolostron/acm-hive-openshift-releases/tree/release-2.5[acm-hive-openshift-releases GitHub repository 2.5 branch].
-//this has to be outdated
+. Add the YAML files for the images that you want available when you create a cluster by adding the images to the ./clusterImageSets/stable/ or ./clusterImageSets/fast/ directory using the Git console or CLI.
 
-. Update the `./subscribe/channel.yaml` file by changing the `spec.pathname` to access your the GitHub name for your forked repository, instead of `stolostron`. This step specifies where the hub cluster retrieves the release images.
+. Create a ConfigMap in the `multicluster-engine` namespace called `cluster-image-set-git-repo`:
 
-+
-Your updated content resembles the following example, with `forked_content` replaced with the path to your forked repository:
-+
 [source,yaml]
 ----
-spec:
-  type: Git
-  pathname: https://github.com/<forked_content>/acm-hive-openshift-releases.git
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-image-set-git-repo
+  namespace: multicluster-engine
+data:
+  gitRepoUrl: <forked acm-hive-openshift-releases repository URL> 
+  gitRepoBranch: backplane-2.2
+  gitRepoPath: clusterImageSets
+  channel: <fast or stable>
 ----
 
-. Add the YAML files for the images that you want available when you create a cluster by using the console to the `./clusterImageSets/stable/` or `./clusterImageSets/fast/` directory. 
+For information regarding other fields available through the ConfigMap, view the `README.md` in the https://github.com/stolostron/cluster-image-set-controller/blob/main/README.md[cluster-image-set-controller GitHub repository]
 
 You can retrieve the available YAML files from the main repository by merging changes in to your forked repository with the following procedure:
 
 . Commit and merge your changes to your forked repository.
-. To synchronize your list of fast release images after you have cloned the `acm-hive-openshift-releases` repository, enter the following command to update the fast images. *Note:* You can only run the `make` command with the Linux or MacOS operating system:
+. To synchronize your list of fast release images after you have cloned the `acm-hive-openshift-releases` repository, update the value of channel field in the cluster-image-set-git-repo ConfigMap to `fast`.
+. To synchronize and display the stable release images, update the value of channel field in the cluster-image-set-git-repo ConfigMap to `stable`.
 
-+
-----
-make subscribe-fast
-----
-+
-
-+
-The list of available fast release images updates with the currently available images in about one minute. By default, only the fast images are listed. 
-
-. To synchronize and display the stable release images, enter the following command. *Note:* You can only run this `make` command when you are using the Linux or MacOS operating system:
-+
-----
-make subscribe-stable
-----
-
-+
-After running this command, the list of available stable release images updates with the currently available images in about one minute. By default, {product-title-short} preloads a few `ClusterImageSets.`
+After updating the ConfigMap, the list of available stable release images updates with the currently available images in about one minute. By default, {product-title-short} preloads a few `ClusterImageSets.`
 
 . You can use the following commands to list what is available and remove the defaults:
 +
@@ -52,6 +40,5 @@ oc get clusterImageSets
 oc delete clusterImageSet <clusterImageSet_NAME>
 ----
 +
-*Note:* If you have not disabled the installer-managed automatic updates of the `ClusterImageSets` by setting the value of `disableUpdateClusterImageSets` to `true` in the `multiclusterhub` resource, any images that you delete are recreated automatically.
 
 . View the list of currently available release images in the {product-title-short} console when you are creating a cluster.
