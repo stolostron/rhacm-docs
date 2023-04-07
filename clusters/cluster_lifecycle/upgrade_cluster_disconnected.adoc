@@ -52,7 +52,7 @@ PRODUCT_REPO=openshift-release-dev
 RELEASE_NAME=ocp-release
 OCP_RELEASE=4.12.2-x86_64
 LOCAL_REGISTRY=$(hostname):5000
-LOCAL_SECRET_JSON=/path/to/pull/secret
+LOCAL_SECRET_JSON=/path/to/pull/secret <1>
 
 oc adm -a ${LOCAL_SECRET_JSON} release mirror \
 --from=${UPSTREAM_REGISTRY}/${PRODUCT_REPO}/${RELEASE_NAME}:${OCP_RELEASE} \
@@ -60,7 +60,7 @@ oc adm -a ${LOCAL_SECRET_JSON} release mirror \
 --to-release-image=${LOCAL_REGISTRY}/ocp4/release:${OCP_RELEASE}
 ----
 +
-Replace `/path/to/pull/secret` with the path to your {ocp-short} pull secret.
+<1> Replace `/path/to/pull/secret` with the path to your {ocp-short} pull secret.
 
 . Run the script to mirror the images, configure settings, and separate the release images from the release content.
 +
@@ -91,36 +91,36 @@ git clone https://github.com/openshift/cincinnati-graph-data
 . Create a file that contains the information for your graph data `init`. You can find this sample https://github.com/openshift/cincinnati-operator/blob/master/dev/Dockerfile[Dockerfile] in the `cincinnati-operator` GitHub repository. The contents of the file is shown in the following sample:
 +
 ----
-FROM registry.access.redhat.com/ubi8/ubi:8.1
+FROM registry.access.redhat.com/ubi8/ubi:8.1 <1>
 
-RUN curl -L -o cincinnati-graph-data.tar.gz https://github.com/openshift/cincinnati-graph-data/archive/master.tar.gz
+RUN curl -L -o cincinnati-graph-data.tar.gz https://github.com/openshift/cincinnati-graph-data/archive/master.tar.gz <2>
 
-RUN mkdir -p /var/lib/cincinnati/graph-data/
+RUN mkdir -p /var/lib/cincinnati/graph-data/ <2>
 
 CMD exec /bin/bash -c "tar xvzf cincinnati-graph-data.tar.gz -C /var/lib/
-cincinnati/graph-data/ --strip-components=1"  
+cincinnati/graph-data/ --strip-components=1"  <3>
 ----
 +
 In this example:
 +
-* The `FROM` value is the external registry where {cincinnati-short} finds the images.
-
-* The `RUN` commands create the directory and package the upgrade files. 
-
-* The `CMD` command copies the package file to the local repository and extracts the files for an upgrade.
+<1> The `FROM` value is the external registry where {cincinnati-short} finds the images.
++
+<2> The `RUN` commands create the directory and package the upgrade files. 
++
+<3> The `CMD` command copies the package file to the local repository and extracts the files for an upgrade.
 
 . Run the following commands to build the `graph data init container`:
 +
 ----
-podman build -f <path_to_Dockerfile> -t ${DISCONNECTED_REGISTRY}/cincinnati/cincinnati-graph-data-container:latest
-podman push ${DISCONNECTED_REGISTRY}/cincinnati/cincinnati-graph-data-container:latest --authfile=</path/to/pull_secret>.json
+podman build -f <path_to_Dockerfile> -t <${DISCONNECTED_REGISTRY}/cincinnati/cincinnati-graph-data-container><2>:latest <1>
+podman push <${DISCONNECTED_REGISTRY}/cincinnati/cincinnati-graph-data-container><2>:latest --authfile=</path/to/pull_secret>.json <3>
 ----
 +
-Replace `path_to_Dockerfile` with the path to the file that you created in the previous step.
+<1> Replace `path_to_Dockerfile` with the path to the file that you created in the previous step.
 +
-Replace `${DISCONNECTED_REGISTRY}/cincinnati/cincinnati-graph-data-container` with the path to your local graph data init container.
+<2> Replace `${DISCONNECTED_REGISTRY}/cincinnati/cincinnati-graph-data-container` with the path to your local graph data init container.
 +
-Replace `/path/to/pull_secret` with the path to your pull secret file.
+<3> Replace `/path/to/pull_secret` with the path to your pull secret file.
 +
 *Note:* You can also replace `podman` in the commands with `docker`, if you don't have `podman` installed.
 
@@ -184,15 +184,15 @@ metadata:
   name: openshift-update-service-instance
   namespace: openshift-cincinnati
 spec:
-  registry: <registry_host_name>:<port>
+  registry: <registry_host_name><1>:<port>
   replicas: 1
   repository: ${LOCAL_REGISTRY}/ocp4/release
-  graphDataImage: '<host_name>:<port>/cincinnati-graph-data-container'
+  graphDataImage: '<host_name>:<port>/cincinnati-graph-data-container'<2>
 ----
 +
-Replace the `spec.registry` value with the path to your local disconnected registry for your images.
+<1> Replace the `spec.registry` value with the path to your local disconnected registry for your images.
 +
-Replace the `spec.graphDataImage` value with the path to your graph data init container. This is the same value that you used when you ran the `podman push` command to push your graph data init container.
+<2> Replace the `spec.graphDataImage` value with the path to your graph data init container. This is the same value that you used when you ran the `podman push` command to push your graph data init container.
 . Select *Create* to create the instance. 
 . From the hub cluster CLI, enter the `oc get pods` command to view the status of the instance creation. It might take a while, but the process is complete when the result of the command shows that the instance and the operator are running.
 
@@ -212,17 +212,17 @@ Complete the following steps to override the default registry:
 apiVersion: operator.openshift.io/v1alpha1
 kind: ImageContentSourcePolicy
 metadata:
-  name: <your-local-mirror-name>
+  name: <your-local-mirror-name><1>
 spec:
   repositoryDigestMirrors:
     - mirrors:
-        - <your-registry>
+        - <your-registry><2>
       source: registry.redhat.io
 ----
 +
-Replace `your-local-mirror-name` with the name of your local mirror. 
+<1> Replace `your-local-mirror-name` with the name of your local mirror. 
 +
-Replace `your-registry` with the path to your local mirror repository.
+<2> Replace `your-registry` with the path to your local mirror repository.
 +
 *Note:* You can find your path to your local mirror by entering the `oc adm release mirror` command. 
 
@@ -257,12 +257,12 @@ metadata:
   namespace: openshift-marketplace
 spec:
   sourceType: grpc
-  image: '<registry_host_name>:<port>/olm/redhat-operators:v1'
+  image: '<registry_host_name>:<port>/olm/redhat-operators:v1'<1>
   displayName: My Operator Catalog
   publisher: grpc
 ----
 +
-Replace the value of `spec.image` with the path to your local restricted catalog source image.
+<1> Replace the value of `spec.image` with the path to your local restricted catalog source image.
 
 . On the command line of the managed cluster, change the catalog source by running the following command:
 +
