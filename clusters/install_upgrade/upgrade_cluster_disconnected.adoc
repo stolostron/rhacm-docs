@@ -10,6 +10,7 @@ In some cases, security concerns prevent clusters from being connected directly 
 * Monitor when upgrades are available for your disconnected clusters.
 * Identify which updates are mirrored to your local site for upgrading by using the graph data file.
 * Notify you that an upgrade is available for your cluster by using the console.
+
 The following topics explain the procedure for upgrading a disconnected cluster: 
 
 * <<cincinnati-prerequisites,Prerequisites>>
@@ -148,6 +149,7 @@ data:
     ...
     -----END CERTIFICATE-----
 ----
+
 . Edit the `cluster` resource in the `image.config.openshift.io` API to set the `additionalTrustedCA` field to the name of the ConfigMap that you created.
 +
 ----
@@ -161,14 +163,24 @@ restart the deployment if the CA cert has changed.
 
 [#deploy-the-cincinnati-instance]
 == Deploy the {cincinnati-short} instance
+
 When you finish deploying the {cincinnati-short} instance on your hub cluster, this instance is located where the images for the cluster upgrades are mirrored and made available to the disconnected managed cluster. Complete the following steps to deploy the instance:
+
 . If you do not want to use the default namespace of the operator, which is `openshift-cincinnati`, create a namespace for your {cincinnati-short} instance:
+
 .. In the {ocp-short} hub cluster console navigation menu, select *Administration* > *Namespaces*.
+
+
 .. Select *Create Namespace*.
+
 .. Add the name of your namespace, and any other information for your namespace.
+
 .. Select *Create* to create the namespace.
+
 . In the _Installed Operators_ section of the {ocp-short} console, select *{cincinnati} Operator*.
+
 . Select *Create Instance* in the menu.
+
 . Paste the contents from your {cincinnati-short} instance. Your YAML instance might resemble the following manifest:
 +
 [source,yaml]
@@ -188,14 +200,20 @@ spec:
 <1> Replace the `spec.registry` value with the path to your local disconnected registry for your images.
 +
 <2> Replace the `spec.graphDataImage` value with the path to your graph data init container. This is the same value that you used when you ran the `podman push` command to push your graph data init container.
+
 . Select *Create* to create the instance. 
+
 . From the hub cluster CLI, enter the `oc get pods` command to view the status of the instance creation. It might take a while, but the process is complete when the result of the command shows that the instance and the operator are running.
 
 [#override-the-default-registry]
 == Override the default registry (optional)
+
 *Note:* The steps in this section only apply if you have mirrored your releases into your mirrored registry. 
+
 {ocp-short} has a default image registry value that specifies where it finds the upgrade packages. In a disconnected environment, you can create an override to replace that value with the path to your local image registry where you mirrored your release images. 
+
 Complete the following steps to override the default registry:
+
 . Create a YAML file named `mirror.yaml` that resembles the following content: 
 +
 [source,yaml]
@@ -216,6 +234,7 @@ spec:
 <2> Replace `your-registry` with the path to your local mirror repository.
 +
 *Note:* You can find your path to your local mirror by entering the `oc adm release mirror` command. 
+
 . Using the command line of the managed cluster, run the following command to override the default registry: 
 +
 ----
@@ -224,8 +243,10 @@ oc apply -f mirror.yaml
 
 [#deploy-a-disconnected-catalog-source]
 == Deploy a disconnected catalog source
+
 On the managed cluster, disable all of the default catalog sources and create a new one.
 Complete the following steps to change the default location from a connected location to your disconnected local registry: 
+
 . Create a YAML file named `source.yaml` that resembles the following content: 
 +
 [source,yaml]
@@ -251,6 +272,7 @@ spec:
 ----
 +
 <1> Replace the value of `spec.image` with the path to your local restricted catalog source image.
+
 . On the command line of the managed cluster, change the catalog source by running the following command:
 +
 ----
@@ -259,7 +281,9 @@ oc apply -f source.yaml
 
 [#change-the-managed-cluster-parameter]
 == Change the managed cluster parameter
+
 Update the `ClusterVersion` resource information on the managed cluster to change the default location from where it retrieves its upgrades. 
+
 . From the managed cluster, confirm that the `ClusterVersion` upstream parameter is currently the default public {cincinnati-short} operand by entering the following command:
 +
 ----
@@ -274,11 +298,12 @@ apiVersion: v1
 items:
 - apiVersion: config.openshift.io/v1
   kind: ClusterVersion
-[..]
+  [..]
   spec:
     channel: stable-4.12
     upstream: https://api.openshift.com/api/upgrades_info/v1/graph
 ----
+
 . From the hub cluster, identify the route URL to the {cincinnati-short} operand by entering the following command: 
 +
 ----
@@ -286,6 +311,7 @@ oc get routes
 ---- 
 +
 Note the returned value for later steps.
+
 . On the command line of the managed cluster, edit the `ClusterVersion` resource by entering the following command:
 +
 ----
@@ -295,14 +321,15 @@ oc edit clusterversion version
 Replace the value of `spec.channel` with your new version.
 +
 Replace the value of `spec.upstream` with the path to your hub cluster {cincinnati-short} operand. You can complete the following steps to determine the path to your operand:
-+
+
 .. Run the following command on the hub cluster:
 + 
 ----
 oc get routes -A
 ----
-+
+
 .. Find the path to `cincinnati`. The path the operand is the value in the `HOST/PORT` field.
+
 . On the command line of the managed cluster, confirm that the upstream parameter in the `ClusterVersion` is updated with the local hub cluster {cincinnati-short} URL by entering the following command:
 +
 ----
@@ -317,7 +344,7 @@ apiVersion: v1
 items:
 - apiVersion: config.openshift.io/v1
   kind: ClusterVersion
-[..]
+  [..]
   spec:
     channel: stable-4.12
     upstream: https://<hub-cincinnati-uri>/api/upgrades_info/v1/graph
@@ -325,16 +352,23 @@ items:
 
 [#viewing-available-upgrades]
 == Viewing available upgrades
+
 On the _Clusters_ page, the *Distribution version* of the cluster indicates that there is an upgrade available, if there is an upgrade in the disconnected registry. You can view the available upgrades by selecting the cluster and selecting *Upgrade clusters* from the _Actions_ menu. If the optional upgrade paths are available, the available upgrades are listed.  
+
 *Note:* No available upgrade versions are shown if the current version is not mirrored into the local image repository.  
 
 [#selecting-a-channel-discon]
 == Selecting a channel
-You can use the console to select a channel for your cluster upgrades on {ocp-short} version 4.6, or later. Those versions must be available on the mirror registry. Complete the steps in xref:../cluster_lifecycle/upgrade_cluster.adoc#selecting-a-channel[Selecting a channel] to specify a channel for your upgrades. 
+
+You can use the console to select a channel for your cluster upgrades on {ocp-short} version 4.6, or later. Those versions must be available on the mirror registry. Complete the steps in xref:../install_upgrade/upgrade_cluster.adoc#selecting-a-channel[Selecting a channel] to specify a channel for your upgrades. 
 
 [#upgrading-the-cluster]
 == Upgrading the cluster
+
 After you configure the disconnected registry, {mce-short} and {cincinnati-short} use the disconnected registry to determine if upgrades are available. If no available upgrades are displayed, make sure that you have the release image of the current level of the cluster and at least one later level mirrored in the local repository. If the release image for the current version of the cluster is not available, no upgrades are available.
+
 On the _Clusters_ page, the *Distribution version* of the cluster indicates that there is an upgrade available, if there is an upgrade in the disconnected registry. You can upgrade the image by clicking *Upgrade available* and selecting the version for the upgrade.  
+
 The managed cluster is updated to the selected version. 
+
 If your cluster upgrade fails, the Operator generally retries the upgrade a few times, stops, and reports the status of the failing component. In some cases, the upgrade process continues to cycle through attempts to complete the process. Rolling your cluster back to a previous version following a failed upgrade is not supported. Contact Red Hat support for assistance if your cluster upgrade fails.
