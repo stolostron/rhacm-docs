@@ -1,0 +1,368 @@
+[#placement-labelselector-claimSelector]
+== Filtering _ManagedClusters_ from _ManagedCusterSets_
+
+You can select which `ManagedClusters` to filter by using `labelSelector` or `claimSelector` . See the following examples to learn how to use both filers:
+
+- In the following example, the `labelSelector` only matches clusters with the label `vendor: OpenShift`:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchLabels:
+            vendor: OpenShift
+
+----
+
+- In the following example, `claimSelector` only matches clusters with `region.open-cluster-management.io` with `us-west-1`:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        claimSelector:
+          matchExpressions:
+            - key: region.open-cluster-management.io
+              operator: In
+              values:
+                - us-west-1
+----
++
+** You can also filter `ManagedClusters` from particular cluster sets by using the `clusterSets` parameter. In the following example, `claimSelector` only matches the cluster sets `clusterset1` and `clusterset2`:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  clusterSets:
+    - clusterset1
+    - clusterset2
+  predicates:
+    - requiredClusterSelector:
+        claimSelector:
+          matchExpressions:
+            - key: region.open-cluster-management.io
+              operator: In
+              values:
+                - us-west-1
+----
+
+You can also select how many `ManagedClusters` you want to filer by using the `numberOfClusters` paremeter. See the following example:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  numberOfClusters: 3 <1>
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchLabels:
+            vendor: OpenShift
+        claimSelector:
+          matchExpressions:
+            - key: region.open-cluster-management.io
+              operator: In
+              values:
+                - us-west-1
+----
+
+<1> Specify how many `ManagedClusters` you want to select. The previous example is set to `3`.
+
+[#placement-tolerations]
+== Filtering _ManagedClusters_ by defining tolerations with placement
+
+To learn how to filter `ManagedClusters` with matching taints, see the following examples:
+
+- By default, the placement cannot select `cluster1` in the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: gpu
+      value: "true"
+      timeAdded: '2022-02-21T08:11:06Z'
+----
++
+To select `cluster1` you must define tolerations. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  tolerations:
+    - key: gpu
+      value: "true"
+      operator: Equal
+----
+
+You can also select `ManagedClusters` with matching taints for a specified amount of time by using the `tolerationSeconds` parameter. `tolerationSeconds` defines how long a toleration stays bound to a taint. `tolerationSeconds` can automatically transfer applications that are deployed on a cluster that goes offline to another managed cluster after a specified length of time.
+
+Learn how to use `tolerationSeconds` by viewing the following examples:
+
+- In the following example, the managed cluster becomes unreachable:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: cluster.open-cluster-management.io/unreachable
+      timeAdded: '2022-02-21T08:11:06Z'
+----
++
+If you define a placement with `tolerationSeconds`, the workload is transferred to another available managed cluster. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300 <1>
+----
++
+<1> Specify after how many seconds you want the workload to be transferred.
+
+[#placement-prioritizerpolicy]
+== Filtering _ManagedClusters_ by defining _prioritizerPolicy_ with placement
+
+View the following examples to learn how to filter `ManagedClusters` by using the `prioritizerPolicy` paremeter with placement.
+
+- The following example selects a cluster with the largest allocatable memory:
++
+*Note:* Similar to Kubernetes _Node Allocatable_, 'allocatable' is defined as the amount of compute resources that are available for pods on each cluster.
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  numberOfClusters: 1
+  prioritizerPolicy:
+    configurations:
+      - scoreCoordinate:
+          builtIn: ResourceAllocatableMemory
+----
+
+- The following example selects a cluster with the largest allocatable CPU and memory, and makes placement sensitive to resource changes:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  numberOfClusters: 1
+  prioritizerPolicy:
+    configurations:
+      - scoreCoordinate:
+          builtIn: ResourceAllocatableCPU
+        weight: 2
+      - scoreCoordinate:
+          builtIn: ResourceAllocatableMemory
+        weight: 2
+----
+
+- The following example selects two clusters with the largest `addOn` score CPU ratio, and pins the placement decisions:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  numberOfClusters: 2
+  prioritizerPolicy:
+    mode: Exact
+    configurations:
+      - scoreCoordinate:
+          builtIn: Steady
+        weight: 3
+      - scoreCoordinate:
+          type: AddOn
+          addOn:
+            resourceName: default
+            scoreName: cpuratio
+----
+
+[#placement-decision]
+== Filtering _ManagedClusters_ by using _PlacementDecisions_
+
+One or more `PlacementDecision` kinds with the label `cluster.open-cluster-management.io/placement={placement_name}` are created to represent `ManagedClusters` selected by a placement.
+
+If a `ManagedCluster` is selected and added to a `PlacementDecision`, components that consume this placement might apply the workload on this `ManagedCluster`. After the `ManagedCluster` is no longer selected and is removed from the `PlacementDecision`, the workload that is applied on this `ManagedCluster` is removed.
+
+See _PlacementDecisions API_ to learn more about the API.
+
+See the following `PlacementDecision` example:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: PlacementDecision
+metadata:
+  labels:
+    cluster.open-cluster-management.io/placement: placement1
+  name: placement1-kbc7q
+  namespace: ns1
+  ownerReferences:
+    - apiVersion: cluster.open-cluster-management.io/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Placement
+      name: placement1
+      uid: 05441cf6-2543-4ecc-8389-1079b42fe63e
+status:
+  decisions:
+    - clusterName: cluster1
+      reason: ''
+    - clusterName: cluster2
+      reason: ''
+    - clusterName: cluster3
+      reason: ''
+----
+
+[#addon-status]
+== Filtering _ManagedClusters_ based on add-on status
+
+You might want to select managed clusters for your placements based on the status of the add-ons that are deployed on them. For example, you can select a managed cluster for your placement only if there is a specific add-on that is enabled on the managed cluster.
+
+You can specify the label for the add-on, as well as its status, when you create the placement. A label is automatically created on a `ManagedCluster` resource if an add-on is enabled on the managed cluster. The label is automatically removed if the add-on is disabled.
+
+Each add-on is represented by a label in the format of `feature.open-cluster-management.io/addon-<addon_name>=<status_of_addon>`. 
+
+Replace `addon_name` with the name of the add-on that you want to enable on the selected managed cluster.
+
+Replace `status_of_addon` with the status that you want the add-on to have if the managed cluster is selected.
+
+See the following table of possible value for `status_of_addon`:
+
+|===
+| Value | Description
+
+| `available`
+| The add-on is enabled and available.
+
+| `unhealthy`
+| The add-on is enabled, but the lease is not updated continuously.
+
+| `unreachable`
+| The add-on is enabled, but there is no lease found for it. This can also be caused when the managed cluster is offline.
+|===
+
+For example, an available `application-manager` add-on is represented by a label on the managed cluster that reads the following:
+
+----
+feature.open-cluster-management.io/addon-application-manager: available
+----
+
+See the following examples to learn how to create placements based on add-ons and their status:
+
+- The following placement example includes all managed clusters that have `application-manager` enabled on them:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement1
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: feature.open-cluster-management.io/addon-application-manager
+              operator: Exists
+----
+
+- The following placement example includes all managed clusters that have `application-manager` enabled with an `available` status: 
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement2
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchLabels:
+            "feature.open-cluster-management.io/addon-application-manager": "available"
+----
+
+- The following placement example includes all managed clusters that have `application-manager` disabled:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement3
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: feature.open-cluster-management.io/addon-application-manager
+              operator: DoesNotExist
+----
+
+[#placement-resources]
+== Additional resources
+
+- See https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#node-allocatable[Node Allocatable] for more details.
+-  See xref:../api/placementdecision.json.adoc#placementdecisions-api[PlacementDecisions API] fore more details.
