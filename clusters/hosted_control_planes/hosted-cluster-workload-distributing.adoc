@@ -1,17 +1,21 @@
 [#hosted-cluster-workload-distributing]
 = Distributing hosted cluster workloads (Technology Preview)
 
-If you are the administrator of a management cluster, you can colocate and isolate pods for hosted clusters. For example, you might need to allocate workload for specific needs or prevent a user from allocating load on resources in such a way that other users are negatively affected.  
+As a management cluster administrator, you can use the following labels and taints in the management cluster nodes to schedule the control plane workload:
 
-* To distribute hosted cluster workloads, you can use the following node labels and taints:
+* `hypershift.openshift.io/control-plane: true`
+* `hypershift.openshift.io/cluster: ${HostedControlPlane Namespace}`
 
-** `hypershift.openshift.io/control-plane: true`
-** `hypershift.openshift.io/cluster: ${HostedControlPlane Namespace}`
-//Is this enough information? Where does the admin use the node labels and taints?
+Pods for a hosted cluster have tolerations and are scheduled according to affinity rules. As a result, pods for a hosted cluster function as follows: 
 
-* If the `ControllerAvailabilityPolicy` is `HighlyAvailable`, schedule pods for each deployment within a hosted cluster across different failure domains. To do so, set `topology.kubernetes.io/zone` as the topology key.
+* They tolerate taints for `control-plane` and their own `cluster`.
+* The scheduler prefers to schedule them into `control-plane` nodes.
+* The scheduler prefers to schedule them into their own `cluster` nodes.
+* The scheduler prefers to schedule them into the same node.
 
-* To enable a hosted cluster to require its pods to be scheduled into infra nodes, set `HostedCluster.spec.nodeSelector`, as shown in the following example. This way, hosted control planes for each tenant are eligible infrastructure node workloads, and you do not need to entitle the underlying {ocp-short} nodes.
+If the `ControllerAvailabilityPolicy` is `HighlyAvailable`, schedule pods for each deployment within a hosted cluster across different failure domains. To do so, set `topology.kubernetes.io/zone` as the topology key.
+
+To enable a hosted cluster to require its pods to be scheduled into infra nodes, set `HostedCluster.spec.nodeSelector`, as shown in the following example. This way, hosted control planes for each tenant are eligible infrastructure node workloads, and you do not need to entitle the underlying {ocp-short} nodes.
 +
 ----
   spec:
@@ -19,21 +23,10 @@ If you are the administrator of a management cluster, you can colocate and isola
       role.kubernetes.io/infra: "" 
 ----
 
-[#hosted-cluster-workload-distributing-topology]
-== Topology
-
-Pods for a hosted cluster are scheduled according to the `preferredDuringSchedulingIgnoreDuringExecution` label. Based on that label, pods for a hosted cluster function as follows:
-
-* They work with taints for `control-plane` and `cluster`.
-* They can be scheduled into `control-plane` nodes.
-* They can be scheduled into their own `cluster` nodes.
-* They can be scheduled into the same node.
-
 [#hosted-cluster-workload-distributing-priority]
 == Priority classes
 
-Hosted control planes use `PriorityClass` resources to drive priority and preemption of managed pods. It installs four priority classes in a management cluster in the following order of priority from highest to lowest:
-// In the previous sentence, what does "It" refer to? Does it mean "Hosted control planes installs four priority classes..."? Or does it mean "The `PriorityClass` resources install four priority classes..."?
+Four built-in priority classes influence the priority and preemption of the hosted cluster pods. You can create the pods in the management cluster in the following order from highest to lowest:
 
 * `hypershift-operator`: HyperShift Operator pods.
 * `hypershift-etcd`: Pods for etcd.
