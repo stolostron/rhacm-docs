@@ -87,6 +87,65 @@ spec:
         status:
           totalViolations: 0
 ----
++
+*Note:* The Gatekeeper audit functionality runs every minute by default. Audit results are sent back to the hub cluster to be viewed in the policy status of the managed cluster.
++
+- audit template using policies: Use the Gatekepper audit feature on your hub cluster by using policies for multicluster distribution and Gatekeeper audit results aggregation. The following example defines a Gatekeeper `ConstraintTemplate` and constraint (`K8sRequiredLabels`) to ensure the `gatekeeper` label is set on all namespaces. 
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: require-gatekeeper-labels-on-ns
+spec:
+  remediationAction: inform <1>
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: templates.gatekeeper.sh/v1beta1
+        kind: ConstraintTemplate
+        metadata:
+          name: k8srequiredlabels
+        spec:
+          crd:
+            spec:
+              names:
+                kind: K8sRequiredLabels
+              validation:
+                openAPIV3Schema:
+                  properties:
+                    labels:
+                      type: array
+                      items: string
+          targets:
+            - target: admission.k8s.gatekeeper.sh
+              rego: |
+                package k8srequiredlabels                violation[{"msg": msg, "details": {"missing_labels": missing}}] {
+                  provided := {label | input.review.object.metadata.labels[label]}
+                  required := {label | label := input.parameters.labels[_]}
+                  missing := required - provided
+                  count(missing) > 0
+                  msg := sprintf("you must provide labels: %v", [missing])
+                }
+    - objectDefinition:
+        apiVersion: constraints.gatekeeper.sh/v1beta1
+        kind: K8sRequiredLabels
+        metadata:
+          name: ns-must-have-gk
+        spec:
+          enforcementAction: dryrun
+          match:
+            kinds:
+              - apiGroups: [""]
+                kinds: ["Namespace"]
+          parameters:
+            labels: ["gatekeeper"] 
+----
++
+<1> Since the `remediationAction` is set to `inform`, the Gatekeeper constraint, `enforcementAction` field is overridden to `warn`. This means that Gatekeeper detects and warns you about creating or updating a namespace that is missing the `gatekeeper` label. If the policy `remediationAction` is set to `enforce`, the Gatekeeper constraint, `enforcementAction` field is overridden to `deny`. In this context, this configuration prevents any user from creating or updating a namespace that is missing the `gatekeeper` label.
++
+With the previous policy, you might receive the following message: `warn - you must provide labels: {"gatekeeper"} (on Namespace default); warn - you must provide labels: {"gatekeeper"} (on Namespace gatekeeper-system)`. Once a policy containing Gatekeeper constraints or ConstraintTemplates is deleted, the constraints and ConstraintTemplates in the policy are also deleted from the managed cluster.
 
 * admission template: Use the `policy-gatekeeper-admission` to check for misconfigurations that are created by the gatekeeper admission webhook:
 +
@@ -113,6 +172,10 @@ spec:
             event_type: violation
 ----
 
-See https://github.com/stolostron/policy-collection/blob/main/community/CM-Configuration-Management/policy-gatekeeper-sample.yaml[`policy-gatekeeper-sample.yaml`] for more details.
 
-See xref:../governance/create_config_pol.adoc#managing-configuration-policies[Managing configuration policies] for more information about managing other policies. Refer to xref:../governance/grc_intro.adoc#governance[Governance] for more topics on the security framework. 
+[#additional-resources-gk]
+== Additional resources
+
+* See link:https://github.com/stolostron/policy-collection/blob/main/community/CM-Configuration-Management/policy-gatekeeper-sample.yaml[`policy-gatekeeper-sample.yaml`] for more details.
+
+* See xref:../governance/create_config_pol.adoc#managing-configuration-policies[Managing configuration policies] for more information about managing other policies. Refer to xref:../governance/grc_intro.adoc#governance[Governance] for more topics on the security framework. 
