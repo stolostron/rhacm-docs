@@ -28,6 +28,7 @@ You must meet the following prerequisites to create an {ocp-short} cluster on {o
 
 - You need administrator access to an {ocp-short} cluster, version 4.12 or later, specified by the `KUBECONFIG` environment variable.
 - The {ocp-short} managed cluster must have wildcard DNS routes enabled, as shown in the following DNS:
+
 +
 ----
 oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p '[{ "op": "add", "path": "/spec/routeAdmission", "value": {wildcardPolicy: "WildcardsAllowed"}}]'
@@ -35,6 +36,7 @@ oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p 
 - The {ocp-short} managed cluster must have {ocp-virt-short} installed on it. For more information, see link:https://docs.openshift.com/container-platform/4.12/virt/install/installing-virt-web.html[Installing OpenShift Virtualization using the web console].
 - The {ocp-short} managed cluster must be configured with OVNKubernetes as the default pod network CNI.
 - The {ocp-short} managed cluster must have a default storage class. For more information, see link:https://docs.openshift.com/container-platform/4.12/post_installation_configuration/storage-configuration.html[Post-installation storage configuration]. The following example shows how to set a default storage class:
+
 +
 ----
 oc patch storageclass ocs-storagecluster-ceph-rbd -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
@@ -48,6 +50,7 @@ oc patch storageclass ocs-storagecluster-ceph-rbd -p '{"metadata": {"annotations
 == Creating a hosted cluster with the KubeVirt platform
 
 . To create a guest cluster, use environment variables and the `hypershift` command line interface:
+
 +
 ----
 export CLUSTER_NAME=example
@@ -71,10 +74,12 @@ Replace values as necessary.
 A default node pool is created for the cluster with two virtual machine worker replicas according to the `--node-pool-replicas` flag.
 +
 After a few moments, you can verify that the hosted control plane pods are running by entering the following command:
+
 +
 ----
 oc -n clusters-$CLUSTER_NAME get pods
 ----
+
 +
 .Example output
 ----
@@ -92,10 +97,12 @@ redhat-operators-catalog-9d5fd4d44-z8qqk              1/1     Running   0       
 A guest cluster that has worker nodes that are backed by KubeVirt virtual machines typically takes 10-15 minutes to be fully provisioned.
 
 . To check the status of the guest cluster, see the corresponding `HostedCluster` resource:
+
 +
 ----
 oc get --namespace clusters hostedclusters
 ----
+
 + 
 The following example output illustrates a fully provisioned `HostedCluster` object:
 +
@@ -111,12 +118,14 @@ clusters    example   4.12.7    example-admin-kubeconfig   Completed   True     
 To gain command line interface access to the guest cluster, retrieve the guest cluster kubeconfig environment variable. 
 
 . To retrieve the guest cluster kubeconfig environment variable by using the `hypershift` command line interface, enter the following command:
+
 +
 ----
 hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
 ----
 
 . Access the cluster by entering the following command:
+
 +
 ----
 oc --kubeconfig $CLUSTER_NAME-kubeconfig get nodes
@@ -130,6 +139,7 @@ example-nc6g4         Ready    worker   32m   v1.25.4+18eadca
 ----
 
 . Check the cluster version by entering the following command:
+
 +
 ----
 oc --kubeconfig $CLUSTER_NAME-kubeconfig get clusterversion
@@ -159,6 +169,7 @@ If you do not want to use the default Ingress and DNS behavior, you can configur
 === Deploying a hosted cluster that specifies the base domain
 
 . To create a hosted cluster that specifies the base domain, enter the following commands:
+
 +
 ----
 export CLUSTER_NAME=example <1>
@@ -182,6 +193,7 @@ hypershift create cluster kubevirt \
 The result is a hosted cluster that has an Ingress wildcard that is configured for the cluster name and the base domain, or as shown in this example, `.apps.example.hypershift.lab`. The hosted cluster does not finish the deployment, but remains in `Partial` status. Because you configured a base domain, you must ensure that the required DNS records and load balancer are in place.
 
 . Enter the following command:
+
 +
 ----
 oc get --namespace clusters hostedclusters
@@ -194,6 +206,7 @@ example                   example-admin-kubeconfig         Partial    True      
 ----
 
 . Access the cluster by entering the following commands:
+
 +
 ----
 hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
@@ -223,6 +236,7 @@ The next steps fixes the errors in the output.
 Set up the load balancer that routes to the KubeVirt VMs and assign a wildcard DNS entry to the load balancer IP address. To do so, you need to create a load balancer service that routes Ingress traffic to the KubeVirt VMs. A `NodePort` service that exposes the hosted cluster Ingress already exists, so you can export the node ports and create the load balancer service that targets those ports.
 
 . Export the node ports by entering the following commands:
+
 +
 ----
 export HTTP_NODEPORT=$(oc --kubeconfig $CLUSTER_NAME-kubeconfig get services -n openshift-ingress router-nodeport-default -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')
@@ -262,12 +276,14 @@ spec:
 Set up up a wildcard DNS record or CNAME that references the external IP of the load balancer service.
 
 . Export the external IP by entering the following command:
+
 +
 ----
 export EXTERNAL_IP=$(oc -n clusters-$CLUSTER_NAME get service $CLUSTER_NAME-apps -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 ----
 
 . Configure a wildcard `*.apps.<hosted-cluster-name\>.<base-domain\>.` DNS entry that references the IP that is stored in the `$EXTERNAL_IP` path. The DNS entry must be able to route inside and outside of the cluster. If you use the example input from step 1, for the cluster that has an external IP value of `192.168.20.30`, the DNS resolutions look like this example:
+
 +
 ----
 dig +short test.apps.example.hypershift.lab
@@ -276,6 +292,7 @@ dig +short test.apps.example.hypershift.lab
 ----
 
 . Check the hosted cluster status and ensure that it has moved from `Partial` to `Completed` by entering the following command:
+
 +
 ----
 oc get --namespace clusters hostedclusters
@@ -291,6 +308,7 @@ example         4.12.7    example-admin-kubeconfig         Completed   True     
 == Scaling a node pool
 
 . You can manually scale a NodePool by using the `oc scale` command:
+
 +
 ----
 NODEPOOL_NAME=${CLUSTER_NAME}-work
@@ -300,6 +318,7 @@ oc scale nodepool/$NODEPOOL_NAME --namespace clusters --replicas=$NODEPOOL_REPLI
 ----
 
 . After a few moments, enter the following command to see the status of the node pool:
+
 +
 ----
 oc --kubeconfig $CLUSTER_NAME-kubeconfig get nodes
@@ -340,6 +359,7 @@ hypershift create nodepool kubevirt \
 ----
 
 . Check the status of the node pool by listing `nodepool` resources in the `clusters` namespace:
+
 +
 ----
 oc get nodepools --namespace clusters
@@ -353,6 +373,7 @@ example-extra-cpu         example         2                               False 
 ----
 
 . After some time, you can check the status of the node pool by entering the following command:
+
 +
 ----
 oc --kubeconfig $CLUSTER_NAME-kubeconfig get nodes
@@ -371,6 +392,7 @@ example-extra-cpu-zr8mj   Ready    worker   102s    v1.25.4+18eadca
 ----
 
 . Verify that the node pool is in the status that you expect by entering this command:
+
 +
 ----
 oc get nodepools --namespace clusters
@@ -390,6 +412,7 @@ Delete a HostedCluster
 To verify that your hosted cluster was successfully created, take the following steps.
 
 . Verify that the `HostedCluster` resource transitioned to the `completed` state by entering the following command:
+
 +
 ----
 oc get --namespace clusters hostedclusters ${CLUSTER_NAME}
@@ -402,6 +425,7 @@ clusters    example   4.12.2    example-admin-kubeconfig   Completed   True     
 ----
 
 . Verify that all the cluster operators in the guest cluster are online by entering the following commands:
+
 +
 ----
 hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
