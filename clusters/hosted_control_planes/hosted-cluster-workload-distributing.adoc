@@ -1,0 +1,33 @@
+[#hosted-cluster-workload-distributing]
+= Distributing hosted cluster workloads (Technology Preview)
+
+As a management cluster administrator, you can use the following labels and taints in the management cluster nodes to schedule the control plane workload:
+
+* `hypershift.openshift.io/control-plane: true`
+* `hypershift.openshift.io/cluster: ${HostedControlPlane Namespace}`
+
+Pods for a hosted cluster have tolerations, and the scheduler uses affinity rules to schedule them. Pods tolerate taints for `control-plane` and the `cluster` for the pods. The scheduler prioritizes the scheduling of pods into nodes that are labeled with `hypershift.openshift.io/control-plane` and `hypershift.openshift.io/cluster: ${HostedControlPlane Namespace}`.
+
+For the `ControllerAvailabilityPolicy` option, use `HighlyAvailable`. When you use that option, you can schedule pods for each deployment within a hosted cluster across different failure domains by setting `topology.kubernetes.io/zone` as the topology key.
+
+To enable a hosted cluster to require its pods to be scheduled into infra nodes, set `HostedCluster.spec.nodeSelector`, as shown in the following example:
+
+[source,yaml]
+----
+  spec:
+    nodeSelector:
+      role.kubernetes.io/infra: ""
+----
+
+This way, hosted control planes for each tenant are eligible infrastructure node workloads, and you do not need to entitle the underlying {ocp-short} nodes.
+
+[#hosted-cluster-workload-distributing-priority]
+== Priority classes
+
+Four built-in priority classes influence the priority and preemption of the hosted cluster pods. You can create the pods in the management cluster in the following order from highest to lowest:
+
+* `hypershift-operator`: HyperShift Operator pods.
+* `hypershift-etcd`: Pods for etcd.
+* `hypershift-api-critical`: Pods that are required for API calls and resource admission to succeed. These pods include pods such as `kube-apiserver`, aggregated API servers, and web hooks.
+* `hypershift-control-plane`: Pods in the control plane that are not API-critical but still need elevated priority, such as the cluster version Operator.
+

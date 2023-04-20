@@ -1,14 +1,14 @@
 [#policy-generator]
 = Policy Generator
 
-The Policy Generator is a part of the {product-title} application lifecycle subscription GitOps workflow that generates {product-title-short} policies using Kustomize. The Policy Generator builds {product-title-short} policies from Kubernetes manifest YAML files, which are provided through a `PolicyGenerator` manifest YAML file that is used to configure it. The Policy Generator is implemented as a Kustomize generator plug-in. For more information on Kustomize, see the link:https://kustomize.io/[Kustomize documentation]. 
+The Policy Generator is a part of the {product-title} application lifecycle subscription GitOps workflow that generates {product-title-short} policies using Kustomize. The Policy Generator builds {product-title-short} policies from Kubernetes manifest YAML files, which are provided through a `PolicyGenerator` manifest YAML file that is used to configure it. The Policy Generator is implemented as a Kustomize generator plug-in. For more information on Kustomize, read the _Kustomize documentation_. 
 
 The Policy Generator version bundled in this version of {product-title-short} is v1.10.0. View the following topics to for more information:
 
 * <<policy-generator-capabilities,Policy Generator capabilities>>
 * <<policy-generator-configuration,Policy Generator configuration structure>>
 * <<policy-gen-yaml-table,Policy Generator configuration reference table>>
-* <<related-resources-pol-gen,Related resources>>
+* <<additional-resources-pol-gen,Additional resources>>
 
 [#policy-generator-capabilities]
 == Policy Generator capabilities
@@ -101,6 +101,7 @@ metadata:
     policy.open-cluster-management.io/categories: CM Configuration Management
     policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
     policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/description:
   name: config-data
   namespace: policies
 spec:
@@ -130,7 +131,7 @@ spec:
 [#policy-gen-yaml-table]
 == Policy Generator configuration reference table
 
-Note that all the fields in the `policyDefaults` section except for `namespace` can be overridden for each policy.
+Note that all the fields in the `policyDefaults` section except for `namespace` can be overridden per policy, and all the fields in the `policySetDefaults` section can be overridden per policy set.
 
 .Parameter table
 |===
@@ -188,6 +189,10 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | Optional
 | Key-value pairs of annotations to set on generated configuration policies. For example, you can disable policy templates by defining the following parameter: `{"policy.open-cluster-management.io/disable-templates": "true"}`. The default value is empty (`{}`).
 
+| `policyDefaults.copyPolicyMetadata`
+| Optional
+| Copies the labels and annotations for all policies and adds them to a replica policy. Set to `true` by default. If set to `false`, only the policy framework specific policy labels and annotations are copied to the replicated policy.
+
 | `policyDefaults.severity`
 | Optional
 | The severity of the policy violation. The default value is `low`.
@@ -202,7 +207,7 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | `policyDefaults.namespaceSelector`
 | Required for namespaced objects that do not have a namespace specified
-| Determines namespaces in the managed cluster that the object is applied to. The `include` and `exclude` parameters accept file path expressions to include and exclude namespaces by name. The `matchExpressions` and `matchLabels` parameters specify namespaces to include by label. See the https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/[Kubernetes labels and selectors] documentation. The resulting list is compiled by using the intersection of results from all parameters.
+| Determines namespaces in the managed cluster that the object is applied to. The `include` and `exclude` parameters accept file path expressions to include and exclude namespaces by name. The `matchExpressions` and `matchLabels` parameters specify namespaces to include by label. Read the _Kubernetes labels and selectors_ documentation. The resulting list is compiled by using the intersection of results from all parameters.
 
 | `policyDefaults.evaluationInterval`
 | Optional
@@ -284,6 +289,10 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | Optional
 | Array of policy sets that the policy joins. Policy set details can be defined in the `policySets` section. When a policy is part of a policy set, a placement binding is not generated for the policy since one is generated for the set. Set `policies[].generatePlacementWhenInSet` or `policyDefaults.generatePlacementWhenInSet` to override `policyDefaults.policySets`.
 
+| `policyDefaults.generatePolicyPlacement`
+| Optional
+| Generate placement manifests for policies. Set to `true` by default. When set to `false`, the placement manifest generation is skipped, even if a placement is specified.
+
 | `policyDefaults.generatePlacementWhenInSet`
 | Optional
 | When a policy is part of a policy set, by default, the generator does not generate the placement for this policy since a placement is generated for the policy set. Set `generatePlacementWhenInSet` to `true` to deploy the policy with both policy placement and policy set placement. The default value is `false`.
@@ -302,11 +311,11 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | `policyDefaults.placement.placementPath`
 | Optional
-| To reuse an existing placement, specify the path here relative to the `kustomization.yaml` file. If provided, this placement rule is used by all policies by default. See `clusterSelectors` to generate a new `Placement`.
+| To reuse an existing placement, specify the path relative to the location of the `kustomization.yaml` file. If provided, this placement rule is used by all policies by default. See `_labelSelector_` to generate a new `Placement`.
 
-| `policyDefaults.placement.clusterSelectors`
+| `policyDefaults.placement.clusterSelector`
 | Optional
-| Specify a placement by defining a cluster selector in the following format, `key:value`. See `placementPath` to specify an existing file.
+| Specify a placement by defining a cluster selector using either `key:value`, or by providing `matchExpressions`, `matchLabels`, or both, with appropriate values. See `_placementRulePath_` to specify an existing file.
 
 | `policyDefaults.placement.placementRuleName`
 | Optional
@@ -314,15 +323,27 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | `policyDefaults.placement.placementRulePath`
 | Optional
-| To reuse an existing placement rule, specify the path here relative to the `kustomization.yaml` file. If provided, this placement rule is used by all policies by default. See `labelSelector` to generate a new `PlacementRule`.
+| To reuse an existing placement rule, specify the path relative to the location of the `kustomization.yaml` file. If provided, this placement rule is used by all policies by default. See `_clusterSelector_` to generate a new `PlacementRule`.
 
 | `policyDefaults.placement.labelSelector`
 | Optional
-| Specify a placement rule by defining a cluster selector in the following format, `key:value`. See `placementRulePath` to specify an existing file.
+| Specify a placement rule by defining a cluster selector using either `key:value`, or providing a `matchExpressions`, `matchLabels`, or both, with appropriate values. See `_placementPath_` to specify an existing file.
 
-| `policies`
-| Required. 
-| The list of policies to create along with overrides to either the default values, or the values that are set in `policyDefaults`. See `policyDefaults` for additional fields and descriptions.
+| *`policySetDefaults`*
+| Optional
+| Default values for policy sets. Any default value listed for this parameter is overridden by an entry in the `policySets` array.
+
+| `policySetDefaults.placement`
+| Optional
+| The placement configuration for the policies. This defaults to a placement configuration that matches all clusters. See `_policyDefaults.placement_` for description of this field.
+
+| `policySetDefaults.generatePolicySetPlacement`
+| Optional
+| Generate placement manifests for policy sets. Set to `true` by default. When set to `false` the placement manifest generation is skipped, even if a placement is specified.
+
+| *`policies`*
+| Required 
+| The list of policies to create along with overrides to either the default values, or the values that are set in `policyDefaults`. See `_policyDefaults_` for additional fields and descriptions.
 
 | `policies[].name`
 | Required
@@ -340,9 +361,9 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | Optional
 | A list of Kustomize patches to apply to the manifest at the path. If there are multiple manifests, the patch requires the `apiVersion`, `kind`, `metadata.name`, and `metadata.namespace` (if applicable) fields to be set so Kustomize can identify the manifest that the patch applies to. If there is a single manifest, the `metadata.name` and `metadata.namespace` fields can be patched.
 
-| `policySets`
+| *`policySets`*
 | Optional
-| The list of policy sets to create. To include a policy in a policy set, use `policyDefaults.policySets`, `policies[].policySets`,  or `policySets.policies`.
+| The list of policy sets to create, along with overrides to either the default values or the values that are set in `policySetDefaults`. To include a policy in a policy set, use `policyDefaults.policySets`, `policies[].policySets`,  or `policySets.policies`. See `_policySetDefaults_` for additional fields and descriptions.
 
 | `policySets[].name`
 | Required
@@ -356,21 +377,20 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | Optional
 | The list of policies to be included in the policy set. If `policyDefaults.policySets` or `policies[].policySets` is also specified, the lists are merged.
 
-| `policySets[].placement`
-| Optional
-| The placement configuration for the policy set. This defaults to a placement configuration that matches all clusters. See `policyDefaults.placement` for placement documentation, however `policyDefaults.placement` settings do not apply to policy sets.
 |===
 
-[#related-resources-pol-gen]
-== Related resources
+[#additional-resources-pol-gen]
+== Additional resources
 
-* See xref:../governance/policy_gen_install_operator.adoc#policy-gen-install-operator[Generating a policy to install an Operator]
-* See the link:https://github.com/open-cluster-management-io/policy-generator-plugin[`policy-generator-plugin`] repository for more details.
-* See xref:../governance/policy_set_ctrl.adoc#policy-set-controller[Policy set controller] for more details.
-* Return to the xref:../governance/third_party_policy.adoc#integrate-third-party-policy-controllers[Integrate third-party policy controllers] documentation.
-* Refer to the xref:../governance/grc_intro.adoc#governance[Governance] documentation for more topics.
-* See link:../applications/subscription_sample.adoc#applying-kustomize[Applying Kustomize] for more information.
+* Read xref:../governance/policy_gen_install_operator.adoc#policy-gen-install-operator[Generating a policy to install an Operator].
+* Read the link:https://github.com/open-cluster-management-io/policy-generator-plugin[`policy-generator-plugin`] repository for more details.
+* Read to xref:../governance/policy_set_ctrl.adoc#policy-set-controller[Policy set controller] for more details.
+* Read link:../applications/subscription_sample.adoc#applying-kustomize[Applying Kustomize] for more information.
+* Read the xref:../governance/grc_intro.adoc#governance[Governance] documentation for more topics.
 * See an example of a link:https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/[`kustomization.yaml`] file.
-* See link:https://open-policy-agent.github.io/gatekeeper/website/docs/[Gatekeeper] for more details.
-* See link:https://kyverno.io/[Kyverno] for more details.
+* Refere to the link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/[Kubernetes labels and selectors] documentation.
+* Refer link:https://open-policy-agent.github.io/gatekeeper/website/docs/[Gatekeeper] for more details.
+* Refer link:https://kyverno.io/[Kyverno] for more details.
+* Refer to the link:https://kustomize.io/[Kustomize documentation]. 
+* Return to the xref:../governance/third_party_policy.adoc#integrate-third-party-policy-controllers[Integrate third-party policy controllers] documentation.
 
