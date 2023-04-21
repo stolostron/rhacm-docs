@@ -114,9 +114,9 @@ Because the control plane and the data plane are separate in hosted control plan
 * Ingress for workloads within the hosted cluster, such as `*.apps.service-consumer-domain.com`
 * Ingress for service endpoints within the management cluster, such as API or OAUTH endpoints through `*.service-provider-domain.com`
 
-The input for the `hostedCluster.spec.dns` dictates the Ingress for workloads within the hosted cluster. The input for `hostedCluster.spec.services.routePublishingStrategy.hostname` dictates the Ingress for service endpoints within the management cluster.
+The input for the `hostedCluster.spec.dns` dictates the Ingress for workloads within the hosted cluster. The input for `hostedCluster.spec.services.servicePublishingStrategy.route.hostname` dictates the Ingress for service endpoints within the management cluster.
 
-External DNS is useful for setups with public endpoints, such as `Public` or `PublicandPrivate`. For a private setup, all endpoints must be accessible through `.hypershift.local`, which contains the CNAME records to the private link endpoint services.
+External DNS is useful for setups with public endpoints, such as `Public` or `PublicAndPrivate`. For a private setup, all endpoints must be accessible through `.hypershift.local`, which contains the CNAME records to the private link endpoint services.
 
 A hosted control plane exposes four services:
 
@@ -193,7 +193,7 @@ oc label secret hypershift-operator-external-dns-credentials -n local-cluster cl
 [#create-public-dns-hosted-zone-aws]
 === Creating the public DNS hosted zone
 
-You can create the public DNS hosted zone in the AWS Route 53 management console:
+You can create the public DNS hosted zone to be used as the external DNS domain-filter in the AWS Route 53 management console:
 
 . In the Route 53 management console, click *Create hosted zone*.
 // LH: Need to verify this step to ensure that it matches the UI
@@ -281,32 +281,8 @@ The following table notes when it is valid to set `hostname` for a service and e
 [#deploy-cluster-cli-external-dns-aws]
 === Deploying a cluster by using the command line interface and external DNS
 
-To deploy the `hypershift` and `external-dns` Operators when the external public hosted zone already exists, take the following steps:
+You need to deploy the `hypershift` and `external-dns` Operators when the external public hosted zone already exists. Ensure that the `external-dns` Operator is running and that the internal flags point to the public hosted zone by entering the following commands:
 
-. Ensure that the public hosted zone exists. In the following example, the zone is `service-provider-domain.com`.
-
-. Enter the following commands:
-+
-----
-export KUBECONFIG=<path_to_management_cluster_kubeconfig>
-export REGION=<region>
-export BUCKET_NAME=<bucket_name>
-export AWS_CREDS=~/.aws/credentials
-
-hypershift install \
-    --oidc-storage-provider-s3-bucket-name ${BUCKET_NAME} \
-    --oidc-storage-provider-s3-credentials ${AWS_CREDS} \
-    --oidc-storage-provider-s3-region ${REGION} \
-    --external-dns-provider=aws \
-    --external-dns-credentials=${AWS_CREDS} \
-    --external-dns-domain-filter=service-provider-domain.com \
-    --private-platform AWS \
-    --aws-private-creds ${AWS_CREDS} \
-    --aws-private-region ${REGION}
-----
-
-. Ensure that the `external-dns` Operator is running and that the internal flags point to the public hosted zone by entering the following commands:
-+
 ----
 export KUBECONFIG=<path_to_management_cluster_kubeconfig>
 export AWS_CREDS=~/.aws/credentials
