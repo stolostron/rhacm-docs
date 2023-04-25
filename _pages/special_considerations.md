@@ -15,7 +15,7 @@ To avoid formatting issues, do not use a single `*` if possible. You can often a
 
 If you must use `*`, make sure to only use a single `*` per line. If necessary, separate paragraphs with multiple single asterisks into several lines to avoid formatting or build issues.
 
-Additionally to only appearing once per line, a single  `*` should also be enclosed in backticks, not in codeblocks.
+Additionally to only appearing once per line, a single  `*` should also be enclosed in backticks, not in a codeblock.
 
 ## IP addresses
 
