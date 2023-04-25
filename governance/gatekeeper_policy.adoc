@@ -3,94 +3,11 @@
 
 Gatekeeper is a validating webhook that enforces custom resource definition based policies that are run with the Open Policy Agent (OPA). You can install gatekeeper on your cluster by using the gatekeeper operator policy. Gatekeeper policy can be used to evaluate Kubernetes resource compliance. You can leverage a OPA as the policy engine, and use Rego as the policy language.
 
-The gatekeeper policy is created as a Kubernetes configuration policy in {product-title-short}. Gatekeeper policies include constraint templates  (`ConstraintTemplates`) and `Constraints`, audit templates, and admission templates. For more information, see the https://github.com/open-policy-agent/gatekeeper#gatekeeper[Gatekeeper upstream repository].
+The gatekeeper policy is created as a Kubernetes configuration policy in {product-title-short}. Gatekeeper policies include constraint templates  (`ConstraintTemplates`) and `Constraints`, audit templates, and admission templates. For more information, see the link:https://github.com/open-policy-agent/gatekeeper#gatekeeper[Gatekeeper upstream repository].
 
 {product-title-short} supports version 3.3.0 for Gatekeeper and applies the following constraint templates in your {product-title-short} gatekeeper policy:
 
-* `ConstraintTemplates` and constraints: Use the `policy-gatekeeper-k8srequiredlabels` policy to create a gatekeeper constraint template on the managed cluster.
-+
-[source,yaml]
-----
-apiVersion: policy.open-cluster-management.io/v1
-kind: ConfigurationPolicy
-metadata:
-  name: policy-gatekeeper-k8srequiredlabels
-spec:
-  remediationAction: enforce # will be overridden by remediationAction in parent policy
-  severity: low
-  object-templates:
-    - complianceType: musthave
-      objectDefinition:
-        apiVersion: templates.gatekeeper.sh/v1beta1
-        kind: ConstraintTemplate
-        metadata:
-          name: k8srequiredlabels
-        spec:
-          crd:
-            spec:
-              names:
-                kind: K8sRequiredLabels
-              validation:
-                # Schema for the `parameters` field
-                openAPIV3Schema:
-                  properties:
-                    labels:
-                      type: array
-                      items: string
-          targets:
-            - target: admission.k8s.gatekeeper.sh
-              rego: |
-                package k8srequiredlabels
-                violation[{"msg": msg, "details": {"missing_labels": missing}}] {
-                  provided := {label | input.review.object.metadata.labels[label]}
-                  required := {label | label := input.parameters.labels[_]}
-                  missing := required - provided
-                  count(missing) > 0
-                  msg := sprintf("you must provide labels: %v", [missing])
-                }
-    - complianceType: musthave
-      objectDefinition:
-        apiVersion: constraints.gatekeeper.sh/v1beta1
-        kind: K8sRequiredLabels
-        metadata:
-          name: ns-must-have-gk
-        spec:
-          match:
-            kinds:
-              - apiGroups: [""]
-                kinds: ["Namespace"]
-            namespaces:
-              - e2etestsuccess
-              - e2etestfail
-          parameters:
-            labels: ["gatekeeper"]
-----
-
-* audit template: Use the `policy-gatekeeper-audit` to periodically check and evaluate existing resources against the gatekeeper policies that are enforced to detect existing misconfigurations. 
-+
-[source,yaml]
-----
-apiVersion: policy.open-cluster-management.io/v1
-kind: ConfigurationPolicy
-metadata:
-  name: policy-gatekeeper-audit
-spec:
-  remediationAction: inform # will be overridden by remediationAction in parent policy
-  severity: low
-  object-templates:
-    - complianceType: musthave
-      objectDefinition:
-        apiVersion: constraints.gatekeeper.sh/v1beta1
-        kind: K8sRequiredLabels
-        metadata:
-          name: ns-must-have-gk
-        status:
-          totalViolations: 0
-----
-+
-*Note:* The Gatekeeper audit functionality runs every minute by default. Audit results are sent back to the hub cluster to be viewed in the policy status of the managed cluster.
-+
-- audit template using policies: Use the Gatekeeper audit feature on your hub cluster by using policies for multicluster distribution and Gatekeeper audit results aggregation. The following example defines a Gatekeeper `ConstraintTemplate` and constraint (`K8sRequiredLabels`) to ensure the `gatekeeper` label is set on all namespaces. 
+* `ConstraintTemplates` and constraints: Use the Gatekeeper integration feature by using policies for multicluster distribution of Gatekeeper constraints and Gatekeeper audit results aggregation on the hub cluster. The following example defines a Gatekeeper `ConstraintTemplate` and constraint (`K8sRequiredLabels`) to ensure the `gatekeeper` label is set on all namespaces:
 +
 [source,yaml]
 ----
@@ -150,7 +67,33 @@ With the previous policy, you might receive the following policy status message:
 +
 To view the Gatekeeper audit results for a specific managed cluster from the console, navigate to the policy template _Results_ page. If search is enabled, view the YAML of the Kubernetes objects that failed the audit. *Note:* The _Related resources_ section is only available when the audit results are generated by Gatekeeper version 3.9 or newer.
 
-* admission template: Use the `policy-gatekeeper-admission` to check for misconfigurations that are created by the gatekeeper admission webhook:
+* audit template: Use the `policy-gatekeeper-audit` to periodically check and evaluate existing resources against the gatekeeper policies that are enforced to detect existing misconfigurations. 
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: policy-gatekeeper-audit
+spec:
+  remediationAction: inform # will be overridden by remediationAction in parent policy
+  severity: low
+  object-templates:
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: constraints.gatekeeper.sh/v1beta1
+        kind: K8sRequiredLabels
+        metadata:
+          name: ns-must-have-gk
+        status:
+          totalViolations: 0
+----
++
+*Note:* The Gatekeeper audit functionality runs every minute by default. Audit results are sent back to the hub cluster to be viewed in the policy status of the managed cluster.
++
+- audit template using policies: Use the Gatekeeper audit feature on your hub cluster by using policies for multicluster distribution and Gatekeeper audit results aggregation. The following example defines a Gatekeeper `ConstraintTemplate` and constraint (`K8sRequiredLabels`) to ensure the `gatekeeper` label is set on all namespaces. 
+
+* admission template: Use the `policy-gatekeeper-admission` to check for Kubernetes API requests denied by the gatekeeper admission webhook:
 +
 [source,yaml]
 ----
