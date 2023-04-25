@@ -113,10 +113,6 @@ See the IBM Style manual and Red Hat Supplementary manual regularly for guidance
 | Should | Do not use. |
 | Would | Do not use as an auxiliary verb. Only use when referring to an unfulfilled condition (x would have resulted in y). |
 
-## IP addresses
-
-Do not include public IP addresses from test clusters in the documentation. You can use private IP addresses where necessary.
-
 ## Supplemental resources
 
 * [The 7 principles of naming](https://www.namingthings.co/naming-things-principles)
