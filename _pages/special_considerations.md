@@ -5,7 +5,7 @@ permalink:special_considerations
 horizontal: false
 ---
 
-You might enciunter some rare and specific writing cirumstances that require a workaround or special considerations. If you are encountering formatting or build issues, read the following topics.
+You might encounter some rare and specific writing cirumstances that require a workaround or special considerations. If you are encountering formatting or build issues, read the following topics.
 
 ## Asterisks
 
