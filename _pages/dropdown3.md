@@ -29,4 +29,7 @@ children:
     - title: divider
     - title: UI writing
       permalink: /ui_writing
+    - title: divider
+    - title: Special considerations
+      permalink: /special_considerations
 ---

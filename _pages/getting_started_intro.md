@@ -44,6 +44,7 @@ The control system we use to maintain our GitHub repository.
 ### gsed
 
 [Download](https://www.gnu.org/software/sed/)
+
 [Download (macOS)](https://formulae.brew.sh/formula/gnu-sed)
 
 The stream editor we use to build our documentation.
