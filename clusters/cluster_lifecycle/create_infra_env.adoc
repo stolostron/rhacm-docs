@@ -13,7 +13,7 @@ You can use the console to create an infrastructure environment to manage your h
 Infrastructure environments support the following features:
 
 - Zero-touch provisioning of clusters: Deploy clusters using a script. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html/scalability_and_performance/ztp-deploying-disconnected[Deploying distributed units at scale in a disconnected environment] in the {ocp} documentation for more information.
-- Late binding: Enable the host to be booted by an infrastructure administrator, and the creator of a cluster can bind a cluster to that host at a later time. The cluster creator does not have to have administrator privileges to the infrastructure when using late binding.
+- Late binding: Enable the host to be booted by an infrastructure administrator. The creator of a cluster can bind a cluster to that host at a later time. The cluster creator does not have to have administrator privileges to the infrastructure when using late binding.
 - Dual stack: Deploy clusters that have both IPv4 and IPv6 addresses. Dual stack uses the `OVN-Kubernetes` networking implementation to support multiple subnets. 
 - Add remote worker nodes: Add remote worker nodes to your clusters after they are created and running, which provides flexibility of adding nodes in other locations for backup purposes.
 - Static IP using NMState: Use the NMState API to define static IP addresses for your environment.
@@ -23,7 +23,7 @@ Infrastructure environments support the following features:
 
 See the following prerequisites before creating an infrastructure environment:
 
-* You must have a deployed hub cluster on {ocp-short} version 4.11 or later.
+* You must have {ocp-short} deployed on your hub cluster.
 * You need Internet access for your hub cluster (connected), or a connection to an internal or mirror registry that has a connection to the Internet (disconnected) to retrieve the required images for creating the environment.
 * You need a configured instance of the Central Infrastructure Management (CIM) feature on your hub cluster. 
 * You need an {ocp-short} https://console.redhat.com/openshift/install/pull-secret[pull secret]. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/images/managing-images#using-image-pull-secrets[Using image pull secrets] for more information. 
@@ -34,19 +34,21 @@ See the following prerequisites before creating an infrastructure environment:
 [#enable-cim]
 == Enabling the Central Infrastructure Management service
 
-The CIM service is provided with the {mce-short} and deploys {ocp-short} clusters. CIM is deployed when you enable the MultiClusterHub Operator on the hub cluster, but must be enabled.
+The Central Infrastructure Management service is provided with the {mce-short} and deploys {ocp-short} clusters. CIM is deployed when you enable the `MultiClusterHub` Operator on the hub cluster, but must be enabled.
 
 To enable the CIM service, complete the following steps: 
 
-. This step only applies if your hub cluster is installed on one of the following platforms: bare metal, Red Hat OpenStack Platform, VMware vSphere, or was installed by using the user-provisioned infrastructure (UPI) method and the platform is `None`. Skip this step if your hub cluster is on any other platform. 
-+
-Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces by running the following command:
+*Important:* Only if your hub cluster is installed on one of the following platforms: bare metal, Red Hat OpenStack Platform, VMware vSphere, or was installed by using the user-provisioned infrastructure (UPI) method and the platform is `None`, complete the following step. Skip this step if your hub cluster is on any other platform. 
+
+. Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces by running the following command:
+
 +
 ----
 oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
 ----
 
-. For disconnected environments, create a `ConfigMap` in the same namespace as your infrastructure operator to specify the values for `ca-bundle.crt` and `registries.conf` for your mirror registry. Your file `ConfigMap` should resemble the following example: 
+. *For disconnected environments:* Create a `ConfigMap` in the _same namespace_ as your infrastructure operator to specify the values for `ca-bundle.crt` and `registries.conf` for your mirror registry. Your file `ConfigMap` should resemble the following example: 
+
 +
 [source,yaml]
 ----
@@ -77,9 +79,12 @@ data:
 +
 Registries in the list of `unqualified-search-registries` are automatically added to an authentication ignore list in the `PUBLIC_CONTAINER_REGISTRIES` environment variable. The specified registries do not require authentication when the pull secret of the managed cluster is validated.
 
-. Create the `AgentServiceConfig` custom resource by completing the following steps:
+[#create-cr-cim]
+=== Creating the _AgentServiceConfig_ custom resource
 
-.. For disconnected environments only, save the following `YAML` content in the `agent_service_config.yaml` file:
+Create the `AgentServiceConfig` custom resource by completing the following steps:
+
+. *For disconnected environments only:* Save the following `YAML` content in the `agent_service_config.yaml` file and replace the values as needed:
 +
 [source,yaml]
 ----
@@ -116,12 +121,14 @@ spec:
       url: "<iso_url>"
       cpuArchitecture: "x86_64"
 ----
+
 +
 Replace `mirror_config` with the name of the `ConfigMap` that contains your mirror registry configuration details. 
 +
 Include the optional `unauthenticated_registry` parameter if you are using a mirror registry that does not require authentication. Entries on this list are not validated or required to have an entry in the pull secret. 
 
-.. For connected environments only, save the following `YAML` content in the `agent_service_config.yaml` file:
+. *For connected environments only:* Save the following `YAML` content in the `agent_service_config.yaml` file:
+
 +
 [source,yaml]
 ----
@@ -162,7 +169,8 @@ Replace `ocp_release_version` with the specific install version, for example, `4
 +
 Replace `iso_url` with the ISO url, for example, `https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.10/4.10.3/rhcos-4.10.3-x86_64-live.x86_64.iso`. You can find other values at: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.10/4.10.3/.
 
-.. Create the AgentServiceConfig custom resource by running the following command:
+. Create the `AgentServiceConfig` custom resource by running the following command:
+
 +
 ----
 oc create -f agent_service_config.yaml
@@ -174,7 +182,7 @@ The output might resemble the following example:
 agentserviceconfig.agent-install.openshift.io/agent created
 ----
 
-Your CIM service is configured. You can verify that it is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. 
+You can verify that your CIM service is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that the pods are ready and running. 
 
 [#manually-create-cr]
 === Manually create the Provisioning custom resource (CR)
@@ -212,7 +220,7 @@ oc get routes --all-namespaces | grep assisted-image-service
 Your domain might resemble the following example:
 `assisted-image-service-multicluster-engine.apps.<yourdomain>.com`
 
-. Make sure you are logged in at the hub and create a new `IngressController` with a unique domain using the `NLB` `type` parameter. See the following example:
+. While logged in to the hub cluster, create a new `IngressController` with a unique domain using the  `type.NLB` parameter. See the following example:
 +
 [source,yaml]
 ----
@@ -268,7 +276,7 @@ If the `spec.domain` report is provided, make sure that the `nlb-apps.<domain>.c
 oc edit route assisted-image-service -n <namespace>
 ----
 +
-*Tip:* The default namespace is where you installed the {mce-short}.
+*Note:* The default namespace is where you installed the {mce-short}.
 
 . Add the following lines to the `assisted-image-service` route:
 +
@@ -319,9 +327,6 @@ To create an infrastructure environment from the console, complete the following
 ** No Proxy domains: A comma-separated list of domains that should bypass the proxy. Begin a domain name with a period `.` to include all of the subdomains that are in that domain. Add and asterisk `*` to bypass the proxy for all destinations. 
 
 You can now continue by adding hosts to your infrastructure environment. 
-
-[#accessing-your-infra-env]
-== Accessing an infrastructure environment
 
 To access an infrastructure environment, select *Infrastructure* > *Host inventory* in the console. Select your infrastructure environment from the list to view the details and hosts for that infrastructure environment.
 
