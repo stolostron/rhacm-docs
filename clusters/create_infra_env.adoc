@@ -85,6 +85,7 @@ Registries in the list of `unqualified-search-registries` are automatically adde
 Create the `AgentServiceConfig` custom resource by completing the following steps:
 
 . *For disconnected environments only:* Save the following `YAML` content in the `agent_service_config.yaml` file and replace the values as needed:
+
 +
 [source,yaml]
 ----
@@ -118,7 +119,8 @@ spec:
   osImages: 
     - openshiftVersion: "<ocp_version>" 
       version: "<ocp_release_version>" 
-      url: "<iso_url>"
+      url: "<iso_url>" 
+      rootFSUrl: "<root_fs_url>" 
       cpuArchitecture: "x86_64"
 ----
 
@@ -171,6 +173,9 @@ Replace `iso_url` with the ISO url, for example, `https://mirror.openshift.com/p
 +
 Replace `root_fs_url` with the root FS image URL, for example, `https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.10/4.10.3/rhcos-4.10.3-x86_64-live-rootfs.x86_64.img`. You can find other values at: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.10/4.10.3/.
 
+[#create-cr-cim]
+=== Creating the _AgentServiceConfig_ custom resource
+
 . Create the `AgentServiceConfig` custom resource by running the following command:
 
 +
@@ -184,18 +189,18 @@ The output might resemble the following example:
 agentserviceconfig.agent-install.openshift.io/agent created
 ----
 
-You can verify that your CIM service is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that the pods are ready and running. 
+You can verify that it is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. Continue with xref:../clusters/create_infra_env.adoc#creating-your-infra-env-with-the-console[Creating your infrastructure environment with the console].
 
 [#manually-create-cr]
 === Manually create the Provisioning custom resource (CR)
 
-Manually create a `Provisioning` custom resource to enable services for automated provisioning by using the following command:
+Manually create a `Provisioning` CR to enable services for automated provisioning by using the following command:
 
 ----
 oc create -f provisioning-configuration.yaml
 ----
 
-Your custom resource might resemble the following sample:
+Your CR might resemble the following sample:
 
 [source,yaml]
 ----
@@ -211,7 +216,7 @@ spec:
 [#enable-cim-aws]
 === Enabling Central Infrastructure Management on Amazon Web Services
 
-If you are running your hub cluster on Amazon Web Services and want to enable the CIM service, complete the following additional steps after <<enable-cim,Enabling CIM>>:
+If you are running your hub cluster on Amazon Web Services and want to enable the CIM service, complete the following additional steps after  <<enable-cim,Enabling CIM>>:
 
 . Make sure you are logged in at the hub and find the unique domain configured on the `assisted-image-service` by running the following command:
 +
@@ -222,7 +227,7 @@ oc get routes --all-namespaces | grep assisted-image-service
 Your domain might resemble the following example:
 `assisted-image-service-multicluster-engine.apps.<yourdomain>.com`
 
-. While logged in to the hub cluster, create a new `IngressController` with a unique domain using the  `type.NLB` parameter. See the following example:
+. Make sure you are logged in at the hub and create a new `IngressController` with a unique domain using the `NLB` `type` parameter. See the following example:
 +
 [source,yaml]
 ----
@@ -254,31 +259,13 @@ spec:
 oc apply -f ingresscontroller.yaml
 ----
 
-. Make sure that the value of the `spec.domain` parameter of the new `IngressController` is not in conflict with an existing `IngressController` by completing the following steps:
-
-.. List all `IngressControllers` by running the following command:
-+
-----
-oc get ingresscontroller -n openshift-ingress-operator
-----
-
-.. Run the following command on each of the `IngressControllers`, except the `ingress-controller-with-nlb` that you just created:
-+
-----
-oc edit ingresscontroller <name> -n openshift-ingress-operator
-----
-+
-If the `spec.domain` report is missing, add a default domain that matches all of the routes that are exposed in the cluster except `nlb-apps.<domain>.com`.
-+
-If the `spec.domain` report is provided, make sure that the `nlb-apps.<domain>.com` route is excluded from the specified range.
-
 . Run the following command to edit the `assisted-image-service` route to use the `nlb-apps` location:
 +
 ----
 oc edit route assisted-image-service -n <namespace>
 ----
 +
-*Note:* The default namespace is where you installed the {mce-short}.
+*Tip:* The default namespace is where you installed the :mce:.
 
 . Add the following lines to the `assisted-image-service` route:
 +
@@ -309,13 +296,13 @@ oc get pods -n multicluster-engine | grep assist
 [#creating-your-infra-env-with-the-console]
 == Creating your infrastructure environment with the console
 
-To create an infrastructure environment from the console, complete the following steps:
+To create an infrastructure environment from the {product-title-short} console, complete the following steps:
 
-. From the navigation menu, navigate to *Infrastructure* > *Host inventory* and click *Create infrastructure environment*.
+. From the navigation menu, navigate to *Infrastructure* > *Infrastructure environments* and click *Create infrastructure environment*.
 . Add the following information to your infrastructure environment settings: 
 +
-* Name: A unique name for your infrastructure environment. 
-* Network type: Specifies which types of hosts can be added to your infrastructure environment. You can only use the static IP option when you are using bare metal hosts. 
+* Name: A unique name for your environment. 
+* Network type: Specifies which types of hosts can be added to your environment. You can only use the static IP option when you are using bare metal hosts. 
 * Location: Specifies the geographic location of the host. The geographic location can be used to easily determine where your data on a cluster is stored when you are creating the cluster. 
 * Labels: Optional field where you can add labels to the infrastructure environment so you can more easily find and group the environment with other environments that share a characteristic. The selections that you made for the network type and location are automatically added to the list of labels.
 * Pull secret: Your {ocp-short} https://console.redhat.com/openshift/install/pull-secret[pull secret] that enables you to access the {ocp-short} resources. 
