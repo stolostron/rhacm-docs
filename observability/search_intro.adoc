@@ -51,7 +51,7 @@ spec:
   storageClassName: gp2
 ----
 +
-This confirguration creates a PVC named `gp2-search` and is mounted to the `search-postgres` pod. By default, the storage size is `10Gi`. You can modify the storage size. For example, `20Gi` might be sufficient for about 200 managed clusters.
+This configuration creates a PVC named `gp2-search` and is mounted to the `search-postgres` pod. By default, the storage size is `10Gi`. You can modify the storage size. For example, `20Gi` might be sufficient for about 200 managed clusters.
 
 - PostgreSQL database configuration:
 +
@@ -79,7 +79,7 @@ spec:
   storageClassName: gp2-search
 ----
 +
-- Optimize cost by tuning the pod memory requirements, replica count, and update log levels for active pods. Update the `deployment` section of the `search-v2-operator` custom resource. There are four deployments managed by the `search-v2-operator`, which can be updated individually. Your `search-v2-operator` custom resource might resemble the following file:
+- Optimize cost by tuning the pod memory or CPU requirements, replica count, and update log levels for any of the four search pods (indexer, database, queryapi, or collector pod). Update the `deployment` section of the `search-v2-operator` custom resource. There are four deployments managed by the `search-v2-operator`, which can be updated individually. Your `search-v2-operator` custom resource might resemble the following file:
 +
 [source,yaml]
 ----
@@ -90,17 +90,36 @@ metadata:
   namespace: open-cluster-management
 spec:
   dbConfig: tuning-config
-    deployments:
-      collector:
-      resources:
+  deployments:
+    collector:
+      resources: <1>
         limits:
           cpu: 500m
           memory: 128Mi
         requests:
           cpu: 250m
           memory: 64Mi
-        indexer:
-        replicaCount: 3
+    indexer:
+      replicaCount: 3
+    database: {}
+    queryapi:
+      arguments: <2>
+      - -v=3
+----
++
+<1> You can apply resources to an indexer, database, queryapi, or collector pod.
+<2> You can control the log level verbosity for any of the previous four pods by adding the `- -v=3` argument.
++
+See the following example where memory resources are applied to the indexer pod:
++
+[source,yaml]
+----
+    indexer:
+      resources:
+        limits:
+          memory: 5Gi
+        requests:
+          memory: 1Gi 
 ----
 
 - Node placement for search pods:
