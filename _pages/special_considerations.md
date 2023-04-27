@@ -9,7 +9,7 @@ You might encounter some rare and specific writing cirumstances that require a w
 
 ## Asterisks
 
-In AsciiDoc, `*` (asterisk symbol, Unicode `U+002A`) denotes the beginning of bold text or a bullet point. This can cause formatting issues when `*` is used for other purposes, such as for placeholders or as part of a code or command.
+In AsciiDoc, `*` (asterisk symbol, Unicode `U+002A`) denotes the beginning of bold text or a bullet point. This can cause formatting issues when `*` is used for other purposes, such as for placeholders or as part of a command or code.
 
 To avoid formatting issues, do not use a single `*` if possible. You can often ask developers to provide alternatives if a codeblock or similar has stray asterisks.
 
