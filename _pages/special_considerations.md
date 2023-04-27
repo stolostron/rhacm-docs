@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Special considerations
-permalink:special_considerations
+permalink: special_considerations
 horizontal: false
 ---
 
