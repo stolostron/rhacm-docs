@@ -1,0 +1,334 @@
+[#restore-backup]
+= Restoring a backup
+
+In a typical restore scenario, the hub cluster where the backups run becomes unavailable, and the backed up data needs to be moved to a new hub cluster. This is done by running the cluster restore operation on the new hub cluster. In this case, the restore operation runs on a different hub cluster than where the backup is created.
+
+There are also cases where you want to restore the data on the same hub cluster where the backup was collected so that you can recover the data from a previous snapshot. In this case, both restore and backup operations run on the same hub cluster.
+
+After you create a `restore.cluster.open-cluster-management.io` resource on the hub cluster, you can run the following command to get the status of the restore operation: 
+
+----
+oc get restore -n open-cluster-management-backup
+----
+
+You can also verify that the backed up resources that are contained by the backup file are created.
+
+*Note:* The `restore.cluster.open-cluster-management.io` resource runs once unless you use the `syncRestoreWithNewBackups` option and set it to `true`, as mentioned in the <<restore-passive-resources,Restore passive resources>> section. If you want to run the same restore operation again after the restore operation is complete, you must create a new `restore.cluster.open-cluster-management.io` resource with the same `spec` options.
+
+The restore operation is used to restore all 3 backup types that are created by the backup operation. Yu can choose to install only a certain type of backup (only managed clusters, only user credentials, or only hub cluster resources).
+
+The restore defines the following 3 required `spec` properties, where the restore logic is defined for the types of backed up files:
+
+* `veleroManagedClustersBackupName` is used to define the restore option for the managed clusters activation resources.
+* `veleroCredentialsBackupName` is used to define the restore option for the user credentials.
+* `veleroResourcesBackupName` is used to define the restore option for the hub cluster resources (`Applications`, `Policy`, and other hub cluster resources like managed cluster passive data).
++
+The valid options for the previously mentioned properties are following values:
++
+** `latest` - This property restores the last available backup file for this type of backup.
+** `skip` - This property does not attempt to restore this type of backup with the current restore operation.
+** `<backup_name>` - This property restores the specified backup pointing to it by name. 
+
+The name of the `restore.velero.io` resources that are created by the `restore.cluster.open-cluster-management.io` is generated using the following template rule, `<restore.cluster.open-cluster-management.io name>-<velero-backup-resource-name>`. View the following descriptions:
+
+* `restore.cluster.open-cluster-management.io name` is the name of the current `restore.cluster.open-cluster-management.io` resource, which initiates the restore.
+* `velero-backup-resource-name` is the name of the Velero backup file that is used for restoring the data. For example, the `restore.cluster.open-cluster-management.io` resource named `restore-acm` creates `restore.velero.io` restore resources. View the following examples for the format:
+
+** `restore-acm-acm-managed-clusters-schedule-20210902205438` is used for restoring managed cluster activation data backups. In this sample, the `backup.velero.io` backup name used to restore the resource is `acm-managed-clusters-schedule-20210902205438`.
+** `restore-acm-acm-credentials-schedule-20210902206789` is used for restoring credential backups. In this sample, the `backup.velero.io` backup name used to restore the resource is `acm-managed-clusters-schedule-20210902206789`.
+** `restore-acm-acm-resources-schedule-20210902201234` is used for restoring application, policy, and other hub cluster resources like managed cluster passive data backups. In this sample, the `backup.velero.io` backup name used to restore the resource is `acm-managed-clusters-schedule-20210902201234`.
+
+*Note:* If `skip` is used for a backup type, `restore.velero.io` is not created.
+
+View the following YAML sample of the cluster `Restore` resource. In this sample, all three types of backed up files are being restored, using the latest available backed up files:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+  namespace: open-cluster-management-backup
+spec:
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+----
+
+*Note:* Only managed clusters created by the Hive API are automatically connected with the new hub cluster when the `acm-managed-clusters` backup from the managed clusters backup is restored on another hub cluster. All other managed clusters remain in the `Pending Import` state and must be imported back onto the new hub cluster. For more information, see <<restore-imported-managed-clusters,Restoring imported managed clusters (Technology Preview)>>.
+
+[#prepare-new-hub]
+== Preparing the new hub cluster 
+
+Before running the restore operation on a new hub cluster, you need to manually configure the hub cluster and install the same operators as on the initial hub cluster. You must install the {product-title-short} operator in the same namespace as the initial hub cluster, create the _DataProtectionApplication_ resource, and then connect to the same storage location where the initial hub cluster previously backed up data.
+
+Use the same configuration as on the initial hub cluster for the `MultiClusterHub` resource created by the {product-title-short} operator, including any changes to the `MultiClusterEngine` resource.
+
+For example, if the initial hub cluster has any other operators installed, such as {aap-short}, Red Hat OpenShift GitOps, `cert-manager`, you have to install them before running the restore operation. This ensures that the new hub cluster is configured in the same way as the initial hub cluster.
+
+[#clean-hub-restore]
+== Cleaning the hub cluster after restore
+
+Velero updates existing resources if they have changed with the currently restored backup. Velero does not clean up delta resources, which are resources created by a previous restore and not part of the currently restored backup. This limits the scenarios you can use when restoring hub cluster data on a new hub cluster. Unless the restore is applied only once, you cannot reliably use the new hub cluster as a passive configuration. The data on the hub cluster does not reflect the data available with the restored resources.
+
+To address this limitation, when a `Restore.cluster.open-cluster-management.io` resource is created, the backup operator runs a post restore operation that cleans up the hub cluster. The operation removes any resources created by a previous {product-title-short} restore that are not part of the currently restored backup.
+
+The post restore cleanup uses the `cleanupBeforeRestore` property to identify the subset of objects to clean up. You can use the following two options for the post restore cleanup:
+
+- `None`: No clean up necessary, just begin Velero restore. Use `None` on a brand new hub cluster.
+- `CleanupRestored`: Clean up all resources created by a previous {product-title-short} restore that are not part of the currently restored backup.
+- `CleanupAll`: Clean up all resources on the hub cluster that might be part of a {product-title-short} backup, even if they were not created as a result of a restore operation. This is to be used when extra content is created on a hub cluster before the restore operation starts.
++
+*Best Practice:* Avoid using the `CleanupAll` option. Only use it as a last resort with extreme caution. `CleanupAll` also cleans up resources on the hub cluster created by the user, in addition to resources created by a previously restored backup. Instead, use the `CleanupRestored `option to prevent updating the hub cluster content when the hub cluster is designated as a passive candidate for a disaster scenario. Use a clean hub cluster as a passive cluster.
+
+*Notes:*
+
+* Velero sets the status, `PartiallyFailed`, for a velero restore resource if the restored backup has no resources. This means that a `restore.cluster.open-cluster-management.io` resource can be in `PartiallyFailed` status if any of the created `restore.velero.io` resources do not restore any resources because the corresponding backup is empty.
+
+* The `restore.cluster.open-cluster-management.io` resource is run once, unless you use the `syncRestoreWithNewBackups:true` to keep restoring passive data when new backups are available. For this case, follow the restore passive with sync sample. See <<restore-passive-resources-check-backups,Restoring passive resources while checking for backups>>. After the restore operation is complete and you want to run another restore operation on the same hub cluster, you have to create a new `restore.cluster.open-cluster-management.io` resource.
+
+* Although you can create multiple `restore.cluster.open-cluster-management.io` resources, only one can be active at any moment in time.
+
+
+[#restore-passive-resources-check-backups]
+== Restoring passive resources while checking for backups
+
+Use the `restore-passive-sync` sample to restore passive data, while continuing to check if new backups are available and restore them automatically. To automatically restore new backups, you must set the `syncRestoreWithNewBackups` parameter to `true`. You must also only restore the latest passive data. You can find the sample example at the end of this section.
+
+Set the `VeleroResourcesBackupName` and `VeleroCredentialsBackupName` parameters to `latest`, and the `VeleroManagedClustersBackupName` parameter to `skip`. Immediately after the `VeleroManagedClustersBackupName` is set to `latest`, the managed clusters are activated on the new hub cluster and is now the primary hub cluster. 
+
+When the activated managed cluster becomes the primary hub cluster, the restore resource is set to `Finished` and the `syncRestoreWithNewBackups` is ignored, even if set to `true`. 
+
+By default, the controler checks for new backups every 30 minutes when the `syncRestoreWithNewBackups` is set to `true`. If new backups are found, it restores the backed up resources. You can change the duration of the check by updating the `restoreSyncInterval` parameter.
+
+For example, see the following resource that checks for backups every 10 minutes:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm-passive-sync
+  namespace: open-cluster-management-backup
+spec:
+  syncRestoreWithNewBackups: true # restore again when new backups are available
+  restoreSyncInterval: 10m # check for new backups every 10 minutes
+  cleanupBeforeRestore: CleanupRestored 
+  veleroManagedClustersBackupName: skip
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+----
+
+[#restore-passive-resources]
+== Restoring passive resources
+
+Use the `restore-acm-passive` sample to restore hub cluster resources in a passive configuration. Passive data is backup data such as secrets, ConfigMaps, applications, policies, and all the managed cluster custom resources, which do not activate a connection between managed clusters and hub clusters. The backup resources are restored on the hub cluster by the credentials backup and restore resources.
+
+See the following sample:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm-passive
+  namespace: open-cluster-management-backup
+spec:
+  cleanupBeforeRestore: CleanupRestored
+  veleroManagedClustersBackupName: skip
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+----
+
+[#restore-activation-resources]
+== Restoring activation resources
+
+Use the `restore-acm-passive-activate` sample when you want the hub cluster to manage the clusters. In this case it is assumed that the other data has been restored already on the hub cluster that using the passive resource.
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm-passive-activate
+  namespace: open-cluster-management-backup
+spec:
+  cleanupBeforeRestore: CleanupRestored
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: skip
+  veleroResourcesBackupName: skip
+----
+
+You have some options to restore activation resources, depending on how you restored the passive resources:
+
+- If you used the `restore-acm-passive-sync cluster.open-cluster-management.io` resource as documented in the _Restore passive resources while checking for backups to restore passive data_ section, update the `veleroManagedClustersBackupName` value to `latest` on this resource. As a result, the managed cluster resources and the `restore-acm-passive-sync` resource are restored.
+
+- If you restored the passive resources as a one time operation, or did not restore any resources yet, choose to restore all resources as specified in the _Restoring all resources_ section.
+
+[#restore-all-resources]
+== Restoring all resources
+
+Use the `restore-acm` sample if you want to restore all data at once and make the hub cluster manage the managed clusters in one step. After you create a `restore.cluster.open-cluster-management.io` resource on the hub cluster, run the following command to get the status of the restore operation:
+
+----
+oc get restore -n open-cluster-management-backup
+----
+
+Your sample might resemble the following resource:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+  namespace: open-cluster-management-backup
+spec:
+  cleanupBeforeRestore: CleanupRestored
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+----
+
+From your hub cluster, verify that the backed up resources contained by the backup file are created.
+
+[#restore-imported-managed-clusters]
+== Restoring imported managed clusters
+
+Only managed clusters connected with the primary hub cluster using the Hive API are automatically connected with the new hub cluster, where the activation data is restored. These clusters have been created on the primary hub cluster using the *Create cluster* button in the *Clusters* tab. Managed clusters connected with the initial hub cluster using the *Import cluster* button appear as `Pending Import` when the activation data is restored, and must be imported back on the new hub cluster.
+
+The Hive managed clusters can be connected with the new hub cluster because Hive stores the managed cluster `kubeconfig` in the managed cluster namespace on the hub cluster. This is backed up and restored on the new hub cluster. The import controller then updates the bootstrap `kubeconfig` on the managed cluster using the restored configuration, which is only available for managed clusters created using the Hive API. It is not available for imported clusters.
+
+To reconnect imported clusters on the new hub cluster, manually create the `auto-import-secret` resource after your start the restore operation. See _Importing the cluster with the auto import secret_ for more details.
+
+Create the `auto-import-secret` resource in the managed cluster namespace for each cluster in `Pending Import` state. Use a `kubeconfig` or token with enough permissions for the import component to start the automatic import on the new hub cluster. You must have access for each managed cluster by using a token to connect with the managed cluster. The token must have a `klusterlet` role binding or a role with the same permissions.
+
+[#more-restore-samples]
+== Using other restore samples
+
+View the following Restore section to view the YAML examples to restore different types of backed up files.
+
+** Restore all three types of backed up resources:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+  namespace: open-cluster-management-backup
+spec:
+  veleroManagedClustersBackupSchedule: latest
+  veleroCredentialsBackupSchedule: latest
+  veleroResourcesBackupSchedule: latest
+----
++
+** Restore only managed cluster resources:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+  namespace: open-cluster-management-backup
+spec:
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: skip
+  veleroResourcesBackupName: skip
+----
++
+** Restore the resources for managed clusters only, using the `acm-managed-clusters-schedule-20210902205438` backup:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+  namespace: open-cluster-management-backup
+spec:
+  veleroManagedClustersBackupName: acm-managed-clusters-schedule-20210902205438
+  veleroCredentialsBackupName: skip
+  veleroResourcesBackupName: skip
+----
++
+*Notes*: 
++
+* The `restore.cluster.open-cluster-management.io` resource is run once. After the restore operation is completed, you can optionally run another restore operation on the same hub cluster. You must create a new `restore.cluster.open-cluster-management.io` resource to run a new restore operation.
++
+* You can create multiple `restore.cluster.open-cluster-management.io`, however only one can be run at any moment.
+
+[#viewing-restore-events]
+== Viewing restore events
+
+Use the following command to get information about restore events:
+
+----
+oc describe -n open-cluster-management-backup <restore-name>
+----
+
+Your list of events might resemble the following sample:
+
+[source,yaml]
+----
+Spec:
+  Cleanup Before Restore:               CleanupRestored
+  Restore Sync Interval:                4m
+  Sync Restore With New Backups:        true
+  Velero Credentials Backup Name:       latest
+  Velero Managed Clusters Backup Name:  skip
+  Velero Resources Backup Name:         latest
+Status:
+  Last Message:                     Velero restores have run to completion, restore will continue to sync with new backups
+  Phase:                            Enabled
+  Velero Credentials Restore Name:  example-acm-credentials-schedule-20220406171919
+  Velero Resources Restore Name:    example-acm-resources-schedule-20220406171920
+Events:
+  Type    Reason                   Age   From                Message
+  ----    ------                   ----  ----                -------
+  Normal  Prepare to restore:      76m   Restore controller  Cleaning up resources for backup acm-credentials-hive-schedule-20220406155817
+  Normal  Prepare to restore:      76m   Restore controller  Cleaning up resources for backup acm-credentials-cluster-schedule-20220406155817
+  Normal  Prepare to restore:      76m   Restore controller  Cleaning up resources for backup acm-credentials-schedule-20220406155817
+  Normal  Prepare to restore:      76m   Restore controller  Cleaning up resources for backup acm-resources-generic-schedule-20220406155817
+  Normal  Prepare to restore:      76m   Restore controller  Cleaning up resources for backup acm-resources-schedule-20220406155817
+  Normal  Velero restore created:  74m   Restore controller  example-acm-credentials-schedule-20220406155817
+  Normal  Velero restore created:  74m   Restore controller  example-acm-resources-generic-schedule-20220406155817
+  Normal  Velero restore created:  74m   Restore controller  example-acm-resources-schedule-20220406155817
+  Normal  Velero restore created:  74m   Restore controller  example-acm-credentials-cluster-schedule-20220406155817
+  Normal  Velero restore created:  74m   Restore controller  example-acm-credentials-hive-schedule-20220406155817
+  Normal  Prepare to restore:      64m   Restore controller  Cleaning up resources for backup acm-resources-schedule-20220406165328
+  Normal  Prepare to restore:      62m   Restore controller  Cleaning up resources for backup acm-credentials-hive-schedule-20220406165328
+  Normal  Prepare to restore:      62m   Restore controller  Cleaning up resources for backup acm-credentials-cluster-schedule-20220406165328
+  Normal  Prepare to restore:      62m   Restore controller  Cleaning up resources for backup acm-credentials-schedule-20220406165328
+  Normal  Prepare to restore:      62m   Restore controller  Cleaning up resources for backup acm-resources-generic-schedule-20220406165328
+  Normal  Velero restore created:  61m   Restore controller  example-acm-credentials-cluster-schedule-20220406165328
+  Normal  Velero restore created:  61m   Restore controller  example-acm-credentials-schedule-20220406165328
+  Normal  Velero restore created:  61m   Restore controller  example-acm-resources-generic-schedule-20220406165328
+  Normal  Velero restore created:  61m   Restore controller  example-acm-resources-schedule-20220406165328
+  Normal  Velero restore created:  61m   Restore controller  example-acm-credentials-hive-schedule-20220406165328
+  Normal  Prepare to restore:      38m   Restore controller  Cleaning up resources for backup acm-resources-generic-schedule-20220406171920
+  Normal  Prepare to restore:      38m   Restore controller  Cleaning up resources for backup acm-resources-schedule-20220406171920
+  Normal  Prepare to restore:      36m   Restore controller  Cleaning up resources for backup acm-credentials-hive-schedule-20220406171919
+  Normal  Prepare to restore:      36m   Restore controller  Cleaning up resources for backup acm-credentials-cluster-schedule-20220406171919
+  Normal  Prepare to restore:      36m   Restore controller  Cleaning up resources for backup acm-credentials-schedule-20220406171919
+  Normal  Velero restore created:  36m   Restore controller  example-acm-credentials-cluster-schedule-20220406171919
+  Normal  Velero restore created:  36m   Restore controller  example-acm-credentials-schedule-20220406171919
+  Normal  Velero restore created:  36m   Restore controller  example-acm-resources-generic-schedule-20220406171920
+  Normal  Velero restore created:  36m   Restore controller  example-acm-resources-schedule-20220406171920
+  Normal  Velero restore created:  36m   Restore controller  example-acm-credentials-hive-schedule-20220406171919
+----
+
+[#primary-cluster-shut-down]
+== Shutting down the primary cluster
+
+When you restore a backup on a new hub cluster, make sure that the previous hub cluster, where the backup was created, is shut down. If that cluster is running, the previous hub cluster tries to reimport the managed clusters when the managed cluster reconciliation finds that the managed clusters are no longer available.
+
+[#dr4hub-restore-resources]
+== Additional resources
+
+- See link:https://github.com/openshift/oadp-operator/blob/master/docs/install_olm.md#create-the-dataprotectionapplication-custom-resource[_DataProtectionApplication_].
+
+- See link:../clusters/cluster_lifecycle/import_cli.adoc#importing-the-cluster-auto-import-secret[Importing the cluster with the auto import secret].
+
+- Return to <<restore-backup,Restoring a backup>>.
