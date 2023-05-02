@@ -11,40 +11,37 @@ An error message resembling the following appears in the `search-api` logs: `ERR
 [#resolving-shared-memory]
 == Resolving the problem: PostgreSQL shared memory error
 
-To resolve the issue, increase the database memory. Add environment variables to specify a value for your resource variables. For example, increase the memory for the following variables, `POSTGRESQL_EFFECTIVE_CACHE_SIZE` and `POSTGRESQL_SHARED_BUFFERS`. View the following `Search` custom resource:
+To resolve the issue, update the PostgreSQL resources found in the `search-postgres` ConfigMap. Complete the following steps to update the resources:
+
+. Run the following command to switch to the `open-cluster-management` project:
++
+----
+oc project open-cluster-management
+----
+
+. Run the following command to prevent the search operator from overwriting your changes:
++
+----
+oc annotate search search-v2-operator search-pause=true
+----
+
+. Run the following command to update the resources in the `search-postgres` YAML file:
++
+----
+oc edit cm search-postgres -n ocm
+----
++
+See the following example for increasing resources:
 +
 [source,yaml]
 ----
-apiVersion: search.open-cluster-management.io/v1alpha1
-kind: Search
-metadata:
-  name: search-v2-operator
-  namespace: open-cluster-management
-spec:
-  dbConfig: tuning-config
-  deployments:
-    collector:
-      resources: <1>
-        limits:
-          cpu: 500m
-          memory: 128Mi
-        requests:
-          cpu: 250m
-          memory: 64Mi
-    indexer:
-      replicaCount: 3
-    database: <2>
-        envVar:
-          - name: POSTGRESQL_EFFECTIVE_CACHE_SIZE
-            value: 1024MB
-          - name: POSTGRESQL_SHARED_BUFFERS
-            value: 512MB
-          - name: WORK_MEM
-            value: 128MB
-    queryapi:
-      arguments: <3>
-      - -v=3
+  postgresql.conf: |-
+    work_mem = '128MB' # Higher values allocate more memory
+    max_parallel_workers_per_gather = '0' # Disables parallel queries
+    shared_buffers = '8GB' # Higher values allocate more memory
 ----
++
+Make sure to save your changes before exiting.
 
 . Run the following command to restart the `postgres` and `api` pod.
 +
