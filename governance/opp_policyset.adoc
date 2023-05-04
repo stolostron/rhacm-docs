@@ -7,25 +7,103 @@ Configure and apply a policy set to install Red Hat OpenShift Platform Plus.
 == Prerequisites
 
 * Install {title-product} {version-prev} or newer.
-
 * Install {ocp} 4.12
 //what is "everything"?
 The OpenShift Plus policy set contains two `PolicySets` that are deployed. The OpenShift Plus policy set installs everything onto the  hub cluster. The Red Hat Advanced Cluster Security secured cluster services and the Compliance Operator are deployed onto all {ocp-short} managed clusters.
 
 Before you apply the policy set, complete the following steps:
 
-. To allow for subscriptions to be applied, you must apply and set the policy to enforce the `policy-configure-subscription-admin-hub.yaml` policy.
+. Apply and set the policy to enforce the `policy-configure-subscription-admin-hub.yaml` policy for subscriptions to be applied.
 
-. Install the Policy Generator Kustomize plugin by following the installation instructions. It is recommended to use Kustomize v4.5+.
-Policies are installed to the policies namespace. Make sure the placement bindings match this namespace for the hub and other managed clusters. Example yaml to apply a ManagedClusterSetBinding for the policies namespace.
+. Install the Policy Generator Kustomize plugin. It is recommended to use Kustomize v4.5+. Complete the following steps:
++
+. Create the plugin directory with the following command:
++
+----
+mkdir -p ${HOME}/.config/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator
+----
+
+. Install the binary by using the either of the following options:
++
+. Download the precompiled plugin binary from the release that you want.
+* Move the binary to the plugin directory:
++
+- Run the following command for a Linux operating system:
++
+----
+chmod +x linux-amd64-PolicyGenerator
+mv linux-amd64-PolicyGenerator ${HOME}/.config/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator/PolicyGenerator
+----
+
+- Run the following command for MacOS operating system:
++
+----
+chmod +x darwin-amd64-PolicyGenerator
+mv darwin-amd64-PolicyGenerator ${HOME}/.config/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator/PolicyGenerator
+----
+
+. Use `go install` command, which is available for Kustomize v1.11.0 and newer. Set the `GOBIN` parameter to the plugin directory and specify the version. The following command uses the `latest` version:
++
+----
+GOBIN=${HOME}/.config/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator \
+go install open-cluster-management.io/policy-generator-plugin/cmd/PolicyGenerator@latest
+----
+
+. Create a `kustomization.yaml` file that references `PolicyGenerator` manifests, with any additional desired patches or customizations. View the following example:
++
+[source,yaml]
+----
+generators:
+  - path/to/generator/file.yaml
+----
+
+. To generate policies with the plugin from any directory with `kustomization.yaml` referencing `PlicyGenerator` manifests, run the following command:
++
+----
+kustomize build --enable-alpha-plugins
+----
++
+Policies are installed to the `policies` namespace. Make sure the placement bindings match this namespace for the hub cluster and other managed clusters. View the following example YAML to apply a `ManagedClusterSetBinding` for the `policies` namespace:
++
+[source,yaml]
+----
 kind: ManagedClusterSetBinding
 metadata:
     name: default
     namespace: policies
 spec:
     clusterSet: default
-oc apply -f managed-cluster.yaml 
-Apply the policies using the kustomize command or subscribing to a fork of the repository and pointing to this directory. See the details for using the Policy Generator for more information. The command to run is kustomize build --enable-alpha-plugins  | oc apply -f -
+----
++
+Apply the YAML using the following command:
++
+----
+oc apply -f managed-cluster.yaml
+----
 
-Note: For any components of OpenShift Plus that you do not wish to install, edit the policyGenerator.yaml file and remove or comment out the policies for those components.
+. Apply the policies using the `kustomize` command:
++
+----
+kustomize build --enable-alpha-plugins  | oc apply -f -
+----
 
+*Note:* For any components of OpenShift Plus that you do not want to install, edit the `policyGenerator.yaml` file and remove or comment out the policies for those components.
+
+OpenShift Platform Plus policy runs on your managed cluster. View the following sections to learn more:
+
+//not sure if this is needed, other grc policy docs have these sections.
+* <<opp-policy-yaml-structure,OpenShift Platform Plus policy set structure>>
+* <<opp-policy-yaml-table,OpenShift Platform Plus policy set YAML table>>
+* <<opp-policy-sample,OpenShift Platform Plus policy set sample>>
+
+
+
+
+[#additional-resources-opp-pol]
+== Additional resources
+
+* link:https://github.com/open-cluster-management-io/policy-collection/blob/main/community/CM-Configuration-Management/policy-configure-subscription-admin-hub.yaml[`policy-configure-subscription-admin-hub.yaml`]
+
+* link:https://github.com/stolostron/policy-generator-plugin/blob/main/examples/policyGenerator.yaml[]
+
+* link:https://github.com/stolostron/policy-generator-plugin/blob/main/docs/policygenerator.md[]
