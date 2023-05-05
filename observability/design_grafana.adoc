@@ -1,22 +1,31 @@
-[#designing-your-grafana-dashboard]
-= Designing your Grafana dashboard
+[#using-grafana-dashboards]
+= Using Grafana dashboards
 
-You can design your Grafana dashboard by creating a `grafana-dev` instance.
+Use Grafana dashboards to view hub cluster and managed cluster metrics.
 
+* <<acm-provided-dashboards,{product-title} dashboards>>
 * <<setting-up-the-grafana-developer-instance,Setting up the Grafana developer instance>>
 - <<verifying-grafana-version,Verifying Grafana version>>
 * <<design-your-dashboard,Designing your Grafana dashboard>>
 - <<designing-your-grafana-dashboard-with-configmap,Designing your Grafana dashboard with a ConfigMap>>
-* <<using-managed-cluster-labels,Using managed cluster labels in Grafana>>
-- <<adding-managed-cluster-labels,Adding managed cluster labels>>
-- <<enabling-managed-cluster-labels,Enabling managed cluster labels>>
-- <<disabling-managed-cluster-labels,Disabling managed cluster labels>>
 * <<uninstalling-the-grafana-developer-instance,Uninstalling the Grafana developer instance>>
+
+[#acm-provided-dashboards]
+== {product-title-short} dashboards
+
+When you enable to the observability service, the following dashboards are available: _Alert Analysis_, _Clusters by Alert_, and _Alerts by Cluster_.
+
+View the following dashboard descriptions:
+
+* _Alert Analysis_: Overview dashboard of the alerts being generated within the managed cluster fleet.
+* _Clusters by Alert_: Alert dashboard where you can filter by the alert name.
+* _Alerts by Cluster_: Alert dashboard where you can filter by cluster, and view real-time data for alerts that are initiated or pending within the cluster environment.
+
 
 [#setting-up-the-grafana-developer-instance]
 == Setting up the Grafana developer instance
 
-First, clone the https://github.com/stolostron/multicluster-observability-operator[`stolostron/multicluster-observability-operator/`] repository, so that you are able to run the scripts that are in the `tools` folder. Be sure to use the most current `grafana-dev` instance.
+You can design your Grafana dashboard by creating a `grafana-dev` instance. First, clone the link:https://github.com/stolostron/multicluster-observability-operator[`stolostron/multicluster-observability-operator/`] repository, so that you are able to run the scripts that are in the `tools` folder. Be sure to use the most current `grafana-dev` instance.
 
 Complete the following steps to set up the Grafana developer instance:
 
@@ -96,7 +105,7 @@ If you do not have permissions to run the previously mentioned script, complete 
 . Select a dashboard and click the *Dashboard settings* icon. 
 . Click the *JSON Model* icon from the navigation panel.
 . Copy the dashboard JSON data and paste it in the `_data_` section.
-. Modify the `_name_` and replace `_$your-dashboard-name_`. Enter a universally unique identifier (UUID) in the `uid` field in `data.$your-dashboard-name.json.$$your_dashboard_json`. You can use a program such as link:https://man7.org/linux/man-pages/man1/uuidgen.1.html[uuidegen] to create a UUID. Your ConfigMap might resemble the following file:
+. Modify the `_name_` and replace `_$your-dashboard-name_`. Enter a universally unique identifier (UUID) in the `uid` field in `data.$your-dashboard-name.json.$$your_dashboard_json`. You can use a program such as _uuidegen_ to create a UUID. Your ConfigMap might resemble the following file:
 +
 [source,yaml]
 ----
@@ -142,129 +151,6 @@ oc apply -f demo-dashboard.yaml
 
 From the {ocp-short} console, create the ConfigMap using the `demo-dashboard.yaml` file. The dashboard is located in the _Custom_ folder.
 
-[#using-managed-cluster-labels]
-== Using managed cluster labels in Grafana
-
-When observability is enabled in the hub cluster, the `observability-managed-cluster-label-allowlist` ConfigMap is created in the `open-cluster-management-observability` namespace. The ConfigMap contains a list of managed cluster labels maintained by the `observabilty-rbac-query-proxy` pod, to populate a list of label names to filter from within the _ACM - Cluster Overview_ Grafana dashboard. By default, observability ignores a subset of labels in the `observability-managed-cluster-label-allowlist` ConfigMap.
-
-When a cluster is imported into the managed cluster fleet or modified, the `observability-rbac-query-proxy` pod watches for any changes in reference to the managed cluster labels and automatically updates the `observability-managed-cluster-label-allowlist` ConfigMap to reflect the changes. The ConfigMap contains only unique label names, which are either included in the `ignore_labels` or `labels` list. Your `observability-managed-cluster-label-allowlist` ConfigMap might resemble the following YAML file:
-
-[source,yaml]
-----
-data:
-  managed_cluster.yaml: |
-    ignore_labels:
-      - clusterID
-      - cluster.open-cluster-management.io/clusterset
-      - feature.open-cluster-management.io/addon-application-manager
-      - feature.open-cluster-management.io/addon-cert-policy-controller
-      - feature.open-cluster-management.io/addon-cluster-proxy
-      - feature.open-cluster-management.io/addon-config-policy-controller
-      - feature.open-cluster-management.io/addon-governance-policy-framework
-      - feature.open-cluster-management.io/addon-iam-policy-controller
-      - feature.open-cluster-management.io/addon-observability-controller
-      - feature.open-cluster-management.io/addon-search-collector
-      - feature.open-cluster-management.io/addon-work-manager
-      - installer.name
-      - installer.namespace
-      - local-cluster
-      - name
-    labels:
-      - cloud
-      - vendor
-----
-
-The labels that are enabled are displayed in the drop-down filter on the _ACM - Clusters Overview_ Grafana dashboard. The values are from the `acm_managed_cluster_labels` metric, depending on the `label` key value that is selected.
-
-Any label that is listed in the `ignore_labels` keylist of the ConfigMap is removed from the drop-down filter on the _ACM - Clusters Overview_ Grafana dashboard.
-
-
-[#adding-managed-cluster-labels]
-=== Adding managed cluster labels
-
-When you add a managed cluster label to the `observability-managed-cluster-label-allowlist` ConfigMap, the label becomes available as a filter option in Grafana. Add a unique label to the hub cluster, or managed cluster object that is associated with the managed cluster fleet. For example, if you add the label, `department=finance` to a managed cluster, the ConfigMap is updated and might resemble the following changes:
-
-[source,yaml]
-----
-data:
-  managed_cluster.yaml: |
-    ignore_labels:
-      - clusterID
-      - cluster.open-cluster-management.io/clusterset
-      - feature.open-cluster-management.io/addon-application-manager
-      - feature.open-cluster-management.io/addon-cert-policy-controller
-      - feature.open-cluster-management.io/addon-cluster-proxy
-      - feature.open-cluster-management.io/addon-config-policy-controller
-      - feature.open-cluster-management.io/addon-governance-policy-framework
-      - feature.open-cluster-management.io/addon-iam-policy-controller
-      - feature.open-cluster-management.io/addon-observability-controller
-      - feature.open-cluster-management.io/addon-search-collector
-      - feature.open-cluster-management.io/addon-work-manager
-      - installer.name
-      - installer.namespace
-      - local-cluster
-      - name
-    labels:
-      - cloud
-      - department
-      - vendor
-----
-
-[#enabling-managed-cluster-labels]
-=== Enabling managed cluster labels
-
-Enable a managed cluster label that is already disabled by removing the label from the `ignore_labels` list in the `observability-managed-cluster-label-allowlist` ConfigMap.
-
-For example, enable the `local-cluster` and `name` labels. Your `observability-managed-cluster-label-allowlist` ConfigMap might resemble the following content:
-
-[source,yaml]
-----
-data:
-  managed_cluster.yaml: |
-    ignore_labels:
-      - clusterID
-      - installer.name
-      - installer.namespace
-    labels:
-      - cloud
-      - vendor
-      - local-cluster
-      - name
-----
-
-The ConfigMap resyncs after 30 seconds to ensure that the cluster labels are updated. After you update the ConfigMap, check the `observability-rbac-query-proxy` pod logs in the `open-cluster-management-observability` namespace to verify where the label is listed. The following information might be displayed in the pod log:
-
-----
-enabled managedcluster labels: <label>
-----
-
-From the Grafana dashboard, verify that the label is listed as a value in the _Label_ drop-down menu.
-
-[#disabling-managed-cluster-labels]
-=== Disabling managed cluster labels
-
-Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list. For example, your YAML might resemble the following file if you add `local-cluster` and `name` back into the `ignore_labels` list:
-
-[source,yaml]
-----
-data:
-  managed_cluster.yaml: |
-    ignore_labels:
-      - clusterID
-      - installer.name
-      - installer.namespace
-      - local-cluster
-      - name
-    labels:
-      - cloud
-      - vendor
-----
-
-Check the `observability-rbac-query-proxy` pod logs in the `open-cluster-management-observability` namespace to verify where the label is listed. The following information might be displayed in the pod log:
-
-----
-disabled managedcluster label: <label>
-----
 
 [#uninstalling-the-grafana-developer-instance]
 == Uninstalling the Grafana developer instance
@@ -282,4 +168,11 @@ oauthclient.oauth.openshift.io "grafana-proxy-client-dev" deleted
 clusterrolebinding.rbac.authorization.k8s.io "open-cluster-management:grafana-crb-dev" deleted
 ----
 
-Return to the xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
+[#additional-resource-grafana]
+== Additional resources
+
+* See link:https://man7.org/linux/man-pages/man1/uuidgen.1.html[uuidegen] for instructions to create a UUID.
+
+* Return to the beginning of the page xref:../observability/design_grafana.adoc#using-grafana-dashboards[Using Grafana dashboard].
+
+* Return to the xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
