@@ -5,9 +5,11 @@ You can use the {mce} console to create a {ocp} hosted cluster. Hosted control p
 
 * <<hosted-prerequisites-aws,Prerequisites>>
 * <<create-hosted-aws,Creating a hosted cluster on AWS with the console>>
-* <<importing-hosted-cluster-aws,Importing a hosted control plane cluster on AWS>>
+* <<hosted-deploy-cluster-aws,Deploying a hosted cluster on AWS>>
 * <<hosting-service-cluster-access-aws,Accessing a hosting cluster on AWS>>
-* <<deploying-aws-private-clusters,Deploying AWS private clusters>>
+* <<deploying-aws-private-clusters,Deploying a private hosted cluster on AWS>>
+* <<access-aws-private-hosted-cluster,Accessing a private hosting cluster on AWS>>
+* <<importing-hosted-cluster-aws,Importing a hosted control plane cluster on AWS>>
 * <<hosted-cluster-arm-aws,Enabling hosted control planes on an ARM64 {ocp-short} cluster>>
 * <<hypershift-cluster-destroy-aws,Destroying a hosted cluster on AWS>>
 
@@ -45,10 +47,12 @@ When you review your information and optionally customize it before creating the
 
 *Note:* You have to run the `oc` command that is provided with the cluster details to import the cluster. When you create the cluster, it is not automatically configured with the management of {product-title-short}.
 
+Next, you can deploy a hosted cluster or a private hosted cluster on AWS.
+
 [#hosted-deploy-cluster-aws]
 == Deploying a hosted cluster on AWS
 
-After setting up the hosted control planes (`hypershift`) command line interface and enabling the `local-cluster` as the hosting cluster, you can deploy a hosted cluster on AWS by completing the following steps:
+After you set up the hosted control planes (`hypershift`) command line interface and enable the `local-cluster` as the hosting cluster, you can deploy a hosted cluster on AWS by completing the following steps. To deploy a private hosted cluster, see the _Deploying a private hosted cluster on AWS_ section.
 
 . Set environment variables as follows, replacing variables as needed with your credentials:
 +
@@ -93,12 +97,157 @@ hypershift create cluster aws \
 oc get hostedclusters -n <hypershift-hosting-service-cluster>
 ----
 
+[#hosting-service-cluster-access-aws]
+== Accessing a hosting cluster on AWS
+
+The access secrets for hosted control plane clusters are stored in the `hypershift-management-cluster` namespace. Learn about the following secret name formats:
+
+- `kubeconfig` secret: `<hostingNamespace>-<name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
+- `kubeadmin` password secret: `<hostingNamespace>-<name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
+
+[#deploying-aws-private-clusters]
+== Deploying a private hosted cluster on AWS
+
+After you set up the hosted control planes (`hypershift`) command line interface and enable the `local-cluster` as the hosting cluster, you can deploy a hosted cluster or a private hosted cluster on AWS. To deploy a public hosted cluster on AWS, see the _Deploying a hosted cluster on AWS_ section.
+
+By default, hosted control plane guest clusters are publicly accessible through public DNS and the default router for the management cluster.
+
+For private clusters on AWS, all communication with the guest cluster occurs over AWS PrivateLink. To configure hosted control planes for private cluster support on AWS, take the following steps.
+
+*Important:* Although public clusters can be created in any region, private clusters can be created only in the region that is specified by `--aws-private-region`.
+
+[#prerequisites-aws-private-clusters]
+=== Prerequisites
+
+To enable private hosted clusters for AWS, you must first enable AWS PrivateLink. For more information, see xref:../../clusters/hosted_control_planes/configure_hosted_aws.adoc#hosted-enable-private-link[Enabling AWS PrivateLink].
+
+[#create-aws-private-hosted-cluster]
+=== Creating a private hosted cluster
+
+. Create the private cluster IAM policy document by entering the following command:
++
+----
+cat << EOF >> policy.json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateVpcEndpointServiceConfiguration",
+        "ec2:DescribeVpcEndpointServiceConfigurations",
+        "ec2:DeleteVpcEndpointServiceConfigurations",
+        "ec2:DescribeVpcEndpointServicePermissions",
+        "ec2:ModifyVpcEndpointServicePermissions",
+        "ec2:CreateTags",
+        "elasticloadbalancing:DescribeLoadBalancers"
+      ],
+      "Resource": "\*"
+    }
+  ]
+}
+----
+
+. Create the IAM policy in AWS by entering the following command:
++
+----
+aws iam create-policy --policy-name=hypershift-operator-policy --policy-document=file://policy.json
+----
+
+. Create a `hypershift-operator` IAM user by entering the following command:
++
+----
+aws iam create-user --user-name=hypershift-operator
+----
+
+. Attach the policy to the `hypershift-operator` user by entering this command, replacing `$POLICY_ARN` with the ARN of the policy that you created:
++
+----
+aws iam attach-user-policy --user-name=hypershift-operator --policy-arn=$POLICY_ARN
+----
+
+. Create an IAM access key for the user by entering this command:
++
+----
+aws iam create-access-key --user-name=hypershift-operator
+----
+
+. Create a private hosted cluster by entering the following command, replacing variables with your values as needed:
++
+----
+CLUSTER_NAME=example
+BASE_DOMAIN=example.com
+AWS_CREDS="$HOME/.aws/credentials"
+PULL_SECRET="$HOME/pull-secret"
+
+hypershift create cluster aws \
+--name $CLUSTER_NAME \
+--node-pool-replicas=3 \
+--base-domain $BASE_DOMAIN \
+--pull-secret $PULL_SECRET \
+--aws-creds $AWS_CREDS \
+--region $REGION \
+--endpoint-access Private <1>
+----
+<1> The `--endpoint-access` flag designates whether a cluster is public or private.
+
+The API endpoints for the cluster are accessible through a private DNS zone:
+
+- `api.$CLUSTER_NAME.hypershift.local`
+- `*.apps.$CLUSTER_NAME.hypershift.local`
+
+[#access-aws-private-hosted-cluster]
+== Accessing a private hosting cluster on AWS
+
+To access a private cluster, you use a bastion.
+
+. Start a bastion instance by entering the following command, replacing `$SSH_KEY` with the credentials to connect to the bastion:
++
+----
+hypershift create bastion aws --aws-creds=$AWS_CREDS --infra-id=$INFRA_ID --region=$REGION --ssh-key-file=$SSH_KEY
+----
+
+. Find the private IPs of nodes in the cluster node pool by entering the following command:
++
+----
+aws ec2 describe-instances --filter="Name=tag:kubernetes.io/cluster/$INFRA_ID,Values=owned" | jq '.Reservations[] | .Instances[] | select(.PublicDnsName=="") | .PrivateIpAddress'
+----
+
+. Create a `kubeconfig` file for the cluster that can be copied to a node by entering the following command:
++
+----
+hypershift create kubeconfig > $CLUSTER_KUBECONFIG
+----
+
+. Enter the following command to SSH into one of the nodes through the bastion by using the IP that is printed from the `create bastion` command: 
++
+----
+ssh -o ProxyCommand="ssh ec2-user@$BASTION_IP -W %h:%p" core@$NODE_IP
+----
+
+. From the SSH shell, copy the `kubeconfig` file contents to a file on the node by entering the following commands:
++
+----
+cat << EOF >> kubeconfig
+<paste kubeconfig contents>
+EOF
+export KUBECONFIG=$PWD/kubeconfig
+----
+
+. From the SSH shell, observe the guest cluster status or run other `oc` commands as shown in this example:
++
+----
+oc get clusteroperators
+oc get clusterversion
+# ...
+----
+
 [#importing-hosted-cluster-aws]
 == Importing a hosted control plane cluster on AWS
 
 You can import a hosted control plane cluster with the console.
 
-. Navigate to *Infrastructure* > *Clusters* and select the hosted cluster that you want to import.
+. Click *Infrastructure* > *Clusters* and select the hosted cluster that you want to import.
 
 . Click *Import hosted cluster*.
 
@@ -197,149 +346,6 @@ Replace <file_name> with the YAML file name you created in the previous step.
 +
 ----
 oc get managedcluster <cluster_name>
-----
-
-[#hosting-service-cluster-access-aws]
-== Accessing a hosting cluster on AWS
-
-The access secrets for hosted control plane clusters are stored in the `hypershift-management-cluster` namespace. Learn about the following secret name formats:
-
-- `kubeconfig` secret: `<hostingNamespace>-<name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
-- `kubeadmin` password secret: `<hostingNamespace>-<name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
-
-[#deploying-aws-private-clusters]
-== Deploying AWS private clusters
-
-By default, hosted control plane guest clusters are publicly accessible through public DNS and the default router for the management cluster.
-
-For private clusters on AWS, all communication with the guest cluster occurs over AWS PrivateLink. To configure hosted control planes for private cluster support on AWS, take the following steps.
-
-*Important:* Although public clusters can be created in any region, private clusters can be created only in the region that is specified by `--aws-private-region`.
-
-[#prerequisites-aws-private-clusters]
-=== Prerequisites
-
-To enable private hosted clusters for AWS, you must first enable AWS PrivateLink. For more information, see xref:../../clusters/hosted_control_planes/configure_hosted_aws.adoc#hosted-enable-private-link[Enabling AWS PrivateLink].
-
-[#create-aws-private-hosted-cluster]
-=== Creating a private hosted cluster
-
-. Create the private cluster IAM policy document by entering the following command:
-+
-----
-cat << EOF >> policy.json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ec2:CreateVpcEndpointServiceConfiguration",
-        "ec2:DescribeVpcEndpointServiceConfigurations",
-        "ec2:DeleteVpcEndpointServiceConfigurations",
-        "ec2:DescribeVpcEndpointServicePermissions",
-        "ec2:ModifyVpcEndpointServicePermissions",
-        "ec2:CreateTags",
-        "elasticloadbalancing:DescribeLoadBalancers"
-      ],
-      "Resource": "\*"
-    }
-  ]
-}
-----
-
-. Create the IAM policy in AWS by entering the following command:
-+
-----
-aws iam create-policy --policy-name=hypershift-operator-policy --policy-document=file://policy.json
-----
-
-. Create a `hypershift-operator` IAM user by entering the following command:
-+
-----
-aws iam create-user --user-name=hypershift-operator
-----
-
-. Attach the policy to the `hypershift-operator` user by entering this command, replacing `$POLICY_ARN` with the ARN of the policy that you created:
-+
-----
-aws iam attach-user-policy --user-name=hypershift-operator --policy-arn=$POLICY_ARN
-----
-
-. Create an IAM access key for the user by entering this command:
-+
-----
-aws iam create-access-key --user-name=hypershift-operator
-----
-
-. Create a private hosted cluster by entering the following command, replacing variables with your values as needed:
-+
-----
-CLUSTER_NAME=example
-BASE_DOMAIN=example.com
-AWS_CREDS="$HOME/.aws/credentials"
-PULL_SECRET="$HOME/pull-secret"
-
-hypershift create cluster aws \
---name $CLUSTER_NAME \
---node-pool-replicas=3 \
---base-domain $BASE_DOMAIN \
---pull-secret $PULL_SECRET \
---aws-creds $AWS_CREDS \
---region $REGION \
---endpoint-access Private <1>
-----
-<1> The `--endpoint-access` flag designates whether a cluster is public or private.
-
-The API endpoints for the cluster are accessible through a private DNS zone:
-
-- `api.$CLUSTER_NAME.hypershift.local`
-- `*.apps.$CLUSTER_NAME.hypershift.local`
-
-[#access-aws-private-hosted-cluster]
-=== Accessing a private hosted cluster
-
-To access a private cluster, you use a bastion.
-
-. Start a bastion instance by entering the following command, replacing `$SSH_KEY` with the credentials to connect to the bastion:
-+
-----
-hypershift create bastion aws --aws-creds=$AWS_CREDS --infra-id=$INFRA_ID --region=$REGION --ssh-key-file=$SSH_KEY
-----
-
-. Find the private IPs of nodes in the cluster node pool by entering the following command:
-+
-----
-aws ec2 describe-instances --filter="Name=tag:kubernetes.io/cluster/$INFRA_ID,Values=owned" | jq '.Reservations[] | .Instances[] | select(.PublicDnsName=="") | .PrivateIpAddress'
-----
-
-. Create a `kubeconfig` file for the cluster that can be copied to a node by entering the following command:
-+
-----
-hypershift create kubeconfig > $CLUSTER_KUBECONFIG
-----
-
-. Enter the following command to SSH into one of the nodes through the bastion by using the IP that is printed from the `create bastion` command: 
-+
-----
-ssh -o ProxyCommand="ssh ec2-user@$BASTION_IP -W %h:%p" core@$NODE_IP
-----
-
-. From the SSH shell, copy the `kubeconfig` file contents to a file on the node by entering the following commands:
-+
-----
-cat << EOF >> kubeconfig
-<paste kubeconfig contents>
-EOF
-export KUBECONFIG=$PWD/kubeconfig
-----
-
-. From the SSH shell, observe the guest cluster status or run other `oc` commands as shown in this example:
-+
-----
-oc get clusteroperators
-oc get clusterversion
-# ...
 ----
 
 [#hosted-cluster-arm-aws]
