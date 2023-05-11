@@ -1,0 +1,170 @@
+[#observability-alerts]
+= Observability alerts
+
+Receive and define alerts for the observability service to be notified of hub cluster and managed cluster changes.
+
+- <<configuring-alertmanager,Configuring AlertManager>>
+- <<forward-alerts,Forwarding alerts>>
+* <<disabling-forward-alerts,Disabling forward alerts for managed clusters>>
+- <<silence-alerts, Silencing alerts>>
+- <<supress-alerts, Suppressing alerts>>
+- <<additional-resources-alerts,Additional resources>>
+
+
+[#configuring-alertmanager]
+== Configuring AlertManager
+
+Integrate external messaging tools such as email, Slack, and PagerDuty to receive notifications from AlertManager. You must override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for AlertManager. Complete the following steps to update the custom receiver rules:
+
+. Extract the data from the `alertmanager-config` secret. Run the following command:
++
+----
+oc -n open-cluster-management-observability get secret alertmanager-config --template='{{ index .data "alertmanager.yaml" }}' |base64 -d > alertmanager.yaml
+----
+
+. Edit and save the `alertmanager.yaml` file configuration by running the following command:
++
+----
+oc -n open-cluster-management-observability create secret generic alertmanager-config --from-file=alertmanager.yaml --dry-run -o=yaml |  oc -n open-cluster-management-observability replace secret --filename=-
+----
++
+Your updated secret might resemble the following content:
++
+[source,yaml]
+----
+global
+  smtp_smarthost: 'localhost:25'
+  smtp_from: 'alertmanager@example.org'
+  smtp_auth_username: 'alertmanager'
+  smtp_auth_password: 'password'
+templates: 
+- '/etc/alertmanager/template/*.tmpl'
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h 
+  receiver: team-X-mails
+  routes:
+  - match_re:
+      service: ^(foo1|foo2|baz)$
+    receiver: team-X-mails
+----
+
+Your changes are applied immediately after it is modified. For an example of AlertManager, see https://github.com/prometheus/alertmanager/blob/master/doc/examples/simple.yml[prometheus/alertmanager].
+
+[#forward-alerts]
+== Forwarding alerts
+
+After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to the hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system. 
+
+View the following example of the `alertmanager-config` YAML file:
+
+[source,yaml]
+----
+global:
+  slack_api_url: '<slack_webhook_url>'
+
+route:
+  receiver: 'slack-notifications'
+  group_by: [alertname, datacenter, app]
+
+receivers:
+- name: 'slack-notifications'
+  slack_configs:
+  - channel: '#alerts'
+    text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
+----
+
+If you want to configure a proxy for alert forwarding, add the following `global` entry to the `alertmanager-config` YAML file:
+
+[source,yaml]
+----
+global:
+  slack_api_url: '<slack_webhook_url>'
+  http_config:
+    proxy_url: http://****
+----
+
+[#disabling-forward-alerts]
+=== Disabling forward alerts for managed clusters
+
+Disable alert forwarding for managed clusters. Add the following annotation to the `MultiClusterObservability` custom resource:
+
+[source,yaml]
+----
+metadata:
+      annotations:
+        mco-disable-alerting: "true"
+----
+
+When you set the annotation, the alert forwarding configuration on the managed clusters is reverted. Any changes made to the `ocp-monitoring-config` ConfigMap in the `openshift-monitoring` namespace are reverted. Setting the annotation ensures that the `ocp-monitoring-config` ConfigMap is no longer managed or updated by the observability operator endpoint. After you update the configuration, the Prometheus instance on your managed cluster restarts.
+
+*Important:* Metrics on your managed cluster are lost if you have a Prometheus instance with a persistent volume for metrics, and the Prometheus instance restarts. However, metrics from the hub cluster are not affected.
+
+When the changes are reverted, a ConfigMap named `cluster-monitoring-reverted` is createde in the `open-cluster-management-addon-observability` namespace. Any new, manually added alert forward configurations are not reverted from the ConfigMap. 
+
+Verify that the hub cluster alert manager is no longer propagating managed cluster alerts to third-party messaging tools. See the previous section, _Configuring AlertManager_.
+
+[#silence-alerts]
+== Silencing alerts
+
+Add alerts that you do not want to recieve. You can silence alerts by the alert name, match label, or time duration. After you add the alert that you want to silence, an ID is created. your ID for your silenced alert might resemble the following string, `d839aca9-ed46-40be-84c4-dca8773671da`.
+
+Continue reading for ways to silence alerts:
+
+- To silence a {product-title-short} alert, you must have access to the `alertmanager-main` pod in the `open-cluster-management-observability` namespace. For eample, enter the following command in the pod terminal to silence `SampleAlert`:
++
+----
+amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" alertname="SampleAlert"
+----
+
+- Silence an alert by using multiple match labels. The following command uses `match-label-1` and `match-label-2`:
++
+----
+amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" <match-label-1>=<match-value-1> <match-label-2>=<match-value-2>
+----
+
+- If you want to silence an alert for a specific period of time, use the `--duration` flag. Run the following command to silence the `SampleAlert` for an hour:
++
+----
+amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" --duration="1h" alertname="SampleAlert"
+----
++
+You can also specify a start or end time for the silenced alert. Enter the following command to silence the `SampleAlert` for a specific start time:
++
+----
+amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" --start="2023-04-14T15:04:05-07:00" alertname="SampleAlert"
+----
+
+- To view all silenced alerts that are created, run the following command:
++
+----
+amtool silence --alertmanager.url="http://localhost:9093"
+----
+
+- If you do not require an alert to be silence, expire the silenced alert. To expire a specific silenced alert, run the following command:
++
+----
+amtool silence expire --alertmanager.url="http://localhost:9093" "d839aca9-ed46-40be-84c4-dca8773671da"
+----
++
+- To expire all silences, run the following command:
++
+----
+amtool silence expire --alertmanager.url="http://localhost:9093" $(amtool silence query --alertmanager.url="http://localhost:9093" -q) 
+----
+
+[#supress-alerts]
+== Suppressing alerts
+
+
+
+
+
+[#additional-resources-alerts]
+== Additional resources
+
+- Return to the beginning of the topic, <<observability-alerts,Observability alerts>>.
+
+- For more observability topics, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service introduction].
