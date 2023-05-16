@@ -155,10 +155,9 @@ amtool silence expire --alertmanager.url="http://localhost:9093" $(amtool silenc
 
 [#supress-alerts]
 == Suppressing alerts
+//suppressing seems similar to silencing , is my explanation accurate?
 
-//suppressing seems similar to silencing 
-//still working|MJ|05/16/23
-Suppress {product-title-short} alerts across your clusters globally that are duplicates. Suppress alerts by defining an inhibition rule in the `inhibit_rule` parameter section. 
+Suppress {product-title-short} alerts across your clusters globally that are duplicates. Suppress alerts by defining an inhibition rule in the `alertmanager-config` in the `open-cluster-management-observability` namespace. 
 
 An inhibition rule mutes an alert by retrieving a set of parameter matches when an alert that matches another set of matchers exists. In order for the rule to take effect, both the target and source alerts must have the same label values for the label names in the `equal` list. An `inhibit_rule` might resemble the following:
 
@@ -166,13 +165,26 @@ An inhibition rule mutes an alert by retrieving a set of parameter matches when 
 ----
 global:
   resolve_timeout: 1h
-inhibit_rules:
+inhibit_rules:<1>
   - equal:
       - namespace
-    source_match:
+    source_match:<2>
       severity: critical
     target_match_re:
       severity: warning|info
+----
+<1> The `inhibit_rule` parameter section is defined to look for alerts in the same namespace. When a `critical` alert is initiated within a namespace and if there are any other alerts that contain the severity level `warning` or `info` in that namespace, only the `critical` alerts are routed to the Alertmanager receiver. The following alerts might be displayed when there are matches:
++
+----
+ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
+ALERTS{alertname="foo", namespace="ns-1", severity="warning"}
+----
++
+<2>If the source and target alert matchers do not match, the alert is routed to the receiver:
++
+----
+ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
+ALERTS{alertname="foo", namespace="ns-2", severity="warning"}
 ----
 
 - To view suppressed alerts in {product-title-short}, enter the following command:
@@ -185,5 +197,5 @@ amtool alert --alertmanager.url="http://localhost:9093" --inhibited
 == Additional resources
 
 - Return to the beginning of the topic, <<observability-alerts,Observability alerts>>.
-
+- See xref:../observability/customize_observability.adoc#customizing-observability[Customizing observability] for more details.
 - For more observability topics, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service introduction].
