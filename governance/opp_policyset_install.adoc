@@ -1,0 +1,145 @@
+[#install-opp-policy-set]
+= Installing Red Hat OpenShift Platform Plus by using a policy set
+
+Continue reading for guidance to apply the Red Hat Openshift Platform Plus policy set. When you apply the Red Hat OpenShift policy set, the Red Hat Advanced Cluster Security secured cluster services and the Compliance Operator are deployed onto all of your {ocp-short} managed clusters.
+
+[#prerequisites-apply-opp-set]
+== Prerequisites
+
+Complete the following steps before you apply the policy set:app-name:
+//added the full YAML bc this policy is in the community folder. Avoid linking to community policies 
+. To allow for subscriptions to be applied to your cluster, you must apply the `policy-configure-subscription-admin-hub.yaml` policy and set the remediation action to `enforce`. Copy and apply the following YAML:
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-configure-subscription-admin-hub
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+spec:
+  remediationAction: inform
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-configure-subscription-admin-hub
+        spec:
+          remediationAction: inform
+          severity: low
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRole
+                metadata:
+                  name: open-cluster-management:subscription-admin
+                rules:
+                - apiGroups:
+                  - app.k8s.io
+                  resources:
+                  - applications
+                  verbs:
+                  - '*'
+                - apiGroups:
+                  - apps.open-cluster-management.io
+                  resources:
+                  - '*'
+                  verbs:
+                  - '*'
+                - apiGroups:
+                  - ""
+                  resources:
+                  - configmaps
+                  - secrets
+                  - namespaces
+                  verbs:
+                  - '*'
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRoleBinding
+                metadata:
+                  name: open-cluster-management:subscription-admin
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: ClusterRole
+                  name: open-cluster-management:subscription-admin
+                subjects:
+                - apiGroup: rbac.authorization.k8s.io
+                  kind: User
+                  name: kube:admin
+                - apiGroup: rbac.authorization.k8s.io
+                  kind: User
+                  name: system:admin
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-configure-subscription-admin-hub
+placementRef:
+  name: placement-policy-configure-subscription-admin-hub
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-configure-subscription-admin-hub
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-configure-subscription-admin-hub
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - {key: name, operator: In, values: ["local-cluster"]}
+----
+
+. Install the Policy Generator kustomize plugin. Use Kustomize v4.5 or newer. See xref:../governance/policy_gen_install_operator.adoc#policy-gen-install-operator[Generating a policy to install an Operator].
+. Policies are installed to the `policies` namaespace. Make sure the placement bindings match the `policies` namespace for the hub cluster and other managed clusters. The following example YAML is a `ManagedClusterSetBinding` apply a ManagedClusterSetBinding in the `policies` namespace:
++
+[source,yaml]
+----
+kind: ManagedClusterSetBinding
+metadata:
+    name: default
+    namespace: policies
+spec:
+    clusterSet: default
+----
++
+. Run the following command to apply the `ManagedClusterSetBinding`:
++
+----
+oc apply -f managed-cluster.yaml 
+----
+
+After you meet the prerequisite requirements, you can apply the policy set.
+
+[#apply-opp-policy-set]
+== Applying Red Hat OpenShift Platform Plus policy set
+
+. Use the `openshift-plus/policyGenerator.yaml` file that includes the prerequisite configuration for Red Hat OpenShift Plus. See link:https://github.com/stolostron/policy-collection/blob/main/policygenerator/policy-sets/stable/openshift-plus/policyGenerator.yaml[`openshify-plus/policyGenerator.yaml`].
+
+.Apply the policies to your hub cluster by using the `kustomize` command:
++
+----
+kustomize build --enable-alpha-plugins  | oc apply -f -
+----
++
+*Note:* For any components of OpenShift Plus that you do not want to install, edit the `policyGenerator.yaml` file and remove or comment out the policies for those components.
+
+[#additional-resource-opp-policy-set]
+== Additional resources
+
+- See xref:../governance/opp_policyset.adoc#opp-policy-set[Red Hat OpenShift Platform Plus policy set] for an overview of the policy set.
+- Return to the beginning of the topic, <<install-opp-policy-set,Installing Red Hat OpenShift Platform Plus by using a policy set>>
