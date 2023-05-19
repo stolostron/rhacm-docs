@@ -1,0 +1,347 @@
+[#using-metrics]
+= Using the metrics service
+
+You can use metrics to monitor component health across {product-title}. Many custom metrics are documented in the https://github.com/stolostron/metrics-chronicle#application-metrics[Metrics chronicle overview].
+
+[#accessing-hub-metrics]
+== Accessing the hub cluster metrics service
+
+To view the collected metrics, you must expose the metrics service on the hub cluster. If your metrics are already exposed in the Grafana dashboard, this procedure is optional.
+
+From the {ocp-short} console, find the metrics service. Click *Observe* > *Metrics*.
+
+[#scrapping-prometheus]
+== Scrapping with Prometheus
+
+You can use Prometheus to expose metrics that are not exposed from the product console. See the procedures for both the hub and managed cluster metrics.
+
+[#scrapping-hub]
+=== Scrapping the hub cluster
+
+See the following procedure to expose metrics for the hub cluster. These files are within the `openshift-monitoring` namespace:
+
+. Create a `ServiceMonitor` for collecting services and exposing metrics. See the following YAML example:
+
++
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hub-subscription-metrics
+  namespace: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  namespaceSelector:
+    matchNames:
+    - open-cluster-management
+  selector:
+    matchLabels:
+      app: hub-subscription-metrics
+----
+
+. Run the following command to apply the file:
+
++
+----
+oc apply -f
+----
+
+. Create a `Role` for setting the permissions for monitoring. See the following YAML file:
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-k8s-monitoring
+  namespace: open-cluster-management
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+----
+
+. Run the following command to apply the file:
+
++
+----
+oc apply -f
+----
+
+. Create a `RoleBinding` for binding the role to the Prometheus monitoring
+`ServiceAccount`, as it is in the following example:
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-k8s-monitoring-binding
+  namespace: open-cluster-management
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-k8s-monitoring
+subjects:
+- kind: ServiceAccount
+  name: prometheus-k8s
+  namespace: monitoring
+----
+
+. Run the following command to apply the file:
+
++
+----
+oc apply -f
+----
+
+. To verify, run the following query in the dashboard to find metrics that are reported by the Subscription Operator Metrics Service:
+
++
+----
+{service="hub-subscription-metrics"}
+----
+
+[#scrapping-managed]
+=== Scrapping the managed cluster
+
+See the following procedure to expose metrics for managed clusters. These files are within the `openshift-monitoring` namespace:
+
+. Create a `ServiceMonitor` for collecting services exposing metrics. See the following YAML file example:
+
++
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mc-subscription-metrics
+  namespace: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  namespaceSelector:
+    matchNames:
+    - open-cluster-management-agent-addon
+  selector:
+    matchLabels:
+      app: mc-subscription-metrics
+----
+
+. Run the following command to apply your file:
+
++
+----
+oc apply -f
+----
+
+. Create a `Role` for setting the permissions for monitoring. See the following YAML file example:
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-k8s-monitoring
+  namespace: open-cluster-management-agent-addon
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+----
+
+. Run the following command to apply the file:
+
++
+----
+oc apply -f
+----
+
+. Create a `RoleBinding` for binding the `Role` to the Prometheus monitoring
+`ServiceAccount`:
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-k8s-monitoring-binding
+  namespace: open-cluster-management-agent-addon
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-k8s-monitoring
+subjects:
+- kind: ServiceAccount
+  name: prometheus-k8s
+  namespace: monitoring
+----
+
+. Run the following command to apply the file:
+
++
+----
+oc apply -f
+----
+
+. Verify in the `Prometheus` dashboard by running the following query to find
+metrics that are reported by the Subscription Operator Metrics Service:
+
++
+----
+{service="mc-subscription-metrics"}
+----
+
+[#scrapping-standalone]
+== Scrapping the standalone cluster
+
+. Create a `ServiceMonitor` for collecting services exposing metrics:
+
++
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: standalone-subscription-metrics
+  namespace: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  namespaceSelector:
+    matchNames:
+    - open-cluster-management
+  selector:
+    matchLabels:
+      app: standalone-subscription-metrics
+----
+
+. Create a `Role` for setting the permissions for monitoring:
++
+----
+oc apply -f
+----
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-k8s-monitoring
+  namespace: open-cluster-management
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+----
+
+. Create a `RoleBinding` for binding the `Role` to the Prometheus monitoring
+`ServiceAccount`. See the following YAML file example:
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-k8s-monitoring-binding
+  namespace: open-cluster-management
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-k8s-monitoring
+subjects:
+- kind: ServiceAccount
+  name: prometheus-k8s
+  namespace: monitoring
+----
+
+. Run the following command to apply the file:
+
++
+----
+oc apply -f
+----
+
+. Verify in the `Prometheus` dashboard by running the following query to find
+metrics that are reported by the Subscription Operator Metrics Service:
++
+----
+{service="standalone-subscription-metrics"}
+----
