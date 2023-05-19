@@ -1,7 +1,7 @@
 [#deploying-policies-using-gitops]
-= Deploying policies using GitOps
+= Deploying policies by using GitOps
 
-You can deploy a set of policies across a fleet of managed clusters with the governance framework. You can add to the open source community, https://github.com/stolostron/policy-collection[`policy-collection`] by contributing to and using the policies in the repository. For more information, see https://github.com/stolostron/policy-collection/blob/main/CONTRIBUTING.md#contributing-a-custom-policy[Contributing a custom policy]. Policies in each of the `stable` and `community` folders from the open source community are further organized according to link:https://nvd.nist.gov/800-53/Rev4[NIST Special Publication 800-53]. 
+You can deploy a set of policies across a fleet of managed clusters with the governance framework. You can add to the open source community, `policy-collection` by contributing to and using the policies in the repository. Policies in each of the `stable` and `community` folders from the open source community are further organized according to NIST Special Publication 800-53. 
 
 Continue reading to learn best practices to use GitOps to automate and track policy updates and creation through a Git repository.
 
@@ -84,7 +84,21 @@ Your changes are committed.
 
 After you push your changes, you can deploy the policies to your {product-title} installation. Post deployment, your hub cluster is connected to your Git repository. Any further changes to your chosen branch of the Git repository is reflected in your cluster.
 
-*Note:* By default, policies deployed with GitOps use the `merge` reconcile option. If you want to use the `replace` reconcile option instead, add the `apps.open-cluster-management.io/reconcile-option: replace` annotation to the `Subscription` resource. See link:../applications/subscribe_git_resources.adoc#resource-overwrite-example[Application Lifecycle] for more details.
+*Note:* By default, policies deployed with GitOps use the `merge` reconcile option. If you want to use the `replace` reconcile option instead, add the `apps.open-cluster-management.io/reconcile-option: replace` annotation to the `Subscription` resource and remove `apps.open-cluster-management.io/reconcile-option: merge`. Your `Subscription` might resemble the following file:
+
+[[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: subscription-example
+  namespace: sub-ns
+  annotations:
+    apps.open-cluster-management.io/git-path: sample-resources
+    apps.open-cluster-management.io/reconcile-option: replace
+spec:
+...
+----
 
 The `deploy.sh` script creates `Channel` and `Subscription` resources in your hub cluster. The channel connects to the Git repository, and the subscription specifies the data to bring to the cluster through the channel. As a result, all policies defined in the specified subdirectory are created on your hub. After the policies are created by the subscription, {product-title-short} analyzes the policies and creates additional policy resources in the namespace associated with each managed cluster that the policy is applied to, based on the defined placement rule.
 
@@ -105,7 +119,7 @@ cd deploy
 oc cluster-info
 ----
 +
-The output of the command displays the API server details for the cluster, where {product-title-short} is installed. If the correct URL is not displayed, configure your CLI to point to the correct cluster. See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/cli_tools/openshift-cli-oc#cli-getting-started#cli-using-cli_cli-developer-commands[Using the OpenShift CLI] for more information.
+The output of the command displays the API server details for the cluster, where {product-title-short} is installed. If the correct URL is not displayed, configure your CLI to point to the correct cluster. See _Using the OpenShift CLI_ in the _Additional resources_ section for more information.
 
 . Create a namespace where your policies are created to control access and to organize the policies. Run the following command:
 +
@@ -209,3 +223,13 @@ oc get policies.policy.open-cluster-management.io -n <policy-namespace> -l <key>
 ----
 
 Your policies are deployed using GitOps.
+
+[#additional-resources-deploy-gitops]
+== Additional resources
+
+- See the open source community, link:https://github.com/stolostron/policy-collection[`policy-collection`].
+- See link:https://nvd.nist.gov/800-53/Rev4[NIST Special Publication 800-53] for standards. 
+- See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/cli_tools/openshift-cli-oc#cli-getting-started#cli-using-cli_cli-developer-commands[Using the OpenShift CLI] for more information.
+- For more information on how to contribute to the open source community, see https://github.com/stolostron/policy-collection/blob/main/CONTRIBUTING.md#contributing-a-custom-policy[Contributing a custom policy].
+- See link:../applications/subscribe_git_resources.adoc#resource-overwrite-example[Application Lifecycle] for more details about the _Resource overwrite example_.
+- Return to the beginning of this topic, <<deploying-policies-using-gitops,Deploying policies by using GitOps>>.
