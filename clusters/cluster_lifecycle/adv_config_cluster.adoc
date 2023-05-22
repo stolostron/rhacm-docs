@@ -1,0 +1,87 @@
+[#advanced-config-cluster]
+= Cluster lifecycle advanced configuration 
+
+The cluster requirements can be further configured during or after installation.
+
+[#custom-api-certificates]
+== Customizing API server certificates
+
+The default OpenShift Kube API server certificate is issued by an internal OpenShift Container Platform cluster CA. By following the guide of Adding API server certificates, you can add one or more alternative certificates that the API server will return based on the fully qualified domain name (FQDN) requested by the client.
+
+There are three cases when your want to change the certificate of OpenShift API server, which may have impact on the communication between ACM managed cluster and ACM hub cluster. It's recommended to add named certificate before ACM/MCE is installed; otherwise you may hit the issue described in [Case 1: Add a named certificate for the external load balancer|http://example.com].
+
+[#add-certificate-load-balancer]
+=== Adding a named certificate for the external load balancer
+
+By adding a named certificate with host name 'api.<cluster_name>.<base_domain>', you are able to replace the the default API server certificate for the external load balancer. Doing so might leave some of your managed clusters in an offline state. If it happens, please follow the guide of Troubleshooting imported clusters offline after certificate change to fix it.
+
+[#replace-certificate-load-balancer]
+=== Replacing the existing named certificate for the external load balancer
+
+In this case, your APIServer resource looks like,
+{code:java}
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+      name: old-cert-secret{code}
+If you want to change the old certificate with a new one for some reason, like the old one will expire soon. Please follow the steps below to make your certificate update smoothly.
+
+1. Create a new secret with both old and new certificates in openshift-config namespace;
+{code:java}
+cp old.crt combined.crt
+
+cat new.crt >> combined.crt
+
+oc create secret tls combined-certs-secret --cert=combined.crt --key=old.key -n openshift-config {code}
+2. Update APIServer resource and change the name of servingCertificate to refer to this new secret.
+{code:java}
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+      name: combined-cert-secret{code}
+3. Wait for about 15 minutes, and the CA bundle containing both new and old certificates will be propagated to the managed clusters.
+
+4. Create another secret, like `new-cert-secret`, with only new certificate in openshift-config namespace;
+{code:java}
+oc create secret tls new-cert-secret --cert=new.crt --key=new.key -n openshift-config {code}
+5. Update APIServer resource and change the name of servingCertificate to refer to `new-cert-secret`;
+
+[source:yaml]
+
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+      name: new-cert-secret{code}
+6. The old certificate will be removed from the CA bundle and the change will be propagated to the managed clusters automatically in about 15 minutes.
+
+[#add-update-named-certificates]
+== Adding or updating invalid named certificates
+
+Managed clusters use the host name `api.<cluster_name>.<base_domain>` to access the hub cluster. It is not supported by ACM/MCE to use named certificates configured with other host names.
