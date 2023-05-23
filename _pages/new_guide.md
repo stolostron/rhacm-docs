@@ -122,10 +122,17 @@ Complete the following steps to complete the _New title_ form:
 
 ## Troubleshooting steps for the `no main file` error message after building the new book:
     
+### No "Title URL fragment"
    1. In the Pantheon interface, select the edit (pencil) icon beside your new book. It appears when you hover over the book title. 
    2. Verify that there is also a **Title URL fragment** listed in the field. It is generally an all lowercase version of the **Title name** that is listed.
    3. If it is not there, add it.
    4. If that doesn't resolve the error with your next build, try deleting and recreating the symlink in the folder of the new book. 
+
+### Default content directory not working 
+   1. In the Pantheon interface, select the down arrow beside the staging build for your book and select "Edit configuration."
+   2. Clear the box for "Use default content directory".
+   3. Manually enter the directory name for your book.
+*Note:* I think this might only be an issue with book titles with multiple words in it, though I have not confirmed that. 
 
 ## Renaming 
 
