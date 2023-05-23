@@ -6,9 +6,6 @@ Review the following sections to learn more about customizing, managing, and vie
 Collect logs about new information that is created for observability resources with the `must-gather` command. For more information, see the _Must-gather_ section in the _Troubleshooting documentation_.
 
 - <<creating-custom-rules,Creating custom rules>>
-- <<configuring-alertmanager,Configuring AlertManager>>
-- <<forward-alerts,Forwarding alerts>>
-* <<disabling-forward-alerts,Disabling forward alerts for managed clusters>>
 - <<adding-custom-metrics, Adding custom metrics>>
 * <<adding-user-workload-metrics,Adding user workload metrics>>
 * <<removing-default-metrics,Removing default metrics>>
@@ -81,102 +78,7 @@ data:
 +
 *Note:* If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, the configuration is automatically reloaded. The configuration is reloaded because of the `config-reload` within the `observability-thanos-ruler` sidecar.
 
-To verify that the alert rules are functioning appropriately, launch the Grafana dashboard, navigate to the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if the alert is initiated.
-
-[#configuring-alertmanager]
-== Configuring AlertManager
-
-Integrate external messaging tools such as email, Slack, and PagerDuty to receive notifications from AlertManager. You must override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for AlertManager. Complete the following steps to update the custom receiver rules:
-
-. Extract the data from the `alertmanager-config` secret. Run the following command:
-+
-----
-oc -n open-cluster-management-observability get secret alertmanager-config --template='{{ index .data "alertmanager.yaml" }}' |base64 -d > alertmanager.yaml
-----
-
-. Edit and save the `alertmanager.yaml` file configuration by running the following command:
-+
-----
-oc -n open-cluster-management-observability create secret generic alertmanager-config --from-file=alertmanager.yaml --dry-run -o=yaml |  oc -n open-cluster-management-observability replace secret --filename=-
-----
-+
-Your updated secret might resemble the following content:
-+
-[source,yaml]
-----
-global
-  smtp_smarthost: 'localhost:25'
-  smtp_from: 'alertmanager@example.org'
-  smtp_auth_username: 'alertmanager'
-  smtp_auth_password: 'password'
-templates: 
-- '/etc/alertmanager/template/*.tmpl'
-route:
-  group_by: ['alertname', 'cluster', 'service']
-  group_wait: 30s
-  group_interval: 5m
-  repeat_interval: 3h 
-  receiver: team-X-mails
-  routes:
-  - match_re:
-      service: ^(foo1|foo2|baz)$
-    receiver: team-X-mails
-----
-
-Your changes are applied immediately after it is modified. For an example of AlertManager, see https://github.com/prometheus/alertmanager/blob/master/doc/examples/simple.yml[prometheus/alertmanager].
-
-[#forward-alerts]
-== Forwarding alerts
-
-After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to the hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system. 
-
-View the following example of the `alertmanager-config` YAML file:
-
-[source,yaml]
-----
-global:
-  slack_api_url: '<slack_webhook_url>'
-
-route:
-  receiver: 'slack-notifications'
-  group_by: [alertname, datacenter, app]
-
-receivers:
-- name: 'slack-notifications'
-  slack_configs:
-  - channel: '#alerts'
-    text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
-----
-
-If you want to configure a proxy for alert forwarding, add the following `global` entry to the `alertmanager-config` YAML file:
-
-[source,yaml]
-----
-global:
-  slack_api_url: '<slack_webhook_url>'
-  http_config:
-    proxy_url: http://****
-----
-
-[#disabling-forward-alerts]
-=== Disabling forward alerts for managed clusters
-
-Disable alert forwarding for managed clusters. Add the following annotation to the `MultiClusterObservability` custom resource:
-
-[source,yaml]
-----
-metadata:
-      annotations:
-        mco-disable-alerting: "true"
-----
-
-When you set the annotation, the alert forwarding configuration on the managed clusters is reverted. Any changes made to the `ocp-monitoring-config` ConfigMap in the `openshift-monitoring` namespace are reverted. Setting the annotation ensures that the `ocp-monitoring-config` ConfigMap is no longer managed or updated by the observability operator endpoint. After you update the configuration, the Prometheus instance on your managed cluster restarts.
-
-*Important:* Metrics on your managed cluster are lost if you have a Prometheus instance with a persistent volume for metrics, and the Prometheus instance restarts. However, metrics from the hub cluster are not affected.
-
-When the changes are reverted, a ConfigMap named `cluster-monitoring-reverted` is createde in the `open-cluster-management-addon-observability` namespace. Any new, manually added alert forward configurations are not reverted from the ConfigMap. 
-
-Verify that the hub cluster alert manager is no longer propagating managed cluster alerts to third-party messaging tools. See the previous section, _Configuring AlertManager_. 
+To verify that the alert rules are functioning correctly, launch the Grafana dashboard, navigate to the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if the alert is initiated. 
 
 [#adding-custom-metrics]
 == Adding custom metrics
@@ -515,4 +417,13 @@ From the {product-title-short} console _Clusters_ page, add the `observability=d
 
 To learn more about alert forwarding, see the https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation]. For more information on monitoring data from the console with the observability service, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
 
-// == Additional resourceslink:../troubleshooting/troubleshooting_intro.adoc[_Troubleshooting documentation_]
+[#additional-resource-custom-obs]
+== Additional resources
+
+- For more details about observability alerts, see xref:../observability/observability_alerts.adoc#observability-alerts[Observability alerts]
+
+- Return to the beginning of this topic, <<customizing-observability,Customizing observability>>. 
+
+- For more topics about the observability service, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service introduction].
+
+
