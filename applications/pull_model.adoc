@@ -1,0 +1,556 @@
+[#argo-pull-model]
+= Deploying ArgoCD with the pull model
+
+The Argo CD server on the hub cluster is responsible for deploying the application resources on the managed
+clusters. Pull model implementation applies {ocm} registration, placement, and ManifestWork APIs so that the hub cluster. Secure communication channel between the hub cluster and the managed cluster. With this model, an Argo CD controller must be running on each target managed cluster, then the Argo CD `applicationSet` can use a single manifest to deploy an application on multiple managed clusters. The same `applicationSet` CRD is used to deploy the application to the managed cluster using the push or pull model. 
+
+*Required access:* Cluster administrator
+
+[#pull-model-arch]
+== Pull model architecture
+
+To use the pull model, a new annotation `apps.open-cluster-management.io/ocm-managed-cluster` is required in
+the template section of the `applicationSet` resource. This annotation is used to specify the target managed cluster for the application. 
+
+- The propagation controller, is added to the hub cluster. This controller watches for applications that contain the
+`ocm-managed-cluster` annotation, and creates a manifestWork to deliver the application to the managed cluster.
+
+- On the hub cluster, the ArgoCD application set controller reconciles to create application resources for each target managed cluster.
+
+- Propagation controller on the hub cluster reconciles on the application resources and creates a manifestWork to deliver the application to the managed clusters.
+
+- The ArgoCD application controller on the managed cluster reconciles to
+deploy the application.
+
+- Resource sync controller on the hub cluster queries the {ocm} search V2 component on each managed cluster periodically to retrieve the resource list and any error messages for each ArgoCD application.
+
+- Aggregation controller on the hub creates/updates the multicluster
+application set report using the data from the resource sync controller
+and the status information from the manifestWork for the applications
+____
+
+[#prereqs-pull-model]
+== Prerequisites 
+
+See the following prerequisites:
+
+- The GitOps operator must be installed on the hub cluster and the target managed clusters. 
+- The operator must be installed in the `openshift-gitops` namespace. *Note* Use the OpenShift operator hub to install the GitOps operator, where the default namespace is `openshift-gitops`.
+- Every managed cluster must have a cluster secret in the Argo CD server namespace on the hub cluster, application set controller to propagate the ArgoCD application template for a managed cluster.
+- Create a GitOps cluster resource that contains a reference to a placement resource since the placement resource selects all the managed clusters that support the pull model. With this prerequisite, the managed cluster secrets are created in the ArgoCD server namespace.
+
+See the following example, where name: `bgdk-app-placement` is a placement can select all clusters:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: argo-acm-importer
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    cluster: notused
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: bgdk-app-placement      
+    namespace: openshift-gitops
+----
+
+*Information:* If the `openshift-gitops-argocd-application-controller` service account is not a cluster administrator, the gitops application controller might not have the required permission to deploy resources. The application status might send an error similar to the following error:
+
+----
+cannot create resource "services" in API group "" in the namespace
+"mortgage",deployments.apps is forbidden: User
+"system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller"
+----
+
+To avoid this issue, see the following procedure:
+
+. Create all namespaces on each managed cluster where the ArgoCD
+application will be deployed.
+
+. Add the `manage-by` label to each namespace. If an ArgoCD application is deployed to multiple namespaces,
+each namespace should be managed by ArgoCD.
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mortgage2
+  labels:
+    argocd.argoproj.io/managed-by: openshift-gitops
+----
+
+. Explicitly declare all application destination namespaces in the repository for the application and include the `managed-by` label in the namespaces. Refer to _Additional resources_ to learn how to declare a namespace.
+____
+
+
+
+[arabic, start=4]
+. {blank}
++
+____
+For deploying applications using the pull model, it is important for the
+ArgoCD application controllers to ignore these application resources on
+the hub cluster. The desired solution is to add the
+_argocd.argoproj.io/skip-reconcile_ annotation to the template section
+of the applicationSet. On the ACM hub cluster, the required OpenShift
+GitOps operator must be version 1.9.0 or above. On the managed
+cluster(s), the OpenShift GitOps operator is recommended to be at the
+same level as the hub cluster.
+____
+
+____
+[line-through]*If you’re OpenShift GitOps operator version lower than
+1.9.0, which does not have support for the _skip-reconcile_ annotation,
+the workaround is to disable the ArgoCD application controller running
+on the hub cluster. In the example below, the image in the deployment
+for the GitOps application controller is set to an invalid value.*
+____
+
+[line-through]*NAMESPACE NAME READY STATUS*
+
+[line-through]*openshift-gitops
+openshift-gitops-application-controller-0 0/1 InvalidImageName*
+
+=== *ApplicationSet CRD*
+
+The ArgoCD ApplicationSet CRD is used to deploy applications on the
+managed clusters using the push or pull model. It uses a placement
+resource in the generator field to get a list of managed clusters. The
+template field supports parameter substitution of specifications for the
+application. The ArgoCD applicationSet controller on the hub cluster
+manages the creation of the application for each target cluster.
+
+For the pull model, the destination for the application must be the
+default local kubernetes server
+(https://kubernetes.default.svc/[[.underline]#https://kubernetes.default.svc#])
+since the application will be deployed locally by the application
+controller on the managed cluster. By default, the push model is used to
+deploy the application, unless the annotations
+_apps.open-cluster-management.io/ocm-managed-cluster_ and
+_apps.open-cluster-management.io/pull-to-ocm-managed-cluster_ are added
+to the template section of the applicationSet.
+
+The following is a sample ApplicationSet YAML that uses the pull model:
+
+apiVersion: argoproj.io/v1alpha1
+
+kind: ApplicationSet
+
+metadata:
+
+name: guestbook-allclusters-app-set
+
+namespace: openshift-gitops
+
+spec:
+
+generators:
+
+- clusterDecisionResource:
+
+configMapRef: ocm-placement-generator
+
+labelSelector:
+
+matchLabels:
+
+cluster.open-cluster-management.io/placement: aws-app-placement
+
+requeueAfterSeconds: 30
+
+template:
+
+metadata:
+
+annotations:
+
+apps.open-cluster-management.io/ocm-managed-cluster: '\{\{name}}'
+
+apps.open-cluster-management.io/ocm-managed-cluster-app-namespace:
+openshift-gitops
+
+argocd.argoproj.io/skip-reconcile: "true"
+
+labels:
+
+apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+
+name: '\{\{name}}-guestbook-app'
+
+spec:
+
+destination:
+
+namespace: guestbook
+
+server: https://kubernetes.default.svc
+
+project: default
+
+source:
+
+path: guestbook
+
+repoURL: https://github.com/argoproj/argocd-example-apps.git
+
+syncPolicy:
+
+automated: \{}
+
+syncOptions:
+
+- CreateNamespace=true
+
+=== *Propagation controller*
+
+There are two sets of controllers on the hub cluster watching the
+applicationSet resources: Argo CD application controllers and the new
+propagation controller. Annotations in the application resource is used
+to determine which controller reconciles to deploy the application. The
+ArgoCD application controllers, which are used for the push model,
+ignore applications that contain the _argocd.argoproj.io/skip-reconcile_
+annotation. The propagation controller, which supports the pull model,
+only reconciles on applications that contain the
+_apps.open-cluster-management.io/ocm-managed-cluster_ annotation. It
+generates a manifestWork to deliver the application to the managed
+cluster. The managed cluster is determined by the value of the
+_ocm-managed-cluster_ annotation.
+
+The following is a sample manifestWork YAML that is generated by the
+propagation controller to create the guestbook application on the
+managed cluster _pcluster2_:
+
+apiVersion: work.open-cluster-management.io/v1
+
+kind: ManifestWork
+
+metadata:
+
+annotations:
+
+apps.open-cluster-management.io/hosting-applicationset:
+openshift-gitops/guestbook-allclusters-app-set
+
+name: pcluster2-guestbook-app-4a491
+
+namespace: pcluster2
+
+spec:
+
+manifestConfigs:
+
+- feedbackRules:
+
+- jsonPaths:
+
+- name: healthStatus
+
+path: .status.health.status
+
+type: JSONPaths
+
+- jsonPaths:
+
+- name: syncStatus
+
+path: .status.sync.status
+
+type: JSONPaths
+
+resourceIdentifier:
+
+group: argoproj.io
+
+name: pcluster2-guestbook-app
+
+namespace: openshift-gitops
+
+resource: applications
+
+workload:
+
+manifests:
+
+- apiVersion: argoproj.io/v1alpha1
+
+kind: Application
+
+metadata:
+
+annotations:
+
+apps.open-cluster-management.io/hosting-applicationset:
+openshift-gitops/guestbook-allclusters-app-set
+
+finalizers:
+
+- resources-finalizer.argocd.argoproj.io
+
+labels:
+
+apps.open-cluster-management.io/application-set: "true"
+
+name: pcluster2-guestbook-app
+
+namespace: openshift-gitops
+
+spec:
+
+destination:
+
+namespace: guestbook
+
+server: https://kubernetes.default.svc
+
+project: default
+
+source:
+
+path: guestbook
+
+repoURL: https://github.com/argoproj/argocd-example-apps.git
+
+syncPolicy:
+
+automated: \{}
+
+syncOptions:
+
+- CreateNamespace=true
+
+As a result of the feedback rules specified in manifestConfigs, the
+health status and the sync status from the status of the ArgoCD
+application are synced to the manifestwork’s statusFeedback.
+
+=== *Deploy application by the local ArgoCD server on the managed cluster*
+
+After the ArgoCD application is created on the managed cluster through
+ManifestWorks, the local ArgoCD controllers reconcile to deploy the
+application. The controllers deploy the application through this
+sequence of operations:
+
+* {blank}
++
+____
+Connect and pull resources from the specified Git/Helm repository
+____
+* {blank}
++
+____
+Deploy the resources on the local managed cluster
+____
+* {blank}
++
+____
+Generate the ArgoCD application status
+____
+
+=== *Multicluster Application report - aggregate application status from the managed clusters* 
+
+A new multicluster applicationSet report CRD is introduced to provide an
+aggregate status of the applicationSet on the hub. The report is only
+created for applicationSets that are deployed using the new pull model.
+It includes the list of resources and the overall status of the
+application from each managed cluster. A separate multicluster
+applicationSet report resource is created for each ArgoCD applicationSet
+resource. The report is created in the same namespace as the
+applicationSet. The Multicluster ApplicationSet report includes:
+
+* {blank}
++
+____
+List of resources for the ArgoCD application
+____
+* {blank}
++
+____
+Overall sync and health status for one ArgoCD application
+____
+* {blank}
++
+____
+Includes error message for each cluster where the overall status is out
+of sync or unhealthy
+____
+* {blank}
++
+____
+Summary status of the overall application status from all the managed
+clusters
+____
+
+To support the generation of the multicluster applicationSet report, two
+new controllers have been added to the hub cluster: the resource sync
+controller and the aggregation controller. The resource sync controller
+runs every 10 seconds, and its purpose is to query the OCM search V2
+component on each managed cluster to retrieve the resource list and any
+error messages for each ArgoCD application. It then produces an
+intermediate report for each application set, which is intended to be
+used by the aggregation controller to generate the final multicluster
+applicationSet report.
+
+The aggregation controller also runs every 10 seconds, and it uses the
+report generated by the resource sync controller to add the health and
+sync status of the application on each managed cluster. The status for
+each application is retrieved from the status feedback in the
+manifestwork for the application. Once the aggregation is complete, the
+final multicluster applicationSet report is saved in the same namespace
+as the ArgoCD applicationSet, with the same name as the applicationSet.
+
+The two new controllers, along with the propagation controller, all run
+in separate containers in the same _multicluster-integrations_ pod, as
+shown in the example below:
+
+NAMESPACE NAME READY STATUS
+
+open-cluster-management multicluster-integrations-7c46498d9-fqbq4 3/3
+Running
+
+The following is a sample multicluster applicationSet report YAML for
+the guestbook applicationSet.
+
+apiVersion: apps.open-cluster-management.io/v1alpha1
+
+kind: MulticlusterApplicationSetReport
+
+metadata:
+
+labels:
+
+apps.open-cluster-management.io/hosting-applicationset:
+openshift-gitops.guestbook-allclusters-app-set
+
+name: guestbook-allclusters-app-set
+
+namespace: openshift-gitops
+
+statuses:
+
+clusterConditions:
+
+- cluster: cluster1
+
+conditions:
+
+- message: 'Failed sync attempt to
+53e28ff20cc530b9ada2173fbbd64d48338583ba: one or more objects failed to
+apply, reason: services is forbidden: User
+"system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller"
+cannot create resource "services" in API group "" in the namespace
+"guestbook",deployments.apps is forbidden: User
+"system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller"
+cannot create resource "deployments" in API group "apps" in the
+namespace "guestboo...'
+
+type: SyncError
+
+healthStatus: Missing
+
+syncStatus: OutOfSync
+
+- cluster: pcluster1
+
+healthStatus: Progressing
+
+syncStatus: Synced
+
+- cluster: pcluster2
+
+healthStatus: Progressing
+
+syncStatus: Synced
+
+summary:
+
+clusters: "3"
+
+healthy: "0"
+
+inProgress: "2"
+
+notHealthy: "3"
+
+notSynced: "1"
+
+synced: "2"
+
+All the resources listed in the multicluster applicationSet report are
+actually deployed on the managed cluster(s). If a resource fails to be
+deployed, the resource won't be included in the resource list. However,
+the error message would indicate why the resource failed to be deployed.
+
+=== *Limitations*
+
+[arabic]
+. {blank}
++
+____
+It is possible that both the ArgoCD controller and the propagation
+controller will both reconcile on the same application resource. This
+will cause the duplicate instances of application to be deployed on the
+managed clusters, from the different deployment models.
+____
+
+____
+For deploying applications using the pull model, it is important for the
+ArgoCD controllers to ignore these application resources. The desired
+solution is to add the _argocd.argoproj.io/skip-reconcile_ annotation to
+the template section of the applicationSet. However, this annotation is
+only available in OpenShift GitOps operator version 1.9.0 or higher. To
+prevent conflicts, it is recommended to wait until the ACM hub and all
+the managed clusters are upgraded to OpenShift GitOps operator version
+1.9.0 before using the pull model.
+
+[line-through]*If you’re OpenShift GitOps operator version lower than
+1.9.0, which does not have support for the _skip-reconcile_ annotation,
+the workaround is to disable the ArgoCD application controller running
+on the hub cluster. In the example below, the image in the deployment
+for the GitOps application controller is set to an invalid value.*
+____
+
+[line-through]*NAMESPACE NAME READY STATUS*
+
+[line-through]*openshift-gitops
+openshift-gitops-application-controller-0 0/1 InvalidImageName*
+
+____
+[line-through]*However, until OpenShift GitOps operator version 1.9.0 is
+installed, users should only use one model for deploying the application
+sets (push or pull). If users already have application sets that were
+deployed using the push model, it is not recommended to disable the
+GitOps application controller on the hub in order to use the pull model,
+as this would prevent updates to their existing applications. If the
+user wishes to switch back to the push model after trying the pull
+model, the user should remove all the application sets before
+re-enabling the GitOps application controller.*
+____
+
+[arabic, start=2]
+. {blank}
++
+____
+All the resources listed in the multicluster application set report are
+actually deployed on the managed cluster(s). If a resource fails to be
+deployed, the resource won't be included in the resource list. However,
+the error message would indicate why the resource failed to be deployed.
+____
+. {blank}
++
+____
+For deploying application sets using the pull model, the `local-cluster`
+is excluded as target managed cluster
+____
+
+== Additional resources
+
+https://docs.openshift.com/container-platform/4.11/cicd/gitops/configuring-an-openshift-cluster-by-deploying-an-application-with-cluster-configurations.html#creating-an-application-by-using-the-oc-tool_configuring-an-openshift-cluster-by-deploying-an-application-with-cluster-configurations (will not be using this)
+
+https://github.com/redhat-developer-demos/openshift-gitops-examples/blob/44fc1d4a38cb79ffa6c8524788f5ac87f369d41c/apps/bgd/overlays/bgd/bgd-ns.yaml#L6 (will not be using this)
