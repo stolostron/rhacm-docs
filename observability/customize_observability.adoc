@@ -9,6 +9,8 @@ Collect logs about new information that is created for observability resources w
 - <<configuring-alertmanager,Configuring AlertManager>>
 - <<forward-alerts,Forwarding alerts>>
 * <<disabling-forward-alerts,Disabling forward alerts for managed clusters>>
+- <<silence-alerts,Silencing alerts>>
+- <<supress-alerts,Suppressing alerts>>
 - <<adding-custom-metrics, Adding custom metrics>>
 * <<adding-user-workload-metrics,Adding user workload metrics>>
 * <<removing-default-metrics,Removing default metrics>>
@@ -29,7 +31,7 @@ Collect logs about new information that is created for observability resources w
 [#creating-custom-rules]
 == Creating custom rules
 
-Create custom rules for the observability installation by adding Prometheus https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
+Create custom rules for the observability installation by adding Prometheus link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see link:https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
 
 ** Recording rules provide you the ability to precalculate, or computate expensive expressions as needed. The results are saved as a new set of time series.
 ** Alerting rules provide you the ability to specify the alert conditions based on how an alert should be sent to an external service.
@@ -177,6 +179,90 @@ When you set the annotation, the alert forwarding configuration on the managed c
 When the changes are reverted, a ConfigMap named `cluster-monitoring-reverted` is createde in the `open-cluster-management-addon-observability` namespace. Any new, manually added alert forward configurations are not reverted from the ConfigMap. 
 
 Verify that the hub cluster alert manager is no longer propagating managed cluster alerts to third-party messaging tools. See the previous section, _Configuring AlertManager_. 
+
+[#silence-alerts]
+== Silencing alerts
+
+Add alerts that you do not want to receive. You can silence alerts by the alert name, match label, or time duration. After you add the alert that you want to silence, an ID is created. Your ID for your silenced alert might resemble the following string, `d839aca9-ed46-40be-84c4-dca8773671da`.
+
+Continue reading for ways to silence alerts:
+
+- To silence a {product-title-short} alert, you must have access to the `alertmanager-main` pod in the `open-cluster-management-observability` namespace. For example, enter the following command in the pod terminal to silence `SampleAlert`:
++
+----
+amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" alertname="SampleAlert"
+----
+- Silence an alert by using multiple match labels. The following command uses `match-label-1` and `match-label-2`:
++
+----
+amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" <match-label-1>=<match-value-1> <match-label-2>=<match-value-2>
+----
+- If you want to silence an alert for a specific period of time, use the `--duration` flag. Run the following command to silence the `SampleAlert` for an hour:
++
+----
+amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" --duration="1h" alertname="SampleAlert"
+----
++
+You can also specify a start or end time for the silenced alert. Enter the following command to silence the `SampleAlert` for a specific start time:
++
+----
+amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" --start="2023-04-14T15:04:05-07:00" alertname="SampleAlert"
+----
+- To view all silenced alerts that are created, run the following command:
++
+----
+amtool silence --alertmanager.url="http://localhost:9093"
+----
+- If you no longer want an alert to be silenced, end the silenced alert by running the following command:
++
+----
+amtool silence expire --alertmanager.url="http://localhost:9093" "d839aca9-ed46-40be-84c4-dca8773671da"
+----
++
+- To end the silencing of all alerts, run the following command:
++
+----
+amtool silence expire --alertmanager.url="http://localhost:9093" $(amtool silence query --alertmanager.url="http://localhost:9093" -q) 
+----
+
+[#supress-alerts]
+== Suppressing alerts
+
+Suppress {product-title-short} alerts across your clusters globally that are less severe. Suppress alerts by defining an inhibition rule in the `alertmanager-config` in the `open-cluster-management-observability` namespace. 
+
+An inhibition rule mutes an alert when there is a set of parameter matches that match another set of existing matchers. In order for the rule to take effect, both the target and source alerts must have the same label values for the label names in the `equal` list. Your `inhibit_rules` might resemble the following:
+
+[source,yaml]
+----
+global:
+  resolve_timeout: 1h
+inhibit_rules:<1>
+  - equal:
+      - namespace
+    source_match:<2>
+      severity: critical
+    target_match_re:
+      severity: warning|info
+----
+<1> The `inhibit_rules` parameter section is defined to look for alerts in the same namespace. When a `critical` alert is initiated within a namespace and if there are any other alerts that contain the severity level `warning` or `info` in that namespace, only the `critical` alerts are routed to the Alertmanager receiver. The following alerts might be displayed when there are matches:
++
+----
+ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
+ALERTS{alertname="foo", namespace="ns-1", severity="warning"}
+----
++
+<2> If the value of the `source_match` and `target_match_re` parameters do not match, the alert is routed to the receiver:
++
+----
+ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
+ALERTS{alertname="foo", namespace="ns-2", severity="warning"}
+----
+
+- To view suppressed alerts in {product-title-short}, enter the following command:
++
+----
+amtool alert --alertmanager.url="http://localhost:9093" --inhibited
+----
 
 [#adding-custom-metrics]
 == Adding custom metrics
@@ -456,7 +542,7 @@ View the data from your managed clusters by accessing Grafana from the hub clust
 
 For example, to _cluster_infrastructure_provider_ from a single node cluster, use the following query expression: `cluster_infrastructure_provider{clusterType="SNO"}`
 
-*Note:* Do not set the `ObservabilitySpec.resources.CPU.limits` parameter if observability is enabled on single node managed clusters. When you set the CPU limits, it causes the observability pod to be counted against the capacity for your managed cluster. See https://github.com/openshift/enhancements/blob/master/enhancements/workload-partitioning/management-workload-partitioning.md#management-workload-partitioning[Management Workload Partitioning] for more information.
+*Note:* Do not set the `ObservabilitySpec.resources.CPU.limits` parameter if observability is enabled on single node managed clusters. When you set the CPU limits, it causes the observability pod to be counted against the capacity for your managed cluster. See link:https://github.com/openshift/enhancements/blob/master/enhancements/workload-partitioning/management-workload-partitioning.md#management-workload-partitioning[Management Workload Partitioning] for more information.
 
 [#viewing-etcd-grafana]
 === Viewing the etcd table
@@ -513,4 +599,4 @@ From the {product-title-short} console _Clusters_ page, add the `observability=d
 
 *Note:* When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
 
-To learn more about alert forwarding, see the https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation]. For more information on monitoring data from the console with the observability service, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
+To learn more about alert forwarding, see the link:https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation]. For more information on monitoring data from the console with the observability service, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
