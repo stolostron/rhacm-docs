@@ -5,6 +5,7 @@ You can use the {mce} console to create a {ocp} hosted cluster. Hosted control p
 
 * <<hosted-prerequisites-aws,Prerequisites>>
 * <<create-hosted-aws,Creating a hosted cluster on AWS with the console>>
+* <<create-hosted-multi-zone-aws,Creating a hosted cluster in multiple zones on AWS>>
 * <<hosted-deploy-cluster-aws,Deploying a hosted cluster on AWS>>
 * <<hosting-service-cluster-access-aws,Accessing a hosting cluster on AWS>>
 * <<importing-hosted-cluster-aws,Importing a hosted control plane cluster on AWS>>
@@ -45,6 +46,39 @@ Proxy information that is provided in the infrastructure environment is automati
 When you review your information and optionally customize it before creating the cluster, you can select *YAML: On* to view the YAML content in the panel. You can edit the YAML file with your custom settings, if you have any updates.  
 
 *Note:* You have to run the `oc` command that is provided with the cluster details to import the cluster. When you create the cluster, it is not automatically configured with the management of {product-title-short}.
+
+[#create-hosted-multi-zone-aws]
+== Creating a hosted cluster in multiple zones on AWS
+
+Create a cluster, specifying the `BASE_DOMAIN` of the public zone, by entering the following commands:
+----
+REGION=us-east-1
+ZONES=us-east-1a,us-east-1b
+CLUSTER_NAME=example
+BASE_DOMAIN=example.com
+AWS_CREDS="$HOME/.aws/credentials"
+PULL_SECRET="$HOME/pull-secret"
+
+hypershift create cluster aws \
+--name $CLUSTER_NAME \
+--node-pool-replicas=3 \
+--base-domain $BASE_DOMAIN \
+--pull-secret $PULL_SECRET \
+--aws-creds $AWS_CREDS \
+--region $REGION \
+--zones $ZONES <1>
+----
+
+<1> The `--zones` flag must specify availability zones within the region that is specified by the `--region` flag. The `--zones` flag is also available on the `hypershift create infra aws` command that is used to create infrastructure separately.
+
+The following per-zone infrastructure is created for all specified zones:
+
+* Public subnet
+* Private subnet
+* NAT gateway
+* Private route table (public route table is shared across public subnets)
+
+One `NodePool` resource is created for each zone. The node pool name is suffixed by the zone name. The private subnet for zone is set in `spec.platform.aws.subnet.id`.
 
 [#hosted-deploy-cluster-aws]
 == Deploying a hosted cluster on AWS
