@@ -2,45 +2,51 @@
 = Deploying Argo CD with the pull model
 //discuss placement
 
-The Argo CD server on the hub cluster is responsible for deploying the application resources on the managed clusters. Pull model implementation applies {ocm} registration, placement, and `manifestWork` APIs so that the hub cluster. Secure communication channel between the hub cluster and the managed cluster. With this model, an Argo CD controller must be running on each target managed cluster, then the Argo CD  `ApplicationSet` can use a single manifest to deploy an application on multiple managed clusters. The same  `ApplicationSet` CRD is used to deploy the application to the managed cluster using the push or pull model. 
+The Argo CD server on the hub cluster deploys the application resources on the managed clusters. Pull model implementation applies {ocm} registration, placement, and `manifestWork` APIs so that the hub cluster can use the secure communication channel between the hub cluster and the managed cluster to deploy resources. 
+
+With this model, an Argo CD controller must be running on each target managed cluster so that the Argo CD  `ApplicationSet` can use a single manifest to deploy an application on multiple managed clusters. The same `ApplicationSet` CRD is used to deploy the application to the managed cluster using the push or pull model. 
 
 *Required access:* Cluster administrator
 
 [#pull-model-arch]
 == Pull model architecture
 
-To use the pull model, a new annotation `apps.open-cluster-management.io/ocm-managed-cluster` is required in
-the template section of the  `ApplicationSet` resource. This annotation is used to specify the target managed cluster for the application. 
+To use the pull model, the `apps.open-cluster-management.io/ocm-managed-cluster` annotation is required in
+the template section of the `ApplicationSet` resource. This annotation is used to specify the target managed cluster for the application. 
 
-- The propagation controller, is added to the hub cluster. This controller watches for applications that contain the
-`ocm-managed-cluster` annotation, and creates a `manifestWork` to deliver the application to the managed cluster.
+*Important:* For pull model, the `local-cluster` is excluded as target managed cluster.
 
-- On the hub cluster, the Argo CD application set controller reconciles to create application resources for each target managed cluster.
+See the following information about pull model architecture:
 
-- Propagation controller on the hub cluster reconciles on the application resources and creates a `manifestWork` to deliver the application to the managed clusters.
+- The _propagation controller_ is added to the hub cluster and watches for applications that contain the
+`ocm-managed-cluster` annotation. 
 
-- The Argo CD application controller on the managed cluster reconciles to
-deploy the application.
+- The propagation controller creates a `manifestWork` to deliver the application to the managed cluster.
 
-- Resource sync controller on the hub cluster queries the {ocm} search V2 component on each managed cluster periodically to retrieve the resource list and any error messages for each Argo CD application.
+- The Argo CD `ApplicationSet` controller on the hub cluster reconciles to create application resources for each target managed cluster.
 
-- Aggregation controller on the hub creates/updates the multicluster
-application set report using the data from the resource sync controller
-and the status information from the `manifestWork` for the applications
+- The Propagation controller on the hub cluster reconciles the application resources and creates a `manifestWork` to deliver the application to the managed clusters.
+
+- The Argo CD application controller on the managed cluster reconciles to deploy the application.
+
+- The _Resource sync controller_ on the hub cluster queries the {ocm} search V2 component on each managed cluster periodically to retrieve the resource list and any error messages for each Argo CD application.
+
+- THe _Aggregation controller_ on the hub cluster creates and updates the multicluster `ApplicationSet` report by using the data from the resource sync controller and the status information from the `manifestWork` for the applications.
 ____
 
 [#prereqs-pull-model]
 == Prerequisites 
 
-See the following prerequisites:
+See the following prerequisites for the Argo CD pull model:
 
-- The GitOps operator must be installed on the hub cluster and the target managed clusters. 
-- The operator must be installed in the `openshift-gitops` namespace. *Note* Use the OpenShift operator hub to install the GitOps operator, where the default namespace is `openshift-gitops`.
-- On the hub cluster, the required OpenShift GitOps operator must be version 1.9.0 or above. On the managed clusters, the OpenShift GitOps operator should be that same version as the hub cluster.
-- Every managed cluster must have a cluster secret in the Argo CD server namespace on the hub cluster, application set controller to propagate the Argo CD application template for a managed cluster.
-- Create a GitOps cluster resource that contains a reference to a placement resource since the placement resource selects all the managed clusters that support the pull model. With this prerequisite, the managed cluster secrets are created in the Argo CD server namespace.
+- The GitOps operator must be installed on the hub cluster and the target managed clusters in the `openshift-gitops` namespace. *Note* Use the OpenShift operator hub to install the GitOps operator, where the default namespace is `openshift-gitops`.
+- The required hub cluster {ocp-short} GitOps operator must be version 1.9.0 or later. 
+- The required managed clusters {ocp-short} GitOps operator must be the same version as the hub cluster.
+- Every managed cluster must have a cluster secret in the Argo CD server namespace on the hub cluster.
+- `ApplicationSet` controller to propagate the Argo CD application template for a managed cluster.
+- The GitOps cluster resource must contains a reference to a placement resource, since the placement resource selects all the managed clusters that support the pull model. With this prerequisite, the managed cluster secrets are created in the Argo CD server namespace.
 
-See the following example, where name: `bgdk-app-placement` is a placement can select all clusters:
+See the following example where name: `bodk-app-placement` is a placement can select all clusters:
 
 +
 [source,yaml]
@@ -234,7 +240,7 @@ The Multicluster `ApplicationSet` report includes the following items:
 
 To support the generation of the multicluster `ApplicationSet` report, two controllers are added to the hub cluster: 
 
-- The resource sync controller, which runs every 10 seconds to query the {ocm} search V2 component on each managed cluster to retrieve the resource list and any error messages for each Argo CD application. It produces an intermediate report for each application set, which is intended to be used by the aggregation controller to generate the final multicluster `ApplicationSet` report.
+- The resource sync controller, which runs every 10 seconds to query the {ocm} search V2 component on each managed cluster to retrieve the resource list and any error messages for each Argo CD application. It produces an intermediate report for each `ApplicationSet`, which is intended to be used by the aggregation controller to generate the final multicluster `ApplicationSet` report.
 
 - The aggregation controller, which alos runs every 10 seconds and uses the report generated by the resource sync controller to add the health and sync status of the application on each managed cluster. The status for each application is retrieved from the status feedback in the `manifestWork` for the application. After the aggregation is complete, the final multicluster `ApplicationSet` report is saved in the same namespace as the Argo CD `ApplicationSet`, with the same name as the `ApplicationSet`.
 
@@ -282,14 +288,6 @@ statuses:
 
 All the resources listed in the multicluster `ApplicationSet` report are actually deployed on the managed cluster. If a resource fails to deploy, the resource is not included in the resource list. However, the error message indicates why the resource failed to be deployed.
 
-Limitations
-//misplaced?
-
-Both the Argo CD controller and the propagation controller might reconcile on the same application resource and cause the duplicate instances of application to be deployed on the managed clusters, from the different deployment models.
-
-For deploying applications using the pull model, it is important for the Argo CD controllers to ignore these application resources. Add the Argo CD `.argoproj.io/skip-reconcile` annotation to the template section of the `ApplicationSet`. 
-
-However, this annotation is only available in GitOps operator version 1.9.0 or later. To prevent conflicts, wait until the hub and all the managed clusters are upgraded to GitOps operator version 1.9.0 before using the pull model. 
 
 == Additional resources
 //change these
