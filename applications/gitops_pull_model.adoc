@@ -11,7 +11,7 @@ With this model, an Argo CD controller must be running on each target managed cl
 [#pull-model-arch]
 == Pull model architecture
 
-To use the pull model, the `apps.open-cluster-management.io/ocm-managed-cluster` annotation is required in
+The `apps.open-cluster-management.io/ocm-managed-cluster` annotation is required in
 the template section of the `ApplicationSet` resource. This annotation is used to specify the target managed cluster for the application. 
 
 *Important:* For pull model, the `local-cluster` is excluded as target managed cluster.
@@ -25,7 +25,8 @@ See the following information about pull model architecture:
 
 - The Argo CD `ApplicationSet` controller on the hub cluster reconciles to create application resources for each target managed cluster.
 
-- The Propagation controller on the hub cluster reconciles the application resources and creates a `manifestWork` to deliver the application to the managed clusters.
+- The Propagation controller on the hub cluster also reconciles the application resources and creates a `manifestWork` to deliver the application to the managed clusters.
+//we say this already?
 
 - The Argo CD application controller on the managed cluster reconciles to deploy the application.
 
@@ -39,14 +40,20 @@ ____
 
 See the following prerequisites for the Argo CD pull model:
 
-- The GitOps operator must be installed on the hub cluster and the target managed clusters in the `openshift-gitops` namespace. *Note* Use the OpenShift operator hub to install the GitOps operator, where the default namespace is `openshift-gitops`.
+- The GitOps operator must be installed on the hub cluster and the target managed clusters in the `openshift-gitops` namespace. *Note* Use the {ocp-short} OperatorHub to install the GitOps operator, where the default namespace is `openshift-gitops`.
+
 - The required hub cluster {ocp-short} GitOps operator must be version 1.9.0 or later. 
+
 - The required managed clusters {ocp-short} GitOps operator must be the same version as the hub cluster.
+
 - Every managed cluster must have a cluster secret in the Argo CD server namespace on the hub cluster.
-- `ApplicationSet` controller to propagate the Argo CD application template for a managed cluster.
+
+- You need the `ApplicationSet` controller to propagate the Argo CD application template for a managed cluster.
+
 - The GitOps cluster resource must contains a reference to a placement resource, since the placement resource selects all the managed clusters that support the pull model. With this prerequisite, the managed cluster secrets are created in the Argo CD server namespace.
 
-See the following example where name: `bodk-app-placement` is a placement can select all clusters:
++
+See the following example where name: `book-app-placement` is a `placementRef` that can select all clusters:
 
 +
 [source,yaml]
@@ -63,12 +70,12 @@ spec:
   placementRef:
     kind: Placement
     apiVersion: cluster.open-cluster-management.io/v1beta1
-    name: bgdk-app-placement      
+    name: book-app-placement      
     namespace: openshift-gitops
 ----
 
-*Information:* If the `openshift-gitops-Argo CD-application-controller` service account is not a cluster administrator, the gitops application controller might not have the required permission to deploy resources. The application status might send an error similar to the following error:
-//I feel this is misplaced
+*Information:* If the `openshift-gitops-ArgoCD-application-controller` service account is not a cluster administrator, the GitOps application controller might not have the required permission to deploy resources. The application status might send an error similar to the following error:
+//I feel this is misplaced -- we need the RBAC stated early but if there is more info needed, this may be more for a known issue?
 
 ----
 cannot create resource "services" in API group "" in the namespace
@@ -80,8 +87,8 @@ To avoid this issue, see the following procedure:
 
 . Create all namespaces on each managed cluster where the Argo CD application will be deployed.
 
-. Add the `manage-by` label to each namespace. If an Argo CD application is deployed to multiple namespaces,
-each namespace should be managed by Argo CD. See the following example (?):
+. Add the `managed-by` label to each namespace. If an Argo CD application is deployed to multiple namespaces,
+each namespace should be managed by Argo CD. See the following example:
 
 +
 [source,yaml]
@@ -95,20 +102,23 @@ metadata:
 ----
 
 . Explicitly declare all application destination namespaces in the repository for the application and include the `managed-by` label in the namespaces. Refer to _Additional resources_ to learn how to declare a namespace.
-//add name of link
+//add name of link if this stays in the topic
 
-To deploy applications using the pull model, the Argo CD application controllers must ignore these application resources on the hub cluster. Add the `Argo CD.argoproj.io/skip-reconcile` annotation to the template section of the  `ApplicationSet`. 
+To deploy applications by using the pull model, the Argo CD application controllers must ignore these application resources on the hub cluster. Add the `Argo CD.argoproj.io/skip-reconcile` annotation to the template section of the  `ApplicationSet`. 
 
 [#crd-pull-model]
 == `ApplicationSet` CRD
+//I wonder if this is for push and pull and should be on it's own
 
-The Argo CD `ApplicationSet` CRD is used to deploy applications on the managed clusters using the push or pull model by using a placement resource in the generator field to get a list of managed clusters. 
+The Argo CD `ApplicationSet` CRD is used to deploy applications on the managed clusters by using the push or pull model with a placement resource in the generator field that is used to get a list of managed clusters. 
 
 The template field supports parameter substitution of specifications for the application. The Argo CD `ApplicationSet` controller on the hub cluster manages the creation of the application for each target cluster.
 
-For the pull model, the destination for the application must be the default local Kubernetes server since the application is deployed locally by the application controller on the managed cluster. By default, the push model is used to deploy the application, unless the annotations `apps.open-cluster-management.io/ocm-managed-cluster` and `apps.open-cluster-management.io/pull-to-ocm-managed-cluster` are added to the template section of the `ApplicationSet`.
+For the pull model, the destination for the application must be the default local Kubernetes server, since the application is deployed locally by the application controller on the managed cluster. 
 
-The following is a sample `ApplicationSet` YAML that uses the pull model:
+By default, the push model is used to deploy the application, unless the annotations `apps.open-cluster-management.io/ocm-managed-cluster` and `apps.open-cluster-management.io/pull-to-ocm-managed-cluster` are added to the template section of the `ApplicationSet`.
+
+The following is a sample `ApplicationSet` YAML that uses the pull model with template annotations:
 
 +
 [source,yaml]
