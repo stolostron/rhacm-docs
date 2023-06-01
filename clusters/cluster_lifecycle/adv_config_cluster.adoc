@@ -1,0 +1,191 @@
+[#advanced-config-cluster]
+= Cluster lifecycle advanced configuration 
+
+Some cluster requirements can be further configured during or after installation.
+
+[#custom-api-certificates]
+== Customizing API server certificates
+
+The default OpenShift Kube API server certificate is issued by an internal {ocp} cluster certificate authority (CA). By following the guidance in _Adding API server certificates_ in the {ocp-short} documentation, you can add one or more alternative certificates that the API server returns based on the fully qualified domain name (FQDN) requested by the client.
+
+You might need to change the certificate of the OpenShift API server. Changing the certificate might impact the communication between the managed cluster and the hub cluster. When you add the named certificate before installing the product, you can avoid an issue that might leave your managed clusters in an offline state.
+
+The following list contains some examples of when you might need to update your certificates: 
+
+* You want to add a named certificate for the external load balancer. By adding a named certificate with host name `api.<cluster_name>.<base_domain>`, you can replace the default API server certificate for the external load balancer. Replacing the certificate might leave some of your managed clusters in an offline state. If your clusters are in an offline state after upgrading the certificates, follow the troubleshooting instructions for _Troubleshooting imported clusters offline after certificate change_ to resolve it.
+
+* The certificate for your external load balancer is expiring. 
+
+* The name of your certificate is invalid. Managed clusters must use the host name `api.<cluster_name>.<base_domain>` to access the hub cluster. You cannot use named certificates that are configured with other host names.
+
+[#replace-certificate-load-balancer]
+=== Replacing the existing named certificate for the external load balancer
+
+Complete the following steps to replace a certificate: 
+
+. Locate your `APIServer` custom resource, which resembles the following example: 
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+      name: old-cert-secret
+----
+
+. Create a new secret in the `openshift-config` namespace that contains the content of the existing and new certificates by running the following commands:
++
+----
+cp old.crt combined.crt
+cat new.crt >> combined.crt
+oc create secret tls combined-certs-secret --cert=combined.crt --key=old.key -n openshift-config {code}
+----
+
+. Update your `APIServer` resource to reference the combined certificate as the `servingCertificate`.
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+      name: combined-cert-secret
+----
+
+. After about 15 minutes, the CA bundle containing both new and old certificates is propagated to the managed clusters.
+
+. Create another secret named `new-cert-secret` in the `openshift-config` namespace that contains only the new certificate information by entering the following command:
++
+----
+oc create secret tls new-cert-secret --cert=new.crt --key=new.key -n openshift-config {code}
+----
+
+. Update the `APIServer` resource by changing the name of `servingCertificate` to reference the `new-cert-secret`. Your resource might resemble the following example: 
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+      name: new-cert-secret
+----
+
+After about 15 minutes, the old certificate is removed from the CA bundle, and the change is automatically propagated to the managed clusters.
+
+[#configure-nodeselector-tolerations-addons]
+== Configuring nodeSelectors and tolerations for add-ons
+
+.  Use the `AddonDeploymentConfig` API to create a configuration to specify the `nodeSelector` and `tolerations` on a certain namespace on the hub cluster.
+
+. Create a file named `addondeploymentconfig.yaml` that is based on the following template:
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+ name: <config-name><1>
+ namespace: <config-name-space><2>
+spec:
+ nodePlacement:
+  nodeSelector: <node-selector><3>
+  tolerations: <tolerations><4>
+----
++
+<1> Replace `config-name` with the name of the `AddonDeploymentConfig` that you just created.
+<2> Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you just created.
+<3> Replace `node-selector` with your node selector.
+<4> Replace `tolerations` with your tolerations.
++
+A completed `AddOnDeployment` file might resemble the following example: 
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: deploy-config
+  namespace: open-cluster-management-hub
+spec:
+  nodePlacement:
+    nodeSelector: 
+      "node-dedicated": "acm-addon"
+    tolerations:
+      - effect: NoSchedule
+        key: node-dedicated
+        value: acm-addon
+        operator: Equal
+----
+
+. Run the following command to apply the file that you created:
++
+----
+oc apply -f addondeploymentconfig
+----
+
+. Use the configuration that you created as the global default configuration for your add-on by running the following command:
++
+----
+oc patch clustermanagementaddons <addon-name><1> --type='json' -p='[{"op":"add", "path":"/spec/supportedConfigs", "value":[\{"group":"addon.open-cluster-management.io","resource":"addondeploymentconfigs", "defaultConfig":{"name":"<config-name>",<2>"namespace":"<config-namespace>"<3>}}]}]'
+----
++
+<1> Replace `addon-name` with your add-on name.
+<2> Replace `config-name` with the name of the `AddonDeploymentConfig` that you just created.
+<3> Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you just created.
+
+The `nodeSelector` and `tolerations` that you specified are applied to all of your add-on managed clusters.
+
+You can also override the global default `AddonDeploymentConfig` configuration for your add-on on a certain managed cluster by using following steps:
+
+. Use the `AddonDeploymentConfig` API to create another configuration to specify the `nodeSelector` and `tolerations` on the hub cluster. 
+
+. Link the new configuration that you created to your add-on `ManagedClusterAddon` on a managed cluster.
++
+----
+oc -n <managed-cluster><1> patch managedclusteraddons <addon-name><2> --type='json' -p='[{"op":"add", "path":"/spec/configs", "value":[
+
+{"group":"addon.open-cluster-management.io","resource":"addondeploymentconfigs","namespace":"<config-namespace><3>","name":"<config-name><4>"}
+]}]'
+----
++
+<1> Replace `managed-cluster` with your managed cluster name
+<2> Replace `addon-name` with your add-on name
+<3> Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you just created
+<4> Replace `config-name` with the name of the `AddonDeploymentConfig` that you just created
+
+The new configuration that you referenced in the add-on `ManagedClusterAddon` overrides the global default configuration that you previously defined in the `ClusterManagementAddon` add-on.
+
+[#add-resources-adv-cluster]
+== Additional resources
+
+* See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/security_and_compliance/configuring-certificates#api-server-certificates[Adding API server certificates] for additional information about certificates. 
+
+* See link:../../troubleshooting/trouble_cluster_offline_cert.adoc#troubleshooting-imported-clusters-offline-after-certificate-change[Troubleshooting imported clusters offline after certificate change] for information about troubleshooting an error that might occur after a certificate change. 
+
+* See link:../taints_tolerations.adoc#adding-a-toleration-to-a-placement[Adding a toleration to a placement] for more information about tolerations. 
