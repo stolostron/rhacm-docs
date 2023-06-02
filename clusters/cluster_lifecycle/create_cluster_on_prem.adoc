@@ -86,7 +86,233 @@ After the hosts are bound, and the validations pass, complete the networking inf
 
 You can view the status of the installation on the _Clusters_ navigation page.
 
-Continue with xref:../cluster_lifecycle/access_cluster.adoc#accessing-your-cluster[Accessing your cluster] for instructions for accessing your cluster. 
+Continue with xref:../cluster_lifecycle/access_cluster.adoc#accessing-your-cluster[Accessing your cluster] to access your cluster.
+
+[#on-prem-creating-your-cluster-with-the-cli]
+== Creating your cluster with the command line
+
+You can also create a single-node cluster without the console by using the assisted installer feature within the Central Infrastructure Management component. After you complete this procedure, you can boot the host from the discovery image that is generated. The order of the procedures is generally not important, but is noted when there is a required order.
+
+[#on-prem-creating-your-cluster-with-the-cli-namespace]
+=== Create the namespace
+
+You need a namespace for your resources. It is more convenient to keep all of the resources in a shared namespace. This example uses `sample-namespace` for the name of the namespace, but you can use any name except `assisted-installer` Create a namepace by creating and applying the following file:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sample-namespace
+----
+
+[#on-prem-creating-your-cluster-with-the-cli-pull-secret]
+=== Add the pull secret to the namespace
+
+Add your link:https://console.redhat.com/openshift/install/pull-secret[pull secret] to your namespace by creating and applying the following custom resource:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: pull-secret
+  namespace: sample-namespace
+stringData:
+  .dockerconfigjson: '{"auths":{"cloud.openshift.com":{"auth":"your-secret-here","email":"user@example.com"}}}'
+
+----
+
+[#on-prem-creating-your-cluster-with-the-cli-cluster-image-set]
+=== Generate a ClusterImageSet
+
+Generate a `CustomImageSet` to specify the version of {ocp-short} for your cluster by creating and applying the following custom resource:
+
+[source,yaml]
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterImageSet
+metadata:
+   name: openshift-v4.8.0
+spec:
+   releaseImage: quay.io/openshift-release-dev/ocp-release:4.8.0-rc.0-x86_64  # That version may change over time
+----
+
+[#on-prem-creating-your-cluster-with-the-cli-clusterdeployment]
+=== Create the ClusterDeployment custom resource
+
+The `ClusterDeployment` custom resource definition is an API that controls the lifecycle of the cluster. It references the `AgentClusterInstall` custom resource in the `spec.ClusterInstallRef` setting which defines the cluster parameters. 
+
+Create and apply a `ClusterDeployment` custom resource based on the following example:
+
+[source,yaml]
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+   name: single-node
+   namespace: demo-worker4
+spec:
+   baseDomain: hive.example.com
+   clusterInstallRef:
+      group: extensions.hive.openshift.io
+      kind: AgentClusterInstall
+      name: test-agent-cluster-install # Use the same name for AgentClusterInstall
+      version: v1beta1
+   clusterName: test-cluster
+   controlPlaneConfig:
+      servingCertificates: {}
+   platform:
+      agentBareMetal:
+         agentSelector:
+            matchLabels:
+               bla: aaa
+   pullSecretRef:
+         name: pull-secret  # Use the pull secret name mentioned in Cluster Prerequisites step 2
+----
+
+[#on-prem-creating-your-cluster-with-the-cli-agentclusterinstall]
+=== Create the AgentClusterInstall custom resource
+
+In the `AgentClusterInstall` custom resource, you can specify many of the requirements for the clusters. For example, you can specify the cluster network settings, platform, number of control planes, and worker nodes. 
+
+Create and add the a custom resource that resembles the following example: 
+
+[source,yaml]
+----
+apiVersion: extensions.hive.openshift.io/v1beta1
+kind: AgentClusterInstall
+metadata:
+  name: test-agent-cluster-install
+  namespace: demo-worker4
+spec:
+  clusterDeploymentRef:
+    name: single-node # Use the clusterDeployment name from the previous step
+  imageSetRef:
+    name: openshift-v4.8.0 # Use the ClusterImageSet name mentioned in Cluster Prerequisites step 3
+  networking:
+    clusterNetwork:
+    - cidr: 10.128.0.0/14
+      hostPrefix: 23
+    machineNetwork:
+    - cidr: 192.168.111.0/24
+    serviceNetwork:
+    - 172.30.0.0/16
+  provisionRequirements:
+    controlPlaneAgents: 1
+ #sshPublicKey: ssh-rsa your-public-key-here (optional)
+ 
+----
+
+[#on-prem-creating-your-cluster-with-the-cli-nmstateconfig]
+=== Optional: Create the NMStateConfig custom resource
+
+The `NMStateConfig` custom resource is only required if you have a host-level network configuration, such as static IP addresses. If you include this custom resource, you must complete this step before creating an `InfraEnv` custom resource. The `NMStateConfig` is referred to by the values for `spec.nmStateConfigLabelSelector` in the `InfraEnv` custom resource.
+
+Create and apply your `NMStateConfig` custom resource, which resembles the following example: 
+
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: NMStateConfig
+metadata:
+  name: mynmstateconfig
+  namespace: demo-worker4
+  labels:
+    demo-nmstate-label: some-value # both the label name and value must be included in InfraEnv nmStateConfigLabelSelector matchLabels
+spec:
+  config:
+    interfaces:
+      - name: eth0
+        type: ethernet
+        state: up
+        mac-address: 02:00:00:80:12:14
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.111.30
+              prefix-length: 24
+          dhcp: false
+      - name: eth1
+        type: ethernet
+        state: up
+        mac-address: 02:00:00:80:12:15
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.140.30
+              prefix-length: 24
+          dhcp: false
+    dns-resolver:
+      config:
+        server:
+          - 192.168.126.1
+    routes:
+      config:
+        - destination: 0.0.0.0/0
+          next-hop-address: 192.168.111.1
+          next-hop-interface: eth1
+          table-id: 254
+        - destination: 0.0.0.0/0
+          next-hop-address: 192.168.140.1
+          next-hop-interface: eth1
+          table-id: 254
+  interfaces:
+    - name: "eth0"
+      macAddress: "02:00:00:80:12:14"
+    - name: "eth1"
+      macAddress: "02:00:00:80:12:15"
+----
+
+[#on-prem-creating-your-cluster-with-the-cli-infraenv]
+=== Create the InfraEnv custom resource
+
+The `InfraEnv` custom resource provides the configuration to create the discovery ISO. Within this custom resource, you identify values for proxy settings, ignition overrides, and specifying `NMState` labels. The `spec.nmStateConfigLabelSelector` in this custom resource references the `NMStateConfig` custom reference, so this custom resource must be created after the `NMStateConfig` custom resource if you included one. 
+
+Create and apply the following custom resource:
+
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: myinfraenv
+  namespace: demo-worker4
+spec:
+  clusterRef:
+    name: single-node  # Use the above created clusterDeployment resource name and namespace
+    namespace: demo-worker4
+  pullSecretRef: # currently ignored by InfraEnv controller
+    name: pull-secret
+ #sshAuthorizedKey: 'your_pub_key_here' (optional), this key will allow to connect to machines booted from the discovery ISO.
+  nmStateConfigLabelSelector:
+    matchLabels:
+      demo-nmstate-label: some-value # both the label name and value must match the NMStateConfig label section
+----
+
+[#on-prem-creating-your-cluster-with-the-cli-boot-host]
+=== Boot the host from the discovery image
+
+The remaining steps explain how to boot the host from the discovery ISO image that results from the previous procedures. 
+
+. Download the discovery image from the namespace by running the following command:
++
+----
+curl --insecure -o image.iso $(kubectl -n sample-namespace get infraenvs.agent-install.openshift.io myinfraenv -o=jsonpath="{.status.isoDownloadURL}")
+----
+
+. Move the discovery image to virtual media, a USB drive, or another storage location and boot the host from the discovery image that you downloaded. 
+
+. Approve the `Agent` custom resource and start the installation by running the following command:
++
+----
+kubectl -n sample-namespace patch agents.agent-install.openshift.io 07e80ea9-200c-4f82-aff4-4932acb773d4 -p '{"spec":{"approved":true}}' --type merge
+----
++
+The `Agent` resource is created automatically. It is registered to the cluster and represents a host that can boot from a discovery image. 
++
+You can confirm that it was approved when the output of the previous command includes an entry for the target cluster that includes a value of `true` for the `APPROVED` parameter. 
 
 [#additional-resources-cluster-on-premises]
 == Additional resources
