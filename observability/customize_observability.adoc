@@ -1,35 +1,32 @@
 [#customizing-observability]
 = Customizing observability
-
+//will change to modular docs | MJ | 05/02/23
 Review the following sections to learn more about customizing, managing, and viewing data that is collected by the observability service.
 
 Collect logs about new information that is created for observability resources with the `must-gather` command. For more information, see the _Must-gather_ section in the _Troubleshooting documentation_.
 
 - <<creating-custom-rules,Creating custom rules>>
-- <<configuring-alertmanager,Configuring AlertManager>>
-- <<forward-alerts,Forwarding alerts>>
-** <<disabling-forward-alerts,Disabling forward alerts for managed clusters>>
 - <<adding-custom-metrics, Adding custom metrics>>
-** <<adding-user-workload-metrics,Adding user workload metrics>>
-** <<exporting-metrics-to-external-endpoints,Exporting metrics to external endpoints>>
-** <<removing-default-metrics,Removing default metrics>>
-- <<creating-the-kubernetes-secret-for-external-endpoint,Creating the Kubernetes secret for an external endpoint>>
-** <<updating-the-multiclusterobservability-cr,Updating the _MultiClusterObservability_ custom resource>>
-** <<viewing-the-status-of-metrics-export,Viewing the status of metric export>>
+* <<adding-user-workload-metrics,Adding user workload metrics>>
+* <<removing-default-metrics,Removing default metrics>>
+- <<exporting-metrics-to-external-endpoints,Exporting metrics to external endpoints>>
+* <<creating-the-kubernetes-secret-for-external-endpoint,Creating the Kubernetes secret for an external endpoint>>
+* <<updating-the-multiclusterobservability-cr,Updating the _MultiClusterObservability_ custom resource>>
+* <<viewing-the-status-of-metrics-export,Viewing the status of metric export>>
 - <<adding-advanced-config,Adding _advanced_ configuration>>
 - <<updating-replicas,Updating the _MultiClusterObservability_ custom resource replicas from the console>>
 - <<customizing-route-cert,Customizing route certification>>
 - <<customizing-certificates-object-store,Customizing certificates for accessing the object store>>
 - <<viewing-and-exploring-data,Viewing and exploring data>>
-** <<viewing-etcd-grafana,Viewing the etcd table>>
-** <<viewing-cluster-fleet-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster fleet service-level overview for the Kubernetes API server dashboard>>
-** <<viewing-cluster-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster service-level overview for the Kubernetes API server dashboard>>
+* <<viewing-etcd-grafana,Viewing the etcd table>>
+* <<viewing-cluster-fleet-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster fleet service-level overview for the Kubernetes API server dashboard>>
+* <<viewing-cluster-service-level-overview-on-k8s-api-server-grafana,Viewing the cluster service-level overview for the Kubernetes API server dashboard>>
 - <<disabling-observability,Disabling observability>>
 
 [#creating-custom-rules]
 == Creating custom rules
 
-Create custom rules for the observability installation by adding Prometheus https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource. For more information, see https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration].
+Create custom rules for the observability installation by adding Prometheus link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource.
 
 ** Recording rules provide you the ability to precalculate, or computate expensive expressions as needed. The results are saved as a new set of time series.
 ** Alerting rules provide you the ability to specify the alert conditions based on how an alert should be sent to an external service.
@@ -81,102 +78,7 @@ data:
 +
 *Note:* If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, the configuration is automatically reloaded. The configuration is reloaded because of the `config-reload` within the `observability-thanos-ruler` sidecar.
 
-To verify that the alert rules are functioning appropriately, launch the Grafana dashboard, navigate to the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if the alert is initiated.
-
-[#configuring-alertmanager]
-== Configuring AlertManager
-
-Integrate external messaging tools such as email, Slack, and PagerDuty to receive notifications from AlertManager. You must override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for AlertManager. Complete the following steps to update the custom receiver rules:
-
-. Extract the data from the `alertmanager-config` secret. Run the following command:
-+
-----
-oc -n open-cluster-management-observability get secret alertmanager-config --template='{{ index .data "alertmanager.yaml" }}' |base64 -d > alertmanager.yaml
-----
-
-. Edit and save the `alertmanager.yaml` file configuration by running the following command:
-+
-----
-oc -n open-cluster-management-observability create secret generic alertmanager-config --from-file=alertmanager.yaml --dry-run -o=yaml |  oc -n open-cluster-management-observability replace secret --filename=-
-----
-+
-Your updated secret might resemble the following content:
-+
-[source,yaml]
-----
-global
-  smtp_smarthost: 'localhost:25'
-  smtp_from: 'alertmanager@example.org'
-  smtp_auth_username: 'alertmanager'
-  smtp_auth_password: 'password'
-templates: 
-- '/etc/alertmanager/template/*.tmpl'
-route:
-  group_by: ['alertname', 'cluster', 'service']
-  group_wait: 30s
-  group_interval: 5m
-  repeat_interval: 3h 
-  receiver: team-X-mails
-  routes:
-  - match_re:
-      service: ^(foo1|foo2|baz)$
-    receiver: team-X-mails
-----
-
-Your changes are applied immediately after it is modified. For an example of AlertManager, see https://github.com/prometheus/alertmanager/blob/master/doc/examples/simple.yml[prometheus/alertmanager].
-
-[#forward-alerts]
-== Forwarding alerts
-
-After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to the hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system. 
-
-View the following example of the `alertmanager-config` YAML file:
-
-[source,yaml]
-----
-global:
-  slack_api_url: '<slack_webhook_url>'
-
-route:
-  receiver: 'slack-notifications'
-  group_by: [alertname, datacenter, app]
-
-receivers:
-- name: 'slack-notifications'
-  slack_configs:
-  - channel: '#alerts'
-    text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
-----
-
-If you want to configure a proxy for alert forwarding, add the following `global` entry to the `alertmanager-config` YAML file:
-
-[source,yaml]
-----
-global:
-  slack_api_url: '<slack_webhook_url>'
-  http_config:
-    proxy_url: http://****
-----
-
-[#disabling-forward-alerts]
-=== Disabling forward alerts for managed clusters
-
-Disable alert forwarding for managed clusters. Add the following annotation to the `MultiClusterObservability` custom resource:
-
-[source,yaml]
-----
-metadata:
-      annotations:
-        mco-disable-alerting: "true"
-----
-
-When you set the annotation, the alert forwarding configuration on the managed clusters is reverted. Any changes made to the `ocp-monitoring-config` ConfigMap in the `openshift-monitoring` namespace are reverted. Setting the annotation ensures that the `ocp-monitoring-config` ConfigMap is no longer managed or updated by the observability operator endpoint. After you update the configuration, the Prometheus instance on your managed cluster restarts.
-
-*Important:* Metrics on your managed cluster are lost if you have a Prometheus instance with a persistent volume for metrics, and the Prometheus instance restarts. However, metrics from the hub cluster are not affected.
-
-When the changes are reverted, a ConfigMap named `cluster-monitoring-reverted` is createde in the `open-cluster-management-addon-observability` namespace. Any new, manually added alert forward configurations are not reverted from the ConfigMap. 
-
-Verify that the hub cluster alert manager is no longer propagating managed cluster alerts to third-party messaging tools. See the previous section, _Configuring AlertManager_. 
+To verify that the alert rules are functioning correctly, launch the Grafana dashboard, navigate to the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if the alert is initiated. 
 
 [#adding-custom-metrics]
 == Adding custom metrics
@@ -211,7 +113,7 @@ For user workload metrics, see the _Adding user workload metrics_ section.
 
 Create the `observability-metrics-custom-allowlist` ConfigMap in the `open-cluster-management-observability` namespace with the following command: `oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml`.
 
-Verify that data from your custom metric is being collected by querying the metric from the *Explore* page, from the Grafana dashboard. You can also use the custom metrics in your own dashboard. For more information about viewing the dashboard, see xref:../observability/design_grafana.adoc#designing-your-grafana-dashboard[Designing your Grafana dashboard].
+Verify that data from your custom metric is being collected by querying the metric from the *Explore* page, from the Grafana dashboard. You can also use the custom metrics in your own dashboard. For more information about viewing the dashboard, see xref:../observability/design_grafana.adoc#using-grafana-dashboards[Using Grafana dashboards].
 
 [#adding-user-workload-metrics]
 === Adding user workload metrics
@@ -252,12 +154,12 @@ Create the `observability-metrics-custom-allowlist` ConfigMap in the
 Verify that the specific metric is not being collected from your managed clusters. When you query the metric from the Grafana dashboard, the metric is not displayed.
 
 [#exporting-metrics-to-external-endpoints]
-=== Exporting metrics to external endpoints
+== Exporting metrics to external endpoints
 
-You can customize observability to export the metrics to external endpoints, which support Prometheus Remote Write protocol in real time. For more information, see link:https://docs.google.com/document/d/1LPhVRSFkGNSuU1fBd81ulhsCPR4hkSZyyBj1SZ8fWOM/edit#heading=h.3p42p5s8n0ui[Prometheus Remote Write protocol].
+You can customize observability to export the metrics to external endpoints, which support the Prometheus Remote-Write specification in real time. For more information, see link:https://prometheus.io/docs/concepts/remote_write_spec/[Prometheus Remote-Write specification].
 
 [#creating-the-kubernetes-secret-for-external-endpoint]
-== Creating the Kubernetes secret for an external endpoint
+=== Creating the Kubernetes secret for an external endpoint
 
 You must create a Kubernetes secret with the access information of the external endpoint in the `open-cluster-management-observability` namespace. View the following example secret:
 
@@ -456,7 +358,7 @@ View the data from your managed clusters by accessing Grafana from the hub clust
 
 For example, to _cluster_infrastructure_provider_ from a single node cluster, use the following query expression: `cluster_infrastructure_provider{clusterType="SNO"}`
 
-*Note:* Do not set the `ObservabilitySpec.resources.CPU.limits` parameter if observability is enabled on single node managed clusters. When you set the CPU limits, it causes the observability pod to be counted against the capacity for your managed cluster. See https://github.com/openshift/enhancements/blob/master/enhancements/workload-partitioning/management-workload-partitioning.md#management-workload-partitioning[Management Workload Partitioning] for more information.
+*Note:* Do not set the `ObservabilitySpec.resources.CPU.limits` parameter if observability is enabled on single node managed clusters. When you set the CPU limits, it causes the observability pod to be counted against the capacity for your managed cluster. See the reference for _Management Workload Partitioning_ in the _Additional resources_ section.
 
 [#viewing-etcd-grafana]
 === Viewing the etcd table
@@ -513,6 +415,20 @@ From the {product-title-short} console _Clusters_ page, add the `observability=d
 
 *Note:* When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
 
-To learn more about alert forwarding, see the https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation]. For more information on monitoring data from the console with the observability service, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
+[#additional-resource-custom-obs]
+== Additional resources
 
-// == Additional resourceslink:../troubleshooting/troubleshooting_intro.adoc[_Troubleshooting documentation_]
+- For more details about observability alerts, see xref:../observability/observability_alerts.adoc#observability-alerts[Observability alerts]
+
+- To learn more about alert forwarding, see the link:https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation].
+
+- See xref:../observability/observe_environments_intro.adoc#observability-alerts[Observability alerts] for more information.
+
+- For more topics about the observability service, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service introduction].
+
+- Refer to link:https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration] for more information.
+
+- See https://github.com/openshift/enhancements/blob/master/enhancements/workload-partitioning/management-workload-partitioning.md#management-workload-partitioning[Management Workload Partitioning] for more information.
+
+- Return to the beginning of this topic, <<customizing-observability,Customizing observability>>. 
+

@@ -5,10 +5,13 @@ You can use the {mce} console to create a {ocp} hosted cluster. Hosted control p
 
 * <<hosted-prerequisites-aws,Prerequisites>>
 * <<create-hosted-aws,Creating a hosted cluster on AWS with the console>>
-* <<importing-hosted-cluster-aws,Importing a hosted control plane cluster on AWS>>
+* <<create-hosted-multi-zone-aws,Creating a hosted cluster in multiple zones on AWS>>
+* <<hosted-deploy-cluster-aws,Deploying a hosted cluster on AWS>>
 * <<hosting-service-cluster-access-aws,Accessing a hosting cluster on AWS>>
+* <<importing-hosted-cluster-aws,Importing a hosted control plane cluster on AWS>>
 * <<hosted-cluster-arm-aws,Enabling hosted control planes on an ARM64 {ocp-short} cluster>>
 * <<hypershift-cluster-destroy-aws,Destroying a hosted cluster on AWS>>
+* <<additional-resources-manage-hosted-aws,Additional resources>>
 
 [#hosted-prerequisites-aws]
 == Prerequisites
@@ -18,11 +21,9 @@ You must configure hosted control planes before you can create hosted control pl
 [#create-hosted-aws]
 == Creating a hosted control plane cluster on AWS with the console
 
-To create a hosted control plane cluster from the {mce-short} console, navigate to *Infrastructure* > *Clusters*. On the _Clusters_ page, click *Create cluster* > *Host inventory* > *Hosted* and complete the steps in the console. 
+To create a hosted control plane cluster from the {mce-short} console, navigate to *Infrastructure* > *Clusters*. On the _Clusters_ page, click *Create cluster* > *Amazon Web Services* > *Hosted* and complete the steps in the console. 
 
 *Important:* When you create a cluster, the {mce-short} controller creates a namespace for the cluster and its resources. Ensure that you include only resources for that cluster instance in that namespace. Destroying the cluster deletes the namespace and all of the resources in it.
-
-Select *YAML: On* to view content updates as you enter the information in the console.
 
 If you want to add your cluster to an existing cluster set, you must have the correct permissions on the cluster set to add it. If you do not have `cluster-admin` privileges when you are creating the cluster, you must select a cluster set on which you have `clusterset-admin` permissions. If you do not have the correct permissions on the specified cluster set, the cluster creation fails. Contact your cluster administrator to provide you with `clusterset-admin` permissions if you do not have any cluster set options to select.
 
@@ -40,14 +41,45 @@ Proxy information that is provided in the infrastructure environment is automati
 
 * Additional trust bundle: The contents of the certificate file that is required to access the mirror registry.
   
-When you review your information and optionally customize it before creating the cluster, you can select *YAML: On* to view the YAML content in the panel. You can edit the YAML file with your custom settings, if you have any updates.  
-
 *Note:* You have to run the `oc` command that is provided with the cluster details to import the cluster. When you create the cluster, it is not automatically configured with the management of {product-title-short}.
+
+[#create-hosted-multi-zone-aws]
+== Creating a hosted cluster in multiple zones on AWS
+
+Create a cluster, specifying the `BASE_DOMAIN` of the public zone, by entering the following commands:
+----
+REGION=us-east-1
+ZONES=us-east-1a,us-east-1b
+CLUSTER_NAME=example
+BASE_DOMAIN=example.com
+AWS_CREDS="$HOME/.aws/credentials"
+PULL_SECRET="$HOME/pull-secret"
+
+hypershift create cluster aws \
+--name $CLUSTER_NAME \
+--node-pool-replicas=3 \
+--base-domain $BASE_DOMAIN \
+--pull-secret $PULL_SECRET \
+--aws-creds $AWS_CREDS \
+--region $REGION \
+--zones $ZONES <1>
+----
+
+<1> The `--zones` flag must specify availability zones within the region that is specified by the `--region` flag. The `--zones` flag is also available on the `hypershift create infra aws` command that is used to create infrastructure separately.
+
+The following per-zone infrastructure is created for all specified zones:
+
+* Public subnet
+* Private subnet
+* NAT gateway
+* Private route table (public route table is shared across public subnets)
+
+One `NodePool` resource is created for each zone. The node pool name is suffixed by the zone name. The private subnet for zone is set in `spec.platform.aws.subnet.id`.
 
 [#hosted-deploy-cluster-aws]
 == Deploying a hosted cluster on AWS
 
-After setting up the hosted control planes (`hypershift`) command line interface and enabling the `local-cluster` as the hosting cluster, you can deploy a hosted cluster on AWS by completing the following steps:
+After you set up the hosted control planes (`hypershift`) command line interface and enable the `local-cluster` as the hosting cluster, you can deploy a hosted cluster on AWS by completing the following steps. To deploy a private hosted cluster, see _Deploying a private hosted cluster on AWS_.
 
 . Set environment variables as follows, replacing variables as needed with your credentials:
 +
@@ -92,12 +124,20 @@ hypershift create cluster aws \
 oc get hostedclusters -n <hypershift-hosting-service-cluster>
 ----
 
+[#hosting-service-cluster-access-aws]
+== Accessing a hosting cluster on AWS
+
+The access secrets for hosted control plane clusters are stored in the `hypershift-management-cluster` namespace. Learn about the following secret name formats:
+
+- `kubeconfig` secret: `<hostingNamespace>-<name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
+- `kubeadmin` password secret: `<hostingNamespace>-<name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
+
 [#importing-hosted-cluster-aws]
 == Importing a hosted control plane cluster on AWS
 
 You can import a hosted control plane cluster with the console.
 
-. Navigate to *Infrastructure* > *Clusters* and select the hosted cluster that you want to import.
+. Click *Infrastructure* > *Clusters* and select the hosted cluster that you want to import.
 
 . Click *Import hosted cluster*.
 
@@ -198,14 +238,6 @@ Replace <file_name> with the YAML file name you created in the previous step.
 oc get managedcluster <cluster_name>
 ----
 
-[#hosting-service-cluster-access-aws]
-== Accessing a hosting cluster on AWS
-
-The access secrets for hosted control plane clusters are stored in the `hypershift-management-cluster` namespace. Learn about the following secret name formats:
-
-- `kubeconfig` secret: `<hostingNamespace>-<name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
-- `kubeadmin` password secret: `<hostingNamespace>-<name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
-
 [#hosted-cluster-arm-aws]
 == Enabling hosted control planes on an ARM64 {ocp-short} cluster
 
@@ -281,3 +313,11 @@ oc delete managedcluster <cluster_name>
 ----
 +
 Replace `cluster_name` with the name of your cluster.
+
+[#additional-resources-manage-hosted-aws]
+== Additional resources
+
+For more information about managing hosted control plane clusters on AWS, see the following topics:
+
+* xref:../hosted_control_planes/deploying_aws_private_clusters.adoc#deploying-aws-private-clusters[Deploying a private hosted cluster on AWS]
+* xref:../hosted_control_planes/managing_aws_infra_iam.adoc#hosted-control-planes-manage-aws-infra-iam[Managing AWS infrastructure and IAM permissions for hosted control planes]

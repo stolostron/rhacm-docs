@@ -1,0 +1,132 @@
+[#known-issues-observability]
+= Observability known issues
+
+////
+Please follow this format:
+
+Title of known issue, be sure to match header and make title, header unique
+
+Hidden comment: Release: #issue
+Known issue process and when to write:
+
+- Doesn't work the way it should
+- Straightforward to describe
+- Good to know before getting started
+- Quick workaround, of any
+- Applies to most, if not all, users
+- Something that is likely to be fixed next release (never preannounce)
+- Always comment with the issue number and version: //2.4:19417
+- Link to customer BugZilla ONLY if it helps; don't link to internal BZs and GH issues.
+
+Or consider a troubleshooting topic.
+////
+
+Review the known issues for {product-title}. The following list contains known issues for this release, or known issues that continued from the previous release. 
+
+For your {ocp} cluster, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/release_notes/ocp-4-12-release-notes#ocp-4-12-known-issues[{ocp-short} known issues]. 
+
+For more about deprecations and removals, see xref:../release_notes/deprecate_remove.adoc#deprecations-removals[Deprecations and removals].
+
+[#duplicate-local-clusters-in-kubernetes-service-level-overview-api-server-dashboard]
+== Duplicate local-clusters on Service-level Overview dashboard
+//2.4:16885
+
+When various hub clusters deploy {product-title-short} observability using the same S3 storage, _duplicate_ `local-clusters` can be detected and displayed within the _Kubernetes/Service-Level Overview/API Server_ dashboard. The duplicate clusters affect the results within the following panels: _Top Clusters_, _Number of clusters that has exceeded the SLO_, and _Number of clusters that are meeting the SLO_. The `local-clusters` are unique clusters associated with the shared S3 storage. To prevent multiple `local-clusters` from displaying within the dashboard, it is recommended for each unique hub cluster to deploy observability with a S3 bucket specifically for the hub cluster.
+
+[#observability-endpoint-operator-fails-to-pull-image]
+== Observability endpoint operator fails to pull image
+//2.2:9259
+
+The observability endpoint operator fails if you create a pull-secret to deploy to the MultiClusterObservability CustomResource (CR) and there is no pull-secret in the `open-cluster-management-observability` namespace. When you import a new cluster, or import a Hive cluster that is created with {product-title-short}, you need to manually create a pull-image secret on the managed cluster.
+
+For more information, see link:../observability/observability_enable.adoc#enabling-observability[Enabling observability].
+
+[#missing-data-roks]
+== There is no data from ROKS clusters
+//2.2.3:12114
+
+{product-title-short} observability does not display data from a ROKS cluster on some panels within built-in dashboards. This is because ROKS does not expose any API server metrics from servers they manage. The following Grafana dashboards contain panels that do not support ROKS clusters: `Kubernetes/API server`, `Kubernetes/Compute Resources/Workload`, `Kubernetes/Compute Resources/Namespace(Workload)`
+
+[#missing-etcd-data-roks]
+== There is no etcd data from ROKS clusters
+//2.2.3:12114
+
+For ROKS clusters, {product-title-short} observability does not display data in the _etcd_ panel of the dashboard.
+
+[#observability-annotation-query-failed]
+== Metrics are unavailable in the Grafana console
+
+* Annotation query failed in the Grafana console: 
+// 2.1.0:5625
++
+When you search for a specific annotation in the Grafana console, you might receive the following error message due to an expired token: 
++
+`"Annotation Query Failed"`
++
+Refresh your browser and verify you are logged into your hub cluster.
+
+* Error in _rbac-query-proxy_ pod:
++
+Due to unauthorized access to the `managedcluster` resource, you might receive the following error when you query a cluster or project:
++
+`no project or cluster found`
++
+Check the role permissions and update appropriately. See link:../access_control/rbac.adoc#role-based-access-control[Role-based access control] for more information. 
+
+[#prometheus-data-loss]
+== Prometheus data loss on managed clusters
+//2.4:17137
+
+By default, Prometheus on OpenShift uses ephemeral storage. Prometheus loses all metrics data whenever it is restarted.
+
+When observability is enabled or disabled on {ocp-short} managed clusters that are managed by {product-title-short}, the observability endpoint operator updates the `cluster-monitoring-config` `ConfigMap` by adding additional alertmanager configuration that restarts the local Prometheus automatically. 
+
+[#error-ingesting-out-of-order-samples]
+== Error ingesting out-of-order samples
+//2.4:15666
+
+Observability `receive` pods report the following error message:
+
+----
+Error on ingesting out-of-order samples
+----
+
+The error message means that the time series data sent by a managed cluster, during a metrics collection interval is older than the time series data it sent in the previous collection interval. When this problem happens, data is discarded by the Thanos receivers and this might create a gap in the data shown in Grafana dashboards. If the error is seen frequently, it is recommended to increase the metrics collection interval to a higher value. For example, you can increase the interval to 60 seconds.
+
+The problem is only noticed when the time series interval is set to a lower value, such as 30 seconds. Note, this problem is not seen when the metrics collection interval is set to the default value of 300 seconds.
+
+[#grafana-dev-fails-upgrade]
+== Grafana deployment fails after upgrade
+//2.6:25815
+
+If you have a `grafana-dev` instance deployed in earlier versions before 2.6, and you upgrade the environment to 2.6, the `grafana-dev` does not work. You must delete the existing `grafana-dev` instance by running the following command:
+
+----
+./setup-grafana-dev.sh --clean
+----
+
+Recreate the instance with the following command:
+
+----
+./setup-grafana-dev.sh --deploy
+----
+
+[#klusterlet-addon-search-crashing]
+== _klusterlet-addon-search_ pod fails
+//2.5:27173
+
+The `klusterlet-addon-search` pod fails because the memory limit is reached. You must update the memory request and limit by customizing the `klusterlet-addon-search` deployment on your managed cluster. Edit the `ManagedclusterAddon` custom resource named `search-collector`, on your hub cluster. Add the following annotations to the `search-collector` and update the memory, `addon.open-cluster-management.io/search_memory_request=512Mi` and `addon.open-cluster-management.io/search_memory_limit=1024Mi`.
+
+For example, if you have a managed cluster named `foobar`, run the following command to change the memory request to `512Mi` and the memory limit to `1024Mi`:
+
+----
+oc annotate managedclusteraddon search-collector -n foobar \
+addon.open-cluster-management.io/search_memory_request=512Mi \
+addon.open-cluster-management.io/search_memory_limit=1024Mi
+----
+
+[#hub-self-management-list-grafana]
+== Enabling _disableHubSelfManagement_ causes empty list in Grafana dashboard
+//2.8:ACM-4942
+
+The Grafana dashboard shows an empty label list if the `disableHubSelfManagement` parameter is set to `true` in the `mulitclusterengine` custom resource. You must set the parameter to `false` or remove the parameter to see the label list. See link:../install/adv_config_install.adoc#disable-hub-self-management[disableHubSelfManagement] for more details.

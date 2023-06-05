@@ -1,0 +1,100 @@
+[#known-issues-governance]
+= Governance known issues
+
+////
+Please follow this format:
+
+Title of known issue, be sure to match header and make title, header unique
+
+Hidden comment: Release: #issue
+Known issue process and when to write:
+
+- Doesn't work the way it should
+- Straightforward to describe
+- Good to know before getting started
+- Quick workaround, of any
+- Applies to most, if not all, users
+- Something that is likely to be fixed next release (never preannounce)
+- Always comment with the issue number and version: //2.4:19417
+- Link to customer BugZilla ONLY if it helps; don't link to internal BZs and GH issues.
+
+Or consider a troubleshooting topic.
+////
+
+Review the known issues for Governance. The following list contains known issues for this release, or known issues that continued from the previous release. 
+
+For your {ocp} cluster, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/release_notes/ocp-4-12-release-notes#ocp-4-12-known-issues[{ocp-short} known issues]. 
+
+For more about deprecations and removals, see xref:../release_notes/deprecate_remove.adoc#deprecations-removals[Deprecations and removals].
+
+[#unable-to-log-out]
+== Unable to log out from Red Hat Advanced Cluster Management
+
+When you use an external identity provider to log in to {product-title-short}, you might not be able to log out of {product-title-short}. This occurs when you use {product-title-short}, installed with IBM Cloud and Keycloak as the identity providers.
+
+You must log out of the external identity provider before you attempt to log out of {product-title-short}. 
+
+[#gatekeeper-upgrade]
+== Gatekeeper operator installation fails
+//2.4:16673
+
+When you install the gatekeeper operator on {ocp} version 4.9, the installation fails. Before you upgrade {ocp-short} to version 4.9.0., you must upgrade the gatekeeper operator to version 0.2.0. See link:../governance/create_gatekeeper.adoc#upgrading-gatekeeper-gatekeeper-operator[Upgrading gatekeeper and the gatekeeper operator] for more information.
+
+[#config-policy-stuck]
+== Configuration policy listed complaint when namespace is stuck in _Terminating_ state
+//2.2:20715
+
+When you have a configuration policy that is configured with `mustnothave` for the `complianceType` parameter and `enforce` for the `remediationAction` parameter, the policy is listed as compliant after a deletion request is made to the Kubernetes API. Therefore, the Kubernetes object can be stuck in a `Terminating` state while the policy is listed as compliant.
+
+[#operators-deployed-with-policies]
+== Operators deployed with policies do not support ARM
+
+While installation into an ARM environment is supported, operators that are deployed with policies might not support ARM environments. The following policies that install operators do not support ARM environments:
+
+* link:https://github.com/stolostron/policy-collection/blob/main/stable/SI-System-and-Information-Integrity/policy-imagemanifestvuln.yaml[{product-title-short} policy for the Quay Container Security Operator]
+* link:https://github.com/stolostron/policy-collection/blob/main/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[{product-title-short} policy for the Compliance Operator]
+
+[#configurationpolicy-crd-terminating]
+== ConfigurationPolicy CRD is stuck in terminating
+
+When you remove the `config-policy-controller` add-on from a managed cluster by disabling the policy controller in the `KlusterletAddonConfig` or by detaching the cluster, the `ConfigurationPolicy` CRD might get stuck in a terminating state. If the `ConfigurationPolicy` CRD is stuck in a terminating state, new policies might not be added to the cluster if the add-on is reinstalled later. You can also receive the following error:
+
+----
+template-error; Failed to create policy template: create not allowed while custom resource definition is terminating
+----
+
+Use the following command to check if the CRD is stuck: 
+
+----
+oc get crd configurationpolicies.policy.open-cluster-management.io -o=jsonpath='{.metadata.deletionTimestamp}'
+----
+
+If a deletion timestamp is on the resource, the CRD is stuck. To resolve the issue, remove all finalizers from configuration policies that remain on the cluster. Use the following command on the managed cluster and replace `<cluster-namespace>` with the managed cluster namespace:
+
+----
+oc get configurationpolicy -n <cluster-namespace> -o name | xargs oc patch -n <cluster-namespace> --type=merge -p '{"metadata":{"finalizers": []}}'
+----
+
+The configuration policy resources are automatically removed from the cluster and the CRD exits its terminating state. If the add-on has already been reinstalled, the CRD is recreated automatically without a deletion timestamp.
+
+[#pruneobjbeh-not-working-existing-config-policy]
+== PruneObjectBehavior does not work when modifying existing configuration policy
+//2.6:25261
+
+When modifying an existing configuration policy, `DeleteAll` or `DeleteIfCreated` in the `pruneObjectBehavior` feature does not clean up old resources that were created before modifying. Only new resources from policy creations and policy updates are tracked and deleted when you delete the configuration policy.
+
+[#policy-status-repeated-updates]
+== Policy status shows repeated updates when enforced
+
+If a policy is set to `remediationAction: enforce` and is repeatedly updated, the {product-title-short} console shows repeated violations with successful updates. This might happen when another controller or process is also updating the object with different values.
++
+To resolve the issue, disable the policy and compare the differences between `objectDefinition` in the policy and the object on the managed cluster. If the values are different, another controller or process might be updating them. Check the `metadata` of the object to help identify why the values are different.
+
+[#psp-not-supported-ocp]
+== Pod security policies not supported on OpenShift 4.12 and later
+
+The support of pod security policies is removed from {ocp-short} 4.12 and later, and from Kubernetes v1.25 and later. If you apply a `PodSecurityPolicy` resource, you might receive the following non-compliant message:
+
+----
+violation - couldn't find mapping resource with kind PodSecurityPolicy, please check if you have CRD deployed
+----

@@ -21,7 +21,7 @@ By default, observability is included with the product installation, but not ena
 
 When the service is enabled, the `observability-endpoint-operator` is automatically deployed to each imported or created cluster. This controller collects the data from {ocp} Prometheus, then sends it to the {product-title-short} hub cluster. If the hub cluster imports itself as the `local-cluster`, observability is also enabled on it and metrics are collected from the hub cluster.
 
-The observability service deploys an instance of Prometheus AlertManager, which enables alerts to be forwarded with third-party applications. It also includes an instance of Grafana to enable data visualization with dashboards (static) or data exploration. {product-title-short} supports version 8.5.20 of Grafana. You can also design your Grafana dashboard. For more information, see _Designing your Grafana dashboard_. You can customize the observability service by creating custom recording rules or alerting rules.
+The observability service deploys an instance of Prometheus Alertmanager, which enables alerts to be forwarded with third-party applications. It also includes an instance of Grafana to enable data visualization with dashboards (static) or data exploration. {product-title-short} supports version 8.5.20 of Grafana. You can also design your Grafana dashboard. For more information, see _Designing your Grafana dashboard_. You can customize the observability service by creating custom recording rules or alerting rules.
 
 [#observability-support]
 == Support
@@ -50,6 +50,21 @@ View the following table of metric types that are supported by the framework:
 | `hub_cluster_id`, `managed_cluster_id`, `vendor`, `cloud`, `version`, `available`, `created_via`, `core_worker`, `socket_worker`
 | Stable
 
+| `config_policies_evaluation_duration_seconds_bucket`
+| Histogram
+| None
+| Stable. Read _Governance metric_ for more details.
+
+| `config_policies_evaluation_duration_seconds_count`
+| Histogram
+| None
+| Stable. Refer to _Governance metric_ for more details.
+
+| `config_policies_evaluation_duration_seconds_sum`
+| Histogram
+| None
+| Stable. Read _Governance metric_ for more details.
+
 | `policy_governance_info`
 | Gauge
 | `type`, `policy`, `policy_namespace`, `cluster_namespace`
@@ -60,20 +75,40 @@ View the following table of metric types that are supported by the framework:
 | `managed_cluster_id`, `category`, `policy`, `result`, `severity`
 | Stable. Read _Managing insight _PolicyReports__ for more details.
 
-| `config_policies_evaluation_duration_seconds_bucket`
-| Histogram
-| None.
-| Stable. Read _Governance metric_ for more details.
+| `search_api_db_connection_failed_total`
+| Counter
+| None
+| Stable. See the _Search components_ section in the _Searching in the console introduction_ documentation.
 
-| `config_policies_evaluation_duration_seconds_count`
+| `search_api_dbquery_duration_seconds`
 | Histogram
-| None.
-| Stable. Refer to _Governance metric_ for more details.
+| None
+| Stable. See the _Search components_ section in the _Searching in the console introduction_ documentation.
 
-| `config_policies_evaluation_duration_seconds_sum`
+| `search_api_requests`
 | Histogram
-| None.
-| Stable. Read _Governance metric_ for more details.
+| None
+| Stable. See the _Search components_ section in the _Searching in the console introduction_ documentation.
+
+| `search_indexer_request_count`
+| Counter
+| None
+| Stable. See the _Search components_ section in the _Searching in the console introduction_ documentation.
+
+| `search_indexer_request_duration`
+| Histogram
+| None
+| Stable. See the _Search components_ section in the _Searching in the console introduction_ documentation.
+
+| `search_indexer_requests_in_flight`
+| Gauge
+| None
+| Stable. See the _Search components_ section in the _Searching in the console introduction_ documentation.
+
+| `search_indexer_request_size`
+| Histogram
+| None
+| Stable. See the _Search components_ section in the _Searching in the console introduction_ documentation.
 |===
 
 [#observability-pod-capacity-requests]
@@ -269,7 +304,8 @@ When you install {product-title-short} the following persistent volumes (PV) mus
 | thanos-receive-default 
 | Thanos receiver accepts incoming data (Prometheus remote-write requests) and writes these into a local instance of the Prometheus TSDB. Periodically (every 2 hours), TSDB blocks are uploaded to the object storage for long term storage and compaction. The amount of hours or days of data retained in this stateful set, which acts a local cache was fixed in API Version `observability.open-cluster-management.io/v1beta`. It has been exposed as an API parameter in `observability.open-cluster-management.io/v1beta2`: `_RetentionInLocal_`
 
-| thanos-store-shard| It acts primarily as an API gateway and therefore does not need significant amounts of local disk space. It joins a Thanos cluster on startup and advertises the data it can access. It keeps a small amount of information about all remote blocks on local disk and keeps it in sync with the bucket. This data is generally safe to delete across restarts at the cost of increased startup times.
+| thanos-store-shard
+| It acts primarily as an API gateway and therefore does not need a significant amount of local disk space. It joins a Thanos cluster on startup and advertises the data it can access. It keeps a small amount of information about all remote blocks on local disk and keeps it in sync with the bucket. This data is generally safe to delete across restarts at the cost of increased startup times.
 |===
 
 *Note:* The time series historical data is stored in object stores. Thanos uses object storage as the primary storage for metrics and metadata related to them. For more details about the object storage and downsampling, see _Enabling observability service_.
@@ -278,10 +314,11 @@ When you install {product-title-short} the following persistent volumes (PV) mus
 == Additional resources
 
 - For more information about enabling observability, read xref:../observability/observability_enable.adoc#enabling-observability-service[Enabling observability service].
-- Read xref:../observability/custom_observability.adoc#customizing-observability[Customizing observability] to learn how to configure the observability service, view metrics and other data.
-- Read xref:../observability/design_grafana.adoc#designing-your-grafana-dashboard[Designing your Grafana dashboard].
+- Read xref:../observability/customize_observability.adoc#customizing-observability[Customizing observability] to learn how to configure the observability service, view metrics and other data.
+- Read xref:../observability/design_grafana.adoc#using-grafana-dashboards[Using Grafana dashboards].
 - Learn from the {ocp-short} documentation what types of metrics are collected and sent using telemetry. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html-single/support/index#about-remote-health-monitoring[Information collected by Telemetry] for information. 
 - Refer to link:../governance/policy_ctrl_adv_config.adoc#gov-metric[Governance metric] for details.
 - Read xref:../observability/manage_insights.adoc#manage-insights[Managing insight _PolicyReports_].
 - Refer to link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[Prometheus recording rules].
 - Also refer to link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[Prometheus alerting rules].
+- Return to xref:../observability/search_intro.adoc#searching-in-the-console-intro[Searching in the console introduction].

@@ -1,0 +1,232 @@
+[#known-issues-applications]
+= Application known issues
+
+////
+Please follow this format:
+
+Title of known issue, be sure to match header and make title, header unique
+
+Hidden comment: Release: #issue
+Known issue process and when to write:
+
+- Doesn't work the way it should
+- Straightforward to describe
+- Good to know before getting started
+- Quick workaround, of any
+- Applies to most, if not all, users
+- Something that is likely to be fixed next release (never preannounce)
+- Always comment with the issue number and version: //2.4:19417
+- Link to customer BugZilla ONLY if it helps; don't link to internal BZs and GH issues.
+
+Or consider a troubleshooting topic.
+////
+
+Review the known issues for application management. The following list contains known issues for this release, or known issues that continued from the previous release. 
+
+For your {ocp} cluster, see https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/release_notes/ocp-4-12-release-notes#ocp-4-12-known-issues[{ocp-short} known issues]. 
+
+For more about deprecations and removals, see xref:../release_notes/deprecate_remove.adoc#deprecations-removals[Deprecations and removals].
+
+See the following known issues for the application lifecycle component.
+
+[#object-bucket-subscription-admin]
+== Application ObjectBucket channel type cannot use allow and deny lists
+//2.5.0: 22807
+
+You cannot specify allow and deny lists with ObjectBucket channel type in the `subscription-admin` role. In other channel types, the allow and deny lists in the subscription indicates which Kubernetes resources can be deployed, and which Kubernetes resources should not be deployed.
+[#argo-app-set-version]
+=== Argo Application cannot be deployed on 3.x {ocp-short} managed clusters
+
+Argo `ApplicationSet` from the console cannot be deployed on 3.x {ocp-short} managed clusters because the `Infrastructure.config.openshift.io` API is not available on  on 3.x.
+
+[#changes-not-automatic]
+== Changes to the multicluster_operators_subscription image do not take effect automatically
+//2.5.0: 21446
+
+The `application-manager` add-on that is running on the managed clusters is now handled by the subscription operator, when it was previously handled by the klusterlet operator. The subscription operator is not managed the `multicluster-hub`, so changes to the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap do not take effect automatically.
+
+If the image that is used by the subscription operator is overrided by changing the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap, the `application-manager` add-on on the managed clusters does not use the new image until the subscription operator pod is restarted. You need to restart the pod.
+
+[#policy-needs-subscription-admin]
+== Policy resource not deployed unless by subscription administrator
+//2.4.0: 17819
+
+The `policy.open-cluster-management.io/v1` resources are no longer deployed by an application subscription by default for {product-title-short} version 2.4.
+
+A subscription administrator needs to deploy the application subscription to change this default behavior.
+
+See link:../applications/allow_deny.adoc[Creating an allow and deny list as subscription administrator] for information. `policy.open-cluster-management.io/v1` resources that were deployed by existing application subscriptions in previous {product-title-short} versions remain, but are no longer reconciled with the source repository unless the application subscriptions are deployed by a subscription administrator.
+
+[#application-ansible-standalone]
+== Application Ansible hook stand-alone mode
+// 2.2:8036
+
+Ansible hook stand-alone mode is not supported. To deploy Ansible hook on the hub cluster with a subscription, you might use the following subscription YAML:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-rhacm-gitops-demo
+  namespace: hello-openshift
+annotations:
+  apps.open-cluster-management.io/github-path: myapp
+  apps.open-cluster-management.io/github-branch: master
+spec:
+  hooksecretref:
+      name: toweraccess
+  channel: rhacm-gitops-demo/ch-rhacm-gitops-demo
+  placement:
+     local: true
+----
+However, this configuration might never create the Ansible instance, since the `spec.placement.local:true` has the subscription running on `standalone` mode. You need to create the subscription in hub mode. 
+
+. Create a placement rule that deploys to `local-cluster`. See the following sample where `local-cluster: "true"` refers to your hub cluster:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata: 
+  name: <towhichcluster>
+  namespace: hello-openshift
+spec:
+  clusterSelector:
+    matchLabels:
+      local-cluster: "true" 
+----
+. Reference that placement rule in your subscription. See the following sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-rhacm-gitops-demo
+  namespace: hello-openshift
+annotations:
+  apps.open-cluster-management.io/github-path: myapp
+  apps.open-cluster-management.io/github-branch: master
+spec:
+  hooksecretref:
+      name: toweraccess
+  channel: rhacm-gitops-demo/ch-rhacm-gitops-demo
+  placement:
+     placementRef:
+        name: <towhichcluster>
+        kind: PlacementRule
+----
+
+After applying both, you should see the Ansible instance created in your hub cluster.
+
+[#application-not-deployed-after-an-updated-placement-rule]
+== Application not deployed after an updated placement rule
+// 1.0.0:1449
+
+If applications are not deploying after an update to a placement rule, verify that the `application-manager` pod is running.
+The `application-manager` is the subscription container that needs to run on managed clusters.
+
+You can run `oc get pods -n open-cluster-management-agent-addon |grep application-manager` to verify.
+
+You can also search for `kind:pod cluster:yourcluster` in the console and see if the `application-manager` is running.
+
+If you cannot verify, attempt to import the cluster again and verify again.
+
+[#subscription-operator-does-not-create-an-scc]
+== Subscription operator does not create an SCC
+// 1.0.0:1764
+
+Learn about {ocp} SCC at https://docs.openshift.com/container-platform/4.8/authentication/managing-security-context-constraints.html#security-context-constraints-about_configuring-internal-oauth[Managing Security Context Constraints (SCC)], which is an additional configuration required on the managed cluster.
+
+Different deployments have different security context and different service accounts. The subscription operator cannot create an SCC CR automatically.. Administrators control permissions for pods. A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace. To manually create an SCC CR in your namespace, complete the following steps:
+
+. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
+
++
+----
+nginx-ingress-52edb
+nginx-ingress-52edb-backend
+----
+
++
+. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example, where `kind: SecurityContextConstraints` is added:
+
++
+[source,yaml]
+----
+apiVersion: security.openshift.io/v1
+ defaultAddCapabilities:
+ kind: SecurityContextConstraints
+ metadata:
+   name: ingress-nginx
+   namespace: ns-sub-1
+ priority: null
+ readOnlyRootFilesystem: false
+ requiredDropCapabilities:
+ fsGroup:
+   type: RunAsAny
+ runAsUser:
+   type: RunAsAny
+ seLinuxContext:
+   type: RunAsAny
+ users:
+ - system:serviceaccount:my-operator:nginx-ingress-52edb
+ - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
+----
+
+[#application-channels-require-unique-namespaces]
+== Application channels require unique namespaces
+// 1.0.0:2311
+
+Creating more than one channel in the same namespace can cause errors with the hub cluster.
+
+For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. All channels need an individual namespace, except GitHub channels, which can share a namespace with another GitHub channel.
+
+[#ansible-automation-platform-fail]
+== {aap-short} job fail
+
+Ansible jobs fail to run when you select an incompatible option. {aap-short} only works when the `-cluster-scoped` channel options are chosen. This affects all components that need to perform Ansible jobs.
+
+[#ansible-automation-operator-access]
+== {aap-short} operator access {aap-short} outside of a proxy
+
+The {aap} operator cannot access {aap-short} outside of a proxy-enabled {ocp-short} cluster. To resolve, you can install the {aap-short} within the proxy. See install steps that are provided by {aap-short}.
+
+[#application-name]
+== Application name requirements
+// 2.3:#14310
+
+An application name cannot exceed 37 characters. The application deployment displays the following error if the characters exceed this amount.
+
+[source,yaml]
+----
+status:
+  phase: PropagationFailed
+  reason: 'Deployable.apps.open-cluster-management.io "_long_lengthy_name_" is invalid: metadata.labels: Invalid value: "_long_lengthy_name_": must be no more than 63 characters/n'
+----
+
+[#application-tables]
+== Application console table limitations
+// 2.3:12410
+
+See the following limitations to various _Application_ tables in the console:
+
+- From the _Applications_ table on the _Overview_ page and the _Subscriptions_ table on the _Advanced configuration_ page, the _Clusters_ column displays a count of clusters where application resources are deployed. Since applications are defined by resources on the local cluster, the local cluster is included in the search results, whether actual application resources are deployed on the local cluster or not.
+
+- From the _Advanced configuration_ table for _Subscriptions_, the _Applications_ column displays the total number of applications that use that subscription, but if the subscription deploys child applications, those are included in the search result, as well.
+
+- From the _Advanced configuration_ table for _Channels_, the _Subscriptions_ column displays the total number of subscriptions on the local cluster that use that channel, but this does not include subscriptions that are deployed by other subscriptions, which are included in the search result.
+
+[#app-topology]
+== No Application console topology filtering
+
+The _Console_ and _Topology_ for _Application_ changes for the {product-version}. There is no filtering capability from the console Topology page.
+
+[#allow-deny-list-not-working-objectstorage-app]
+== Allow and deny list does not work in Object storage applications
+// 2.6:25445
+
+The `allow` and `deny` list feature does not work in Object storage application subscriptions.
