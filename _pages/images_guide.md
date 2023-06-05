@@ -7,14 +7,6 @@ horizontal: false
 
 Our diagrams are somewhat standardized on the Customer Portal. There is a graphic design team that specializes in creating and editing these diagrams. Our contact at this time is Jess Schaefer, if you have questions.
 
-## Tools to use for specific purposes
-
-**Screenshots:** GIMP 
-
-**Diagrams:** Adobe Illustrator
-
-**Illustrations:** Inkscape  
-
 ## Requesting a diagram
 
 Submit a [Technical Diagram Request Form](https://docs.google.com/forms/d/e/1FAIpQLSdF8V0n3E-aAfRen8vZchXCxwA0iDTd0QYyASnutznfGLATvA/viewform) for a diagram.

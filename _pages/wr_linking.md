@@ -13,7 +13,7 @@ When writers advise readers to select a link, it can be disruptive and divert th
 
 ## Types of link referencing
 
-There are several ways reference links in the ASCII source file (`.adoc`). View a list of examples for link referencing:
+There are several ways to reference links in the ASCII source file (`.adoc`). View a list of examples for link referencing:
 
 * Document/section header, otherwise known as anchors. Use these anchors for longer topics or topics with lots of headers (three or more). Add them after the short description:
 
@@ -27,7 +27,7 @@ There are several ways reference links in the ASCII source file (`.adoc`). View 
 
   **Note:** It is not required for the anchor to match the entire name of the document or title. Ensure that the link reference includes the correct anchor for a specific document. Avoid using spaces and special characters in the brackets
 
-* External links and cross-book references :
+* External links and cross-book references:
 
   ```
   //External link
@@ -49,10 +49,16 @@ There are several ways reference links in the ASCII source file (`.adoc`). View 
   xref:../console/web_console.adoc#random-web-console[Web console link example]
   ```
 
-* Image links
+* Image links:
 
   ```
   image::Image-example.jpg[My image]
+  ```
+
+* Internal base path, which is how Asciidoctor knows how the documentation is structured. Remember that file/folder structure is invisible to Asciidoctor:
+
+  ```
+  include::health_intro.adoc
   ```
 
 You must verify that the links are functioning as expected. If there are broken links in your source file, you might receive the following errors:

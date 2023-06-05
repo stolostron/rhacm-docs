@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Creating guides
-permalink: /new_guide
+title: Creating books
+permalink: /create_books
 horizontal: false
 ---
 
