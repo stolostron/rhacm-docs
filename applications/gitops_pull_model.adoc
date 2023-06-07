@@ -1,0 +1,198 @@
+[#argo-pull-model]
+= Deploying Argo CD with the push and pull model
+//discuss placement
+
+The Argo CD server on the hub cluster deploys the application resources on the managed clusters. The same `ApplicationSet` CRD is used to deploy the application to the managed cluster using the push or pull model. 
+
+- Pull model implementation applies {ocm} registration, placement, and `manifestWork` APIs so that the hub cluster can use the secure communication channel between the hub cluster and the managed cluster to deploy resources. For pull model, an Argo CD controller must be running on each target managed cluster so that the Argo CD `ApplicationSet` can use a single manifest to deploy an application on multiple managed clusters. 
+
+- Push model implementation only contains the Argo CD application on the hub cluster, which has credentials for managed clusters. The Argo CD application on the hub cluster can deploy the applications to the managed clusters.
+
+*Required access:* Cluster administrator
+
+*Information:* If the `openshift-gitops-ArgoCD-application-controller` service account is _not_ a cluster administrator, the GitOps application controller might not have the required permission to deploy resources. The application status might send an error similar to the following error:
+
++
+----
+cannot create resource "services" in API group "" in the namespace
+"mortgage",deployments.apps is forbidden: User
+"system:serviceaccount:openshift-gitops:openshift-gitops-Argo CD-application-controller"
+----
+
+If you are not a cluster administrator, complete the following steps:
+
+. Create all namespaces on each managed cluster where the Argo CD application will be deployed.
+
+. Add the `managed-by` label to each namespace. If an Argo CD application is deployed to multiple namespaces,
+each namespace should be managed by Argo CD.
+
++
+See the following example:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mortgage2
+  labels:
+    Argo CD.argoproj.io/managed-by: openshift-gitops
+----
+
+. Explicitly declare all application destination namespaces in the repository for the application and include the `managed-by` label in the namespaces. Refer to _Additional resources_ to learn how to declare a namespace.
+
+[#push-pull-arch]
+== Architecture
+
+- For both push and pull model, _Argo CD ApplicationSet controller_ on the hub cluster reconciles to create application resources for each target managed cluster.
+
+- The pull model _Propagation controller_ replicates the application on the hub cluster and deploys to the managed cluster by using `manifestWork`.
+
+- By default, the push model is used to deploy the application, unless the annotations `apps.open-cluster-management.io/ocm-managed-cluster` and `apps.open-cluster-management.io/pull-to-ocm-managed-cluster` are added to the template section of the `ApplicationSet`.
+
+- The managed cluster is determined by the value of the `ocm-managed-cluster` annotation.
+
+- To use Pull model, the Argo CD application controller must ignore push model resources by using the `argocd.argoproj.io/skip-reconcile` annotation to the template section of the `ApplicationSet`, which disables push model. 
+
+- For pull model, the _Argo CD Application controller_ on the managed cluster reconciles to deploy the application.
+
+- The pull model _Resource sync controller_ on the hub cluster queries the {ocm} search V2 component on each managed cluster periodically to retrieve the resource list and error messages for each Argo CD application.
+
+- The _Aggregation controller_ on the hub cluster creates and updates the ApplicationSet report from across cluster by using the data from the Resource sync controller, and the status information from the `manifestWork`.
+
+[#prereqs-pull-model]
+== Prerequisites 
+
+See the following prerequisites for the Argo CD pull model:
+
+- The GitOps operator must be installed on the hub cluster and the target managed clusters in the `openshift-gitops` namespace. *Note* Use the {ocp-short} OperatorHub to install the GitOps operator, where the default namespace is `openshift-gitops`.
+//let's discuss with dev team? Installing this way on managed clusters is a lot if there are many; consider limitation if we keep it like this or add a policy.
+
+- The required hub cluster {ocp-short} GitOps operator must be version 1.9.0 or later. 
+
+- The required managed clusters {ocp-short} GitOps operator must be the same version as the hub cluster.
+
+- You need the _ApplicationSet controller_ to propagate the Argo CD application template for a managed cluster.
+
+- The GitOps cluster resource must contains a reference to a placement resource, since the placement resource selects all the managed clusters that support the pull model. With this prerequisite, the managed cluster secrets are created in the Argo CD server namespace.
+
+[#crd-pull-model]
+== `ApplicationSet` CRD
+
+The Argo CD `ApplicationSet` CRD is used to deploy applications on the managed clusters by using the push or pull model with a placement resource in the generator field that is used to get a list of managed clusters. 
+
+For the pull model, the destination for the application must be the default local Kubernetes server, as displayed in the following example. The application is deployed locally by the application controller on the managed cluster. 
+
+The following is a sample `ApplicationSet` YAML that uses the pull model with template annotations:
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: `ApplicationSet`
+metadata:
+  name: guestbook-allclusters-app-set
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: ocm-placement-generator
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: aws-app-placement
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}' <1>
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops <2>
+        argocd.argoproj.io/skip-reconcile: "true" <3>
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+      name: '{{name}}-guestbook-app'
+    spec:
+      destination:
+        namespace: guestbook
+        server: https://kubernetes.default.svc
+      project: default
+      source:
+        path: guestbook
+        repoURL: https://github.com/argoproj/Argo CD-example-apps.git
+      syncPolicy:
+        automated: {}
+        syncOptions:
+        - CreateNamespace=true
+----
+. The `apps.open-cluster-management.io/ocm-managed-cluster` is needed for the pull model.
+. The `apps.open-cluster-management.io/ocm-managed-cluster-app-namespace` is needed for the pull model.
+. The `argocd.argoproj.io/skip-reconcile` is needed to ignore the push model resources.
+
+[#status-report]
+== ApplicationSet status report
+
+- For the pull model, the ApplicationSet status report aggregates application status from across your managed clusters.
+
+- The report includes the list of resources and the overall status of the application from each managed cluster. 
+
+- A separate report resource is created for each Argo CD ApplicationSet resource. The report is created in the same namespace as the `ApplicationSet`. 
+
+- The report includes the following items:
+
+  - A list of resources for the Argo CD application
+  - The overall sync and health status for each Argo CD application
+  - An error message for each cluster where the overall status is `out of sync` or `unhealthy`
+  - A summary status all the states of your managed clusters
+
+- The _Resource sync controller_ and the _Aggregation controller_ both run every 10 seconds to create the report.
+
+- The two controllers, along with the Propagation controller, all run in separate containers in the same `multicluster-integrations` pod, as shown in the following example output:
+
+----
+NAMESPACE               NAME                                       READY   STATUS  
+open-cluster-management multicluster-integrations-7c46498d9-fqbq4  3/3     Running  
+----
+
+The following is a sample ApplicationSet report YAML for the guestbook:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1alpha1
+kind: MulticlusterApplicationSetReport
+metadata:
+  labels:
+    apps.open-cluster-management.io/hosting-applicationset: openshift-gitops.guestbook-allclusters-app-set
+  name: guestbook-allclusters-app-set
+  namespace: openshift-gitops
+statuses:
+  clusterConditions:
+  - cluster: cluster1
+    conditions:
+    - message: 'Failed sync attempt to 53e28ff20cc530b9ada2173fbbd64d48338583ba: one or more objects failed to apply, reason: services is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-Argo CD-application-controller" cannot create resource "services" in API group "" in the namespace "guestbook",deployments.apps is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-Argo CD-application-controller" cannot create resource "deployments" in API group "apps" in the namespace "guestboo...'
+      type: SyncError
+    healthStatus: Missing
+    syncStatus: OutOfSync
+  - cluster: pcluster1
+    healthStatus: Progressing
+    syncStatus: Synced
+  - cluster: pcluster2
+    healthStatus: Progressing
+    syncStatus: Synced
+  summary:
+    clusters: "3"
+    healthy: "0"
+    inProgress: "2"
+    notHealthy: "3"
+    notSynced: "1"
+    synced: "2"
+----
+
+*Note:* If a resource fails to deploy, the resource is not included in the resource list. See error messages for information.
+
+== Additional resources
+//change these
+
+https://docs.openshift.com/container-platform/4.11/cicd/gitops/configuring-an-openshift-cluster-by-deploying-an-application-with-cluster-configurations.html#creating-an-application-by-using-the-oc-tool_configuring-an-openshift-cluster-by-deploying-an-application-with-cluster-configurations (will not be using this--replace)
+
+https://github.com/redhat-developer-demos/openshift-gitops-examples/blob/44fc1d4a38cb79ffa6c8524788f5ac87f369d41c/apps/bgd/overlays/bgd/bgd-ns.yaml#L6 (will not be using this-replace

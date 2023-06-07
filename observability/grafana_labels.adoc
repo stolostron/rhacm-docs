@@ -1,0 +1,133 @@
+[#using-managed-cluster-labels]
+= Using managed cluster labels in Grafana
+
+Enable managed cluster labels to use them with Grafana dashboards. When observability is enabled in the hub cluster, the `observability-managed-cluster-label-allowlist` ConfigMap is created in the `open-cluster-management-observability` namespace. The ConfigMap contains a list of managed cluster labels maintained by the `observabilty-rbac-query-proxy` pod, to populate a list of label names to filter from within the _ACM - Cluster Overview_ Grafana dashboard. By default, observability ignores a subset of labels in the `observability-managed-cluster-label-allowlist` ConfigMap.
+
+When a cluster is imported into the managed cluster fleet or modified, the `observability-rbac-query-proxy` pod watches for any changes in reference to the managed cluster labels and automatically updates the `observability-managed-cluster-label-allowlist` ConfigMap to reflect the changes. The ConfigMap contains only unique label names, which are either included in the `ignore_labels` or `labels` list. Your `observability-managed-cluster-label-allowlist` ConfigMap might resemble the following YAML file:
+
+[source,yaml]
+----
+data:
+  managed_cluster.yaml: |
+    ignore_labels: <1>
+      - clusterID
+      - cluster.open-cluster-management.io/clusterset
+      - feature.open-cluster-management.io/addon-application-manager
+      - feature.open-cluster-management.io/addon-cert-policy-controller
+      - feature.open-cluster-management.io/addon-cluster-proxy
+      - feature.open-cluster-management.io/addon-config-policy-controller
+      - feature.open-cluster-management.io/addon-governance-policy-framework
+      - feature.open-cluster-management.io/addon-iam-policy-controller
+      - feature.open-cluster-management.io/addon-observability-controller
+      - feature.open-cluster-management.io/addon-search-collector
+      - feature.open-cluster-management.io/addon-work-manager
+      - installer.name
+      - installer.namespace
+      - local-cluster
+      - name
+    labels: <2>
+      - cloud
+      - vendor
+----
++
+<1> Any label that is listed in the `ignore_labels` keylist of the ConfigMap is removed from the drop-down filter on the _ACM - Clusters Overview_ Grafana dashboard.
+<2> The labels that are enabled are displayed in the drop-down filter on the _ACM - Clusters Overview_ Grafana dashboard. The values are from the `acm_managed_cluster_labels` metric, depending on the `label` key value that is selected.
+
+Continue reading how to use managed cluster labels in Grafana:
+
+- <<adding-managed-cluster-labels,Adding managed cluster labels>>
+- <<enabling-managed-cluster-labels,Enabling managed cluster labels>>
+- <<disabling-managed-cluster-labels,Disabling managed cluster labels>>
+
+[#adding-managed-cluster-labels]
+== Adding managed cluster labels
+
+When you add a managed cluster label to the `observability-managed-cluster-label-allowlist` ConfigMap, the label becomes available as a filter option in Grafana. Add a unique label to the hub cluster, or managed cluster object that is associated with the managed cluster fleet. For example, if you add the label, `department=finance` to a managed cluster, the ConfigMap is updated and might resemble the following changes:
+
+[source,yaml]
+----
+data:
+  managed_cluster.yaml: |
+    ignore_labels:
+      - clusterID
+      - cluster.open-cluster-management.io/clusterset
+      - feature.open-cluster-management.io/addon-application-manager
+      - feature.open-cluster-management.io/addon-cert-policy-controller
+      - feature.open-cluster-management.io/addon-cluster-proxy
+      - feature.open-cluster-management.io/addon-config-policy-controller
+      - feature.open-cluster-management.io/addon-governance-policy-framework
+      - feature.open-cluster-management.io/addon-iam-policy-controller
+      - feature.open-cluster-management.io/addon-observability-controller
+      - feature.open-cluster-management.io/addon-search-collector
+      - feature.open-cluster-management.io/addon-work-manager
+      - installer.name
+      - installer.namespace
+      - local-cluster
+      - name
+    labels:
+      - cloud
+      - department
+      - vendor
+----
+
+[#enabling-managed-cluster-labels]
+== Enabling managed cluster labels
+
+Enable a managed cluster label that is already disabled by removing the label from the `ignore_labels` list in the `observability-managed-cluster-label-allowlist` ConfigMap.
+
+For example, enable the `local-cluster` and `name` labels. Your `observability-managed-cluster-label-allowlist` ConfigMap might resemble the following content:
+
+[source,yaml]
+----
+data:
+  managed_cluster.yaml: |
+    ignore_labels:
+      - clusterID
+      - installer.name
+      - installer.namespace
+    labels:
+      - cloud
+      - vendor
+      - local-cluster
+      - name
+----
+
+The ConfigMap resyncs after 30 seconds to ensure that the cluster labels are updated. After you update the ConfigMap, check the `observability-rbac-query-proxy` pod logs in the `open-cluster-management-observability` namespace to verify where the label is listed. The following information might be displayed in the pod log:
+
+----
+enabled managedcluster labels: <label>
+----
+
+From the Grafana dashboard, verify that the label is listed as a value in the _Label_ drop-down menu.
+
+[#disabling-managed-cluster-labels]
+== Disabling managed cluster labels
+
+Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list. For example, your YAML might resemble the following file if you add `local-cluster` and `name` back into the `ignore_labels` list:
+
+[source,yaml]
+----
+data:
+  managed_cluster.yaml: |
+    ignore_labels:
+      - clusterID
+      - installer.name
+      - installer.namespace
+      - local-cluster
+      - name
+    labels:
+      - cloud
+      - vendor
+----
+
+Check the `observability-rbac-query-proxy` pod logs in the `open-cluster-management-observability` namespace to verify where the label is listed. The following information might be displayed in the pod log:
+
+----
+disabled managedcluster label: <label>
+----
+
+[#additional-resources-grafana-labels]
+== Additional resources
+
+* See xref:../observability/design_grafana.adoc#using-grafana-dashboards[Using Grafana dashboards].
+* Return to the beginning of the page, xref:../observability/grafana_labels.adoc#using-managed-cluster-labels[Using managed cluster labels in Grafana].
