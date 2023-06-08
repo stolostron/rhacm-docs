@@ -20,8 +20,34 @@ You can use the {mce} console to create and manage a {ocp} hosted cluster. Hoste
 
 You must configure hosted control planes for bare metal before you can create hosted control plane clusters. See xref:../../clusters/hosted_control_planes/configure_hosted_bm.adoc#configuring-hosting-service-cluster-configure-bm[Configuring the hosting cluster on bare metal (Technology Preview)] for more information.
 
+
+[#create-hosted-bm]
+== Creating a hosted control plane cluster on Bare Metal Agent with the console
+
+To create a hosted control plane cluster from the {mce-short} console, navigate to *Infrastructure* > *Clusters*. On the _Clusters_ page, click *Create cluster* > *Host Inventory* > *Hosted control plane* and complete the steps in the console. 
+
+*Important:* When you create a cluster, the {mce-short} controller creates a namespace for the cluster and its resources. Ensure that you include only resources for that cluster instance in that namespace. Destroying the cluster deletes the namespace and all of the resources in it.
+
+If you want to add your cluster to an existing cluster set, you must have the correct permissions on the cluster set to add it. If you do not have `cluster-admin` privileges when you are creating the cluster, you must select a cluster set on which you have `clusterset-admin` permissions. If you do not have the correct permissions on the specified cluster set, the cluster creation fails. Contact your cluster administrator to provide you with `clusterset-admin` permissions if you do not have any cluster set options to select.
+
+Every managed cluster must be associated with a managed cluster set. If you do not assign the managed cluster to a `ManagedClusterSet`, it is automatically added to the `default` managed cluster set.
+
+The release image identifies the version of the {ocp-short} image that is used to create the cluster. Hosted control plane clusters must use one of the provided release images.
+
+Proxy information that is provided in the infrastructure environment is automatically added to the proxy fields. You can use the existing information, overwrite it, or add the information if you want to enable a proxy. The following list contains the required information for creating a proxy: 
+
+* HTTP proxy URL: The URL that should be used as a proxy for `HTTP` traffic. 
+
+* HTTPS proxy URL: The secure proxy URL that should be used for `HTTPS` traffic. If no value is provided, the same value as the `HTTP Proxy URL` is used for both `HTTP` and `HTTPS`.
+
+* No proxy domains: A comma-separated list of domains that should bypass the proxy. Begin a domain name with a period `.` to include all of the subdomains that are in that domain. Add an asterisk `*` to bypass the proxy for all destinations. 
+
+* Additional trust bundle: The contents of the certificate file that is required to access the mirror registry.
+  
+*Note:* You have to run the `oc` command that is provided with the cluster details to import the cluster. When you create the cluster, it is not automatically configured with the management of {product-title-short}.
+
 [#creating-a-hosted-cluster-bm]
-== Creating a hosted cluster on bare metal
+== Creating a hosted cluster on bare metal using the command line
 
 Verify that you have a default storage class configured for your cluster. Otherwise, you might end up with pending PVCs.
 
@@ -476,30 +502,17 @@ spec:
   autoAssign: false
   addresses:
     - ${INGRESS_IP}-${INGRESS_IP}
-EOF
-----
-
-. In the `<hosted-cluster-name>.kubeconfig` file, make the following changes so that the Ingress controller is exposed to the L2 network:
-+
-[source,yaml]
-----
+---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
+  name: ingress-public-ip
   namespace: metallb
-  name: ingress-public-advertisement
 spec:
   ipAddressPools:
     - ingress-public-ip
+EOF
 ----
-
-. Enter the following command to apply the changes to your `<hosted-cluster-name>.kubeconfig` file:
-+
-----
-oc --kubeconfig <hosted-cluster-name>.kubeconfig apply
-----
-+
-The {ocp-short} node starts to detect the IP from the host network, and the system becomes operational.
 
 . Expose the {ocp-short} Router via MetalLB by following these steps:
 
