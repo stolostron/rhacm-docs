@@ -7,7 +7,7 @@ For both models, the same `ApplicationSet` CRD is used to deploy the application
 
 *Required access:* Cluster administrator
 
-*Information:* If your `openshift-gitops-ArgoCD-application-controller` service account is _not_ assigned as a cluster administrator, the GitOps application controller might not deploy resources. The application status might send an error similar to the following error:
+*Important:* If your `openshift-gitops-ArgoCD-application-controller` service account is _not_ assigned as a cluster administrator, the GitOps application controller might not deploy resources. The application status might send an error similar to the following error:
 
 ----
 cannot create resource "services" in API group "" in the namespace
@@ -71,10 +71,9 @@ For both Push and Pull model, the _Argo CD ApplicationSet controller_ on the hub
 [#prereqs-pull-model]
 == Prerequisites 
 
-See the following prerequisites to use the Argo CD pull model:
+See the following prerequisites to use the Argo CD Pull model:
 
-- The GitOps operator must be installed on the hub cluster and the target managed clusters in the `openshift-gitops` namespace. *Note:* Use the {ocp-short} OperatorHub to install the GitOps operator, where the default namespace is `openshift-gitops`.
-//developer to get back to us here... Installing this way on managed clusters is a lot if there are many; consider limitation if we keep it like this or add a policy. bcs 6/5
+- The GitOps operator must be installed on the hub cluster and the target managed clusters in the `openshift-gitops` namespace. 
 
 - The required hub cluster {ocp-short} GitOps operator must be version 1.9.0 or later. 
 
@@ -82,9 +81,12 @@ See the following prerequisites to use the Argo CD pull model:
 
 - You need the _ApplicationSet controller_ to propagate the Argo CD application template for a managed cluster.
 
-- Every managed cluster must have a cluster secret in the Argo CD server namespace on the hub cluster, which is required by the ArgoCD application set controller to propagate the Argo CD application template for a managed cluster. Create a `gitOpsCluster` resource that contains a reference to a `placement` resource. The `placement` resource selects all of the managed clusters that need to support the pull model, so that managed cluster secrets are created in the Argo CD server namespace.
+- Every managed cluster must have a cluster secret in the Argo CD server namespace on the hub cluster, which is required by the ArgoCD application set controller to propagate the Argo CD application template for a managed cluster. 
 
-- The GitOps cluster resource must contains a reference to a `placement` resource, since the `placement` resource selects all the managed clusters that support the pull model. With this prerequisite, the managed cluster secrets are created in the Argo CD server namespace.
++
+To create the cluster secret, create a `gitOpsCluster` resource that contains a reference to a `placement` resource. The `placement` resource selects all the managed clusters that need to support the Pull model. When the GitOps cluster controller reconciles, it creates the cluster secrets for the managed clusters in the Argo CD server namespace.
+
+- The GitOps cluster resource must contains a reference to a `placement` resource, since the `placement` resource selects all the managed clusters that support the Pull model. With this prerequisite, the managed cluster secrets are created in the Argo CD server namespace.
 
 [#crd-pull-model]
 == Creating the _ApplicationSet_ CRD
@@ -93,7 +95,7 @@ The Argo CD `ApplicationSet` CRD is used to deploy applications on the managed c
 
 . For the Pull model, set the destination for the application to the default local Kubernetes server, as displayed in the following example. The application is deployed locally by the application controller on the managed cluster. 
 
-. Add the annotations that are required to override the default Push model, as displayed in the following example `ApplicationSet` YAML, which uses the pull model with template annotations:
+. Add the annotations that are required to override the default Push model, as displayed in the following example `ApplicationSet` YAML, which uses the Pull model with template annotations:
 
 +
 [source,yaml]
@@ -116,9 +118,9 @@ spec:
       annotations:
         apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'<1>
         apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops 
-        argocd.argoproj.io/skip-reconcile: "true" <3>
+        argocd.argoproj.io/skip-reconcile: "true" <2>
       labels:
-        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true" <2>
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true" <3>
       name: '{{name}}-guestbook-app'
     spec:
       destination:
@@ -134,9 +136,9 @@ spec:
         - CreateNamespace=true
 ----
 +
-<1> The `apps.open-cluster-management.io/ocm-managed-cluster` is needed for the pull model.
-<2> The `apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"` is also needed for the pull model.
-<3> The `argocd.argoproj.io/skip-reconcile` is needed to ignore the push model resources.
+<1> The `apps.open-cluster-management.io/ocm-managed-cluster` is needed for the Pull model.
+<2> The `argocd.argoproj.io/skip-reconcile` is needed to ignore the Push model resources.
+<3> The `apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"` is also needed for the Pull model.
 
 [#status-report]
 == _MulticlusterApplicationSetReport_
@@ -203,7 +205,7 @@ statuses:
 [#pull-push-resources]
 == Additional resources
 
- - https://docs.openshift.com/container-platform/4.11/cicd/gitops/configuring-an-openshift-cluster-by-deploying-an-application-with-cluster-configurations.html#creating-an-application-by-using-the-oc-tool_configuring-an-openshift-cluster-by-deploying-an-application-with-cluster-configurations 
-//working for either a replacement (not easily in 4.13) 6/5
+ - See  https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/cicd/gitops#configuring-an-openshift-cluster-by-deploying-an-application-with-cluster-configurations[Configuring an OpenShift cluster by deploying an application with cluster configurations] in the {ocp-short} documentation.
+
 
 - See https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/cicd/gitops#setting-up-argocd-instance[Setting up an Argo CD instance] in the {ocp-short} documentation.
