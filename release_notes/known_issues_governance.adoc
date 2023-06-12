@@ -116,3 +116,46 @@ The support of pod security policies is removed from {ocp-short} 4.12 and later,
 ----
 violation - couldn't find mapping resource with kind PodSecurityPolicy, please check if you have CRD deployed
 ----
+
+[#disabling-grc]
+== Governance deployments do not shut down gracefully when disabled
+
+When disabling the Governance deployments, if Governance is disabled in the `MultiClusterHub` object, the deployments do not all get cleaned up properly. To disable Governance so that the deployments also get cleaned up:
+
+. Disable the `policyController` in the `KlusterletAddonConfig` for the managed cluster. If doing this for all managed clusters, this loop will handle it:
++
+[source,bash]
+----
+for CLUSTER in $(oc get managedclusters -o jsonpath='{.items[].metadata.name}'); do
+  oc patch -n ${CLUSTER} klusterletaddonconfig ${CLUSTER} --type=merge --patch='{"spec":{"policyController":{"enabled":false}}}'
+done
+----
+
+. (For self-managed hubs only) A self-managed hub's `governance-policy-framework-uninstall` pod will go into `CrashLoopBackOff` because it is in conflict with the `governance-policy-propagator` pod. If this is the case, delete the `ManifestWork` for the self-managed hub and remove the finalizer on the `ManagedClusterAddon`:
++
+[source,bash]
+----
+oc delete manifestwork -n local-cluster -l open-cluster-management.io/addon-name=governance-policy-framework
+oc patch managedclusteraddon -n local-cluster governance-policy-framework --type=merge --patch='{"metadata":{"finalizers":[]}}'
+----
+
+. Now that Governance is disabled on the managed clusters, it can be disabled globally if required by setting the `grc` element under `spec.overrides` to `false` in the `MultiClusterHub` object:
++
+[source,bash]
+----
+oc edit multiclusterhub <name> -n <namespace>
+----
+
+. (For self-managed hubs only) If there were any local-cluster policies, those can optionally be deleted:
++
+[source,bash]
+----
+oc delete policies -n local-cluster --all
+----
+
+To re-enable Governance after doing this, re-enable the `grc` element under `spec.overrides` in the `MultiClusterHub` first and then run the loop with `"enabled":true` to re-enable Governance in the KlusterletAddonConfig. If the deployments don't come up successfully, the `governance-policy-addon-controller` might have a stale lease. Deleting the lease will allow it to function properly again:
+
+[source,bash]
+----
+oc delete lease governance-policy-addon-controller-lock -n <namespace> 
+----
