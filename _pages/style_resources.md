@@ -27,6 +27,8 @@ IBM Style is the main authority on style issues, but there are supplementary Red
 
 - [IBM Style](https://www.ibm.com/docs/en/ibm-style)
 
+- [Red Hat style overview](https://www.stylepedia.net/)
+
 - [Red Hat supplementary style guide](https://redhat-documentation.github.io/supplementary-style-guide/)
 
 - [Red Hat trademarks (general)](https://www.redhat.com/en/about/brand/standards/trademarks)
