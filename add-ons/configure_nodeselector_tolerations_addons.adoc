@@ -1,0 +1,99 @@
+[#configure-nodeselector-tolerations-addons]
+= Configuring nodeSelectors and tolerations for klusterlet add-ons
+
+In {product-title-short}, you can configure nodeSelector and tolerations for the following klusterlet add-ons:
+
+* application-manager
+* cert-policy-controller
+* cluster-proxy
+* config-policy-controller
+* governance-policy-framework
+* hypershift-addon
+* iam-policy-controller
+* managed-serviceaccount 
+* observability-controller
+* search-collector
+* volsync
+* work-manager
+
+Complete the following steps:
+
+.  Use the `AddonDeploymentConfig` API to create a configuration to specify the `nodeSelector` and `tolerations` on a certain namespace on the hub cluster.
+
+. Create a file named `addondeploymentconfig.yaml` that is based on the following template:
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: config-name <1>
+  namespace: config-name-space <2>
+spec:
+  nodePlacement:
+    nodeSelector: node-selector <3>
+    tolerations: tolerations <4>
+----
++
+<1> Replace `config-name` with the name of the `AddonDeploymentConfig` that you just created.
+<2> Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you just created.
+<3> Replace `node-selector` with your node selector.
+<4> Replace `tolerations` with your tolerations.
++
+A completed `AddOnDeployment` file might resemble the following example: 
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: deploy-config
+  namespace: open-cluster-management-hub
+spec:
+  nodePlacement:
+    nodeSelector: 
+      "node-dedicated": "acm-addon"
+    tolerations:
+      - effect: NoSchedule
+        key: node-dedicated
+        value: acm-addon
+        operator: Equal
+----
+
+. Run the following command to apply the file that you created:
++
+----
+oc apply -f addondeploymentconfig
+----
+
+. Use the configuration that you created as the global default configuration for your add-on by running the following command:
++
+----
+oc patch clustermanagementaddons <addon-name> --type='json' -p='[ {"op":"add", "path":"/spec/supportedConfigs", "value":[\{"group":"addon.open-cluster-management.io","resource":"addondeploymentconfigs", "defaultConfig":{"name":"<config-name>","namespace":"<config-namespace>"}}]}]'
+----
++
+* Replace `addon-name` with your add-on name.
+* Replace `config-name` with the name of the `AddonDeploymentConfig` that you just created.
+* Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you just created.
+
+The `nodeSelector` and `tolerations` that you specified are applied to all of your add-on on each of the managed clusters.
+
+You can also override the global default `AddonDeploymentConfig` configuration for your add-on on a certain managed cluster by using following steps:
+
+. Use the `AddonDeploymentConfig` API to create another configuration to specify the `nodeSelector` and `tolerations` on the hub cluster. 
+
+. Link the new configuration that you created to your add-on `ManagedClusterAddon` on a managed cluster.
++
+----
+oc -n <managed-cluster> patch managedclusteraddons <addon-name> --type='json' -p='[{"op":"add", "path":"/spec/configs", "value":[ 
+
+{"group":"addon.open-cluster-management.io","resource":"addondeploymentconfigs","namespace":"<config-namespace>","name":"<config-name>"}
+]}]'
+----
++
+* Replace `managed-cluster` with your managed cluster name
+* Replace `addon-name` with your add-on name
+* Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you just created
+* Replace `config-name` with the name of the `AddonDeploymentConfig` that you just created
+
+The new configuration that you referenced in the add-on `ManagedClusterAddon` overrides the global default configuration that you previously defined in the `ClusterManagementAddon` add-on.
