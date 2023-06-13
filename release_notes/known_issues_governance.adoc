@@ -123,7 +123,7 @@ for CLUSTER in $(oc get managedclusters -o jsonpath='{.items[].metadata.name}');
 done
 ----
 
-. (For self-managed hub clusters only) Delete the `ManifestWork` for the self-managed hub cluster and remove the finalizer on the `ManagedClusterAddon` if the `governance-policy-framework-uninstall` pod of a self-managed hub cluster is in `CrashLoopBackOff`. Run the following commands:
+. For self-managed hub clusters only: Delete the `ManifestWork` for the self-managed hub cluster and remove the finalizer on the `ManagedClusterAddon` if the `governance-policy-framework-uninstall` pod of a self-managed hub cluster is in `CrashLoopBackOff`. Run the following commands:
 +
 [source,bash]
 ----
@@ -131,7 +131,7 @@ oc delete manifestwork -n local-cluster -l open-cluster-management.io/addon-name
 oc patch managedclusteraddon -n local-cluster governance-policy-framework --type=merge --patch='{"metadata":{"finalizers":[]}}'
 ----
 
-. Now that governance is disabled on the managed clusters, you can disable globally if required by setting the `grc` element under `spec.overrides` to `false` in the `MultiClusterHub` object. Run the following command:
+. Disable governance globally, if required, by setting the `grc` element in the `spec.overrides` section to `false` in the `MultiClusterHub` object. Run the following command:
 +
 [source,bash]
 ----
@@ -145,7 +145,16 @@ oc edit multiclusterhub <name> -n <namespace>
 oc delete policies -n local-cluster --all
 ----
 
-. To reenable governance in the `KlusterletAddonConfig`, reenable the `grc` element of the `spec.overrides` in the `MultiClusterHub` first and then run the loop with `"enabled":true`. If the deployments are unsuccessful, the `governance-policy-addon-controller` might have a stale lease. Delete the lease by using the following command:
+. To re-enable governance in the `KlusterletAddonConfig`, re-enable the `grc` element of the `spec.overrides` section in the `MultiClusterHub`. Run the following command:
++
+[source,bash]
+----
+for CLUSTER in $(oc get managedclusters -o jsonpath='{.items[].metadata.name}'); do
+  oc patch -n ${CLUSTER} klusterletaddonconfig ${CLUSTER} --type=merge --patch='{"spec":{"policyController":{"enabled":true}}}'
+done
+----
+
+. If the deployments are unsuccessful, the `governance-policy-addon-controller` might have a stale lease. Delete the lease by using the following command:
 
 [source,bash]
 ----
