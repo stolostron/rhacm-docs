@@ -29,12 +29,10 @@ You can install yabai by completing the following steps:
     
 5. Install Xcode CLI tools by downloading it from the app store. You need an Apple ID for this.
 
-6. Run the following commands to install yabai:
+6. Run the following command to install yabai:
 
     ```
     brew install koekeishiya/formulae/yabai
-    sudo yabai --install-sa
-    killall Dock
     ```
     
 7. Configure the scripting addition by creating a new `yabai` file in _sudoers.d_:
@@ -49,9 +47,9 @@ You can install yabai by completing the following steps:
     <user> ALL = (root) NOPASSWD: sha256:<hash> <yabai> --load-sa
     ```
 
-    - Replace `<yabai>` with the path to the yabai binary (echo `which yabai`).
-    - Replace `<user>` with your username (echo `whoami`). 
+    - Replace `<user>` with your username (echo `whoami`).
     - Replace `<hash>` with the sha256 hash of the yabai binary (echo `shasum -a 256 $(which yabai)`). You must update this hash manually again after running `brew upgrade`.
+    - Replace `<yabai>` with the path to the yabai binary (echo `which yabai`).
 
 9. Add the following loading script to the top of your `.yabairc` file (located in your home directory), if you are setting up your own configuration:
 
@@ -79,13 +77,13 @@ You can install yabai by completing the following steps:
 11. Start yabai and add it to your login items by running the following command:
 
     ```
-    brew services start yabai
+    yabai --start-service
     ```
     **Note:** When prompted, grant yabai access to Accessbility.
     If you need to make changes to the configuration, you can run the following command after saving your changes to restart yabai:
 
     ```
-    brew services restart yabai
+    yabai --restart-service
     ```
 
 ### Installing skhd
@@ -111,12 +109,12 @@ To configure hotkeys that allow you to manipulate windows managed by yabai (as i
 3. Start skhd and add it to your login items by running the following command:
 
     ```
-    brew services start skhd
+    skhd --start-service
     ```
     **Note:** When prompted, grant skhd access to Accessbility.
     If you need to make changes to the configuration, you can run the following command after saving your changes to restart yabai:
 
     ```
-    brew services restart skhd
+    skhd --restart-service
     ```
     
