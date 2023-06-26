@@ -1,14 +1,13 @@
 [#hosted-bare-metal-adding-agents]
-= Adding agents to hosted control planes on bare metal (Technology Preview)
+= Adding agents to the InfraEnv resource (Technology Preview)
 
 You can add agents by manually configuring the machine to start with the live ISO or by using Metal3.
 
 * To manually add agents, follow these steps:
 
-. Download the live ISO and use it to start a node (bare metal or VM). At startup, the node communicates with the Assisted Service and registers as an agent in the same namespace as the `InfraEnv` resource.
+. Download the live ISO and use it to start a host (bare metal or VM). The URL for the live ISO can be found in the `InfraEnv` resource, in the `status.isoDownloadURL` field. At startup, the host communicates with the Assisted Service and registers as an agent in the same namespace as the `InfraEnv` resource.
 
-. After each agent is created, you can optionally set its `installation_disk_id` and `hostname` in the spec. Then, approve it to indicate that the agent is ready for use.
-//lahinson - June 2023 - We need to better clarify what the following command does
+. To list the agents and some of their properties, enter the following command:
 +
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agents
@@ -20,14 +19,15 @@ NAME                                   CLUSTER   APPROVED   ROLE          STAGE
 86f7ac75-4fc4-4b36-8130-40fa12602218                        auto-assign
 e57a637f-745b-496e-971d-1abbf03341ba                        auto-assign
 ----
-+
-// lahinson - June 2023 - We need to better clarify what the following commands do
+
+. After each agent is created, you can optionally set its `installation_disk_id` and `hostname` in the spec and approve the agent by entering the following commands: 
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} patch agent 86f7ac75-4fc4-4b36-8130-40fa12602218 -p '{"spec":{"installation_disk_id":"/dev/sda","approved":true,"hostname":"worker-0.example.krnl.es"}}' --type merge
 
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} patch agent 23d0c614-2caa-43f5-b7d3-0b3564688baa -p '{"spec":{"installation_disk_id":"/dev/sda","approved":true,"hostname":"worker-1.example.krnl.es"}}' --type merge
 ----
-+
+
+. To verify that the agents are approved for use, enter the following command and check the output:
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agents
 ----
@@ -41,25 +41,23 @@ e57a637f-745b-496e-971d-1abbf03341ba             true       auto-assign
 
 * To add agents by using Metal3, follow these instructions:
 
-. Use the Assisted Service to create the custom ISO and the Baremetal Operator to perform the installation.
+. Use the Assisted Service to create the custom ISO and the Baremetal Operator to perform the installation by entering the following command:
 +
 **Important:** Because the `BaremetalHost` objects are created outside the baremetal-operator namespace, you must configure the Operator to watch all namespaces.
 +
-//lahinson - June 2023 - Would it be clearer to add "by entering the following command:" to the end of line 44?
 ----
 oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
 ----
 +
 The `metal3` pod is restarted in the `openshift-machine-api` namespace.
 
-. Wait until the `metal3` pod is ready again:
-// lahinson - June 2023 - We need to better clarify this step. It says to "Wait", but then it provides a command. Is the user supposed to enter the command, or is the following text output?
+. Enter the following command, which continuously checks the status of the pod and returns the status when it is ready:
 +
 ----
 until oc wait -n openshift-machine-api $(oc get pods -n openshift-machine-api -l baremetal.openshift.io/cluster-baremetal-operator=metal3-state -o name) --for condition=containersready --timeout 10s >/dev/null 2>&1 ; do sleep 1 ; done
 ----
 
-. Create your BaremetalHost objects by entering the following commands. You need to configure a few variables that are required to start your bare-metal nodes.
+. Create your BaremetalHost objects by entering the following commands. You need to configure a few variables that are required to start your bare-metal hosts.
 +
 ----
 export BMC_USERNAME=$(echo -n "root" | base64 -w0) <1>
@@ -154,7 +152,7 @@ NAME           STATE          CONSUMER   ONLINE   ERROR   AGE
 ocp-worker-0   provisioned               true             72s
 ----
 +
-_Provisioned_ means that the node was configured to start from the virtualCD correctly. It takes a few moments for the agent to be displayed:
+_Provisioned_ means that the host was configured to start from the virtualCD correctly. It takes a few moments for the agent to be displayed:
 +
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent
@@ -168,7 +166,7 @@ NAME                                   CLUSTER   APPROVED   ROLE          STAGE
 +
 The agent is automatically approved. 
 
-.. Repeat this process with the other two nodes:
+.. Repeat this process for all other hosts:
 +
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent
