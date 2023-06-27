@@ -7,7 +7,7 @@ You can use the {mce} console to create a {ocp} hosted cluster. Hosted control p
 * <<create-hosted-aws,Creating a hosted cluster on AWS with the console>>
 * <<create-hosted-multi-zone-aws,Creating a hosted cluster in multiple zones on AWS>>
 * <<hosted-deploy-cluster-aws,Deploying a hosted cluster on AWS>>
-* <<hosting-service-cluster-access-aws,Accessing a hosting cluster on AWS>>
+* <<hosting-service-cluster-access-aws,Accessing a hosting cluster>>
 * <<importing-hosted-cluster-aws,Importing a hosted control plane cluster on AWS>>
 * <<hosted-cluster-arm-aws,Enabling hosted control planes on an ARM64 {ocp-short} cluster>>
 * <<hypershift-cluster-destroy-aws,Destroying a hosted cluster on AWS>>
@@ -124,12 +124,40 @@ oc get hostedclusters -n <hypershift-hosting-service-cluster>
 ----
 
 [#hosting-service-cluster-access-aws]
-== Accessing a hosting cluster on AWS
+== Accessing the hosted cluster
 
-The access secrets for hosted control plane clusters are stored in the `hypershift-management-cluster` namespace. Learn about the following secret name formats:
+You can access the hosted cluster by either getting the `kubeconfig` file and `kubeadmin` credential directly from resources or by using the `hypershift` CLI to generate a `kubeconfig` file.
 
-- `kubeconfig` secret: `<hostingNamespace>-<name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
-- `kubeadmin` password secret: `<hostingNamespace>-<name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
+* To access the hosted cluster by getting the `kubeconfig` file and credentials directly from resources, you need to be familiar with the access secrets for hosted control plane clusters. The secrets are stored in the `hypershift-management-cluster` namespace. Learn about the following secret name formats:
+
+** `kubeconfig` secret: `<hostingNamespace>-<name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
+** `kubeadmin` password secret: `<hostingNamespace>-<name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
+
+//lahinson - June 2023 - Does the user need to take any steps with the secrets to access the hosted cluster? The latter section seems incomplete.
+
+* To access the hosted cluster by using the `hypershift` CLI to generate the `kubeconfig` file, take the following steps:
+
+. Generate the `kubeconfig` file by entering the following command:
++
+----
+hypershift create kubeconfig --namespace ${CLUSTERS_NAMESPACE} --name ${HOSTED_CLUSTER_NAME} > ${HOSTED_CLUSTER_NAME}.kubeconfig
+----
++
+. If you access the cluster by entering the following command, the output shows that you do not have any nodes and that the ClusterVersion is trying to reconcile the {ocp} release:
++
+----
+oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get clusterversion,nodes
+----
++
+.Example output
+----
+NAME                                         VERSION   AVAILABLE   PROGRESSING   SINCE   STATUS
+clusterversion.config.openshift.io/version             False       True          8m6s    Unable to apply 4.12z: some cluster operators have not yet rolled out
+----
++
+To get the cluster running, you need to add nodes to it.
+
+//lahinson - June 2023 - Can we point the user to where they can find out about adding nodes to the cluster, or will that be obvious?
 
 [#importing-hosted-cluster-aws]
 == Importing a hosted control plane cluster on AWS
