@@ -1,18 +1,18 @@
 ---
 layout: page
 title: Learning Markdown
-permalink: /getting_started_markdown
+permalink: /learning_md
 horizontal: false
 ---
 
 So you gotta start writing in Markdown? If you love DITA, this might be a hard transition. When you get going, you will probably grow to enjoy Markdown. And who does not enjoy having a new skill?
 
 1. Start here with a [basic tutorial](https://www.markdowntutorial.com/). (Should this trusty tutorial go down, search for another one online--but it has been available for a few years now.)
-   
+
 2. Save this and use it often--you will reach a point when you don't need it: [Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 
 ## Tips
-   
+
 - Header organization has to be consecutive (H1 > H2 > H3), if you accidentally go from H1 # to H3 #, your code will be off.
 - If content, like a list, should be indented and be a subset of the preceding content, include the subset content on a new line and indent it by two spaces or one tab. 
 - Use `git pull` often to minimize conflicts when you merge and to ensure that you have the latest content that someone else merged. 
@@ -58,4 +58,3 @@ To convert a table to a `.md` table, consider a [Table generator](https://www.ta
 - You need to know the IBM Style Guide and stay on top of changes. Standardization is not as easy as it is in DITA. For instance, IBM DITA writers know exactly when to use `ui-control` (click **something** is bold), and when to use `wintitle` (window or _page_ is italicized). 
 
 This is because the DITA tag alone takes care of the text meaning for us. Work as a team to follow the style guide and use bold, italics, lists, etc... according to the IBM Style Guide and the context of the document. 
-

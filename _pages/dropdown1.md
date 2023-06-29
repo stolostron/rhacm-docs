@@ -13,11 +13,14 @@ children:
       permalink: /getting_started_github
     - title: divider
     - title: Learning Markdown
-      permalink: /getting_started_markdown
+      permalink: /learning_md
     - title: divider
-    - title: Images
-      permalink: /images_guide
+    - title: UI content
+      permalink: /ui_content
     - title: divider
     - title: Technical resources
       permalink: /technical_resources
+    - title: divider
+    - title: Style resources
+      permalink: /style_resources
 ---

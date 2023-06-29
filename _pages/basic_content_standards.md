@@ -100,20 +100,6 @@ Comments should be temporary. Use the date when the comment was signed along wit
 
 If you are commenting about changes that need to be made, please create an issue and remove the comments as soon as possible as not to clutter the source. The source is open and should be as close to the product documentation as possible to follow `dev>test>prod` principle.
 
-## Modals
-
-See the IBM Style manual and Red Hat Supplementary manual regularly for guidance. For a short summary, see the following table on the use of modals:
-
-| **Modal** | **How to use** |
-| ----------- | ----------- |
-| Can | Use to indicate ability. |
-| Could | Don't use in present tense. Use can or might instead. |
-| May | Only use to indicate permission, use can or might in other instances. |
-| Might | Use to indicate possibility. |
-| Must | Use instead of have to or need to unless it is too restrictive. For example, you don't have to is different than you must not.  |
-| Should | Do not use. |
-| Would | Do not use as an auxiliary verb. Only use when referring to an unfulfilled condition (x would have resulted in y). |
-
 ## Supplemental resources
 
 * [The 7 principles of naming](https://www.namingthings.co/naming-things-principles)
