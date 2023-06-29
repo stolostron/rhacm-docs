@@ -26,7 +26,7 @@ children:
     - title: divider
     - title: Special considerations
       permalink: /special_considerations
-     - title: divider
+    - title: divider
     - title: UI writing
       permalink: /ui_writing
     - title: divider
