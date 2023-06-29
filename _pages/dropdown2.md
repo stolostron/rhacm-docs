@@ -12,8 +12,8 @@ children:
     - title: Refreshing builds
       permalink: /refresh_builds
     - title: divider
-    - title: Creating books
-      permalink: /create_books
+    - title: Creating new guides
+      permalink: /create_guides
     - title: divider
     - title: Branch strategy
       permalink: /branch_strategy
