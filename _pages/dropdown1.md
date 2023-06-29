@@ -12,6 +12,9 @@ children:
     - title: GitHub
       permalink: /getting_started_github
     - title: divider
+    - title: Learning Markdown
+      permalink: /learning_md
+    - title: divider
     - title: UI content
       permalink: /ui_content
     - title: divider

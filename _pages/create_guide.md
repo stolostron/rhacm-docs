@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Creating books
-permalink: /create_books
+title: Creating new guides
+permalink: /create_guides
 horizontal: false
 ---
 
-Follow these instructions if you have to set up a new book or guide or need to rename them.
+Follow these instructions if you have to set up a new guide or need to rename them.
 
 ## Prerequisites
 
