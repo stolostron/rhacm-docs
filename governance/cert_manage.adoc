@@ -1,0 +1,82 @@
+[#cert-manage]
+= Managing certificates
+
+Continue reading for information on how to refresh, replace, rotate, and list certificates. 
+
+[#refresh-an-acm-webhook]
+== Refreshing a {product-title-short} webhook certificate
+
+You can refresh {ocp-short} managed certificates, which are certificates that are used by {product-title-short} webhooks. 
+
+Complete the following steps to refresh {product-title-short} webhook certificate:
+
+. Delete the secret that is associated with the {ocp-short} managed certificate by running the following command:
++
+----
+oc delete secret -n open-cluster-management ocm-webhook-secret
+----
++
+*Note:* Some services might not have a secret that needs to be deleted.
+. Restart the services that are associated with the {ocp-short} managed certificate(s) by running the following command:
++
+----
+oc delete po -n open-cluster-management ocm-webhook-679444669c-5cg76
+----
++
+*Important:* There are replicas of many services, each service must be restarted.
+
+[#refresh-hub-cluster-managed-certificates]
+== Refreshing hub cluster managed certificates 
+
+You can refresh a hub cluster managed certificate by running the `delete secret` command. When you identify the certificate that you need to refresh, delete the secret that is associated with the certificate. For example, you can delete a secret by running the following command::
++
+[source,bash]
+----
+oc delete secret grc-0c925-grc-secrets -n open-cluster-management
+----
+
+*Note:* After you delete the secret, a new one is created. However, you must restart pods that use the secret manually so they can begin to use the new certificate.
+
+[#replacing-cert-alertmanager]
+== Replacing certificates for alertmanager route
+
+You can replace alertmanager certificates by updating the alertmanager route, if you do not want to use the OpenShift default ingress certificate. Complete the following steps:
+
+. Examine the observability certificate with the following command:
++
+----
+openssl x509  -noout -text -in ./observability.crt
+----
+
+. Change the common name (`CN`) on the certificate to `alertmanager`.
+
+. Change the SAN in the `csr.cnf` configuration file with the hostname for your alertmanager route.
+
+. Create the two following secrets in the `open-cluster-management-observability` namespace. Run the following command:
++
+----
+oc -n open-cluster-management-observability create secret tls alertmanager-byo-ca --cert ./ca.crt --key ./ca.key
+
+oc -n open-cluster-management-observability create secret tls alertmanager-byo-cert --cert ./ingress.crt --key ./ingress.key
+----
+
+[#list-hub-cluster-managed-certificates]
+== Listing hub cluster managed certificates
+
+You can view a list of hub cluster managed certificates that use OpenShift Service Serving Certificates service internally. Run the following command to list the certificates: 
+
+[source,bash]
+----
+for ns in multicluster-engine open-cluster-management ; do echo "$ns:" ; oc get secret -n $ns -o custom-columns=Name:.metadata.name,Expiration:.metadata.annotations.service\\.beta\\.openshift\\.io/expiry | grep -v '<none>' ; echo ""; done
+----
+
+For more information, see _OpenShift Service Serving Certificates_ in the _Additional resources_ section.
+
+*Note:* If observability is enabled, there are additional namespaces where certificates are created.
+
+[additional-resource-cert-manage]
+== Additional resources
+
+- link:https://docs.openshift.com/container-platform/4.11/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates]
+- link:../governance/cert_manage_overview.adoc#cert-manage-overview[Managing certificates overview]
+- Return to the beginning of this page, <<cert-manage,Managing certificates>>.
