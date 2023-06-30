@@ -27,7 +27,9 @@ oc delete po -n open-cluster-management ocm-webhook-679444669c-5cg76
 
 [#refresh-hub-cluster-managed-certificates]
 == Refreshing hub cluster managed certificates 
-
+//in terms of refreshing certificates, there is an ask to add instructions on refreshing certificates manually if the cert is not propagated by itself
+//add reference to this section to cert_manage_overview.adoc
+//request from the issue is to add instructions on how to update certificates after they are replaced
 You can refresh a hub cluster managed certificate by running the `delete secret` command. When you identify the certificate that you need to refresh, delete the secret that is associated with the certificate. For example, you can delete a secret by running the following command::
 +
 [source,bash]
@@ -60,6 +62,28 @@ oc -n open-cluster-management-observability create secret tls alertmanager-byo-c
 oc -n open-cluster-management-observability create secret tls alertmanager-byo-cert --cert ./ingress.crt --key ./ingress.key
 ----
 
+[#rotating-the-gatekeeper-webhook-certificate]
+=== Rotating the gatekeeper webhook certificate
+
+Complete the following steps to rotate the gatekeeper webhook certificate:
+
+. Edit the secret that contains the certificate with the following command: 
++
+----
+oc edit secret -n openshift-gatekeeper-system gatekeeper-webhook-server-cert
+----
+
+. Delete the following content in the `data` section: `ca.crt`, `ca.key`, tls.crt`, and `tls.key`.
+
+. Restart the gatekeeper webhook service by deleting the `gatekeeper-controller-manager` pods with the following command:
++
+----
+oc delete po -n openshift-gatekeeper-system -l control-plane=controller-manager
+----
+
+The gatekeeper webhook certificate is rotated. 
+//If we want to keep the previous statement^, we must provide a verification step for the user to conform that the cert was rotated successfully
+
 [#list-hub-cluster-managed-certificates]
 == Listing hub cluster managed certificates
 
@@ -78,5 +102,5 @@ For more information, see _OpenShift Service Serving Certificates_ in the _Addit
 == Additional resources
 
 - link:https://docs.openshift.com/container-platform/4.11/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates]
-- link:../governance/cert_manage_overview.adoc#cert-manage-overview[Managing certificates overview]
+- xref:../governance/cert_manage_overview.adoc#cert-manage-overview[Managing certificates overview]
 - Return to the beginning of this page, <<cert-manage,Managing certificates>>.
