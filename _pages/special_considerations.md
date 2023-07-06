@@ -13,7 +13,7 @@ In AsciiDoc, `*` (asterisk symbol, Unicode `U+002A`) denotes the beginning of bo
 
 Asterisks can cause formatting issues when used for other purposes, such as for placeholders or as part of a command or code. See the following DNS example:
 
-Ingress for workloads within the hosted cluster, such as the following domain: `*.apps.service-consumer-domain.com`
+Ingress for workloads within the hosted cluster, such as the following domain: `*.apps.service-consumer-domain.com`.
 
 To avoid formatting issues, place them within the backtics `*`, just as we do for any of the code or command element. If you are creating a DNS command, it is best to format that within the same line as the text inside backtics, as seen in the previous example.
 
