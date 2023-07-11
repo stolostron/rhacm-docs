@@ -30,4 +30,6 @@ children:
     - title: UI writing
       permalink: /ui_writing
     - title: divider
+    - title: UI content
+      permalink: /ui_content
 ---
