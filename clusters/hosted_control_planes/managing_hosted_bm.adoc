@@ -14,10 +14,12 @@ You must configure hosted control planes for bare metal before you can create ho
 You add nodes to your hosted cluster by scaling the NodePool object.  
 
 . Scale the NodePool object to two nodes:
+
 +
 ----
 oc -n ${CLUSTERS_NAMESPACE} scale nodepool ${NODEPOOL_NAME} --replicas 2
 ----
+
 +
 The Cluster API agent provider randomly picks two agents that are then assigned to the hosted cluster. Those agents go through different states and finally join the hosted cluster as {ocp-short} nodes. The agents pass through states in the following order:
 + 
@@ -27,13 +29,17 @@ The Cluster API agent provider randomly picks two agents that are then assigned 
 * `installing`
 * `installing-in-progress`
 * `added-to-existing-cluster`
+
 +
 //lahinson - June 2023 - Need to add a step here to explain what the following command does
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                                   CLUSTER         APPROVED   ROLE          STAGE
 4dac1ab2-7dd5-4894-a220-6a3473b67ee6   hypercluster1   true       auto-assign   
@@ -46,37 +52,49 @@ BMH: ocp-worker-2 Agent: 4dac1ab2-7dd5-4894-a220-6a3473b67ee6 State: binding
 BMH: ocp-worker-0 Agent: d9198891-39f4-4930-a679-65fb142b108b State: known-unbound
 BMH: ocp-worker-1 Agent: da503cf1-a347-44f2-875c-4960ddb04091 State: insufficient
 ----
+
 +
 . After the agents reach the `added-to-existing-cluster` state, verify that you can see the {ocp-short} nodes by entering the following command:
+
 +
 ----
 oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME           STATUS   ROLES    AGE     VERSION
 ocp-worker-1   Ready    worker   5m41s   v1.24.0+3882f8f
 ocp-worker-2   Ready    worker   6m3s    v1.24.0+3882f8f
 ----
+
 +
 Cluster Operators start to reconcile by adding workloads to the nodes. 
 
 . Enter the following command to verify that two machines were created when you scaled up the `NodePool` object:
+
 +
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get machines
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                            CLUSTER               NODENAME       PROVIDERID                                     PHASE     AGE   VERSION
 hypercluster1-c96b6f675-m5vch   hypercluster1-b2qhl   ocp-worker-1   agent://da503cf1-a347-44f2-875c-4960ddb04091   Running   15m   4.12z
 hypercluster1-c96b6f675-tl42p   hypercluster1-b2qhl   ocp-worker-2   agent://4dac1ab2-7dd5-4894-a220-6a3473b67ee6   Running   15m   4.12z
 ----
+
 +
 The `clusterversion` reconcile process eventually reaches a point where only Ingress and Console cluster operators are missing:
 //lahinson - June 2023 - Is the following code output, or a command followed by output?
+
 +
 ----
 oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get clusterversion,co
@@ -116,9 +134,10 @@ Every {ocp-short} cluster comes set up with a default application ingress contro
 You can set up a load balancer and wildcard DNS record for the `*.apps`. This process requires deploying MetalLB, configuring a new load balancer service that routes to the ingress deployment, and assigning a wildcard DNS entry to the load balancer IP address.
 
 . Set up MetalLB so that when you create a service of the `LoadBalancer` type, MetalLB adds an external IP address for the service.
-//lahinson - June 2023 - Please check the following revision for accuracy.
+
 +
 .. Create a YAML file that contains the configuration for the MetalLB Operator:
+
 +
 [source,yaml]
 ----
@@ -152,15 +171,17 @@ spec:
 .. Save the file as `metallb-operator-config.yaml`.
 
 .. Enter the following command to apply the configuration:
+
 +
 ----
 oc apply -f metallb-operator-config.yaml
 ----
 
 . After the Operator is running, create the MetalLB instance:
-//lahinson - June 2023 - Please check the following revision for accuracy.
+
 
 .. Create a YAML file that contains the configuration for the MetalLB instance:
+
 +
 [source,yaml]
 ----
@@ -174,20 +195,23 @@ metadata:
 .. Save the file as `metallb-instance-config.yaml`.
 
 .. Create the MetalLB instance by entering this command:
+
 +
 ----
 oc apply -f metallb-instance-config.yaml
 ----
 
 . Configure the MetalLB Operator by creating two resources:
+
 +
 ** An `IPAddressPool` resource with a single IP address. This IP address must be on the same subnet as the network that the cluster nodes use.
 ** A `BGPAdvertisement` resource to advertise the load balancer IP addresses that the `IPAddressPool` resource provides through the BGP protocol.
 +
 **Important:** Change the `INGRESS_IP` environment variable to match your environment's address.
+
 +
-//lahinson - June 2023 - Please check the following revision for accuracy.
 .. Create a YAML file to contain the configuration:
+
 +
 [source,yaml]
 ----
@@ -217,14 +241,16 @@ spec:
 .. Save the file as `ipaddresspool-bgpadvertisement-config.yaml`.
 
 .. Create the resources by entering the following command:
+
 +
 ----
 oc apply -f ipaddresspool-bgpadvertisement-config.yaml
 ----
 
 . Expose the {ocp-short} Router via MetalLB by following these steps:
-//lahinson - June 2023 - Please check the following revision for accuracy.
+
 .. Create a YAML file to set up the LoadBalancer Service that routes ingress traffic to the ingress deployment:
+
 +
 [source,yaml]
 ----
@@ -253,12 +279,14 @@ spec:
 .. Save the file as `metallb-loadbalancer-service.yaml`.
 
 .. Enter the following command to apply the configuration from the YAML file:
+
 +
 ----
 oc apply -f metallb-loadbalancer-service.yaml
 ----
 
 .. Enter the following command to reach the {ocp-short} console:
+
 +
 ----
 curl -kI https://console-openshift-console.apps.example.krnl.es
@@ -267,12 +295,16 @@ HTTP/1.1 200 OK
 ----
 
 .. Check the `clusterversion` and `clusteroperator` values to verify that everything is running. Enter the following command:
+
 +
 ----
 oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get clusterversion,co
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                                         VERSION   AVAILABLE   PROGRESSING   SINCE   STATUS
 clusterversion.config.openshift.io/version   4.12z    True        False         3m32s   Cluster version is 4.12z
@@ -308,17 +340,19 @@ For more information about MetalLB, see link:https://docs.openshift.com/containe
 When you need more capacity in your hosted cluster and spare agents are available, you can enable auto-scaling to install new agents. 
 
 . To enable auto-scaling, enter the following command. In this case, the minimum number of nodes is 2, and the maximum number is 5. The maximum number of nodes that you can add is bound by the number of available agents.
+
 +
 ----
 oc -n ${CLUSTERS_NAMESPACE} patch nodepool ${HOSTED_CLUSTER_NAME} --type=json -p '[{"op": "remove", "path": "/spec/replicas"},{"op":"add", "path": "/spec/autoScaling", "value": { "max": 5, "min": 2 }}]'
 ----
+
 +
 If 10 minutes pass without requiring the additional capacity, the agent is decommissioned and placed in the spare queue again.
 
 . Create a workload that requires a new node.
-//lahinson - June 2023 - Please check the following revision for accuracy.
 
 .. Create a YAML file that contains the workload configuration, as shown in the following example:
+
 +
 [source,yaml]
 ----
@@ -354,18 +388,23 @@ status: {}
 .. Save the file as `workload-config.yaml`.
 
 .. Apply the YAML by entering the following command:
+
 +
 ----
 oc apply -f workload-config.yaml 
 ----
 
 . Verify that the remaining agents are deployed by entering the following command. In this example, the spare agent, `d9198891-39f4-4930-a679-65fb142b108b`, is provisioned:
+
 +
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent -o jsonpath='{range .items[*]}BMH: {@.metadata.labels.agent-install\.openshift\.io/bmh} Agent: {@.metadata.name} State: {@.status.debugInfo.state}{"\n"}{end}'
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 BMH: ocp-worker-2 Agent: 4dac1ab2-7dd5-4894-a220-6a3473b67ee6 State: added-to-existing-cluster
 BMH: ocp-worker-0 Agent: d9198891-39f4-4930-a679-65fb142b108b State: installing-in-progress
@@ -373,12 +412,16 @@ BMH: ocp-worker-1 Agent: da503cf1-a347-44f2-875c-4960ddb04091 State: added-to-ex
 ----
 
 . If you check the nodes by entering the following command, the new node is displayed in the output. In this example, `ocp-worker-0` is added to the cluster:
+
 +
 ----
 oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME           STATUS   ROLES    AGE   VERSION
 ocp-worker-0   Ready    worker   35s   v1.24.0+3882f8f
@@ -387,23 +430,29 @@ ocp-worker-2   Ready    worker   41m   v1.24.0+3882f8f
 ----
 
 . To remove the node, delete the workload by entering the following command:
+
 +
 ----
 oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig -n default delete deployment reversewords
 ----
 
 . Wait 10 minutes and then confirm that the node was removed by entering the following command:
+
 +
 ----
 oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME           STATUS   ROLES    AGE   VERSION
 ocp-worker-1   Ready    worker   51m   v1.24.0+3882f8f
 ocp-worker-2   Ready    worker   52m   v1.24.0+3882f8f
 ----
+
 +
 //lahinson - June 2023 - Should the following command be preceded by a step? Or is it part of the example output?
 ----
