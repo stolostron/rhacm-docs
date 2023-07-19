@@ -5,7 +5,9 @@ Continue reading for information on how to refresh, replace, rotate, and list ce
 
 - <<refresh-an-acm-webhook,Refreshing a {product-title-short} webhook certificate>>
 - <<replacing-cert-alertmanager,Replacing certificates for alertmanager route>>
+//- <<rotating-certs,Rotating certificates>> section on line 9 should be a subsection | MJ | 07/19/23
 - <<rotating-the-gatekeeper-webhook-certificate,Rotating the gatekeeper webhook certificate>>
+- <<verifying-cert-rotation, Verifying certificate rotation>>
 - <<list-hub-cluster-managed-certificates,Listing hub cluster managed certificates>>
 
 [#refresh-an-acm-webhook]
@@ -56,9 +58,13 @@ oc -n open-cluster-management-observability create secret tls alertmanager-byo-c
 oc -n open-cluster-management-observability create secret tls alertmanager-byo-cert --cert ./ingress.crt --key ./ingress.key
 ----
 
+//[#rotating-certs]
+//== Rotating certificates
+//we can maybe use this as rotating certificates and list the commands 
+
 [#rotating-the-gatekeeper-webhook-certificate]
 == Rotating the gatekeeper webhook certificate
-//we can maybe use this as rotating certificates and list the commands 
+
 Complete the following steps to rotate the gatekeeper webhook certificate:
 
 . Edit the secret that contains the certificate with the following command: 
@@ -75,9 +81,36 @@ oc edit secret -n openshift-gatekeeper-system gatekeeper-webhook-server-cert
 oc delete pod -n openshift-gatekeeper-system -l control-plane=controller-manager
 ----
 
+//add verification step here | MJ | 07/19/23
 The gatekeeper webhook certificate is rotated. 
 
-//If we want to keep the previous statement^, we must provide a verification step for the user to conform that the cert was rotated successfully | MJ | 07/13/23
+[#verifying-cert-rotation]
+== Verifying certificate rotation
+
+Verify that your certificates are rotated using the following steps:
+
+. Identify the secret that you want to check.
+. Check the `tls.crt` key to verify that a certificate is available.
+. Display the certificate information by using the following command:
++
+[source,bash]
+----
+oc get secret <your-secret-name> -n open-cluster-management -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -text -noout
+----
++
+Replace `<your-secret-name>` with the name of secret that you are verifying. If it is necessary, also update the namespace and JSON path.
+
+. Check the `Validity` details in the output. View the following `Validity` example:
++
+[source,bash]
+----
+Validity
+            Not Before: Jul 13 15:17:50 2023 GMT <1>
+            Not After : Jul 12 15:17:50 2024 GMT <2>
+----
++
+<1> The `Not Before` value is the date and time that you rotated your certificate.
+<2> The `Not After` value is the date and time for the certificate expiration.
 
 [#list-hub-cluster-managed-certificates]
 == Listing hub cluster managed certificates
