@@ -27,6 +27,7 @@ Everyone helps maintain Jira issues with the following guidance:
   - Do not switch `Train-XX` labels on doc issues because we need to track velocity and reasons for not completing `Train-XX` work for future improvements.
   - It's OK to complete work from a previous `Train-XX`, though the goal is to merge your doc along with `Train-XX` development issues.
   - Change the train label only if the engineers have discussed in the release plan to move a feature to a different train. Track those changes in a comment.
+  - Trains are numbered continuously in JIRA, so you may start the release in `Train-05`, though it is the first train for that new release.
   - Keep up with existing issues, but no issues should be 6 months old untouched, for instance. 
   
 ## Pipelines/Columns used for sprint planning
