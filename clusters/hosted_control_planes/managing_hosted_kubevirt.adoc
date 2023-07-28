@@ -14,11 +14,11 @@ To learn how to create a hosted control plane cluster on {ocp-virt-short}, see t
 * <<creating-a-hosted-cluster-kubevirt,Creating a hosted cluster with the KubeVirt platform>>
 * <<create-hosted-clusters-kubevirt-default-ingress-dns,Default Ingress and DNS behavior>>
 * <<create-hosted-clusters-kubevirt-customized-ingress-dns,Customizing Ingress and DNS behavior>>
+* <<hosting-service-cluster-configure-metallb-config,Optional: Configuring MetalLB>>
 * <<create-hosted-clusters-kubevirt-scaling-node-pool,Scaling a node pool>>
 * <<create-hosted-clusters-kubevirt-adding-node-pool,Adding node pools>>
 * <<verifying-cluster-creation-kubevirt,Verifying hosted cluster creation on OpenShift Virtualization>>
 * <<hypershift-cluster-destroy-kubevirt,Destroying a hosted cluster on OpenShift Virtualization>>
-* <<hosting-service-cluster-configure-metallb-config,Optional: Configuring MetalLB>>
 
 [#create-hosted-clusters-prereqs-kubevirt]
 == Prerequisites
@@ -350,6 +350,58 @@ NAME            VERSION   KUBECONFIG                       PROGRESS    AVAILABLE
 example         4.12.7    example-admin-kubeconfig         Completed   True        False         The hosted control plane is available
 ----
 
+[#hosting-service-cluster-configure-metallb-config]
+== Optional: Configuring MetalLB
+
+You must use a load balancer, such as MetalLB. The following example shows the steps you can take to configure MetalLB after you install it. For more information about installing MetalLB, see _Installing the MetalLB Operator_ in the {ocp-short} documentation.
+
+. Create a MetalLB instance:
+
++
+----
+oc create -f - 
+apiVersion: metallb.io/v1beta1
+kind: MetalLB
+metadata:
+  name: metallb
+  namespace: metallb-system
+----
+
+. Create an address pool with an available range of IP addresses within the node network. Replace the following IP address ranges with an unused pool of available IP addresses in your network.
+
++
+----
+oc create -f - 
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: metallb
+  namespace: metallb-system
+spec:
+  addresses:
+  - 192.168.216.32-192.168.216.122
+----
+
+. Advertise the address pool by using L2 protocol:
+
++
+----
+oc create -f - 
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: l2advertisement
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+   - metallb
+----
+
+[#managing-hosted-kubevirt-additional-resources]
+=== Additional resources
+
+* For more information about MetalLB, see link:https://docs.openshift.com/container-platform/4.13/networking/metallb/metallb-operator-install.html[Installing the MetalLB Operator].
+
 [#create-hosted-clusters-kubevirt-scaling-node-pool]
 == Scaling a node pool
 
@@ -533,55 +585,3 @@ hcp destroy cluster kubevirt --name $CLUSTER_NAME
 ----
 
 Replace names where necessary.
-
-[#hosting-service-cluster-configure-metallb-config]
-=== Optional: Configuring MetalLB
-
-You must use a load balancer, such as MetalLB. The following example shows the steps you can take to configure MetalLB after you install it. For more information about installing MetalLB, see _Installing the MetalLB Operator_ in the {ocp-short} documentation.
-
-. Create a MetalLB instance:
-
-+
-----
-oc create -f - 
-apiVersion: metallb.io/v1beta1
-kind: MetalLB
-metadata:
-  name: metallb
-  namespace: metallb-system
-----
-
-. Create an address pool with an available range of IP addresses within the node network. Replace the following IP address ranges with an unused pool of available IP addresses in your network.
-
-+
-----
-oc create -f - 
-apiVersion: metallb.io/v1beta1
-kind: IPAddressPool
-metadata:
-  name: metallb
-  namespace: metallb-system
-spec:
-  addresses:
-  - 192.168.216.32-192.168.216.122
-----
-
-. Advertise the address pool by using L2 protocol:
-
-+
-----
-oc create -f - 
-apiVersion: metallb.io/v1beta1
-kind: L2Advertisement
-metadata:
-  name: l2advertisement
-  namespace: metallb-system
-spec:
-  ipAddressPools:
-   - metallb
-----
-
-[#managing-hosted-kubevirt-additional-resources]
-== Additional resources
-
-* For more information about MetalLB, see link:https://docs.openshift.com/container-platform/4.13/networking/metallb/metallb-operator-install.html[Installing the MetalLB Operator].
