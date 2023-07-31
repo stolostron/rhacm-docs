@@ -1,0 +1,118 @@
+[#importing-hosted-cluster-aws]
+= Importing a hosted control plane cluster on AWS
+
+You can import a hosted control plane cluster with the console.
+
+. Click *Infrastructure* > *Clusters* and select the hosted cluster that you want to import.
+
+. Click *Import hosted cluster*.
+
++
+*Note:* For your _discovered_ hosted cluster, you can also import from the console, but the cluster must be in an upgradable state. Import on your cluster is disabled if the hosted cluster is not in an upgradable state because the hosted control plane is not available. Click *Import* to begin the process. The status is `Importing` while the cluster receives updates and then changes to `Ready`.
+//lahinson - july 2023 - check reference to cli here
+You can also import a hosted control plane cluster on AWS with the command line interface by completing the following steps:
+
+. Add an annotation to the `HostedCluster` custom resource by running the following command:
+
++
+----
+oc edit hostedcluster <cluster_name> -n clusters
+----
+
++
+Replace `<cluster_name>` with the name of your hosted cluster.
+
+. Run the following command to add the annotations to the `HostedCluster` custom resource:
+
++
+----
+cluster.open-cluster-management.io/hypershiftdeployment: local-cluster/<cluster_name>
+cluster.open-cluster-management.io/managedcluster-name: <cluster_name>
+----
+
++
+Replace `<cluster_name>` with the name of your hosted cluster.
+
+. Create your `ManagedCluster` resource by using the following sample YAML file:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:  
+  annotations:    
+    import.open-cluster-management.io/hosting-cluster-name: local-cluster    
+    import.open-cluster-management.io/klusterlet-deploy-mode: Hosted
+    open-cluster-management/created-via: other  
+  labels:    
+    cloud: auto-detect    
+    cluster.open-cluster-management.io/clusterset: default    
+    name: <cluster_name>  
+    vendor: OpenShift  
+  name: <cluster_name>
+spec:  
+  hubAcceptsClient: true  
+  leaseDurationSeconds: 60
+----
+
++
+Replace `<cluster_name>` with the name of your hosted cluster.
+
+. Run the following command to apply the resource:
+
++
+----
+oc apply -f <file_name>
+----
+
++
+Replace <file_name> with the YAML file name you created in the previous step.
+
+. Create your `KlusterletAddonConfig` resource by using the following sample YAML file. This only applies to {product-title-short}. If you have installed {mce-short} only, skip this step:
+
++
+[source,yaml]
+----
+apiVersion: agent.open-cluster-management.io/v1
+kind: KlusterletAddonConfig
+metadata:
+  name: <cluster_name>
+  namespace: <cluster_name>
+spec:
+  clusterName: <cluster_name>
+  clusterNamespace: <cluster_name>
+  clusterLabels:
+    cloud: auto-detect
+    vendor: auto-detect
+  applicationManager:
+    enabled: true
+  certPolicyController:
+    enabled: true
+  iamPolicyController:
+    enabled: true
+  policyController:
+    enabled: true
+  searchCollector:
+    enabled: false
+----
+
++
+Replace `<cluster_name>` with the name of your hosted cluster.
+
+. Run the following command to apply the resource:
+
++
+----
+oc apply -f <file_name>
+----
+
++
+Replace <file_name> with the YAML file name you created in the previous step.
+
+. After the import process is complete, your hosted cluster becomes visible in the console. You can also check the status of your hosted cluster by running the following command:
+
++
+----
+oc get managedcluster <cluster_name>
+----
