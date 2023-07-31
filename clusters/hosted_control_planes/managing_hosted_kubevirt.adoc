@@ -42,13 +42,13 @@ oc patch storageclass ocs-storagecluster-ceph-rbd -p '{"metadata": {"annotations
 ----
 - You need a valid pull secret file for the `quay.io/openshift-release-dev` repository. For more information, see link:https://console.redhat.com/openshift/install/platform-agnostic/user-provisioned[Install OpenShift on any x86_64 platform with user-provisioned infrastructure].
 - You need to enable the hosted control planes feature. For information, see xref:../hosted_control_planes/configure_hosted_aws.adoc#hosted-enable-feature-aws[Enabling the hosted control planes feature].
-- After you enable the hosted control planes feature, you need to xref:../hosted_control_planes/configure_hosted_aws.adoc#hosted-install-cli[install the hosted control planes (`hypershift`) command line interface binary].
+- After you enable the hosted control planes feature, you need to xref:../hosted_control_planes/configure_hosted_aws.adoc#hosted-install-cli[install the hcp command line interface binary].
 - Before you can provision your cluster, you need to configure a load balancer. For more information, see <<hosting-service-cluster-configure-metallb-config,Configuring a load balancer>>.
 
 [#creating-a-hosted-cluster-kubevirt]
 == Creating a hosted cluster with the KubeVirt platform
 
-. To create a guest cluster, use environment variables and the `hypershift` command line interface:
+. To create a guest cluster, use environment variables and the `hcp` command line interface:
 
 +
 ----
@@ -58,7 +58,7 @@ export MEM="6Gi"
 export CPU="2"
 export WORKER_COUNT="2"
 
-hypershift create cluster kubevirt \
+hcp create cluster kubevirt \
 --name $CLUSTER_NAME \
 --node-pool-replicas $WORKER_COUNT \
 --pull-secret $PULL_SECRET \
@@ -80,7 +80,9 @@ oc -n clusters-$CLUSTER_NAME get pods
 ----
 
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                                                  READY   STATUS    RESTARTS   AGE
 capi-provider-5cc7b74f47-n5gkr                        1/1     Running   0          3m
@@ -92,6 +94,7 @@ cluster-api-6bbc867966-l4dwl                          1/1     Running   0       
 .
 redhat-operators-catalog-9d5fd4d44-z8qqk              1/1     Running   0          66s
 ----
+
 +
 A guest cluster that has worker nodes that are backed by KubeVirt virtual machines typically takes 10-15 minutes to be fully provisioned.
 
@@ -104,8 +107,11 @@ oc get --namespace clusters hostedclusters
 
 + 
 The following example output illustrates a fully provisioned `HostedCluster` object:
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAMESPACE   NAME      VERSION   KUBECONFIG                 PROGRESS    AVAILABLE   PROGRESSING   MESSAGE
 clusters    example   4.12.7    example-admin-kubeconfig   Completed   True        False         The hosted control plane is available
@@ -116,11 +122,11 @@ clusters    example   4.12.7    example-admin-kubeconfig   Completed   True     
 
 To gain command line interface access to the guest cluster, retrieve the guest cluster kubeconfig environment variable. 
 
-. To retrieve the guest cluster kubeconfig environment variable by using the `hypershift` command line interface, enter the following command:
+. To retrieve the guest cluster kubeconfig environment variable by using the `hcp` command line interface, enter the following command:
 
 +
 ----
-hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
+hcp create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
 ----
 
 . Access the cluster by entering the following command:
@@ -129,8 +135,11 @@ hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
 ----
 oc --kubeconfig $CLUSTER_NAME-kubeconfig get nodes
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                  STATUS   ROLES    AGE   VERSION
 example-n6prw         Ready    worker   32m   v1.25.4+18eadca
@@ -143,8 +152,11 @@ example-nc6g4         Ready    worker   32m   v1.25.4+18eadca
 ----
 oc --kubeconfig $CLUSTER_NAME-kubeconfig get clusterversion
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME      VERSION       AVAILABLE   PROGRESSING   SINCE   STATUS
 version   4.12.7        True        False         5m39s   Cluster version is 4.12.7
@@ -190,7 +202,7 @@ export CPU="2"
 export WORKER_COUNT="2"
 export BASE_DOMAIN=hypershift.lab <2>
 
-hypershift create cluster kubevirt \
+hcp create cluster kubevirt \
 --name $CLUSTER_NAME \
 --node-pool-replicas $WORKER_COUNT \
 --pull-secret $PULL_SECRET \
@@ -211,8 +223,11 @@ The result is a hosted cluster that has an Ingress wildcard that is configured f
 ----
 oc get --namespace clusters hostedclusters
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME            VERSION   KUBECONFIG                       PROGRESS   AVAILABLE   PROGRESSING   MESSAGE
 example                   example-admin-kubeconfig         Partial    True        False         The hosted control plane is available
@@ -222,14 +237,18 @@ example                   example-admin-kubeconfig         Partial    True      
 
 +
 ----
-hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
+hcp create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
 ----
+
 +
 ----
 oc --kubeconfig $CLUSTER_NAME-kubeconfig get co
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE   MESSAGE
 console                                    4.12.7    False       False         False      30m     RouteHealthAvailable: failed to GET route (https://console-openshift-console.apps.example.hypershift.lab): Get "https://console-openshift-console.apps.example.hypershift.lab": dial tcp: lookup console-openshift-console.apps.example.hypershift.lab on 172.31.0.10:53: no such host
@@ -238,6 +257,7 @@ console                                    4.12.7    False       False         F
 .
 ingress                                    4.12.7    True        False         True       28m     The "default" ingress controller reports Degraded=True: DegradedConditions: One or more other status conditions indicate a degraded state: CanaryChecksSucceeding=False (CanaryChecksRepetitiveFailures: Canary route checks for the default ingress controller are failing)
 ----
+
 +
 The next steps fixes the errors in the output.
 +
@@ -296,11 +316,13 @@ export EXTERNAL_IP=$(oc -n clusters-$CLUSTER_NAME get service $CLUSTER_NAME-apps
 ----
 
 . Configure a wildcard DNS entry that references the IP that is stored in the `$EXTERNAL_IP` path. View the following example DNS entry:
+
 +
 [source,bash]
 ----
 *.apps.<hosted-cluster-name\>.<base-domain\>.
----- 
+----
+
 +
 The DNS entry must be able to route inside and outside of the cluster. If you use the example input from step 1, for the cluster that has an external IP value of `192.168.20.30`, the DNS resolutions look like this example:
 
@@ -317,8 +339,11 @@ dig +short test.apps.example.hypershift.lab
 ----
 oc get --namespace clusters hostedclusters
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME            VERSION   KUBECONFIG                       PROGRESS    AVAILABLE   PROGRESSING   MESSAGE
 example         4.12.7    example-admin-kubeconfig         Completed   True        False         The hosted control plane is available
@@ -396,7 +421,9 @@ oc scale nodepool/$NODEPOOL_NAME --namespace clusters --replicas=$NODEPOOL_REPLI
 oc --kubeconfig $CLUSTER_NAME-kubeconfig get nodes
 ----
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                  STATUS   ROLES    AGE     VERSION
 example-9jvnf         Ready    worker   97s     v1.25.4+18eadca
@@ -421,7 +448,7 @@ export MEM="6Gi"
 export CPU="4"
 export DISK="16"
 
-hypershift create nodepool kubevirt \
+hcp create nodepool kubevirt \
   --cluster-name $CLUSTER_NAME \
   --name $NODEPOOL_NAME \
   --node-count $WORKER_COUNT \
@@ -437,7 +464,9 @@ hypershift create nodepool kubevirt \
 oc get nodepools --namespace clusters
 ----
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                      CLUSTER         DESIRED NODES   CURRENT NODES   AUTOSCALING   AUTOREPAIR   VERSION   UPDATINGVERSION   UPDATINGCONFIG   MESSAGE
 example                   example         5               5               False         False        4.12.7                                       
@@ -450,8 +479,11 @@ example-extra-cpu         example         2                               False 
 ----
 oc --kubeconfig $CLUSTER_NAME-kubeconfig get nodes
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                      STATUS   ROLES    AGE     VERSION
 example-9jvnf             Ready    worker   97s     v1.25.4+18eadca
@@ -469,8 +501,11 @@ example-extra-cpu-zr8mj   Ready    worker   102s    v1.25.4+18eadca
 ----
 oc get nodepools --namespace clusters
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                      CLUSTER         DESIRED NODES   CURRENT NODES   AUTOSCALING   AUTOREPAIR   VERSION   UPDATINGVERSION   UPDATINGCONFIG   MESSAGE
 example                   example         5               5               False         False        4.12.7                                       
@@ -489,8 +524,11 @@ To verify that your hosted cluster was successfully created, take the following 
 ----
 oc get --namespace clusters hostedclusters ${CLUSTER_NAME}
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAMESPACE   NAME      VERSION   KUBECONFIG                 PROGRESS    AVAILABLE   PROGRESSING   MESSAGE
 clusters    example   4.12.2    example-admin-kubeconfig   Completed   True        False         The hosted control plane is available
@@ -500,14 +538,18 @@ clusters    example   4.12.2    example-admin-kubeconfig   Completed   True     
 
 +
 ----
-hypershift create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
+hcp create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
 ----
+
 +
 ----
 oc get co --kubeconfig=$CLUSTER_NAME-kubeconfig
 ----
+
 +
-.Example output
+See the following example output:
+
++
 ----
 NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE   MESSAGE
 console                                    4.12.2   True        False         False      2m38s
@@ -538,7 +580,7 @@ storage                                    4.12.2   True        False         Fa
 To delete a hosted cluster on {ocp-virt-short}, enter the following command on a command line:
 
 ----
-hypershift destroy cluster kubevirt --name $CLUSTER_NAME
+hcp destroy cluster kubevirt --name $CLUSTER_NAME
 ----
 
 Replace names where necessary.
