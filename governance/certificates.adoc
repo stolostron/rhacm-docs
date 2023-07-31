@@ -1,72 +1,41 @@
 [#certificates]
 = Certificates
 
-Various certificates are created and used throughout {product-title}.
+All certificates required by services that run on {product-title-short} are created during the installation of {product-title-short}. Certificates are created and managed by the following components of the OpenShift platform:
 
-You can bring your own certificates. You must create a Kubernetes TLS Secret for your certificate. After you create your certificates, you can replace certain certificates that are created by the {product-title-short} installer.
-
-*Required access*: Cluster administrator
-
-All certificates required by services that run on {product-title-short} are created during the installation of {product-title-short}. Certificates are created and managed by the following components:
-
-* link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/security_and_compliance/configuring-certificates#add-service-serving[OpenShift Service Serving Certificates]
+* OpenShift Service Serving Certificates
 * {product-title-short} webhook controllers
 * Kubernetes Certificates API
 * OpenShift default ingress
 
+*Required access*: Cluster administrator
+
 Continue reading to learn more about certificate management:
  
-*<<acm-certs,{product-title-short} hub cluster certificates>>*
-
-* link:https://docs.openshift.com/container-platform/4.11/security/certificates/replacing-default-ingress-certificate.html[Replacing the OpenShift default ingress certificate]
-* <<observability-certificates,Observability certificates>>
-** <<observability-byo-certificates,Bring Your Own (BYO) observability certificate authority (CA) certificates>>
-** <<openssl-commands-ca,OpenSSL commands to generate CA certificate>>
-** <<create-secrets-byo-certs,Create the secrets associated with the BYO observability CA certificates>>
-** <<replacing-cert-alertmanager,Replacing certificates for alertmanager route>>
-
-*<<acm-component-cert,{product-title-short} component certificates>>*
-
-* <<list-hub-cluster-managed-certificates,List hub cluster managed certificates>>
-* <<refresh-hub-cluster-managed-certificates,Refresh hub cluster managed certificates>>
-* <<refresh-an-acm-webhook,Refresh a {product-title-short} webhook certificate>>
-
-*<<acm-managed-cert,{product-title-short} managed certificates>>*
-
-* <<channel-certificates,Channel certificates>>
-* <<managed-cluster-certificates,Managed cluster certificates>>
-
-*<<third-party-cert,Third-party certificates>>*
-
-* <<rotating-the-gatekeeper-webhook-certificate,Rotating the gatekeeper webhook certificate>>
+- <<acm-certs,{product-title-short} hub cluster certificates>>
+//- <<mce-certs,{mce} certificates>>
+- <<acm-component-cert,{product-title-short} component certificates>>
 
 *Note:* Users are responsible for certificate rotations and updates.
 
 [#acm-certs]
 == {product-title-short} hub cluster certificates
 
-[#observability-certificates]
-=== Observability certificates
+OpenShift default ingress certificate is considered a hub cluster certificate. After {product-title-short} is installed, observability certificates are created and used by the observability components to provide mutual TLS on the traffic between the hub cluster and managed cluster. The Kubernetes secrets that are associated with the observability certificates. 
 
-After {product-title-short} is installed, observability certificates are created and used by the observability components, to provide mutual TLS on the traffic between the hub cluster and managed cluster. The Kubernetes secrets that are associated with the observability certificates. 
+* The `open-cluster-management-observability` namespace contains the following certificates:
 
-The `open-cluster-management-observability` namespace contain the following certificates:
+- `observability-server-ca-certs`: Has the CA certificate to sign server-side certificates
+- `observability-client-ca-certs`: Has the CA certificate to sign client-side certificates
+- `observability-server-certs`: Has the server certificate used by the `observability-observatorium-api` deployment
+- `observability-grafana-certs`: Has the client certificate used by the `observability-rbac-query-proxy` deployment 
 
-* `observability-server-ca-certs`: Has the CA certificate to sign server-side certificates
-* `observability-client-ca-certs`: Has the CA certificate to sign client-side certificates
-* `observability-server-certs`: Has the server certificate used by the `observability-observatorium-api` deployment
-* `observability-grafana-certs`: Has the client certificate used by the `observability-rbac-query-proxy` deployment 
+* The `open-cluster-management-addon-observability` namespace contain the following certificates on managed clusters:
 
+- `observability-managed-cluster-certs`: Has the same server CA certificate as `observability-server-ca-certs` in the hub server
+- `observability-controller-open-cluster-management.io-observability-signer-client-cert`: Has the client certificate used by the `metrics-collector-deployment` 
 
-The `open-cluster-management-addon-observability` namespace contain the following certificates on managed clusters:
-
-* `observability-managed-cluster-certs`: Has the same server CA certificate as `observability-server-ca-certs` in the hub server
-* `observability-controller-open-cluster-management.io-observability-signer-client-cert`: Has the client certificate used by the `metrics-collector-deployment` 
-
-
-The CA certificates are valid for five years and other certificates are valid for one year. All observability certificates are automatically refreshed upon expiration.
-
-View the following list to understand the effects when certificates are automatically renewed:
+The CA certificates are valid for five years and other certificates are valid for one year. All observability certificates are automatically refreshed upon expiration. View the following list to understand the effects when certificates are automatically renewed:
 
 * Non-CA certificates are renewed automatically when the remaining valid time is no more than 73 days. After the certificate is renewed, the pods in the related deployments restart automatically to use the renewed certificates.
 
@@ -74,187 +43,112 @@ View the following list to understand the effects when certificates are automati
 
 * When a certificate is renewed, the traffic between the hub cluster and managed cluster is not interrupted.
 
-[#observability-byo-certificates]
-=== Bring Your Own (BYO) observability certificate authority (CA) certificates
+View the following {product-title-short} hub cluster certificates table:
 
-If you do not want to use the default observability CA certificates generated by {product-title-short}, you can choose to use the BYO observability CA certificates before you enable observability.
+.{product-title-short} hub cluster certificates
+|===
+| Namespace | Secret name | Pod label |  
 
-[#openssl-commands-ca]
-==== OpenSSL commands to generate CA certificate
+| open-cluster-management
+| channels-apps-open-cluster-management-webhook-svc-ca
+| app=multicluster-operators-channel
 
-Observability requires two CA certificates; one is for the server-side and the other is for the client-side.
+| open-cluster-management
+| channels-apps-open-cluster-management-webhook-svc-signed-ca 
+| app=multicluster-operators-channel
 
-* Generate your CA RSA private keys with the following commands:
-+
-----
-openssl genrsa -out serverCAKey.pem 2048
+| open-cluster-management
+| multicluster-operators-application-svc-ca
+| app=multicluster-operators-application
 
-openssl genrsa -out clientCAKey.pem 2048
-----
+| open-cluster-management
+| multicluster-operators-application-svc-signed-ca
+| app=multicluster-operators-application
 
-* Generate the self-signed CA certificates using the private keys. Run the following commands:
-+
-----
-openssl req -x509 -sha256 -new -nodes -key serverCAKey.pem -days 1825 -out serverCACert.pem
+| open-cluster-management-hub
+| registration-webhook-serving-cert signer-secret
+| Not required
 
-openssl req -x509 -sha256 -new -nodes -key clientCAKey.pem -days 1825 -out clientCACert.pem
-----
+| open-cluster-management-hub
+| work-webhook-serving-cert
+| Not required
+|===
 
-[#create-secrets-byo-certs]
-==== Create the secrets associated with the BYO observability CA certificates
+//[#mce-certs]
+//== {mce} certificates
 
-Complete the following steps to create the secrets:
+//.{mce-short} certificates
+//|===
+//| Namespace | Secret name | Pod label |
 
-. Create the `observability-server-ca-certs` secret by using your certificate and private key. Run the following command:
-+
-----
-oc -n open-cluster-management-observability create secret tls observability-server-ca-certs --cert ./serverCACert.pem --key ./serverCAKey.pem
-----
+//| multicluster-engine
+//| agent-server
+//| component=cluster-proxy-addon-user
 
-. Create the `observability-client-ca-certs` secret by using your certificate and private key. Run the following command:
-+
-----
-oc -n open-cluster-management-observability create secret tls observability-client-ca-certs --cert ./clientCACert.pem --key ./clientCAKey.pem
-----
+//| multicluster-engine
+//| cluster-proxy-service-proxy-server-cert
+//| component=cluster-proxy-addon-user
 
-[#replacing-cert-alertmanager]
-==== Replacing certificates for alertmanager route
+//| multicluster-engine
+//| ocm-klusterlet-self-signed-secrets
+//| component=cluster-proxy-addon-user
 
-You can replace alertmanager certificates by updating the alertmanager route, if you do not want to use the OpenShift default ingress certificate. Complete the following steps:
+//| multicluster-engine
+//| proxy-client proxy-server
+//| component=cluster-proxy-addon-user
 
-. Examine the observability certificate with the following command:
-+
-----
-openssl x509  -noout -text -in ./observability.crt
-----
-
-. Change the common name (`CN`) on the certificate to `alertmanager`.
-
-. Change the SAN in the `csr.cnf` configuration file with the hostname for your alertmanager route.
-
-. Create the two following secrets in the `open-cluster-management-observability` namespace. Run the following command:
-+
-----
-oc -n open-cluster-management-observability create secret tls alertmanager-byo-ca --cert ./ca.crt --key ./ca.key
-
-oc -n open-cluster-management-observability create secret tls alertmanager-byo-cert --cert ./ingress.crt --key ./ingress.key
-----
+//| multicluster-engine
+//| proxy-server-ca cluster-proxy-signer
+//| component=cluster-proxy-addon-user
+//|===
 
 [#acm-component-cert]
-== {product-title-short} component certificates
-
-[#list-hub-cluster-managed-certificates]
-=== List hub cluster managed certificates
-
-You can view a list of hub cluster managed certificates that use link:https://docs.openshift.com/container-platform/4.11/security/certificates/service-serving-certificate.html[OpenShift Service Serving Certificates] service internally. Run the following command to list the certificates: 
-
-----
-for ns in multicluster-engine open-cluster-management ; do echo "$ns:" ; oc get secret -n $ns -o custom-columns=Name:.metadata.name,Expiration:.metadata.annotations.service\\.beta\\.openshift\\.io/expiry | grep -v '<none>' ; echo ""; done
-----
-
-*Note:* If observability is enabled, there are additional namespaces where certificates are created.
-
-[#refresh-hub-cluster-managed-certificates]
-=== Refresh hub cluster managed certificates 
-
-You can refresh a hub cluster managed certificate by running the `delete secret` command in the <<list-hub-cluster-managed-certificates,List hub cluster managed certificates>> section. When you identify the certificate that you need to refresh, delete the secret that is associated with the certificate. For example, you can delete a secret by running the following command:
-
-----
-oc delete secret grc-0c925-grc-secrets -n open-cluster-management
-----
-
-*Note:* After you delete the secret, a new one is created. However, you must restart pods that use the secret manually so they can begin to use the new certificate.
-
-[#refresh-an-acm-webhook]
-=== Refresh a {product-title-short} webhook certificate
-
-You can refresh {ocp-short} managed certificates, which are certificates that are used by {product-title-short} webhooks. 
-
-Complete the following steps to refresh {product-title-short} webhook certificate:
-
-. Delete the secret that is associated with the {ocp-short} managed certificate by running the following command:
-+
-----
-oc delete secret -n open-cluster-management ocm-webhook-secret
-----
-+
-*Note:* Some services might not have a secret that needs to be deleted.
-
-. Restart the services that are associated with the {ocp-short} managed certificate(s) by running the following command:
-+
-----
-oc delete po -n open-cluster-management ocm-webhook-679444669c-5cg76
-----
-+
-*Important:* There are replicas of many services; each service must be restarted.
-
-View the following table for a summarized list of the pods that contain certificates and whether a secret needs to be deleted prior to restarting the pod:
-
-.Pods that contain {ocp-short} managed certificates
-|===
-| Service name | Namespace | Sample pod name | Secret name (if applicable)
-
-|  channels-apps-open-cluster-management-webhook-svc
-| open-cluster-management
-| multicluster-operators-application-8c446664c-5lbfk
-| channels-apps-open-cluster-management-webhook-svc-ca
-
-| multicluster-operators-application-svc
-| open-cluster-management
-| multicluster-operators-application-8c446664c-5lbfk
-| multicluster-operators-application-svc-ca
-
-| cluster-manager-registration-webhook
-| open-cluster-management-hub
-| cluster-manager-registration-webhook-fb7b99c-d8wfc
-| registration-webhook-serving-cert
-
-| cluster-manager-work-webhook
-| open-cluster-management-hub
-| cluster-manager-work-webhook-89b8d7fc-f4pv8
-| work-webhook-serving-cert
-|===
-
-[#acm-managed-cert]
 == {product-title-short} managed certificates
 
-[#channel-certificates]
-=== Channel certificates
+//can we add managed cluster entries to this table? Do we want to add a seperate table in the Managedcluster certs section?
+//Pod label selector column will be updated 
 
-CA certificates can be associated with Git channel that are a part of the {product-title-short} application management. See link:../applications/configuring_git_channel.adoc#using-custom-CA-certificates-for-secure-HTTPS-connection[Using custom CA certificates for a secure HTTPS connection] for more details.
+View the following table for a summarized list of the component pods that contain {product-title-short} managed certificates and the related secrets:
 
-Helm channels allow you to disable certificate validation. Helm channels where certificate validation is disabled, must be configured in development environments. Disabling certificate validation introduces security risks.
+//MCE certs what do we do with those? There are still some things that we need to account for. Some of the MCE certs were successfully rotated by Gus | MJ | 07/12/23
+
+.Pods that contain {product-title-short} managed certificates
+|===
+| Namespace | Secret name (if applicable)
+
+| open-cluster-management-agent-addon
+| cluster-proxy-open-cluster-management.io-proxy-agent-signer-client-cert
+
+| open-cluster-management-agent-addon
+| cluster-proxy-service-proxy-server-certificates
+|===
+
+//removed previous section, are there other links to third party certificates that we want to add. For example VMWare| Gus, Mikela, Dale | 07/12/23
 
 [#managed-cluster-certificates]
 === Managed cluster certificates
 
-Certificates are used to authenticate managed clusters with the hub. Therefore, it is important to be aware of troubleshooting scenarios associated with these certificates. View link:../troubleshooting/trouble_cluster_offline_cert.adoc#troubleshooting-imported-clusters-offline-after-certificate-change[Troubleshooting imported clusters offline after certificate change] for more details.  
+Certificates are used to authenticate managed clusters with the hub cluster. Therefore, it is important to be aware of troubleshooting scenarios associated with these certificates. For more details select the link to the _Troubleshooting imported clusters offline after certificate change_ topic in the _Additional resources_ section. 
 
 The managed cluster certificates are refreshed automatically.
 
-[#third-party-cert]
-== Third-party certificates
+[#additional-resources-cert]
+== Additional resources
 
-[#rotating-the-gatekeeper-webhook-certificate]
-=== Rotating the gatekeeper webhook certificate
+- Use the certificate policy controller to create and manage certificate policies on managed clusters. See xref:../governance/cert_policy_ctrl.adoc#certificate-policy-controller[Certificate policy controller] for more details.
 
-Complete the following steps to rotate the gatekeeper webhook certificate:
+- See link:../applications/configuring_git_channel.adoc#using-custom-CA-certificates-for-secure-HTTPS-connection[Using custom CA certificates for a secure HTTPS connection] for more details about securely connecting to a privately-hosted Git server with SSL certificates.
 
-. Edit the secret that contains the certificate with the following command: 
-+
-----
-oc edit secret -n openshift-gatekeeper-system gatekeeper-webhook-server-cert
-----
+//it is best to not link to the troubleshoot topic; hiding reference | MJ | 07/03/23
+//Question asked in live review: Is this so common that we need to add this to the procedure doc? | MJ + BS | 07/03/23
+//Check clusters guide or foundations for cert info (Gus suggestion). Consider pointing to those source if found | MJ | 07/12/23
+//(Potential) Changing certificates for offline clusters OR choosing a different reference. The troubleshoot topic is duplicated in the MCE doc---does it apply to MCE users? | MJ, Gus, Dale | 07/12/23
+//- Refer to link:../troubleshooting/trouble_cluster_offline_cert.adoc#troubleshooting-imported-clusters-offline-after-certificate-change[Troubleshooting imported clusters offline after certificate change] topic for more details.  
 
-. Delete the following content in the `data` section: `ca.crt`, `ca.key`, tls.crt`, and `tls.key`.
+- See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/security_and_compliance/configuring-certificates#add-service-serving[OpenShift Service Serving Certificates] for more details.
 
-. Restart the gatekeeper webhook service by deleting the `gatekeeper-controller-manager` pods with the following command:
-+
-----
-oc delete po -n openshift-gatekeeper-system -l control-plane=controller-manager
-----
+- The {ocp-short} default ingress is considered a hub cluster certificate See link:https://docs.openshift.com/container-platform/4.11/security/certificates/replacing-default-ingress-certificate.html[Replacing the OpenShift default ingress certificate] for more details.
 
-The gatekeeper webhook certificate is rotated. 
+- See xref:../governance/cert_manage_overview.adoc#cert-overview[Certificates overview] for topics.
 
-
-Use the certificate policy controller to create and manage certificate policies on managed clusters. See xref:../governance/policy_controllers.adoc#policy-controllers[Policy controllers] to learn more about controllers. Return to the xref:../governance/security_overview.adoc#security[Risk and compliance] page for more information.
+- Return to the xref:../governance/security_overview.adoc#security[Risk and compliance] page.
