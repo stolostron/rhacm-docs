@@ -61,7 +61,7 @@ If the console URL displays `console-openshift-console.router.default.svc.cluste
 
 Follow these steps to install the {mce-short} in a disconnected environment:
 
-. Create a mirror registry. If you do not already have a mirror registry, create one by completing the procedure in the link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html/installing/disconnected-installation-mirroring[Disconnected installation mirroring] topic of the Red Hat OpenShift Container Platform documentation.
+. Create a mirror registry. If you do not already have a mirror registry, create one by completing the procedure in the link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/installing/disconnected-installation-mirroring[Disconnected installation mirroring] topic of the {ocp-short} documentation.
 
 +
 If you already have a mirror registry, you can configure and use your existing one.
@@ -142,3 +142,36 @@ the {mce-short} is included in the Operator Lifecycle Manager Red Hat Operator c
 . Now that you have the image in the disconnected Operator Lifecycle Manager, continue to install the {mce-short} for Kubernetes from the  Operator Lifecycle Manager catalog.
 
 See xref:./install_connected.adoc#installing-while-connected-online-mce[Installing while connected online] for the required steps.
+
+[#mirror-ironic-agent-image-mce]
+== Mirroring images when using Assisted Installer
+
+If you deploy a hub cluster on bare metal by using `assisted-service`, the {ocp} image is not mirrored automatically in disconnected environments. A matching ironic agent image of {ocp-short} must be used on your hub cluster to install managed clusters. The hub cluster {ocp-short} version detects which ironic agent image is being used.
+
+In a disconnected environment, you must mirror the {ocp-short} image manually. The ironic agent image used is based on the hub cluster release version set in the `ClusterVersion` resource. If the image version set in the resource is not available, one of the following default images is used, depending on your CPU architecture:
+
+- x86_64: `quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:d3f1d4d3cd5fbcf1b9249dd71d01be4b901d337fdc5f8f66569eb71df4d9d446`
+- arm64: `quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:cb0edf19fffc17f542a7efae76939b1e9757dc75782d4727fb0aa77ed5809b43`
+
+You can set a different default ironic agent image by overriding the following environment variables:
+
+- x86_64: `IRONIC_AGENT_IMAGE`
+- arm64: `IRONIC_AGENT_IMAGE_ARM`
+
+Alterantively, you can also use the `infraenv.agent-install.openshift.io/ironic-agent-image-override` InfraEnv annotation to override the ironic agent image.
+
+Make sure that the ironic agent image version matches the hub cluster {ocp-short} version by running the following command. Replace `<hub-release-image>` with the image for the hub cluster release:
+
+----
+oc adm release info --image-for=ironic-agent <hub-release-image>
+----
+
+If the image versions do not match, run the following command to mirror the {ocp-short} image manually:
+
+----
+skopeo copy <image-from-oc-adm-output> <mirror>
+----
+
+Replace `<image-from-oc-adm-output>` with the image from the output of `oc adm`.
+
+Replace `<mirror>` with your mirrored image.
