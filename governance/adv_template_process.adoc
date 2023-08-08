@@ -8,6 +8,7 @@ Use both managed cluster and hub cluster templates to reduce the need to create 
 Continue reading for advanced template use-cases:
 
 * <<special-annotation-processing,Special annotation for reprocessing>>
+* <<raw-object-template-processing,Object template processing>>
 * <<bypass-template-processing,Bypass template processing>>
 * <<additional-resources-hub-temp,Additional resources>>
 
@@ -18,6 +19,31 @@ Hub cluster templates are resolved to the data in the referenced resources durin
 
 If you need to manually initiate an update, use the special annotation, `policy.open-cluster-management.io/trigger-update`, to indicate changes for the data referenced by the templates. Any change to the special annotation value automatically initiates template processing. Additionally, the latest contents of the referenced resource are read and updated in the policy definition that is propagated for processing on managed clusters. A way to use this annotation is to increment the value by one each time.
 
+[#raw-object-template-processing]
+== Object template processing
+
+Set object templates with a YAML string representation. The `object-template-raw` parameter is an optional parameter that supports advanced templating use-cases, such as if-else and the `range` function. The following example is defined to add the `species-category: mammal` label  to any ConfigMap in the `default` namespace that has a `name` key equal to `Sea Otter`:
+
+[source,yaml]
+----
+object-templates-raw: |
+  {{- range (lookup "v1" "ConfigMap" "default" "").items }}
+  {{- if eq .data.name "Sea Otter" }}
+  - complianceType: musthave
+    objectDefinition:
+      kind: ConfigMap
+      apiVersion: v1
+      metadata:
+        name: {{ .metadata.name }}
+        namespace: {{ .metadata.namespace }}
+        labels:
+          species-category: mammal
+  {{- end }}
+  {{- end }}
+----
+
+*Note:* While `spec.object-templates` and `spec.object-templates-raw` are optional, one of the two parameter fields must be set.
+ 
 [#bypass-template-processing]
 == Bypass template processing
 
@@ -30,6 +56,7 @@ Alternatively, you can add the following annotation in the `ConfigurationPolicy`
 [#additional-resources-hub-temp]
 == Additional resources
 
-* xref:../governance/template_support_intro.adoc#template-processing[Template processing]
-* xref:../governance/template_functions.adoc#template-functions[Template functions]
+* See xref:../governance/template_functions.adoc#template-functions[Template functions] for more details.
+* Return to xref:../governance/template_support_intro.adoc#template-processing[Template processing].
+* See xref:../governance/config_policy_ctrl.adoc#kubernetes-configuration-policy-controller[Kubernetes configuration policy controller] for more details.
 * Also refer to the link:https://docs.openshift.com/container-platform/4.11/security/encrypting-etcd.html[{ocp} etcd encryption documentation].

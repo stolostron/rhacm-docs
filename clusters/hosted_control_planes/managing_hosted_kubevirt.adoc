@@ -14,12 +14,11 @@ To learn how to create a hosted control plane cluster on {ocp-virt-short}, see t
 * <<creating-a-hosted-cluster-kubevirt,Creating a hosted cluster with the KubeVirt platform>>
 * <<create-hosted-clusters-kubevirt-default-ingress-dns,Default Ingress and DNS behavior>>
 * <<create-hosted-clusters-kubevirt-customized-ingress-dns,Customizing Ingress and DNS behavior>>
+* <<hosting-service-cluster-configure-metallb-config,Optional: Configuring MetalLB>>
 * <<create-hosted-clusters-kubevirt-scaling-node-pool,Scaling a node pool>>
 * <<create-hosted-clusters-kubevirt-adding-node-pool,Adding node pools>>
 * <<verifying-cluster-creation-kubevirt,Verifying hosted cluster creation on OpenShift Virtualization>>
 * <<hypershift-cluster-destroy-kubevirt,Destroying a hosted cluster on OpenShift Virtualization>>
-* <<hosting-service-cluster-configure-metallb-config,Optional: Configuring MetalLB>>
-* <<managing-hosted-kubevirt-additional-resources,Additional resources>>
 
 [#create-hosted-clusters-prereqs-kubevirt]
 == Prerequisites
@@ -33,9 +32,9 @@ You must meet the following prerequisites to create an {ocp-short} cluster on {o
 ----
 oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p '[{ "op": "add", "path": "/spec/routeAdmission", "value": {wildcardPolicy: "WildcardsAllowed"}}]'
 ----
-- The {ocp-short} managed cluster must have {ocp-virt-short} installed on it. For more information, see link:https://docs.openshift.com/container-platform/4.12/virt/install/installing-virt-web.html[Installing OpenShift Virtualization using the web console].
+- The {ocp-short} managed cluster must have {ocp-virt-short} installed on it. For more information, see link:https://docs.openshift.com/container-platform/4.13/virt/install/installing-virt-web.html[Installing OpenShift Virtualization using the web console].
 - The {ocp-short} managed cluster must be configured with OVNKubernetes as the default pod network CNI.
-- The {ocp-short} managed cluster must have a default storage class. For more information, see link:https://docs.openshift.com/container-platform/4.12/post_installation_configuration/storage-configuration.html[Post-installation storage configuration]. The following example shows how to set a default storage class:
+- The {ocp-short} managed cluster must have a default storage class. For more information, see link:https://docs.openshift.com/container-platform/4.13/post_installation_configuration/storage-configuration.html[Post-installation storage configuration]. The following example shows how to set a default storage class:
 
 +
 ----
@@ -156,10 +155,20 @@ version   4.12.7        True        False         5m39s   Cluster version is 4.1
 
 Every {ocp-short} cluster includes a default application Ingress controller, which must have an wildcard DNS record associated with it. By default, guest clusters that are created by using the HyperShift KubeVirt provider automatically become a subdomain of the underlying {ocp-short} cluster that the KubeVirt virtual machines run on.
 
-For example, your {ocp-short} cluster might have the default Ingress DNS entry of `*.apps.mgmt-cluster.example.com`.
+For example, your {ocp-short} cluster might have the following default Ingress DNS entry:
 
-As a result, a KubeVirt guest cluster that is named `guest` and that runs on that underlying {ocp-short} cluster has the default Ingress of `*.apps.guest.apps.mgmt-cluster.example.com`.
+[source,bash]
+----
+*.apps.mgmt-cluster.example.com
+----
+//*
+As a result, a KubeVirt guest cluster that is named `guest` and that runs on that underlying {ocp-short} cluster has the following default Ingress:
 
+[source,bash]
+----
+*.apps.guest.apps.mgmt-cluster.example.com
+----
+//*
 *Note:* For the default Ingress DNS to work properly, the underlying cluster that hosts the KubeVirt virtual machines must allow wildcard DNS routes. You can configure this behavior by entering the following command: `oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p '[{ "op": "add", "path": "/spec/routeAdmission", "value": {wildcardPolicy: "WildcardsAllowed"}}]'`
 
 [#create-hosted-clusters-kubevirt-customized-ingress-dns]
@@ -286,7 +295,15 @@ Set up up a wildcard DNS record or CNAME that references the external IP of the 
 export EXTERNAL_IP=$(oc -n clusters-$CLUSTER_NAME get service $CLUSTER_NAME-apps -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 ----
 
-. Configure a wildcard `*.apps.<hosted-cluster-name\>.<base-domain\>.` DNS entry that references the IP that is stored in the `$EXTERNAL_IP` path. The DNS entry must be able to route inside and outside of the cluster. If you use the example input from step 1, for the cluster that has an external IP value of `192.168.20.30`, the DNS resolutions look like this example:
+. Configure a wildcard DNS entry that references the IP that is stored in the `$EXTERNAL_IP` path. View the following example DNS entry:
++
+[source,bash]
+----
+*.apps.<hosted-cluster-name\>.<base-domain\>.
+---- 
+//* 
++
+The DNS entry must be able to route inside and outside of the cluster. If you use the example input from step 1, for the cluster that has an external IP value of `192.168.20.30`, the DNS resolutions look like this example:
 
 +
 ----
@@ -307,6 +324,58 @@ oc get --namespace clusters hostedclusters
 NAME            VERSION   KUBECONFIG                       PROGRESS    AVAILABLE   PROGRESSING   MESSAGE
 example         4.12.7    example-admin-kubeconfig         Completed   True        False         The hosted control plane is available
 ----
+
+[#hosting-service-cluster-configure-metallb-config]
+== Optional: Configuring MetalLB
+
+You must use a load balancer, such as MetalLB. The following example shows the steps you can take to configure MetalLB after you install it. For more information about installing MetalLB, see _Installing the MetalLB Operator_ in the {ocp-short} documentation.
+
+. Create a MetalLB instance:
+
++
+----
+oc create -f - 
+apiVersion: metallb.io/v1beta1
+kind: MetalLB
+metadata:
+  name: metallb
+  namespace: metallb-system
+----
+
+. Create an address pool with an available range of IP addresses within the node network. Replace the following IP address ranges with an unused pool of available IP addresses in your network.
+
++
+----
+oc create -f - 
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: metallb
+  namespace: metallb-system
+spec:
+  addresses:
+  - 192.168.216.32-192.168.216.122
+----
+
+. Advertise the address pool by using L2 protocol:
+
++
+----
+oc create -f - 
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: l2advertisement
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+   - metallb
+----
+
+[#managing-hosted-kubevirt-additional-resources]
+=== Additional resources
+
+* For more information about MetalLB, see link:https://docs.openshift.com/container-platform/4.13/networking/metallb/metallb-operator-install.html[Installing the MetalLB Operator]. 
 
 [#create-hosted-clusters-kubevirt-scaling-node-pool]
 == Scaling a node pool
@@ -474,55 +543,3 @@ hypershift destroy cluster kubevirt --name $CLUSTER_NAME
 ----
 
 Replace names where necessary.
-
-[#hosting-service-cluster-configure-metallb-config]
-=== Optional: Configuring MetalLB
-
-You must use a load balancer, such as MetalLB. The following example shows the steps you can take to configure MetalLB after you install it. For more information about installing MetalLB, see _Installing the MetalLB Operator_ in the {ocp-short} documentation.
-
-. Create a MetalLB instance:
-
-+
-----
-oc create -f - 
-apiVersion: metallb.io/v1beta1
-kind: MetalLB
-metadata:
-  name: metallb
-  namespace: metallb-system
-----
-
-. Create an address pool with an available range of IP addresses within the node network. Replace the following IP address ranges with an unused pool of available IP addresses in your network.
-
-+
-----
-oc create -f - 
-apiVersion: metallb.io/v1beta1
-kind: IPAddressPool
-metadata:
-  name: metallb
-  namespace: metallb-system
-spec:
-  addresses:
-  - 192.168.216.32-192.168.216.122
-----
-
-. Advertise the address pool by using L2 protocol:
-
-+
-----
-oc create -f - 
-apiVersion: metallb.io/v1beta1
-kind: L2Advertisement
-metadata:
-  name: l2advertisement
-  namespace: metallb-system
-spec:
-  ipAddressPools:
-   - metallb
-----
-
-[#managing-hosted-kubevirt-additional-resources]
-== Additional resources
-
-* For more information about MetalLB, see link:https://docs.openshift.com/container-platform/4.12/networking/metallb/metallb-operator-install.html[Installing the MetalLB Operator].

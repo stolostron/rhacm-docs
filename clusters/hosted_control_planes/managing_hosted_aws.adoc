@@ -7,11 +7,10 @@ You can use the {mce} console to create a {ocp} hosted cluster. Hosted control p
 * <<create-hosted-aws,Creating a hosted cluster on AWS with the console>>
 * <<create-hosted-multi-zone-aws,Creating a hosted cluster in multiple zones on AWS>>
 * <<hosted-deploy-cluster-aws,Deploying a hosted cluster on AWS>>
-* <<hosting-service-cluster-access-aws,Accessing a hosting cluster on AWS>>
+* <<hosting-service-cluster-access-aws,Accessing a hosting cluster>>
 * <<importing-hosted-cluster-aws,Importing a hosted control plane cluster on AWS>>
 * <<hosted-cluster-arm-aws,Enabling hosted control planes on an ARM64 {ocp-short} cluster>>
 * <<hypershift-cluster-destroy-aws,Destroying a hosted cluster on AWS>>
-* <<additional-resources-manage-hosted-aws,Additional resources>>
 
 [#hosted-prerequisites-aws]
 == Prerequisites
@@ -47,6 +46,8 @@ Proxy information that is provided in the infrastructure environment is automati
 == Creating a hosted cluster in multiple zones on AWS
 
 Create a cluster, specifying the `BASE_DOMAIN` of the public zone, by entering the following commands:
+
+
 ----
 REGION=us-east-1
 ZONES=us-east-1a,us-east-1b
@@ -82,6 +83,7 @@ One `NodePool` resource is created for each zone. The node pool name is suffixed
 After you set up the hosted control planes (`hypershift`) command line interface and enable the `local-cluster` as the hosting cluster, you can deploy a hosted cluster on AWS by completing the following steps. To deploy a private hosted cluster, see _Deploying a private hosted cluster on AWS_.
 
 . Set environment variables as follows, replacing variables as needed with your credentials:
+
 +
 ----
 export REGION=us-east-1
@@ -93,8 +95,10 @@ export PULL_SECRET=/Users/username/pull-secret.txt
 export BUCKET_NAME=acmqe-hypershift
 export BUCKET_REGION=us-east-1
 ----
+
 +
 . Verify that `CLUSTER_NAME` and `INFRA_ID` have the same values, otherwise the cluster might not appear correctly in the {mce} console. To see descriptions for each variable, run the following command
+
 +
 ----
 hypershift create cluster aws --help
@@ -103,6 +107,7 @@ hypershift create cluster aws --help
 . Verify that you are logged into your hub cluster.
 
 . Run the following command to create the hosted cluster:
+
 +
 ----
 hypershift create cluster aws \
@@ -115,22 +120,55 @@ hypershift create cluster aws \
     --node-pool-replicas 3 \
     --namespace <hypershift-hosting-service-cluster>
 ----
+
 +
 *Note:* By default, all `HostedCluster` and `NodePool` custom resources are created in the `clusters` namespace. If you specify the `--namespace <namespace>` parameter, `HostedCluster` and `NodePool` custom resources are created in the namespace you chose.
 
 . You can check the status of your hosted cluster by running the following command:
+
 +
 ----
 oc get hostedclusters -n <hypershift-hosting-service-cluster>
 ----
 
 [#hosting-service-cluster-access-aws]
-== Accessing a hosting cluster on AWS
+== Accessing the hosted cluster
 
-The access secrets for hosted control plane clusters are stored in the `hypershift-management-cluster` namespace. Learn about the following secret name formats:
+You can access the hosted cluster by either getting the `kubeconfig` file and `kubeadmin` credential directly from resources or by using the `hypershift` CLI to generate a `kubeconfig` file.
 
-- `kubeconfig` secret: `<hostingNamespace>-<name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
-- `kubeadmin` password secret: `<hostingNamespace>-<name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
+* To access the hosted cluster by getting the `kubeconfig` file and credentials directly from resources, you need to be familiar with the access secrets for hosted control plane clusters. The secrets are stored in the hosted cluster (hosting) namespace. The _hosted cluster (hosting)_ namespace contains hosted cluster resources, and the _hosted control plane_ namespace is where the hosted control plane runs.
++
+The secret name formats are as follows:
+
+** `kubeconfig` secret: `<hostingNamespace>-<name>-admin-kubeconfig` (clusters-hypershift-demo-admin-kubeconfig)
+** `kubeadmin` password secret: `<hostingNamespace>-<name>-kubeadmin-password` (clusters-hypershift-demo-kubeadmin-password)
++
+The `kubeconfig` secret contains a Base64-encoded `kubeconfig` field, which you can decode and save into a file to use with the following command:
+
++
+----
+oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
+----
+
++
+The `kubeadmin` password secret is also Base64-encoded. You can decode it and use the password to log into the API server or console of the hosted cluster.
+
+* To access the hosted cluster by using the `hypershift` CLI to generate the `kubeconfig` file, take the following steps:
+
+. Generate the `kubeconfig` file by entering the following command:
+
++
+----
+hypershift create kubeconfig --namespace ${CLUSTERS_NAMESPACE} --name ${HOSTED_CLUSTER_NAME} > ${HOSTED_CLUSTER_NAME}.kubeconfig
+----
+
++
+. After you save the `kubeconfig` file, you can access the hosted cluster by entering the following example command:
++
+----
+oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
+----
+
 
 [#importing-hosted-cluster-aws]
 == Importing a hosted control plane cluster on AWS
@@ -147,23 +185,28 @@ You can import a hosted control plane cluster with the console.
 You can also import a hosted control plane cluster on AWS with the command line interface by completing the following steps:
 
 . Add an annotation to the `HostedCluster` custom resource by running the following command:
+
 +
 ----
 oc edit hostedcluster <cluster_name> -n clusters
 ----
+
 +
 Replace `<cluster_name>` with the name of your hosted cluster.
 
 . Run the following command to add the annotations to the `HostedCluster` custom resource:
+
 +
 ----
 cluster.open-cluster-management.io/hypershiftdeployment: local-cluster/<cluster_name>
 cluster.open-cluster-management.io/managedcluster-name: <cluster_name>
 ----
+
 +
 Replace `<cluster_name>` with the name of your hosted cluster.
 
 . Create your `ManagedCluster` resource by using the following sample YAML file:
+
 +
 [source,yaml]
 ----
@@ -184,18 +227,22 @@ spec:
   hubAcceptsClient: true  
   leaseDurationSeconds: 60
 ----
+
 +
 Replace `<cluster_name>` with the name of your hosted cluster.
 
 . Run the following command to apply the resource:
+
 +
 ----
 oc apply -f <file_name>
 ----
+
 +
 Replace <file_name> with the YAML file name you created in the previous step.
 
 . Create your `KlusterletAddonConfig` resource by using the following sample YAML file. This only applies to {product-title-short}. If you have installed {mce-short} only, skip this step:
+
 +
 [source,yaml]
 ----
@@ -221,18 +268,22 @@ spec:
   searchCollector:
     enabled: false
 ----
+
 +
 Replace `<cluster_name>` with the name of your hosted cluster.
 
 . Run the following command to apply the resource:
+
 +
 ----
 oc apply -f <file_name>
 ----
+
 +
 Replace <file_name> with the YAML file name you created in the previous step.
 
 . After the import process is complete, your hosted cluster becomes visible in the console. You can also check the status of your hosted cluster by running the following command:
+
 +
 ----
 oc get managedcluster <cluster_name>
@@ -256,6 +307,7 @@ To run a hosted cluster on an ARM64 {ocp-short} cluster, take the following step
 . Install the HyperShift Operator for ARM64 on the management cluster to override the default HyperShift Operator image.
 +
 For example, through the hosted control planes (`hypershift`) command line interface, enter the following commands, being careful to replace the bucket name, AWS credentials, and region with your information:
+
 +
 ----
 hypershift install \
@@ -268,6 +320,7 @@ hypershift install \
 . Create a hosted cluster that overrides the default release image with a multi-architecture release image.
 +
 For example, through the hosted control planes (`hypershift`) command line interface, enter the following commands, being careful to replace the cluster name, node pool replicas, base domain, pull secret, AWS credentials, and region with your information:
+
 +
 ----
 hypershift create cluster aws \ 
@@ -279,12 +332,14 @@ hypershift create cluster aws \
 --region $REGION \
 --release-image quay.io/openshift-release-dev/ocp-release:4.13.0-rc.0-multi
 ----
+
 +
 This example adds a default `NodePool` object through the `--node-pool-replicas` flag.
 
 . Add a 64-bit x86 `NodePool` object to the hosted cluster.
 +
 For example, through the hosted control planes (`hypershift`) command line interface, enter the following commands, being careful to replace the cluster name, node pool name, and node pool replicas with your information:
+
 +
 ----
 hypershift create nodepool aws \
@@ -299,25 +354,21 @@ hypershift create nodepool aws \
 To destroy a hosted cluster and its managed cluster resource, complete the following steps:
 
 . Delete the hosted cluster and its back-end resources by running the following command:
+
 +
 ----
 hypershift destroy cluster aws --name <cluster_name> --infra-id <infra_id> --aws-creds <aws-credentials> --base-domain <base_domain> --destroy-cloud-resources
 ----
+
 +
 Replace names where necessary.
 
 . Delete the managed cluster resource on {mce-short} by running the following command:
+
 +
 ----
 oc delete managedcluster <cluster_name>
 ----
+
 +
 Replace `cluster_name` with the name of your cluster.
-
-[#additional-resources-manage-hosted-aws]
-== Additional resources
-
-For more information about managing hosted control plane clusters on AWS, see the following topics:
-
-* xref:../hosted_control_planes/deploying_aws_private_clusters.adoc#deploying-aws-private-clusters[Deploying a private hosted cluster on AWS]
-* xref:../hosted_control_planes/managing_aws_infra_iam.adoc#hosted-control-planes-manage-aws-infra-iam[Managing AWS infrastructure and IAM permissions for hosted control planes]
