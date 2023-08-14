@@ -18,7 +18,6 @@ You can deploy hosted control planes by configuring an existing cluster to funct
 * <<hosted-create-public-zone-aws,Creating a routable public zone>>
 * <<hosted-enable-ext-dns-aws,Enabling external DNS>>
 * <<hosted-enable-private-link,Enabling AWS PrivateLink>>
-* <<hosted-enable-feature-aws,Enabling the hosted control planes feature>>
 * <<hosted-enable-hypershift-add-on-aws,Manually enabling the hypershift-addon managed cluster add-on for local-cluster>>
 * <<hosted-install-cli,Installing the hosted control planes command line interface>>
 * <<dr-hosted-cluster,Disaster recovery for a hosted cluster>>
@@ -370,83 +369,6 @@ oc create secret generic hypershift-operator-private-link-credentials --from-lit
 ----
 oc label secret hypershift-operator-private-link-credentials -n local-cluster cluster.open-cluster-management.io/backup=""
 ----
-
-[#hosted-enable-feature-aws]
-== Enabling the hosted control planes feature
-
-The hosted control planes feature is disabled by default. Enabling the feature automatically also enables the `hypershift-addon` managed cluster add-on. 
-
-. You can run the following command to enable the feature:
-+
-----
-oc patch mce multiclusterengine --type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift-preview","enabled": true}]}}}' <1>
-----
-<1> The default `MultiClusterEngine` resource instance name is `multiclusterengine`, but you can get the `MultiClusterEngine` name from your cluster by running the following command: `$ oc get mce`.
-
-. Run the following command to verify that the `hypershift-preview` and `hypershift-local-hosting` features are enabled in the `MultiClusterEngine` custom resource:
-+
-----
-oc get mce multiclusterengine -o yaml <1>
-----
-<1> The default `MultiClusterEngine` resource instance name is `multiclusterengine`, but you can get the `MultiClusterEngine` name from your cluster by running the following command: `$ oc get mce`.
-+
-The output resembles the following example:
-+
-[source,yaml]
-----
-apiVersion: multicluster.openshift.io/v1
-kind: MultiClusterEngine
-metadata:
-  name: multiclusterengine
-spec:
-  overrides:
-    components:
-    - name: hypershift-preview
-      enabled: true
-    - name: hypershift-local-hosting
-      enabled: true
-----
-
-[#hosted-enable-hypershift-add-on-aws]
-=== Manually enabling the hypershift-addon managed cluster add-on for local-cluster
-
-Enabling the hosted control planes feature automatically enables the `hypershift-addon` managed cluster add-on. If you need to enable the `hypershift-addon` managed cluster add-on manually, complete the following steps to use the `hypershift-addon` to install the HyperShift Operator on `local-cluster`:
-
-. Create the `ManagedClusterAddon` HyperShift add-on by creating a file that resembles the following example:
-+
-[source,yaml]
-----
-apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: ManagedClusterAddOn
-metadata:
-  name: hypershift-addon
-  namespace: local-cluster 
-spec:
-  installNamespace: open-cluster-management-agent-addon
-----
-
-. Apply the file by running the following command:
-+
-----
-oc apply -f <filename>
-----
-+
-Replace `filename` with the name of the file that you created. 
-
-. Confirm that the `hypershift-addon` is installed by running the following command:
-+
-----
-oc get managedclusteraddons -n local-cluster hypershift-addon
-----
-+
-If the add-on is installed, the output resembles the following example:
-+
-----
-NAME               AVAILABLE   DEGRADED   PROGRESSING
-hypershift-addon   True
-----
-
-Your HyperShift add-on is installed and the hosting cluster is available to create and manage hosted clusters.
 
 [#hosted-install-cli]
 == Installing the hosted control planes command line interface
