@@ -46,7 +46,7 @@ Git refers to the Git CLI. See [Here are all the Git commands I used last week, 
 - `git checkout -b <name>`: Create and switch to a new branch.
    **Note:** Start the branch with a letter, not an integer. You can name the branch anything you like, but a useful template is `initials-platform-issue-version number`.
 - `git add .`: Add the changes you made in the editor to your branch. 
-- `git commit -m "<description>"`: Commit your changes you made in the editor to your branch. 
+- `git commit -m "<description-jira#>"`: Commit your changes you made in the editor to your branch. 
 - `git push --set-upstream origin <name>`: Push your new branch.
 - `git push`: Push your changes upstream.
    **Note:** You must create PRs from the GitHub website after pushing your branch.
