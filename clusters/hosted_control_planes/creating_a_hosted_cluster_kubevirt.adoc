@@ -1,0 +1,117 @@
+[#creating-a-hosted-cluster-kubevirt]
+= Creating a hosted cluster with the KubeVirt platform
+
+. To create a hosted cluster, use environment variables and the `hcp` command line interface:
+
++
+----
+export CLUSTER_NAME=example
+export PULL_SECRET="$HOME/pull-secret"
+export MEM="6Gi"
+export CPU="2"
+export WORKER_COUNT="2"
+
+hcp create cluster kubevirt \
+--name $CLUSTER_NAME \
+--node-pool-replicas $WORKER_COUNT \
+--pull-secret $PULL_SECRET \
+--memory $MEM \
+--cores $CPU
+----
++
+Replace values as necessary.
++
+*Note:* You can use the `--release-image` flag to set up the hosted cluster with a specific {ocp-short} release.
++
+A default node pool is created for the cluster with two virtual machine worker replicas according to the `--node-pool-replicas` flag.
+
+. After a few moments, verify that the hosted control plane pods are running by entering the following command:
+
++
+----
+oc -n clusters-$CLUSTER_NAME get pods
+----
+
++
+See the following example output:
+
++
+----
+NAME                                                  READY   STATUS    RESTARTS   AGE
+capi-provider-5cc7b74f47-n5gkr                        1/1     Running   0          3m
+catalog-operator-5f799567b7-fd6jw                     2/2     Running   0          69s
+certified-operators-catalog-784b9899f9-mrp6p          1/1     Running   0          66s
+cluster-api-6bbc867966-l4dwl                          1/1     Running   0          66s
+.
+.
+.
+redhat-operators-catalog-9d5fd4d44-z8qqk              1/1     Running   0          66s
+----
+
++
+A hosted cluster that has worker nodes that are backed by KubeVirt virtual machines typically takes 10-15 minutes to be fully provisioned.
+
+. To check the status of the hosted cluster, see the corresponding `HostedCluster` resource by entering the following command:
+
++
+----
+oc get --namespace clusters hostedclusters
+----
+
++ 
+See the following example output, which illustrates a fully provisioned `HostedCluster` object:
+
++
+----
+NAMESPACE   NAME      VERSION   KUBECONFIG                 PROGRESS    AVAILABLE   PROGRESSING   MESSAGE
+clusters    example   4.12.7    example-admin-kubeconfig   Completed   True        False         The hosted control plane is available
+----
+
+Next, you can access the hosted cluster by following the instructions in xref:../hosted_control_planes/hosting_service_cluster_access.adoc#access-hosted-cluster[Accessing the hosted cluster].
+
+[#kubevirt-create-hosted-cluster-external-infra]
+== Creating a hosted cluster by using external infrastructure
+
+By default, the HyperShift Operator hosts both the control plane pods of the hosted cluster and the KubeVirt worker VMs within the same cluster. With the external infrastructure feature, you can place the worker node VMs on a separate cluster from the control plane pods.
+
+[#hosting-cluster-types]
+=== Hosting cluster types
+
+The _management cluster_ is the {ocp-short} cluster that runs the HyperShift Operator and hosts the control plane pods for a hosted cluster.
+
+The _infrastructure cluster_ is the {ocp-short} cluster that runs the KubeVirt worker VMs for a hosted cluster.
+
+By default, the management cluster also acts as the infrastructure cluster that hosts VMs. However, for external infrastructure, the management and infrastructure clusters are different.
+
+[#external-infrastructure-prereqs]
+=== Prerequisites
+
+* You must have a namespace on the external infrastructure cluster for the KubeVirt nodes to be hosted in.
+
+* You must have a `kubeconfig` file for the external infrastructure cluster.
+
+[#create-hosted-cluster-external-infrastructure]
+=== Creating a hosted cluster by using external infrastructure
+
+You can create a hosted cluster by using the `hcp` command line interface. To place the KubeVirt worker VMs on the infrastructure cluster, use the `--infra-kubeconfig-file` and `--infra-namespace` arguments, as shown in the following example:
+
+----
+export CLUSTER_NAME=example
+export PULL_SECRET="$HOME/pull-secret"
+export MEM="6Gi"
+export CPU="2"
+export WORKER_COUNT="2"
+
+hcp create cluster kubevirt \
+--name $CLUSTER_NAME \
+--node-pool-replicas $WORKER_COUNT \
+--pull-secret $PULL_SECRET \
+--memory $MEM \
+--cores $CPU \
+--infra-namespace=clusters-example \
+--infra-kubeconfig-file=$HOME/external-infra-kubeconfig
+----
+
+After you enter that command, the control plane pods are hosted on the management cluster that the HyperShift Operator runs on, and the KubeVirt VMs are hosted on a separate infrastructure cluster.
+
+Next, you can access the hosted cluster by following the instructions in xref:../hosted_control_planes/hosting_service_cluster_access.adoc#access-hosted-cluster[Accessing the hosted cluster].
