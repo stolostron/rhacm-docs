@@ -67,7 +67,6 @@ oc create secret generic multiclusterhub-operator-pull-secret \
     --from-literal=.dockerconfigjson="$DOCKER_CONFIG_JSON" \
     --type=kubernetes.io/dockerconfigjson
 ----
-
 *Important:* If you modify the global pull secret for your cluster by using the {ocp-short} documentation, be sure to also update the global pull secret in the observability namespace. See link:https://docs.openshift.com/container-platform/4.12/openshift_images/managing_images/using-image-pull-secrets.html#images-update-global-pull-secret_using-image-pull-secrets[Updating the global pull secret] for more details.
 
 . Create a secret for your object storage for your cloud provider. Your secret must contain the credentials to your storage solution. For example, run the following command:
@@ -78,7 +77,7 @@ oc create -f thanos-object-storage.yaml -n open-cluster-management-observability
 +
 View the following examples of secrets for the supported object stores:
 
-** For Amazon S3 or S3 compatible, your secret might resemble the following file:
+- For Amazon S3 or S3 compatible, your secret might resemble the following file:
 +
 [source,yaml]
 ----
@@ -93,15 +92,17 @@ stringData:
     type: s3
     config:
       bucket: YOUR_S3_BUCKET
-      endpoint: YOUR_S3_ENDPOINT
+      endpoint: YOUR_S3_ENDPOINT <1>
       insecure: true
       access_key: YOUR_ACCESS_KEY
       secret_key: YOUR_SECRET_KEY
 ----
 +
-For more details, see link:https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html[Amazon Simple Storage Service user guide].
+<1> Enter the URL without the protocol. Enter the URL for your Amazon S3 endpoint that might resemble the following URL: `example.redhat.com:443`.
++
+For more details, see the link:https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html[Amazon Simple Storage Service user guide].
 
-** For Google, your secret might resemble the following file: 
+- For Google, your secret might resemble the following file: 
 +
 [source,yaml]
 ----
@@ -121,7 +122,7 @@ stringData:
 +
 For more details, see link:https://cloud.google.com/storage/docs/introduction[Google Cloud Storage].
 
-** For Azure your secret might resemble the following file:
+- For Azure your secret might resemble the following file:
 +
 [source,yaml]
 ----
@@ -138,15 +139,18 @@ stringData:
       storage_account: YOUR_STORAGE_ACCT
       storage_account_key: YOUR_STORAGE_KEY
       container: YOUR_CONTAINER
-      endpoint: blob.core.windows.net
+      endpoint: blob.core.windows.net <1>
       max_retries: 0
 ----
 +
+<1> If you use the `msi_resource` path, the endpoint authentication is complete by using the system-assigned managed identity. Your value must resemble the following endpoint: `https://<storage-account-name>.blob.core.windows.net`. 
++
+If you use the `user_assigned_id` path, endpoint authentication is complete by using the user-assigned managed identity. When you use the `user_assigned_id`, the `msi_resource` endpoint default value is `https:<storage_account>.<endpoint>`.
 For more details, see link:https://docs.microsoft.com/en-us/azure/storage/[Azure Storage documentation].
 +
 *Note:* If you use Azure as an object storage for a {ocp} cluster, the storage account associated with the cluster is not supported. You must create a new storage account.
 
-** For Red Hat OpenShift Data Foundation, your secret might resemble the following file:
+- For Red Hat OpenShift Data Foundation, your secret might resemble the following file:
 +
 [source,yaml]
 ----
@@ -161,13 +165,17 @@ stringData:
     type: s3
     config:
       bucket: YOUR_RH_DATA_FOUNDATION_BUCKET
-      endpoint: YOUR_RH_DATA_FOUNDATION_ENDPOINT
+      endpoint: YOUR_RH_DATA_FOUNDATION_ENDPOINT <1>
       insecure: false
       access_key: YOUR_RH_DATA_FOUNDATION_ACCESS_KEY
       secret_key: YOUR_RH_DATA_FOUNDATION_SECRET_KEY
 ----
 +
-For more details, see link:https://www.redhat.com/en/technologies/cloud-computing/openshift-data-foundation[Red Hat OpenShift Data Foundation]. For Red Hat OpenShift on IBM (ROKS), your secret might resemble the following file:
+<1> Enter the URL without the protocol. Enter the URL for your Red Hat OpenShift Data Foundation endpoint that might resemble the following URL: `example.redhat.com:443`.
++
+For more details, see link:https://www.redhat.com/en/technologies/cloud-computing/openshift-data-foundation[Red Hat OpenShift Data Foundation].
+
+- For Red Hat OpenShift on IBM (ROKS), your secret might resemble the following file:
 +
 [source,yaml]
 ----
@@ -182,21 +190,23 @@ stringData:
     type: s3
     config:
       bucket: YOUR_ROKS_S3_BUCKET
-      endpoint: YOUR_ROKS_S3_ENDPOINT
+      endpoint: YOUR_ROKS_S3_ENDPOINT <1>
       insecure: true
       access_key: YOUR_ROKS_ACCESS_KEY
       secret_key: YOUR_ROKS_SECRET_KEY
 ----
 +
+<1> Enter the URL without the protocol. Enter the URL for your Red Hat OpenShift Data Foundation endpoint that might resemble the following URL: `example.redhat.com:443`.
++
 For more details, follow the IBM Cloud documentation, link:https://cloud.ibm.com/objectstorage/create[Cloud Object Storage]. Be sure to use the service credentials to connect with the object storage. For more details, follow the IBM Cloud documentation, link:https://cloud.ibm.com/objectstorage/create%5BCloud[Cloud Object Store] and link:https://cloud.ibm.com/docs/cloud-object-storage/iam?topic=cloud-object-storage-service-credentials%5BService[Service Credentials].
 
-** For Amazon S3 or S3 compatible storage, you can also use short term, limited-privilege credentials generated with AWS Security Token Service (AWS STS). Refer to link:https://docs.aws.amazon.com/STS/latest/APIReference/welcome.html[AWS Security Token Service documentation] for more details.
+- For Amazon S3 or S3 compatible storage, you can also use short term, limited-privilege credentials generated with AWS Security Token Service (AWS STS). Refer to link:https://docs.aws.amazon.com/STS/latest/APIReference/welcome.html[AWS Security Token Service documentation] for more details.
 +
 Generating access keys using AWS Security Service require the following additional steps:
 
-- Create an IAM policy that limits access to an S3 bucket
-- Create an IAM role with a trust policy to generate JWT tokens for {ocp-short} service accounts
-- Specify annotations for the observability service accounts that requires access to the S3 bucket. You can find an example of how observability on Red Hat OpenShift Service on AWS (ROSA) cluster can be configured to work with AWS STS tokens in the _Set environment_ step. See link:https://www.rosaworkshop.io/[Red Hat OpenShift Service on AWS (ROSA)] for more details, along with link:https://www.rosaworkshop.io/rosa/15-sts_explained/[ROSA with STS explained] for an in-depth description of the requirements and setup to use STS tokens.
+* Create an IAM policy that limits access to an S3 bucket.
+* Create an IAM role with a trust policy to generate JWT tokens for {ocp-short} service accounts.
+* Specify annotations for the observability service accounts that requires access to the S3 bucket. You can find an example of how observability on Red Hat OpenShift Service on AWS (ROSA) cluster can be configured to work with AWS STS tokens in the _Set environment_ step. See link:https://www.rosaworkshop.io/[Red Hat OpenShift Service on AWS (ROSA)] for more details, along with link:https://www.rosaworkshop.io/rosa/15-sts_explained/[ROSA with STS explained] for an in-depth description of the requirements and setup to use STS tokens.
 
 Complete the following steps to generate access keys using the AWS Security Service:
 
@@ -328,7 +338,6 @@ stringData:
    endpoint: s3.$REGION.amazonaws.com
    signature_version2: false
 ----
-
 . Specify service account annotations when you the `MultiClusterObservability` custom resource as described in _Creating the MultiClusterObservability custom resource_ section. 
 
 . You can retrieve the S3 access key and secret key for your cloud providers with the following commands. You must decode, edit, and encode your `base64` string in the secret:
@@ -368,6 +377,8 @@ The Thanos version is displayed.
 
 [#creating-mco-cr]
 === Creating the MultiClusterObservability custom resource
+
+Use the `MultiClusterObservability` custom resource to specify the persistent volume storage size for various components. You must set the storage size during the initial creation of the `MultiClusterObservability` custom resource. When you update the storage size values post-deployment, changes take effect only if the storage class supports dynamic volume expansion. For more information, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/storage/expanding-persistent-volumes[Expanding persistent volumes] from the {ocp} documentation.
 
 Complete the following steps to create the `MultiClusterObservability` custom resource on your hub cluster:
 
@@ -447,7 +458,7 @@ Optionally, you can enable observability from the {ocp} console, create a projec
 
 Create your object storage secret named, `thanos-object-storage` in the `open-cluster-management-observability` project. Enter the object storage secret details, then click *Create*. See step four of the _Enabling observability_ section to view an example of a secret.
 
-Create the `MultiClusterObservability` custom resource instance. When you receive the following message, the obseravbility service is enabled successfully from {ocp-short}: `Observability components are deployed and running`.
+Create the `MultiClusterObservability` custom resource instance. When you receive the following message, the observability service is enabled successfully from {ocp-short}: `Observability components are deployed and running`.
 
 [#external-metric-query]
 === Using the external metric query
