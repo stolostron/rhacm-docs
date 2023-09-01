@@ -1,15 +1,23 @@
 [#gitops-push-pull]
-= Deploying Argo CD with the Push and Pull model 
+= Deploying Argo CD with Push and Pull model 
 
-Using a _Push model_, The Argo CD server on the hub cluster deploys the application resources on the managed clusters. For the _Pull model_, the application resources are propagated by the _Propagation controller_ to the managed clusters by using `manifestWork`. 
+Using a _Push model_, The Argo CD server on the hub cluster deploys the application resources on the managed clusters. For the _Pull model_(Technology Preview), the application resources are propagated by the _Propagation controller_ to the managed clusters by using `manifestWork`. 
 
-*Technology Preview:* Pull model is in a Technology Preview status, with limited support this release.
+*Technology Preview:* Pull model has limited support this release.
 
 For both models, the same `ApplicationSet` CRD is used to deploy the application to the managed cluster.
 
 *Required access:* Cluster administrator
 
-*Important:* If your `openshift-gitops-ArgoCD-application-controller` service account is _not_ assigned as a cluster administrator, the GitOps application controller might not deploy resources. The application status might send an error similar to the following error:
+* <<prereqs-pull-model,Prerequisites>>
+* <<arch-push-pull,Architecture>>
+* <<crd-pull-model,Creating the _ApplicationSet_ CRD>>
+* <<status-report,_MulticlusterApplicationSetReport_>>
+
+[#prereqs-pull-model]
+== Prerequisites 
+
+* *Important:* If your `openshift-gitops-ArgoCD-application-controller` service account is _not_ assigned as a cluster administrator, the GitOps application controller might not deploy resources. The application status might send an error similar to the following error:
 
 ----
 cannot create resource "services" in API group "" in the namespace
@@ -17,7 +25,7 @@ cannot create resource "services" in API group "" in the namespace
 "system:serviceaccount:openshift-gitops:openshift-gitops-Argo CD-application-controller"
 ----
 
-If you are not a cluster administrator and need to resolve this issue, complete the following steps:
+* If you are not a cluster administrator and need to resolve this issue, complete the following steps:
 
 . Create all namespaces on each managed cluster where the Argo CD application will be deployed.
 
@@ -39,41 +47,8 @@ metadata:
 ----
 
 . You must declare all application destination namespaces in the repository for the application and include the `managed-by` label in the namespaces. Refer to _Additional resources_ to learn how to declare a namespace.
-//still need a good link 6/8
 
-[#push-pull-arch]
-== Argo CD Push and Pull model architecture
-
-For both Push and Pull model, the _Argo CD ApplicationSet controller_ on the hub cluster reconciles to create application resources for each target managed cluster. See the following information about architecture for both models:
-
-[#push-arch]
-=== Push model architecture
-
-- Push model implementation only contains the Argo CD application on the hub cluster, which has credentials for managed clusters. The Argo CD application on the hub cluster can deploy the applications to the managed clusters.
-
-- By default, the Push model is used to deploy the application unless you add the `apps.open-cluster-management.io/ocm-managed-cluster` and `apps.open-cluster-management.io/pull-to-ocm-managed-cluster` annotations to the template section of the `ApplicationSet`.
-
-[#pull-arch]
-=== Pull model architecture
-
-- Pull model implementation applies {ocm} registration, placement, and `manifestWork` APIs so that the hub cluster can use the secure communication channel between the hub cluster and the managed cluster to deploy resources. 
-
-- For Pull model, an Argo CD server must be running on each target managed cluster. The Argo CD application resources are replicated on the managed clusters, which are then deployed by the local Argo CD server. The distributed Argo CD applications on the managed clusters are created with a single Argo CD `ApplicationSet` resource on the hub cluster.
-
-- The managed cluster is determined by the value of the `ocm-managed-cluster` annotation.
-
-- For successful implementation of Pull model, the Argo CD application controller must ignore Push model application resources with the `argocd.argoproj.io/skip-reconcile` annotation in the template section of the `ApplicationSet`.
-
-- For Pull model, the _Argo CD Application controller_ on the managed cluster reconciles to deploy the application.
-
-- The Pull model _Resource sync controller_ on the hub cluster queries the {ocm} search V2 component on each managed cluster periodically to retrieve the resource list and error messages for each Argo CD application.
-
-- The _Aggregation controller_ on the hub cluster creates and updates the `MulticlusterApplicationSetReport` from across clusters by using the data from the Resource sync controller, and the status information from `manifestWork`.
-
-[#prereqs-pull-model]
-== Prerequisites 
-
-See the following prerequisites to use the Argo CD Pull model:
+See the following requirements to use the Argo CD _Pull_ model:
 
 - The GitOps operator must be installed on the hub cluster and the target managed clusters in the `openshift-gitops` namespace. 
 
@@ -87,6 +62,49 @@ See the following prerequisites to use the Argo CD Pull model:
 
 +
 To create the cluster secret, create a `gitOpsCluster` resource that contains a reference to a `placement` resource. The `placement` resource selects all the managed clusters that need to support the Pull model. When the GitOps cluster controller reconciles, it creates the cluster secrets for the managed clusters in the Argo CD server namespace.
+
+[#arch-push-pull]
+== Architecture
+
+For both Push and Pull model, the _Argo CD ApplicationSet controller_ on the hub cluster reconciles to create application resources for each target managed cluster. See the following information about architecture for both models:
+
+[#arch-push]
+=== Architecture Push model
+
+- With Push model, {ocp-short} GitOps applies resources _directly_ from a centralized hub cluster to the managed clusters. 
+
+- An Argo CD application that is running on the hub cluster communicates with the GitHub repository and deploys the manifests directly to the managed clusters. 
+
+- Push model implementation only contains the Argo CD application on the hub cluster, which has credentials for managed clusters. The Argo CD application on the hub cluster can deploy the applications to the managed clusters.
+
+- *Important:* With a large number of managed clusters that require resource application, consider potential strain on the {ocp-short} GitOps controller memory and CPU usage. To optimize resource management, refer to link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/cicd/gitops#configuring-resource-quota[Configuring resource quota or requests].
+
+- By default, the Push model is used to deploy the application unless you add the `apps.open-cluster-management.io/ocm-managed-cluster` and `apps.open-cluster-management.io/pull-to-ocm-managed-cluster` annotations to the template section of the `ApplicationSet`.
+
+[#arch-pull]
+=== Architecture Pull model (Technology Preview)
+
+- Pull model can provide scalability relief compared to the push model by reducing stress on the controller in the hub cluster, but with more requests and status reporting required.
+
+- With Pull model, {ocp-short} GitOps _does not_ apply resources directly from a centralized hub cluster to the managed clusters. The Argo CD Application is propagated from the hub cluster to the managed clusters.
+
+- Pull model implementation applies {ocm} registration, placement, and `manifestWork` APIs so that the hub cluster can use the secure communication channel between the hub cluster and the managed cluster to deploy resources. 
+
+- Each managed cluster individually communicates with the GitHub repository to deploy the resource manifests locally, so you must install and configure GitOps operators on each managed cluster.
+
+- An Argo CD server must be running on each target managed cluster. The Argo CD application resources are replicated on the managed clusters, which are then deployed by the local Argo CD server. The distributed Argo CD applications on the managed clusters are created with a single Argo CD `ApplicationSet` resource on the hub cluster.
+
+- The managed cluster is determined by the value of the `ocm-managed-cluster` annotation.
+
+- For successful implementation of Pull model, the Argo CD application controller must _ignore_ Push model application resources with the `argocd.argoproj.io/skip-reconcile` annotation in the template section of the `ApplicationSet`.
+
+- For Pull model, the _Argo CD Application controller_ on the managed cluster reconciles to deploy the application.
+
+- The Pull model _Resource sync controller_ on the hub cluster queries the {ocm} search V2 component on each managed cluster periodically to retrieve the resource list and error messages for each Argo CD application.
+
+- The _Aggregation controller_ on the hub cluster creates and updates the `MulticlusterApplicationSetReport` from across clusters by using the data from the Resource sync controller, and the status information from `manifestWork`.
+
+- The status of the deployments is gathered back to the hub cluster, but not all the detailed information is transmitted. Additional status updates are periodically scraped to provide an overview. The status feedback is not real-time, and each managed cluster GitOps operator needs to communicate with the Git repository, which results in multiple requests.
 
 [#crd-pull-model]
 == Creating the _ApplicationSet_ CRD
@@ -127,9 +145,13 @@ spec:
         namespace: guestbook
         server: https://kubernetes.default.svc
       project: default
-      source:
-        path: guestbook
+      sources: [
+      { 
         repoURL: https://github.com/argoproj/argocd-example-apps.git
+        targetRevision: main
+        path: guestbook
+         }
+      ]   
       syncPolicy:
         automated: {}
         syncOptions:
@@ -210,3 +232,4 @@ statuses:
 
 
 - See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/cicd/gitops#setting-up-argocd-instance[Setting up an Argo CD instance] in the {ocp-short} documentation.
+

@@ -14,7 +14,7 @@ You can deploy hosted control planes by configuring an existing cluster to funct
 * <<hosted-create-public-zone-aws,Creating a routable public zone>>
 * <<hosted-enable-ext-dns-aws,Enabling external DNS>>
 * <<hosted-enable-private-link,Enabling AWS PrivateLink>>
-* <<hosted-install-cli,Installing the hosted control planes command line interface>>
+* <<hosted-install-cli,Installing the hosted control plane command line interface (hcp)>>
 * <<dr-hosted-cluster,Disaster recovery for a hosted cluster>>
 
 [#hosting-service-cluster-configure-prereq-aws]
@@ -235,11 +235,11 @@ dig +short test.user-dest-public.aws.kerberos.com
 192.168.1.1
 ----
 
-//lahinson - july 2023 - update hypershift cli command here
 . To create a hosted cluster that sets the hostname for `LoadBalancer` and `Route` services, enter the following command, where `external-dns-domain` matches the public hosted zone that you created:
+
 +
 ----
-hypershift create cluster aws --name=example --endpoint-access=PublicAndPrivate --external-dns-domain=service-provider-domain.com ...
+hcp create cluster aws --name=example --endpoint-access=PublicAndPrivate
 ----
 
 This example shows the resulting `services` block for the hosted cluster:
@@ -300,16 +300,16 @@ The following table notes when it is valid to set `hostname` for a service and e
 |===
 
 [#deploy-cluster-cli-external-dns-aws]
-=== Deploying a cluster by using the command line interface and external DNS
+=== Deploying a cluster by using the hosted control plane command line interface and external DNS
 
 You need to deploy the `hypershift` and `external-dns` Operators when the external public hosted zone already exists. Ensure that the `external-dns` Operator is running and that the internal flags point to the public hosted zone by entering the following commands:
-//lahinson - july 2023 - update hypershift cli command here
+
 ----
 export KUBECONFIG=<path_to_management_cluster_kubeconfig>
 export AWS_CREDS=~/.aws/credentials
 export REGION=<region>
 
-hypershift create cluster aws \
+hcp create cluster aws \
     --aws-creds ${AWS_CREDS} \
     --instance-type m6i.xlarge \
     --region ${REGION} \
@@ -321,13 +321,11 @@ hypershift create cluster aws \
     --node-pool-replicas 2 \
     --pull-secret ${HOME}/pull_secret.json \
     --release-image quay.io/openshift-release-dev/ocp-release:4.12.0-ec.3-x86_64 \
-    --external-dns-domain=service-provider-domain.com \ <2>
-    --endpoint-access=PublicAndPrivate <3>
+    --endpoint-access=PublicAndPrivate <2>
 ----
 
 <1> Points to the public hosted zone, `service-consumer-domain.com`, which is typically in an AWS account that the service consumer owns.
-<2> Points to the public external DNS hosted zone, `service-provider-domain.com`, which is typically in an AWS account that the service provider owns.
-<3> Set as `PublicAndPrivate.` The external DNS can be used with only `Public` or `PublicAndPrivate` configurations.
+<2> Set as `PublicAndPrivate.` The external DNS can be used with only `Public` or `PublicAndPrivate` configurations.
 
 [#hosted-enable-private-link]
 == Enabling AWS PrivateLink
@@ -366,16 +364,23 @@ oc label secret hypershift-operator-private-link-credentials -n local-cluster cl
 ----
 
 [#hosted-install-cli]
-== Installing the hosted control planes command line interface
+== Installing the hosted control plane command line interface (hcp)
 
-The hosted control planes (`hypershift`) command line interface is used to create and manage {ocp-short} hosted control plane clusters. After you enable the hosted control planes feature, you can install the hosted control planes command line interface by completing the following steps:
+The hosted control plane command line interface (`hcp`) is used to create and manage {ocp-short} hosted control plane clusters. 
+
+[#hosted-install-cli-prereqs]
+=== Prerequisites
+
+* You must have enabled the `hypershift` feature. In the {ocp-short} console, the download for the hosted control plane command line interface (`hcp`)  is visible only if you enabled that feature.
+
+[#hosted-install-hcp-cli]
+=== Installing the hosted control plane command line interface (hcp)
+
+You can install the hosted control plane command line interface (hcp) by completing the following steps:
 
 . From the {ocp-short} console, click the *Help icon* > *Command Line Tools*.
 
-//lahinson - july 2023 - does the UI still say "hypershift CLI"?
-. Click *Download hypershift CLI* for your platform.
-+
-*Note:* The download is only visible if you have enabled the `hypershift` feature.
+. Click *Download hcp CLI* for your platform.
 
 . Unpack the downloaded archive by running the following command:
 +
@@ -394,11 +399,11 @@ chmod +x hypershift
 ----
 sudo mv hypershift /usr/local/bin/.
 ----
-//lahinson - july 2023 - update hypershift cli commands here
-You can now use the `hypershift create cluster` command to create and manage hosted clusters. Use the following command to list the available parameters:
+
+You can now use the `hcp create cluster` command to create and manage hosted clusters. To list the available parameters, enter the following command:
 
 ----
-hypershift create cluster aws --help
+hcp create cluster aws --help
 ----
 
 [#dr-hosted-cluster]
