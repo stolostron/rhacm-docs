@@ -1,0 +1,88 @@
+[#global-hub-summarization]
+= Creating a compliance summary
+
+The Multicluster Global Hub architecture contains the following sets of microservices that create the high level summary of the many policies that are deployed across many clusters:
+
+* Multicluster Global Hub manager
+
+* Multicluster Global Hub agent
+
+You can summarize a single line that shows policy compliance across time. The following steps take place that allows the policies to flow into the multicluster global hub and made available for viewing in the global hub interface:
+
+. Events for the following policies flow into the Multicluster global hub:
++
+* Policy creation
+
+* Policy propagation to managed clusters
+
+* Policy compliance for each of the managed clusters
+
+. The raw events are saved in the database. 
+
+. The current status of each policy is saved in the database. 
+
+. The summarization routine is configured to start at a specific time or at a time interval. It retrieves a status of every policy that is running on the cluster as `compliant`, `non-compliant`, or `pending` since the last routine was run. The summary is based on the following input:
++
+* Compliance state of the `policy on the cluster` since the previous summarization. 
+
+* Events on the `policy on the cluster` since the previous summarization. 
+
+* Compliance state of a cluster is a logical _and_ of daily summarized status of all policies on the cluster.
+
+[#global-hub-summarization-manually]
+== Running the summarization process manually
+
+You can also run the summarization process manually. This can be helpful when you are trying to investigate a problem or need a report sooner than the next scheduled routine. 
+
+The manual summarization process consists of two subtasks:
+
+* Insert the cluster policy data of that day from link:https://www.postgresql.org/docs/current/rules-materializedviews.html[Materialized View]  `local_compliance_view_<yyyy_MM_dd>` to `history.local_compliance`.
+
+* Update the `compliance` and policy flip `frequency` of that day to `history.local_compliance` based on `event.local_policies`.
+
+Complete the following steps to run the summarization process manually: 
+
+. Connect to the database.
++ 
+You can use clients such as pgAdmin, tablePlush, etc. to connect to the global hub database to execute the SQL statements involved in the next few steps. If your postgres database is installed through this link:https://github.com/stolostron/multicluster-global-hub/blob/main/operator/config/samples/storage/deploy_postgres.sh[deploy script], you can directly connect to the database on the cluster by running the following command:
++
+----
+kubectl exec -it $(kubectl get pods -n multicluster-global-hub-postgres -l postgres-operator.crunchydata.com/role=master -o jsonpath='{.items..metadata.name}') -n multicluster-global-hub-postgres -c database -- psql -d hoh
+----
+       
+. Determine the date when it needs to be run, such as `2023-07-06`.
++
+If you find that there is no compliance information on the dashboard for `2023-07-06`, then find the job failure information of the day following this day in the `history.local_compliance_job_log`. In this case, it is `2023-07-07`. It can be determined that `2023-07-06` is the date when we need to manually run the summary processes.
+
+. Check whether the Materialized View of `history.local_compliance_view_2023_07_06` exists by running the following command:
++
+----
+select * from history.local_compliance_view_2023_07_06;
+----
++
+If the view exists, load the view records to `history.local_compliance` by runnning the following command:
++
+----
+-- exec the insert func for that day '2023_07_06'
+SELECT history.insert_local_compliance_job('2023_07_06');
+----
++
+If the view does not exist, inherit the history compliance records of the day before that day, in this example, it might be `2023_07_05`.
++
+----
+-- call the func to generate the data of '2023_07_06' by inheriting '2023_07_05'
+CALL history.inherit_local_compliance_job('2023_07_05', '2023_07_06');
+----
+
+. Update the `compliance` and `frequency` information of that day to `history.local_compliance`.
++
+----
+-- call the func to update records start with '2023-07-06', end with '2023-07-07'
+SELECT history.update_local_compliance_job('2023_07_06', '2023_07_07');
+----
+
+. Find the records of that day generated in `history.local_compliance`. You can safely delete the Materialized View `history.local_compliance_view_2023_07_06` by running the following command:
++
+----
+DROP MATERIALIZED VIEW IF EXISTS history.local_compliance_view_2023_07_06;
+----
