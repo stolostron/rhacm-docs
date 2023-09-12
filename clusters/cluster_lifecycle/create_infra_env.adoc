@@ -350,7 +350,7 @@ To access an infrastructure environment, select *Infrastructure* > *Host invento
 [#import-ocp-cluster-infra-env]
 == Importing an {ocp-short} cluster
 
-You can import an existing {ocp-short} cluster so that you can add additional nodes. Complete the following steps to import an {ocp-short} cluster and prepare it for adding additional nodes:
+You can import an existing {ocp-short} cluster so that you can add additional nodes. Complete the following steps to import an {ocp-short} cluster without a static network and without bare metal host and prepare it for adding additional nodes:
 
 . Create a namespace for the {ocp-short} cluster you want to import by applying the following YAML content:
 +
@@ -374,7 +374,7 @@ spec:
   releaseImage: quay.io/openshift-release-dev/ocp-release@sha256:22e149142517dfccb47be828f012659b1ccf71d26620e6f62468c264a7ce7863
 ----
 
-. Make sure that the infrastructure owner has made the ClusterImageSet available by applying the following YAML content:
+. Add your pull secret to access the image by applying the following YAML content:
 +
 [source,yaml]
 ----
@@ -404,76 +404,80 @@ oc get secret -n openshift-kube-apiserver node-kubeconfigs -ojson | jq '.data["l
 oc -n managed-cluster create secret generic some-other-cluster-admin-kubeconfig --from-file=kubeconfig=/tmp/kubeconfig.some-other-cluster
 ----
 
-. Create an `AgentClusterInstall` by applying the following YAML content:
+. Create an `AgentClusterInstall` by applying the following YAML content. Replace values where needed:
 +
 [source,yaml]
 ----
 apiVersion: extensions.hive.openshift.io/v1beta1
 kind: AgentClusterInstall
 metadata:
-  name: some-other-cluster-install
+  name: your-cluster-name <1>
   namespace: managed-cluster
 spec:
   networking:
     userManagedNetworking: true
   clusterDeploymentRef:
-    name: some-other-cluster
+    name: your-cluster
   imageSetRef:
     name: openshift-v4.11.18
   provisionRequirements:
-    controlPlaneAgents: 1
-  sshPublicKey: "" <1> 
+    controlPlaneAgents: 1 <2>
+  sshPublicKey: "" <3> 
 ----
 +
-<1> You can use the optional `sshPublicKey` field to log into nodes for troubleshooting purposes.
+<1> Choose a name for your cluster.
+<2> Use `1` if you are using a single-node OpenShift (SNO) cluster. Use `3` if you are using a multinode cluster.
+<3> You can use the optional `sshPublicKey` field to log into nodes for troubleshooting purposes.
 
-. Create a ClusterDeployment by applying the following YAML content:
+. Create a ClusterDeployment by applying the following YAML content. Replace values where needed:
 +
 [source,yaml]
 ----
 apiVersion: hive.openshift.io/v1
 kind: ClusterDeployment
 metadata:
-  name: some-other-cluster
+  name: your-cluster-name <1>
   namespace: managed-cluster
 spec:
-  baseDomain: redhat.com <1>
-  installed: true <2>
+  baseDomain: redhat.com <2>
+  installed: true <3>
   clusterMetadata:
       adminKubeconfigSecretRef:
-        name: some-other-cluster-admin-kubeconfig <3>
-      clusterID: "" <4>
-      infraID: "" <4>
+        name: your-cluster-name-admin-kubeconfig <4>
+      clusterID: "" <5>
+      infraID: "" <5>
   clusterInstallRef:
     group: extensions.hive.openshift.io
     kind: AgentClusterInstall
-    name: some-other-cluster-install
+    name: your-cluster-name-install
     version: v1beta1
-  clusterName: some-other-cluster
+  clusterName: your-cluster-name
   platform:
     agentBareMetal:
   pullSecretRef:
     name: pull-secret
 ----
 +
-<1> Make sure `baseDomain` matches the domain you are using for your {ocp-short} cluster.
-<2> Your {ocp-short} cluster is only automatically imported as a production environment cluster if `installed` is set to `true`.
-<3> Make sure that the `kubeconfig` you created in step 4 is referenced in `adminKubeconfigSecretRef`.
-<4> In production environments, you can leave `clusterID` and `infraID` empty.
+<1> Choose a name for your cluster.
+<2> Make sure `baseDomain` matches the domain you are using for your {ocp-short} cluster.
+<3> Your {ocp-short} cluster is only automatically imported as a production environment cluster if `installed` is set to `true`.
+<4> Make sure that the `kubeconfig` you created in step 4 is referenced in `adminKubeconfigSecretRef`.
+<5> In production environments, you can leave `clusterID` and `infraID` empty.
 
-
-. Add an `InfraEnv` by applying the following YAML content:
+. Add an `InfraEnv` to discover new hosts to add to your cluster by applying the following YAML content. Replace values where needed:
++
+*Note:* The following example might require additional configuration if you are not using a static IP address.
 +
 [source,yaml]
 ----
 apiVersion: agent-install.openshift.io/v1beta1
 kind: InfraEnv
 metadata:
-  name: some-other-infraenv
+  name: your-infraenv
   namespace: managed-cluster
 spec:
   clusterRef: <1>
-    name: some-other-cluster
+    name: your-cluster-name
     namespace: managed-cluster
   pullSecretRef:
     name: pull-secret
@@ -484,6 +488,8 @@ spec:
 <2> You can use the optional `sshPublicKey` field to log into nodes for troubleshooting purposes.
 
 . If the import is successful, a URL to download an ISO file appears. Download the ISO file by running the following command, replacing <url> with the URL that appears:
++
+*Note:* You can automate host discovery by using bare metal host.
 +
 ----
 oc get infraenv -n managed-cluster some-other-infraenv -ojson | jq ".status.<url>" --raw-output | xargs curl -k -o /storage0/isos/some-other.iso
