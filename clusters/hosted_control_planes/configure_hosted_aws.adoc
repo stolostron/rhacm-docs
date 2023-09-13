@@ -3,11 +3,7 @@
 
 To configure hosted control planes, you need a hosting cluster and a hosted cluster. By deploying the HyperShift Operator on an existing managed cluster by using the `hypershift-addon` managed cluster add-on, you can enable that cluster as a hosting cluster and start to create the hosted cluster. 
 
-*Important:* Do not enable this feature if the cluster is configured for FIPS mode or the cluster is in a disconnected environment.
-
 The {mce-short} 2.4 supports only the default `local-cluster` and the hub cluster as the hosting cluster.
-
-Hosted control planes is a Technology Preview feature, so the related components are disabled by default.
 
 You can deploy hosted control planes by configuring an existing cluster to function as a hosting cluster. The hosting cluster is the {ocp} cluster where the control planes are hosted. {product-title-short} 2.9 can use the hub cluster, also known as the `local-cluster`, as the hosting cluster. See the following topics to learn how to configure the `local-cluster` as the hosting cluster.
 
@@ -18,9 +14,7 @@ You can deploy hosted control planes by configuring an existing cluster to funct
 * <<hosted-create-public-zone-aws,Creating a routable public zone>>
 * <<hosted-enable-ext-dns-aws,Enabling external DNS>>
 * <<hosted-enable-private-link,Enabling AWS PrivateLink>>
-* <<hosted-enable-feature-aws,Enabling the hosted control planes feature>>
-* <<hosted-enable-hypershift-add-on-aws,Manually enabling the hypershift-addon managed cluster add-on for local-cluster>>
-* <<hosted-install-cli,Installing the hosted control planes command line interface>>
+* <<hosted-install-cli,Installing the hosted control plane command line interface (hcp)>>
 * <<dr-hosted-cluster,Disaster recovery for a hosted cluster>>
 
 [#hosting-service-cluster-configure-prereq-aws]
@@ -241,11 +235,11 @@ dig +short test.user-dest-public.aws.kerberos.com
 192.168.1.1
 ----
 
-//lahinson - july 2023 - update hypershift cli command here
 . To create a hosted cluster that sets the hostname for `LoadBalancer` and `Route` services, enter the following command, where `external-dns-domain` matches the public hosted zone that you created:
+
 +
 ----
-hypershift create cluster aws --name=example --endpoint-access=PublicAndPrivate --external-dns-domain=service-provider-domain.com ...
+hcp create cluster aws --name=example --endpoint-access=PublicAndPrivate
 ----
 
 This example shows the resulting `services` block for the hosted cluster:
@@ -306,16 +300,16 @@ The following table notes when it is valid to set `hostname` for a service and e
 |===
 
 [#deploy-cluster-cli-external-dns-aws]
-=== Deploying a cluster by using the command line interface and external DNS
+=== Deploying a cluster by using the hosted control plane command line interface and external DNS
 
 You need to deploy the `hypershift` and `external-dns` Operators when the external public hosted zone already exists. Ensure that the `external-dns` Operator is running and that the internal flags point to the public hosted zone by entering the following commands:
-//lahinson - july 2023 - update hypershift cli command here
+
 ----
 export KUBECONFIG=<path_to_management_cluster_kubeconfig>
 export AWS_CREDS=~/.aws/credentials
 export REGION=<region>
 
-hypershift create cluster aws \
+hcp create cluster aws \
     --aws-creds ${AWS_CREDS} \
     --instance-type m6i.xlarge \
     --region ${REGION} \
@@ -327,13 +321,11 @@ hypershift create cluster aws \
     --node-pool-replicas 2 \
     --pull-secret ${HOME}/pull_secret.json \
     --release-image quay.io/openshift-release-dev/ocp-release:4.12.0-ec.3-x86_64 \
-    --external-dns-domain=service-provider-domain.com \ <2>
-    --endpoint-access=PublicAndPrivate <3>
+    --endpoint-access=PublicAndPrivate <2>
 ----
 
 <1> Points to the public hosted zone, `service-consumer-domain.com`, which is typically in an AWS account that the service consumer owns.
-<2> Points to the public external DNS hosted zone, `service-provider-domain.com`, which is typically in an AWS account that the service provider owns.
-<3> Set as `PublicAndPrivate.` The external DNS can be used with only `Public` or `PublicAndPrivate` configurations.
+<2> Set as `PublicAndPrivate.` The external DNS can be used with only `Public` or `PublicAndPrivate` configurations.
 
 [#hosted-enable-private-link]
 == Enabling AWS PrivateLink
@@ -371,94 +363,67 @@ oc create secret generic hypershift-operator-private-link-credentials --from-lit
 oc label secret hypershift-operator-private-link-credentials -n local-cluster cluster.open-cluster-management.io/backup=""
 ----
 
-[#hosted-enable-feature-aws]
-== Enabling the hosted control planes feature
+[#hosted-disable-auto-import]
+== Disabling the automatic import of hosted clusters into {mce-short}
 
-The hosted control planes feature is disabled by default. Enabling the feature automatically also enables the `hypershift-addon` managed cluster add-on. 
+Starting with {mce-short} 2.4, hosted clusters are automatically imported into {mce-short} after the control plane becomes available. All {product-title-short} add-ons are also enabled if {product-title-short} is installed. Any hosted clusters that were previously imported are not affected, even if you disable automatic import. When you upgrade to {mce-short} 2.4 and automatic import is enabled, all hosted clusters that are not imported are automatically imported if their control planes are available.
 
-. You can run the following command to enable the feature:
+If needed, you can disable the automatic import of hosted clusters. When automatic import is disabled, only newly created hosted clusters are not automatically imported. Hosted clusters that were already imported are not affected. You can still manually import clusters by using the console or by creating the `ManagedCluster` and `KlusterletAddonConfig` custom resources. For more information about manual import, see _Manually importing a hosted control plane cluster_.
+
+To disable the automatic import of hosted clusters, complete the following steps:
+
+. On the hub cluster, open the `hypershift-addon-deploy-config` specification that is in the `AddonDeploymentConfig` resource in the namespace where {mce-short} is installed by entering the following command:
+
 +
 ----
-oc patch mce multiclusterengine --type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift-preview","enabled": true}]}}}' <1>
-----
-<1> The default `MultiClusterEngine` resource instance name is `multiclusterengine`, but you can get the `MultiClusterEngine` name from your cluster by running the following command: `$ oc get mce`.
-
-. Run the following command to verify that the `hypershift-preview` and `hypershift-local-hosting` features are enabled in the `MultiClusterEngine` custom resource:
-+
-----
-oc get mce multiclusterengine -o yaml <1>
-----
-<1> The default `MultiClusterEngine` resource instance name is `multiclusterengine`, but you can get the `MultiClusterEngine` name from your cluster by running the following command: `$ oc get mce`.
-+
-The output resembles the following example:
-+
-[source,yaml]
-----
-apiVersion: multicluster.openshift.io/v1
-kind: MultiClusterEngine
-metadata:
-  name: multiclusterengine
-spec:
-  overrides:
-    components:
-    - name: hypershift-preview
-      enabled: true
-    - name: hypershift-local-hosting
-      enabled: true
+oc edit addondeploymentconfig hypershift-addon-deploy-config -n multicluster-engine
 ----
 
-[#hosted-enable-hypershift-add-on-aws]
-=== Manually enabling the hypershift-addon managed cluster add-on for local-cluster
+. In the `spec.customizedVariables` section, add the `autoImportDisabled` variable with value of `"true"`, as shown in the following example:
 
-Enabling the hosted control planes feature automatically enables the `hypershift-addon` managed cluster add-on. If you need to enable the `hypershift-addon` managed cluster add-on manually, complete the following steps to use the `hypershift-addon` to install the HyperShift Operator on `local-cluster`:
-
-. Create the `ManagedClusterAddon` HyperShift add-on by creating a file that resembles the following example:
 +
 [source,yaml]
 ----
 apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: ManagedClusterAddOn
+kind: AddOnDeploymentConfig
 metadata:
-  name: hypershift-addon
-  namespace: local-cluster 
+  name: hypershift-addon-deploy-config
+  namespace: multicluster-engine
 spec:
-  installNamespace: open-cluster-management-agent-addon
+  customizedVariables:
+   - name: hcMaxNumber
+     value: "80"
+  - name: hcThresholdNumber
+    value: "60"
+  - name: autoImportDisabled
+    value: "true"
 ----
 
-. Apply the file by running the following command:
-+
-----
-oc apply -f <filename>
-----
-+
-Replace `filename` with the name of the file that you created. 
+. To re-enable automatic import, set the value of the `autoImportDisabled` variable to `"false"` or remove the variable from the `AddonDeploymentConfig` resource.
 
-. Confirm that the `hypershift-addon` is installed by running the following command:
-+
-----
-oc get managedclusteraddons -n local-cluster hypershift-addon
-----
-+
-If the add-on is installed, the output resembles the following example:
-+
-----
-NAME               AVAILABLE   DEGRADED   PROGRESSING
-hypershift-addon   True
-----
+[#hosted-auto-import-additional-resources]
+=== Additional resources
 
-Your HyperShift add-on is installed and the hosting cluster is available to create and manage hosted clusters.
+For instructions to manually import a hosted cluster, see xref:../hosted_control_planes/importing_hosted_cluster_aws.adoc#importing-hosted-cluster[Manually importing a hosted control plane cluster].
 
 [#hosted-install-cli]
-== Installing the hosted control planes command line interface
+== Installing the hosted control plane command line interface (hcp)
 
-The hosted control planes (`hypershift`) command line interface is used to create and manage {ocp-short} hosted control plane clusters. After you enable the hosted control planes feature, you can install the hosted control planes command line interface by completing the following steps:
+The hosted control plane command line interface (`hcp`) is used to create and manage {ocp-short} hosted control plane clusters. 
+
+[#hosted-install-cli-prereqs]
+=== Prerequisites
+
+* You must have enabled the `hypershift` feature. In the {ocp-short} console, the download for the hosted control plane command line interface (`hcp`)  is visible only if you enabled that feature.
+
+[#hosted-install-hcp-cli]
+=== Installing the hosted control plane command line interface (hcp)
+
+You can install the hosted control plane command line interface (hcp) by completing the following steps:
 
 . From the {ocp-short} console, click the *Help icon* > *Command Line Tools*.
 
-//lahinson - july 2023 - does the UI still say "hypershift CLI"?
-. Click *Download hypershift CLI* for your platform.
-+
-*Note:* The download is only visible if you have enabled the `hypershift-preview` feature.
+. Click *Download hcp CLI* for your platform.
 
 . Unpack the downloaded archive by running the following command:
 +
@@ -477,11 +442,11 @@ chmod +x hypershift
 ----
 sudo mv hypershift /usr/local/bin/.
 ----
-//lahinson - july 2023 - update hypershift cli commands here
-You can now use the `hypershift create cluster` command to create and manage hosted clusters. Use the following command to list the available parameters:
+
+You can now use the `hcp create cluster` command to create and manage hosted clusters. To list the available parameters, enter the following command:
 
 ----
-hypershift create cluster aws --help
+hcp create cluster aws --help
 ----
 
 [#dr-hosted-cluster]
@@ -496,6 +461,6 @@ See link:https://access.redhat.com/documentation/en-us/openshift_container_platf
 [#additional-resources-configure-hosted-cluster-aws]
 == Additional resources
 
-For more information about hosted control planes on AWS, see the following resource:
+* To disable the hosted control planes feature, see xref:../hosted_control_planes/enable_or_disable_hosted.adoc#disable-hosted-control-planes[Disabling the hosted control planes feature].
 
 * You can now deploy the SR-IOV Operator. For more information, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/networking/hardware-networks#sriov-operator-hosted-control-planes_configuring-sriov-operator[Deploying the SR-IOV Operator for hosted control planes].

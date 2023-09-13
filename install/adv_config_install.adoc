@@ -1,12 +1,31 @@
 [#advanced-config-hub]
 = MultiClusterHub advanced configuration 
 
-{product-title} is installed by using an operator that deploys all of the required components. {product-title-short} can be further configured during or after installation by adding one or more of the following attributes to the `MultiClusterHub` custom resource:
+{product-title} is installed by using an operator that deploys all of the required components. Some of the listed components are enabled by default. If a component is disabled, that resource is not deployed to the cluster until it is enabled. The operator works to deploy the following components:
 
-[#console-config]
-== Console configuration
+.Table list of the deployed components
+|===
+| Name | Description | Enabled
+| app-lifecycle | Unifies and simplifies options for constructing and deploying applications and application updates. | True
+| cluster-backup | Provides backup and restore support for all hub cluster resources such as managed clusters, applications, and policies. | False
+| cluster-lifecycle | Provides cluster management capabilities for {ocp-short} and {product-title-short} hub clusters. | True
+| cluster-permission |  Automatically distributes RBAC resources to managed clusters and manage the lifecycle of those resources. | True
+| console | Enables {product-title-short} web console plug-in. | True
+| grc | Enables the security enhancement for you to define policies for your clusters. | True
+| insights | Identifies existing or potential problems in your clusters. | True
+| multicluster-observability | Enables monitoring to gain further insights into the health of your managed clusters. | True
+| search | Provides visibility into your Kubernetes resources across all of your clusters. | True
+| submariner-addon | Enables direct networking and service discovery between two or more managed clusters in your environment, either on-premises or in the cloud. | True
+| volsync | Supports asynchronous replication of persistent volumes within a cluster, or across clusters with storage types that are not otherwise compatible for replication. | True
+|===
 
-The following example displays the `spec.overrides` default template that you can use to enable or disable the `console` components. Replace `namespace` with the name of your project:
+*Important:* When {product-title-short} is installed onto the cluster, not all of the listed components are enabled by default.
+
+You can further configure {product-title-short} during or after installation by adding one or more attributes to the `MultiClusterHub` custom resource. Continue reading for information about the attributes that can be added.
+
+== Console and component configuration
+
+The following example displays the `spec.overrides` default template that you can use to enable or disable the component:
 
 [source,yaml]
 ----
@@ -14,21 +33,23 @@ apiVersion: operator.open-cluster-management.io/v1
 kind: MultiClusterHub
 metadata:
   name: multiclusterhub
-  namespace: <namespace>
+  namespace: <namespace> <1>
 spec:
   overrides:
     components:
-    - name: console
+    - name: <name> <2>
       enabled: true
 ----
+1. Replace `namespace` with the name of your project.
+2. Replace `name` with the name of the component.
 
-Alternatively, you can run the following command. Replace `namespace` with the name of your project and the value:
+Alternatively, you can run the following command. Replace `namespace` with the name of your project and `name` with the name of the component:
 
 ----
-oc patch MultiClusterHub multiclusterhub -n <namespace> --type=json -p='[{"op": "add", "path": "/spec/overrides/components/-","value":{"name":"console","enabled":true}}]'
+oc patch MultiClusterHub multiclusterhub -n <namespace> --type=json -p='[{"op": "add", "path": "/spec/overrides/components/-","value":{"name":"<name>","enabled":true}}]'
 ----
 
-**Note:** The console is forced to stay off if the {ocp} console is disabled.
+*Note:* When the `console` component is disabled, the {ocp} console is disabled.
 
 [#custom-image-pull-secret]
 == Custom Image Pull Secret
@@ -69,7 +90,9 @@ spec:
 
 The {product-title-short} hub cluster has two availabilities: `High` and `Basic`. By default, the hub cluster has an availability of `High`, which gives hub cluster components a `replicaCount` of `2`. This provides better support in cases of failover but consumes more resources than the `Basic` availability, which gives components a `replicaCount` of `1`.
 
-The following examples shows the `spec.availabilityConfig` template with `Basic` availability:
+*Important:* Set `spec.availabilityConfig` to `Basic` if you are using {mce-short} on a Single-Node OpenShift (SNO) cluster.
+
+The following example shows the `spec.availabilityConfig` template with `Basic` availability:
 
 [source,yaml]
 ----
