@@ -43,7 +43,97 @@ object-templates-raw: |
 ----
 
 *Note:* While `spec.object-templates` and `spec.object-templates-raw` are optional, one of the two parameter fields must be set.
- 
+
+View the following policy example that uses advanced templates to create and configure infrastructure `MachineSet` objects for your managed clusters.
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: create-infra-machineset
+spec:
+  remediationAction: enforce
+  severity: low
+  object-templates-raw: |
+    {{- /* Specify the parameters needed to create the MachineSet  */ -}}
+    {{- $machineset_role := "infra" }}
+    {{- $region := "ap-southeast-1" }}
+    {{- $zones := list "ap-southeast-1a" "ap-southeast-1b" "ap-southeast-1c" }}
+    {{- $infrastructure_id := (lookup "config.openshift.io/v1" "Infrastructure" "" "cluster").status.infrastructureName }}
+    {{- $worker_ms := (index (lookup "machine.openshift.io/v1beta1" "MachineSet" "openshift-machine-api" "").items 0) }}
+    {{- /* Generate the MachineSet for each zone as specified  */ -}}
+    {{- range $zone := $zones }}
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: machine.openshift.io/v1beta1
+        kind: MachineSet
+        metadata:
+          labels:
+            machine.openshift.io/cluster-api-cluster: {{ $infrastructure_id }} 
+          name: {{ $infrastructure_id }}-{{ $machineset_role }}-{{ $zone }} 
+          namespace: openshift-machine-api
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              machine.openshift.io/cluster-api-cluster: {{ $infrastructure_id }} 
+              machine.openshift.io/cluster-api-machineset: {{ $infrastructure_id }}-{{ $machineset_role }}-{{ $zone }} 
+          template:
+            metadata:
+              labels:
+                machine.openshift.io/cluster-api-cluster: {{ $infrastructure_id }} 
+                machine.openshift.io/cluster-api-machine-role: {{ $machineset_role }} 
+                machine.openshift.io/cluster-api-machine-type: {{ $machineset_role }} 
+                machine.openshift.io/cluster-api-machineset: {{ $infrastructure_id }}-{{ $machineset_role }}-{{ $zone }} 
+            spec:
+              metadata:
+                labels:
+                  node-role.kubernetes.io/{{ $machineset_role }}: "" 
+              taints: 
+                - key: node-role.kubernetes.io/{{ $machineset_role }}
+                  effect: NoSchedule
+              providerSpec:
+                value:
+                  ami:
+                    id: {{ $worker_ms.spec.template.spec.providerSpec.value.ami.id }}
+                  apiVersion: awsproviderconfig.openshift.io/v1beta1
+                  blockDevices:
+                    - ebs:
+                        encrypted: true
+                        iops: 2000
+                        kmsKey:
+                          arn: ''
+                        volumeSize: 500
+                        volumeType: io1
+                  credentialsSecret:
+                    name: aws-cloud-credentials
+                  deviceIndex: 0
+                  instanceType: {{ $worker_ms.spec.template.spec.providerSpec.value.instanceType }}
+                  iamInstanceProfile:
+                    id: {{ $infrastructure_id }}-worker-profile 
+                  kind: AWSMachineProviderConfig
+                  placement:
+                    availabilityZone: {{ $zone }} 
+                    region: {{ $region }}
+                  securityGroups:
+                    - filters:
+                        - name: tag:Name
+                          values:
+                            - {{ $infrastructure_id }}-worker-sg 
+                  subnet:
+                    filters:
+                      - name: tag:Name
+                        values:
+                          - {{ $infrastructure_id }}-private-{{ $zone }} 
+                  tags:
+                    - name: kubernetes.io/cluster/{{ $infrastructure_id }} 
+                      value: owned
+                  userDataSecret:
+                    name: worker-user-data
+    {{- end }}
+----
+
 [#bypass-template-processing]
 == Bypass template processing
 
