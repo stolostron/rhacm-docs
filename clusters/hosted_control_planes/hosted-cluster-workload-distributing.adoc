@@ -4,27 +4,27 @@
 Before you get started with hosted control planes for {ocp-short}, you must properly label nodes so that the pods of hosted clusters can be scheduled into infrastructure nodes. Node labeling is also important for the following reasons:
 
 * To ensure high availability and proper workload deployment
-* To ensure that control planes are well contained
+* To ensure that control plane workloads are configured at one of the following multi-tenancy distribution levels:
+** Everything shared: Control planes for hosted clusters can run on any node that is designated for control planes.
+** Request serving isolation: Serving pods are requested in their own dedicated nodes.
+** Nothing shared: Every control plane has its own dedicated nodes. 
+* To ensure that control plane workloads are separate from other workloads in the management cluster.
+
+*Important:* Do not use the management cluster for your workload. Workloads must not run on nodes where control planes run.
 
 [#hosted-cluster-labels-taints-overview]
 == Labels and taints for management cluster nodes
 
-//lahinson - sept. 2023 - do we need to add a note to prevent customers from using the management cluster for their workload?
-
 As a management cluster administrator, you can use the following labels and taints in the management cluster nodes to schedule the control plane workload:
 
-//lahinson - sept. 2023 - If we want to explain the implications of each label and taint, I'll need that info.
-
-* `hypershift.openshift.io/hypershift.openshift.io/control-plane: true`
-* `node-role.kubernetes.io/infra`
-* `topology.kubernetes.io/zone`
-* `hypershift.openshift.io/cluster: ${HostedControlPlane Namespace}`
+* `hypershift.openshift.io/control-plane: true`: Use this label and taint to dedicate a node to running hosted control plane workloads. Setting this label and taint is required if you do not want other workloads on the management cluster to run in your control plane nodes.
+* `node-role.kubernetes.io/infra`: Use this label to avoid having a node count toward your subscription.
+* `topology.kubernetes.io/zone`: Use this label to deploy highly available clusters. The zone might be a location, rack name, or the hostname of the node where the zone is set.
+* `hypershift.openshift.io/cluster: ${HostedControlPlane Namespace}`: Use this label and taint when you want to dedicate a node to a single hosted cluster.
 
 Pods for a hosted cluster have tolerations, and the scheduler uses affinity rules to schedule them. Pods tolerate taints for `control-plane` and the `cluster` for the pods. The scheduler prioritizes the scheduling of pods into nodes that are labeled with `hypershift.openshift.io/control-plane` and `hypershift.openshift.io/cluster: ${HostedControlPlane Namespace}`.
 
 For the `ControllerAvailabilityPolicy` option, use `HighlyAvailable`. When you use that option, you can schedule pods for each deployment within a hosted cluster across different failure domains by setting `topology.kubernetes.io/zone` as the topology key.
-
-//lahinson - sept. 2023 - If we want to explain zone versus hostname, I'll need info for that.
 
 *Important:* Proper node labeling, which is detailed in the following procedure, is a prerequisite to deploying hosted control planes.
 
@@ -40,9 +40,7 @@ To enable a hosted cluster to require its pods to be scheduled into infrastructu
       role.kubernetes.io/infra: ""
 ----
 
-This way, hosted control planes for each tenant are eligible infrastructure node workloads, and you do not need to entitle the underlying {ocp-short} nodes.
-
-//lahinson - sept. 2023 - in the line above, should we replace "tenant" with something else? Maybe "hosted cluster"?
+This way, hosted control planes for each hosted cluster are eligible infrastructure node workloads, and you do not need to entitle the underlying {ocp-short} nodes.
 
 [#hosted-cluster-workload-distributing-priority]
 == Priority classes
