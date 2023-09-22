@@ -27,41 +27,28 @@ If you need to create a new secret, see xref:../cluster_lifecycle/import_gui.ado
 * macOS
 
 [#cluster-import-agent]
-== Importing a cluster by using the 
+== Importing a cluster
 
-//WARNING YOU ARE ENTERING DRAFT CONTENT, PROCEED WITH CAUTION
+To import a managed cluster by using the the agent registration endpoint, complete the following steps:
 
-Before using agent registration endpoint on the managed cluster, complete the following steps:
-
-Before using agent-registration from the managed cluster side, we need to complete the following steps:
-
-    The agent-registration URL
-    The cacert of agent-registration server
-    The token that can be authenticated and autherizated by the agent-registration server.
-    Enable auto-approve in ClusterManager.
-
-          
-
-To get the agent-registration server URL, we need run this command on the hub side:
-
+. Get the agent registration server URL by running the following command on the hub cluster:
++
+----
 export agent_registration_host=$(oc get route -n multicluster-engine agent-registration -o=jsonpath="{.spec.host}")
+----
++
+*Note:* If your hub is using a cluster-wide-proxy, make sure using the URL that managed cluster can access.
 
-Not that, if hub is behind a cluster-wide-proxy, make sure using the URL that managed cluster can access.
+. Get the cacert by running the following command:
++
+----
+oc get configmap -n kube-system kube-root-ca.crt -o=jsonpath="{.data['ca\.crt']}" > ca.crt_
+----
 
- 
-
-Using the following command to get the cacert:
-
-_oc get configmap -n kube-system kube-root-ca.crt -o=jsonpath="
-{.data['ca\.crt']}
-
-" > ca.crt_
-
- 
-
-We don’t limit the token's source as long as its assciated User has the get permisson on NonResourceURL /agent-registration/* . Here, we provide a simple way of get the token, it creates a serviceaccount and binds it with the ClusterRole managedcluster-import-controller-agent-regitration-client which has get permission for nonResourceURLs: ["/agent-registration/*"] :
-
-cat << EOF | oc apply -f -
+. Get the token for the agent regsitration sever to authorize by applying the following YAML content:
++
+[source,yaml]
+----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -89,28 +76,35 @@ subjects:
   - kind: ServiceAccount
     name: managed-cluster-import-agent-registration-sa
     namespace: multicluster-engine
-EOF
+----
 
+. Run the following command to export the token:
++
+----
 export token=$(oc get secret -n multicluster-engine managed-cluster-import-agent-registration-sa-token -o=jsonpath='{.data.token}' | base64 -d)
+----
 
- 
-
-Next, we enable to auto-approval  by patching the following content to cluster-manager, but you can also set auto-approval mode to Disable and manually approve CSR requests from the managed clusters.
-
+. Enable to automatic approval and patch the content to `cluster-manager` by running the following command:
++
+----
 oc patch clustermanager cluster-manager --type=merge -p '{"spec":{"registrationConfiguration":{"featureGates":[
-{"feature": "ManagedClusterAutoApproval", "mode": "Enable"}
+{"feature": "ManagedClusterAutoApproval", "mode": "Enable"}], "autoApproveUsers":["system:serviceaccount:multicluster-engine:agent-registration-bootstrap"]}}}'
+----
++
+*Note:* You can also disable automatic approval and manually approve certificate signing requests from managed clusters.
 
-], "autoApproveUsers":["system:serviceaccount:multicluster-engine:agent-registration-bootstrap"]}}}'
- 
-
-Finally, switch to the managed cluster context, and run the following commands to import the managed cluster to the hub:
-
- 
-
+. Switch to your managed cluster and get the cacert by running the following command. Replace 
++
+----
 curl --cacert ca.crt -H "Authorization: Bearer $token" https://$agent_registration_host/agent-registration/crds/v1 | oc apply -f -
+----
 
+. Run the following command to import the managed cluster to the hub cluster:
++
+Replace `<clusterName>` with the name of you cluster.
++
+*Optional*: Replace `<klusterletconfigName>` with the name of your KlusterletConfig.
++
+----
 curl --cacert ca.crt -H "Authorization: Bearer $token" https://$agent_registration_host/agent-registration/manifests/<clusterName>?klusterletconfig=<klusterletconfigName> | oc apply -f -
-
- 
-
-Specify the <clusterName> and <klusterletconfigName>(Optional) in the above commands.
+----
