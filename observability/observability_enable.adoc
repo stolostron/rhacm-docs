@@ -11,6 +11,7 @@ Monitor the status of your managed clusters with the observability component, al
 * <<enabling-observability,Enabling observability from the command line interface>>
 * <<creating-mco-cr,Creating the MultiClusterObservability custom resource>>
 * <<enabling-observability-ocp,Enabling observability from the {ocp} console>>
+* <<disabling-observability,Disabling observability>>
 * <<removing-observability-resource,Removing observability>>
 
 [#prerequisites-observability]
@@ -367,7 +368,7 @@ observability-thanos-store-shard-x  (statefulsets)
 ----
 
 [#creating-mco-cr]
-=== Creating the MultiClusterObservability custom resource
+== Creating the MultiClusterObservability custom resource
 
 Use the `MultiClusterObservability` custom resource to specify the persistent volume storage size for various components. You must set the storage size during the initial creation of the `MultiClusterObservability` custom resource. When you update the storage size values post-deployment, changes take effect only if the storage class supports dynamic volume expansion. For more information, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/storage/expanding-persistent-volumes[Expanding persistent volumes from the {ocp} documentation].
 
@@ -456,6 +457,7 @@ multicluster-observability-operator   1/1     1            1           35m   ins
     installer.namespace: open-cluster-management
 ----
 
+.
 . _Optional:_ If you want to exclude specific managed clusters from collecting the observability data, add the following cluster label to your clusters: `observability: disabled`.
 
 The observability service is enabled. After you enable the observability service, the following functions are initiated:
@@ -466,7 +468,7 @@ The observability service is enabled. After you enable the observability service
 *Note:* Alert forwarding to the {product-title-short} hub cluster feature is only supported by managed clusters with {ocp} version 4.8 or later. After you install {product-title-short} with observability enabled, alerts from {ocp-short} v4.8 and later are automatically forwarded to the hub cluster. See xref:../observability/customize_observability.adoc#forward-alerts[Forwarding alerts] to learn more.
 
 [#enabling-observability-ocp]
-=== Enabling observability from the {ocp} console
+== Enabling observability from the {ocp} console
 
 Optionally, you can enable observability from the {ocp} console, create a project named `open-cluster-management-observability`. Be sure to create an image pull-secret named, `multiclusterhub-operator-pull-secret` in the `open-cluster-management-observability` project.
 
@@ -486,6 +488,34 @@ thanos --version
 ----
 
 The Thanos version is displayed.
+
+[#disabling-observability]
+== Disabling observability
+
+You can disable observability, which stops data collection on the {product-title-short} hub cluster.
+
+[#disabling-observability-on-all-clusters]
+=== Disabling observability on all clusters
+
+Disable observability by removing observability components on all managed clusters.
+Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
+
+[source,yaml]
+----
+spec:
+  imagePullPolicy: Always
+  imagePullSecret: multiclusterhub-operator-pull-secret
+  observabilityAddonSpec: # The ObservabilityAddonSpec defines the global settings for all managed clusters which have observability add-on enabled
+    enableMetrics: false #indicates the observability addon push metrics to hub server
+----
+
+[#disabling-observability-on-a-single-cluster]
+=== Disabling observability on a single cluster
+
+Disable observability by removing observability components on specific managed clusters. Add the `observability: disabled` label to the `managedclusters.cluster.open-cluster-management.io` custom resource.
+From the {product-title-short} console _Clusters_ page, add the `observability=disabled` label to the specified cluster.
+
+*Note:* When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
 
 [#removing-observability-resource]
 == Removing observability
