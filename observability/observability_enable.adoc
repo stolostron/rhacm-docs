@@ -1,7 +1,9 @@
-[#enabling-observability-service]
-= Enabling observability service
-//i need to either rename the title or rename the Enabling observability section on line 9; modular changes handled later | MJ | 07/03/23
-Monitor the health of your managed clusters with the observability service (`multicluster-observability-operator`).
+[#managing-observability-service]
+= Managing the observability service
+
+When you enable the observability component, you can use metrics and configure Grafana dashboards to make cluster resource information visible, help you save cost, and prevent unnecessary events.
+
+Monitor the status of your managed clusters with the observability component (`multicluster-observability-operator`).
 
 *Required access:* Cluster administrator, the `open-cluster-management:cluster-manager-admin` role, or S3 administrator.
 
@@ -378,6 +380,8 @@ The Thanos version is displayed.
 [#creating-mco-cr]
 === Creating the MultiClusterObservability custom resource
 
+Use the `MultiClusterObservability` custom resource to specify the persistent volume storage size for various components. You must set the storage size during the initial creation of the `MultiClusterObservability` custom resource. When you update the storage size values post-deployment, changes take effect only if the storage class supports dynamic volume expansion. For more information, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/storage/expanding-persistent-volumes[Expanding persistent volumes from the {ocp} documentation].
+
 Complete the following steps to create the `MultiClusterObservability` custom resource on your hub cluster:
 
 . Create the `MultiClusterObservability` custom resource YAML file named `_multiclusterobservability_cr.yaml_`. 
@@ -436,9 +440,34 @@ oc apply -f multiclusterobservability_cr.yaml
 +
 All the pods in `open-cluster-management-observability` namespace for Thanos, Grafana and Alertmanager are created. All the managed clusters connected to the {product-title-short} hub cluster are enabled to send metrics back to the {product-title-short} Observability service.
 
-. Validate that the observability service is enabled and the data is populated by launching the Grafana dashboards. Click the **Grafana link** that is near the console header, from either the console _Overview_ page or the _Clusters_ page.
+. Validate that the observability service is enabled and the data is populated by launching the Grafana dashboards. 
+
+. Click the *Grafana link* that is near the console header, from either the console _Overview_ page or the _Clusters_ page.
 +
-*Note:* If you want to exclude specific managed clusters from collecting the observability data, add the following cluster label to your clusters: `observability: disabled`.
+.. Alternatively, access the {ocp-short} 3.11 Grafana dashboards with the following URL: `https://$ACM_URL/grafana/dashboards`.
++
+.. To view the {ocp-short} 3.11 dashboards, select the folder named _OCP 3.11_ .
+ 
+. Access the `multicluster-observability-operator` deployment to verify that the `multicluster-observability-operator` pod is being deployed by the `multiclusterhub-operator` deployment. Run the following command:
++
+[source,bash]
+----
+oc get deploy multicluster-observability-operator -n open-cluster-management --show-labels
+
+NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE   LABELS
+multicluster-observability-operator   1/1     1            1           35m   installer.name=multiclusterhub,installer.namespace=open-cluster-management
+----
+
+. View the `labels` section of the `multicluster-observability-operator` deployment for labels that are associated with the resource. The `labels` section might contain the following details:
++
+[source,yaml]
+----
+ labels:
+    installer.name: multiclusterhub
+    installer.namespace: open-cluster-management
+----
+
+. _Optional:_ If you want to exclude specific managed clusters from collecting the observability data, add the following cluster label to your clusters: `observability: disabled`.
 
 The observability service is enabled. After you enable the observability service, the following functions are initiated:
 
@@ -446,8 +475,6 @@ The observability service is enabled. After you enable the observability service
 - All the managed clusters that are connected to the {product-title-short} hub cluster are enabled to send alerts back to the {product-title-short} observability service. You can configure the {product-title-short} Alertmanager to take care of deduplicating, grouping, and routing the alerts to the correct receiver integration such as email, PagerDuty, or OpsGenie. You can also handle silencing and inhibition of the alerts.
 +
 *Note:* Alert forwarding to the {product-title-short} hub cluster feature is only supported by managed clusters with {ocp} version 4.8 or later. After you install {product-title-short} with observability enabled, alerts from {ocp-short} v4.8 and later are automatically forwarded to the hub cluster. See xref:../observability/customize_observability.adoc#forward-alerts[Forwarding alerts] to learn more.
-
-* Access the {ocp-short} 3.11 Grafana dashboards with the following URL: `https://$ACM_URL/grafana/dashboards`. Select the folder named _OCP 3.11_ to view the {ocp-short} 3.11 dashboards.
 
 [#enabling-observability-ocp]
 == Enabling observability from the {ocp} console
