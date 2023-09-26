@@ -1,10 +1,11 @@
 [#using-observability]
 = Using observability
-//Draft
-Use the observability service to view the utilization of cluster across your fleet.
 
-* <<external-metric-query,Using the external metric query>>
+Use the observability service to view the utilization of clusters across your fleet.
 
+- <<external-metric-query,Using the external metric query>>
+- <<exporting-metrics-to-external-endpoints,Exporting metrics to external endpoints>>
+- <<viewing-and-exploring-data,Viewing and exploring data>>
 
 [#external-metric-query]
 == Using the external metric query
@@ -43,87 +44,135 @@ oc -n open-cluster-management-observability create secret tls proxy-byo-ca --cer
 oc -n open-cluster-management-observability create secret tls proxy-byo-cert --cert ./ingress.crt --key ./ingress.key
 ----
 
-[#dynamic-metrics-for-sno]
-=== Dynamic metrics for single-node OpenShift clusters
+[#exporting-metrics-to-external-endpoints]
+== Exporting metrics to external endpoints
 
-Dynamic metrics collection supports automatic metric collection based on certain conditions. By default, a SNO cluster does not collect pod and container resource metrics. Once a SNO cluster reaches a specific level of resource consumption, the defined granular metrics are collected dynamically. When the cluster resource consumption is consistently less than the threshold for a period of time, granular metric collection stops.
+Use observability to export metrics to external endpoints, which support the Prometheus Remote-Write specification in real time. Complete the following steps to export metrics to external endpoints: 
 
-The metrics are collected dynamically based on the conditions on the managed cluster specified by a collection rule. Because these metrics are collected dynamically, the following {product-title-short} Grafana dashboards do not display any data. When a collection rule is activated and the corresponding metrics are collected, the following panels display data for the duration of the time that the collection rule is initiated:
-
-* Kubernetes/Compute Resources/Namespace (Pods)
-* Kubernetes/Compute Resources/Namespace (Workloads)
-* Kubernetes/Compute Resources/Nodes (Pods)
-* Kubernetes/Compute Resources/Pod
-* Kubernetes/Compute Resources/Workload
-
-A collection rule includes the following conditions:
-
-* A set of metrics to collect dynamically.
-* Conditions written as a PromQL expression.
-* A time interval for the collection, which must be set to `true`.
-* A match expression to select clusters where the collect rule must be evaluated.
-
-By default, collection rules are evaluated continuously on managed clusters every 30 seconds, or at a specific time interval. The lowest value between the collection interval and time interval takes precedence. Once the collection rule condition persists for the duration specified by the `for` attribute, the collection rule starts and the metrics specified by the rule are automatically collected on the managed cluster. Metrics collection stops automatically after the collection rule condition no longer exists on the managed cluster, at least 15 minutes after it starts.
-
-The collection rules are grouped together as a parameter section named `collect_rules`, where it can be enabled or disabled as a group. {product-title-short} installation includes the collection rule group, `SNOResourceUsage` with two default collection rules: `HighCPUUsage` and `HighMemoryUsage`. The `HighCPUUsage` collection rule begins when the node CPU usage exceeds 70%. The `HighMemoryUsage` collection rule begins if the overall memory utilization of the SNO cluster exceeds 70% of the available node memory. Currently, the previously mentioned thresholds are fixed and cannot be changed. When a collection rule begins for more than the interval specified by the `for` attribute, the system automatically starts collecting the metrics that are specified in the `dynamic_metrics` section.
-
-View the list of dynamic metrics that from the `collect_rules` section, in the following YAML file:
-
+. Create the Kubernetes secret for an external endpoint with the access information of the external endpoint in the `open-cluster-management-observability` namespace. View the following example secret:
++
 [source,yaml]
 ----
-collect_rules:
-  - group: SNOResourceUsage
-    annotations:
-      description: >
-        By default, a SNO cluster does not collect pod and container resource metrics. Once a SNO cluster 
-        reaches a level of resource consumption, these granular metrics are collected dynamically. 
-        When the cluster resource consumption is consistently less than the threshold for a period of time, 
-        collection of the granular metrics stops.
-    selector:
-      matchExpressions:
-        - key: clusterType
-          operator: In
-          values: ["SNO"]
-    rules:
-    - collect: SNOHighCPUUsage
-      annotations:
-        description: >
-          Collects the dynamic metrics specified if the cluster cpu usage is constantly more than 70% for 2 minutes
-      expr: (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))) * 100 > 70
-      for: 2m
-      dynamic_metrics:
-        names:
-          - container_cpu_cfs_periods_total
-          - container_cpu_cfs_throttled_periods_total
-          - kube_pod_container_resource_limits 
-          - kube_pod_container_resource_requests   
-          - namespace_workload_pod:kube_pod_owner:relabel 
-          - node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate 
-          - node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate 
-    - collect: SNOHighMemoryUsage
-      annotations:
-        description: >
-          Collects the dynamic metrics specified if the cluster memory usage is constantly more than 70% for 2 minutes
-      expr: (1 - sum(:node_memory_MemAvailable_bytes:sum) / sum(kube_node_status_allocatable{resource=\"memory\"})) * 100 > 70
-      for: 2m
-      dynamic_metrics:
-        names:
-          - kube_pod_container_resource_limits 
-          - kube_pod_container_resource_requests 
-          - namespace_workload_pod:kube_pod_owner:relabel
-        matches:
-          - __name__="container_memory_cache",container!=""
-          - __name__="container_memory_rss",container!=""
-          - __name__="container_memory_swap",container!=""
-          - __name__="container_memory_working_set_bytes",container!=""
+apiVersion: v1
+kind: Secret
+metadata:
+  name: victoriametrics
+  namespace: open-cluster-management-observability
+type: Opaque
+stringData:
+  ep.yaml: |
+    url: http://victoriametrics:8428/api/v1/write
+    http_client_config:
+      basic_auth:
+        username: test
+        password: test
 ----
++
+The `ep.yaml` is the key of the content and is used in the `MultiClusterObservability` custom resource in next step. Currently, observability supports exporting metrics to endpoints without any security checks, with basic authentication or with `tls` enablement. View the following tables for a full list of supported parameters:
 
-A `collect_rules.group` can be disabled in the `custom-allowlist` as shown in the following example. When a `collect_rules.group` is disabled, metrics collection reverts to the previous behavior. These metrics are collected at regularly, specified intervals:
+//this information is similar syntax used in the API docs. This seems out of place 
+//should this be added to the observbaility API? | MJ | 09/26/23
+[options="header", cols=".^2a,.^6a,.^4a"]
+|===
+|Name|Description|Schema
+|*url* +
+_required_|URL for the external endpoint.|string
+|*http_client_config* +
+_optional_|Advanced configuration for the HTTP client.|<<jsonmulticlusterobservability_httpclient,HttpClientConfig>>
+|===
 
+[[jsonmulticlusterobservability_httpclient]]
+*HttpClientConfig*
+[options="header", cols=".^2a,.^3a,.^4a"]
+|===
+|Name|Description|Schema
+|*basic_auth* +
+_optional_|HTTP client configuration for basic authentication.|<<jsonmulticlusterobservability_basicauth,BasicAuth>>
+|*tls_config* +
+_optional_|HTTP client configuration for TLS.|<<jsonmulticlusterobservability_tls,TLSConfig>>
+|===
+
+[[jsonmulticlusterobservability_basicauth]]
+*BasicAuth*
+[options="header", cols=".^2a,.^3a,.^4a"]
+|===
+|Name|Description|Schema
+|*username* +
+_optional_|User name for basic authorization.|string
+|*password* +
+_optional_|Password for basic authorization.|string
+|===
+
+[[jsonmulticlusterobservability_tls]]
+*TLSConfig*
+|===
+|Name|Description|Schema
+|*secret_name* +
+_required_|Name of the secret that contains certificates.|string
+|*ca_file_key* +
+_optional_|Key of the CA certificate in the secret (only _optional_ if **insecure_skip_verify** is set to true).|string
+|*cert_file_key* +
+_required_|Key of the client certificate in the secret.|string
+|*key_file_key* +
+_required_|Key of the client key in the secret.|string
+|*insecure_skip_verify* +
+_optional_|Parameter to skip the verification for target certificate.|bool
+|===
+
+. Add the `writeStorage` parameter to the `MultiClusterObservability` custom resource for adding a list of external endppoints that you want to export. View the following example:
++
 [source,yaml]
 ----
-collect_rules:
-  - group: -SNOResourceUsage
----- 
+spec:
+  storageConfig:
+    writeStorage: <1>
+    - key: ep.yaml
+      name: victoriametrics
+----
++
+<1> Each item contains two attributes: _name_ and _key_. _Name_ is the name of the Kubernetes secret that contains endpoint access information, and _key_ is the key of the content in the secret. If you add more than one item to the list, then the metrics are exported to multiple external endpoints.
 
-The data is only displayed in Grafana when the rule is initiated.
+. View the status of metric export after the metrics export is enabled by checking the `acm_remote_write_requests_total` metric.
++
+.. From the {ocp-short} console of your hub cluster, navigate to the _Metrics_ page by clicking *Metrics* in the _Observe_ section. 
++
+.. Then query the `acm_remote_write_requests_total` metric. The value of that metric is the total number of requests with a specific response for one external endpoint, on one observatorium API instance. The `name` label is the name for the external endpoint. The `code` label is the return code of the HTTP request for the metrics export.
+
+[#viewing-and-exploring-data]
+== Viewing and exploring data
+
+View the data from your managed clusters by accessing Grafana from the hub cluster. You can query specific alerts and add filters for the query. 
+
+For example, to _cluster_infrastructure_provider_ from a single node cluster, use the following query expression: `cluster_infrastructure_provider{clusterType="SNO"}`
+
+*Note:* Do not set the `ObservabilitySpec.resources.CPU.limits` parameter if observability is enabled on single node managed clusters. When you set the CPU limits, it causes the observability pod to be counted against the capacity for your managed cluster. See the reference for _Management Workload Partitioning_ in the _Additional resources_ section.
+
+[#viewing-etcd-grafana]
+=== Viewing the etcd table
+
+View the etcd table from the hub cluster dashboard in Grafana to learn the stability of the etcd as a data store. 
+
+Select the Grafana link from your hub cluster to view the _etcd_ table data, which is collected from your hub cluster. The _Leader election changes_ across managed clusters are displayed.
+
+[#viewing-cluster-fleet-service-level-overview-on-k8s-api-server-grafana]
+=== Viewing the cluster fleet service-level overview for the Kubernetes API server dashboard
+
+View the cluster fleet Kubernetes API service-level overview from the hub cluster dashboard in Grafana.
+
+After you navigate to the Grafana dashboard, access the managed dashboard menu by selecting *Kubernetes* > *Service-Level Overview* > *API Server*. The _Fleet Overview_ and _Top Cluster_ details are displayed. 
+
+View the total number of clusters that are exceeding or meeting the targeted _service-level objective_ (SLO) value for the past seven or 30-day period, offending and non-offending clusters, and API Server Request Duration.
+
+[#viewing-cluster-service-level-overview-on-k8s-api-server-grafana]
+=== Viewing the cluster service-level overview for the Kubernetes API server dashboard
+
+View the Kubernetes API service-level overview table from the hub cluster dashboard in Grafana. 
+
+After you navigate to the Grafana dashboard, access the managed dashboard menu by selecting *Kubernetes* > *Service-Level Overview* > *API Server*. The _Fleet Overview_ and _Top Cluster_ details are displayed.
+
+View the error budget for the past seven or 30-day period, the remaining downtime, and trend.
+
+[#additional-resources-use]
+== Additional resources
+
+- For more information, see link:https://prometheus.io/docs/concepts/remote_write_spec/[Prometheus Remote-Write specification].
