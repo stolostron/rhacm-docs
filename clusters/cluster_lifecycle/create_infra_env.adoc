@@ -1,19 +1,21 @@
 [#creating-an-infrastructure-environment]
-= Creating an infrastructure environment
+= Managing host inventory
 //iniline links need to be reduced in this file, need to add Additional resources section, plus modularize| MJ | 07/27/23
-You can use the console to create an infrastructure environment to manage your hosts and create clusters on those hosts.
+Your host inventory consists of pools of bare-metal and virtual machines that you can use to create on-premises {ocp-short} clusters. These clusters can be standalone, with dedicated machines for the control plane, or <<hosted-control-planes-intro,hosted control planes>>, where the control plane runs as pods on a hosting cluster.
 
-Infrastructure environments support the following features:
+The host inventory management, together with the standalone on-premises cluster installation, are parts of {mce-short}'s Central Infrastructure Management (CIM) feature. CIM runs the link:https://access.redhat.com/documentation/en-us/assisted_installer_for_openshift_container_platform/2022/html/assisted_installer_for_openshift_container_platform/index[Assisted Installer] as an operator on the hub cluster.
 
-- Zero Touch Provisioning of clusters: Deploy clusters using a script. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html-single/scalability_and_performance/index#installing-disconnected-rhacm_ztp-preparing-the-hub-cluster[Installing GitOps ZTP in a disconnected environment] in the {ocp} documentation for more information.
-- Late binding: Add a node to an existing cluster. An infrastructure administrator can boot the host, and the cluster creator can bind the host to the existing cluster at a later time. Administrator privileges are not required for the cluster creator to access the infrastructure when using late binding.
-- Dual stack: Deploy clusters that have both IPv4 and IPv6 addresses. Dual stack uses the `OVN-Kubernetes` networking implementation to support multiple subnets. 
-- Add remote worker nodes: Add remote worker nodes to your clusters after they are created and running, which provides flexibility of adding nodes in other locations for backup purposes.
-- Static IP using NMState: Use the NMState API to define static IP addresses for your environment.
-- Specify the infrastructure environment kernel arguments by editing the `InfraEnv` custom resource, which is required in some environments. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/scalability_and_performance/clusters-at-the-network-far-edge#setting-managed-bare-metal-host-kernel-arguments_ztp-manual-install[Configuring the Discovery ISO kernel arguments for installations by using GitOps ZTP] for the instructions.
-- Specify your partition storage layout in a `custom-partitions.yaml` file when you deploy a bare metal cluster. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html-single/installing/index#configuring-storage-on-nodes_ipi-install-installation-workflow[Optional: Configuring storage on nodes] in the {ocp-short} documentation.
+A machine joins the host inventory once it is booted with a Discovery Image. The Discovery Image contains:
 
-Continue reading the documentation for details. 
+- an agent that performs discovery, validation, and installation tasks
+- the necessary configuration for reaching the service on the hub, including the endpoint, token, and static network configuration if applicable
+
+You would generally have a single Discovery Image for each "infrastructure environment", which is a set of hosts sharing a common set of properties. This infrastructure environment and associated Discovery Image is represented by the InfraEnv custom resource definiition.
+
+Once the host boots and the agent contacts the service, the service creates a new Agent custom resource on the hub that represents that host. The Agent resources make up the host inventory.
+
+The high-level flow is summarized in the following diagram.
+image:../../images/infraenv-agent-flow.png[InfraEnv and Agent flow]
 
 * <<infra-env-prerequisites,Prerequisites>>
 * <<enable-cim,Enable Central Infrastructure Management service>>
