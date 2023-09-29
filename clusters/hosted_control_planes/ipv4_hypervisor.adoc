@@ -1,0 +1,191 @@
+[#ipv4-hypervisor]
+= Configuring the hypervisor for an IPv4 network
+
+The following information applies to virtual machine environments only.
+
+. Ensure that you meet the following prerequisites:
+
++
+//lahinson - sept 2023 - the upstream docs refer to this list as "bare metal requisites" even though the intro to the hypervisor section states that this section is for virtual machine environments only. Do these prerequisites also apply to virtual machine environments?
+
+** CPU: The number of CPUs provided determines how many hosted clusters can run concurrently. In general, use 16 CPUs for each node for 3 nodes. For minimal development, you can use 12 CPUs for each node for 3 nodes.
+** Memory: The amount of RAM affects how many hosted clusters can be hosted. Use 48 GB of RAM for each node. For minimal development, 18 GB of RAM might be sufficient.
+** Storage: Use SSD storage for {mce-short}. 
+*** Management cluster: 250 GB.
+*** Registry: The storage needed depends on the number of releases, operators, and images that are hosted. An acceptable number might be 500 GB, preferably separated from the disk that hosts the hosted cluster.
+*** Web server: The storage needed depends on the number of ISOs and images that are hosted. An acceptable number might be 500 GB.
+** Production: For a production environment, separate the management cluster, the registry, and the web server on different disks. This example illustrates a possible configuration for production:
+*** Registry: 2 TB
+*** Management cluster: 500 GB
+*** Web server: 2 TB
+
++
+//lahinson - sept 2023 - adding comment to ensure proper formatting
+
+. To deploy a virtual {ocp-short} management cluster, access the required packages by entering the following command:
+
++
+----
+sudo dnf install dnsmasq radvd vim golang podman bind-utils net-tools httpd-tools tree htop strace tmux -y
+----
+
+. Enable and start the Podman service by entering the following command:
+
++
+----
+systemctl enable --now podman
+----
+
+. To use kcli to deploy the {ocp-short} management cluster and other virtual components, install and configure the hypervisor by entering the following commands:
+
++
+----
+sudo yum -y install libvirt libvirt-daemon-driver-qemu qemu-kvm
+----
+
++
+----
+sudo usermod -aG qemu,libvirt $(id -un)
+----
+
++
+----
+sudo newgrp libvirt
+----
+
++
+----
+sudo systemctl enable --now libvirtd
+----
+
++
+----
+sudo dnf -y copr enable karmab/kcli
+----
+
++
+----
+sudo dnf -y install kcli
+----
+
++
+----
+sudo kcli create pool -p /var/lib/libvirt/images default
+----
+
++
+----
+kcli create host kvm -H 127.0.0.1 local
+----
+
++
+----
+sudo setfacl -m u:$(id -un):rwx /var/lib/libvirt/images
+----
+
++
+----
+kcli create network  -c 192.168.122.0/24 default
+----
+
+. Enable the network dispatch manager to ensure that virtual machines can resolve the required domains, routes, and registries. To enable the network manager dispatcher, in the `/etc/NetworkManager/dispatcher.d/` directory, create a script named `forcedns` that contains the following content, replacing values as necessary to match your environment:
+
++
+----
+#!/bin/bash
+
+export IP="192.168.126.1" <1>
+export BASE_RESOLV_CONF="/run/NetworkManager/resolv.conf"
+
+if ! [[ `grep -q "$IP" /etc/resolv.conf` ]]; then
+export TMP_FILE=$(mktemp /etc/forcedns_resolv.conf.XXXXXX)
+cp $BASE_RESOLV_CONF $TMP_FILE
+chmod --reference=$BASE_RESOLV_CONF $TMP_FILE
+sed -i -e "s/hypershiftbm.lab//" -e "s/search /& hypershiftbm.lab /" -e "0,/nameserver/s/nameserver/& $IP\n&/" $TMP_FILE
+mv $TMP_FILE /etc/resolv.conf
+fi
+echo "ok"
+----
+
++
+<1> Modify the `IP` variable to point to the IP address of the hypervisor interface that hosts the {ocp-short} management cluster.
+
+. After you create the file, add execution permissions by entering the following command:
+
++
+----
+chmod 755 /etc/NetworkManager/dispatcher.d/forcedns
+----
+
+. Run the script and verify that the output returns `ok`.
+
+. Configure `ksushy` to simulate baseboard management controllers (BMCs) for the virtual machines. Enter the following commands:
+
++
+----
+sudo dnf install python3-pyOpenSSL.noarch python3-cherrypy -y
+----
+
++
+----
+kcli create sushy-service --ssl --port 9000
+----
+
++
+----
+sudo systemctl daemon-reload
+----
+
++
+----
+systemctl enable --now ksushy
+----
+
+. Test whether the service is correctly functioning by entering the following command:
+
++
+----
+systemctl status ksushy
+----
+
+. If you are working in a development environment, configure the hypervisor system to allow various types of connections through different virtual networks within the environment.
+
++
+*Note:* If you are working in a production environment, you must establish proper rules for the `firewalld` service and configure SELinux policies to maintain a secure environment. 
+
+** For SELinux, enter the following command:
+
++
+----
+sed -i s/^SELINUX=.*$/SELINUX=permissive/ /etc/selinux/config; setenforce 0
+----
+
+** For `firewalld`, enter the following command:
+
++
+----
+systemctl disable --now firewalld
+----
+
+** For `libvirtd`, enter the following commands:
+
++
+----
+systemctl restart libvirtd
+----
+
++
+----
+systemctl enable --now libvirtd
+----
+
++
+//lahinson - sept 2023 - adding comment to ensure proper formatting
+
+Next, configure DNS for your environment.
+
+
+[#ipv4-additional-resources]
+== Additional resources
+
+* For more information about kcli, see the link:https://kcli.readthedocs.io/en/latest/[official kcli documentation].
