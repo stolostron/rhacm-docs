@@ -1,19 +1,19 @@
-[#ipv4-hosted-cluster]
-= Deploying the hosted cluster for an IPv4 network
+[#ipv6-hosted-cluster]
+= Deploying the hosted cluster for an IPv6 network
 
 A _hosted cluster_ is an {ocp-short} cluster with its control plane and API endpoint hosted on a management cluster. The hosted cluster includes the control plane and its corresponding data plane.
 
 Although you can use the console in {product-title-short} to create a hosted cluster, the following procedures use manifests, which provide more flexibility for modifying the related artifacts.
 
-[#ipv4-hosted-cluster-objects]
+[#ipv6-hosted-cluster-objects]
 == Deploying hosted cluster objects
 
 For the purposes of this procedure, the following values are used:
 
-* `HostedCluster` name: `hosted-ipv4`
+* `HostedCluster` name: `hosted-ipv6`
 * `HostedCluster` namespace: `clusters`
 * Disconnected: true
-* Network stack: IPv4
+* Network stack: IPv6
 
 Typically, the HyperShift Operator creates the `HostedControlPlane` namespace. However, in this case, you want to include all the objects before the HyperShift Operator begins to reconcile the `HostedCluster` object. Then, when the Operator starts the reconciliation process, it can find all of the objects in place.
 
@@ -27,7 +27,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   creationTimestamp: null
-  name: clusters-hosted-ipv4
+  name: clusters-hosted-ipv6
 spec: {}
 status: {}
 ---
@@ -62,13 +62,13 @@ data:
 kind: Secret
 metadata:
   creationTimestamp: null
-  name: hosted-ipv4-pull-secret
+  name: hosted-ipv6-pull-secret
   namespace: clusters
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: sshkey-cluster-hosted-ipv4
+  name: sshkey-cluster-hosted-ipv6
   namespace: clusters
 stringData:
   id_rsa.pub: ssh-rsa xxxxxxxxx
@@ -79,7 +79,7 @@ data:
 kind: Secret
 metadata:
   creationTimestamp: null
-  name: hosted-ipv4-etcd-encryption-key
+  name: hosted-ipv6-etcd-encryption-key
   namespace: clusters
 type: Opaque
 ----
@@ -94,7 +94,7 @@ kind: Role
 metadata:
   creationTimestamp: null
   name: capi-provider-role
-  namespace: clusters-hosted-ipv4
+  namespace: clusters-hosted-ipv6
 rules:
 - apiGroups:
   - agent-install.openshift.io
@@ -115,8 +115,10 @@ rules:
 apiVersion: hypershift.openshift.io/v1beta1
 kind: HostedCluster
 metadata:
-  name: hosted-ipv4
+  name: hosted-ipv6
   namespace: clusters
+  annotations:
+    hypershift.openshift.io/control-plane-operator-image: registry.ocp-edge-cluster-0.qe.lab.redhat.com:5005/openshift/release@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8
 spec:
   additionalTrustBundle:
     name: "user-ca-bundle"
@@ -152,45 +154,45 @@ spec:
     - cidr: 172.31.0.0/16
   platform:
     agent:
-      agentNamespace: clusters-hosted-ipv4
+      agentNamespace: clusters-hosted-ipv6
     type: Agent
   pullSecret:
-    name: hosted-ipv4-pull-secret
+    name: hosted-ipv6-pull-secret
   release:
     image: registry.hypershiftbm.lab:5000/openshift/release-images:4.14.0-0.nightly-2023-08-29-102237
   secretEncryption:
     aescbc:
       activeKey:
-        name: hosted-ipv4-etcd-encryption-key
+        name: hosted-ipv6-etcd-encryption-key
     type: aescbc
   services:
   - service: APIServer
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-ipv4.hypershiftbm.lab
+        address: api.hosted-ipv6.hypershiftbm.lab
       type: NodePort
   - service: OAuthServer
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-ipv4.hypershiftbm.lab
+        address: api.hosted-ipv6.hypershiftbm.lab
       type: NodePort
   - service: OIDC
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-ipv4.hypershiftbm.lab
+        address: api.hosted-ipv6.hypershiftbm.lab
       type: NodePort
   - service: Konnectivity
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-ipv4.hypershiftbm.lab
+        address: api.hosted-ipv6.hypershiftbm.lab
       type: NodePort
   - service: Ignition
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-ipv4.hypershiftbm.lab
+        address: api.hosted-ipv6.hypershiftbm.lab
       type: NodePort
   sshKey:
-    name: sshkey-cluster-hosted-ipv4
+    name: sshkey-cluster-hosted-ipv6
 status:
   controlPlaneEndpoint:
     host: ""
@@ -251,12 +253,12 @@ packageserver-67c87d4d4f-kl7qh                        2/2     Running   0       
 +
 ----
 NAMESPACE   NAME         VERSION   KUBECONFIG                PROGRESS   AVAILABLE   PROGRESSING   MESSAGE
-clusters    hosted-ipv4            hosted-admin-kubeconfig   Partial    True          False         The hosted control plane is available
+clusters    hosted-ipv6            hosted-admin-kubeconfig   Partial    True          False         The hosted control plane is available
 ----
 
 Next, create a `NodePool` object.
 
-[#ipv4-hosted-cluster-node-pools]
+[#ipv6-hosted-cluster-node-pools]
 == Creating a NodePool object for the hosted cluster
 
 A `NodePool` is a scalable set of worker nodes that is associated with a hosted cluster. `NodePool` machine architectures remain consistent within a specific pool and are independent of the machine architecture of the control plane.
@@ -272,11 +274,11 @@ apiVersion: hypershift.openshift.io/v1beta1
 kind: NodePool
 metadata:
   creationTimestamp: null
-  name: hosted-ipv4
+  name: hosted-ipv6
   namespace: clusters
 spec:
   arch: amd64
-  clusterName: hosted-ipv4
+  clusterName: hosted-ipv6
   management:
     autoRepair: false <3>
     upgradeType: InPlace <2>
@@ -311,12 +313,12 @@ oc apply -f 02-nodepool.yaml
 +
 ----
 NAMESPACE   NAME          CLUSTER   DESIRED NODES   CURRENT NODES   AUTOSCALING   AUTOREPAIR   VERSION                              UPDATINGVERSION   UPDATINGCONFIG   MESSAGE
-clusters    hosted-ipv4   hosted    0                               False         False        4.14.0-0.nightly-2023-08-29-102237
+clusters    hosted-ipv6   hosted    0                               False         False        4.14.0-0.nightly-2023-08-29-102237
 ----
 
 Next, create an `InfraEnv` resource.
 
-[#ipv4-infraenv]
+[#ipv6-infraenv]
 == Creating an InfraEnv resource for the hosted cluster
 
 The `InfraEnv` resource is an Assisted Service object that includes essential details, such as the `pullSecretRef` and the `sshAuthorizedKey`. Those details are used to create the Red Hat Enterprise Linux CoreOS (RHCOS) boot image that is customized for the hosted cluster. 
@@ -330,8 +332,8 @@ The `InfraEnv` resource is an Assisted Service object that includes essential de
 apiVersion: agent-install.openshift.io/v1beta1
 kind: InfraEnv
 metadata:
-  name: hosted-ipv4
-  namespace: clusters-hosted-ipv4
+  name: hosted-ipv6
+  namespace: clusters-hosted-ipv6
 spec:
   pullSecretRef: <1>
     name: pull-secret
@@ -354,23 +356,23 @@ oc apply -f 03-infraenv.yaml
 +
 ----
 NAMESPACE              NAME     ISO CREATED AT
-clusters-hosted-ipv4   hosted   2023-09-11T15:14:10Z
+clusters-hosted-ipv6   hosted   2023-09-11T15:14:10Z
 ----
 
 Next, create worker nodes.
 
-[#ipv4-hosted-cluster-worker-nodes]
+[#ipv6-hosted-cluster-worker-nodes]
 == Creating worker nodes for the hosted cluster
 
 If you are working on a bare metal platform, creating worker nodes is crucial to ensure that the details in the `BareMetalHost` are correctly configured. 
 
-If you are working with virtual machines, you can complete the following steps to create empty worker nodes that the Metal3 Operator will consume. To do so, you use `kcli`.
+If you are working with virtual machines, you can complete the following steps to create empty worker nodes that the Metal3 Operator will consume. To do so, you use the `kcli` tool.
 
 . If this is not your first attempt to create worker nodes, you must first delete your previous setup. To do so, delete the plan by entering the following command:
 
 +
 ----
-kcli delete plan hosted-ipv4
+kcli delete plan hosted-ipv6
 ----
 
 .. When you are prompted to confirm whether you want to delete the plan, type `y`.
@@ -381,17 +383,17 @@ kcli delete plan hosted-ipv4
 
 +
 ----
-kcli create vm -P start=False -P uefi_legacy=true -P plan=hosted-ipv4 -P memory=8192 -P numcpus=16 -P disks=[200,200] -P nets=["{\"name\": \"ipv4\", \"mac\": \"aa:aa:aa:aa:02:11\"}"] -P uuid=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0211 -P name=hosted-ipv4-worker0
+kcli create vm -P start=False -P uefi_legacy=true -P plan=hosted-ipv6 -P memory=8192 -P numcpus=16 -P disks=[200,200] -P nets=["{\"name\": \"ipv6\", \"mac\": \"aa:aa:aa:aa:02:11\"}"] -P uuid=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0211 -P name=hosted-ipv6-worker0
 ----
 
 +
 ----
-kcli create vm -P start=False -P uefi_legacy=true -P plan=hosted-ipv4 -P memory=8192 -P numcpus=16 -P disks=[200,200] -P nets=["{\"name\": \"ipv4\", \"mac\": \"aa:aa:aa:aa:02:12\"}"] -P uuid=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0212 -P name=hosted-ipv4-worker1
+kcli create vm -P start=False -P uefi_legacy=true -P plan=hosted-ipv6 -P memory=8192 -P numcpus=16 -P disks=[200,200] -P nets=["{\"name\": \"ipv6\", \"mac\": \"aa:aa:aa:aa:02:12\"}"] -P uuid=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0212 -P name=hosted-ipv6-worker1
 ----
 
 +
 ----
-kcli create vm -P start=False -P uefi_legacy=true -P plan=hosted-ipv4 -P memory=8192 -P numcpus=16 -P disks=[200,200] -P nets=["{\"name\": \"ipv4\", \"mac\": \"aa:aa:aa:aa:02:13\"}"] -P uuid=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0213 -P name=hosted-ipv4-worker2
+kcli create vm -P start=False -P uefi_legacy=true -P plan=hosted-ipv6 -P memory=8192 -P numcpus=16 -P disks=[200,200] -P nets=["{\"name\": \"ipv6\", \"mac\": \"aa:aa:aa:aa:02:13\"}"] -P uuid=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0213 -P name=hosted-ipv6-worker2
 ----
 
 +
@@ -421,15 +423,15 @@ where:
 +---------------------+--------+-------------------+----------------------------------------------------+-------------+---------+
 |         Name        | Status |         Ip        |                       Source                       |     Plan    | Profile |
 +---------------------+--------+-------------------+----------------------------------------------------+-------------+---------+
-|    hosted-worker0   |  down  |                   |                                                    | hosted-ipv4 |  kvirt  |
-|    hosted-worker1   |  down  |                   |                                                    | hosted-ipv4 |  kvirt  |
-|    hosted-worker2   |  down  |                   |                                                    | hosted-ipv4 |  kvirt  |
+|    hosted-worker0   |  down  |                   |                                                    | hosted-ipv6 |  kvirt  |
+|    hosted-worker1   |  down  |                   |                                                    | hosted-ipv6 |  kvirt  |
+|    hosted-worker2   |  down  |                   |                                                    | hosted-ipv6 |  kvirt  |
 +---------------------+--------+-------------------+----------------------------------------------------+-------------+---------+
 ----
 
 Next, create bare metal hosts for the hosted cluster.
 
-[#ipv4-bmh-hosted-cluster]
+[#ipv6-bmh-hosted-cluster]
 == Creating bare metal hosts for the hosted cluster
 
 A _bare metal host_ is an `openshift-machine-api` object that encompasses physical and logical details so that it can be identified by a Metal3 Operator. Those details are associated with other Assisted Service objects, known as _agents_.
@@ -450,8 +452,8 @@ To create a bare metal host, complete the following steps:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: hosted-ipv4-worker0-bmc-secret
-  namespace: clusters-hosted-ipv4
+  name: hosted-ipv6-worker0-bmc-secret
+  namespace: clusters-hosted-ipv6
 data:
   password: YWRtaW4=
   username: YWRtaW4=
@@ -460,20 +462,20 @@ type: Opaque
 apiVersion: metal3.io/v1alpha1
 kind: BareMetalHost
 metadata:
-  name: hosted-ipv4-worker0
-  namespace: clusters-hosted-ipv4
+  name: hosted-ipv6-worker0
+  namespace: clusters-hosted-ipv6
   labels:
-    infraenvs.agent-install.openshift.io: hosted-ipv4 <1>
+    infraenvs.agent-install.openshift.io: hosted-ipv6 <1>
   annotations:
     inspect.metal3.io: disabled
-    bmac.agent-install.openshift.io/hostname: hosted-ipv4-worker0 <2>
+    bmac.agent-install.openshift.io/hostname: hosted-ipv6-worker0 <2>
 spec:
   automatedCleaningMode: disabled <3>
   bmc:
     disableCertificateVerification: true <4>
-    address: redfish-virtualmedia://[192.168.125.1]:9000/redfish/v1/Systems/local/hosted-ipv4-worker0 <5>
-    credentialsName: hosted-ipv4-worker0-bmc-secret <6>
-  bootMACAddress: aa:aa:aa:aa:02:11 <7>
+    address: redfish-virtualmedia://[192.168.125.1]:9000/redfish/v1/Systems/local/hosted-ipv6-worker0 <5>
+    credentialsName: hosted-ipv6-worker0-bmc-secret <6>
+  bootMACAddress: aa:aa:aa:aa:03:11 <7>
   online: true <8>
 ----
 
@@ -484,7 +486,7 @@ spec:
 <4> `disableCertificateVerification` is set to `true` to bypass certificate validation from the client.
 <5> `address` denotes the baseboard management controller (BMC) address of the worker node.
 <6> `credentialsName` points to the secret where the user and password credentials are stored.
-<7> `bootMACAddress` indicates the interface MACAddress that the node starts from.
+<7> `bootMACAddress` indicates the interface MAC address that the node starts from.
 <8> `online` defines the state of the node after the `BareMetalHost` object is created.
 
 . Deploy the `BareMetalHost` object by entering the following command:
@@ -543,7 +545,7 @@ clusters-hosted   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0413             true       au
 +
 The agents represent nodes that are available for installation. To assign the nodes to a hosted cluster, scale up the node pool.
 
-[#ipv4-scale-node-pool-hosted-cluster]
+[#ipv6-scale-node-pool-hosted-cluster]
 == Scaling up the node pool
 
 After you create the bare metal hosts, their statuses change from `Registering` to `Provisioning` to `Provisioned`. The nodes start with the `LiveISO` of the agent and a default pod that is named `agent`. That agent is responsible for receiving instructions from the Assisted Service Operator to install the {ocp-short} payload.
@@ -552,7 +554,7 @@ After you create the bare metal hosts, their statuses change from `Registering` 
 
 +
 ----
-oc -n clusters scale nodepool hosted-ipv4 --replicas 3
+oc -n clusters scale nodepool hosted-ipv6 --replicas 3
 ----
 
 . After the scaling process is complete, notice that the agents are assigned to a hosted cluster:
@@ -560,9 +562,9 @@ oc -n clusters scale nodepool hosted-ipv4 --replicas 3
 +
 ----
 NAMESPACE         NAME                                   CLUSTER   APPROVED   ROLE          STAGE
-clusters-hosted   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0411   hosted    true       auto-assign
-clusters-hosted   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0412   hosted    true       auto-assign
-clusters-hosted   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0413   hosted    true       auto-assign
+clusters-hosted   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0211   hosted    true       auto-assign
+clusters-hosted   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0212   hosted    true       auto-assign
+clusters-hosted   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0213   hosted    true       auto-assign
 ----
 
 . Also notice that the node pool replicas are set:
