@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Dashboard
-description: Dashboard view of documentation tasks and bugs for assigning story points.
-img: assets/img/12-dashboard.png
-redirect: https://issues.redhat.com/secure/Dashboard.jspa?selectPageId=12350324
+title: Z-Streams
+description: Overview of ACM and MCE Z-Stream release schedules for Errata updates.
+img: assets/img/12-zstream.png
+redirect: https://docs.google.com/document/d/1J8xDUVL_WRC0lpldRCatR1YXQpdgHMkDP5jTtQ2uiZA/edit
 importance: 12
 category: work
 ---
