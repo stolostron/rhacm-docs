@@ -1,7 +1,7 @@
 [#troubleshooting-network-config-bm]
-= Adding day-2 nodes to an existing cluster fails pending user action
+= Adding day-2 nodes to an existing cluster fails with pending user action
 
-Adding a new node (scale out) to your existing cluster created by the multicluster engine for Kubernetes (MCE), with  Zero Touch Provisioning (ZTP) or Host inventory create methods. The installation on this node fails. More on concrete, the installation goes oka during the first (discovery phase), but it fails on the installation phase. Using RHACM GUI you will see a pending user action. In the description, you can see it is failing on the rebooting step.
+Adding a new node (scale out) to your existing cluster created by the multicluster engine for Kubernetes (MCE), with  Zero Touch Provisioning (ZTP) or Host inventory create methods. The installation on this node fails. More on concrete, the installation works correctly during the discovery phase, but it fails on the installation phase. Using RHACM GUI you will see a pending user action. In the description, you can see it is failing on the rebooting step.
 
 The configuration of the network is failing. Therefore, the message on what could be failing would be not very accurate. Because the agent cannot longer report information back.
  
@@ -9,33 +9,34 @@ The configuration of the network is failing. Therefore, the message on what coul
 == Symptom: Installation for day two workers fails
 
 At the Discover phase, the host cannot configure the network. Check for the following symptoms and messages:
-----
-This host is pending user action. Host timed out when pulling ignition. Check the host console...
-----
 
-Also check all the MCs (we need this actual term) from the `/sysroot/etc/NetworkManager/system-connections/` or `/sysroot/etc/sysconfig/network-scripts/` file paths. 
+ * Check, that RHACM GUI shows an Pending user action on the adding node.
+====
+This host is pending user action. Host timed out when pulling ignition. Check the host console... *Rebooting*
+====
+ * Check all the MachineConfings of the currently existing cluster. Check if any of the MachineConfigs create any file on the following directories: 
+    ** `/sysroot/etc/NetworkManager/system-connections/` 
+    ** `/sysroot/etc/sysconfig/network-scripts/` 
 
-Check the failing host for the following messages:
+ * Check the failing host (console or journalctl) for the following messages:
+====
+info: networking config is defined in the real root
 
-----
-system: Stopped Create Volatile Files and Directories...
-----
-----
-system: Stopped target Swap...
-----
+info: will not attempt to propagate initramfs networking
+====
+Actually, this last message is the real problem. The networking configuration is not been propagated. Because it already found an existing network configuration on the folders listed above.
 
 [#resolving-cluster-rotating-agents]
-== Resolving the problem: Manually configure the network
+== Resolving the problem: Recreate the node merging network configuration
 
 Perform the following task to manually configure your network:
 
-. Delete the node from your hub cluster.
-. Create your cluster from the console again.
-. Add or append the following annotation to the BMH of the new node:
-
-----
+. Delete the node from your hub cluster
+. Repeat your previous process to install the node in the same way
+. This time, add the following annotation to the BareMetalHost (BMH) object of the new node: 
+====
 "bmac.agent-install.openshift.io/installer-args": "[\"--append-karg\", \"coreos.force_persist_ip\"]"
-----
+====
 
-The node starts the installation, and after the Discovery phase, merges the network configuration between your changes and the initial phase.
+The node starts the installation. After the Discovery phase, it will reboot. This time, it merges the network configuration between the changes on the existint cluster and the initial configuration.
 
