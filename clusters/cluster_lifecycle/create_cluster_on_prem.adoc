@@ -90,6 +90,82 @@ You can view the status of the installation on the _Clusters_ navigation page.
 
 Continue with xref:../cluster_lifecycle/access_cluster.adoc#accessing-your-cluster[Accessing your cluster] for instructions for accessing your cluster. 
 
+[#on-prem-boot-host-bmh]
+== Booting a host address by using bare metal hosts for on-premise environments
+
+Complete the following steps to use an automated procedure for booting a host address by using bare metal hosts:
+
+. Create a BMC secret by applying the following YAML content and replacing values where needed:
++
+[source,YAML]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: <bmc-secret-name>
+  namespace: <namespace>
+type: Opaque
+data:
+  username: <username>
+  password: <password>
+----
+
+. Create a bare metal host by applying the following YAML content and replacing values where needed:
++
+[source,YAML]
+----
+apiVersion: metal3.io/v1alpha1
+kind: BareMetalHost
+metadata:
+  name: <bmh-name>
+  namespace: <namespace>
+  annotations:
+    inspect.metal3.io: disabled
+  labels:
+    infraenvs.agent-install.openshift.io: <myinfraenv> <1>
+spec:
+  online: true
+  automatedCleaningMode: disabled <2>
+  bootMACAddress: <your-mac-address>  <3>
+  bmc:
+    address: <machine-address> <4>
+    credentialsName: <bmc-secret-name> <5>
+----
+<1> Must match the InfraEnv name and exist in the same namespace.
+<2> If you do not set a value, `metadata` is automatically used.
+<3> Use your mac address.
+<4> Use your machine address.
+<5> Make sure `credentialsName` matches the name of the BMC secret you created.
+
+After turning on the host, the image starts downloading. This might take a few mintues. When the host is discovered, an agent custom resource is created automatically.
+
+The following annotations are available for the agent custom resource:
+|===
+| Annotation | Optional or required | Description
+
+| `bmac.agent-install.openshift.io/role`
+| Required
+| Master or worker role.
+
+| `bmac.agent-install.openshift.io/hostname`
+| Optional
+|
+
+| `bmac.agent-install.openshift.io/machine-config-pool`
+| Optional
+|
+
+| `bmac.agent-install.openshift.io/installer-args`
+| Optional
+|
+
+| `bmac.agent-install.openshift.io/ignition-config-overrides`
+| Optional
+|
+|===
+
+See link:https://docs.openshift.com/container-platform/4.13/installing/installing_bare_metal_ipi/ipi-install-prerequisites.html#network-requirements-out-of-band_ipi-install-prerequisites[Port access for the out-of-band management IP address] to learn about the required ports for using a bare metal host.
+
 [#additional-resources-cluster-on-premises]
 == Additional resources
 
