@@ -1,39 +1,50 @@
-[#troubleshooting-network-config-bm]
-= Troubleshooting network configuration for bare metal clusters
+[#troubleshooting-network-config-fail]
+= Troubleshooting: Adding day-two nodes to an existing cluster fails with pending user action
 
-When you have a cluster that is installed by the Infrastructure Operator for Red Hat OpenShift, you must manually update the network configuration for your hub cluster to install workers.
+Adding a node, or scaling out, to your existing cluster that is created by the {mce} with Zero Touch Provisioning or Host inventory create methods fails during installation. The installation process works correctly during the Discovery phase, but fails on the installation phase. 
+
+The configuration of the network is failing. Using the console, you see a `pending` user action. In the description, you can see it failing on the rebooting step.
+
+The error message about failing is not very accurate, since the agent cannot report information.
  
-[#symptom-worker-node-fail]
+[#symptom-network-config-fail]
 == Symptom: Installation for day two workers fails
 
 At the Discover phase, the host cannot configure the network. Check for the following symptoms and messages:
+
+* In the console, check for `Pending` user action on the adding node, with the `Rebooting` indicator:
++
 ----
-This host is pending user action. Host timed out when pulling ignition. Check the host console...
+This host is pending user action. Host timed out when pulling ignition. Check the host console... Rebooting
 ----
 
-Also check all the MCs (we need this actual term) from the `/sysroot/etc/NetworkManager/system-connections/` or `/sysroot/etc/sysconfig/network-scripts/` file paths. 
+* Check all the `MachineConfings` of the existing cluster. Check if any of the `MachineConfigs` create any file on the following directories: 
 
-Check the failing host for the following messages:
+ ** `/sysroot/etc/NetworkManager/system-connections/` 
+ ** `/sysroot/etc/sysconfig/network-scripts/` 
+
+In the console, check the failing host for the following messages. You can also use `journalctl` to see the log messages:
 
 ----
-system: Stopped Create Volatile Files and Directories...
-----
-----
-system: Stopped target Swap...
+info: networking config is defined in the real root
+
+info: will not attempt to propagate initramfs networking
 ----
 
-[#resolving-cluster-rotating-agents]
-== Resolving the problem: Manually configure the network
+If you get the last message in the log, the networking configuration is not propagated because it already found an existing network configuration on the folders previously listed in the _Symptom_.
+
+[#resolving-network-config-fail]
+== Resolving the problem: Recreate the node merging network configuration
 
 Perform the following task to manually configure your network:
 
-. Delete the node from your hub cluster.
-. Create your cluster from the console again.
-. Add or append the following annotation to the BMH of the new node:
-
+. Delete the node from your hub cluster
+. Repeat your previous process to install the node as you did before.
+. Then, add the following annotation to the `BareMetalHost` object of the new node: 
++
 ----
 "bmac.agent-install.openshift.io/installer-args": "[\"--append-karg\", \"coreos.force_persist_ip\"]"
 ----
 
-The node starts the installation, and after the Discovery phase, merges the network configuration between your changes and the initial phase.
+The node starts the installation and after the Discovery phase, it reboots. With succes, it merges the network configuration between the changes on the existing cluster and the initial configuration.
 
