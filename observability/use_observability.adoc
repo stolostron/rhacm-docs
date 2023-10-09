@@ -20,15 +20,18 @@ oc get route rbac-query-proxy -n open-cluster-management-observability
 ----
 
 * You can also access the `rbac-query-proxy` route with your OpenShift OAuth access token. The token should be associated with a user or service account, which has permission to get namespaces. For more information, see link:https://docs.openshift.com/container-platform/4.11/authentication/managing-oauth-access-tokens.html[Managing user-owned OAuth access tokens].
-//should this be a step
-//is this a substep if the user chooses to access the `rbac-query-proxy`?
-* Get the default CA certificate and store the content of the key `tls.crt` in a local file. Run the following command:
+
+//need to improve the flow here; should these steps be in a separate section? How is this related to querying external queries?
+
+Complete the following steps to create `proxy-byo-cert` secrets for observability:
+
+. Get the default CA certificate and store the content of the key `tls.crt` in a local file. Run the following command:
 +
 ----
 oc -n openshift-ingress get secret router-certs-default -o jsonpath="{.data.tls\.crt}" | base64 -d > ca.crt
 ----
 
-* Run the following command to query metrics:
+. Run the following command to query metrics:
 +
 ----
 curl --cacert ./ca.crt -H "Authorization: Bearer {TOKEN}" https://{PROXY_ROUTE_URL}/api/v1/query?query={QUERY_EXPRESSION}
@@ -36,20 +39,19 @@ curl --cacert ./ca.crt -H "Authorization: Bearer {TOKEN}" https://{PROXY_ROUTE_U
 +
 *Note:* The `QUERY_EXPRESSION` is the standard Prometheus query expression. For example, query the metrics `cluster_infrastructure_provider` by replacing the URL in the previously mentioned command with the following URL: `https://{PROXY_ROUTE_URL}/api/v1/query?query=cluster_infrastructure_provider`. For more details, see link:https://prometheus.io/docs/prometheus/latest/querying/basics/[Querying Prometheus].
 
-.. Run the following command to create `proxy-byo-ca` secrets using the generated certificates:
+. Run the following command to create `proxy-byo-ca` secrets using the generated certificates:
 +
 [source,bash]
 ----
 oc -n open-cluster-management-observability create secret tls proxy-byo-ca --cert ./ca.crt --key ./ca.key
 ----
 
-.. Run the following command to create `proxy-byo-cert` secrets using the generated certificates:
+. Create `proxy-byo-cert` secrets using the generated certificates by using the following command:
 +
 [source,bash]
 ----
 oc -n open-cluster-management-observability create secret tls proxy-byo-cert --cert ./ingress.crt --key ./ingress.key
 ----
-
 //how to verify query...refresh your page to view your query
 . Refresh your page to verify your metrics.
 
