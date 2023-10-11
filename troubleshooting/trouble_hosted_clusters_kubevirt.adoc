@@ -15,7 +15,7 @@ A hosted control plane is not coming fully online because a `HostedCluster` reso
 
 * View the conditions on the `HostedCluster` and `NodePool` resources for validation errors that prevent progress.
 
-* In the `kubeconfig` file of the hosted cluster, inspect the status of the hosted cluster: 
+* By using the `kubeconfig` file of the hosted cluster, inspect the status of the hosted cluster: 
 
 ** View the output of the `oc get clusteroperators` command to see which cluster operators are pending. 
 
@@ -57,7 +57,7 @@ If the virt-launcher pods are in a pending state, investigate why the pods are n
 
 * If the VMs are running but they are not registered as worker nodes, use the web console to gain VNC access to one of the affected VMs. The VNC output indicates whether the ignition configuration was applied. If a VM cannot access the hosted control plane ignition server on startup, the VM cannot be provisioned correctly.
 
-* If the ignition configuration was applied but the VM is still not registering as a node, go to the <<identifying-vm-bootstrap-logs,Identifying the problem: Accessing VM bootstrap logs>> section to learn how to access the VM console logs during startup.
+* If the ignition configuration was applied but the VM is still not registering as a node, go to the <<identifying-vm-console-logs,Identifying the problem: Access the VM console logs>> section to learn how to access the VM console logs during startup.
 
 [#symptom-worker-nodes-stuck]
 == Symptom: Worker nodes are stuck in the NotReady state
@@ -129,7 +129,7 @@ A hosted control plane is not coming fully online because the persistent volume 
 
 * Look for events and details that are associated with the PVC to understand which errors are occurring.
 
-* If a PVC is failing to attach to a pod, view the logs for the kubevirt-sci-node daemonset component within the hosted cluster to further investigate the problem. To identify the kubevirt-csi-node pods for each node, enter the following command:
+* If a PVC is failing to attach to a pod, view the logs for the kubevirt-csi-node daemonset component within the hosted cluster to further investigate the problem. To identify the kubevirt-csi-node pods for each node, enter the following command:
 
 +
 ----
@@ -143,90 +143,15 @@ oc get pods -n openshift-cluster-csi-drivers -o wide -l app=kubevirt-csi-driver
 oc get pods -n <hcp namespace> -l app=kubevirt-csi-driver
 ----
 
-[#symptom-vm-bootstrap-logs]
+[#symptom-vm-console-logs]
 == Symptom: VM nodes are not correctly joining the cluster
 
 A hosted control plane is not coming fully online because the VM nodes are not correctly joining the cluster.
 
-[#identifying-vm-bootstrap-logs]
-== Identifying the problem: Accessing VM bootstrap logs
+[#identifying-vm-console-logs]
+== Identifying the problem: Access the VM console logs
 
-* If you use KubeVirt 1.1.0, you can access logs from the serial console of guest VMs by entering the following command:
+To access the VM console logs, follow the steps in link:https://access.redhat.com/solutions/7037705[How to get serial console logs for VMs part of OpenShift Virtualization Hosted Control Plane clusters].
 
-+
-----
-kubectl logs -n <namespace> <vmi_pod> -c guest-console-log
-----
-
-* If you use KubeVirt 1.0.0, you can use a helper script to stream the logs from an interactive console that runs in the background.
-
-.. Save the following script as `hypershift_kv_log.sh`:
-
-+
-----
-#!/bin/bash
-HC_NAMESPACE="${HC_NAMESPACE:-clusters}" <1>
-NAME=$1
-
-if [[ -z "${NAME}" ]]
-then
-    echo "Please specify the name of the guest cluster."
-    exit 1
-fi
-
-VMNS="${HC_NAMESPACE}"-"${NAME}"
-REPLICAS=$(oc get NodePool -n "${HC_NAMESPACE}" "${NAME}" -o=jsonpath='{.spec.replicas}')
-PLATFORMTYPE=$(oc get NodePool -n "${HC_NAMESPACE}" "${NAME}" -o=jsonpath='{.spec.platform.type}')
-INFRAID=$(oc get HostedCluster -n "${HC_NAMESPACE}" "${NAME}" -o=jsonpath='{.spec.infraID}')
-
-if [[ "${PLATFORMTYPE}" != "KubeVirt" ]]; then
-    echo "This tool is designed for the KubeVirt provider."
-    exit 1
-fi
-
-if ! which tmux >/dev/null 2>&1;
-then
-    echo "this tool requires tmux, please install it."
-    exit 1
-fi
-
-VMNAMES=()
-
-while [[ ${#VMNAMES[@]} < ${REPLICAS}  ]]; do
-  for VMNAME in $(oc get vmi -n "${VMNS}" -l hypershift.openshift.io/infra-id="${INFRAID}" -o name 2>/dev/null); do
-    SVMNAME=${VMNAME/virtualmachineinstance.kubevirt.io\//}
-    if ! [[ " ${VMNAMES[*]} " =~ ${SVMNAME} ]]; then
-       VMNAMES+=("${SVMNAME}")
-       tmux new-session -s "${SVMNAME}" -d "virtctl console --timeout 30 -n ${VMNS} ${SVMNAME} | tee -a ${VMNS}_${SVMNAME}.log"
-       echo "logs for VM ${SVMNAME} will be appended to ${VMNS}_${SVMNAME}.log"
-    fi
-  done
-  sleep 3
-done
-
-echo "Log collection will continue in background while the VMs are running."
-echo "Please avoid trying to directly connect to VM console with 'virtctl console' to avoid hijacking open sessions:"
-echo "you can instead use 'tmux attach -t <vmname>' to reach open session, this will not break file logging."
-----
-
-+
-<1> If the namespace on the hosted cluster is not `clusters`, you can set a custom value by using the `HC_NAMESPACE` environment variable.
-
-+
-.. As soon as you create the `HostedCluster` resource, run the script by entering the following command:
-
-+
-----
-hypershift_kv_log.sh <hosted-cluster-name>
-----
-+
-
-The script loops until all of the expected VMs are created. Log collection continues in the background in `tmux` sessions until the VMs are running.
-
-+
-*Note:* To avoid breaking the logging, do not directly connect to the VM console by entering `virtctl console`. Instead, you can enter `tmux attach -t <vmname>` and use the serial console.
-
-+
-//lahinson - oct. 2023 -adding comment to ensure proper formatting
-
-
+//lahinson - oct. 2023 - adding commented-out text to use in the OCP 4.15 timeframe:
+// In {ocp-virt} 4.15, enter the following command to access the VM console logs: `oc logs -n <namespace> <vmi_pod> -c guest-console-log`
