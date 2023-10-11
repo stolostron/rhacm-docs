@@ -12,9 +12,13 @@ A hosted control plane is not coming fully online because a `HostedCluster` reso
 == Identifying the problem: Check prerequisites, resource conditions, and node and operator status
 
 * Ensure that you meet all of the prerequisites for a hosted cluster on {ocp-virt}
+
 * View the conditions on the `HostedCluster` and `NodePool` resources for validation errors that prevent progress.
+
 * In the `kubeconfig` file of the hosted cluster, inspect the status of the hosted cluster: 
+
 ** View the output of the `oc get clusteroperators` command to see which cluster operators are pending. 
+
 ** View the output of the `oc get nodes` command to ensure that worker nodes are ready.
 
 [#symptom-hosted-control-plane-no-worker-nodes]
@@ -26,24 +30,33 @@ A hosted control plane is not coming fully online because the hosted control pla
 == Identifying the problem: Check the status of various parts of the hosted control plane
 
 * View the `HostedCluster` and `NodePool` conditions for failures that indicate what the problem might be.
+
 * Enter the following command to view the KubeVirt worker node virtual machine (VM) status for the `NodePool` resource:
+
 +
 ----
 oc get vm -n <namespace>
 ----
+
 * If the VMs are stuck in the provisioning state, enter the following command to view the CDI import pods within the VM namespace for clues about why the importer pods have not completed:
+
 +
 ----
 oc get pods -n <namespace> | grep "import"
 ----
+
 * If the VMs are stuck in the starting state, enter the following command to view the status of the virt-launcher pods:
+
 +
 ----
 oc get pods -n <namespace> -l kubevirt.io=virt-launcher
 ----
+
 +
 If the virt-launcher pods are in a pending state, investigate why the pods are not being scheduled. For example, not enough resources might exist to run the virt-launcher pods.
+
 * If the VMs are running but they are not registered as worker nodes, use the web console to gain VNC access to one of the affected VMs. The VNC output indicates whether the ignition configuration was applied. If a VM cannot access the hosted control plane ignition server on startup, the VM cannot be provisioned correctly.
+
 * If the ignition configuration was applied but the VM is still not registering as a node, go to the <<identifying-vm-bootstrap-logs,Identifying the problem: Accessing VM bootstrap logs>> section to learn how to access the VM console logs during startup.
 
 [#symptom-worker-nodes-stuck]
@@ -55,11 +68,14 @@ During cluster creation, nodes enter the `NotReady` state temporarily while the 
 == Identifying the problem: Investigate the node object and pods
 
 * Enter the following command to view the conditions on the node object and determine why the node is not ready:
+
 +
 ----
 oc get nodes -o yaml
 ----
+
 * Enter the following command to look for failing pods within the cluster:
+
 +
 ----
 oc get pods -A --field-selector=status.phase!=Running,status,phase!=Succeeded
@@ -74,12 +90,16 @@ A hosted control plane is not coming fully online because the Ingress and consol
 == Identifying the problem: Check wildcard DNS routes and load balancer
 
 * If the cluster uses the default Ingress behavior, enter the following command to ensure that wildcard DNS routes are enabled on the {ocp-short} cluster that the VMs are hosted on:
+
 +
 ----
 oc patch ingresscontroller -n openshift-ingress-operator default --type=json -p '[{ "op": "add", "path": "/spec/routeAdmission", "value": {wildcardPolicy: "WildcardsAllowed"}}]'
 ----
+
 * If you use a custom base domain for the hosted control plane, complete the following steps:
+
 ** Ensure that the load balancer is targeting the VM pods correctly.
+
 ** Ensure that the wildcard DNS entry is targeting the load balancer IP.
 
 [#symptom-hosted-cluster-load-balancer]
@@ -91,7 +111,9 @@ A hosted control plane is not coming fully online because the load balancer serv
 == Identifying the problem: Check events, details, and the kccm pod
 
 * Look for events and details that are associated with the load balancer service within the hosted cluster.
+
 * By default, load balancers for the hosted cluster are handled by the kubevirt-cloud-controller-manager within the hosted control plane namespace. Ensure that the kccm pod is online and view its logs for errors or warnings. To identify the kccm pod in the hosted control plane namespace, enter the following command:
+
 +
 ----
 oc get pods -n <hosted-control-plane-namespace> -l app=cloud-controller-manager
@@ -106,12 +128,16 @@ A hosted control plane is not coming fully online because the persistent volume 
 == Identifying the problem: Check PVC events and details, and component logs
 
 * Look for events and details that are associated with the PVC to understand which errors are occurring.
+
 * If a PVC is failing to attach to a pod, view the logs for the kubevirt-sci-node daemonset component within the hosted cluster to further investigate the problem. To identify the kubevirt-csi-node pods for each node, enter the following command:
+
 +
 ----
 oc get pods -n openshift-cluster-csi-drivers -o wide -l app=kubevirt-csi-driver
 ----
+
 * If a PVC cannot bind to a persistent volume (PV), view the logs of the kubevirt-csi-controller component within the hosted control plane namespace. To identify the kubevirt-csi-controller pod within the hosted control plane namespace, enter the following command:
+
 +
 ----
 oc get pods -n <hcp namespace> -l app=kubevirt-csi-driver
@@ -126,13 +152,16 @@ A hosted control plane is not coming fully online because the VM nodes are not c
 == Identifying the problem: Accessing VM bootstrap logs
 
 * If you use KubeVirt 1.1.0, you can access logs from the serial console of guest VMs by entering the following command:
+
 +
 ----
 kubectl logs -n <namespace> <vmi_pod> -c guest-console-log
 ----
+
 * If you use KubeVirt 1.0.0, you can use a helper script to stream the logs from an interactive console that runs in the background.
 
 .. Save the following script as `hypershift_kv_log.sh`:
+
 +
 ----
 #!/bin/bash
@@ -185,13 +214,19 @@ echo "you can instead use 'tmux attach -t <vmname>' to reach open session, this 
 
 +
 .. As soon as you create the `HostedCluster` resource, run the script by entering the following command:
+
 +
 ----
 hypershift_kv_log.sh <hosted-cluster-name>
 ----
 +
+
 The script loops until all of the expected VMs are created. Log collection continues in the background in `tmux` sessions until the VMs are running.
+
 +
 *Note:* To avoid breaking the logging, do not directly connect to the VM console by entering `virtctl console`. Instead, you can enter `tmux attach -t <vmname>` and use the serial console.
+
++
+//lahinson - oct. 2023 -adding comment to ensure proper formatting
 
 
