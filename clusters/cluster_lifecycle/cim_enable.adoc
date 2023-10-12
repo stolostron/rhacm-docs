@@ -10,9 +10,9 @@ See the following prerequisites before creating an host inventory:
 
 - You must have a deployed hub cluster on {ocp-short} version 4.11 or later.
 - You need internet access for your hub cluster (connected), or a connection to an internal or mirror registry that has a connection to the internet (disconnected) to retrieve the required images for creating the environment.
-- You must have the Bare Metal Operator installed on your hub cluster.
-- You need an {ocp-short} link:https://console.redhat.com/openshift/install/pull-secret[pull secret]. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/images/managing-images#using-image-pull-secrets[Using image pull secrets] for more information. 
-- You need a storage class configured as `default`.
+- You need a bare metal host custom resource definition.
+- You need an {ocp-short} link:https://console.redhat.com/openshift/install/pull-secret[pull secret]. See _Using image pull secrets_ for more information. 
+- You need a configured default storage class.
 - For disconnected environments only, complete the procedure for link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/scalability_and_performance/clusters-at-the-network-far-edge#ztp-acm-preparing-to-install-disconnected-acm_ztp-deploying-disconnected[Clusters at the network far edge] in the {ocp-short} documentation.
 
 [#enable-cim-provision]
@@ -27,7 +27,7 @@ Modify the `Provisoning` resource if your hub cluster is installed on one of the
 
 If your hub cluster is installed on a different platform, continue at <<enable-cim-disconnected,Enabling CIM in disconnected environments>> or <<enable-cim-connected,Enabling CIM in connected environments>>.
 
-Run the following command to modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces:
+Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces by running the following command:
 
 ----
 oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
@@ -65,8 +65,6 @@ data:
 Registries in the list of `unqualified-search-registries` are automatically added to an authentication ignore list in the `PUBLIC_CONTAINER_REGISTRIES` environment variable. The specified registries do not require authentication when the pull secret of the managed cluster is validated.
 
 . Create the `AgentServiceConfig` custom resource by saving the following YAML content in the `agent_service_config.yaml` file:
-+
-*Important:* If you are using the late binding feature and the `spec.osImages` releases in the `AgentServiceConfig` custom resource are version 4.13 or later, the {ocp-short} release images that you use when creating your clusters must be version 4.13 or later. The Red Hat Enterprise Linux CoreOS images for version 4.13 and later are not compatible with images earlier than version 4.13.
 +
 [source,yaml]
 ----
@@ -178,7 +176,7 @@ spec:
         storage: <img_volume_size> <3>
 ----
 +
-<1> Replace `db_volume_size` with the volume size for the `databaseStorage` field, for example `1Gi`. This value specifies how much storage is allocated for storing files such as database tables and database views for the clusters. The minimum value that is required is `1Gi`. You might need to use a higher value if there are many clusters.
+<1> Replace `db_volume_size` with the volume size for the `databaseStorage` field, for example `10Gi`. This value specifies how much storage is allocated for storing files such as database tables and database views for the clusters. The minimum value that is required is `1Gi`. You might need to use a higher value if there are many clusters.
 +
 <2> Replace `fs_volume_size` with the size of the volume for the `filesystemStorage` field, for example `200M` per cluster and `2-3Gi` per supported {ocp-short} version. The minimum value that is required is `1Gi`, but the recommended value is at least `100Gi`. This value specifies how much storage is allocated for storing logs, manifests, and `kubeconfig` files for the clusters. You might need to use a higher value if there are many clusters. 
 +
@@ -186,24 +184,11 @@ spec:
 
 Your CIM service is configured. You can verify that it is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. 
 
-[#manually-create-provisioning-cr]
-== Manually create the _Provisioning_ custom resource
+[#additional-resources-cim-enable]
+== Additional resources
 
-Manually create a `Provisioning` custom resource to enable services for automated provisioning by running the following command:
+- For additional information about zero touch provisioning, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/scalability_and_performance/clusters-at-the-network-far-edge[Clusters at the network far edge] in the {ocp-short} documentation.
 
-----
-oc create -f provisioning-configuration.yaml
-----
+- See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/images/managing-images#using-image-pull-secrets[Using image pull secrets].
 
-Your custom resource might resemble the following sample:
-
-[source,yaml]
-----
-apiVersion: metal3.io/v1alpha1
-kind: Provisioning
-metadata:
-  name: provisioning-configuration
-spec:
-  provisioningNetwork: Disabled
-  watchAllNamespaces: true
-----
+- Return to <<enable-cim,Enabling the Central Infrastructure Management (CIM) service>>
