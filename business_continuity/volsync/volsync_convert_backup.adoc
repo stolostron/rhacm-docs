@@ -1,20 +1,13 @@
 [#volsync-convert-backup-pvc]
 = Converting a replicated image to a usable persistent volume claim
 
-You might need to use the replicated image to recover data, or create a new instance of a persistent volume claim. The copy of the image must be converted to a persistent volume claim before it can be used. To convert a replicated image to a persistent volume claim, complete the following steps:
+When replicating or restoring a PVC via a ReplicationDestination using a VolumeSnapshot, the end result is a VolumeSnapshot that contains the latestImage from the last successful synchronization.
+You might need to use the replicated image to recover data, or create a new instance of a persistent volume claim. The copy of the image must be converted to a persistent volume claim before it can be used.
+The VolSync ReplicationDestination Volume Populator can be used to do this.
 
-. When the replication is complete, identify the latest snapshot from the `ReplicationDestination` object by entering the following command:
+. Create a PVC with a `dataSourceRef` that points to the ReplicationDestination you want to restore to a PVC. This PVC will be populated with the contents of the VolumeSnapshot indicated in the status.latestImage of the ReplicationDestination.
 +
-----
-$ kubectl get replicationdestination <destination> -n <destination-ns> --template={{.status.latestImage.name}}
-----
-Note the value of the latest snapshot for when you create your persistent volume claim.
-+
-Replace `destination` with the name of your replication destination. 
-+
-Replace `destination-ns` with the namespace of your destination. 
-
-. Create a `pvc.yaml` file that resembles the following example:
+Here is an example:
 +
 [source,yaml]
 ----
@@ -26,10 +19,10 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  dataSource:
-    kind: VolumeSnapshot
-    apiGroup: snapshot.storage.k8s.io
-    name: <snapshot_to_replace>
+  dataSourceRef:
+    kind: ReplicationDestination
+    apiGroup: volsync.backube
+    name: <replicationdestination_to_replace>
   resources:
     requests:
       storage: 2Gi
@@ -37,9 +30,9 @@ spec:
 +
 Replace `pvc-name` with a name for your new persistent volume claim.
 +
-Replace `destination-ns` with the namespace where the persistent volume claim is located.  
+Replace `destination-ns` with the namespace where the persistent volume claim (and ReplicationDestination) are located.
 +
-Replace `snapshot_to_replace` with the `VolumeSnapshot` name that you found in the previous step.
+Replace `replicationdestination_to_replace` with the `ReplicationDestination` name.
 +
 **Best practice:** You can update `resources.requests.storage` with a different value when the value is at least the same size as the initial source persistent volume claim.
 
@@ -50,3 +43,15 @@ $ kubectl get pvc -n <destination-ns>
 ----
 
 Your original backup image is running as the main persistent volume claim.
+
+
+Note:
+
+If no latestImage exists yet, then the PVC will remain in pending state until the ReplicationDestination completes and a snapshot is available.
+In this way you could create a ReplicationDestination and a PVC that uses the ReplicationDestination at the same time. The PVC will only start
+the volume population process after the ReplicationDestination has completed a replication and a snapshot is available (as seen in `.status.latestImage`).
+
+Additionally, if the storage class used has a volumeBindingMode of WaitForFirstConsumer, the volume populator will need to wait until there is a
+consumer of the PVC before it gets populated. When a consumer does come along (for example a pod that wants to mount the PVC), then the volume
+will be populated at that time. At this point the VolSync volume populator controller will take the latestImage from the ReplicationDestination,
+which may have been updated if additional replications have occurred since the PVC was created.
