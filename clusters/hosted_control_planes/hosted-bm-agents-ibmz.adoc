@@ -1,0 +1,103 @@
+[#hosted-bare-metal-adding-agents-ibmz]
+= Adding agents to the InfraEnv resource
+
+- Boot zKVM and zVM with the downloaded PXE images from the 'InfraEnv' resource. Wait for the Agents to get created on the management cluster. At startup, the host communicates with the Assisted Service and registers as an agent in the same namespace as the 'InfraEnv' resource. 
+- For zKVM, perform the boot by running the following command:
++
+----
+virt-install   --name "<vm_name>"   --autostart   --ram=16384   --cpu host   --vcpus=4   --location "<path_to_kernel_initrd_image>,kernel=kernel.img,initrd=initrd.img"   --disk <qcow_image_path>   --network network:macvtap-net,mac=<mac_address>   --graphics none   --noautoconsole   --wait=-1   --extra-args "rd.neednet=1 nameserver=<nameserver>   coreos.live.rootfs_url=http://<http_server>/rootfs.img random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs=console=tty1 console=ttyS1,115200n8"
+----  
+- For zVM, perform the boot using the following procedure:
+
+. Update the paramfile to add 'rootfs url', 'net type' and disk type. 
+
+Following is the sample command for 'vswitch' network with fcp singlepath/ dasd disk:
+
++
+----
+rd.neednet=1 console=ttysclp0   coreos.live.rootfs_url=<rootfs_url> ip=<IP for guest vm>::<nameserver>:255.255.255.0::<network adaptor>:none nameserver=<nameserver> zfcp.allow_lun_scan=0  rd.znet=qeth,<network adaptor range>,layer2=1 rd.<zfcp/dasd>=<storage> random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs="console=tty1 console=ttyS1,115200n8"
+----  
+
+Following is the sample command for 'OSA' & 'Hipersocket' network with fcp singlepath/dasd disk:
+
++
+----
+rd.neednet=1 console=ttysclp0   coreos.live.rootfs_url=<rootfs_url> ip=<IP for guest vm>::<nameserver>:255.255.255.0::<network adaptor>:none nameserver=<nameserver> rd.znet=qeth,<network adaptor range>,layer2=1 rd.<zfcp/dasd>=<storage> random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs="console=tty1 console=ttyS1,115200n8"
+----
+
+Following is the sample command for 'ROCE' network with fcp singlepath/ dasdc disk:
++
+----
+rd.neednet=1 console=ttysclp0         coreos.live.rootfs_url=<rootfs_url> ip=<IP for guest vm>::<nameserver>:255.255.255.0 nameserver=<nameserver> rd.<zfcp/dasd>=<storage> random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs="console=tty1 console=ttyS1,115200n8" 
+----  
+
+. Punch 'initrd' ,  kernel images and paramfile to guest VM by running the following commands:
+
++
+----
+vmur pun -r -u m1321006 -N kernel.img $INSTALLERKERNELLOCATION/<image name>
+vmur pun -r -u m1321006 -N generic.parm $PARMFILELOCATION/paramfilename
+vmur pun -r -u m1321006 -N initrd.img $INSTALLERINITRAMFSLOCATION/<image name>
+
+----  
+. Run the following command from the guest VM console to perform the boot.
++
+----
+cp ipl c
+----
+
+- To list the agents and some of their properties, enter the following command:
++
+----
+oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agents
+----
+
+Example output follows:
+
++
+----
+NAME                                   CLUSTER   APPROVED   ROLE          STAGE
+50c23cda-cedc-9bbd-bcf1-9b3a5c75804d
+                        auto-assign
+5e498cd3-542c-e54f-0c58-ed43e28b568a
+                        auto-assign
+
+----
+
+After each agent is created, you can optionally set the agent ID 'installation_disk_id' and hostname in the specification and approve the agent by entering the following commands:
++
+----
+oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} patch agent 50c23cda-cedc-9bbd-bcf1-9b3a5c75804d -p '{"spec":{"installation_disk_id":"/dev/sda","approved":true,"hostname":"worker-zvm-0.hostedn.example.com"}}' --type merge
+----
+
+To verify that the agents are approved for use, enter the following command and check the output:
+
++
+----
+oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agents
+----
+
+Example output follows:
+
++
+----
+NAME                                   CLUSTER   APPROVED   ROLE          STAGE
+50c23cda-cedc-9bbd-bcf1-9b3a5c75804d             true       auto-assign
+5e498cd3-542c-e54f-0c58-ed43e28b568a             true       auto-assign
+----
+
+
+- For zVM, an additional step is required to edit the agent patched in the last step and update installer 'args' under 'spec' section as follows:
+
+For network types as vswitch/ OSA & Hipersocket:
++
+----
+installerArgs: '[ "--append-karg", "rd.neednet=1", "--append-karg", "ip=<Guest vm ip>::<nameserver>:255.255.255.0:<hostname>:<network adaptor>:none", "--append-karg", "nameserver=<nameserver>", "--append-karg", "rd.znet=qeth,<network adaptor range>,layer2=1", "--append-karg", "rd.<storage type>=<storage>" ]'
+----
+
+For network type as ROCE:
+
++
+----
+installerArgs: '[ "--append-karg", "rd.neednet=1", "--append-karg", "ip=<Guest vm ip>::<nameserver>:255.255.255.0:<hostname>","--append-karg", "nameserver=<nameserver>", "--append-karg", "rd.znet=qeth,<network adaptor range>,layer2=1","--append-karg", "rd.<storage type>=<storage>" ]'
+----
