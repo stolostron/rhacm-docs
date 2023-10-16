@@ -1,18 +1,18 @@
-[#managing-observability-service]
-= Managing the observability service
+[#enabling-observability-service]
+= Enabling the observability service
 
 When you enable the observability component, you can use metrics and configure Grafana dashboards to make cluster resource information visible, help you save cost, and prevent unnecessary events.
 
-Monitor the status of your managed clusters with the observability component (`multicluster-observability-operator`).
+Monitor the status of your managed clusters with the observability component, also known as the `multicluster-observability-operator` pod. 
 
 *Required access:* Cluster administrator, the `open-cluster-management:cluster-manager-admin` role, or S3 administrator.
 
 * <<prerequisites-observability,Prerequisites>>
-* <<enabling-observability,Enabling observability>>
+* <<enabling-observability,Enabling observability from the command line interface>>
 * <<creating-mco-cr,Creating the MultiClusterObservability custom resource>>
 * <<enabling-observability-ocp,Enabling observability from the {ocp} console>>
-* <<external-metric-query,Using the external metric query>>
-* <<disabling-observability-resource,Disabling observability>>
+* <<disabling-observability,Disabling observability>>
+* <<removing-observability-resource,Removing observability>>
 
 [#prerequisites-observability]
 == Prerequisites
@@ -22,17 +22,17 @@ Monitor the status of your managed clusters with the observability component (`m
 - Direct network access to the hub cluster is required. Network access to load balancers and proxies are not supported. For more information, see link:../networking/networking_intro.adoc#networking[Networking].
 - You must configure an object store to create a storage solution. {product-title-short} supports the following cloud providers with stable object stores:
 
-* link:https://aws.amazon.com/getting-started/hands-on/lightsail-object-storage/[Amazon Web Services S3 (AWS S3)]
-* link:https://www.redhat.com/en/technologies/storage/ceph[Red Hat Ceph (S3 compatible API)]
-* link:https://cloud.google.com/storage[Google Cloud Storage]
-* link:https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction[Azure storage]
-* link:https://www.redhat.com/en/technologies/cloud-computing/openshift-data-foundation[Red Hat OpenShift Data Foundation (formerly known as Red Hat OpenShift Container Storage)]
-* link:https://www.ibm.com/docs/en/baw/20.x?topic=storage-preparing-cloud-public-roks[Red Hat OpenShift on IBM (ROKS)]
+* Amazon Web Services S3 (AWS S3)
+* Red Hat Ceph (S3 compatible API)
+* Google Cloud Storage
+* Azure storage
+* Red Hat OpenShift Data Foundation, formerly known as Red Hat OpenShift Container Storage
+* Red Hat OpenShift on IBM (ROKS)
 +
 *Important:* When you configure your object store, ensure that you meet the encryption requirements that are necessary when sensitive data is persisted. The observability service uses Thanos supported, stable object stores.
 
 [#enabling-observability]
-== Enabling observability
+== Enabling observability from the command line interface
 
 Enable the observability service by creating a `MultiClusterObservability` custom resource instance. Before you enable observability, see xref:../observability/observe_environments.adoc#observability-pod-capacity-requests[Observability pod capacity requests] for more information. 
 
@@ -69,7 +69,7 @@ oc create secret generic multiclusterhub-operator-pull-secret \
     --type=kubernetes.io/dockerconfigjson
 ----
 +
-*Important:* If you modify the global pull secret for your cluster by using the {ocp-short} documentation, be sure to also update the global pull secret in the observability namespace. See link:https://docs.openshift.com/container-platform/4.12/openshift_images/managing_images/using-image-pull-secrets.html#images-update-global-pull-secret_using-image-pull-secrets[Updating the global pull secret] for more details.
+*Important:* If you modify the global pull secret for your cluster by using the {ocp-short} documentation, be sure to also update the global pull secret in the observability namespace. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/images/managing-images#images-update-global-pull-secret_using-image-pull-secrets[Updating the global pull secret] for more details.
 
 . Create a secret for your object storage for your cloud provider. Your secret must contain the credentials to your storage solution. For example, run the following command:
 +
@@ -209,6 +209,9 @@ Generating access keys using AWS Security Service require the following addition
 * Create an IAM policy that limits access to an S3 bucket.
 * Create an IAM role with a trust policy to generate JWT tokens for {ocp-short} service accounts.
 * Specify annotations for the observability service accounts that requires access to the S3 bucket. You can find an example of how observability on Red Hat OpenShift Service on AWS (ROSA) cluster can be configured to work with AWS STS tokens in the _Set environment_ step. See link:https://www.rosaworkshop.io/[Red Hat OpenShift Service on AWS (ROSA)] for more details, along with link:https://www.rosaworkshop.io/rosa/15-sts_explained/[ROSA with STS explained] for an in-depth description of the requirements and setup to use STS tokens.
+
+[generate-access-keys]
+=== Generating access keys using the AWS Security Service
 
 Complete the following steps to generate access keys using the AWS Security Service:
 
@@ -364,21 +367,8 @@ observability-thanos-rule   (statefulset)
 observability-thanos-store-shard-x  (statefulsets)
 ----
 
-[#verifying-thanos-version]
-=== Verifying the Thanos version
-
-Verify the Thanos version from the command line interface (CLI). 
-
-After you log in to your hub cluster, run the following command in the observability pods to receive the Thanos version:
-
-----
-thanos --version
-----
-
-The Thanos version is displayed.
-
 [#creating-mco-cr]
-=== Creating the MultiClusterObservability custom resource
+== Creating the MultiClusterObservability custom resource
 
 Use the `MultiClusterObservability` custom resource to specify the persistent volume storage size for various components. You must set the storage size during the initial creation of the `MultiClusterObservability` custom resource. When you update the storage size values post-deployment, changes take effect only if the storage class supports dynamic volume expansion. For more information, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/storage/expanding-persistent-volumes[Expanding persistent volumes from the {ocp} documentation].
 
@@ -467,6 +457,7 @@ multicluster-observability-operator   1/1     1            1           35m   ins
     installer.namespace: open-cluster-management
 ----
 
+.
 . _Optional:_ If you want to exclude specific managed clusters from collecting the observability data, add the following cluster label to your clusters: `observability: disabled`.
 
 The observability service is enabled. After you enable the observability service, the following functions are initiated:
@@ -485,133 +476,68 @@ Create your object storage secret named, `thanos-object-storage` in the `open-cl
 
 Create the `MultiClusterObservability` custom resource instance. When you receive the following message, the observability service is enabled successfully from {ocp-short}: `Observability components are deployed and running`.
 
-[#external-metric-query]
-=== Using the external metric query
+[#verifying-thanos-version]
+=== Verifying the Thanos version
 
-Observability provides an external API for metrics to be queried through the OpenShift route, `rbac-query-proxy`. View the following tasks to use `rbac-query-proxy` route:
+After Thanos is deployed on your cluster, verify the Thanos version from the command line interface (CLI). 
 
-* You can get the details of the route with the following command:
-+
+After you log in to your hub cluster, run the following command in the observability pods to receive the Thanos version:
+
 ----
-oc get route rbac-query-proxy -n open-cluster-management-observability
-----
-
-* To access the `rbac-query-proxy` route, you must have an OpenShift OAuth access token. The token should be associated with a user or service account, which has permission to get namespaces. For more information, see link:https://docs.openshift.com/container-platform/4.11/authentication/managing-oauth-access-tokens.html[Managing user-owned OAuth access tokens].
-
-* Get the default CA certificate and store the content of the key `tls.crt` in a local file. Run the following command:
-+
-----
-oc -n openshift-ingress get secret router-certs-default -o jsonpath="{.data.tls\.crt}" | base64 -d > ca.crt
+thanos --version
 ----
 
-* Run the following command to query metrics:
-+
-----
-curl --cacert ./ca.crt -H "Authorization: Bearer {TOKEN}" https://{PROXY_ROUTE_URL}/api/v1/query?query={QUERY_EXPRESSION}
-----
-+
-*Note:* The `QUERY_EXPRESSION` is the standard Prometheus query expression. For example, query the metrics `cluster_infrastructure_provider` by replacing the URL in the previously mentioned command with the following URL: `https://{PROXY_ROUTE_URL}/api/v1/query?query=cluster_infrastructure_provider`. For more details, see link:https://prometheus.io/docs/prometheus/latest/querying/basics/[Querying Prometheus].
-//IS THIS ACCURATE? THIS FILE WAS REMOVED
-//* You can also replace certificates for the `rbac-query-proxy` route. See link:../governance/cert_mgmt_ingress.adoc#openssl-commands-for-generating-a-certificate[OpenSSL commands for generating a certificate] to create certificates. When you customize the `csr.cnf`, update the `DNS.1` to the hostname for the `rbac-query-proxy` route.
+The Thanos version is displayed.
 
-** Run the following command to create `proxy-byo-ca` and `proxy-byo-cert` secrets using the generated certificates:
-+
-----
-oc -n open-cluster-management-observability create secret tls proxy-byo-ca --cert ./ca.crt --key ./ca.key
-
-oc -n open-cluster-management-observability create secret tls proxy-byo-cert --cert ./ingress.crt --key ./ingress.key
-----
-
-[#dynamic-metrics-for-sno]
-=== Dynamic metrics for single-node OpenShift clusters
-
-Dynamic metrics collection supports automatic metric collection based on certain conditions. By default, a SNO cluster does not collect pod and container resource metrics. Once a SNO cluster reaches a specific level of resource consumption, the defined granular metrics are collected dynamically. When the cluster resource consumption is consistently less than the threshold for a period of time, granular metric collection stops.
-
-The metrics are collected dynamically based on the conditions on the managed cluster specified by a collection rule. Because these metrics are collected dynamically, the following {product-title-short} Grafana dashboards do not display any data. When a collection rule is activated and the corresponding metrics are collected, the following panels display data for the duration of the time that the collection rule is initiated:
-
-* Kubernetes/Compute Resources/Namespace (Pods)
-* Kubernetes/Compute Resources/Namespace (Workloads)
-* Kubernetes/Compute Resources/Nodes (Pods)
-* Kubernetes/Compute Resources/Pod
-* Kubernetes/Compute Resources/Workload
-
-A collection rule includes the following conditions:
-
-* A set of metrics to collect dynamically.
-* Conditions written as a PromQL expression.
-* A time interval for the collection, which must be set to `true`.
-* A match expression to select clusters where the collect rule must be evaluated.
-
-By default, collection rules are evaluated continuously on managed clusters every 30 seconds, or at a specific time interval. The lowest value between the collection interval and time interval takes precedence. Once the collection rule condition persists for the duration specified by the `for` attribute, the collection rule starts and the metrics specified by the rule are automatically collected on the managed cluster. Metrics collection stops automatically after the collection rule condition no longer exists on the managed cluster, at least 15 minutes after it starts.
-
-The collection rules are grouped together as a parameter section named `collect_rules`, where it can be enabled or disabled as a group. {product-title-short} installation includes the collection rule group, `SNOResourceUsage` with two default collection rules: `HighCPUUsage` and `HighMemoryUsage`. The `HighCPUUsage` collection rule begins when the node CPU usage exceeds 70%. The `HighMemoryUsage` collection rule begins if the overall memory utilization of the SNO cluster exceeds 70% of the available node memory. Currently, the previously mentioned thresholds are fixed and cannot be changed. When a collection rule begins for more than the interval specified by the `for` attribute, the system automatically starts collecting the metrics that are specified in the `dynamic_metrics` section.
-
-View the list of dynamic metrics that from the `collect_rules` section, in the following YAML file:
-
-[source,yaml]
-----
-collect_rules:
-  - group: SNOResourceUsage
-    annotations:
-      description: >
-        By default, a SNO cluster does not collect pod and container resource metrics. Once a SNO cluster 
-        reaches a level of resource consumption, these granular metrics are collected dynamically. 
-        When the cluster resource consumption is consistently less than the threshold for a period of time, 
-        collection of the granular metrics stops.
-    selector:
-      matchExpressions:
-        - key: clusterType
-          operator: In
-          values: ["SNO"]
-    rules:
-    - collect: SNOHighCPUUsage
-      annotations:
-        description: >
-          Collects the dynamic metrics specified if the cluster cpu usage is constantly more than 70% for 2 minutes
-      expr: (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))) * 100 > 70
-      for: 2m
-      dynamic_metrics:
-        names:
-          - container_cpu_cfs_periods_total
-          - container_cpu_cfs_throttled_periods_total
-          - kube_pod_container_resource_limits 
-          - kube_pod_container_resource_requests   
-          - namespace_workload_pod:kube_pod_owner:relabel 
-          - node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate 
-          - node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate 
-    - collect: SNOHighMemoryUsage
-      annotations:
-        description: >
-          Collects the dynamic metrics specified if the cluster memory usage is constantly more than 70% for 2 minutes
-      expr: (1 - sum(:node_memory_MemAvailable_bytes:sum) / sum(kube_node_status_allocatable{resource=\"memory\"})) * 100 > 70
-      for: 2m
-      dynamic_metrics:
-        names:
-          - kube_pod_container_resource_limits 
-          - kube_pod_container_resource_requests 
-          - namespace_workload_pod:kube_pod_owner:relabel
-        matches:
-          - __name__="container_memory_cache",container!=""
-          - __name__="container_memory_rss",container!=""
-          - __name__="container_memory_swap",container!=""
-          - __name__="container_memory_working_set_bytes",container!=""
-----
-
-A `collect_rules.group` can be disabled in the `custom-allowlist` as shown in the following example. When a `collect_rules.group` is disabled, metrics collection reverts to the previous behavior. These metrics are collected at regularly, specified intervals:
-
-[source,yaml]
-----
-collect_rules:
-  - group: -SNOResourceUsage
----- 
-
-The data is only displayed in Grafana when the rule is initiated.
-
-[#disabling-observability-resource]
+[#disabling-observability]
 == Disabling observability
 
-To disable the observability service, uninstall the `observability` resource. From the {ocp-short} console navigation, select *Operators* > *Installed Operators* > *Advanced Cluster Manager for Kubernetes*. Remove the `MultiClusterObservability` custom resource.
+You can disable observability, which stops data collection on the {product-title-short} hub cluster.
 
-To learn more about customizing the observability service, see xref:../observability/customize_observability.adoc#customizing-observability[Customizing observability].
+[#disabling-observability-on-all-clusters]
+=== Disabling observability on all clusters
+
+Disable observability by removing observability components on all managed clusters.
+Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
+
+[source,yaml]
+----
+spec:
+  imagePullPolicy: Always
+  imagePullSecret: multiclusterhub-operator-pull-secret
+  observabilityAddonSpec: # The ObservabilityAddonSpec defines the global settings for all managed clusters which have observability add-on enabled
+    enableMetrics: false #indicates the observability addon push metrics to hub server
+----
+
+[#disabling-observability-on-a-single-cluster]
+=== Disabling observability on a single cluster
+
+Disable observability by removing observability components on specific managed clusters. Add the `observability: disabled` label to the `managedclusters.cluster.open-cluster-management.io` custom resource.
+From the {product-title-short} console _Clusters_ page, add the `observability=disabled` label to the specified cluster.
+
+*Note:* When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
+
+[#removing-observability-resource]
+== Removing observability
+
+When you remove the `MultiClusterObservability` custom resource, you are disabling and uninstalling the observability service. From the {ocp-short} console navigation, select *Operators* > *Installed Operators* > *Advanced Cluster Manager for Kubernetes*. Remove the `MultiClusterObservability` custom resource.
+
+[#additional-resources-enable-obs]
+== Additional resources
+
+- Links to cloud provider documentation for object storage information:
+
+* link:https://aws.amazon.com/getting-started/hands-on/lightsail-object-storage/[Amazon Web Services S3 (AWS S3)]
+* link:https://www.redhat.com/en/technologies/storage/ceph[Red Hat Ceph (S3 compatible API)]
+* link:https://cloud.google.com/storage[Google Cloud Storage]
+* link:https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction[Azure storage]
+* link:https://www.redhat.com/en/technologies/cloud-computing/openshift-data-foundation[Red Hat OpenShift Data Foundation (formerly known as Red Hat OpenShift Container Storage)]
+* link:https://www.ibm.com/docs/en/baw/20.x?topic=storage-preparing-cloud-public-roks[Red Hat OpenShift on IBM (ROKS)]
+
+- See xref:../observability/using_observability.adoc#using-observability[Using observability].
+
+- To learn more about customizing the observability service, see xref:../observability/customize_observability.adoc#customizing-observability[Customizing observability].
+
+- For more related topics, return to the xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service introduction].
 
 
