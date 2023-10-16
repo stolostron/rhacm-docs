@@ -1,37 +1,5 @@
-[#create-hosted-aws]
-= Creating a hosted control plane cluster on AWS with the console
-
-. Create a hosted control plane cluster from the {mce-short} console by navigating to *Infrastructure* > *Clusters*. 
-
-. On the _Clusters_ page, click *Create cluster* > *Amazon Web Services* > *Hosted* and complete the steps in the console. 
-+
-*Important:* When you create a cluster, the {mce-short} controller creates a namespace for the cluster and its resources. Ensure that you include only resources for that cluster instance in that namespace. Destroying the cluster deletes the namespace and all of the resources in it.
-
-. If you want to add your cluster to an existing cluster set, you must have the correct permissions on the cluster set to add it. If you do not have `cluster-admin` privileges when you are creating the cluster, you must select a cluster set on which you have `clusterset-admin` permissions. If you do not have the correct permissions on the specified cluster set, the cluster creation fails. Contact your cluster administrator to provide you with `clusterset-admin` permissions if you do not have any cluster set options to select.
-
-. Assign every managed cluster to a managed cluster set. Every managed cluster must be associated with a managed cluster set. If you do not assign the managed cluster to a `ManagedClusterSet`, it is automatically added to the `default` managed cluster set.
-
-. Ensure that your hosted control plane cluster uses one of the provided release images. The release image identifies the version of the {ocp-short} image that is used to create the cluster.
-
-. To import the cluster, run the `oc` command that is provided with the cluster details. When you create the cluster, it is not automatically configured with the management of {product-title-short}.
-
-[#create-hosted-aws-proxy]
-== Proxy information for hosted clusters
-
-Proxy information that is provided in the infrastructure environment is automatically added to the proxy fields. 
-
-If you want to enable a proxy, you can use the existing information, overwrite it, or add the information. The following list contains the required information for creating a proxy: 
-
-* HTTP proxy URL: The URL that should be used as a proxy for `HTTP` traffic. 
-
-* HTTPS proxy URL: The secure proxy URL that should be used for `HTTPS` traffic. If no value is provided, the same value as the `HTTP Proxy URL` is used for both `HTTP` and `HTTPS`.
-
-* No proxy domains: A comma-separated list of domains that should bypass the proxy. Begin a domain name with a period `.` to include all of the subdomains that are in that domain. Add an asterisk `*` to bypass the proxy for all destinations. 
-
-* Additional trust bundle: The contents of the certificate file that is required to access the mirror registry.
-
 [#create-hosted-multi-zone-aws]
-== Creating a hosted cluster in multiple zones on AWS
+= Creating a hosted cluster in multiple zones on AWS
 
 Create a cluster, specifying the `BASE_DOMAIN` of the public zone, by entering the following commands:
 
@@ -53,9 +21,9 @@ hcp create cluster aws \
 --zones $ZONES <1>
 ----
 
-<1> The `--zones` flag must specify availability zones within the region that is specified by the `--region` flag. The `--zones` flag is also available on the `hypershift create infra aws` command that is used to create infrastructure separately.
-//lahinson - july 2023 - update hypershift cli command above
-The following per-zone infrastructure is created for all specified zones:
+<1> The `--zones` flag must specify availability zones within the region, which is specified by the `--region` flag.
+
+For each specified zone, the following infrastructure is created:
 
 * Public subnet
 * Private subnet
@@ -64,8 +32,74 @@ The following per-zone infrastructure is created for all specified zones:
 
 One `NodePool` resource is created for each zone. The node pool name is suffixed by the zone name. The private subnet for zone is set in `spec.platform.aws.subnet.id`.
 
+[#create-hosted-multi-zone-aws-credentials]
+== Providing credentials for creating a hosted cluster on AWS
+
+When you create a hosted cluster by using the `hcp create cluster aws` command, you need to provide AWS account credentials that have permissions to create infrastructure resources for your cluster. Examples of infrastructure resources include VPCs, subnets, and NAT gateways. You can provide the AWS credentials in two ways: by using the `--aws-creds` flag or by using the AWS cloud provider secret from {mce-short}.
+
+[#create-hosted-multi-zone-aws-creds-flag]
+=== Providing credentials by using the --aws-creds flag
+
+If you use the `--aws-creds` flag to provide credentials, use that flag with the value of the AWS credentials file path.
+
+See the following example:
+
+----
+hcp create cluster aws \
+--name $CLUSTER_NAME \
+--node-pool-replicas=3 \
+--base-domain $BASE_DOMAIN \
+--pull-secret $PULL_SECRET \
+--aws-creds $AWS_CREDS \
+--region $REGION \
+----
+
+[#create-hosted-multi-zone-aws-cloud-provider-secret]
+=== Providing credentials by using the AWS cloud provider secret
+
+If you use the AWS cloud provider secret from {mce-short} to provide credentials, the secret has the following format:
+
+----
+apiVersion: v1
+metadata:
+  name: my-aws-cred <1>
+  namespace: clusters <2>   
+type: Opaque
+kind: Secret
+stringData:
+  ssh-publickey:          # Value
+  ssh-privatekey:         # Value
+  pullSecret:             # Value, required
+  baseDomain:             # Value, required
+  aws_secret_access_key:  # Value, required
+  aws_access_key_id:      # Value, required
+----
+
+<1> Because the secret contains the SSH keys, pull secret, base domain, and AWS credentials, you can use the `hcp create cluster aws` command with the `--secret-creds <my_aws_cred>` flag, where `<my_aws_cred>` is the cloud provider secret name. 
+<2> If the secret is not in the default `clusters` namespace, you must specify the namespace; for example, `--secret-creds <my_aws_cred> --namespace <name_of_namespace>`.
+
+When you use this secret, the following flags become optional. If you specify these flags with the `--secret-creds <my_aws_cred>` flag, these flags take precedence over the values in the cloud provider secret:
+
+* `--aws-creds`
+* `--base-domain`
+* `--pull-secret`
+* `--ssh-key`
+
+//lahinson - sept. 2023 - including comment to ensure proper formatting
+
+. To create the secret by using the {mce-shortF} console, from the navigation menu, select *Credentials* and follow the credential creation steps in the console.
+
+. To create the secret on the command line, enter the following command:
+
++
+----
+$ oc create secret generic <my_secret> -n <namespace> --from-literal=baseDomain='your.domain.com' --from-literal=aws_access_key_id='your-aws-access-key' --from-literal=aws_secret_access_key='your-aws-secret-key' --from-literal=pullSecret='{"auths":{"cloud.openshift.com":{"auth":"auth-info", "email":"xx@redhat.com"}, "quay.io":{"auth":"auth-info", "email":"xx@redhat.com"} } }' --from-literal=ssh-publickey='your-ssh-publickey' --from-literal=ssh-privatekey='your-ssh-privatekey'
+----
+
++
+//lahinson - sept. 2023 - including comment to ensure proper formatting
+
 [#create-hosted-aws-additional-resources]
 == Additional resources
 
-For instructions to install the AWS Elastic File Service (EFS) CSI Driver Operator on a hosted cluster, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/storage/using-container-storage-interface-csi#efs-sts_persistent-storage-csi-aws-efs[Configuring AWS EFS CSI Driver Operator with Security Token Service].
-
+For instructions to install the AWS Elastic File Service (EFS) CSI Driver Operator on a hosted cluster, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/storage/using-container-storage-interface-csi#efs-sts_persistent-storage-csi-aws-efs[Configuring AWS EFS CSI Driver Operator with Security Token Service].
