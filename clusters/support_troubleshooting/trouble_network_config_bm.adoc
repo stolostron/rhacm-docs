@@ -1,0 +1,49 @@
+[#troubleshooting-network-config-fail]
+= Troubleshooting: Adding day-two nodes to an existing cluster fails with pending user action
+
+Adding a node, or scaling out, to your existing cluster that is created by the {mce} with Zero Touch Provisioning or Host inventory create methods fails during installation. The installation process works correctly during the Discovery phase, but fails on the installation phase. 
+
+The configuration of the network is failing. From the hub cluster in the integrated console, you see a `Pending` user action. In the description, you can see it failing on the rebooting step.
+
+The error message about failing is not very accurate, since the agent that is running in the installing host cannot report information.
+ 
+[#symptom-network-config-fail]
+== Symptom: Installation for day two workers fails
+
+After the Discover phase, the host reboots to continue the installation, but it cannot configure the network. Check for the following symptoms and messages:
+
+* From the hub cluster in the integrated console, check for `Pending` user action on the adding node, with the `Rebooting` indicator:
++
+----
+This host is pending user action. Host timed out when pulling ignition. Check the host console... Rebooting
+----
+
+* From the {ocp} configuration managed cluster, check the `MachineConfigs` of the existing cluster. Check if any of the `MachineConfigs` create any file on the following directories: 
+
+ ** `/sysroot/etc/NetworkManager/system-connections/` 
+ ** `/sysroot/etc/sysconfig/network-scripts/` 
+
+* From the terminal of the installing host, check the failing host for the following messages. You can use `journalctl` to see the log messages:
+
+----
+info: networking config is defined in the real root
+
+info: will not attempt to propagate initramfs networking
+----
+
+If you get the last message in the log, the networking configuration is not propagated because it already found an existing network configuration on the folders previously listed in the _Symptom_.
+
+[#resolving-network-config-fail]
+== Resolving the problem: Recreate the node merging network configuration
+
+Perform the following task to use a proper network configuration during the installation:
+
+. Delete the node from your hub cluster.
+. Repeat your previous process to install the node in the same way.
+. Then, create the `BareMetalHost` object of the node with the following annotation: 
+----
+"bmac.agent-install.openshift.io/installer-args": "[\"--append-karg\", \"coreos.force_persist_ip\"]"
+----
+
+The node starts the installation. After the Discovery phase, the node merges the network configuration between the changes on the existing cluster and the initial configuration.
+

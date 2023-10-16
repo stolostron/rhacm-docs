@@ -1,0 +1,170 @@
+[#ansible-config-hosted-cluster]
+= Configuring {aap-short} jobs to run on hosted clusters
+
+{aap} is integrated with {mce-short} so that you can create prehook and posthook {aap-short} job instances that occur before or after you create or update hosted clusters.
+
+*Required access:* Cluster administrator
+
+* <<prerequisites-for-ansible-integration-hosted-cluster,Prerequisites>>
+* <<ansible-hosted-cluster-install,Running an {aap-short} job to install a hosted cluster>>
+* <<ansible-hosted-cluster-update,Running an {aap-short} job to update a hosted cluster>>
+* <<ansible-hosted-cluster-delete,Running an {aap-short} job to delete a hosted cluster>>
+
+[#prerequisites-for-ansible-integration-hosted-cluster]
+== Prerequisites
+
+You must meet the following prerequisites to run Automation templates on your clusters:
+
+* {ocp-short} 4.14 or later
+
+* Install the {aap-short} Resource Operator to connect {aap-short} jobs to the lifecycle of Git subscriptions. When you use the Automation template to start {aap-short} jobs, ensure that the {aap-short} job template is idempotent when it is run. You can find the {aap-short} Resource Operator in the {ocp-short} _OperatorHub_. 
+
+[#ansible-hosted-cluster-install]
+== Running an {aap-short} job to install a hosted cluster
+
+To start an {aap-short} job that installs a hosted cluster, complete the following steps:
+
+. Create the `HostedCluster` and `NodePool` resources, including the `pausedUntil: true` field. If you use the `hcp create cluster` command line interface command, you can specify the `--pausedUntil: true` flag.
+
++
+See the following examples:
+
++
+[source,yaml]
+----
+apiVersion: hypershift.openshift.io/v1beta1
+kind: HostedCluster
+metadata:
+  name: my-cluster
+  namespace: clusters
+spec:
+  pausedUntil: 'true'
+...
+----
+
++
+[source,yaml]
+----
+apiVersion: hypershift.openshift.io/v1beta1
+kind: NodePool
+metadata:
+  name: my-cluster-us-east-2
+  namespace: clusters
+spec:
+  pausedUntil: 'true'
+...
+----
+
+. Create a `ClusterCurator` resource with the same name as the `HostedCluster` resource and in the same namespace as the `HostedCluster` resource. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: ClusterCurator
+metadata:
+  name: my-cluster
+  namespace: clusters
+  labels:
+    open-cluster-management: curator
+spec:
+  desiredCuration: install
+  install:
+    jobMonitorTimeout: 5
+    prehook:
+      - name: Demo Job Template
+        extra_vars:
+          variable1: something-interesting
+          variable2: 2
+      - name: Demo Job Template
+    posthook:
+      - name: Demo Job Template
+    towerAuthSecret: toweraccess
+----
+
+. If your {aap-short} Tower requires authentication, create a secret resource. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: toweraccess
+  namespace: clusters
+stringData:
+  host: https://my-tower-domain.io
+  token: ANSIBLE_TOKEN_FOR_admin
+----
+
+[#ansible-hosted-cluster-update]
+== Running an {aap-short} job to update a hosted cluster
+
+To run an {aap-short} job that updates a hosted cluster, edit the `ClusterCurator` resource of the hosted cluster that you want to update. See the following example:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: ClusterCurator
+metadata:
+  name: my-cluster
+  namespace: clusters
+  labels:
+    open-cluster-management: curator
+spec:
+  desiredCuration: upgrade
+  upgrade:
+    desiredUpdate: 4.14.1 <1>
+    monitorTimeout: 120
+    prehook:
+      - name: Demo Job Template
+        extra_vars:
+          variable1: something-interesting
+          variable2: 2
+      - name: Demo Job Template
+    posthook:
+      - name: Demo Job Template
+    towerAuthSecret: toweraccess
+----
+
+<1> For details about supported versions, see _Hosted control planes_.
+
+*Note:* When you update a hosted cluster in this way, you update both the hosted control plane and the node pools to the same version. Updating the hosted control planes and node pools to different versions is not supported.
+
+[#ansible-hosted-cluster-delete]
+== Running an {aap-short} job to delete a hosted cluster
+
+To run an {aap-short} job that deletes a hosted cluster, edit the `ClusterCurator` resource of the hosted cluster that you want to delete. See the following example:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: ClusterCurator
+metadata:
+  name: my-cluster
+  namespace: clusters
+  labels:
+    open-cluster-management: curator
+spec:
+  desiredCuration: destroy
+  destroy:
+    jobMonitorTimeout: 5
+    prehook:
+      - name: Demo Job Template
+        extra_vars:
+          variable1: something-interesting
+          variable2: 2
+      - name: Demo Job Template
+    posthook:
+      - name: Demo Job Template
+    towerAuthSecret: toweraccess
+----
+
+*Note:* Deleting a hosted cluster on AWS is not supported.
+
+[#ansible-hosted-cluster-additional-resources]
+== Additional resources
+
+* For more information about the hosted control plane command line interface (`hcp`), see link:../hosted_control_planes/hosted_install_cli.adoc#hosted-install-cli[Installing the hosted control plane command line interface (hcp)].
+
+* For more information about hosted clusters, including supported versions, see xref:../hosted_control_planes/hosted_intro.adoc#hosted-control-planes-intro[Hosted control planes].
