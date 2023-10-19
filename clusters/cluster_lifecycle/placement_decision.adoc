@@ -34,6 +34,93 @@ status:
       reason: ''
 ----
 
+== Using the decision strategy 
+
+You can use the `decisionStrategy` section of `Placement` to divide the created `PlacementDecision` into groups and define the number of clusters for each decision group. 
+
+For example, there is an environment that has 310 clusters. Of these 310 clusters, 10  have the label, `prod-canary-west` and 10 have the label, `prod-canary-east`. The `decisionStrategy` can create multiple groups: one group for the `prod-canary-west`, label, one group for the `prod-canary-east` label, and groups for the remaining clusters with a maximum of 150 clusters for one group. The following source YAML demonstrates how to create these groups: 
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement1
+  namespace: default
+spec:
+  clusterSets:
+    - global
+  decisionStrategy:
+    groupStrategy:
+      clustersPerDecisionGroup: 150
+      decisionGroups:
+      - groupName: prod-canary-west
+        groupClusterSelector:
+          labelSelector:
+            matchExpressions:
+              - key: prod-canary-west
+                operator: Exists
+      - groupName: prod-canary-east
+        groupClusterSelector:
+          labelSelector:
+            matchExpressions:
+              - key: prod-canary-east
+                operator: Exists
+----
+
+The `decisionStrategy` section includes the following fields:
+
+* `decisionGroups`: Representes a list of predefined groups to put decision results. The `decisionGroups` field construct the decision groups. Then, it divides the clusters not included in the `decisionGroups` into separate decision groups. Each decision group should not have the number of clusters larger than the defined number specified in `clustersPerDecisionGroup`. 
+** `groupName`: Represents the name to be added as the value of the label key,`cluster.open-cluster-management.io/decision-group-name` of the created `PlacementDecisions`.
+** `groupClusterSelector`: Defines the label selector to the select clusters subset by the label.
+* `clusterPerDecisionGroup`:  A specific number or percentage of the total selected 
+  clusters. The specific number divides the `placementDecisions` to `decisionGroups` and requires that each group only has the max number of clusters equal to that specific number.
+
+When you define the decision strategy, the placement status lists the group result, including the decision group name and index, the cluster count, and the corresponding `PlacementDecision` names. For an example, see the following source YAML:
+
+[source,yaml]
+----
+ decisionGroups:
+  - clusterCount: 10
+    decisionGroupIndex: 0
+    decisionGroupName: prod-canary-west
+    decisions:
+    - placement1-decision-1
+  - clusterCount: 10
+    decisionGroupIndex: 1
+    decisionGroupName: prod-canary-east
+    decisions:
+    - placement1-decision-2
+  - clusterCount: 150
+    decisionGroupIndex: 2
+    decisionGroupName: ""
+    decisions:
+    - placement1-decision-3
+    - placement1-decision-4
+  - clusterCount: 140
+    decisionGroupIndex: 3
+    decisionGroupName: ""
+    decisions:
+    - placement1-decision-5
+    - placement1-decision-6
+  numberOfSelectedClusters: 310
+----
+
+The `PlacementDecision` includes labels, such as: `cluster.open-cluster-management.io/decision-group-name` and `cluster.open-cluster-management.io/decision-group-index`. These labels indicate which group name and group index `PlacementDecision` belongs to. For an example, see the following source YAML:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: PlacementDecision
+metadata:
+  labels:
+    cluster.open-cluster-management.io/placement: placement1
+    cluster.open-cluster-management.io/decision-group-index: "0"
+    cluster.open-cluster-management.io/decision-group-name: prod-canary-west
+  name: placement1-decision-1
+  namespace: default
+----
+
 [#placement-decision-resources]
 == Additional resources
 
