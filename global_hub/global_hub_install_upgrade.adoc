@@ -1,9 +1,11 @@
 [#global-hub-install]
-= Installing
+= Installing in disconnected network environments
 
 Multicluster global hub is installed through {olm}, which manages the installation, upgrade, and removal of the components that encompass the multicluster global hub. 
 
-**Required access:** Cluster administrator. **{ocp-short} Dedicated environment required access:** You must have `cluster-admin` permissions. By default `dedicated-admin` role does not have the required permissions to create namespaces in the {ocp-short} Dedicated environment. 
+To install multicluster cluster global hub on a disconnected hub cluster, perform the following steps in addition to the usual install or upgrade steps that are for the connected network environment.
+
+*Required access:* Cluster administrator is required for all installation and upgrade tasks.
 
 * <<global-hub-install-prerequisites,Prerequisites>>
 * <<global-hub-install-dependencies,Dependencies>>
@@ -14,585 +16,154 @@ Multicluster global hub is installed through {olm}, which manages the installati
 [#global-hub-install-prerequisites]
 == Prerequisites
 
-Before you install {product-title-short}, see the following requirements:
+You must meet the following requirements before you install multicluster global:
 
-[#global-hub-install-dependencies]
-=== Dependencies
+- An image registry and a bastion host that has access to both the internet and to your mirror registry.
 
-* {product-title} version 2.7 or later must be installed and configured. link:https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9[Learn more details about {product-title-short}].
+- You must install {product-title} version 2.7, or later on your cluster
 
-- Storage secret
+- You must install the {ocp} `oc` command line interface. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/cli_tools/openshift-cli-oc#cli-getting-started[Installing the {ocp-short} CLI]. 
 
-Both the global hub manager and Grafana services need a postgres database to collect and display data. The data can be accessed by creating a storage secret, 
-which contains the following two fields:
+- You must install the `opm` command line interface. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/cli_tools/opm-cli[Installing the opm CLI].
 
-- `database_uri`: Required, the URI user must have the permission to create the global hub database in the postgres.
+- You must install the {ocp-short} `oc-mirror` command line interface. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/installing/disconnected-installation-mirroring#installing-mirroring-disconnected[Mirroring images for a disconnected installation using the oc-mirror plugin].
 
-- `database_uri_with_readonlyuser`: Required, the URI user must have the permission to read the global hub database in the postgres.
-
-- `ca.crt`: Optional, if your database service has TLS enabled, you can provide the appropriate certificate depending on the SSL mode of the connection. If the SSL mode is `verify-ca` and `verify-full`, then the `ca.crt` certificate must be provided.
-
-**Note:** There is a link:https://github.com/stolostron/multicluster-global-hub/tree/main/operator/config/samples/storage[sample script] available to install postgres in `multicluster-global-hub-postgres` namespace and create the secret `storage-secret` in namespace `open-cluster-management` automatically. The client version of kubectl must be verison 1.21, or later. 
-
-- Transport secret
+- Confirm the availability of your local image registry. *Best practice*: Use your existing mirror registry for the {olm} related content. Because you have already completed the installation of the {ocp-short} cluster in your disconnected environment, the mirror registry is created.
 +
-Right now, only Kafka transport is supported. You need to create a secret for the Kafka transport. The secret contains the following fields:
+If you do not already have a local image registry, create one by completing the procedure that is described in link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/installing/disconnected-installation-mirroring#mirroring-images-disconnected-install[Mirroring images for a disconnected installation] of the {ocp-short} documentation.
 
-- `bootstrap.servers`: Required, the Kafka bootstrap servers.
+- You must configure {olm}. In disconnected environments, {olm} cannot access the standard Red Hat operator sources that are provided because they are hosted on image registries that are not accessible from a disconnected cluster. Instead, a cluster administrator can enable the installation and upgrade of operators in a disconnected environment by using mirrored image registries and operator catalogs.
 
-- `ca.crt`: Optional, if you use the `KafkaUser` custom resource to configure authentication credentials, see link:https://strimzi.io/docs/operators/latest/deploying.html#con-securing-client-authentication-str[User authentication] in the STRIMZI documentation for the steps to extract the `ca.crt` certificate from the secret.
- 
-- `client.crt`: Optional, see link:https://strimzi.io/docs/operators/latest/deploying.html#con-securing-client-authentication-str[User authentication] in the STRIMZI documentation for the steps to extract the `user.crt` certificate from the secret.
+- Prepare your disconnected cluster to install multicluster global hub. Complete the following procedure in the {ocp-short} documentation, link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html-single/operators/index#olm-restricted-networks[Using Operator Lifecycle Manager on restricted networks].
 
-- `client.key`: Optional, see link:https://strimzi.io/docs/operators/latest/deploying.html#con-securing-client-authentication-str[User authentication] in the STRIMZI documentation for the steps to extract the `user.key` from the secret.
-
-*Note:* There is a link:https://github.com/stolostron/multicluster-global-hub/tree/main/operator/config/samples/transport[sample script] available to automatically install kafka in the `kafka` namespace and create the secret `transport-secret` in namespace `open-cluster-management`.
-
-- Crunchy Postgres for Kubernetes version 5.0 or later needs to be installed
+- Add operator packages in the mirror catalog.
 +
-Crunchy Postgres for Kubernetes provide a declarative Postgres solution that automatically manages PostgreSQL clusters.
-+    
-See link:https://access.crunchydata.com/documentation/postgres-operator/v5/[Crunchy Postgres for Kubernetes] for more information about Crunchy Postgres for Kubernetes. 
-
-Global hub manager and Grafana services need Postgres database to collect and display data. The data can be accessed by creating a storage secret named `multicluster-global-hub-storage` in the `open-cluster-management` namespace. This secret should contain the following two fields:
-
-- `database_uri`: Required: The URI user should have the required permission to create the global hub database in the postgres.
-
-- `database_uri_with_readonlyuser`: Required, the URI user must have the permission to read the global hub database in the postgres.
-    
-- `ca.crt`: Optional: If your database service has TLS enabled, you can provide the appropriate certificate depending on the SSL mode of the connection. If the SSL mode is `verify-ca` and `verify-full`, then the `ca.crt` certificate must be provided.
-
-*Note:* There is a link:https://github.com/stolostron/multicluster-global-hub/tree/main/operator/config/samples/storage[sample script] available for guidance. The client version of kubectl must be v1.21+ to install postgres in `multicluster-global-hub-postgres` namespace and automatically create the secret `multicluster-global-hub-storage` in namespace `open-cluster-management`.
-
-- Strimzi 0.33 or later needs to be installed
+Include the required operator packages in your mirror catalog. Red Hat provides the Multicluster Global Hub and AMQ Streams operators in the Red Hat operators catalog, which are delivered by the `registry.redhat.io/redhat/redhat-operator-index` index image. When you prepare your mirror of this catalog index image, you can choose to either mirror the entire catalog as provided by Red Hat, or you can mirror a subset that contains only the operator packages that you intend to use.
 +
-Strimzi provides a way to run Kafka cluster on Kubernetes in various deployment configurations. 
+If you are creating a full mirror catalog, no special considerations are needed as all of the packages required to install multicluster global hub and AMQ Streams are included. However, if you are creating a partial or filtered mirrored catalog, for which you identify particular packages to be included, you need to include the following package names in your list:
+
+- `multicluster-global-hub-operator-product` 
+- `amq-streams`
+
+
+//which procedure it best for the user? 
+//are these procedures a part of the prereqisites?
+//Create the mirrored catalog or registry by using the `oc-mirror` plug-in
+
+//OR
+
+//Create the mirrored catalog or registry by using the OPM utility
+
+//Are all of the tasks between lines 53-228 considered prerequisite steps? 
+//seems like the following should be in a seperate file
+[#installing-global-hub]
+== Installing the multicluster global hub operator from the command line interface
+
+. Install the operator from the OperatorHub using the command line interface.
+.. Create the `OpertorGroup` resource. Each namespace can have only one operator group. Run the following command:
 +
-See the link:https://strimzi.io/documentation/[Strimzi documentation] to learn more about Strimzi.
-
-- Global hub agent needs to synchronize cluster information and policy information to Kafka transport. The global hub manager persists the Kafka transport data to Postgres database.
-
-[#global-hub-install-sizing]
-=== Sizing
-
-. link:https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/install/installing#sizing-your-cluster[Sizing your {product-title-short} cluster]
-
-. **Minimum requirements for Crunchy Postgres**
-
-    | vCPU | Memory | Storage size | Namespace |
-    | ---- | ------ | ------ | ------ |
-    | 100m | 2G | 20Gi*3 | multicluster-global-hub-postgres
-    | 10m | 500M | N/A | multicluster-global-hub-postgres
-    
-. **Minimum requirements for Strimzi**
-
-    | vCPU | Memory | Storage size | Namespace |
-    | ---- | ------ | ------ | ------ |
-    | 100m | 8G | 20Gi*3 | kafka
-
-[#global-hub-install-network-configuration]
-=== Network conifiguration
-
-The managed hub is also a managed cluster of global hub in {product-title-short}. The network configuration in {product-title-short} is necessary. See link:https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/networking/networking[Networking] for {product-title-short} networking details.
-
-. Global hub networking requirements
-
-    | Direction | Protocol | Connection | Port (if specified) | Source address |	Destination address |
-    | ------ | ------ | ------ | ------ |------ | ------ |
-    |Inbound from browser of the user | HTTPS | User need to access the Grafana dashboard | 443 | Browser of the user | IP address of Grafana route |
-    | Outbound to Kafka Cluster | HTTPS | Global hub manager need to get data from Kafka cluster | 443 | multicluster-global-hub-manager-xxx pod | Kafka route host |
-    | Outbound to Postgres database | HTTPS | Global hub manager need to persist data to Postgres database | 443 | multicluster-global-hub-manager-xxx pod | IP address of Postgres database |
-
-. Managed hub networking requirements
-
-    | Direction | Protocol | Connection | Port (if specified) | Source address |	Destination address |
-    | ------ | ------ | ------ | ------ | ------ | ------ |
-    | Outbound to Kafka Cluster | HTTPS | Global hub agent need to sync cluster info and policy info to Kafka cluster | 443 | multicluster-global-hub-agent pod | Kafka route host |
-
-[#global-hub-install-support-matrix]
-=== Support matrix
-
-See the link:https://access.redhat.com/articles/7033110[multicluster global hub support matrix] for information about supported versions. 
-
-[#global-hub-installing-connected]
-=== Installing Multicluster global hub in a connected environment
-
-To install the Multicluster global hub operator in a connected environment by using the {ocp-short} console, complete the following steps:
-
-. Log in to the {ocp-short} console as a user with the `cluster-admin` role.
-
-. In the navigation, select *Operators* and the _OperatorHub_ icon.
-
-. Search for and select the *Multicluster global hub operator*.
-
-. Click *Install* to start the installation.
-
-. After the installation completes, check the status on the _Installed Operators_ page.
-
-. Click *Multicluster global hub operator* to go to the _Operator_ page.
-
-. Click the *Multicluster global hub* tab to see the `multicluster global hub` instance.
-
-. Click *Create multicluster global hub* to create the `multicluster global hub` instance.
-
-. Enter the required information and click *Create* to create the `multicluster global hub` instance.
-
-*Notes:*
-
-* The multicluster global hub is only available for the x86 platform.
-    
-* The policy and application are disabled in {product-title-short} after the multicluster global hub is installed.
-
-[#global-hub-installing-disconnected]
-=== Installing Multicluster global hub in a disconnected environment
-
-If a network connection is not available, you can deploy the multicluster global hub operator in a disconnected environment.
-
-[#global-hub-installing-disconnected-prereq]
-==== Prerequisites
-
-Before installing in a disconnected environment, ensure that you have the following:
-
-- An image registry and a bastion host that have access to both the Internet and to your mirror registry
-- Operator Lifecycle Manager link:https://docs.openshift.com/container-platform/4.11/operators/understanding/olm/olm-understanding-olm.html[OLM}] installed on your cluster
-- {product-title-short} version 2.7, or later, installed on your cluster
-- A user account with `cluster-admin` permissions
-
-[#global-hub-installing-disconnected-mirror]
-==== Configure a mirror registry
-
-You must use a mirror image registry when installing Multicluster global hub in a disconnected environment. The image registry ensures that your clusters only use container images that satisfy your organizational controls on external content. You can complete the following procedures to provision the mirror registry for global hub:
-
-- link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/installing/disconnected-installation-mirroring#creating-mirror-registry[Create a mirror registry]
-
-- link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/installing/disconnected-installation-mirroring#installing-mirroring-installation-images[Mirroring images for a disconnected installation]
-
-[#global-hub-installing-disconnected-icsp]
-==== Create an ImageContentSourcePolicy
-
-You can configure an `ImageContentSourcePolicy` on your disconnected cluster to redirect image references to your mirror registry. This enables you to have your cluster obtain container images for the global hub operator on your mirror registry, rather than from the Internet-hosted registries. 
-
-*Note:* The `ImageContentSourcePolicy` can only support the image mirror with image digest.
-
-. Create a file called `imagecontentsourcepolicy.yaml`:
+[source,bash]
+----
+oc apply -f ./global-hub-og.yaml
+----
 +
-[source,yaml]
-----
-cat ./doc/disconnected_environment/imagecontentsourcepolicy.yaml
-----
-
-. Add content that to the new file that resembles the following content:
-+
-[source,yaml]
-----
-apiVersion: operator.openshift.io/v1alpha1
-kind: ImageContentSourcePolicy
-metadata:
-  name: global-hub-operator-icsp
-spec:
-  repositoryDigestMirrors:
-  - mirrors:
-    - ${REGISTRY}//multicluster-globalhub
-    source: registry.redhat.io/multicluster-globalhub
-----
-    
-. Apply `imagecontentsourcepolicy.yaml` file by running the following command:
-+
-----
-envsubst < ./doc/disconnected-operator/imagecontentsourcepolicy.yaml | kubectl apply -f -
-----
-
-[#global-hub-installing-disconnected-pull-secret]
-==== Configure the image pull secret
-
-If the Operator or Operand images that are referenced by a subscribed Operator require access to a private registry, you can either link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html-single/operators/index#olm-creating-catalog-from-index_olm-managing-custom-catalogs[provide access to all namespaces in the cluster, or to individual target tenant namespaces]. 
-
-[#global-hub-installing-disconnected-pull-secret-generic]
-===== Configure the global hub image pull secret in an {ocp-short} cluster
-
-*Note:* Applying the image pull secret on a pre-existing cluster causes a rolling restart of all of the nodes.
-
-. Export the user name from the pull secret:
-+
-----
-export USER=<the-registry-user>
-----
-
-. Export the password from the pull secret:
-+
-----
-export PASSWORD=<the-registry-password>
-----
-
-. Copy the pull secret:
-+
-----
-oc get secret/pull-secret -n openshift-config --template='{{index .data ".dockerconfigjson" | base64decode}}' > pull_secret.yaml
-----
-
-. Log in using the pull secret:
-+
-----
-oc registry login --registry=${REGISTRY} --auth-basic="$USER:$PASSWORD" --to=pull_secret.yaml
-----
-
-. Specify the global hub image pull secret:
-+
-----
-oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=pull_secret.yaml
-----
-
-. Remove the old pull secret:
-+
-----
-rm pull_secret.yaml
-----
-
-[#global-hub-installing-disconnected-pull-secret-individual-namespace]
-===== Configure the global hub image pull secret to an individual namespace
-
-. Create the secret in the tenant namespace by running the following command:
-+
-----
-oc create secret generic <secret_name> -n <tenant_namespace> \
---from-file=.dockerconfigjson=<path/to/registry/credentials> \
---type=kubernetes.io/dockerconfigjson
-----
-
-. Link the secret to the service account for your operator or operand:
-+
-----
-oc secrets link <operator_sa> -n <tenant_namespace> <secret_name> --for=pull
-----
-
-[#global-hub-installing-disconnected-add-operator-catalog]
-==== Add the GlobalHub operator catalog
-
-. *Optional:* Build the GlobalHub catalog from upstream
-
-.. Enter the following command to export the registry, replacing `operator-mirror-registry` with the name of your registry:
-+
-----
-export REGISTRY=<operator-mirror-registry>
-----
-
-.. Run the following command to export the version number:
-+
-----
-export VERSION=0.0.1
-----
-
-.. Run the following command to set the `IMAGE_TAG_BASE`:
-+
-----
-export IMAGE_TAG_BASE=${REGISTRY}multicluster-global-hub-operator
-----
-
-.. Ensure that you are in in the operator directory by running the following command: 
-+
-----
-cd ./operator
-----
-
-.. Update the bundle:
-+
-----
-make generate manifests bundle
-----
-
-.. Build the bundle image: 
-+
-----
-make bundle-build bundle-push catalog-build catalog-push
-----
-
-.. Move to the higher directory: 
-+
-----
-cd ..
-----
-
-After running the previous commands, the following images are built and pushed to the `$REGISTRY`:
-
-* Bundle Image: `${REGISTRY}/multicluster-global-hub-operator-bundle:v0.0.1`
-
-* Catalog Image: `${REGISTRY}/multicluster-global-hub-operator-catalog:v0.0.1`
-
-[#global-hub-installing-disconnected-create-catalogsource-object]
-==== Create the CatalogSource object
-
-Ensure that you completed the steps in xref:../global_hub/global_hub_install_upgrade.adoc#global-hub-installing-disconnected-pull-secret[Configure the image pull secret] before creating a `CatalogSource` object.
-
-. Run the following command to create the `catalogsource.yaml` file:
-+
-----
-cat ./doc/disconnected_environment/catalogsource.yaml
-----
-
-. Add the following content to the `catalogsource.yaml` file: 
-+
-[source,yaml]
-----
-apiVersion: operators.coreos.com/v1alpha1
-kind: CatalogSource
-metadata:
-  name: global-hub-operator-catalog
-  namespace: openshift-marketplace
-spec:
-  displayName: global-hub-operator-catalog
-  sourceType: grpc
-  grpcPodConfig: {}
-  secrets:
-  - <global-hub-secret>
-  image: ${REGISTRY}/multicluster-global-hub-operator-catalog:v${VERSION}
-  publisher: global-hub-squad  
-----
-
-. Add the contents of the file to the environment variables by running the following command: 
-+
-----
-envsubst < ./doc/disconnected_environment/catalogsource.yaml
-----
-
-. Apply the file by running the following command:
-+
-----
-oc apply -f -./doc/disconnected_environment/catalogsource.yaml
-----
-
-Operator License Manager (OLM) polls catalog sources for available packages on a timed interval. After OLM polls the catalog source for your mirrored catalog, you can verify that the required packages are available on your disconnected cluster by querying the available `PackageManifest` resources:
-
-----
-oc get packagemanifest multicluster-global-hub-operator
-----
-+ 
-The results resemble the following example: 
-+
-----
-NAME                               CATALOG               AGE
-multicluster-global-hub-operator   Community Operators   28m
-----
-
-
-[#global-hub-installing-disconnected-installing-operator]
-=== Installing the the Global Hub Operator
-
-[#global-hub-installing-disconnected-installing-operator-cli]
-==== Installing the the Global Hub Operator by using the CLI
-
-Complete the following steps to install the Global Hub Operator by using the CLI: 
-
-. Create the `OperatorGroup`.
-+
-Each namespace can have only one operator group. Replace `global-hub-operator-sdk-og` with the name of your operator group. and replace `open-cluster-management` namespace with your project namespace.
-
-.. Create the `operatorgroup.yaml` file:
-+
-----
-cat ./doc/disconnected_environment/operatorgroup.yaml 
-----
-
-.. Add the following content to your `operatorgroup.yaml` file: 
+Your resource might resemble the following content:
 +
 [source,yaml]
 ----
 apiVersion: operators.coreos.com/v1
-kind: OperatorGroup
-metadata:
-  name: global-hub-operator-sdk-og
-  namespace: open-cluster-management
-spec:
-  targetNamespaces:
-   - open-cluster-management
+  kind: OperatorGroup
+  metadata:
+    name: global-hub-operator-sdk-og <1>
+    namespace: multicluster-global-hub <2>
+  spec:
+    targetNamespaces:
+    - multicluster-global-hub
 ----
++
+<1> Replace `global-hub-operator-sdk-og` with the name of your operator group.
+<2> Replace `multicluster-global-hub` namespace with your project namespace.
++
+Save the `global-hub-og.yaml file`.
 
-.. Apply the `operatorgroup.yaml` file:
+.. Create the `Subscription` resource. Run the following command:
 +
+[source,bash]
 ----
-oc apply -f ./doc/disconnected_environment/operatorgroup.yaml   
+oc apply -f ./subscription.yaml
 ----
- 
-. Create the `Subscription`.
 +
-Replace the `open-cluster-management` namespace with your project namespace.
-  
-.. Create the `subscription.yaml` file:
-+
-----
-cat ./doc/disconnected_environment/subscription.yaml
-----
-
-.. Add the following content to your `subscription.yaml` file:
+Your resource might resemble the following YAML file:
 +
 [source,yaml]
 ----
 apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: multicluster-global-hub-operator
-  namespace: <open-cluster-management>
-spec:
-  channel: alpha
-  installPlanApproval: Automatic
-  name: multicluster-global-hub-operator
-  source: global-hub-operator-catalog
-  sourceNamespace: openshift-marketplace
+  kind: Subscription
+  metadata:
+    name: multicluster-global-hub-operator
+    namespace: multicluster-global-hub <1>
+  spec:
+    channel: alpha
+    installPlanApproval: Automatic
+    name: multicluster-global-hub-operator
+    source: my-mirror-catalog-source
+    sourceNamespace: openshift-marketplace
 ----
++
+<1> Replace the `multicluster-global-hub` namespace with your project namespace.
 
-.. Apply the `subscription.yaml` file:
+.. Verify that the pods are running for the multicluster global hub operator. Run the following command:
 +
+[source,bash]
 ----
-oc apply -f ./doc/disconnected_environment/subscription.yaml
-----
-  
-. Check the status of the Global Hub Operator.
-+
-Replace the `open-cluster-management` namespace with your project namespace.
-
-.. Display the status of the pods in the namespace:
-+
-----
-oc get pods -n <open-cluster-management>
+oc get pods -n multicluster-global-hub
 ----
 +
-The results resemble the following example:
+The following information might be displayed:
 +
+[source,bash]
 ----
 NAME                                                READY   STATUS    RESTARTS   AGE
 multicluster-global-hub-operator-687584cb7c-fnftj   1/1     Running   0          2m12s
-----  
+----
 
-.. Display the event information for the pods in the `open-cluster-management` namespace: 
-+ 
+.. Get a description of the `multicluster-global-hub-operator` pod with the following command:
++
+[source,bash]
 ----
-oc describe pod -n open-cluster-management
+oc describe pod -n multicluster-global-hub multicluster-global-hub-operator-687584cb7c-fnftj
 ----
 +
-The results look similar to the following events:
+The following information might be displayed:
 +
+[source,bash]
 ----
-multicluster-global-hub-operator-687584cb7c-fnftj
 ...
-Events:
-Type    Reason          Age    From               Message
-------    ------          -----   -----               -------
-Normal  Scheduled       2m52s  default-scheduler  Successfully assigned open-cluster-management/multicluster-global-hub-operator-5546668786-f7b7v to ip-10-0-137-91.ec2.internal
-Normal  AddedInterface  2m50s  multus             Add eth0 [10.128.1.7/23] from openshift-sdn
-Normal  Pulling         2m49s  kubelet            Pulling image "registry.redhat.io/multicluster-globalhub/multicluster-global-hub-operator@sha256:f385a9cfa78442526d6721fc7aa182ec6b98dffdabc78e2732bf9adbc5c8e0df"
-Normal  Pulled          2m35s  kubelet            Successfully pulled image "registry.redhat.io/multicluster-globalhub/multicluster-global-hub-operator@sha256:f385a9cfa78442526d6721fc7aa182ec6b98dffdabc78e2732bf9adbc5c8e0df" in 14.180033246s
-Normal  Created         2m35s  kubelet            Created container multicluster-global-hub-operator
-Normal  Started         2m35s  kubelet            Started container multicluster-global-hub-operator
-...
+  Events:
+  Type    Reason          Age    From               Message
+  ----    ------          ----   ----               -------
+  Normal  Scheduled       2m52s  default-scheduler  Successfully assigned multicluster-global-hub/multicluster-global-hub-operator-5546668786-f7b7v to ip-10-0-137-91.ec2.internal
+  Normal  AddedInterface  2m50s  multus             Add eth0 [10.128.1.7/23] from openshift-sdn
+  Normal  Pulling         2m49s  kubelet            Pulling image "registry.redhat.io/multicluster-globalhub/multicluster-global-hub-operator@sha256:f385a9cfa78442526d6721fc7aa182ec6b98dffdabc78e2732bf9adbc5c8e0df"
+  Normal  Pulled          2m35s  kubelet            Successfully pulled image "registry.redhat.io/multicluster-globalhub/multicluster-global-hub-operator@sha256:f385a9cfa78442526d6721fc7aa182ec6b98dffdabc78e2732bf9adbc5c8e0df" in 14.180033246s
+  Normal  Created         2m35s  kubelet            Created container multicluster-global-hub-operator
+  Normal  Started         2m35s  kubelet            Started container multicluster-global-hub-operator
+  ...
 ----
 
-[#global-hub-installing-disconnected-installing-operator-console]
-==== Installing the the Global Hub Operator by using the console
+//need to replace the link
+[#installing-global-hub]
+=== Installing the Multicluster Global Hub Operator from the {ocp} console
 
-You can install and subscribe an Operator from OperatorHub using the {ocp} web console. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/operators/administrator-tasks#olm-adding-operators-to-a-cluster[Adding Operators to a cluster] for the procedure.
+You can also install and subscribe an Operator from OperatorHub using the {ocp-short} web console. For more details, see link:ttps://docs.openshift.com/container-platform/4.11/operators/admin/olm-adding-operators-to-cluster.html[here].
 
-[#global-hub-installing-disconnected-import-managed-hub-custom-image-registry]
-=== Import the managed hub using the customized image registry
+//Is this required for the install of multicluster global hub? 
+== Import the managed hub using customized image registry
 
-Complete the following steps to import the managed hub using the customized image registry:
-
-. Configure the image registry annotations in the `MulticlusterGlobalHub` custom resource:
-+
-.. Add an annotation to the `MulticlusterGlobalHub` custom resource and specify the image pull secret and image pull policy.
-+
-[source,yaml]
-----
-apiVersion: operator.open-cluster-management.io/v1alpha4
-kind: MulticlusterGlobalHub
-metadata:
-  annotations:
-    mgh-image-repository: <private-image-registry>
-  name: multiclusterglobalhub
-  namespace: open-cluster-management
-spec:
-  imagePullPolicy: Always
-  imagePullSecret: ecr-image-pull-secret
-----
-+
-This is the global configuration, and all of your managed hubs use the same image registry and image pull secret.
-
-To support different image registries for different managed hubs, use the `ManagedClusterImageRegistry` API to import the managed hub.
-
-. Configure the `ManagedClusterImageRegistry`.
-+
-See link:https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html-single/clusters/index#import-cluster-managedclusterimageregistry[Importing a cluster that has a ManagedClusterImageRegistry] to import the clusters using the `ManagedClusterImageRegistry` API. to replace the agent image.
-+
-.. Create a `managedclusterregistry.yaml` file with the following contents:
-+
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1
-kind: ManagedCluster
-metadata:
-  labels:
-    cluster.open-cluster-management.io/clusterset: <cluster-set>
-    vendor: auto-detect
-    cloud: auto-detect
-  name: <managed-hub>
-spec:
-  hubAcceptsClient: true
-  leaseDurationSeconds: 60
----
-apiVersion: cluster.open-cluster-management.io/v1beta2
-kind: ManagedClusterSet
-metadata:
-  name: <cluster-set>
----
-apiVersion: cluster.open-cluster-management.io/v1beta2
-kind: ManagedClusterSetBinding
-metadata:
-  name: <cluster-set>
-  namespace: <placement-namespace>
-spec:
-  clusterSet: <cluster-set>
----
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: Placement
-metadata:
-  name: <placement-name>
-  namespace: <placement-namespace>
-spec:
-  clusterSets:
-    - <cluster-set>
-  tolerations:
-  - key: "cluster.open-cluster-management.io/unreachable"
-    operator: Exists
-----
-
-. Create the `ManagedClusterImageRegistry` to replace the `Agent image`.
-+
-[source,yaml]
-----
-apiVersion: imageregistry.open-cluster-management.io/v1alpha1
-kind: ManagedClusterImageRegistry
-metadata:
-  name: <global-hub-cluster-image-registry>
-  namespace: <placement-namespace>
-spec:
-  placementRef:
-    group: cluster.open-cluster-management.io
-    resource: placements
-    name: <placement-name>
-  pullSecret:
-    name: <image-pull-secret>
-  registries:
-    - mirror: <mirror-image-registry>
-      source: <source-image-registry>
-----
-
-By completing the previous steps, a label and an annotation are added to the selected `ManagedCluster`. This means that the agent image in the cluster are replaced with the mirror image.
-
-* Label: `open-cluster-management.io/image-registry=<namespace.managedclusterimageregistry-name>`
-
-* Annotation: `open-cluster-management.io/image-registries: <image-registry-info>`
 
 [#additional-resource-custom-global-hub-install]
 == Additional resources
-
+//need to double check these links and point to the correct files
 - For more information about mirroring an Operator catalog, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html-single/operators/index#olm-mirror-catalog_olm-restricted-networks[Mirroring an Operator catalog].
 
 - For more information about accessing images from private registries, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html-single/operators/index#olm-accessing-images-private-registries_olm-managing-custom-catalogs[Accessing images for Operators from private registries].
