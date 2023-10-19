@@ -1,0 +1,194 @@
+#enable-cim]
+= Enabling the Central Infrastructure Management service
+
+The Central Infrastructure Management service is provided with the {mce-short} and deploys {ocp-short} clusters. Central Infrastructure Management is deployed automatically when you enable the MultiClusterHub Operator on the hub cluster, but you have to enable the service manually.
+
+[#enable-cim-prerequisites]
+== Prerequisites
+
+See the following prerequisites before creating an host inventory:
+
+- You must have a deployed hub cluster on {ocp-short} 4.11 or later with the supported {product-title} version.
+- You need internet access for your hub cluster (connected), or a connection to an internal or mirror registry that has a connection to the internet (disconnected) to retrieve the required images for creating the environment.
+- You need a bare metal host custom resource definition.
+- You need an {ocp-short} link:https://console.redhat.com/openshift/install/pull-secret[pull secret]. See _Using image pull secrets_ for more information. 
+- You need a configured default storage class.
+- For disconnected environments only, complete the procedure for link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/scalability_and_performance/clusters-at-the-network-far-edge#ztp-acm-preparing-to-install-disconnected-acm_ztp-deploying-disconnected[Clusters at the network far edge] in the {ocp-short} documentation.
+
+[#enable-cim-provision]
+== Modifying the _Provisoning_ resource
+
+Modify the `Provisoning` resource if your hub cluster is installed on one of the following platforms:
+
+- Bare metal
+- Red Hat OpenStack Platform
+- VMware vSphere
+- User-provisioned infrastructure (UPI) method and the platform is `None`
+
+If your hub cluster is installed on a different platform, continue at <<enable-cim-disconnected,Enabling CIM in disconnected environments>> or <<enable-cim-connected,Enabling CIM in connected environments>>.
+
+Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces by running the following command:
+
+----
+oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
+----
+
+[#enable-cim-disconnected]
+== Enabling Central Infrastructure Management in disconnected environments
+
+To enable Central Infrastructure Management in disconnected environments, complete the following steps:
+
+. Create a `ConfigMap` in the same namespace as your infrastructure operator to specify the values for `ca-bundle.crt` and `registries.conf` for your mirror registry. Your file `ConfigMap` might resemble the following example:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: <mirror-config>
+  namespace: "<infrastructure-operator-namespace>"
+  labels:
+    app: assisted-service
+data:
+  ca-bundle.crt: |    
+    <certificate-content>
+  registries.conf: |
+    unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
+    [[registry]]
+       prefix = ""
+       location = "registry.redhat.io/multicluster-engine"
+       mirror-by-digest-only = true
+       [[registry.mirror]]
+       location = "mirror.registry.com:5000/multicluster-engine"
+----
++
+Registries in the list of `unqualified-search-registries` are automatically added to an authentication ignore list in the `PUBLIC_CONTAINER_REGISTRIES` environment variable. The specified registries do not require authentication when the pull secret of the managed cluster is validated.
+
+. Create the `AgentServiceConfig` custom resource by saving the following YAML content in the `agent_service_config.yaml` file:
++
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: AgentServiceConfig
+metadata:
+ name: agent
+spec:
+  databaseStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <db_volume_size> 
+  filesystemStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <fs_volume_size>
+  mirrorRegistryRef:
+    name: <mirror_config> <1>
+  unauthenticatedRegistries:
+    - <unauthenticated_registry> <2>
+  imageStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <img_volume_size> <3>
+  osImages: 
+    - openshiftVersion: "<ocp_version>" <4>
+      version: "<ocp_release_version>" <5>
+      url: "<iso_url>" <6>
+      cpuArchitecture: "x86_64"
+----
++
+<1> Replace `mirror_config` with the name of the `ConfigMap` that contains your mirror registry configuration details.
++
+<2> Include the optional `unauthenticated_registry` parameter if you are using a mirror registry that does not require authentication. Entries on this list are not validated or required to have an entry in the pull secret. 
++
+<3> Replace `img_volume_size` with the size of the volume for the `imageStorage` field, for example `10Gi` per operating system image. The minimum value is `10Gi`, but the recommended value is at least `50Gi`. This value specifies how much storage is allocated for the images of the clusters. You need to allow 1 GB of image storage for each instance of Red Hat Enterprise Linux CoreOS that is running. You might need to use a higher value if there are many clusters and instances of Red Hat Enterprise Linux CoreOS.
++
+<4> Replace `ocp_version` with the {ocp-short} version to install, for example, `4.13`.
++
+<5> Replace `ocp_release_version` with the specific install version, for example, `49.83.202103251640-0`.
++
+<6> Replace `iso_url` with the ISO url, for example, `https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.10/4.10.3/rhcos-4.10.3-x86_64-live.x86_64.iso`. You can find other values at the link:https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.10/4.10.3/[4.10.3 dependencies].
+
+Your Central Infrastructure Management service is configured. You can verify that it is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. 
+
+[#enable-cim-connected]
+== Enabling Central Infrastructure Management in connected environments
+
+To enable Central Infrastructure Management in connected environments, complete the following steps:
+
+. Create a `ConfigMap` in the same namespace as your infrastructure operator to specify the values for `ca-bundle.crt` and `registries.conf` for your mirror registry. Your file `ConfigMap` might resemble the following example:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: <mirror-config>
+  namespace: "<infrastructure-operator-namespace>"
+  labels:
+    app: assisted-service
+data:
+  ca-bundle.crt: |
+    <certificate-content>
+  registries.conf: |
+    unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
+    [[registry]]
+       prefix = ""
+       location = "registry.redhat.io/multicluster-engine"
+       mirror-by-digest-only = true
+       [[registry.mirror]]
+       location = "mirror.registry.com:5000/multicluster-engine"
+----
++
+Registries in the list of `unqualified-search-registries` are automatically added to an authentication ignore list in the `PUBLIC_CONTAINER_REGISTRIES` environment variable. The specified registries do not require authentication when the pull secret of the managed cluster is validated.
+
+. Create the `AgentServiceConfig` custom resource by saving the following YAML content in the `agent_service_config.yaml` file:
++
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: AgentServiceConfig
+metadata:
+ name: agent
+spec:
+  databaseStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <db_volume_size> <1>
+  filesystemStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <fs_volume_size> <2>
+  imageStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <img_volume_size> <3>
+----
++
+<1> Replace `db_volume_size` with the volume size for the `databaseStorage` field, for example `10Gi`. This value specifies how much storage is allocated for storing files such as database tables and database views for the clusters. The minimum value that is required is `1Gi`. You might need to use a higher value if there are many clusters.
++
+<2> Replace `fs_volume_size` with the size of the volume for the `filesystemStorage` field, for example `200M` per cluster and `2-3Gi` per supported {ocp-short} version. The minimum value that is required is `1Gi`, but the recommended value is at least `100Gi`. This value specifies how much storage is allocated for storing logs, manifests, and `kubeconfig` files for the clusters. You might need to use a higher value if there are many clusters. 
++
+<3> Replace `img_volume_size` with the size of the volume for the `imageStorage` field, for example `10Gi` per operating system image. The minimum value is `10Gi`, but the recommended value is at least `50Gi`. This value specifies how much storage is allocated for the images of the clusters. You need to allow 1 GB of image storage for each instance of Red Hat Enterprise Linux CoreOS that is running. You might need to use a higher value if there are many clusters and instances of Red Hat Enterprise Linux CoreOS.
+
+Your Central Infrastructure Management service is configured. You can verify that it is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. 
+
+[#additional-resources-cim-enable]
+== Additional resources
+
+- For additional information about zero touch provisioning, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/scalability_and_performance/clusters-at-the-network-far-edge[Clusters at the network far edge] in the {ocp-short} documentation.
+
+- See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/images/managing-images#using-image-pull-secrets[Using image pull secrets].
+
+- Return to <<enable-cim,Enabling the Central Infrastructure Management service>>
