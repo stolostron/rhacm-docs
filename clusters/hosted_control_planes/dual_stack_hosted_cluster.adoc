@@ -107,9 +107,6 @@ rules:
 . Create a YAML file with information about the `HostedCluster` object, replacing values as necessary:
 
 +
-//lahinson - oct 2023 - I think it would be wise for us to replace any text in the following steps and examples that mentions hypershiftbm.lab.
-
-+
 [source,yaml]
 ----
 apiVersion: hypershift.openshift.io/v1beta1
@@ -124,17 +121,17 @@ spec:
   imageContentSources: <1>
   - source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
     mirrors:
-    - registry.hypershiftbm.lab:5000/openshift/release
+    - registry.dns.base.domain.name:5000/openshift/release <2>
   - source: quay.io/openshift-release-dev/ocp-release
     mirrors:
-    - registry.hypershiftbm.lab:5000/openshift/release-images
+    - registry.dns.base.domain.name:5000/openshift/release-images
   - mirrors:
   ...
   ...
   autoscaling: {}
   controllerAvailabilityPolicy: SingleReplica
   dns:
-    baseDomain: hypershiftbm.lab
+    baseDomain: dns.base.domain.name
   etcd:
     managed:
       storage:
@@ -159,7 +156,7 @@ spec:
   pullSecret:
     name: hosted-dual-pull-secret
   release:
-    image: registry.hypershiftbm.lab:5000/openshift/release-images:4.14.0-0.nightly-2023-08-29-102237
+    image: registry.dns.base.domain.name:5000/openshift/release-images:4.14.0-0.nightly-2023-08-29-102237
   secretEncryption:
     aescbc:
       activeKey:
@@ -169,27 +166,27 @@ spec:
   - service: APIServer
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-dual.hypershiftbm.lab
+        address: api.hosted-dual.dns.base.domain.name
       type: NodePort
   - service: OAuthServer
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-dual.hypershiftbm.lab
+        address: api.hosted-dual.dns.base.domain.name
       type: NodePort
   - service: OIDC
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-dual.hypershiftbm.lab
+        address: api.hosted-dual.dns.base.domain.name
       type: NodePort
   - service: Konnectivity
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-dual.hypershiftbm.lab
+        address: api.hosted-dual.dns.base.domain.name
       type: NodePort
   - service: Ignition
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-dual.hypershiftbm.lab
+        address: api.hosted-dual.dns.base.domain.name
       type: NodePort
   sshKey:
     name: sshkey-cluster-hosted-dual
@@ -201,6 +198,7 @@ status:
 
 +
 <1> The `imageContentSources` section contains mirror references for user workloads within the hosted cluster.
+<2> Throughout the YAML file, replace `_dns.base.domain.name_` with the DNS base domain name.
 
 
 . Add an annotation in the `HostedCluster` object that points to the HyperShift Operator release in the {ocp-short} release:
@@ -209,8 +207,11 @@ status:
 
 +
 ----
-oc adm release info registry.hypershiftbm.lab:5000/openshift-release-dev/ocp-release:4.14.0-rc.1-x86_64 | grep hypershift
+oc adm release info registry.dns.base.domain.name:5000/openshift-release-dev/ocp-release:4.14.0-rc.1-x86_64 | grep hypershift
 ----
+
++
+where `_dns.base.domain.name_` is the DNS base domain name.
 
 .. See the following output:
 
@@ -223,15 +224,18 @@ hypershift                                     sha256:31149e3e5f8c5e5b5b100ff2d8
 
 +
 ----
-podman pull registry.hypershiftbm.lab:5000/openshift-release-dev/ocp-v4.0-art-dev@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8
+podman pull registry.dns.base.domain.name:5000/openshift-release-dev/ocp-v4.0-art-dev@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8
 ----
+
++
+where `_dns.base.domain.name_` is the DNS base domain name.
 
 .. See the following output:
 
 +
 ----
-podman pull registry.hypershiftbm.lab:5000/openshift/release@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8
-Trying to pull registry.hypershiftbm.lab:5000/openshift/release@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8...
+podman pull registry.dns.base.domain.name:5000/openshift/release@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8
+Trying to pull registry.dns.base.domain.name:5000/openshift/release@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8...
 Getting image source signatures
 Copying blob d8190195889e skipped: already exists
 Copying blob c71d2589fba7 skipped: already exists
@@ -308,8 +312,6 @@ Next, create a `NodePool` object.
 
 A `NodePool` is a scalable set of worker nodes that is associated with a hosted cluster. `NodePool` machine architectures remain consistent within a specific pool and are independent of the machine architecture of the control plane.
 
-//lahinson - sept 2023 - is the latter sentence necessary? I'm not sure if that's something most users need to know.
-
 . Create a YAML file with the following information about the `NodePool` object, replacing values as necessary:
 
 +
@@ -331,14 +333,14 @@ spec:
   platform:
     type: Agent
   release:
-    image: registry.hypershiftbm.lab:5000/openshift/release-images:4.14.0-0.nightly-2023-08-29-102237 <1>
+    image: registry.dns.base.domain.name:5000/openshift/release-images:4.14.0-0.nightly-2023-08-29-102237 <1>
   replicas: 0
 status:
   replicas: 0 <4>
 ----
 
 +
-<1> All of the nodes included in this `NodePool` are based on the following {ocp-short} version: `4.14.0-0.nightly-2023-08-29-102237`.
+<1> All of the nodes included in this `NodePool` are based on the following {ocp-short} version: `4.14.0-0.nightly-2023-08-29-102237`. Replace the `dns.base.domain.name` value with your DNS base domain name.
 <2> The `upgradeType` is set to `InPlace`, which indicates that the same bare metal node is reused during an upgrade.
 <3> The `autoRepair` field is set to `false` because the node will not be re-created if it is removed.
 <4> The `replicas` value is set to `0` so that you can scale them when needed. It is important to keep the `NodePool` replicas at 0 until all steps are completed.
