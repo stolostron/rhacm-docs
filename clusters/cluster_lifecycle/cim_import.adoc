@@ -1,0 +1,180 @@
+[#import-ocp-cluster-cim]
+= Importing an {ocp-short} cluster
+
+You can import an existing {ocp-short} cluster so that you can add additional nodes. Complete the following steps to import an {ocp-short} cluster without a static network or a bare metal host, and prepare it for adding nodes:
+
+. Create a namespace for the {ocp-short} cluster that you want to import by applying the following YAML content:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: managed-cluster
+----
+
+. Make sure that a ClusterImageSet matching the {ocp-short} cluster you are importing exists by applying the following YAML content:
++
+[source,yaml]
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterImageSet
+metadata:
+  name: openshift-v4.11.18
+spec:
+  releaseImage: quay.io/openshift-release-dev/ocp-release@sha256:22e149142517dfccb47be828f012659b1ccf71d26620e6f62468c264a7ce7863
+----
+
+. Add your pull secret to access the image by applying the following YAML content:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: pull-secret
+  namespace: managed-cluster
+stringData:
+  .dockerconfigjson: <pull-secret-json> <1>
+----
++
+<1> Replace <pull-secret-json> with your pull secret JSON.
+
+. Copy the `kubeconfig` from your {ocp-short} cluster to the hub cluster.
+
+.. Get the `kubeconfig` from your {ocp-short} cluster by running the following command. Make sure that `kubeconfig` is set as the cluster being imported:
++
+----
+oc get secret -n openshift-kube-apiserver node-kubeconfigs -ojson | jq '.data["lb-ext.kubeconfig"]' --raw-output | base64 -d > /tmp/kubeconfig.some-other-cluster
+----
++
+.. Copy the `kubeconfig` to the hub cluster by running the following command. Make sure that `kubeconfig` is set as your hub cluster:
++
+----
+oc -n managed-cluster create secret generic some-other-cluster-admin-kubeconfig --from-file=kubeconfig=/tmp/kubeconfig.some-other-cluster
+----
+
+. Create an `AgentClusterInstall` custom resource by applying the following YAML content. Replace values where needed:
++
+[source,yaml]
+----
+apiVersion: extensions.hive.openshift.io/v1beta1
+kind: AgentClusterInstall
+metadata:
+  name: your-cluster-name <1>
+  namespace: managed-cluster
+spec:
+  networking:
+    userManagedNetworking: true
+  clusterDeploymentRef:
+    name: your-cluster
+  imageSetRef:
+    name: openshift-v4.11.18
+  provisionRequirements:
+    controlPlaneAgents: 1 <2>
+  sshPublicKey: "" <3> 
+----
++
+<1> Choose a name for your cluster.
+<2> Use `1` if you are using a single-node OpenShift (SNO) cluster. Use `3` if you are using a multinode cluster.
+<3> You can use the optional `sshPublicKey` field to log in to nodes for troubleshooting purposes.
+
+. Create a `ClusterDeployment` by applying the following YAML content. Replace values where needed:
++
+[source,yaml]
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: your-cluster-name <1>
+  namespace: managed-cluster
+spec:
+  baseDomain: redhat.com <2>
+  installed: true <3>
+  clusterMetadata:
+      adminKubeconfigSecretRef:
+        name: your-cluster-name-admin-kubeconfig <4>
+      clusterID: "" <5>
+      infraID: "" <5>
+  clusterInstallRef:
+    group: extensions.hive.openshift.io
+    kind: AgentClusterInstall
+    name: your-cluster-name-install
+    version: v1beta1
+  clusterName: your-cluster-name
+  platform:
+    agentBareMetal:
+  pullSecretRef:
+    name: pull-secret
+----
++
+<1> Choose a name for your cluster.
+<2> Make sure `baseDomain` matches the domain you are using for your {ocp-short} cluster.
+<3> Your {ocp-short} cluster is only automatically imported as a production environment cluster if `installed` is set to `true`.
+<4> Make sure that the `kubeconfig` you created in step 4 is referenced in `adminKubeconfigSecretRef`.
+<5> In production environments, you can leave `clusterID` and `infraID` empty.
+
+. Add an `InfraEnv` custom resource to discover new hosts to add to your cluster by applying the following YAML content. Replace values where needed:
++
+*Note:* The following example might require additional configuration if you are not using a static IP address.
++
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: your-infraenv
+  namespace: managed-cluster
+spec:
+  clusterRef: <1>
+    name: your-cluster-name
+    namespace: managed-cluster
+  pullSecretRef:
+    name: pull-secret
+  sshAuthorizedKey: "" <2>
+----
++
+<1> The `clusterRef` field is optional if you are using late binding. If you are not using late binding, you must add the `clusterRef`, as seen in the example.
+<2> You can use the optional `sshPublicKey` field to log in to nodes for troubleshooting.
+
+. If the import is successful, a URL to download an ISO file appears. Download the ISO file by running the following command, replacing <url> with the URL that appears:
++
+*Note:* You can automate host discovery by using bare metal host.
++
+----
+oc get infraenv -n managed-cluster some-other-infraenv -ojson | jq ".status.<url>" --raw-output | xargs curl -k -o /storage0/isos/some-other.iso
+----
+
+[#add-nodes-ocp-infra-env]
+== Add worker nodes to {ocp-short} clusters
+
+Complete the following steps to add production environment worker nodes to {ocp-short} clusters:
+
+. Boot the machine that you want to use as a worker node from the ISO you previously downloaded.
++
+*Note:* Make sure that the worker node meets the requirements for an {ocp-short} worker node.
+
+. Wait for an agent to register after running the following command:
++
+----
+watch -n 5 "oc get agent -n managed-cluster"
+----
+
+. If the agent registration is succesful, an agent is listed. Approve the agent for installation. This can take a few minutes.
++
+*Note:* If the agent is not listed, exit the `watch` command by pressing Ctrl and C, then log in to the worker node to troubleshoot.
+
+. If you are using late binding, run the following command to associate pending unbound agents with your {ocp-short} cluster. Skip to step 5 if you are not using late binding:
++
+----
+oc get agent -n managed-cluster -ojson | jq -r '.items[] | select(.spec.approved==false) |select(.spec.clusterDeploymentName==null) | .metadata.name'| xargs oc -n managed-cluster patch -p '{"spec":{"clusterDeploymentName":{"name":"some-other-cluster","namespace":"managed-cluster"}}}' --type merge agent
+----
+
+. Approve any pending agents for installation by running the following command:
++
+----
+oc get agent -n managed-cluster -ojson | jq -r '.items[] | select(.spec.approved==false) | .metadata.name'| xargs oc -n managed-cluster patch -p '{"spec":{"approved":true}}' --type merge agent
+----
+
+Wait for the installation of the worker node. When the worker node installation is complete, the worker node contacts the managed cluster with a Certificate Signing Request (CSR) to start the joining process. The CSR is automatically signed.
