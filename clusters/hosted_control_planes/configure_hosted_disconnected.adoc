@@ -6,37 +6,41 @@ In the context of hosted control planes, a _disconnected_ environment is an {ocp
 [#mce_and_agent]
 == Disconnected environment architecture
 
-When you provision hosted control planes on bare metal, you use the Agent platform. The Agent platform uses the Central Infrastructure Management (CIM) service to add worker nodes to a hosted cluster. For an introduction to the CIM service, see link:https://github.com/openshift/assisted-service/blob/master/docs/hive-integration/kube-api-getting-started.md[Kube API - Getting Started Guide].
+When you provision hosted control planes on bare metal, you use the Agent platform. The Agent platform uses the Central Infrastructure Management (CIM) service to add worker nodes to a hosted cluster. For an introduction to the central infrastructure management service, see xref:../cluster_lifecycle/cim_enable.adoc#enable-cim[Enabling the central infrastructure management service].
 
-The Agent platform and {mce-short} work together to enable _disconnected_ deployments, which are not connected to the internet and use hosted control planes as a base. The following diagram provides an overview of the environment and how the workflow functions, along with labeled components for reference:
+The Agent platform and {mce-short} work together to enable _disconnected_ deployments, which are not connected to the internet and use hosted control planes as a base. 
+
+//lahinson - oct. 2023 - commenting out the following section until we have the final diagram from Design. Without the diagram, the following content doesn't make sense.
+
+//The following diagram provides an overview of the environment and how the workflow functions, along with labeled components for reference:
 
 // ADD DIAGRAM HERE. For a draft of the diagram, see https://deploy-preview-3008--hypershift-docs.netlify.app/reference/architecture/mce-and-agent/
 
-. *Applicable in disconnected environments only*: Create a config map in the `openshift-config` namespace. In this example, the config map is named `registry-config`. The content of the config map is the Registry CA certificate.
-. *Applicable in disconnected environments only*: Modify the `images.config.openshift.io` custom resource (CR) and add a new field named `additionalTrustedCA` with a value of `name: registry-config` in the specification.
-. *Applicable in disconnected environments only*: Create a config map that contains two data fields. One field contains the `registries.conf` file in `RAW` format, and the other field contains the Registry CA and is named `ca-bundle.crt`.
-. Create the `multiclusterengine` CR, which enables both the Agent and `hypershift-addon` add-ons.
-. Create the `HostedCluster` objects, which include the following components:
+//. *Applicable in disconnected environments only*: Create a config map in the `openshift-config` namespace. In this example, the config map is named `registry-config`. The content of the config map is the Registry CA certificate.
+//. *Applicable in disconnected environments only*: Modify the `images.config.openshift.io` custom resource (CR) and add a new field named `additionalTrustedCA` with a value of `name: registry-config` in the specification.
+//. *Applicable in disconnected environments only*: Create a config map that contains two data fields. One field contains the `registries.conf` file in `RAW` format, and the other field contains the Registry CA and is named `ca-bundle.crt`.
+//. Create the `multiclusterengine` CR, which enables both the Agent and `hypershift-addon` add-ons.
+//. Create the `HostedCluster` objects, which include the following components:
 
-** *Secrets:* Secrets contain the pull secret, SSH key, and the etcd encryption key.
-** *Config map (applicable in disconnected environments only):* This config map contains the CA certificate of the private registry.
-** *HostedCluster:* This component defines the configuration of the cluster that you intend to create.
-** *NodePool:* This component identifies the pool that references the machines to use for the data plane.
+//** *Secrets:* Secrets contain the pull secret, SSH key, and the etcd encryption key.
+//** *Config map (applicable in disconnected environments only):* This config map contains the CA certificate of the private registry.
+//** *HostedCluster:* This component defines the configuration of the cluster that you intend to create.
+//** *NodePool:* This component identifies the pool that references the machines to use for the data plane.
 
-. After you create the `HostedCluster` objects, the HyperShift Operator establishes the `HostedControlPlane` namespace to accommodate control plane pods. The namespace also hosts components such as agents, bare metal hosts, and `InfraEnv` resource. Later, you need to create the `InfraEnv` resource, and after ISO creation, you need to create the bare metal hosts and their secrets that contain baseboard management controller (BMC) credentials.
+//. After you create the `HostedCluster` objects, the HyperShift Operator establishes the `HostedControlPlane` namespace to accommodate control plane pods. The namespace also hosts components such as agents, bare metal hosts, and `InfraEnv` resource. Later, you need to create the `InfraEnv` resource, and after ISO creation, you need to create the bare metal hosts and their secrets that contain baseboard management controller (BMC) credentials.
 
-. The Metal3 Operator within the `openshift-machine-api` namespace inspects the new bare metal hosts. Then, the Metal3 Operator tries to connect to the BMCs to start them by using the configured `LiveISO` and `RootFS` values that are specified through the `AgentServiceConfig` CR in the {mce-short} namespace.
+//. The Metal3 Operator within the `openshift-machine-api` namespace inspects the new bare metal hosts. Then, the Metal3 Operator tries to connect to the BMCs to start them by using the configured `LiveISO` and `RootFS` values that are specified through the `AgentServiceConfig` CR in the {mce-short} namespace.
 
-. After the worker nodes of the `HostedCluster` resource are started, an agent container is started. This agent establishes contact with the Assisted Service, which orchestrates the actions to complete the deployment. Initially, you need to scale the `NodePool` resource to the number of worker nodes for your `HostedCluster` resource. The Assisted Service manages the remaining tasks.
+//. After the worker nodes of the `HostedCluster` resource are started, an agent container is started. This agent establishes contact with the Assisted Service, which orchestrates the actions to complete the deployment. Initially, you need to scale the `NodePool` resource to the number of worker nodes for your `HostedCluster` resource. The Assisted Service manages the remaining tasks.
 
-. At this point, wait for the deployment process to be completed.
+//. At this point, wait for the deployment process to be completed.
 
 [#configure-hosted-disconnected-networks]
 == Configuring hosted control planes in a disconnected environment
 
-You deploy hosted control planes in a disconnected environment on an IPv4, IPv6, or dual stack network. 
+You can deploy hosted control planes in a disconnected environment by using an IPv4, IPv6, or dual stack network. 
 
-Before you take any network-specific steps, complete the steps in xref:../hosted_control_planes/monitor_user_workload_disconnected.adoc#monitor-user-workload-disconnected[Monitoring user workload in a disconnected environment], which is a procedure that is required no matter which network you use.
+Before you complete any network-specific steps, complete the steps in xref:../hosted_control_planes/monitor_user_workload_disconnected.adoc#monitor-user-workload-disconnected[Monitoring user workload in a disconnected environment], which is a procedure that is required no matter which network you use.
 
 Next, see the instructions that are related to one of the following networking configurations on bare metal servers or virtual machines: 
 
