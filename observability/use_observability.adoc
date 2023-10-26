@@ -1,0 +1,223 @@
+[#using-observability]
+= Using observability
+
+//after changes, let's reconsider the name for this topic. How will the user know what this is for? What is the content for? Implementing observability? Using observability is broad
+
+Use the observability service to view the utilization of clusters across your fleet.
+
+- <<external-metric-query,Querying external metrics>>
+- <<exporting-metrics-to-external-endpoints,Exporting metrics to external endpoints>>
+- <<viewing-and-exploring-data,Viewing and exploring data>>
+
+[#external-metric-query]
+== Querying external metrics
+
+Observability provides an external API for metrics to be queried through the OpenShift route, `rbac-query-proxy`. See the following options to get your queries for the `rbac-query-proxy` route:
+
+* You can get the details of the route with the following command:
++
+----
+oc get route rbac-query-proxy -n open-cluster-management-observability
+----
+
+* You can also access the `rbac-query-proxy` route with your OpenShift OAuth access token. The token should be associated with a user or service account, which has permission to get namespaces. For more information, see link:https://docs.openshift.com/container-platform/4.12/authentication/managing-oauth-access-tokens.html[Managing user-owned OAuth access tokens].
+
+Complete the following steps to create `proxy-byo-cert` secrets for observability:
+
+. Get the default CA certificate and store the content of the key `tls.crt` in a local file. Run the following command:
++
+----
+oc -n openshift-ingress get secret router-certs-default -o jsonpath="{.data.tls\.crt}" | base64 -d > ca.crt
+----
+
+. Run the following command to query metrics:
++
+----
+curl --cacert ./ca.crt -H "Authorization: Bearer {TOKEN}" https://{PROXY_ROUTE_URL}/api/v1/query?query={QUERY_EXPRESSION}
+----
++
+*Note:* The `QUERY_EXPRESSION` is the standard Prometheus query expression. For example, query the metrics `cluster_infrastructure_provider` by replacing the URL in the previously mentioned command with the following URL: `https://{PROXY_ROUTE_URL}/api/v1/query?query=cluster_infrastructure_provider`. For more details, see link:https://prometheus.io/docs/prometheus/latest/querying/basics/[Querying Prometheus].
+
+. Run the following command to create `proxy-byo-ca` secrets using the generated certificates:
++
+[source,bash]
+----
+oc -n open-cluster-management-observability create secret tls proxy-byo-ca --cert ./ca.crt --key ./ca.key
+----
+
+. Create `proxy-byo-cert` secrets using the generated certificates by using the following command:
++
+[source,bash]
+----
+oc -n open-cluster-management-observability create secret tls proxy-byo-cert --cert ./ingress.crt --key ./ingress.key
+----
+//how to verify query...refresh your page to view your query
+
+[#exporting-metrics-to-external-endpoints]
+== Exporting metrics to external endpoints
+
+Export metrics to external endpoints, which support the Prometheus Remote-Write specification in real time. Complete the following steps to export metrics to external endpoints: 
+
+. Create the Kubernetes secret for an external endpoint with the access information of the external endpoint in the `open-cluster-management-observability` namespace. View the following example secret:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: victoriametrics
+  namespace: open-cluster-management-observability
+type: Opaque
+stringData:
+  ep.yaml: |
+    url: http://victoriametrics:8428/api/v1/write
+    http_client_config:
+      basic_auth:
+        username: test
+        password: test
+----
++
+The `ep.yaml` is the key of the content and is used in the `MultiClusterObservability` custom resource in next step. Currently, observability supports exporting metrics to endpoints without any security checks, with basic authentication or with `tls` enablement. View the following tables for a full list of supported parameters:
++
+[options="header", cols=".^2a,.^6a,.^4a"]
+|===
+|Name|Description|Schema
+|*url* +
+_required_|URL for the external endpoint.|string
+|*http_client_config* +
+_optional_|Advanced configuration for the HTTP client.|<<jsonmulticlusterobservability_httpclient,HttpClientConfig>>
+|===
++
+[[jsonmulticlusterobservability_httpclient]]
+*HttpClientConfig*
+[options="header", cols=".^2a,.^3a,.^4a"]
++
+|===
+|Name|Description|Schema
+|*basic_auth* +
+_optional_|HTTP client configuration for basic authentication.|<<jsonmulticlusterobservability_basicauth,BasicAuth>>
+|*tls_config* +
+_optional_|HTTP client configuration for TLS.|<<jsonmulticlusterobservability_tls,TLSConfig>>
+|===
++
+[[jsonmulticlusterobservability_basicauth]]
+*BasicAuth*
+[options="header", cols=".^2a,.^3a,.^4a"]
++
+|===
+|Name|Description|Schema
+|*username* +
+_optional_|User name for basic authorization.|string
+|*password* +
+_optional_|Password for basic authorization.|string
+|===
++
+[[jsonmulticlusterobservability_tls]]
+*TLSConfig*
++
+|===
+|Name|Description|Schema
+|*secret_name* +
+_required_|Name of the secret that contains certificates.|string
+|*ca_file_key* +
+_optional_|Key of the CA certificate in the secret (only _optional_ if *insecure_skip_verify* is set to true).|string
+|*cert_file_key* +
+_required_|Key of the client certificate in the secret.|string
+|*key_file_key* +
+_required_|Key of the client key in the secret.|string
+|*insecure_skip_verify* +
+_optional_|Parameter to skip the verification for target certificate.|bool
+|===
+
+. Add the `writeStorage` parameter to the `MultiClusterObservability` custom resource for adding a list of external endppoints that you want to export. View the following example:
++
+[source,yaml]
+----
+spec:
+  storageConfig:
+    writeStorage: <1>
+    - key: ep.yaml
+      name: victoriametrics
+----
++
+<1> Each item contains two attributes: _name_ and _key_. _Name_ is the name of the Kubernetes secret that contains endpoint access information, and _key_ is the key of the content in the secret. If you add more than one item to the list, then the metrics are exported to multiple external endpoints.
+
+. View the status of metric export after the metrics export is enabled by checking the `acm_remote_write_requests_total` metric.
++
+.. From the {ocp-short} console of your hub cluster, navigate to the _Metrics_ page by clicking *Metrics* in the _Observe_ section. 
++
+.. Then query the `acm_remote_write_requests_total` metric. The value of that metric is the total number of requests with a specific response for one external endpoint, on one observatorium API instance. The `name` label is the name for the external endpoint. The `code` label is the return code of the HTTP request for the metrics export.
+
+[#viewing-and-exploring-data]
+== Viewing and exploring data by using dashboards
+
+View the data from your managed clusters by accessing Grafana from the hub cluster. You can query specific alerts and add filters for the query. 
+
+For example, to _cluster_infrastructure_provider_ from a single node cluster, use the following query expression: `cluster_infrastructure_provider{clusterType="SNO"}`
+
+*Note:* Do not set the `ObservabilitySpec.resources.CPU.limits` parameter if observability is enabled on single node managed clusters. When you set the CPU limits, it causes the observability pod to be counted against the capacity for your managed cluster. See the reference for _Management Workload Partitioning_ in the _Additional resources_ section.
+
+[#view-historical-data]
+=== Viewing historical data
+
+When you query historical data, manually set your query parameter options to control how much data is displayed from the dashboard. Complete the following steps:
+
+. From your hub cluster, select the *Grafana link* that is in the console header. 
+
+. Edit your cluster dashboard by selecting *Edit Panel*.
+
+. From the Query front-end data source in Grafana, click the _Query_ tab. 
+
+. Select `$datasource`. 
+
+. If you want to see more data, increase the value of the _Step_ parameter section. If the _Step_ parameter section is empty, it is automatically calculated.
+
+. Find the _Custom query parameters_ field and select *`max_source_resolution=auto`*.
+
+. To verify that the data is displayed, refresh your Grafana page.
+
+Your query data appears from the Grafana dashboard.
+
+[#acm-provided-dashboards]
+=== Viewing {product-title-short} dashboards
+
+When you enable the {product-title-short} observability service, three dashboards become available. the following dashboard descriptions:
+
+* _Alert Analysis_: Overview dashboard of the alerts being generated within the managed cluster fleet.
+* _Clusters by Alert_: Alert dashboard where you can filter by the alert name.
+* _Alerts by Cluster_: Alert dashboard where you can filter by cluster, and view real-time data for alerts that are initiated or pending within the cluster environment.
+
+[#viewing-etcd-grafana]
+=== Viewing the etcd table
+
+You can also view the etcd table from the hub cluster dashboard in Grafana to learn the stability of the etcd as a data store. Select the Grafana link from your hub cluster to view the _etcd_ table data, which is collected from your hub cluster. The _Leader election changes_ across managed clusters are displayed.
+
+[#viewing-k8s-dashboards]
+=== Viewing the Kubernetes API server dashboard
+
+View the following options to view the Kubernetes API server dashboards:
+
+* View the cluster fleet Kubernetes API service-level overview from the hub cluster dashboard in Grafana.
++
+. Navigate to the Grafana dashboard.
+. Access the managed dashboard menu by selecting *Kubernetes* > *Service-Level Overview* > *API Server*. The _Fleet Overview_ and _Top Cluster_ details are displayed. 
++
+The total number of clusters that are exceeding or meeting the targeted _service-level objective_ (SLO) value for the past seven or 30-day period, offending and non-offending clusters, and API Server Request Duration is displayed.
+
+* View the Kubernetes API service-level overview table from the hub cluster dashboard in Grafana. 
+
+. Navigate to the Grafana dashboard from your hub cluster.
+. Access the managed dashboard menu by selecting *Kubernetes* > *Service-Level Overview* > *API Server*. The _Fleet Overview_ and _Top Cluster_ details are displayed.
++
+The error budget for the past seven or 30-day period, the remaining downtime, and trend are displayed.
+
+[#additional-resources-use]
+== Additional resources
+
+- For more information, see link:https://prometheus.io/docs/concepts/remote_write_spec/[Prometheus Remote-Write specification].
+
+- Return to xref:../observability/observability_enable.adoc#enabling-observability-service[Enabling the observability service]
+
+- For more topics, return to xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service introduction].
+
+- Return to the beginning of this topic, xref:../observability/use_observability.adoc#using-observability[Using observability].
