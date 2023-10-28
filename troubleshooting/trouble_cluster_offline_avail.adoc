@@ -8,18 +8,33 @@ The status of the managed cluster alternates between `offline` and `available` w
 
 When the network that connects the managed cluster to the hub cluster is unstable, the status of the managed cluster that is reported by the hub cluster cycles between `offline` and `available`. 
 
+The connection between the hub cluster and managed cluster is maintained through a lease that is validated at the `leaseDurationSeconds` interval value. If the lease is not validated within five consecutive attempts of the `leaseDurationSeconds` value, then the cluster is marked `offline`. 
+
+For example, the cluster is marked `offline` after five minutes with a `leaseDurationSeconds` interval of `60 seconds`. This configuration can be inadequate for reasons such as connectivity issues or latency, causing instability.
+
 [#resolving-the-problem-cluster-status-changing-from-offline-to-available]
 == Resolving the problem: Cluster status changing from offline to available
 
-To attempt to resolve this issue, complete the following steps:
+The five validation attempts is default and cannot be changed, but you can change the `leaseDurationSeconds` interval. 
 
-. Edit your `ManagedCluster` specification on the hub cluster by entering the following command:
+Determine the amount of time, in minutes, that you want the cluster to be marked as `offline`, then multiply that value by 60 to convert to seconds. Then divide by the default five number of attempts. The result is your `leaseDurationSeconds` value.
+
+. Edit your `ManagedCluster` specification on the hub cluster by entering the following command, but replace `cluster-name` with the name of your managed cluster:
 +
 ----
 oc edit managedcluster <cluster-name>
 ----
-Replace _cluster-name_ with the name of your managed cluster.
 
-. Increase the value of `leaseDurationSeconds` in your `ManagedCluster` specification. The default value is 60 seconds. The toleration time is the value of `leaseDurationSeconds` multiplied by 5, which controls how long the `ManagedCluster` remains available after the last time the `ManagedCluster` lease is renewed.
+. Increase the value of `leaseDurationSeconds` in your `ManagedCluster` specification, as seen in the following sample YAML:
 +
-If the `ManagedCluster` lease is not renewed in 300 seconds, the cluster status changes from available to offline. The default value might not be enough time to maintain the connection with the network issues. Specify a greater amount of time for the lease. For example, you can raise the setting to 240 seconds.
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: <cluster-name>
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+----
+. Save and apply the file.
