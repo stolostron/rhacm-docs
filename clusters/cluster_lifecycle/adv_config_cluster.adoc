@@ -8,15 +8,15 @@ You can configure some cluster settings during or after installation.
 
 The managed clusters communicate with the hub cluster through a mutual connection with the OpenShift Kube API server external load balancer. The default OpenShift Kube API server certificate is issued by an internal {ocp} cluster certificate authority (CA) when {ocp-short} is installed. If necessary, you can add or change certificates.
 
-Changing the certificate might impact the communication between the managed cluster and the hub cluster. When you add the named certificate before installing the product, you can avoid an issue that might leave your managed clusters in an offline state. 
+Changing the API server certificate might impact the communication between the managed cluster and the hub cluster. When you add the named certificate before installing the product, you can avoid an issue that might leave your managed clusters in an offline state. 
 
 The following list contains some examples of when you might need to update your certificates: 
 
-* You want to replace the default certificate for the load balancer with your own certificate. By following the guidance in _Adding API server certificates_ in the {ocp-short} documentation, you can add a named certificate with host name `api.<cluster_name>.<base_domain>` to replace the default API server certificate for the external load balancer. Replacing the certificate might cause some of your managed clusters to move to an offline state. If your clusters are in an offline state after upgrading the certificates, follow the troubleshooting instructions for _Troubleshooting imported clusters offline after certificate change_ to resolve it.
+* You want to replace the default API server certificate for the external load balancer with your own certificate. By following the guidance in _Adding API server certificates_ in the {ocp-short} documentation, you can add a named certificate with host name `api.<cluster_name>.<base_domain>` to replace the default API server certificate for the external load balancer. Replacing the certificate might cause some of your managed clusters to move to an offline state. If your clusters are in an offline state after upgrading the certificates, follow the troubleshooting instructions for _Troubleshooting imported clusters offline after certificate change_ to resolve it.
 +
 *Note:* Adding the named certificate before installing the product helps to avoid your clusters moving to an offline state.
 
-* The certificate for your external load balancer is expiring and you need to replace it. Complete the following steps to replace the certificate: 
+* The named certificate for the external load balancer is expiring and you need to replace it. If both the old and the new certificate share the same root CA certificate, despite the number of intermediate certificates, you can follow the guidance in _Adding API server certificates_ in the {ocp-short} documentation to create a new secret for the new certificate. Then update the serving certificate reference for host name `api.<cluster_name>.<base_domain>` to the new secret in the `APIServer` custom resource. Otherwise, when the old and new certificates have different root CA certificates, complete the following steps to replace the certificate: 
 +
 . Locate your `APIServer` custom resource, which resembles the following example: 
 +
@@ -41,18 +41,21 @@ spec:
 +
 .. Copy the old certificate into a new certificate:
 +
+[source,bash]
 ----
 cp old.crt combined.crt
 ----
 
 .. Add the contents of the new certificate to the copy of the old certificate:
 +
+[source,bash]
 ----
 cat new.crt >> combined.crt
 ----
 
 .. Apply the combined certificates to create a secret:
 +
+[source,bash]
 ----
 oc create secret tls combined-certs-secret --cert=combined.crt --key=old.key -n openshift-config
 ----
@@ -80,6 +83,7 @@ spec:
 
 . Create another secret named `new-cert-secret` in the `openshift-config` namespace that contains only the new certificate information by entering the following command:
 +
+[source,bash]
 ----
 oc create secret tls new-cert-secret --cert=new.crt --key=new.key -n openshift-config {code}
 ----
@@ -102,7 +106,7 @@ spec:
       servingCertificate:
         name: new-cert-secret
 ----
-
++
 After about 15 minutes, the old certificate is removed from the CA bundle, and the change is automatically propagated to the managed clusters.
 
 *Note:* Managed clusters must use the host name `api.<cluster_name>.<base_domain>` to access the hub cluster. You cannot use named certificates that are configured with other host names.
