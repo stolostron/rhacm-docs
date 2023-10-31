@@ -1,0 +1,140 @@
+[#global-hub-grafana]
+= Grafana 
+
+With the global hub Grafana data, you can monitor the policies that you configured when you used the hub cluster. Additionally, you can identify the compliance statuses of these policies. 
+
+== Grafana default alert rules
+
+Grafana has three default alert rules, and all three are stored in the configmap, `multicluster-global-hub-default-alerting`. The Grafana default alert rules are notifications of the following: 
+
+. Suspicious policy change  
+* This alert watches for a suspicious policy change. If the following events occur more than 5 times in 1 hour, the default alert becomes a firing alert: 
+** A policy was enabled or disabled. 
+** a policy was updated. 
+. Suspicious clusters compliance status change 
+* This alert watches the cluster compliance status and policy events for a cluster. The following are the two rules in this default alert:
+** If a cluster compliance status changes from `compliance` to `non-compliance` more than 3 times in 1 hour, the default alert becomes a firing alert.
+** Too many policy events in a cluster
+. Failed Cron jobs 
+* This alert watches the Cron jobs failed events. The following are the two rules in this default alert:
+** Local compliance job failed: if this  default alert rule becomes firing, it means the local compliance status sync job failed. The firing default might cause the data to be lost in the table,  `history.local_compliance`. 
+** Data retention job failed:  if this default alert rule becomes firing, it means the partition job failed.
+
+== Deleting default Grafana alert rules 
+
+If the Grafana default alert rules do not help you and your development needs you can delete the Grafan default alert rules. 
+
+.Prerequisite 
+
+* Create the link:https://github.com/stolostron/multicluster-global-hub/blob/main/doc/README.md#Customize-Grafana-Alerting-Resources[customize Grafana alerting resources]. 
+
+
+. In your customized Grafana alerting resource, include the `deleteRules`. 
+. To delete all default alerting, create a config, like the following: 
++
+[source,yaml]
+----
+    deleteRules:
+      - orgId: 1
+        uid: globalhub_suspicious_policy_change
+      - orgId: 1
+        uid: globalhub_cluster_compliance_status_change_frequently
+      - orgId: 1
+        uid: globalhub_high_number_of_policy_events
+      - orgId: 1
+        uid: globalhub_data_retention_job
+      - orgId: 1
+        uid: globalhub_local_compliance_job
+----
+
+== Customizing Grafana alerts
+
+If you want Grafana default alert rules specific to your individual development needs, you can customize the Grafana default alert rules. 
+
+. Create a secret in the namespace, `multicluster-global-hub`. 
+. Name the secret, `multicluster-global-hub-custom-grafana-config`. 
+. For a sample, use the following yaml: 
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: multicluster-global-hub-custom-grafana-config
+  namespace: multicluster-global-hub
+type: Opaque
+stringData:
+  grafana.ini: |
+    [smtp]
+    enabled = true
+    host = smtp.google.com:465
+    user = example@google.com
+    password = xxx
+    ;cert_file =
+    ;key_file =
+    skip_verify = true
+    from_address = example@163.com
+    from_name = Grafana	
+    # EHLO identity in SMTP dialog (defaults to instance_name)
+    ;ehlo_identity = dashboard.example.com
+----
+
+*Note:* You cannote confiure the section which is already in the secret, `multicluster-global-hub-default-grafana-config`. 
+
+You can also customize the Grafana alerting resources. 
+
+. Create a `configmap` in the namespace, `multicluster-global-hub`. 
+. Name the `configmap`, `multicluster-global-hub-custom-alerting`. 
+. Make the `configmap` data key an `alerting.yaml`. 
+. For a sample, use the following yaml: 
++
+[source,yaml]
+----
+apiVersion: v1
+data:
+  alerting.yaml: |
+    contactPoints:
+      - orgId: 1
+        name: globalhub_policy
+        receivers:
+          - uid: globalhub_policy_alert_email
+            type: slack
+            type: email
+            settings:
+              addresses: example@redhat.com
+              singleEmail: false
+          - uid: globalhub_policy_alert_slack
+            type: slack
+            settings:
+              url: <Slack Webhook URL>
+              title: |
+                {{ template "globalhub.policy.title" . }}
+              text: |
+                {{ template "globalhub.policy.message" . }}              
+    policies:
+      - orgId: 1
+        receiver: globalhub_policy
+        group_by: ['grafana_folder', 'alertname']
+        matchers:
+          - grafana_folder = Policy
+        repeat_interval: 1d
+    deleteRules:
+      - orgId: 1
+        uid: <Alert Rule Uid>
+    muteTimes:
+      - orgId: 1
+        name: mti_1
+        time_intervals:
+          - times:
+              - start_time: '06:00'
+                end_time: '23:59'
+                location: 'UTC'
+            weekdays: ['monday:wednesday', 'saturday', 'sunday']
+            months: ['1:3', 'may:august', 'december']
+            years: ['2020:2022', '2030']
+            days_of_month: ['1:5', '-3:-1']
+kind: ConfigMap
+metadata:
+  name: multicluster-global-hub-custom-alerting
+  namespace: multicluster-global-hub
+----
