@@ -27,19 +27,14 @@ Installing multicluster global hub in a disconnected environment involves the us
 Complete the following procedures to provision the mirror registry for multicluster global hub:
 
 [#global-hub-packages-in-catalog]
-=== Creating operator packages in your catalog
+=== Creating operator packages in mirror catalog with oc-mirror plug-in
 
 Red Hat provides the multicluster global hub and AMQ Streams operators in the Red Hat operators catalog, which are delivered by the `registry.redhat.io/redhat/redhat-operator-index` index image. When you prepare your mirror of this catalog index image, you can choose to either mirror the entire catalog as provided by Red Hat, or you can mirror a subset that contains only the operator packages that you intend to use.
 
-If you are creating a full mirror catalog, no special considerations are needed as all of the packages required to install multicluster global hub and AMQ Streams are included. However, if you are creating a partial or filtered mirrored catalog, for which you identify particular packages to be included, you must to include the `multicluster-global-hub-operator-product` and `amq-streams` package names in your list. 
+If you are creating a full mirror catalog, no special considerations are needed as all of the packages required to install multicluster global hub and AMQ Streams are included. However, if you are creating a partial or filtered mirrored catalog, for which you identify particular packages to be included, you must to include the `multicluster-global-hub-operator-rh` and `amq-streams` package names in your list. 
 
+Complete the following steps to create a local mirror registry of the `multicluster-global-hub-operator-rh` and `amq-streams` packages:
 
-//Mirror the catalog images to the registry with one of the following procedures:
-//which procedure is easiest for the user? Is it necessary to have both of the procedures?
-Complete the following steps to create a local mirror registry of the `multicluster-global-hub-operator-product` and `amq-streams` packages:
-
-* Create the mirrored catalog or registry by using the `oc-mirror` plug-in:
-+
 . Create a `ImageSetConfiguration` YAML file to configure and add the operator image. Your YAML file might resemble the following content:
 +
 [source,yaml]
@@ -57,7 +52,7 @@ mirror:
   operators:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.12
     packages:
-    - name: multicluster-global-hub-operator-product
+    - name: multicluster-global-hub-operator-rh
     - name: amq-streams
   additionalImages: []
   helm: {}
@@ -71,62 +66,6 @@ oc mirror --config=./imageset-config.yaml docker://myregistry.example.com:5000
 ----
 
 . Mirror the image set in a fully disconnected environment. For more details, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/installing/disconnected-installation-mirroring#installing-mirroring-installation-images[Mirroring images for a disconnected installation].
-
-//do you mean command line instead of utility?
-* Create the mirrored catalog or registry by using the `opm` utility. Build and push the multicluster global hub index image:
-+
-. Make a directory for the `multicluster-global-hub-mirror` image by using the following command:
-+
-[source,bash]
-----
-mkdir multicluster-global-hub-mirror 
-----
-
-. Use the `opm` utility to add the `multicluster-global-hub-operator-product` and `amq-streams` images. Run the following command:
-+
-[source,bash]
-----
-opm render registry.redhat.io/redhat/redhat-operator-index:v4.12 | jq 'select(.package=="multicluster-global-hub-operator-product" or .name=="multicluster-global-hub-operator-product" or .package=="amq-streams" or .name=="amq-streams")' > multicluster-global-hub-mirror/index.json
-----
-
-. Use the `opm` utility to create a Dockerfile for the `multicluster-global-hub-mirror` operator. Run the following command:
-+
-[source,bash]
-----
-opm generate dockerfile multicluster-global-hub-mirror
-----
-
-. Run the following command to build the `multicluster-global-hub-mirror` image:
-+
-[source,bash]
-----
-docker build -f multicluster-global-hub-mirror.Dockerfile -t myregistry.example.com:5000/mirror/multicluster-global-hub-operator-index:v4.12
-----
-
-. Push the multicluster global hub index image by using the following command:
-+
-[source,bash]
-----
-docker push myregistry.example.com:5000/mirror/multicluster-global-hub-operator-index:v4.12
-----
-
-. Mirror the images to the registry with the following command:
-+
-[source,bash]
-----
-oc adm catalog mirror myregistry.example.com:5000/mirror/multicluster-global-hub-operator-index:v4.12 your-local-private-registry --manifests-only=true --to-manifests=multicluster-globalhub-manifest --index-filter-by-os=linux/amd64
-----
-
-. Push the images to the registy by using the following command:
-+
-[source,bash]
-----
-oc image mirror -f multicluster-globalhub-manifest/mapping.txt -a <imagepullsecret> --filter-by-os=.* --keep-manifest-list --continue-on-error=true --skip-multiple-scopes
-----
-
-You have populated a local mirror registry with the `multicluster-global-hub-operator-product` and `amq-streams` packages.
-
-//* Configure to use your mirror registry
 
 
 [#global-hub-add-reg-in-catalog]
@@ -171,7 +110,7 @@ with the following command:
 oc -n openshift-marketplace get packagemanifests`
 ----
 +
-The list that is displayed should include entries showing that the `multicluster-global-hub-operator-product` and `amq-streams` packages are supplied by the catalog source for your mirror catalog:
+The list that is displayed should include entries showing that the `multicluster-global-hub-operator-rh` and `amq-streams` packages are supplied by the catalog source for your mirror catalog:
 
 
 [#global-hub-installing-disconnected-config-image-registry]
@@ -207,7 +146,7 @@ spec:
     - myregistry.example.com:5000/redhat
     source: registry.redhat.io/redhat
 ----
-
+//still need to edit this
 * Configure different image registries for different managed hubs with `ManagedClusterImageRegistry`
 +
 See link:https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html-single/clusters/index#import-cluster-managedclusterimageregistry[Importing a cluster that has a ManagedClusterImageRegistry] to use the `ManagedClusterImageRegistry` API replace the agent image.
