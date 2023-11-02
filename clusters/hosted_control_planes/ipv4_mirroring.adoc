@@ -1,0 +1,153 @@
+[#ipv4-mirroring]
+= Configuring image mirroring for an IPv4 network
+
+Image mirroring is the process of fetching images from external registries, such as `registry.redhat.com` or `quay.io`, and storing them in your private registry.
+
+[#ipv4-mirroring-process]
+== Completing the mirroring process
+
+*Note:* Start the mirroring process after the registry server is running.
+
+In the following procedures, the `oc-mirror` tool is used, which is a binary that uses the `ImageSetConfiguration` object. In the file, you can specify the following information:
+
+* The {ocp-short} versions to mirror. The versions are in `quay.io`.
+* The additional Operators to mirror. Select packages individually.
+* The extra images that you want to add to the repository.
+
+To configure image mirroring, complete the following steps:
+
+. Ensure that your `${HOME}/.docker/config.json` file is updated with the registries that you are going to mirror from and with the private registry that you plan to push the images to.
+
+. By using the following example, create an `ImageSetConfiguration` object to use for mirroring. Replace values as needed to match your environment:
+
++
+----
+apiVersion: mirror.openshift.io/v1alpha2
+kind: ImageSetConfiguration
+storageConfig:
+  registry:
+    imageURL: registry.dns.base.domain.name:5000/openshift/release/metadata:latest <1>
+mirror:
+  platform:
+    channels:
+    - name: candidate-4.14
+      minVersion: 4.14.0-ec.1
+      maxVersion: 4.14.0-ec.3
+      type: ocp
+    graph: true
+  additionalImages:
+  - name: quay.io/karmab/origin-keepalived-ipfailover:latest
+  - name: quay.io/karmab/kubectl:latest
+  - name: quay.io/karmab/haproxy:latest
+  - name: quay.io/karmab/mdns-publisher:latest
+  - name: quay.io/karmab/origin-coredns:latest
+  - name: quay.io/karmab/curl:latest
+  - name: quay.io/karmab/kcli:latest
+  - name: quay.io/user-name/trbsht:latest
+  - name: quay.io/user-name/hypershift:BMSelfManage-v4.14-rc-v3
+  - name: registry.redhat.io/openshift4/ose-kube-rbac-proxy:v4.10
+  operators:
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.14
+    packages:
+    - name: lvms-operator
+    - name: local-storage-operator
+    - name: odf-csi-addons-operator
+    - name: odf-operator
+    - name: mcg-operator
+    - name: ocs-operator
+    - name: metallb-operator
+    - name: kubevirt-hyperconverged
+----
+
++
+<1> Replace `_dns.base.domain.name_` with the DNS base domain name.
+
+. Start the mirroring process by entering the following command:
+
++
+----
+oc-mirror --source-skip-tls --config imagesetconfig.yaml docker://${REGISTRY}
+----
+
++
+After the mirroring process is finished, you have a new folder named `oc-mirror-workspace/results-XXXXXX/`, which contains the ICSP and the catalog sources to apply on the hosted cluster.
+
+. Mirror the nightly or CI versions of {ocp-short} by using the `oc adm release mirror` command. Enter the following command:
+
++
+----
+REGISTRY=registry.$(hostname --long):5000
+
+oc adm release mirror \
+  --from=registry.ci.openshift.org/ocp/release:4.14.0-0.nightly-2023-08-29-102237 \
+  --to=${REGISTRY}/openshift/release \
+  --to-release-image=${REGISTRY}/openshift/release-images:4.14.0-0.nightly-2023-08-29-102237
+----
+
+. Mirror the latest {mce-short} images by following the steps in xref:../install_upgrade/install_disconnected.adoc#install-on-disconnected-networks[Install on disconnected networks].
+
+[#ipv4-mirroring-applying]
+== Applying objects in the management cluster
+
+After the mirroring process is complete, you need to apply two objects in the management cluster:
+
+* Image Content Source Policies (ICSP) or Image Digest Mirror Set (IDMS)
+* Catalog sources
+
+When you use the `oc-mirror` tool, the output artifacts are in a folder named `oc-mirror-workspace/results-XXXXXX/`.
+
+ICSP or IDMS initiates a `MachineConfig` change that does not restart your nodes but restarts the kubelet on each of them. After the nodes are marked as `READY`, you need to apply the newly generated catalog sources.
+
+The catalog sources initiate actions in the `openshift-marketplace` Operator, such as downloading the catalog image and processing it to retrieve all the `PackageManifests` that are included in that image. 
+
+. To check the new sources, run the following command by using the new `CatalogSource` as a source:
+
++
+----
+oc get packagemanifest
+----
+
+. To apply the artifacts, complete the following steps:
+
+.. Create the ImageContentSourcePolicy (ICSP) or IDMS artifacts by entering the following command:
+
++
+----
+oc apply -f oc-mirror-workspace/results-XXXXXX/imageContentSourcePolicy.yaml
+----
+
+.. Wait for the nodes to become ready, and then enter the following command:
+
++
+----
+oc apply -f catalogSource-XXXXXXXX-index.yaml
+----
+
+
+. Mirror the OLM catalogs and configure the hosed cluster to point to the mirror. 
+
++
+When you use the `management` (default) OLMCatalogPlacement mode, the image stream that is used for OLM catalogs is not automatically amended with override information from the ICSP on the management cluster. 
+
++
+.. If the OLM catalogs are properly mirrored to an internal registry by using the original name and tag, add the `hypershift.openshift.io/olm-catalogs-is-registry-overrides` annotation to the `HostedCluster` resource. The format is `"sr1=dr1,sr2=dr2"`, where the source registry string is a key and the destination registry is a value. 
+
+.. To bypass the OLM catalog image stream mechanism, use the following four annotations on the `HostedCluster` resource to directly specify the addresses of the four images to use for OLM operator catalogs:
+
+** `hypershift.openshift.io/certified-operators-catalog-image`
+** `hypershift.openshift.io/community-operators-catalog-image`
+** `hypershift.openshift.io/redhat-marketplace-catalog-image`
+** `hypershift.openshift.io/redhat-operators-catalog-image`
+
++
+In this case, the image stream is not created, and you must update the value of the annotations when the internal mirror is refreshed to pull in operator updates.
+
++
+*Note:* If the override mechanism is required, all four values for the four default catalog sources are needed.
+
+[#ipv4-mirroring-additional-resources]
+== Additional resources
+
+* If you are working in a virtual environment, after you configure mirroring, ensure that you meet the xref:../hosted_control_planes/managing_hosted_kubevirt.adoc#prerequisites[prerequisites for hosted control planes on OpenShift Virtualization].
+
+* For more information about mirroring nightly or CI versions of {ocp-short}, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html-single/installing/index#installing-mirroring-disconnected[Mirroring images for a disconnected installation using the oc-mirror plugin].
