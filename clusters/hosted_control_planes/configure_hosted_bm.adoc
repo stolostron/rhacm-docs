@@ -48,6 +48,28 @@ oc get managedclusters local-cluster
 
 * You need to xref:../hosted_control_planes/hosted_install_cli.adoc#hosted-install-cli[install the hosted control plane command line interface].
 
+[#firewall-port-reqs-bare-metal]
+== Bare metal firewall and port requirements
+
+Ensure that you meet the firewall and port requirements so that ports can communicate between the management cluster, the control plane, and hosted clusters:
+
+* The `kube-apiserver` service runs on port 6443 by default and requires ingress access for communication between the control plane components. 
+
+** If you use the `NodePort` publishing strategy, ensure that the node port that is assigned to the `kube-apiserver` service is exposed.
+** If you use MetalLB load balancing, allow ingress access to the IP range that is used for load balancer IP addresses.
+
+* If you use the `NodePort` publishing strategy, use a firewall rule for the `ignition-server` and `Oauth-server` settings.
+
+* The `konnectivity` agent, which establishes a reverse tunnel to allow bi-directional communication on the hosted cluster, requires egress access to the cluster API server address on port 6443. With that egress access, the agent can reach the `kube-apiserver` service.
+
+** If the cluster API server address is an internal IP address, allow access from the workload subnets to the IP address on port 6443.
+** If the address is an external IP address, allow egress on port 6443 to that external IP address from the nodes.
+
+* If you change the default port of 6443, adjust the rules to reflect that change.
+* Ensure that you open any ports that are required by the workloads that run in the clusters.
+* Use firewall rules, security groups, or other access controls to restrict access to only required sources. Avoid exposing ports publicly unless necessary.
+* For production deployments, use a load balancer to simplify access through a single IP address.
+
 [#infrastructure-reqs-bare-metal]
 == Bare metal infrastructure requirements
 
@@ -55,7 +77,7 @@ The Agent platform does not create any infrastructure, but it does have the foll
 
 * Agents: An _Agent_ represents a host that is booted with a discovery image and is ready to be provisioned as an {ocp-short} node.
 
-* DNS: The API and Ingress endpoints must be routable.
+* DNS: The API and ingress endpoints must be routable.
 
 [#configuring-hcp-bare-metal]
 == Configuring hosted control planes on bare metal
