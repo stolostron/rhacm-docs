@@ -1,38 +1,7 @@
 [#observing-environments]
-= Observing environments
+= Observability configuration
 
-You can use {product-title} to gain insight and optimize your managed clusters. Enable the observability service operator, `multicluster-observability-operator`, on your hub cluster to monitor the health of your managed clusters. Learn about the architecture for the multicluster observability service in the following sections. 
-
-image:../images/observability-arch-24.png[Multicluster observability architecture]
-
-*Note:* The _on-demand log_ provides access for engineers to get logs for a given pod in real-time. Logs from the hub cluster are not aggregated. These logs can be accessed with the search service and other parts of the console.
-
-* <<observability-service,Observability service>>
-* <<observability-support,Support>>
-* <<metric-types,Metric types>>
-* <<observability-pod-capacity-requests,Observability pod capacity requests>>
-* <<persistent-stores-observability,Persistent stores used in the observability service>>
-* <<additional-resources-obs,Additional resources>>
-
-[#observability-service]
-== Observability service
-
-By default, observability is included with the product installation, but not enabled. Due to the requirement for persistent storage, the observability service is not enabled by default. See the _Support_ section for observability.
-
-When the service is enabled, the `observability-endpoint-operator` is automatically deployed to each imported or created cluster. This controller collects the data from {ocp} Prometheus, then sends it to the {product-title-short} hub cluster. If the hub cluster imports itself as the `local-cluster`, observability is also enabled on it and metrics are collected from the hub cluster.
-
-The observability service deploys an instance of Prometheus Alertmanager, which enables alerts to be forwarded with third-party applications. It also includes an instance of Grafana to enable data visualization with dashboards (static) or data exploration. {product-title-short} supports version 8.5.20 of Grafana. You can also design your Grafana dashboard. For more information, see _Designing your Grafana dashboard_. You can customize the observability service by creating custom recording rules or alerting rules.
-
-[#observability-support]
-== Support
-
-- {product-title-short} is tested with and fully supported by Red Hat OpenShift Data Foundation (formerly Red Hat OpenShift Container Storage). 
-
-- {product-title-short} supports the function of the multicluster observability operator on user-provided third-party object storage that is S3 API compatible. The observability service uses Thanos supported, stable object stores.
-
-- {product-title-short} use commercial, reasonable efforts to assist in the identification of the root cause. If a support ticket is raised and the root cause has been determined to be a result of the customer-provided S3 compatible object storage, then the issue must be resolved using the customer support channels.
-
-- {product-title-short} does not commit to fix support tickets raised by customers, where the root cause identified is the S3 compatible object storage provider.
+Continue reading to understand what metrics can be collected with the observability compnent, and for information about the observability pod capacity.
 
 [#metric-types]
 == Metric types
@@ -284,43 +253,15 @@ Observability components require 2701mCPU and 11972Mi memory to install the obse
 | 3072
 |===
 
-[#persistent-stores-observability]
-== Persistent stores used in the observability service
-
-*Important:* Do not use the local storage operator or a storage class that uses local volumes for persistent storage. You can lose data if the pod relaunched on a different node after a restart. When this happens, the pod can no longer access the local storage on the node. Be sure that you can access the persistent volumes of the `receive` and `rules` pods to avoid data loss.
-
-When you install {product-title-short} the following persistent volumes (PV) must be created so that Persistent Volume Claims (PVC) can attach to it automatically. As a reminder, you must define a storage class in the `MultiClusterObservability` custom resource when there is no default storage class specified or you want to use a non-default storage class to host the PVs. It is recommended to use Block Storage, similar to what Prometheus uses. Also each replica of `alertmanager`, `thanos-compactor`, `thanos-ruler`, `thanos-receive-default` and `thanos-store-shard` must have its own PV. View the following table:
-
-.Table list of persistent volumes
-|===
-| Persistent volume name | Purpose 
-| alertmanager 
-| Alertmanager stores the `nflog` data and silenced alerts in its storage. `nflog` is an append-only log of active and resolved notifications along with the notified receiver, and a hash digest of contents that the notification identified.
-
-| thanos-compact 
-| The compactor needs local disk space to store intermediate data for its processing, as well as bucket state cache. The required space depends on the size of the underlying blocks. The compactor must have enough space to download all of the source blocks, then build the compacted blocks on the disk. On-disk data is safe to delete between restarts and should be the first attempt to get crash-looping compactors unstuck. However, it is recommended to give the compactor persistent disks in order to effectively use bucket state cache in between restarts.
-
-| thanos-rule 
-| The thanos ruler evaluates Prometheus recording and alerting rules against a chosen query API by issuing queries at a fixed interval. Rule results are written back to the disk in the Prometheus 2.0 storage format. The amount of hours or days of data retained in this stateful set was fixed in the API version `observability.open-cluster-management.io/v1beta1`. It has been exposed as an API parameter in `observability.open-cluster-management.io/v1beta2`: `_RetentionInLocal_` 
-
-| thanos-receive-default 
-| Thanos receiver accepts incoming data (Prometheus remote-write requests) and writes these into a local instance of the Prometheus TSDB. Periodically (every 2 hours), TSDB blocks are uploaded to the object storage for long term storage and compaction. The amount of hours or days of data retained in this stateful set, which acts a local cache was fixed in API Version `observability.open-cluster-management.io/v1beta`. It has been exposed as an API parameter in `observability.open-cluster-management.io/v1beta2`: `_RetentionInLocal_`
-
-| thanos-store-shard
-| It acts primarily as an API gateway and therefore does not need a significant amount of local disk space. It joins a Thanos cluster on startup and advertises the data it can access. It keeps a small amount of information about all remote blocks on local disk and keeps it in sync with the bucket. This data is generally safe to delete across restarts at the cost of increased startup times.
-|===
-
-*Note:* The time series historical data is stored in object stores. Thanos uses object storage as the primary storage for metrics and metadata related to them. For more details about the object storage and downsampling, see _Enabling observability service_.
-
 [#additional-resources-obs]
 == Additional resources
 
-- For more information about enabling observability, read xref:../observability/observability_enable.adoc#enabling-observability-service[Enabling observability service].
+- For more information about enabling observability, read xref:../observability/observability_enable.adoc#enabling-observability-service[Enabling the observability service].
 - Read xref:../observability/customize_observability.adoc#customizing-observability[Customizing observability] to learn how to configure the observability service, view metrics and other data.
 - Read xref:../observability/design_grafana.adoc#using-grafana-dashboards[Using Grafana dashboards].
-- Learn from the {ocp-short} documentation what types of metrics are collected and sent using telemetry. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html-single/support/index#about-remote-health-monitoring[Information collected by Telemetry] for information. 
+- Learn from the {ocp-short} documentation what types of metrics are collected and sent using telemetry. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html-single/support/index#about-remote-health-monitoring[Information collected by Telemetry] for information. 
 - Refer to link:../governance/policy_ctrl_adv_config.adoc#gov-metric[Governance metric] for details.
 - Read xref:../observability/manage_insights.adoc#manage-insights[Managing insight _PolicyReports_].
 - Refer to link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[Prometheus recording rules].
 - Also refer to link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[Prometheus alerting rules].
-- Return to xref:../observability/search_intro.adoc#searching-in-the-console-intro[Searching in the console introduction].
+- Return to xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service introduction].

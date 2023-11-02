@@ -1,0 +1,107 @@
+[#importing-managed-agent]
+= Importing a managed cluster by using agent registration
+
+After you install {mce}, you are ready to import a cluster and manage it by using the agent registration endpoint. Continue reading the following topics to learn how to import a managed cluster by using the agent registration endpoint. To import a managed cluster by using the console, see xref:../cluster_lifecycle/import_gui.adoc#importing-managed-cluster-console[Importing a managed cluster by using the console]. To import a managed cluster by using the CLI, see xref:../cluster_lifecycle.adoc/import_cli.adoc#importing-managed-cluster-cli[Importing a managed cluster by using the CLI].
+
+* <<import-agent-prereqs,Prerequisites>>
+* <<supported-architectures-agent,Supported architectures>>
+* <<cluster-import-agent,Importing a cluster>>
+
+[#import-agent-prereqs]
+== Prerequisites
+
+* A deployed hub cluster. If you are importing bare metal clusters, the hub cluster must be installed on {ocp-short} version 4.12 or later. 
+* A cluster you want to manage.
+* The `base64` command line tool.
+* A defined `multiclusterhub.spec.imagePullSecret` if you are importing a cluster that was not created by {ocp-short}. This secret might have been created when {mce} was installed. See xref:../install_upgrade/adv_config_install.adoc#custom-image-pull-secret[Custom image pull secret] for more information about how to define this secret.
++
+If you need to create a new secret, see xref:../cluster_lifecycle/import_gui.adoc#creating-new-pull-secret[Creating a new pull secret].
+
+[#supported-architectures-agent]
+== Supported architectures
+
+* Linux (x86_64, s390x, ppc64le)
+* macOS
+
+[#cluster-import-agent]
+== Importing a cluster
+
+To import a managed cluster by using the the agent registration endpoint, complete the following steps:
+
+. Get the agent registration server URL by running the following command on the hub cluster:
++
+----
+export agent_registration_host=$(oc get route -n multicluster-engine agent-registration -o=jsonpath="{.spec.host}")
+----
++
+*Note:* If your hub cluster is using a cluster-wide-proxy, make sure that you are using the URL that managed cluster can access.
+
+. Get the cacert by running the following command:
++
+----
+oc get configmap -n kube-system kube-root-ca.crt -o=jsonpath="{.data['ca\.crt']}" > ca.crt_
+----
+
+. Get the token for the agent registration sever to authorize by applying the following YAML content:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: managed-cluster-import-agent-registration-sa
+  namespace: multicluster-engine
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: managed-cluster-import-agent-registration-sa-token
+  namespace: multicluster-engine
+  annotations:
+    kubernetes.io/service-account.name: "managed-cluster-import-agent-registration-sa"
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: managed-cluster-import-agent-registration
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: managedcluster-import-controller-agent-regitration-client
+subjects:
+  - kind: ServiceAccount
+    name: managed-cluster-import-agent-registration-sa
+    namespace: multicluster-engine
+----
+
+. Run the following command to export the token:
++
+----
+export token=$(oc get secret -n multicluster-engine managed-cluster-import-agent-registration-sa-token -o=jsonpath='{.data.token}' | base64 -d)
+----
+
+. Enable the automatic approval and patch the content to `cluster-manager` by running the following command:
++
+----
+oc patch clustermanager cluster-manager --type=merge -p '{"spec":{"registrationConfiguration":{"featureGates":[
+{"feature": "ManagedClusterAutoApproval", "mode": "Enable"}], "autoApproveUsers":["system:serviceaccount:multicluster-engine:agent-registration-bootstrap"]}}}'
+----
++
+*Note:* You can also disable automatic approval and manually approve certificate signing requests from managed clusters.
+
+. Switch to your managed cluster and get the cacert by running the following command:
++
+----
+curl --cacert ca.crt -H "Authorization: Bearer $token" https://$agent_registration_host/agent-registration/crds/v1 | oc apply -f -
+----
+
+. Run the following command to import the managed cluster to the hub cluster:
++
+Replace `<clusterName>` with the name of you cluster.
++
+*Optional:* Replace `<klusterletconfigName>` with the name of your KlusterletConfig.
++
+----
+curl --cacert ca.crt -H "Authorization: Bearer $token" https://$agent_registration_host/agent-registration/manifests/<clusterName>?klusterletconfig=<klusterletconfigName> | oc apply -f -
+----

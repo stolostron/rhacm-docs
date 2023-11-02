@@ -1,13 +1,11 @@
 [#performance-and-scalability]
 = Performance and scalability
 
-{product-title} is tested to determine certain scalability and performance data.
-The major areas that are tested are cluster scalability and search performance.
-
-You can use this information to help you plan your environment.
+{product-title} is tested to determine certain scalability and performance data. The major areas that are tested are cluster scalability and search performance. You can use this information as you plan your environment.
 
 *Note:* Data is based on the results from a lab environment at the time of testing.
-Your results might vary, depending on your environment, network speed, and changes to the product.
+
+{product-title-short} is tested by using a three node hub cluster on bare metal machines. At testing, there is a sufficient amount of resource capacity (CPU, memory, and disk) to find software component limits. Your results might vary, depending on your environment, network speed, and changes to the product.
 
 * <<maximum-number-of-managed-clusters,Maximum number of managed clusters>>
 * <<search-scalability,Search scalability>>
@@ -21,111 +19,37 @@ The maximum number of clusters that {product-title-short} can manage varies base
 * Number of resources in the cluster, which depends on factors like the number of policies and applications that are deployed.
 * Configuration of the hub cluster, such as how many pods are used for scaling.
 
-The following table shows the configuration information for the clusters on the Amazon Web Services cloud platform that were used during this testing:
+The managed clusters are {sno} virtual machines hosted on Red Hat Enterprise Linux hypervisors. Virtual machines are used to achieve high-density counts of clusters per single bare metal machine in the testbed. Sushy-emulator is used with libvirt for virtual machines to have an accessible bare metal cluster by using Redfish APIs. The following operators are a part of the test installation, Topology Aware Lifecycle Manager, Local Storage Operator, and Red Hat OpenShift GitOps. The following table shows the lab environment scaling information:
 
+.Table for environment scaling
 |===
-| Node | Flavor | vCPU | RAM (GiB) | Disk type | Disk size (GiB) | Count | Region
+| Node | Count | Operating system | Hardware | CPU cores | Memory | Disks  
 
-| Master
-| m5.2xlarge
-| 8
-| 32
-| gp2
-| 100
+| Hub cluster control plane
 | 3
-| us-east-1
+| {ocp-short}
+| Bare metal
+| 112
+| 512 GiB
+| 446 GB SSD, 2.9 TB NVMe, 2 x 1.8 TB SSD
 
-| Worker or Infrastructure
-| m5.2xlarge
+| Managed cluster 
+| 3500
+| {sno}
+| Virtual machine
 | 8
-| 32
-| gp2
-| 100
-| 3 or 5 nodes
-| us-east-1
+| 18 GiB
+| 120 GB
 |===
-
-For more information about infrastructure nodes, see, xref:../install/install_connected.adoc#installing-on-infra-node[Installing the {product-title-short} hub cluster on infrastructure nodes]. Also see link:https://docs.openshift.com/container-platform/4.11/machine_management/creating-infrastructure-machinesets.html[Creating infrastructure machine sets].
 
 [#search-scalability]
 == Search scalability
 
 The scalability of the Search component depends on the performance of the data store.
-The following variables are important when analyzing the search performance:
-
-* Physical memory
-* Write throughput (Cache recovery time)
-* Query execution time
-
-[#physical-memory]
-=== Physical memory
-
-Search keeps the data in-memory to achieve fast response times.
-The memory required is proportional to the number of Kubernetes resources and their relationships in the cluster.
-
-|===
-| Clusters | Kubernetes resources | Relationships | Observed size (with simulated data)
-
-| 1 medium
-| 5000
-| 9500
-| 50 Mi
-
-| 5 medium
-| 25,000
-| 75,000
-| 120 Mi
-
-| 15 medium
-| 75,000
-| 20,0000
-| 492 Mi
-
-| 30 medium
-| 150,000
-| 450,000
-| 1 Gi
-
-| 50 medium
-| 250,000
-| 750,000
-| 2 Gi
-|===
-
-[#write-throughput-cache-recovery-time]
-=== Write throughput (cache recovery time)
-
-Most clusters in steady state generate a small number of resource updates.
-The highest rate of updates happen when the data in RedisGraph is cleared, which causes the remote collectors to synchronize their full state around the same time. When the datastore is cleared, recovery times are measured for a different number of managed clusters.
-
-|===
-| Clusters | Kubernetes resources | Relationships | Average recovery time from simulation
-
-| 1 medium
-| 5000
-| 9500
-| less than 2 seconds
-
-| 5 medium
-| 25,000
-| 75,000
-| less than 15 seconds
-
-| 15 medium
-| 75,000
-| 200,000
-| 2 minutes and 40 seconds
-
-| 30 medium
-| 150,000
-| 450,000
-| 5-8 minutes
-|===
-
-*Remember:* Times might increase for clusters that have a slow network connection to the hub. The write throughput information that is previously stated is applicable only if `persistence` is disabled.
+The query run time is an important variable when analyzing the search performance.
 
 [#query-execution-considerations]
-=== Query execution considerations
+=== Query run time considerations
 
 There are some things that can affect the time that it takes to run and return results from a query.
 Consider the following items when planning and configuring your environment:
@@ -138,10 +62,9 @@ If you search for `RedHat` and you manage a large number of clusters, it might t
 * The length of time to complete a request is proportional to the number of namespaces and resources the user is authorized to access.
 +
 *Note:* If you save and share a Search query with another user, returned results depend on access level for that user.
-For more information on role access, see link:https://docs.openshift.com/container-platform/4.11/authentication/using-rbac.html[Using RBAC to define and apply permissions] in the {ocp-short} documentation.
+For more information on role access, see link:https://docs.openshift.com/container-platform/4.12/authentication/using-rbac.html[Using RBAC to define and apply permissions] in the {ocp-short} documentation.
 
 * The worst performance is observed for a request by a non-administrator user with access to all of the namespaces, or all of the managed clusters.
-
 
 [#scaling-for-observability]
 == Scaling for observability

@@ -1,0 +1,154 @@
+[#create-host-inventory-cli]
+= Creating a host inventory by using the command line interface
+
+You can create a host inventory (infrastructure environment) to discover physical or virtual machines that you can install your {ocp-short} clusters on. Use the command line interface instead of the console for automated deployments or for the following advanced configuration options:
+
+- Automatically bind discovered hosts to an existing cluster definition
+- Override the ignition configuration of the Discovery Image
+- Control the iPXE behavior
+- Modify kernel arguments for the Discovery Image
+- Pass additional certificates that you want the host to trust during the discovery phase
+- Select a Red Hat CoreOS version to boot for testing that is not the default option of the newest version
+
+[#create-host-inventory-prereqs-cli]
+== Prerequisite
+
+- You must enable the central infrastructure management service. See _Enabling the central infrastructure management service_ for more information.
+
+[#create-host-inventory-cli-steps]
+== Creating a host inventory
+
+Complete the following steps to create a host inventory (infrastructure environment) by using the command line interface:
+
+. Log in to your hub cluster by running the following command:
++
+----
+oc login
+----
+
+. Create a namespace for your resource.
+
+.. Create the `namespace.yaml` file and add the following content:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: <your_namespace> <1>
+----
++
+<1> Use the same name for your namespace and your infrastructure environment to monitor your inventory in the console.
+
+..  Apply the YAML content by running the following command:
++
+----
+oc apply -f namespace.yaml
+----
+
+. Create a `Secret` custom resource containing your {ocp-short} link:https://console.redhat.com/openshift/install/pull-secret[pull secret].
+
+.. Create the `pull-secret.yaml` file and add the following content:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: pull-secret <1>
+  namespace: <your_namespace> 
+stringData:
+  .dockerconfigjson: <your_pull_secret> <2>
+----
++
+<1> Add your namesapce.
+<2> Add your pull secret.
+
+.. Apply the YAML content by running the following command:
++
+----
+oc apply -f pull-secret.yaml
+----
+
+. Create the infrastructure environment.
+
+.. Create the `infra-env.yaml` file and add the following content. Replace values where needed, but the only required property in the `spec` field is `pullSecretRef`:
++
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: myinfraenv
+  namespace: <your_namespace>
+spec:
+  proxy: <1>
+    httpProxy: <http://user:password@ipaddr:port> <2>
+    httpsProxy: <http://user:password@ipaddr:port> <3>
+    noProxy: <4>
+  additionalNTPSources: <5>
+  sshAuthorizedKey: <6>
+  pullSecretRef:
+    name: <name> <7>
+  agentLabels: <8>
+    <key>: <value>
+  nmStateConfigLabelSelector: <9>
+    matchLabels:
+      <key>: <value>
+  clusterRef: <10>
+    name: <cluster_name>
+    namespace: <projecct_name>
+  ignitionConfigOverride: '{"ignition": {"version": "3.1.0"}, …}' <11>
+  cpuArchitecture: x86_64 <12>
+  ipxeScriptType: DiscoveryImageAlways <13>
+  kernelArguments: <14>
+    - operation: append
+      value: audit=0
+  additionalTrustBundle: <bundle> <15>
+  osImageVersion: <version> <16>
+----
++
+<1> Defines the proxy settings for agents and clusters that use the `InfraEnv` resource. If you do not set the `proxy` value, agents are not configured to use a proxy.
+<2> The URL of the proxy for HTTP requests. The URL must start with `http`. HTTPS is not supported.
+<3> The URL of the proxy for HTTP requests. The URL must start with `http`. HTTPS is not supported.
+<4> A list of domains and CIDRs separated by commas that you do not want to use the proxy with.
+<5> A list of Network Time Protocol (NTP) sources (hostname or IP) to add to all hosts. They are added to NTP sources that are configured by using other options, such as DHCP.
+<6> SSH public keys that will be added to all hosts for use in debugging during the discovery phase (when the host boots the Discovery Image).
+<7> The name of the Kubernetes secret containing your pull secret.
+<8> Labels that are automatically added to the `Agent` resources representing the hosts that are discovered with your `InfraEnv`. Make sure to add your key and value.
+<9> Consolidates advanced network configuration such as static IPs, bridges, and bonds for the hosts. The host network configuration is specified in one or more `NMStateConfig` resources with labels you choose. The `nmStateConfigLabelSelector` property is a Kubernetes label selector that matches your chosen labels. The network configuration for all `NMStateConfig` labels that match this label selector is included in the Discovery Image.  When you boot, each host compares each configuration to its network interfaces and applies the appropriate configuration. See link to section _Configuring advanced networking for a host inventory_. to learn more about advanced network configuration.
+<10> References an existing `ClusterDeployment` resource that describes a standalone on-premises cluster. Not set by default. If `clusterRef` is not set, the hosts can be bound to one or more clusters at a later time. The hosts can also be removed from one cluster and added to another.  However, if clusterRef is set, all hosts discovered with this InfraEnv will be automatically bound to the specified cluster.  If the cluster has not yet been installed, all discovered hosts will be part of its installation. If the cluster has already been installed, all discovered hosts will be added.
+<11> Modifies the ignition configuration of the Red Hat CoreOS live image, such as adding files. Make sure to only use `ignitionConfigOverride` if you need it. Must use ignition version 3.1.0, regardless of the cluster version.
+<12> Choose one of the following supported CPU architectures: x86_64, aarch64, ppc64le, or s390x. The default value is x86_64.
+<13> Causes the image service to always serve the iPXE script when set to the default value of `DiscoveryImageAlways` and when you are using iPXE to boot. As a result, the host boots from the network discovery image. Setting the value to `BootOrderControl` causes the image service to determine when to return the iPXE script, depending on the host state, which causes the host to boot from the disk when the host is provisioned and is part of a cluster.
+<14> Allows modifying the kernel arguments for when the Discovery Image boots. Possible values for `operation` are `append`, `replace`, or `delete`.
+<15> A PEM-encoded X.509 certificate bundle, usually needed if the hosts are in a network with a re-encrypting man-in-the-middle (MITM) proxy, or if the hosts need to trust certificates for other purposes, such as container image registries. Hosts discovered by your `InfraEnv` trust the certificates in this bundle. Clusters created from the hosts discovered by your `InfraEnv` also trust the certificates in this bundle.
+<16> The Red Hat CoreOS image version to use for your `InfraEnv`. Make sure the version refers to the OS image specified in the `AgentServiceConfig.spec.osImages`, and that `OSImageVersion` matches an {ocp-short} version in the OS images list. You cannot specify `OSImageVersion` and `ClusterRef` at the same time. See _Enabling the central infrastructure management service_ for more information.
+
+.. Apply the YAML content by running the following command:
++
+----
+oc apply -f infra-env.yaml
+----
+
+.. To verify that your host inventory is created, check the status with the following command:
+
+----
+oc describe infraenv myinfraenv -n <your_namespace>
+----
+
+See the following list of notable properties:
+
+- `conditions`: The standard Kubernetes conditions indicating if the image was created succesfully.
+- `isoDownloadURL`: The URL to download the Discovery Image.
+- `createdTime`: The time at which the image was last created. If you modify the `InfraEnv`, make sure that the timestamp has been updated before downloading a new image.
+
+*Note:* If you modify the `InfraEnv` resource, make sure that the `InfraEnv` has created a new Discovery Image by looking at the `createdTime` property. If you already booted hosts, boot them again with the latest Discovery Image.
+
+You can continue by configuring static networking, if required, and begin adding hosts to your infrastructure environment.
+
+[#additional-resources-host-inv-cli]
+== Additional resources
+
+- See xref:../cluster_lifecycle/cim_enable.adoc#enable-cim[Enabling the central infrastructure management service].
