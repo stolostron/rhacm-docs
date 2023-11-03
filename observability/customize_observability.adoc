@@ -13,6 +13,9 @@ Read the following sections to learn more about how you want to manage and view 
 - <<updating-replicas,Updating the _MultiClusterObservability_ custom resource replicas from the console>>
 - <<customizing-route-cert,Customizing route certification>>
 - <<customizing-certificates-object-store,Customizing certificates for accessing the object store>>
+- <<configuring-proxy-settings-for-observability-add-ons,Configuring proxy settings for observability add-ons>>
+- <<disabling-proxy-settings-for-observability-add-ons,Disabling proxy settings for observability add-ons>>
+
 
 [#creating-custom-rules]
 == Creating custom rules
@@ -359,6 +362,58 @@ metricObjectStorage:
 ----
 
 This secret can be mounted into all components that need to access the object store, and it includes the following components: `receiver`, `store`, `ruler`, `compact`.
+
+[#configuring-proxy-settings-for-observability-add-ons]
+== Configuring proxy settings for observability add-ons
+
+Configure the proxy settings to allow the communications from the managed cluster to access the hub cluster through a HTTP and HTTPS proxy server. Typically, add-ons do not need any special configuration to support HTTP and HTTPS proxy servers between a hub cluster and a managed cluster. But if you enabled the observability add-on, you must complete the following configuration: 
+
+=== Prerequisite 
+- You have a hub cluster. 
+- You have enabled the proxy settings between the hub cluster and managed cluster. 
+
+. Go to the cluster namespace on your hub cluster. 
+. Create an `AddOnDeploymentConfig` with the proxy settings by adding a `spec.proxy.Config`. View the following YAML example:
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: <addon-deploy-config-name>
+  namespace: <managed-cluster-name>
+spec:
+  agentInstallNamespace: open-cluster-managment-addon-observability
+  proxyConfig:
+    httpsProxy: "https://<username>:<password>@<ip>:<port>" <1>
+    noProxy: ".cluster.local,.svc,172.30.0.1" <2> 
+----
++
+<1> Specify the same name for the HTTP and HTTPS proxy.
+<2> Include the IP address of the `kube-apiserver`. To get the IP address, run following command on your managed cluster: `oc -n default describe svc kubernetes | grep IP:`. 
+. Go to the `ManagedClusterAddOn` and reference the `AddOnDeploymentConfig` you made by adding an item in `spec.configs`. View the following YAML example: 
+
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: <addon-deploy-config-name>
+  namespace: <managed-cluster-name>
+spec:
+  agentInstallNamespace: open-cluster-managment-addon-observability
+  proxyConfig:
+    httpsProxy: "https://<username>:<password>@<ip>:<port>"
+    noProxy: ".cluster.local,.svc,172.30.0.1"
+----
+
+[#disabling-proxy-settings-for-observability-add-ons]
+== Disabling proxy settings for Observability add-ons
+
+If your development needs change, you might need to disable the Observability add-ons you configured for the hub cluster and managed cluster. You can disable the Observability add-on at any time. ,
+
+. Go to the `ManagedClusterAddOn`.
+. Remove the referenced `AddOnDeploymentConfig`. 
 
 [#additional-resource-custom-obs]
 == Additional resources
