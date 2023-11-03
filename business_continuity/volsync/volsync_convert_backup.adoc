@@ -1,20 +1,13 @@
 [#volsync-convert-backup-pvc]
 = Converting a replicated image to a usable persistent volume claim
 
-You might need to use the replicated image to recover data, or create a new instance of a persistent volume claim. The copy of the image must be converted to a persistent volume claim before it can be used. To convert a replicated image to a persistent volume claim, complete the following steps:
+You might need to convert the replicated image to a persistent volume claim to recover data. 
 
-. When the replication is complete, identify the latest snapshot from the `ReplicationDestination` object by entering the following command:
-+
-----
-$ kubectl get replicationdestination <destination> -n <destination-ns> --template={{.status.latestImage.name}}
-----
-Note the value of the latest snapshot for when you create your persistent volume claim.
-+
-Replace `destination` with the name of your replication destination. 
-+
-Replace `destination-ns` with the namespace of your destination. 
+When you replicate or restore a pesistent volume claim from a `ReplicationDestination` location by using a `VolumeSnapshot`, a `VolumeSnapshot` is created. The `VolumeSnapshot` contains the `latestImage` from the last successful synchronization. The copy of the image must be converted to a persistent volume claim before it can be used. The VolSync `ReplicationDestination` volume populator can be used to convert a copy of the image to a usable persistent volume claim.
 
-. Create a `pvc.yaml` file that resembles the following example:
+. Create a persistent volume claim with a `dataSourceRef` that points to the `ReplicationDestination` where you want to restore a persistent volume claim. This persistent volume claim is populated with the contents of the `VolumeSnapshot` that is specified in the `status.latestImage` setting of the `ReplicationDestination` custom resource definition.
++
+The following YAML content shows a sample persistent volume claim that might be used:
 +
 [source,yaml]
 ----
@@ -26,10 +19,10 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  dataSource:
-    kind: VolumeSnapshot
-    apiGroup: snapshot.storage.k8s.io
-    name: <snapshot_to_replace>
+  dataSourceRef:
+    kind: ReplicationDestination
+    apiGroup: volsync.backube
+    name: <replicationdestination_to_replace>
   resources:
     requests:
       storage: 2Gi
@@ -37,9 +30,9 @@ spec:
 +
 Replace `pvc-name` with a name for your new persistent volume claim.
 +
-Replace `destination-ns` with the namespace where the persistent volume claim is located.  
+Replace `destination-ns` with the namespace where the persistent volume claim and `ReplicationDestination` are located.
 +
-Replace `snapshot_to_replace` with the `VolumeSnapshot` name that you found in the previous step.
+Replace `replicationdestination_to_replace` with the `ReplicationDestination` name.
 +
 **Best practice:** You can update `resources.requests.storage` with a different value when the value is at least the same size as the initial source persistent volume claim.
 
@@ -49,4 +42,13 @@ Replace `snapshot_to_replace` with the `VolumeSnapshot` name that you found in t
 $ kubectl get pvc -n <destination-ns>
 ----
 
-Your original backup image is running as the main persistent volume claim.
+*Note:*
+
+If no `latestImage` exists, the persistent volume claim remains in a pending state until the `ReplicationDestination` completes and a snapshot is available.
+You can create a `ReplicationDestination` and a persistent volume controller that use the `ReplicationDestination` at the same time. The persistent volume claim only starts
+the volume population process after the `ReplicationDestination` completed a replication and a snapshot is available. You can find the snapshot in `.status.latestImage`.
+
+Additionally, if the storage class that is used has a `volumeBindingMode` value of `WaitForFirstConsumer`, the volume populator waits until there is a
+consumer of the persistent volume claim before it is populated. When a consumer requires access, such as a pod that wants to mount the persistent volume claim, then the volume
+is populated. The VolSync volume populator controller uses the `latestImage` from the `ReplicationDestination`. The `latestImage` is updated each time a replication completes
+after the persistent volume control was created.
