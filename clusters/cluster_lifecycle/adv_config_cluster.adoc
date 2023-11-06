@@ -111,6 +111,71 @@ After about 15 minutes, the old certificate is removed from the CA bundle, and t
 
 *Note:* Managed clusters must use the host name `api.<cluster_name>.<base_domain>` to access the hub cluster. You cannot use named certificates that are configured with other host names.
 
+[#configuring-HTTP-or-HTTPS-proxy-between-hub-cluster-and-managed-cluster]
+== Configuring HTTP or HTTPS proxy between hub cluster and managed cluster
+
+To register a managed cluster to your Multicluster Engine (MCE) hub cluster, you need to transport the  managed cluster to your MCE hub cluster. Sometimes your managed cluster cannot directly reach your MCE hub cluster. In this instance, configure the proxy settings to allow the communications from the managed cluster to access the MCE hub cluster through a HTTP or HTTPS proxy server
+
+For example, the MCE hub cluster is in a public cloud, and the managed cluster is in a private cloud environment behind firewalls. The communications out of the private cloud can only go through a HTTP or HTTPS proxy server. 
+
+=== Prerequisites
+- You have a HTTP or HTTPS proxy server running that supports HTTP tunnels. For example, HTTP connect method. 
+- You have a HTTP or HTTPS proxy server that can reach the managed clusters and can access the MCE hub cluster. 
+
+. Create a `KlusterConfig` with proxy settings. 
+.. See the following configuration with HTTP proxy:
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: http-proxy
+spec:
+  hubKubeAPIServerProxyConfig:
+    httpProxy: "http://<username>:<password>@<ip>:<port>"
+----
++ 
+.. See the following configuration with HTTPS proxy:  
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: https-proxy
+spec:
+  hubKubeAPIServerProxyConfig:
+    httpsProxy: "https://<username>:<password>@<ip>:<port>"
+    caBundle: <user-ca-bundle> 
+----
++ 
+*Note:* A CA certificate is required if the HTTPS proxy server is severing with a self-signed server certificate. The HTTPS proxy is used if both HTTP proxy and HTTPS proxy are specified.
+. When creating a managed cluster, chose the `KlusterletConfig` by adding an annotation and referring to the `ManagedCluster`. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    agent.open-cluster-management.io/klusterlet-config: <klusterlet-config-name>
+  name:<managed-cluster-name>
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60 
+----
++ 
+*Note:* You might need to toggle the yaml view to add the annotation to the `ManagedCluster` when you operate on the MCE UI console.
+
+[#disabling-HTTP-or-HTTPS-proxy-between-hub-cluster-and-managed-cluster]
+== Disabling HTTP or HTTPS proxy between hub cluster and managed cluster
+
+If your development needs change, you might need to disable the HTTP or HTTPS proxy. 
+
+. Go to `ManagedCluster`.
+. Remove the annotation, `agent.open-cluster-management.io/klusterlet-config`.
+
 [#create-cluster-configuring-nodeselector-tolerations]
 == Optional: Configuring the klusterlet to run on specific nodes
 
