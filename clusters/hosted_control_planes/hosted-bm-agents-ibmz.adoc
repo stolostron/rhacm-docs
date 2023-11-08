@@ -4,8 +4,8 @@
 Boot KVM on IBM Z and z/VM with the downloaded PXE images from the 'InfraEnv' resource. After the Agents are created, the host communicates with the Assisted Service and registers in the same namespace as the 'InfraEnv' resource on the management cluster.
 
 - For KVM on IBM Z, perform the boot by running the following command:
-
 +
+[source,terminal]
 ----
 virt-install \
    --name "<vm_name>" \
@@ -26,28 +26,30 @@ virt-install \
 . Update the paramfile to add `rootfs url`, `net type` and `disk type`. 
 
 Following is the sample command for 'VSwitch' network with fcp singlepath/ dasd disk:
-
 +
+[source,terminal]
 ----
 rd.neednet=1 console=ttysclp0   coreos.live.rootfs_url=<rootfs_url> ip=<IP for guest vm>::<nameserver>:255.255.255.0::<network adaptor>:none nameserver=<nameserver> zfcp.allow_lun_scan=0  rd.znet=qeth,<network adaptor range>,layer2=1 rd.<zfcp/dasd>=<storage> random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs="console=tty1 console=ttyS1,115200n8"
 ----  
 
 Following is the sample command for 'OSA' & 'Hipersocket' network with fcp singlepath/dasd disk:
-
 +
+[source,terminal]
 ----
 rd.neednet=1 console=ttysclp0   coreos.live.rootfs_url=<rootfs_url> ip=<IP for guest vm>::<nameserver>:255.255.255.0::<network adaptor>:none nameserver=<nameserver> rd.znet=qeth,<network adaptor range>,layer2=1 rd.<zfcp/dasd>=<storage> random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs="console=tty1 console=ttyS1,115200n8"
 ----
 
 Following is the sample command for 'ROCE' network with fcp singlepath/ dasdc disk:
 +
+[source,terminal]
 ----
 rd.neednet=1 console=ttysclp0         coreos.live.rootfs_url=<rootfs_url> ip=<IP for guest vm>::<nameserver>:255.255.255.0 nameserver=<nameserver> rd.<zfcp/dasd>=<storage> random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs="console=tty1 console=ttyS1,115200n8" 
 ----  
 
-. Punch 'initrd',  kernel images and paramfile to guest VM by running the following commands:
+. Punch 'initrd',  kernel images and paramfile to guest VM by running following commands:
 
 +
+[source,terminal]
 ----
 vmur pun -r -u -N kernel.img $INSTALLERKERNELLOCATION/<image name>
 vmur pun -r -u -N generic.parm $PARMFILELOCATION/paramfilename
@@ -56,19 +58,20 @@ vmur pun -r -u -N initrd.img $INSTALLERINITRAMFSLOCATION/<image name>
 ----  
 . Run the following command from the guest VM console to perform the boot.
 +
+[source,terminal]
 ----
 cp ipl c
 ----
 
 - To list the agents and their properties, enter the following command:
 +
+[source,terminal]
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agents
 ----
-
-Example output follows:
-
+.Example output
 +
+[source,terminal]
 ----
 NAME    CLUSTER APPROVED    ROLE    STAGE
 50c23cda-cedc-9bbd-bcf1-9b3a5c75804d    auto-assign
@@ -78,40 +81,40 @@ NAME    CLUSTER APPROVED    ROLE    STAGE
 
 Optionally, you can set the agent ID `installation_disk_id` and hostname in the specification. 
 
-Run the following command to approve the agent:
+. Run the following command to approve the agent:
 +
+[source,terminal]
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} patch agent 50c23cda-cedc-9bbd-bcf1-9b3a5c75804d -p '{"spec":{"installation_disk_id":"/dev/sda","approved":true,"hostname":"worker-zvm-0.hostedn.example.com"}}' --type merge
 ----
 
-Run the following command to verify that the agents are approved:
-
+. Run the following command to verify that the agents are approved:
 +
+[source,terminal]
 ----
 oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agents
 ----
-
-Example output follows:
-
+.Example output
 +
+[source,terminal]
 ----
-NAME                                   CLUSTER   APPROVED   ROLE          STAGE
+NAME                                            CLUSTER     APPROVED   ROLE          STAGE
 50c23cda-cedc-9bbd-bcf1-9b3a5c75804d             true       auto-assign
 5e498cd3-542c-e54f-0c58-ed43e28b568a             true       auto-assign
 ----
 
+. For IBM z/VM, an additional step is required to edit the agent patched in the last step and update installer 'args' under 'spec' section as follows:
 
-- For IBM z/VM, an additional step is required to edit the agent patched in the last step and update installer 'args' under 'spec' section as follows:
-
-For network types as VSwitch/ OSA & Hipersocket:
-
+- For network types as VSwitch/ OSA & Hipersocket:
++
+[source,terminal]
 ----
 installerArgs: '[ "--append-karg", "rd.neednet=1", "--append-karg", "ip=<Guest vm ip>::<nameserver>:255.255.255.0:<hostname>:<network adaptor>:none", "--append-karg", "nameserver=<nameserver>", "--append-karg", "rd.znet=qeth,<network adaptor range>,layer2=1", "--append-karg", "rd.<storage type>=<storage>" ]'
 ----
 
-For network type as ROCE:
-
-
+- For network type as ROCE:
++
+[source,terminal]
 ----
 installerArgs: '[ "--append-karg", "rd.neednet=1", "--append-karg", "ip=<Guest vm ip>::<nameserver>:255.255.255.0:<hostname>","--append-karg", "nameserver=<nameserver>", "--append-karg", "rd.znet=qeth,<network adaptor range>,layer2=1","--append-karg", "rd.<storage type>=<storage>" ]'
 ----
