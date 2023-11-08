@@ -114,7 +114,7 @@ stringData:
     ;cert_file =
     ;key_file =
     skip_verify = true
-    from_address = [example@163.com]
+    from_address = [example@google.com]
     from_name = Grafana 
     # EHLO identity in SMTP dialog (defaults to instance_name)
     ;ehlo_identity = dashboard.example.com
@@ -142,7 +142,6 @@ data:
         name: globalhub_policy
         receivers:
           - uid: globalhub_policy_alert_email
-            type: slack
             type: email
             settings:
               addresses: [example@redhat.com]
@@ -190,11 +189,15 @@ After installing the multicluster global hub operand, the global hub manager run
 
 * Local compliance status sync job: This cronjob runs at midnight every day, based on the policy status and events collected by the manager on the previous day. Running this job summarizes the compliance status and the change frequency of the policy on the cluster, and stores them to the `history.local_compliance` table as the data source of the Grafana dashboards. 
 
-* Data retention job: Some data tables in global hub continue to grow over time. Generally, they fall into two categories: the policy event tables and the `history.local_compliance`. Because they grow every day, the tables contain soft deleted records. The policy event tables generate a large amount of data, so range partitioning is used to break down the large tables into small partitions. This partitioning increases the speed of running queries and deletions on these tables. The `history.local_compliance` has a smaller amount of data, and `deleted_at` indexes are added to these tables to obtain better hard delete performance.
+* Data retention job: Some data tables in global hub continue to grow over time, which normally can cause problems when the tables get too large. The following two methods help to minimize the issues that result from tables that are too large:
 
-At the practical level, a scheduled job runs to delete expired data, which prevents the table from growing too large. There is an additional task that creates a buffer partition table for the next month.
+** Deleting older data that is no longer needed
 
-The amount of time that the job should keep the data can be configured through the link:https://github.com/stolostron/multicluster-global-hub/blob/main/operator/apis/v1alpha4/multiclusterglobalhub_types.go#L90[retention] on the global hub operand. It is best practice to use at least a value of one month, and the default value is 18 months. The run interval of this job should be less than one month.  
+** Enabling partitioning on the large table to run queries and deletions on faster
++
+For event tables like the `event.local_policies` and the `history.local_compliance` that increase in size daily, range partitioning divides the large tables into smaller partitions. This process also creates the partition tables for the next month each time it is run. For the policy and cluster tables like `local_spec.policies` and `status.managed_clusters`, there are `deleted_at` indexes on the tables to improve performance when hard deleting.
++
+You can change the duration of time that the data is retained by changing the `retention` setting on the global hub operand. The recommended minimum value is 1 month, and the default value is 18 months. The run interval of this job should be less than one month.
 
 The listed cronjobs run every time the global hub manager starts. The local compliance status sync job is run once a day and can be run multiple times within the day without changing the result. The data retention job is run once a week and also can be run many times per month without a change in the results. 
 
