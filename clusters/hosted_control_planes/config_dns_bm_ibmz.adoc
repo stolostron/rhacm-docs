@@ -1,0 +1,45 @@
+[#configuring-dns-hosted-control-plane-ibmz]
+= Configuring DNS for hosted control plane with IBM Z
+
+The API server for the hosted cluster is exposed as a 'NodePort' service. A DNS entry must exist for the `api.<hosted_cluster_name>.<base-domain>` that points to the destination where the API server is reachable.
+
+The DNS entry can be as simple as a record that points to one of the nodes in the managed cluster that is running the hosted control plane. 
+
+The entry can also point to a load balancer deployed to redirect incoming traffic to the Ingress pods.
+
+See the following example of DNS configuration:
+
+[source,terminal]
+----
+$ cat /var/named/<example.krnl.es.zone>  
+----
+
+.Example Output 
+[source,text]
+----
+$ TTL 900
+@ IN  SOA bastion.example.krnl.es.com. hostmaster.example.krnl.es.com. (
+      2019062002
+      1D 1H 1W 3H )
+  IN NS bastion.example.krnl.es.com.
+;
+;
+api                   IN A 1xx.2x.2xx.1xx <1>
+api-int               IN A 1xx.2x.2xx.1xx
+;
+;
+*api.${HOSTED_CLUSTER_NAME}.${BASEDOMAIN}           IN A 1xx.2x.2xx.1xx
+;
+;EOF
+----
+<1> The record refers to the IP address of the API load balancer that handles ingress and egress traffic for hosted control planes.
+
+For IBM z/VM, add IP addresses that correspond to the IP address of the agent.
+
+[source,bash]
+----
+compute-0              IN A 1xx.2x.2xx.1yy
+compute-1              IN A 1xx.2x.2xx.1yy
+----
+
+

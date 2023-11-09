@@ -1,0 +1,123 @@
+[#hosted-bare-metal-adding-agents-ibmz]
+= Adding IBM Z agents to the InfraEnv resource (Technology Preview)
+
+Start KVM on IBM Z and IBM z/VM with the downloaded PXE images from the 'InfraEnv' resource. After the Agents are created, the host communicates with the Assisted Service and registers in the same namespace as the `InfraEnv` resource on the management cluster.
+
+- For KVM on IBM Z, run the following command:
++
+[source,bash]
+----
+virt-install \
+   --name "<vm_name>" \
+   --autostart \
+   --ram=16384 \
+   --cpu host \
+   --vcpus=4 \
+   --location "<path_to_kernel_initrd_image>,kernel=kernel.img,initrd=initrd.img" \
+   --disk <qcow_image_path> \
+   --network network:macvtap-net,mac=<mac_address> \
+   --graphics none \
+   --noautoconsole \
+   --wait=-1 \
+   --extra-args "rd.neednet=1 nameserver=<nameserver>   coreos.live.rootfs_url=http://<http_server>/rootfs.img random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs=console=tty1 console=ttyS1,115200n8"
+----  
+- For IBM z/VM, start KVM by completing the following procedure:
+
+. Update the paramfile to add the `rootfs url`, `net type` and `disk type`. 
+
+The following example shows a  sample command for the `VSwitch` network with a `fcp singlepath/ dasd` disk:
++
+[source,bash]
+----
+rd.neednet=1 console=ttysclp0   coreos.live.rootfs_url=<rootfs_url> ip=<IP for guest vm>::<nameserver>:255.255.255.0::<network adaptor>:none nameserver=<nameserver> zfcp.allow_lun_scan=0  rd.znet=qeth,<network adaptor range>,layer2=1 rd.<zfcp/dasd>=<storage> random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs="console=tty1 console=ttyS1,115200n8"
+----  
+
+The following example is a sample command for the `OSA` and `Hipersocket` networks with a `fcp singlepath/dasd` disk:
++
+[source,bash]
+----
+rd.neednet=1 console=ttysclp0   coreos.live.rootfs_url=<rootfs_url> ip=<IP for guest vm>::<nameserver>:255.255.255.0::<network adaptor>:none nameserver=<nameserver> rd.znet=qeth,<network adaptor range>,layer2=1 rd.<zfcp/dasd>=<storage> random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs="console=tty1 console=ttyS1,115200n8"
+----
+
+The following example is a sample command for the `ROCE` network with a `fcp singlepath/ dasdc` disk:
++
+[source,bash]
+----
+rd.neednet=1 console=ttysclp0         coreos.live.rootfs_url=<rootfs_url> ip=<IP for guest vm>::<nameserver>:255.255.255.0 nameserver=<nameserver> rd.<zfcp/dasd>=<storage> random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs="console=tty1 console=ttyS1,115200n8" 
+----  
+
+.  Move `initrd`,  kernel images, and the paramfile to the guest VM by running the following commands:
+
++
+[source,bash]
+----
+vmur pun -r -u -N kernel.img $INSTALLERKERNELLOCATION/<image name>
+vmur pun -r -u -N generic.parm $PARMFILELOCATION/paramfilename
+vmur pun -r -u -N initrd.img $INSTALLERINITRAMFSLOCATION/<image name>
+----  
+. Run the following command from the guest VM console to start KVM.
++
+[source,bash]
+----
+cp ipl c
+----
+
+- To list the agents and their properties, enter the following command:
+
++
+[source,bash]
+----
+oc -n <hosted_control_plane_namespace> get agents
+----
+
+.Example output
++
+[source,bash]
+----
+NAME    CLUSTER APPROVED    ROLE    STAGE
+50c23cda-cedc-9bbd-bcf1-9b3a5c75804d    auto-assign
+5e498cd3-542c-e54f-0c58-ed43e28b568a    auto-assign
+----
+
+Optionally, you can set the agent ID `installation_disk_id` and hostname in the specification. 
+
+. Run the following command to approve the agent:
+
++
+[source,bash]
+----
+oc -n <hosted_control_plane_namespace> patch agent 50c23cda-cedc-9bbd-bcf1-9b3a5c75804d -p '{"spec":{"installation_disk_id":"/dev/sda","approved":true,"hostname":"worker-zvm-0.hostedn.example.com"}}' --type merge
+----
+
+. Run the following command to verify that the agents are approved:
+
++
+[source,bash]
+----
+oc -n <hosted_control_plane_namespace> get agents
+----
+
+.Example output
++
+[source,bash]
+----
+NAME                                            CLUSTER     APPROVED   ROLE          STAGE
+50c23cda-cedc-9bbd-bcf1-9b3a5c75804d             true       auto-assign
+5e498cd3-542c-e54f-0c58-ed43e28b568a             true       auto-assign
+----
+
+. For IBM z/VM, edit the agent that you patched in the previous step and update the `installerArgs` setting in the `spec` section as follows:
+
+- For network types such as `VSwitch`, `OSA`, and `Hipersocket`, enter the following command:
++
+[source,bash]
+----
+installerArgs: '[ "--append-karg", "rd.neednet=1", "--append-karg", "ip=<Guest vm ip>::<nameserver>:255.255.255.0:<hostname>:<network adaptor>:none", "--append-karg", "nameserver=<nameserver>", "--append-karg", "rd.znet=qeth,<network adaptor range>,layer2=1", "--append-karg", "rd.<storage type>=<storage>" ]'
+----
+
+- For network types such as `ROCE`, enter the following command:
++
+[source,bash]
+----
+installerArgs: '[ "--append-karg", "rd.neednet=1", "--append-karg", "ip=<Guest vm ip>::<nameserver>:255.255.255.0:<hostname>","--append-karg", "nameserver=<nameserver>", "--append-karg", "rd.znet=qeth,<network adaptor range>,layer2=1","--append-karg", "rd.<storage type>=<storage>" ]'
+----
