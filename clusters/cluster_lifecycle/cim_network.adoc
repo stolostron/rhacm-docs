@@ -1,0 +1,97 @@
+[#cim-network-config]
+= Configuring advanced networking for an infrastructure environment
+
+For hosts that require networking beyond DHCP on a single interface, you must configure advanced networking. The required configuration includes creating one or more instances of the `NMStateConfig` resource that describes the networking for one or more hosts. 
+
+Each `NMStateConfig` resource must contain a label that matches the `nmStateConfigLabelSelector` on your `InfraEnv` resource. See _Creating a host inventory by using the command line interface_ to learn more about the `nmStateConfigLabelSelector`.
+
+The Discovery Image contains the network configurations defined in all referenced `NMStateConfig` resources. After booting, each host compares each configuration to its network interfaces and applies the appropriate configuration.
+
+[#cim-network-prereqs]
+== Prerequisites
+
+- You must enable the central infrastructure management service.
+- You must create a host inventory.
+
+[#cim-network-steps]
+== Configuring advanced networking by using the command line interface
+
+To configure advanced networking for your infrastructure environment by using the command line interface, complete the following steps:
+
+. Create a file named `nmstateconfig.yaml` and add content that is similar to the following template:
++
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: NMStateConfig
+metadata:
+  name: mynmstateconfig <1>
+  namespace: <your-infraenv-namespace> <2>
+  labels:
+    some-key: <some-value> <3>
+spec:
+  config: <4>
+    interfaces:
+      - name: eth0
+        type: ethernet
+        state: up
+        mac-address: 02:00:00:80:12:14
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.111.30
+              prefix-length: 24
+          dhcp: false
+      - name: eth1
+        type: ethernet
+        state: up
+        mac-address: 02:00:00:80:12:15
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.140.30
+              prefix-length: 24
+          dhcp: false
+    dns-resolver:
+      config:
+        server:
+          - 192.168.126.1
+    routes:
+      config:
+        - destination: 0.0.0.0/0
+          next-hop-address: 192.168.111.1
+          next-hop-interface: eth1
+          table-id: 254
+        - destination: 0.0.0.0/0
+          next-hop-address: 192.168.140.1
+          next-hop-interface: eth1
+          table-id: 254
+  interfaces: <5>
+    - name: "eth0"
+      macAddress: "02:00:00:80:12:14"
+    - name: "eth1"
+      macAddress: "02:00:00:80:12:15"
+----
++
+<1> Use a name that is relevant to the host or hosts you are configuring.
+<2> The namespace must match the namespace of your `InfraEnv` resource.  
+<3> Add one or more labels that match the `nmStateConfigLabelSelector` on your `InfraEnv` resource.
+<4> Describes the network settings in `NMstate` format. See _Declarative Network API_ for the format specification and additional examples. The configuration can also apply to a single host, where you have one `NMStateConfig` resource per host, or can describe the interfaces for multiple hosts in a single `NMStateConfig` resource.
+<5> Describes the mapping between interface names found in the specified `NMstate` configuration and MAC addresses found on the hosts. Make sure the mapping uses physical interfaces present on a host. For example, when the `NMState` configuration defines a bond or VLAN, the mapping  only contains an entry for parent interfaces. The mapping has the following purposes:
+* Allows you to use interface names in the configuration that do not match the interface names on a host. You might find this useful because the operating system chooses the interface names, which might not be predictable.
+* Tells a host what MAC addresses to look for after booting and applies the correct `NMstate` configuration.
++
+*Note:* The Image Service automatically creates a new image when you update any `InfraEnv` properties or change the `NMStateConfig` resources that match its label selector. If you add `NMStateConfig` resources after creating the `InfraEnv` resource, make sure that the `InfraEnv` creates a new Discovery Image by checking the `createdTime` property in your `InfraEnv`. If you already booted hosts, boot them again with the latest Discovery Image.
+
+. Apply the YAML content by running the following command:
++
+----
+oc apply -f nmstateconfig.yaml
+----
+
+[#additional-resources-cim-network]
+== Additional resources
+
+- See xref:../cluster_lifecycle/cim_create_cli.adoc#create-host-inventory-cli[Creating a host inventory by using the command line interface]
+
+- See link:https://nmstate.io/[Declarative Network API]
