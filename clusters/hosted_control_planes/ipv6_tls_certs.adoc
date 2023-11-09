@@ -1,0 +1,43 @@
+[#ipv6-tls-certs]
+= Configuring TLS certificates for an IPv6 network
+
+Several TLS certificates are involved in the process to configure hosted control planes in a disconnected environment. To add a Certificate Authority (CA) to the management cluster, you need to modify the content of the following files in the {ocp-short} control plane and worker nodes:
+
+* `/etc/pki/ca-trust/extracted/pem/`
+* `/etc/pki/ca-trust/source/anchors`
+* `/etc/pki/tls/certs/`
+
+To add a CA to the management cluster, complete the following steps:
+
+. Complete the steps in link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/security_and_compliance/configuring-certificates#updating-ca-bundle[Updating the CA bundle] in the official {ocp-short} documentation. That method involves using the `image-registry-operator`, which deploys the CAs to the {ocp-short} nodes.
+
+. If that method does not apply to your situation, check whether the `openshift-config` namespace in the management cluster contains a config map named `user-ca-bundle`.
+
++
+* If the namespace contains that config map, enter the following command:
+
++
+----
+## REGISTRY_CERT_PATH=<PATH/TO/YOUR/CERTIFICATE/FILE>
+export REGISTRY_CERT_PATH=/opt/registry/certs/domain.crt
+
+oc create configmap user-ca-bundle -n openshift-config --from-file=ca-bundle.crt=${REGISTRY_CERT_PATH}
+----
+
+* If the namespace does not contain that config map, enter the following command:
+
++
+----
+## REGISTRY_CERT_PATH=<PATH/TO/YOUR/CERTIFICATE/FILE>
+export REGISTRY_CERT_PATH=/opt/registry/certs/domain.crt
+export TMP_FILE=$(mktemp)
+
+oc get cm -n openshift-config user-ca-bundle -ojsonpath='{.data.ca-bundle\.crt}' > ${TMP_FILE}
+echo >> ${TMP_FILE}
+echo \#registry.$(hostname --long) >> ${TMP_FILE}
+cat ${REGISTRY_CERT_PATH} >> ${TMP_FILE}
+oc create configmap user-ca-bundle -n openshift-config --from-file=ca-bundle.crt=${TMP_FILE} --dry-run=client -o yaml | kubectl apply -f -
+----
+
++
+//lahinson - sept 2023 - adding comment to ensure proper formatting

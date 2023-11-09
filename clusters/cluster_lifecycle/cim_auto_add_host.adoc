@@ -1,0 +1,101 @@
+[#auto-add-host-host-inventory]
+= Automatically adding bare metal hosts to the host inventory
+
+After creating your host inventory (infrastructure environment) you can discover your hosts and add them to your inventory. You can automate booting the Discovery Image of your infrastructure environment by making the bare metal operator communicate with the Baseboard Management Controller (BMC) of each bare metal host by creating a `BareMetalHost` resource and associated BMC secret for each host. The automation is set by a label on the `BareMetalHost` that references your infrastructure environment.
+
+The automation performs the following actions:
+
+- Boots each bare metal host with the Discovery Image represented by the infrastructure environment
+- Reboots each host with the latest Discovery Image in case the infrastructure environment or any associated network configurations is updated
+- Associates each agent resource with its corresponding `BareMetalHost` resource upon discovery
+- Updates agent resource properties based on information from the `BareMetalHost`, such as hostname, role, and installation disk
+- Approves the agent for use as a cluster node
+
+[#auto-add-host-prereqs]
+== Prerequisites
+
+- You must enable the central infrastructure management service.
+- You must create a host inventory.
+
+[#auto-add-host-steps-console]
+== Adding bare metal hosts by using the console
+
+Complete the following steps to automatically add bare metal hosts to your host inventory by using the console:
+
+. Select *Infrastructure* > *Host inventory* in the console.
+
+. Select your infrastructure environment from the list.
+
+. Click *Add hosts* and select *With BMC Form*.
+
+. Add the required information and click *Create*.
+
+[#auto-add-host-steps-cli]
+== Adding bare metal hosts by using the command line interface
+
+Complete the following steps to automatically add bare metal hosts to your host inventory by using the command line interface.
+
+. Create a BMC secret by applying the following YAML content and replacing values where needed:
++
+[source,YAML]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: <bmc-secret-name>
+  namespace: <your_infraenv_namespace> <1>
+type: Opaque
+data:
+  username: <username>
+  password: <password>
+----
++
+<1> The namespace must be the same as the namespace of your `InfraEnv`.
+
+. Create a bare metal host by applying the following YAML content and replacing values where needed:
++
+[source,YAML]
+----
+apiVersion: metal3.io/v1alpha1
+kind: BareMetalHost
+metadata:
+  name: <bmh-name>
+  namespace: <your_infraenv_namespace> <1>
+  annotations:
+    inspect.metal3.io: disabled
+  labels:
+    infraenvs.agent-install.openshift.io: <your-infraenv> <2>
+spec:
+  online: true
+  automatedCleaningMode: disabled <3>
+  bootMACAddress: <your-mac-address>  <4>
+  bmc:
+    address: <machine-address> <5>
+    credentialsName: <bmc-secret-name> <6>
+  rootDeviceHints:
+    deviceName: /dev/sda <7>
+----
+<1> The namespace must be the same as the namespace of your `InfraEnv`.
+<2> The name must match the name of your `InfrEnv` and exist in the same namespace.
+<3> If you do not set a value, the `metadata` value is automatically used.
+<4> Make sure the MAC address matches the MAC address of one of the interaces on your host.
+<5> Use the address of the BMC. See _Port access for the out-of-band management IP address_ for more information.
+<6> Make sure that the `credentialsName` value matches the name of the BMC secret you created.
+<7> *Optional:* Select the installation disk. See _The BareMetalHost spec_ for the available root device hints. After the host is booted with the Discovery Image and the corresponding agent resource is created, the installation disk is set according to this hint.
+
+After turning on the host, the image starts downloading. This might take a few mintues. When the host is discovered, an agent custom resource is created automatically.
+
+[#additional-resources-auto-add-host]
+== Additional resources
+
+- For additional information about zero touch provisioning, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/scalability_and_performance/clusters-at-the-network-far-edge[Clusters at the network far edge] in the {ocp-short} documentation.
+
+- To learn about the required ports for using a bare metal host, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/installing/deploying-installer-provisioned-clusters-on-bare-metal#network-requirements-out-of-band_ipi-install-prerequisites[Port access for the out-of-band management IP address] in the {ocp-short} documentation.
+
+- To learn about root device hints, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/post-installation_configuration/post-install-bare-metal-configuration#the-baremetalhost-spec[The BareMetalHost spec] in the {ocp-short} documentation.
+
+- See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/images/managing-images#using-image-pull-secrets[Using image pull secrets]
+
+- See xref:../credentials/credential_on_prem.adoc#creating-a-credential-for-an-on-premises-environment[Creating a credential for an on-premises environment]
+
+
