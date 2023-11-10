@@ -1,0 +1,206 @@
+[#global-hub-configuring]
+= Configuring the multicluster global hub
+
+You can configure some settings of the multicluster global hub. 
+
+* <<global-hub-importing-managed-hub-in-default-mode,Importing a managed hub cluster in the default mode>> 
+* <<global-hub-accessing-grafana-data,Accessing the Grafana data>>
+* <<global-hub-grafana-cronjobs-metrics,Setting the cronjobs to gather metrics>>
+
+
+[#global-hub-importing-managed-hub-in-default-mode]
+== Importing a managed hub cluster in the default mode
+
+To import a hub cluster as a managed hub cluster, complete the following steps: 
+
+. Disable the cluster self-management in the existing {product-title} hub cluster by setting the `disableHubSelfManagement` setting to `true` in the `multiclusterhub` custom resource. This setting disables the automatic importing of the hub cluster as a managed cluster.
+
+. Import the managed hub cluster by completing the steps in link:../clusters/cluster_lifecycle/import.adoc#importing-a-target-managed-cluster-to-the-hub-cluster[Importing a target managed cluster to the hub cluster].
+
+. After the managed hub cluster is imported, check the global hub agent status to ensure that the agent is running in the managed hub cluster by running the following command:
+
+----
+oc get managedclusteraddon multicluster-global-hub-controller -n ${MANAGED_HUB_CLUSTER_NAME}
+----
+
+[#global-hub-accessing-grafana-data]
+== Accessing the Grafana data
+
+The Grafana data is exposed through the route. Run the following command to display the login URL:
+
+----
+oc get route multicluster-global-hub-grafana -n <the-namespace-of-multicluster-global-hub-instance>
+----
+
+The authentication method of this URL is same as authenticating to the {ocp} console.
+
+[#global-hub-grafana-dashboards]
+=== Viewing policy status by using Grafana dashboards
+
+After accessing the global hub Grafana data, you can begin monitoring the policies that were configured through the hub cluster environments that are managed. From the global hub dashboard, you can identify the compliance status of the policies of the system over a selected time range. The policy compliance status is updated daily, so the dashboard does not display the status of the current day until the following day.
+
+To navigate the global hub dashboards, you can observe and filter the policy data by grouping them by `policy` or by `cluster`. If you prefer to examine the policy data by using the `policy` grouping, start from the and the dashboard called `Global Hub - Policy Group Compliancy Overview`. This dashboard allows you to filter the policy data based on `standard`, `category`, and `control`. After selecting a specific point in time on the graph, you are directed to the `Global Hub - Offending Policies` dashboard. The `Global Hub - Offending Policies` dashboard lists the non-compliant or unknown policies at that time. After selecting a target policy, you can view related events and see what has changed by accessing the `Global Hub - What's Changed / Policies` dashboard.
+
+Similarly, if you want to examine the policy data by `cluster` grouping, begin by using the `Global Hub - Cluster Group Compliancy Overview` dashboard. The navigation flow is identical to the `policy` grouping flow, but you select filters that are related to the cluster, such as managed cluster `labels` and `values`. Instead of viewing policy events for all clusters, after reaching the `Global Hub - What's Changed / Clusters` dashboard, you can view policy events related to an individual cluster.
+
+[#global-hub-grafana-alerts]
+=== Grafana alerts (Technology Preview)
+
+There are three Grafana alerts that you can configure. These alerts are stored in configmap `multicluster-global-hub-default-alerting`. These alerts notify you of suspicious policies, suspicious clusters compliance status change, and failed cron jobs.
+
+* Suspicious policy change - This alert rule watches the suspicious policies change. If the following events occur more than 5 times in 1 hour, it creates notifications.
++
+- A policy was enabled/disabled.
+- A policy was updated.
+
+* Suspicious cluster compliance status change - This alert rule watches the cluster compliance status and policy events for a cluster. There are two rules in this alert:
++
+- Cluster compliance status changes frequently. If a cluster compliance status changes from `compliance` to `non-compliance` more than 3 times in 1 hour, it creates notifications.
+- Too many policy events in a cluster. For a policy in a cluster, if there are more than 20 events in 5 minutes, it creates notifications. If this alert is always firing, the data in the `event.local_policies` table increases too fast.
+
+* Cron Job Failed - This alert watches the [Cron jobs](#Cronjobs-and-Metrics) failed events. There are two rules in this alert:
++
+- Local compliance job failed. If this alert rule creates notifications, it means the local compliance status synchronization job failed. It might cause the data in the `history.local_compliance` table to be lost. Run the job manually, if necessary.
+- Data Retention Job Failed. If this alert rule starts creating notifications, it means the data retention job failed. You can run it manually.
+
+[#global-hub-delete-grafana-alert-rule]
+==== Deleting a default Grafana alert rule
+
+If the default Grafana alert rules do not provide useful information for your needs, you can delete the Grafana alert rule by including a `deleteRules` section in the `multicluster-global-hub-custom-alerting` configmap. See xref:../global_hub_configuring.adoc#global-hub-customize-grafana-alerting-resources[Customize Grafana alerting resources] for more information about the `multicluster-global-hub-custom-alerting` configmap.
+
+To delete all of the default alerts, the `deleteRules` configuration section should resemble the following example:
+
+----
+    deleteRules:
+      - orgId: 1
+        uid: globalhub_suspicious_policy_change
+      - orgId: 1
+        uid: globalhub_cluster_compliance_status_change_frequently
+      - orgId: 1
+        uid: globalhub_high_number_of_policy_events
+      - orgId: 1
+        uid: globalhub_data_retention_job
+      - orgId: 1
+        uid: globalhub_local_compliance_job
+----
+
+[#global-hub-customize-grafana-alerts]
+=== Customizing Grafana alerts
+
+Multicluster global hub supports creating custom Grafana alerts. Complete the following steps to customize your Grafana alerts:
+
+[#global-hub-customize-grafana-ini-file]
+==== Customize your grafana.ini file
+
+To customize your `grafana.ini` file, create a secret named `multicluster-global-hub-custom-grafana-config` in the namespace where you installed your multicluster global hub operator. The secret data key must be: `grafana.ini`. 
+ 
+The following code shows an example. Replace the required information with your own:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: multicluster-global-hub-custom-grafana-config
+  namespace: multicluster-global-hub
+type: Opaque
+stringData:
+  grafana.ini: |
+    [smtp]
+    enabled = true
+    host = smtp.google.com:465
+    user = [example@google.com]
+    password = [xxx]
+    ;cert_file =
+    ;key_file =
+    skip_verify = true
+    from_address = [example@google.com]
+    from_name = Grafana 
+    # EHLO identity in SMTP dialog (defaults to instance_name)
+    ;ehlo_identity = dashboard.example.com
+----
+
+*Note:* you cannot configure the section that already contains the `multicluster-global-hub-default-grafana-config` secret.
+
+[#global-hub-customize-grafana-alerting-resources]
+==== Customizing Grafana alerting resources
+
+Global hub supports customizing the alerting resources which is explained in link:https://grafana.com/docs/grafana/v10.1/alerting/set-up/provision-alerting-resources/file-provisioning/[Create and manage alerting resources using file provisioning] in the Grafana documentation. 
+
+. Create a configmap named `multicluster-global-hub-custom-alerting` in the `multicluster-global-hub` namespace. 
+. The configmap data key must be: `alerting.yaml`. 
+
+The following code shows an example:
+
+[source,yaml]
+----
+apiVersion: v1
+data:
+  alerting.yaml: |
+    contactPoints:
+      - orgId: 1
+        name: globalhub_policy
+        receivers:
+          - uid: globalhub_policy_alert_email
+            type: email
+            settings:
+              addresses: [example@redhat.com]
+              singleEmail: false
+          - uid: globalhub_policy_alert_slack
+            type: slack
+            settings:
+              url: [Slack Webhook URL]
+              title: |
+                {{ template "globalhub.policy.title" . }}
+              text: |
+                {{ template "globalhub.policy.message" . }}              
+    policies:
+      - orgId: 1
+        receiver: globalhub_policy
+        group_by: ['grafana_folder', 'alertname']
+        matchers:
+          - grafana_folder = Policy
+        repeat_interval: 1d
+    deleteRules:
+      - orgId: 1
+        uid: [Alert Rule Uid]
+    muteTimes:
+      - orgId: 1
+        name: mti_1
+        time_intervals:
+          - times:
+              - start_time: '06:00'
+                end_time: '23:59'
+                location: 'UTC'
+            weekdays: ['monday:wednesday', 'saturday', 'sunday']
+            months: ['1:3', 'may:august', 'december']
+            years: ['2020:2022', '2030']
+            days_of_month: ['1:5', '-3:-1']
+kind: ConfigMap
+metadata:
+  name: multicluster-global-hub-custom-alerting
+  namespace: multicluster-global-hub
+----
+
+[#global-hub-grafana-cronjobs-metrics]
+=== Configuring the cronjobs
+
+After installing the multicluster global hub operand, the global hub manager runs and displays a job scheduler for you to schedule the following cronjobs:
+
+* Local compliance status sync job: This cronjob runs at midnight every day, based on the policy status and events collected by the manager on the previous day. Running this job summarizes the compliance status and the change frequency of the policy on the cluster, and stores them to the `history.local_compliance` table as the data source of the Grafana dashboards. 
+
+* Data retention job: Some data tables in global hub continue to grow over time, which normally can cause problems when the tables get too large. The following two methods help to minimize the issues that result from tables that are too large:
+
+** Deleting older data that is no longer needed
+
+** Enabling partitioning on the large table to run queries and deletions on faster
++
+For event tables like the `event.local_policies` and the `history.local_compliance` that increase in size daily, range partitioning divides the large tables into smaller partitions. This process also creates the partition tables for the next month each time it is run. For the policy and cluster tables like `local_spec.policies` and `status.managed_clusters`, there are `deleted_at` indexes on the tables to improve performance when hard deleting.
++
+You can change the duration of time that the data is retained by changing the `retention` setting on the global hub operand. The recommended minimum value is 1 month, and the default value is 18 months. The run interval of this job should be less than one month.
+
+The listed cronjobs run every time the global hub manager starts. The local compliance status sync job is run once a day and can be run multiple times within the day without changing the result. The data retention job is run once a week and also can be run many times per month without a change in the results. 
+
+The status of these jobs are are saved in the metrics named `multicluster_global_hub_jobs_status`, which can be viewed from the console of the {ocp} cluster. A value of `0` indicates that the job ran successfully, while a value of `1` indicates failure. 
+
+If there is a failed job, you can troubleshoot by using the log tables (`history.local_compliance_job_log`, `event.data_retention_job_log`). See xref:../global_hub/global_hub_trouble_cronjob_compliance_data_restore.adoc#gh-cronjob_compliance_data_restore[Restoring compliance data] for more details and for guidance for deciding whether to run the service manually.
