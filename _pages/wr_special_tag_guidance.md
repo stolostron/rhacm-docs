@@ -15,7 +15,7 @@ Special tags can be used to draw attention to content where necessary. Limit spe
 | **Important:** | A little stronger than a note. |
 | **Optional:**  | For any step not required, but user may want to take or needs to take in certain cases. |
 | **Best practice:** | Use with caution. Avoid when possible by writing more descriptive text to guide the user. |
-| **(Technology preview)** | Place at the highest level of the component that is tech preview on the title (to get this in the navigation). Include a special tag on the What's new entry. |
+| **Technology preview** | Place at the highest level of the doc that is tech preview then on the title place (Technology Preview) (not bold). Include a bold special tag on the What's new entry. |
 
 &nbsp;
 
