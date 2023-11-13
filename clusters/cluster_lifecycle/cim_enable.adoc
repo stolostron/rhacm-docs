@@ -1,5 +1,4 @@
 [#enable-cim]
-
 = Enabling the central infrastructure management service
 
 The central infrastructure management service is provided with the {mce-short} and deploys {ocp-short} clusters. Central infrastructure management is deployed automatically when you enable the MultiClusterHub Operator on the hub cluster, but you have to enable the service manually.
@@ -11,6 +10,7 @@ See the following prerequisites before creating an host inventory:
 
 - You must have a deployed hub cluster on {ocp-short} 4.11 or later with the supported {product-title} version.
 - You need internet access for your hub cluster (connected), or a connection to an internal or mirror registry that has a connection to the internet (disconnected) to retrieve the required images for creating the environment.
+- You must open ports 5050, 6138, 6180, and 6385.
 - You need a bare metal host custom resource definition.
 - You need an {ocp-short} link:https://console.redhat.com/openshift/install/pull-secret[pull secret]. See _Using image pull secrets_ for more information. 
 - You need a configured default storage class.
@@ -47,7 +47,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: <mirror-config>
-  namespace: "<infrastructure-operator-namespace>"
+  namespace: multicluster-engine
   labels:
     app: assisted-service
 data:
@@ -120,36 +120,8 @@ Your central infrastructure management service is configured. You can verify tha
 [#enable-cim-connected]
 == Enabling central infrastructure management in connected environments
 
-To enable central infrastructure management in connected environments, complete the following steps:
+To enable central infrastructure management in connected environments, create the `AgentServiceConfig` custom resource by saving the following YAML content in the `agent_service_config.yaml` file:
 
-. Create a `ConfigMap` in the same namespace as your infrastructure operator to specify the values for `ca-bundle.crt` and `registries.conf` for your mirror registry. Your file `ConfigMap` might resemble the following example:
-+
-[source,yaml]
-----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: <mirror-config>
-  namespace: "<infrastructure-operator-namespace>"
-  labels:
-    app: assisted-service
-data:
-  ca-bundle.crt: |
-    <certificate-content>
-  registries.conf: |
-    unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
-    [[registry]]
-       prefix = ""
-       location = "registry.redhat.io/multicluster-engine"
-       mirror-by-digest-only = true
-       [[registry.mirror]]
-       location = "mirror.registry.com:5000/multicluster-engine"
-----
-+
-Registries in the list of `unqualified-search-registries` are automatically added to an authentication ignore list in the `PUBLIC_CONTAINER_REGISTRIES` environment variable. The specified registries do not require authentication when the pull secret of the managed cluster is validated.
-
-. Create the `AgentServiceConfig` custom resource by saving the following YAML content in the `agent_service_config.yaml` file:
-+
 [source,yaml]
 ----
 apiVersion: agent-install.openshift.io/v1beta1
@@ -176,11 +148,8 @@ spec:
       requests:
         storage: <img_volume_size> <3>
 ----
-+
 <1> Replace `db_volume_size` with the volume size for the `databaseStorage` field, for example `10Gi`. This value specifies how much storage is allocated for storing files such as database tables and database views for the clusters. The minimum value that is required is `1Gi`. You might need to use a higher value if there are many clusters.
-+
 <2> Replace `fs_volume_size` with the size of the volume for the `filesystemStorage` field, for example `200M` per cluster and `2-3Gi` per supported {ocp-short} version. The minimum value that is required is `1Gi`, but the recommended value is at least `100Gi`. This value specifies how much storage is allocated for storing logs, manifests, and `kubeconfig` files for the clusters. You might need to use a higher value if there are many clusters. 
-+
 <3> Replace `img_volume_size` with the size of the volume for the `imageStorage` field, for example `10Gi` per operating system image. The minimum value is `10Gi`, but the recommended value is at least `50Gi`. This value specifies how much storage is allocated for the images of the clusters. You need to allow 1 GB of image storage for each instance of Red Hat Enterprise Linux CoreOS that is running. You might need to use a higher value if there are many clusters and instances of Red Hat Enterprise Linux CoreOS.
 
 Your central infrastructure management service is configured. You can verify that it is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. 
@@ -191,5 +160,3 @@ Your central infrastructure management service is configured. You can verify tha
 - For additional information about zero touch provisioning, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/scalability_and_performance/clusters-at-the-network-far-edge[Clusters at the network far edge] in the {ocp-short} documentation.
 
 - See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/images/managing-images#using-image-pull-secrets[Using image pull secrets]
-
-- Return to <<enable-cim,Enabling the central infrastructure management service>>
