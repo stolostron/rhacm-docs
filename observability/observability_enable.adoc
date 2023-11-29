@@ -1,13 +1,12 @@
 [#enabling-observability-service]
 = Enabling observability service
-//i need to either rename the title or rename the Enabling observability section on line 9; modular changes handled later | MJ | 07/03/23
+
 Monitor the health of your managed clusters with the observability service (`multicluster-observability-operator`).
 
 *Required access:* Cluster administrator, the `open-cluster-management:cluster-manager-admin` role, or S3 administrator.
 
 * <<prerequisites-observability,Prerequisites>>
-* <<enabling-observability,Enabling observability>>
-- <<verifying-thanos-version,Verifying the Thanos version>>
+* <<enabling-observability,Enabling observability from the command line>>
 * <<creating-mco-cr,Creating the MultiClusterObservability custom resource>>
 * <<enabling-observability-ocp,Enabling observability from the {ocp} console>>
 * <<external-metric-query,Using the external metric query>>
@@ -25,13 +24,13 @@ Monitor the health of your managed clusters with the observability service (`mul
 * link:https://www.redhat.com/en/technologies/storage/ceph[Red Hat Ceph (S3 compatible API)]
 * link:https://cloud.google.com/storage[Google Cloud Storage]
 * link:https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction[Azure storage]
-* link:https://www.redhat.com/en/technologies/cloud-computing/openshift-data-foundation[Red Hat OpenShift Data Foundation (formerly known as Red Hat OpenShift Container Storage)]
+* link:https://www.redhat.com/en/technologies/cloud-computing/openshift-data-foundation[Red Hat OpenShift Data Foundation], formerly known as Red Hat OpenShift Container Storage
 * link:https://www.ibm.com/docs/en/baw/20.x?topic=storage-preparing-cloud-public-roks[Red Hat OpenShift on IBM (ROKS)]
 +
 *Important:* When you configure your object store, ensure that you meet the encryption requirements that are necessary when sensitive data is persisted. The observability service uses Thanos supported, stable object stores.
 
 [#enabling-observability]
-== Enabling observability
+== Enabling observability from the command line
 
 Enable the observability service by creating a `MultiClusterObservability` custom resource instance. Before you enable observability, see xref:../observability/observe_environments.adoc#observability-pod-capacity-requests[Observability pod capacity requests] for more information. 
 
@@ -208,6 +207,9 @@ Generating access keys using AWS Security Service require the following addition
 * Create an IAM role with a trust policy to generate JWT tokens for {ocp-short} service accounts.
 * Specify annotations for the observability service accounts that requires access to the S3 bucket. You can find an example of how observability on Red Hat OpenShift Service on AWS (ROSA) cluster can be configured to work with AWS STS tokens in the _Set environment_ step. See link:https://www.rosaworkshop.io/[Red Hat OpenShift Service on AWS (ROSA)] for more details, along with link:https://www.rosaworkshop.io/rosa/15-sts_explained/[ROSA with STS explained] for an in-depth description of the requirements and setup to use STS tokens.
 
+[#generate-access-keys]
+=== Generating access keys using the AWS Security Service
+
 Complete the following steps to generate access keys using the AWS Security Service:
 
 . Set up the AWS environment. Run the following commands:
@@ -362,21 +364,8 @@ observability-thanos-rule   (statefulset)
 observability-thanos-store-shard-x  (statefulsets)
 ----
 
-[#verifying-thanos-version]
-=== Verifying the Thanos version
-
-Verify the Thanos version from the command line interface (CLI). 
-
-After you log in to your hub cluster, run the following command in the observability pods to receive the Thanos version:
-
-----
-thanos --version
-----
-
-The Thanos version is displayed.
-
 [#creating-mco-cr]
-=== Creating the MultiClusterObservability custom resource
+== Creating the MultiClusterObservability custom resource
 
 Use the `MultiClusterObservability` custom resource to specify the persistent volume storage size for various components. You must set the storage size during the initial creation of the `MultiClusterObservability` custom resource. When you update the storage size values post-deployment, changes take effect only if the storage class supports dynamic volume expansion. For more information, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/storage/expanding-persistent-volumes[Expanding persistent volumes] from the {ocp} documentation.
 
@@ -459,6 +448,19 @@ Optionally, you can enable observability from the {ocp} console, create a projec
 Create your object storage secret named, `thanos-object-storage` in the `open-cluster-management-observability` project. Enter the object storage secret details, then click *Create*. See step four of the _Enabling observability_ section to view an example of a secret.
 
 Create the `MultiClusterObservability` custom resource instance. When you receive the following message, the observability service is enabled successfully from {ocp-short}: `Observability components are deployed and running`.
+
+[#verifying-thanos-version]
+=== Verifying the Thanos version
+
+Verify the Thanos version from the command line interface (CLI). After Thanos is deployed on your cluster, verify the Thanos version from the command line interface (CLI).
+
+After you log in to your hub cluster, run the following command in the observability pods to receive the Thanos version:
+
+----
+thanos --version
+----
+
+The Thanos version is displayed.
 
 [#external-metric-query]
 === Using the external metric query
@@ -589,4 +591,30 @@ To disable the observability service, uninstall the `observability` resource. Fr
 
 To learn more about customizing the observability service, see xref:../observability/customize_observability.adoc#customizing-observability[Customizing observability].
 
+[#disabling-observability-on-all-clusters]
+=== Disabling observability on all clusters
 
+Disable observability by removing observability components on all managed clusters.
+Update the `multicluster-observability-operator` resource by setting `enableMetrics` to `false`. Your updated resource might resemble the following change:
+
+[source,yaml]
+----
+spec:
+  imagePullPolicy: Always
+  imagePullSecret: multiclusterhub-operator-pull-secret
+  observabilityAddonSpec: # The ObservabilityAddonSpec defines the global settings for all managed clusters which have observability add-on enabled
+    enableMetrics: false #indicates the observability addon push metrics to hub server
+----
+
+[#disabling-observability-on-a-single-cluster]
+=== Disabling observability on a single cluster
+
+Disable observability by removing observability components on specific managed clusters. Add the `observability: disabled` label to the `managedclusters.cluster.open-cluster-management.io` custom resource.
+From the {product-title-short} console _Clusters_ page, add the `observability=disabled` label to the specified cluster.
+
+*Note:* When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
+
+[#removing-observability-resource]
+== Removing observability
+
+When you remove the `MultiClusterObservability` custom resource, you are disabling and uninstalling the observability service. From the {ocp-short} console navigation, select *Operators* > *Installed Operators* > *Advanced Cluster Manager for Kubernetes*. Remove the `MultiClusterObservability` custom resource.
