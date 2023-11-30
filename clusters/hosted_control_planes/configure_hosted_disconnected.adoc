@@ -10,10 +10,35 @@ In the context of hosted control planes, a disconnected environment is an {ocp-s
 
 When you provision hosted control planes on bare metal, you use the Agent platform. The Agent platform and {mce-short} work together to enable disconnected deployments. The Agent platform uses the central infrastructure management service to add worker nodes to a hosted cluster. For an introduction to the central infrastructure management service, see xref:../cluster_lifecycle/cim_enable.adoc#enable-cim[Enabling the central infrastructure management service].
 
+The following diagram illustrates an example architecture of a disconnected environment:
+
+// ADD DIAGRAM HERE. For a draft of the diagram, see https://deploy-preview-3008--hypershift-docs.netlify.app/reference/architecture/mce-and-agent/
+
+. The user configures infrastructure services, including the Registry certificate, web server, and DNS, to ensure that the disconnected deployment works.
+. The user creates a config map in the `openshift-config` namespace. In this example, the config map is named `registry-config`. The content of the config map is the Registry CA certificate.
+. The user modifies the `images.config.openshift.io` custom resource (CR) specification and adds a new field named `additionalTrustedCA` with a value of `name: registry-config`.
+//where does the next step show up in the diagram? 
+. The user creates a config map that contains two data fields. One field contains the `registries.conf` file in `RAW` format, and the other field contains the Registry CA and is named `ca-bundle.crt`.
+. In the {mce-short} namespace, the user creates the `multiclusterengine` CR, which enables both the Agent and `hypershift-addon` add-ons. The {mce-short} namespace must contain the config maps to modify behavior in a disconnected deployment. The namespace also contains the `multicluster-engine`, `assisted-service`, and `hypershift-addon-manager` pods.
+. The user creates the objects that are necessary to deploy the hosted cluster, which include the following components:
+
+** Secrets: Secrets contain the pull secret, SSH key, and etcd encryption key.
+** Config map: The config map contains the CA certificate of the private registry.
+** `HostedCluster`: The `HostedCluster` resource defines the configuration of the cluster that the user intends to create.
+** `NodePool`: The `NodePool` resource identifies the node pool that references the machines to use for the data plane.
+
+. After the user creates the hosted cluster objects, the HyperShift Operator establishes the `HostedControlPlane` namespace to accommodate control plane pods. The namespace also hosts components such as Agents, bare metal hosts (BMHs), and the `InfraEnv` resource. Later, the user creates the `InfraEnv` resource, and after ISO creation, the user creates the BMHs and their secrets that contain baseboard management controller (BMC) credentials.
+
+. The Metal3 Operator in the `openshift-machine-api` namespace inspects the new BMHs. Then, the Metal3 Operator tries to connect to the BMCs to start them by using the configured `LiveISO` and `RootFS` values that are specified through the `AgentServiceConfig` CR in the {mce-short} namespace.
+
+. After the worker nodes of the `HostedCluster` resource are started, an Agent container is started. This agent establishes contact with the Assisted Service, which orchestrates the actions to complete the deployment. Initially, the user needs to scale the `NodePool` resource to the number of worker nodes for the `HostedCluster` resource. The Assisted Service manages the remaining tasks.
+
+. At this point, the user waits for the deployment process to be completed.
+
 [#configure-hosted-disconnected-networks-prereqs]
 == Prerequisites 
 
-To configure hosted control planes in a disconected environment, you must meet the following prerequisites:
+To configure hosted control planes in a disconnected environment, you must meet the following prerequisites:
 
 - CPU: The number of CPUs provided determines how many hosted clusters can run concurrently. In general, use 16 CPUs for each node for 3 nodes. For minimal development, you can use 12 CPUs for each node for 3 nodes.
 - Memory: The amount of RAM affects how many hosted clusters can be hosted. Use 48 GB of RAM for each node. For minimal development, 18 GB of RAM might be sufficient.
