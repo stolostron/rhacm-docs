@@ -17,7 +17,7 @@ When you are ready to create a build, you can create the `XX_prod` from the most
 
 When you are creating a branch for your work, from the `default` branch,  **start your personal branch with a letter**, such as your initials, so your branch is never confused with a release or staging branch.
 
-For example, a staging branch might be named, `2.8_stage`. If you name your _own_ branch for completing install related changes, `2.8_changes`, that confuses any developer doing a review in our docs, and other writers looking for the `2.8` branch.
+For example, a staging branch might be named, `2.9_stage`. If you name your _own_ branch for completing install related changes, `2.9_changes`, that confuses any developer doing a review in our docs, and other writers looking for the `2.9` branch.
 
 Instead, consider naming your branch, `install-bug-3` or `jean-install-bug`. (Using a name makes it easy to see when you have to clean up your own branches.)
 
@@ -38,8 +38,8 @@ See the following content to learn about how the overall branching strategy work
 
 There can be multiple main branches for some releases: 
 
-  * A **staging** branch where daily drafting and updates are completed. The format is <major_release_number>\_stage. Example: 2.8_stage
-  * A **production** branch, which always contains the live content. The format is <major_release_number>\_prod.: Example: 2.8_prod
+  * A **staging** branch where daily drafting and updates are completed. The format is <major_release_number>\_stage. Example: 2.9_stage
+  * A **production** branch, which always contains the live content. The format is <major_release_number>\_prod.: Example: 2.9_prod
 
 ### Stage branch
 
