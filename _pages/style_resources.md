@@ -27,6 +27,8 @@ IBM Style is the main authority on style issues, but there are supplementary Red
 
 - [IBM Style](https://www.ibm.com/docs/en/ibm-style)
 
+- [Red Hat versus IBM conventions for style](https://www.ibm.com/docs/en/ibm-style?topic=medium-red-hat)
+
 - [Red Hat style overview](https://www.stylepedia.net/)
 
 - [Red Hat supplementary style guide](https://redhat-documentation.github.io/supplementary-style-guide/)
@@ -41,7 +43,9 @@ IBM Style is the main authority on style issues, but there are supplementary Red
 
 - [Red Hat products style guide](https://docs.google.com/spreadsheets/d/1DLS_lS3VKidgZIvcLmLp9BoiqptkvqHWfe1D5FD2kfk/edit#gid=1375785039)
 
-- [PatternFly style guide](https://www.patternfly.org/v4/ux-writing/about/)
+- [Red Hat corporate style guide](https://source.redhat.com/groups/public/word-nerds/red_hat_word_nerds_wiki/corporate_style_guide)
+
+- [PatternFly UX writing](https://www.patternfly.org/ux-writing/about/)
 
 ### Writing for accessibility and globalization
 
