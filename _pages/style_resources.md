@@ -49,4 +49,4 @@ IBM Style is the main authority on style issues, but there are supplementary Red
 
 ### Writing for accessibility and globalization
 
-- [Writing for accessibility (future)](wr_accessibility.md)
+- [Writing for accessibility](wr_accessibility.md)
