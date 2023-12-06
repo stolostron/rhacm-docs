@@ -29,9 +29,9 @@ The primary code editor we use. Alternatively, you can also use [VSCodium](https
 
 The primary messaging software we use.
 
-### Homebrew (macOS only)
+### Homebrew
 
-[Download](https://brew.sh/)
+[Download (macOS)](https://brew.sh/)
 
 A package manager for macOS that we use to install and manage other tools.
 
