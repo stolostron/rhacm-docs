@@ -33,7 +33,7 @@ IBM Style is the main authority on style issues, but there are supplementary Red
 
 - [Red Hat trademarks (general)](https://www.redhat.com/en/about/brand/standards/trademarks)
 
-  - [Red Hat copyright notices and trademark legends](https://source.redhat.com/departments/legal/redhatintellectualproperty/trademarks/trademarks_and_domain_names_wiki/copyright_notices_and_trademark_legends)
+- [Red Hat copyright notices and trademark legends](https://source.redhat.com/departments/legal/redhatintellectualproperty/trademarks/trademarks_and_domain_names_wiki/copyright_notices_and_trademark_legends)
 
 - [Red Hat trademark guidelines](https://static.redhat.com/legacy/f/pdf/corp/RH-3573_284204_TM_Gd.pdf)
 
