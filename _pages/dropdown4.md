@@ -14,7 +14,4 @@ children:
     - title: divider
     - title: macOS tools
       permalink: /macos_tools
-    - title: divider
-    - title: Tiling wm for macOS
-      permalink: /installing_yabai
 ---

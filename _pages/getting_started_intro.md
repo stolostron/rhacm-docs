@@ -21,7 +21,7 @@ See the following list of required software and tools. Let your manager know if 
 
 [Download](https://code.visualstudio.com/download/)
 
-The primary code editor we use.
+The primary code editor we use. Alternatively, you can also use [VSCodium](https://vscodium.com/) to avoid sending telemetry data to Microsoft.
 
 ### Slack
 

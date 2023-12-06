@@ -22,7 +22,7 @@ Complete the following steps to run the spellcheck tool:
    ```
 2. Run the following command in the folder where the `misspell` tool is installed:
    ```
-   misspell -w -locale US rhacm-docs 2.8_stage
+   misspell -w -locale US rhacm-docs 2.9_stage
    ```
    
    **Note**: The results are populated in your terminal automatically.

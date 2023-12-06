@@ -40,13 +40,13 @@ Use this process to refresh a public version or build internally.
    Example:
 
    ```
-   ./acm_sync_asciidoc.sh 2.8 2.8_stage 
+   ./acm_sync_asciidoc.sh 2.9 2.9_stage 
    ```
    
 2. When the build output says `"DONE"`, the commit number and branch are displayed. Take note of the last commit number that is listed (in this case, `9ce7819`). See the following example:
 
    ```
-   + e7cd514...9ce7819 2.8_stage -> 2.8 (forced update)
+   + e7cd514...9ce7819 2.9_stage -> 2.9 (forced update)
    ```
 
 3. Open the Pantheon UI that lists the books for the release that you are building. 
@@ -102,10 +102,10 @@ Make sure you are connected to the VPN and have [Homebrew](https://brew.sh/) ins
    - Select **SSH Keys** in the left nav.
    - Paste the key and select **Add key**.   
       
-6. Run the file with the following command to build 2.8:
+6. Run the file with the following command to build 2.9:
 
    ```
-   ./acm_sync_asciidoc.sh 2.8 2.8_stage
+   ./acm_sync_asciidoc.sh 2.9 2.9_stage
    ```
 
    **Note:** The first number is the GitLab branch number (corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.

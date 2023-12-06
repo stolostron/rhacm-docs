@@ -19,7 +19,7 @@ You must have the following:
 
 Complete the following steps:
 
-1. Create a new branch in the [rhacm-docs GitHub repository](https://github.com/open-cluster-management/rhacm-docs) for the new version. For example, 2.8_stage. For more information, see [Creating a branch](https://github.com/open-cluster-management/rhacm-docs/blob/gh-pages/_pages/arch_branching.md).
+1. Create a new branch in the [rhacm-docs GitHub repository](https://github.com/open-cluster-management/rhacm-docs) for the new version. For example, 2.9_stage. For more information, see [Creating a branch](https://github.com/open-cluster-management/rhacm-docs/blob/gh-pages/_pages/arch_branching.md).
 
 2. Navigate to the [`modules/common-attributes.adoc`](https://github.com/open-cluster-management/rhacm-docs/blob/2.3_stage/modules/common-attributes.adoc) that is in your new branch to change the version for the `:product-version:` field. This value is used during the build process, and must be updated to your new version for the build to work. 
 

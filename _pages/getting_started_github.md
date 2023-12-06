@@ -24,7 +24,7 @@ You can use your personal GitHub account if you want, but all of our team member
 
 - **Branch:** Basically a copy of the doc where you apply the changes. Branches named **prod** or **stage** are set as the branches that are published at GA or for a refresh. Never work based off the production branch. We always work in staging, then copy the changes over to production when we schedule a refresh.
 
-For example, if you want to work on 2.8, you need to check out `2.8_stage` by running `git checkout`, run `git pull` to get the latest changes that were committed by the team, then checkout your own branch by running `git checkout -b`. If you do not run `git pull` before you check out your branch, you don't have the most recent copy of the branch. Then, for the refresh, we create a pull request (PR) to add the new content from `2.8_stage` to `2.8_prod`.
+For example, if you want to work on 2.9, you need to check out `2.9_stage` by running `git checkout`, run `git pull` to get the latest changes that were committed by the team, then checkout your own branch by running `git checkout -b`. If you do not run `git pull` before you check out your branch, you don't have the most recent copy of the branch. Then, for the refresh, we create a pull request (PR) to add the new content from `2.9_stage` to `2.9_prod`.
   
 - **Pull request:** Since you opened your own branch, `<my-branch>`, against the staging branch, you must create a pull request to get your changes into the `<_stage>` branch (think of it as pulling in changes on staging from your branch).
   
