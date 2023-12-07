@@ -15,9 +15,6 @@ children:
     - title: Learning Markdown
       permalink: /learning_md
     - title: divider
-    - title: UI content
-      permalink: /ui_content
-    - title: divider
     - title: Technical resources
       permalink: /technical_resources
     - title: divider
