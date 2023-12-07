@@ -11,7 +11,4 @@ children:
     - title: divider
     - title: Git aliases
       permalink: /git_aliases
-    - title: divider
-    - title: macOS tools
-      permalink: /macos_tools
 ---
