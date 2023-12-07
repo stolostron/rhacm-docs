@@ -1,0 +1,157 @@
+[#search-query-api]
+= Search query API
+
+[[_rhacm-docs_apis_policy_jsonoverview]]
+== Overview
+
+This documentation describes how to expose the search API with a route and how to use the API to resolve search queries.
+
+The API is a GraphQL endpoint. You can use any client like curl or Postman. GraphQL Playground is included with the search API deployment for development purposes.
+
+=== Version information
+[%hardbreaks]
+__Version__ : 2.9.0
+
+//schema vs scheme
+//should this be labeled URI schema and list GraphQL as the BasePath? 
+=== URI scheme
+[%hardbreaks]
+__BasePath__ : /kubernetes/apis
+__Schemes__ : HTTPS
+
+[[_search_query_api_access]]
+=== Configure API access
+
+....
+GET /search.open-cluster-management.io/v2/v1alpha1/namespaces/{namespace}/
+....
+
+==== Description
+
+Create a route to access the API external to your cluster. 
+
+=== Generic schema
+
+[source,json]
+----
+type Query { 
+  search(input: [SearchInput]): [SearchResult]
+  searchComplete(property: String!, query: SearchInput, limit: Int): [String]
+  searchSchema: Map
+  messages: [Message]
+ }
+type Mutation { 
+    scalar Map
+
+}
+type Subscription { ... }
+----
+
+== Definitions
+
+=== Schema design
+
+[source,json]
+----
+type SearchResult {
+count: Int
+items: [Map]
+related: [SearchRelatedResult]
+}
+ 
+type SearchRelatedResult {
+kind: String!
+count: Int
+items: [Map]
+}
+----
+
+==== Examples of query requests
+
+===== Deployment
+//consider adding description
+[source,json]
+----
+Query:
+query mySearch($input: [SearchInput]) {
+    searchResult: search(input: $input) {
+    		items
+        }
+}
+Variables:
+{"input":[
+    {
+        "keywords":[],
+        "filters":[
+            {"property":"kind","values":["Deployment"]}],
+        "limit":10
+    }
+]}
+----
+
+===== Pod
+
+[source,json]
+----
+Query:
+query mySearch($input: [SearchInput]) {
+    searchResult: search(input: $input) {
+    		items
+        }
+}
+Variables:
+{"input":[
+    {
+        "keywords":[],
+        "filters":[
+            {"property":"kind","values":["Pod"]}],
+        "limit":10
+    }
+]}
+----
+
+===== Other resources
+
+[source,json]
+----
+Query:
+query mySearch($input: [SearchInput]) {
+    searchResult: search(input: $input) {
+    		items
+        }
+}
+Variables:
+{"input":[
+    {
+        "keywords":[],
+        "filters":[
+            {"property":"kind","values":["AnyOtherResource"]}],
+        "limit":10
+    }
+]}
+----
+
+===== Related resources
+
+[source,json]
+----
+Query:
+query mySearch($input: [SearchInput]) {
+    searchResult: search(input: $input) {
+    		items,
+             related{
+             items
+             },       
+        }
+}
+Variables:
+{"input":[
+    {
+        "keywords":[],
+        "filters":[
+            {"property":"kind","values":["Deployment"]}],
+            "relatedKinds": ["Service"],
+        "limit":10
+    }
+]}
+----
