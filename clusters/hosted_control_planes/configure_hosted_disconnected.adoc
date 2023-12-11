@@ -14,11 +14,52 @@ The following diagram illustrates an example architecture of a disconnected envi
 
 image:../images/489_RHACM_HyperShift_on_bare_metal_1223.png[Disconnected architecture diagram]
 
-. The user configures infrastructure services, including the Registry certificate, web server, and DNS, to ensure that the disconnected deployment works.
-. The user creates a config map in the `openshift-config` namespace. In this example, the config map is named `registry-config`. The content of the config map is the Registry CA certificate.
+. The user configures infrastructure services, including the certificate deployment with TLS support, web server, and DNS, to ensure that the disconnected deployment works.
+. The user creates a config map in the `openshift-config` namespace. In this example, the config map is named `registry-config`. The content of the config map is the Registry CA certificate. The data field of the config map must contain the following key/value: 
+
+* Key: `<registry_dns_domain_name>..<port>`
+* Value: The certificate content
+
++
+For more information about creating a config map, see _Configuring TLS certificates for an IPv4 network_.
 . The user modifies the `images.config.openshift.io` custom resource (CR) specification and adds a new field named `additionalTrustedCA` with a value of `name: registry-config`.
-//where does the next step show up in the diagram? 
-. The user creates a config map that contains two data fields. One field contains the `registries.conf` file in `RAW` format, and the other field contains the Registry CA and is named `ca-bundle.crt`.
+. The user creates a config map that contains two data fields. One field contains the `registries.conf` file in `RAW` format, and the other field contains the Registry CA and is named `ca-bundle.crt`. The config map belongs to the `multicluster-engine` namespace, and the config map name is referenced in other objects. For an example of a config map, see the following sample configuration:
+
++
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-registries
+  namespace: multicluster-engine
+  labels:
+    app: assisted-service
+data:
+  ca-bundle.crt: |
+    -----BEGIN CERTIFICATE-----
+    ...
+    ...
+    ...
+    -----END CERTIFICATE-----
+  registries.conf: |
+    unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
+
+    [[registry]]
+    prefix = ""
+    location = "registry.redhat.io/openshift4"
+    mirror-by-digest-only = true
+
+    [[registry.mirror]]
+      location = "registry.ocp-edge-cluster-0.qe.lab.redhat.com:5000/openshift4"
+
+    [[registry]]
+    prefix = ""
+    location = "registry.redhat.io/rhacm2"
+    mirror-by-digest-only = true
+...
+...
+----
+
 . In the {mce-short} namespace, the user creates the `multiclusterengine` CR, which enables both the Agent and `hypershift-addon` add-ons. The {mce-short} namespace must contain the config maps to modify behavior in a disconnected deployment. The namespace also contains the `multicluster-engine`, `assisted-service`, and `hypershift-addon-manager` pods.
 . The user creates the objects that are necessary to deploy the hosted cluster, which include the following components:
 
@@ -51,13 +92,7 @@ To configure hosted control planes in a disconnected environment, you must meet 
 * Management cluster: 500 GB
 * Web server: 2 TB
 
-[#configure-hosted-disconnected-networks-next-steps]
-== Next steps
+[#disconnected-intro-additional-resources]
+=== Additional resources
 
-Complete the steps in xref:../hosted_control_planes/monitor_user_workload_disconnected.adoc#monitor-user-workload-disconnected[Monitoring user workload in a disconnected environment].
-
-Then, complete the steps that are specific to your network: 
-
-* xref:../hosted_control_planes/configure_hosted_disconnected_ipv4.adoc#configure-hosted-disconnected-ipv4[IPv4]
-* xref:../hosted_control_planes/configure_hosted_disconnected_ipv6.adoc#configure-hosted-disconnected-ipv6[IPv6]
-* xref:../hosted_control_planes/configure_hosted_disconnected_dual_stack.adoc#configure-hosted-disconnected-dual-stack[Dual stack]
+* xref:../hosted_control_planes/ipv4_tls_certs.adoc#ipv4-tls-certs[Configuring TLS certificates for an IPv4 network]
