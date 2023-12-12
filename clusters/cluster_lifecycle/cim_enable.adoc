@@ -6,6 +6,8 @@ The central infrastructure management service is provided with the {mce-short} a
 [#enable-cim-prerequisites]
 == Prerequisites
 
+See the following prerequisites before enabling the central infrastructure management service:
+
 - You must have a deployed hub cluster on {ocp-short} 4.12 or later with the supported {product-title} version.
 - You need internet access for your hub cluster (connected), or a connection to an internal or mirror registry that has a connection to the internet (disconnected) to retrieve the required images for creating the environment.
 - You must open the required ports for bare metal provisoning. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/installing/deploying-installer-provisioned-clusters-on-bare-metal#network-requirements-ensuring-required-ports-are-open_ipi-install-prerequisites[Ensuring required ports are open] in the {ocp-short} documentation.
@@ -17,20 +19,24 @@ The central infrastructure management service is provided with the {mce-short} a
 [#enable-cim-bmh-crd]
 == Creating a bare metal host custom resource definition
 
-You can check if you already have a bare metal host custom resource definition by running the following command:
+You need a bare metal host custom resource definition before enabling the central infrastructure management service. 
 
+. Check if you already have a bare metal host custom resource definition by running the following command:
++
 ----
 oc get crd baremetalhosts.metal3.io
 ----
-
-If you have a bare metal host custom resource definition, the output shows the date when the resource was created. If you do not have the resource, you receive an error that resembles the following:
-
++
+- If you have a bare metal host custom resource definition, the output shows the date when the resource was created.
++
+- If you do not have the resource, you receive an error that resembles the following:
++
 ----
 Error from server (NotFound): customresourcedefinitions.apiextensions.k8s.io "baremetalhosts.metal3.io" not found
 ----
 
-To create a bare metal host custom resource definition, download the link:https://raw.githubusercontent.com/openshift/baremetal-operator/master/config/crd/bases/metal3.io_baremetalhosts.yaml[metal3.io_baremetalhosts.yaml] file and apply the content by running the following command:
-
+. If you do not have a bare metal host custom resource definition, download the link:https://raw.githubusercontent.com/openshift/baremetal-operator/master/config/crd/bases/metal3.io_baremetalhosts.yaml[metal3.io_baremetalhosts.yaml] file and apply the content by running the following command to create the resource:
++
 ----
 oc apply -f
 ----
@@ -38,22 +44,33 @@ oc apply -f
 [#enable-cim-provision]
 == Creating or modifying the _Provisioning_ resource
 
-If you do not have a `Provisioning` resource, you must create the resource. If you already have a `Provisioning` resource, you must modify the resource if your hub cluster is installed on one of the following platforms:
+You need a `Provisioning` resource before enabling the central infrastructure management service.
+
+. Check if you have the `Provisioning` resource by running the following command:
++
+----
+oc get provisioning
+----
++
+- If you already have a `Provisioning` resource, continue by _Modifying the `Provisioning` resource_.
++
+- If you do not have a `Provisioning` resource, you receive a `No resources found` error. Continue by  _Creating the `Provisioning` resource_.
+
+[#enable-cim-mod-provision]
+=== Modifying the _Provisioning_ resource
+
+If you already have a `Provisioning` resource, you must modify the resource if your hub cluster is installed on one of the following platforms:
 
 - Bare metal
 - Red Hat OpenStack Platform
 - VMware vSphere
 - User-provisioned infrastructure (UPI) method and the platform is `None`
 
-Do not modify the `Provisioning` resource if you create it, or if your hub cluster is not installed on one of the previously listed platforms.
-
-You can check if you have the `Provisioning` resource by running the following command:
-
+. Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces by running the following command:
++
 ----
-oc get provisioning
+oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
 ----
-
-If you do not have a `Provisioning` resource, you receive a `No resources found` error.
 
 [#enable-cim-create-provision]
 === Creating the _Provisioning_ resource
@@ -77,17 +94,6 @@ spec:
 +
 ----
 oc apply -f
-----
-
-You can now continue with <<enable-cim-disconnected,Enabling central infrastructure management in disconnected environments>> or <<enable-cim-connected,Enabling central infrastructure management in connected environments>>.
-
-[#enable-cim-mod-provision]
-=== Modifying the _Provisioning_ resource
-
-If you have the `Provisioning` resource and your hub cluster is installed on one of the previously listed platforms, modify the `Provisioning` resource by running the following command. Running the command allows the Bare Metal Operator to watch all namespaces:
-
-----
-oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
 ----
 
 [#enable-cim-disconnected]
