@@ -1,13 +1,13 @@
 [#scaling-the-nodepool]
 = Scaling the NodePool object for a hosted cluster
 
-You add nodes to your hosted cluster by scaling the NodePool object.  
+You add nodes to your hosted cluster by scaling the `NodePool` object.  
 
-. Scale the NodePool object to two nodes:
+. Scale the `NodePool` object to two nodes:
 
 +
 ----
-oc -n ${CLUSTERS_NAMESPACE} scale nodepool ${NODEPOOL_NAME} --replicas 2
+oc -n <cluster-namespace> scale nodepool <nodepool-name> --replicas 2
 ----
 
 +
@@ -21,11 +21,12 @@ The Cluster API agent provider randomly picks two agents that are then assigned 
 * `installing-in-progress`
 * `added-to-existing-cluster`
 
+. Enter the following command:
+
 +
 ----
-oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent
+oc -n <hosted-control-plane-namespace> get agent
 ----
-//lahinson - June 2023 - Need to add a step above to explain what this command does
 
 +
 See the following example output:
@@ -36,20 +37,30 @@ NAME                                   CLUSTER         APPROVED   ROLE          
 4dac1ab2-7dd5-4894-a220-6a3473b67ee6   hypercluster1   true       auto-assign   
 d9198891-39f4-4930-a679-65fb142b108b                   true       auto-assign   
 da503cf1-a347-44f2-875c-4960ddb04091   hypercluster1   true       auto-assign
+----
 
-oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get agent -o jsonpath='{range .items[*]}BMH: {@.metadata.labels.agent-install\.openshift\.io/bmh} Agent: {@.metadata.name} State: {@.status.debugInfo.state}{"\n"}{end}'
+. Enter the following command:
 
++
+----
+oc -n <hosted-control-plane-namespace> get agent -o jsonpath='{range .items[*]}BMH: {@.metadata.labels.agent-install\.openshift\.io/bmh} Agent: {@.metadata.name} State: {@.status.debugInfo.state}{"\n"}{end}'
+----
+
++
+See the following example output:
+
++
+----
 BMH: ocp-worker-2 Agent: 4dac1ab2-7dd5-4894-a220-6a3473b67ee6 State: binding
 BMH: ocp-worker-0 Agent: d9198891-39f4-4930-a679-65fb142b108b State: known-unbound
 BMH: ocp-worker-1 Agent: da503cf1-a347-44f2-875c-4960ddb04091 State: insufficient
 ----
 
-+
 . After the agents reach the `added-to-existing-cluster` state, verify that you can see the {ocp-short} nodes by entering the following command:
 
 +
 ----
-oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get nodes
+oc --kubeconfig <hosted-cluster-name>.kubeconfig get nodes
 ----
 
 +
@@ -69,7 +80,7 @@ Cluster Operators start to reconcile by adding workloads to the nodes.
 
 +
 ----
-oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get machines
+oc -n <hosted-control-plane-namespace> get machines
 ----
 
 +
@@ -83,13 +94,20 @@ hypercluster1-c96b6f675-tl42p   hypercluster1-b2qhl   ocp-worker-2   agent://4da
 ----
 
 +
-The `clusterversion` reconcile process eventually reaches a point where only Ingress and Console cluster operators are missing:
-//lahinson - June 2023 - Is the following code output, or a command followed by output?
+The `clusterversion` reconcile process eventually reaches a point where only Ingress and Console cluster operators are missing.
+
+. Enter the following command:
 
 +
 ----
-oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get clusterversion,co
+oc --kubeconfig <hosted-cluster-name>.kubeconfig get clusterversion,co
+----
 
++
+See the following example output:
+
++
+----
 NAME                                         VERSION   AVAILABLE   PROGRESSING   SINCE   STATUS
 clusterversion.config.openshift.io/version             False       True          40m     Unable to apply 4.12z: the cluster operator console has not yet successfully rolled out
 
@@ -114,4 +132,44 @@ clusteroperator.config.openshift.io/operator-lifecycle-manager-catalog         4
 clusteroperator.config.openshift.io/operator-lifecycle-manager-packageserver   4.12z    True        False         False      40m     
 clusteroperator.config.openshift.io/service-ca                                 4.12z    True        False         False      11m     
 clusteroperator.config.openshift.io/storage                                    4.12z    True        False         False      11m 
+----
+
+[#adding-nodepool-bm]
+== Adding node pools
+
+You can create node pools for a hosted cluster by specifying a name, number of replicas, and any additional information, such as an agent label selector.
+
+. To create a node pool, enter the following information. In this example, the node pool uses agents with the `"size" : "medium"` label:
+
++
+----
+export NODEPOOL_NAME=${CLUSTER_NAME}-extra-cpu
+export WORKER_COUNT="2"
+
+hcp create nodepool agent \
+  --cluster-name $CLUSTER_NAME \
+  --name $NODEPOOL_NAME \
+  --node-count $WORKER_COUNT \
+  --agentLabelSelector '{"matchLabels": {"size": "medium"}}'
+----
+
+. Check the status of the node pool by listing `nodepool` resources in the `clusters` namespace:
+
++
+----
+oc get nodepools --namespace clusters
+----
+
+. After some time, you can check the status of the node pool by entering the following command:
+
++
+----
+oc --kubeconfig $CLUSTER_NAME-kubeconfig get nodes
+----
+
+. Verify that the node pool is in the status that you expect by entering this command:
+
++
+----
+oc get nodepools --namespace clusters
 ----

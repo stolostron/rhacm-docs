@@ -28,200 +28,24 @@ Hosted control plane clusters offer several advantages:
 
 * Supports turn-key deployments or fully customized {ocp-short} provisioning
 
-[#hosted-sizing-guidance]
-== Hosted control plane sizing guidance
+To use hosted control planes, start with the following documentation:
 
-Many factors, including hosted cluster workload and worker node count, affect how many hosted clusters can fit within a certain number of control-plane nodes. Use this sizing guide to help with hosted cluster capacity planning. This guidance assumes a highly available hosted control plane topology. The load-based sizing examples were measured on a bare-metal cluster. Cloud-based instances might have different limiting factors, such as memory size. For more information about highly available hosted control plane topology, see _Distributing hosted cluster workloads_.
+. xref:../hosted_control_planes/hosted_sizing_guidance.adoc#hosted-sizing-guidance[Hosted control plane sizing guidance]
+. xref:../hosted_control_planes/install_hcp_cli.adoc#hosted-install-cli[Installing the hosted control plane command line interface]
+. xref:../hosted_control_planes/distribute_cluster_workloads.adoc#hosted-cluster-workload-distributing[Distributing hosted cluster workloads]
 
-See the following highly available hosted control plane requirements, which were tested with {ocp-short} version 4.12.9 and later:
-
-* 78 pods
-* Three 8 Gi PVs for etcd
-* Minimum CPU: approximately 5.5 cores
-* Minimum memory: approximately 19 GB
-
-[#hosted-sizing-guidance-pod-limit]
-=== Pod limits
-
-The `maxPods` setting for each node affects how many hosted clusters can fit in a control-plane node. It is important to note the `maxPods` value on all control-plane nodes. Plan for about 75 pods for each highly available hosted control plane. 
-
-For bare-metal nodes, the default `maxPods` setting of 250 is likely to be a limiting factor because roughly three hosted control planes fit for each node given the pod requirements, even if the machine has plenty of resources to spare. Setting the `maxPods` value to 500 by configuring the `KubeletConfig` value allows for greater hosted control plane density, which can help you take advantage of additional compute resources. For more information, see _Configuring the maximum number of pods per node_ in the {ocp-short} documentation.
-
-[#hosted-sizing-guidance-request-based-limit]
-=== Request-based resource limit
-
-To understand the request-based resource limit, consider the total request value of a hosted control plane. To calculate that value, add the request values of all highly available hosted control plane pods across the namespace. See the following examples:
-
-* Five CPU requests for each highly available hosted control plane
-* 18 Gi memory requests for each highly available hosted control plane
-
-[#hosted-sizing-guidance-load-based-limit]
-=== Load-based limit
-
-Request-based sizing provides a maximum number of hosted control planes that can run based on the minimum request totals for the `Burstable` class, which meet the average resource usage. For sizing guidance that is tuned to higher levels of hosted cluster load, the load-based approach demonstrates resource usage at increasing API rates. The load-based approach builds in resource capacity for each hosted control plane to handle higher API load points.
-
-For example, to demonstrate resource scaling with API load, consider the following workload configuration:
-
-* One hosted cluster with 9 workers (8 vCPU, 32 Gi each), using the KubeVirt provider
-* Benchmark tool: link:https://github.com/cloud-bulldozer/kube-burner[Kube-burner]
-* The workload profile is a cluster density test that is configured to focus on API control-plane stress, based on this link:https://cloud-bulldozer.github.io/kube-burner/v1.7.9/ocp/#cluster-density-v2[definition]:
-
-** Creates objects per namespace, scaling up to 100 namespaces total
-** The `churn` parameter is enabled to cause additional API stress with continuous object deletion and creation
-** The workload queries per second (QPS) and `Burst` settings are set high to remove any client-side throttling
-
-Resource utilization is measured as the workload increased to the total namespace count. This data provided an estimation factor to increase the compute resource capacity based on the expected API load. Exact utilization rates can vary based on the type and pace of the cluster workload. 
-
-|===
-| Hosted control plane resource utilization scaling | CPUs | Memory (GB)
-
-| Default requests 
-| 5 
-| 18
-
-| Usage when idle 
-| 2.9 
-| 11.1
-
-| Incremental usage per 1000 increase in API rate 
-| 9.0 
-| 2.5
-|===
-
-By using these examples, you can factor in a load-based limit that is based on the expected rate of stress on the API, which is measured as the aggregated QPS across the 3 hosted API servers. For general sizing purposes, consider a 1000 QPS API rate to be a medium hosted cluster load and a 2000 QPS API to be a heavy hosted cluster load.
-
-To determine the API rate of an active hosted cluster, measure the number of queries per second for the appropriate hosted namespace by using the following metric, which you can query from the Administrator perspective in the {ocp-short} web console by selecting *Observe* -> *Metrics*:
-
-----
-sum(rate(apiserver_request_total{namespace=~"clusters-$name*"}[2m])) by (namespace)
-----
-
-The following example shows hosted control plane resource scaling for the workload and API rate definitions:
-
-|===
-| QPS (API rate) | CPU usage | Memory usage (GB)
-
-| < 50 QPS (low) 
-| 2.9 
-| 11.1
-
-| 1000 QPS (medium) 
-| 11.9 
-| 13.6
-
-| 2000 QPS (high) 
-| 20.9 
-| 16.1
-|===
-
-The hosted control plane sizing is about control-plane load and workloads that cause heavy API activity, etcd activity, or both. Hosted pod workloads that focus on data-plane loads, such as running a database, might not result in high API rates.
-
-[#hosted-sizing-guidance-examples]
-=== Sizing calculation example
-
-This example provides sizing guidance for the following scenario:
-
-* Three bare-metal workers that are labeled as `hypershift.openshift.io/control-plane` nodes
-* `maxPods` value set to 500
-* The expected API rate is medium or about 1000, according to the load-based limits
-
-.Limit inputs
-|===
-| Limit description | Server 1 | Server 2
-
-| Number of CPUs on worker node 
-| 64 
-| 128
-
-| Memory on worker node (GB) 
-| 128 
-| 256
-
-| Maximum pods per worker 
-| 500 
-| 500
-
-| Number of workers used to host control planes 
-| 3 
-| 3
-
-| Maximum QPS target rate (API requests per second) 
-| 1000 
-| 1000
-|===
-
-.Sizing calculation example
-|===
-
-| Calculated values based on worker node size and API rate | Server 1 | Server 2 | Calculation notes
-
-| Maximum hosted control planes per worker based on CPU requests 
-| 12.8 
-| 25.6 
-| Number of worker CPUs / 5 total CPU requests per hosted control plane
-
-| Maximum hosted control planes per worker based on CPU usage 
-| 5.4 
-| 10.7 
-| Number of CPUS / (2.9 measured idle CPU usage + (QPS target rate / 1000) * 9.0 measured CPU usage per 1000 QPS increase)
-
-| Maximum hosted control planes per worker based on memory requests 
-| 7.1 
-| 14.2 
-| Worker memory GB / 18 GB total memory request per hosted control plane
-
-| Maximum hosted control planes per worker based on memory usage 
-| 9.4 
-| 18.8 
-| Worker memory GB / (11.1 measured idle memory usage + (QPS target rate / 1000) * 2.5 measured memory usage per 1000 QPS increase)
-
-| Maximum hosted control planes per worker based on per node pod limit 
-| 6.7 
-| 6.7 
-| 500 `maxPods` / 75 pods per hosted control plane
-
-| Minimum of above maximums 
-| 5.4 
-| 6.7 
-| 
-
-| 
-| CPU limiting factor 
-| `maxPods` limiting factor 
-|
-
-| Maximum number of hosted control planes within a management cluster 
-| 16
-| 20 
-| Minimum of above maximums * 3 control-plane workers
-|===
-
-[#hosted-sizing-guidance-additional-resources]
-=== Additional resources
-
-* xref:../hosted_control_planes/hosted-cluster-workload-distributing.adoc#hosted-cluster-workload-distributing[Distribute hosted cluster workloads]
-* link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/nodes/working-with-nodes#nodes-nodes-managing-max-pods-proc_nodes-nodes-managing-max-pods[Configuring the maximum number of pods per node]
-
-[#hosted-get-started]
-== Next steps
-
-To get started with hosted control planes, complete the following steps:
-
-. xref:../hosted_control_planes/hosted_install_cli.adoc#hosted-install-cli[Install the hosted control plane command line interface]
-. xref:../hosted_control_planes/hosted-cluster-workload-distributing.adoc#hosted-cluster-workload-distributing[Distribute hosted cluster workloads]
-
-Then, read the topics related to the platform that you plan to use:
+Then, see the documentation related to the platform that you plan to use:
 
 * xref:../hosted_control_planes/configure_hosted_aws.adoc#hosting-service-cluster-configure-aws[Configuring the hosting cluster on AWS (Technology Preview)]
 * xref:../hosted_control_planes/managing_hosted_aws.adoc#hosted-control-planes-manage-aws[Managing hosted control planes on AWS (Technology Preview)]
-* xref:../hosted_control_planes/configure_hosted_bm.adoc#configuring-hosting-service-cluster-configure-bm[Configuring the hosting cluster on bare metal]
-* xref:../hosted_control_planes/managing_hosted_bm.adoc#hosted-control-planes-manage-bm[Managing hosted control plane clusters on bare metal]
-* xref:../hosted_control_planes/managing_hosted_kubevirt.adoc#hosted-control-planes-manage-kubevirt[Managing hosted control plane clusters on OpenShift Virtualization]
+* xref:../hosted_control_planes/bm_intro.adoc#configuring-hosting-service-cluster-configure-bm[Configuring hosted control plane clusters on bare metal]
+* xref:../hosted_control_planes/config_hosted_bm_ibmpower_intro.adoc#config-hosted-service-ibmpower[Configuring the hosting cluster on a 64-bit x86 OpenShift Container Platform cluster to create hosted control planes for IBM Power compute nodes (Technology Preview)]
+* xref:../hosted_control_planes/configure_hosted_bm_ibmz.adoc#configuring-hosting-service-cluster-ibmz[Configuring the hosting cluster on `x86` bare metal for IBM Z compute nodes (Technology Preview)]
+* xref:../hosted_control_planes/kubevirt_intro.adoc#hosted-control-planes-manage-kubevirt[Managing hosted control plane clusters on OpenShift Virtualization]
 * xref:../hosted_control_planes/configure_hosted_disconnected.adoc#configure-hosted-disconnected[Configuring hosted control planes in a disconnected environment]
 * xref:../hosted_control_planes/disable_hosted.adoc#disable-hosted-control-planes[Disabling the hosted control feature]
 
-[#hosted-intro-additional-resources]
-== Additional resources
+For additional resources about hosted control planes, see the following {ocp-short} documentation:
 
 * link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/hosted_control_planes/hcp-overview#hosted-control-planes-architecture_hcp-overview[Architecture of hosted control planes]
 * link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/hosted_control_planes/hcp-overview#hosted-control-planes-concepts-personas_hcp-overview[Glossary of common concepts and personas for hosted control planes]
