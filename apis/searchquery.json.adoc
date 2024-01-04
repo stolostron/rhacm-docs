@@ -4,9 +4,7 @@
 [[_rhacm-docs_apis_policy_jsonoverview]]
 == Overview
 
-This documentation describes how to expose the search API with a route and how to use the API to resolve search queries.
-
-The API is a GraphQL endpoint. You can use any client like curl or Postman. GraphQL Playground is included with the search API deployment for development purposes.
+This documentation describes how to expose the search API with a route and how to use the API to resolve search queries. The API is a GraphQL endpoint. You can use any client like curl or Postman. GraphQL Playground is included with the search API deployment for development purposes.
 
 === Version information
 [%hardbreaks]
@@ -22,36 +20,27 @@ __Schemes__ : HTTPS
 [[_search_query_api_access]]
 === Configure API access
 
-....
-GET /search.open-cluster-management.io/v2/v1alpha1/namespaces/{namespace}/
-....
+The search operator must be installed on your managed cluster, and you must have access to the search API external to your cluster. Create a route to access the Search API external from your cluster with the following command:
 
-==== Description
-
-Create a route to access the API external to your cluster. 
-
-=== Generic schema
-
-[source,json]
+[source,bash]
 ----
-type Query { 
-  search(input: [SearchInput]): [SearchResult]
-  searchComplete(property: String!, query: SearchInput, limit: Int): [String]
-  searchSchema: Map
-  messages: [Message]
- }
-type Mutation { 
-    scalar Map
-
-}
-type Subscription { ... }
+oc create route passthrough search-api --service=search-search-api -n open-cluster-management
 ----
 
-== Definitions
+==== Parameters
 
-=== Schema design
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Header**|**COOKIE** +
+__required__|Authorization: Bearer {ACCESS_TOKEN} ; ACCESS_TOKEN is the user access token.|string
+|**Path**|**cluster_name** +
+__required__|Name of the cluster that you want to delete.|string
+|===
 
-[source,json]
+== Schema design
+
+[source,graphql]
 ----
 type SearchResult {
 count: Int
@@ -66,92 +55,111 @@ items: [Map]
 }
 ----
 
-==== Examples of query requests
-
-===== Deployment
-//consider adding description
-[source,json]
-----
-Query:
-query mySearch($input: [SearchInput]) {
-    searchResult: search(input: $input) {
-    		items
-        }
-}
-Variables:
-{"input":[
-    {
-        "keywords":[],
-        "filters":[
-            {"property":"kind","values":["Deployment"]}],
-        "limit":10
-    }
-]}
-----
-
-===== Pod
+=== Schema example
 
 [source,json]
 ----
-Query:
-query mySearch($input: [SearchInput]) {
-    searchResult: search(input: $input) {
-    		items
-        }
+{
+  "query": "type SearchResult {count: Intitems: [Map]related: [SearchRelatedResult]} type SearchRelatedResult {kind: String!count: Intitems: [Map]}",
+  "variables": {
+    "input": [
+      {
+        "keywords": [],
+        "filters": [
+          {
+            "property": "kind",
+            "values": [
+              "Deployment"
+            ]
+          }
+        ],
+        "limit": 10
+      }
+    ]
+  }
 }
-Variables:
-{"input":[
-    {
-        "keywords":[],
-        "filters":[
-            {"property":"kind","values":["Pod"]}],
-        "limit":10
-    }
-]}
 ----
 
-===== Other resources
+== Generic schema 
+
+----
+type Query { ... }
+----
 
 [source,json]
 ----
-Query:
-query mySearch($input: [SearchInput]) {
-    searchResult: search(input: $input) {
-    		items
-        }
+type Query {
+  search(input: [SearchInput]): [SearchResult]
+  searchComplete(property: String!, query: SearchInput, limit: Int): [String]
+  searchSchema: Map
+  messages: [Message]
 }
-Variables:
-{"input":[
-    {
-        "keywords":[],
-        "filters":[
-            {"property":"kind","values":["AnyOtherResource"]}],
-        "limit":10
-    }
-]}
 ----
 
-===== Related resources
+== Supported queries
+
+Continue reading to see the query types that are supported in JSON format.
+
+=== Search for deployments
 
 [source,json]
 ----
-Query:
-query mySearch($input: [SearchInput]) {
-    searchResult: search(input: $input) {
-    		items,
-             related{
-             items
-             },       
-        }
+{
+  "query": "query mySearch($input: [SearchInput]) { searchResult: search(input: $input) { items }}",
+  "variables": {
+    "input": [
+      {
+        "keywords": [],
+        "filters": [
+          {
+            "property": "kind",
+            "values": [
+              "Deployment"
+            ]
+          }
+        ],
+        "limit": 10
+      }
+    ]
+  }
 }
-Variables:
-{"input":[
-    {
-        "keywords":[],
-        "filters":[
-            {"property":"kind","values":["Deployment"]}],
-            "relatedKinds": ["Service"],
-        "limit":10
-    }
-]}
 ----
+
+=== Search for pods
+
+[source,json]
+----
+{
+  "query": "query mySearch($input: [SearchInput]) { searchResult: search(input: $input) { items }}Variables:{\"input\":[ { \"keywords\":[], \"filters\":[ {\"property\":\"kind\",\"values\":[\"Pod\"]}], \"limit\":10 }]}",
+  "variables": {
+    "input": [
+      {
+        "keywords": [],
+        "filters": [
+          {
+            "property": "kind",
+            "values": [
+              "Deployment"
+            ]
+          }
+        ],
+        "limit": 10
+      }
+    ]
+  }
+}
+----
+
+=== Description table
+
+[options="header", cols=".^2a,.^14a,"]
+|===
+|Query|Description
+|*search*|Search for resources and their relationships. Results only include Kubernetes resources for which the authenticated user has list permission.
+|*searchComplete*|Query all values for the given property. The default limit is 10,000. When the value is -1, the limit is removed. 
+|*searchSchema*|Returns all properties from resources currently in the index.
+|*messages*|Additional information about the service status or conditions found while processing the query. This is similar to the errors query, but without implying that there was a problem processing the query.
+|===
+
+
+
