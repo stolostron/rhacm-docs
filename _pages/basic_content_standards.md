@@ -5,21 +5,17 @@ permalink: basic_content_standards
 horizontal: false
 ---
 
-Most of the following content is addressed in the IBM Style Manual, the Red Hat Supplemental guide, or PatternFly. Refer to manuals to stay informed about corporate standards. Additionally, many of the guidelines we adopt are industry standards for high quality writing, for proper grammar, and used to engage with technical audiences who seek for quick answers and rely on SEO.
+Most of the following content is addressed in the _IBM Style Manual_, the _Red Hat Supplemental_ guide, or _PatternFly_. Refer to manuals to stay informed about corporate standards. Additionally, many of the guidelines we adopt are industry standards for high quality writing, for proper grammar, and used to engage with technical audiences who seek for quick answers and rely on SEO.
 
 **Note:** Much of these points result from clean-up after the release. It's important that each writer seek these standards while working on refresh items and the current release so that the team is not addressing them later. 
 
-## Team requirements for each PR
+[File names, titles, headers](#file-names-titles-headers)
+[Short descriptions](#short-descriptions)
+[Concise, clear content](#concise-clear-content)
+[Lists and tables](#lists-and-tables)
+[Requirements before merging PRs](#requirements-before-merging-prs)
 
-* Request peer reviews for all new topics and other changes that result in more than a typo or small correction.
-* Request peer reviews when developers make changes with PRs.
-* Request technical review for any changes other than typos or broken links. 
-* Check broken links as you build content. Use the easy _Check my links_ plug-in on each PR in preview mode.
-* Check your PR _requests_ from team members. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
-* Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`.
-* Ensure your peer reviews and contributions are in your goals.
-
-## Creating a file, section, or list
+## File names, titles, headers
 
 * Guides should begin with an introductory file named, `folder_name/intro.adoc`, which only has conceptual information and links to the rest of the topics. This is a _container_ topic that will be the entry to the guide collection. Name the file `intro.adoc`, or `overview.adoc` if it contains a few intros and guides.
 * Be sure file names increase UX and don't confuse the reader or writer. Example: `man_clu_set` changes to `manage_clusterset`, a file that is titled: _Managing ClusterSets_. This will help the entire product team better manage links in the doc and the console, and it increases expectation about the contents of the file.
@@ -34,11 +30,7 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
     - No code in headers
     - Use conrefs as necessary
     - Make headers and anchors unique but intuitive (think about search engine optimization)
-* List: avoiding nesting more than 2, parallelism, etc... See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-lists
-    - Definition lists are built with term in bold and colon.
-    - **Definition list:** DLs look like this.
-    - Choose complete sentences, or not, but commit!
-    
+
 ## Short descriptions
 
 * Use complete, but concise sentences with no more than 50 words at a time. 
@@ -47,22 +39,10 @@ Most of the following content is addressed in the IBM Style Manual, the Red Hat 
 * Give the user a little knowledge in just a couple sentences about what the topic is about. 
 * If it is a task, make it clear that it is a procedure in the description. If it is a reference, be sure the user knows to refer to the topic for information. If it is just a concept, make it clear it is only for details about a component or function. (These can be blended, but use steps for tasks.)
 
-## Key tips for quality, translatable, accessible content
-
-The following tips help with translation, readability, usability, presentation, voice.
-
-* Use proper grammar and follow IBM style. (Style manuals are typical in most writing professions.)
-* Use concise sentences. This means remove extra words. (See more examples later.)
-    - First draft: `There are many ways that you can use this feature, but this is one way.` 
-    - Second draft: `This is one of many procedures...`
-* Write using minimalistic writing. Get to the point early. Bulleted lists and steps in place of cumbersome paragraphs.
-* Avoid dangling modifiers. Be sure subject and predicate agree.
-* Use GitHub to search for file names if you change a file name so that you can replace URL paths.
-* See instructions for link & spell checker.
-
-## Writing concisely and clearly
+## Concise, clear content
 
 * Analyze your sentence structure. Examples:
+  
   - First draft: Only users belonging to the certain role can view data belonging to a certain namespace.
   - Better draft: Only users who are assigned to a certain role can view data within a namespace.
   - Why? Belonging is confusing and can mean many things, and it is used twice. A relative pronoun is better used to connect a clause or phrase to a noun or pronoun. The clause modifies, or describes, the noun. The most common relative pronouns are who, whom, whose, which, and that. 
@@ -77,7 +57,25 @@ The following tips help with translation, readability, usability, presentation, 
 * Voice: Use active voice almost always:
   - No: When the latch has been opened, the panel will slide forward.
   - Yes: When you open the latch, the panel slides forward.
+ 
+The following tips help with translation, readability, usability, presentation, voice:
+
+* Use proper grammar and follow IBM style. (Style manuals are typical in most writing professions, all writers at Red Hat and IBM have access to the manuals and use them to create content.)
+* Use concise sentences. Remove extra words. (See more examples in the manuals.)
+    - First draft: `There are many ways that you can use this feature, but this is one way.` 
+    - Second draft: `This is one of many procedures...`
+* Write using minimalistic writing. Get to the point early. Bulleted lists and steps in place of cumbersome paragraphs.
+* Avoid dangling modifiers. Be sure subject and predicate agree.
+* See instructions for link & spell checker.
   
+## Lists and tables
+
+* List: avoiding nesting more than 2, parallelism, etc... See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-lists
+    - Definition lists are built with term in bold and colon.
+    - **Definition list:** DLs look like this.
+    - Choose complete sentences, or not, but commit!
+* Tables:
+     
 ## Adding links
 
 From the Developing Quality Technical Information handbook (IBM Press), do not overuse embedded links:
@@ -89,16 +87,27 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * URLs to GitHub issues are usually long and uninformative. Take the extra step to define the link with a good link title. 
 * Never link to internal materials like internal GitHub issues, files, other internal-only docs like scripts. Have the developer replace a script with steps. Some initial drafts can require this removal. Ensure linked materials are from public spaces.
 * Avoid linking to upstream documentation and community policies unless necessary.
+* When you change a file name, any links to that file also need to change or we will have broken links.
 
-## Comments
+## Comments in the source
+
+Comments should be temporary. Use the date when the comment was signed along with its purpose to determine if the comment is worth removing. If you need additional information, consider reaching out to the person who signed the comment.
+
+If you are commenting about changes that need to be made, please create an issue and remove the comments as soon as possible as not to clutter the source. The source is open and should be as close to the product documentation as possible to follow `dev>test>prod` principle.
 
 When commenting in the source, avoid miscommunications by being specific about the context of the comment. Provide the following information when leaving comments:
 
 `//comment | initials or GitHub account name | date`
 
-Comments should be temporary. Use the date when the comment was signed along with its purpose to determine if the comment is worth removing. If you need additional information, consider reaching out to the person who signed the comment.
+## Requirements before merging PRs
 
-If you are commenting about changes that need to be made, please create an issue and remove the comments as soon as possible as not to clutter the source. The source is open and should be as close to the product documentation as possible to follow `dev>test>prod` principle.
+* Request peer reviews for all new topics and other changes that result in more than a typo or small correction.
+* Request peer reviews when developers make changes with PRs.
+* Request technical review for any changes other than typos or broken links. 
+* Check broken links as you build content. Use the easy _Check my links_ plug-in on each PR in preview mode.
+* Check your PR _requests_ from team members. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
+* Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`.
+* Ensure your peer reviews and contributions are in your goals.
 
 ## Supplemental resources
 
