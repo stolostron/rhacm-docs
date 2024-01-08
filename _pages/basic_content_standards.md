@@ -7,29 +7,37 @@ horizontal: false
 
 Most of the following content is addressed in the _IBM Style Manual_, the _Red Hat Supplemental_ guide, or _PatternFly_. Refer to manuals to stay informed about corporate standards. Additionally, many of the guidelines we adopt are industry standards for high quality writing, for proper grammar, and used to engage with technical audiences who seek for quick answers and rely on SEO.
 
+* Use proper grammar and follow IBM style. (Style manuals are typical in most writing professions, all writers at Red Hat and IBM have access to the manuals and use them to create content.)
+
+* Write using minimalistic writing. Get to the point early. Bulleted lists and steps in place of cumbersome paragraphs.
+* Avoid dangling modifiers. Be sure subject and predicate agree.
+* See instructions for link & spell checker.
+* * Know something about the technology so that you can better write about it. What is the purpose of the new function? Why should a customer use it? This will help as you build the file.
+* Ask where the user will interact with the feature. Day 1? Day 2? During the Application lifecycle? This will help you place the content.
+* Seek guidance from the architect before creating a new book or section so that the team can agree on the best placement for the new content.
+
 **Note:** Much of these points result from clean-up after the release. It's important that each writer seek these standards while working on refresh items and the current release so that the team is not addressing them later. 
 
-[File names, titles, headers](#file-names-titles-headers)
-[Short descriptions](#short-descriptions)
-[Concise, clear content](#concise-clear-content)
-[Lists and tables](#lists-and-tables)
-[Requirements before merging PRs](#requirements-before-merging-prs)
+* [File names, titles, headers](#file-names-titles-headers)
+* [Short descriptions](#short-descriptions)
+* [Concise, clear content](#concise-clear-content)
+* [Lists and tables](#lists-and-tables)
+* [Requirements before merging PRs](#requirements-before-merging-prs)
 
 ## File names, titles, headers
 
-* Guides should begin with an introductory file named, `folder_name/intro.adoc`, which only has conceptual information and links to the rest of the topics. This is a _container_ topic that will be the entry to the guide collection. Name the file `intro.adoc`, or `overview.adoc` if it contains a few intros and guides.
-* Be sure file names increase UX and don't confuse the reader or writer. Example: `man_clu_set` changes to `manage_clusterset`, a file that is titled: _Managing ClusterSets_. This will help the entire product team better manage links in the doc and the console, and it increases expectation about the contents of the file.
-* Recognize the goal of the content: Task, reference, concept? Tasks require gerunds in the title, for example.
-* Know something about the technology. What is the purpose of the new function? If you don't understand it, you won't be able to advocate for the customer with the content.
-* Ask where the user will interact with the feature. Day 1? Day 2? During the Application lifecycle?
-* Seek guidance from the architect before creating a new book or section so that the team can agree on the best placement for the new content.
-* Don't use internal terms to define a file. Name the file after what the user will read about the product in announcements and in the console.
-* Validation steps need to be concrete and produce a result. 
-* Headers: parallel, separate headers with content, etc... See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-headings
+* Guides should begin with an _introductory_ file named, `folder_name/intro.adoc`, which only has conceptual information and links to the rest of the topics. Name the file `intro.adoc`, or `overview.adoc` if it contains a few intros and guides. You only need this if the component has multiple procedures and conceptual files.
+* Be sure file names increase UX and don't confuse the reader or writer. Proper and concise file names make our jobs easier. We can find and retrieve files easier and building URLs is easier. Example: `man_clu_set` changes to `manage_clusterset`, a file that is titled: _Managing ClusterSets_. This increases expectation about the contents of the file.
+* Recognize the goal of the content: Task, reference, concept. Topics will sometimes have a mix of these items. 
+    ** Tasks require gerunds ("ing" verbs) in the title and are procedures. (**Note:** a task is not a task if it just links to other tasks.) We ask for validation steps at the end but you may not get them. Those steps need to be concrete and produce a result, or just skip them. Example: Run `oc get` to verify pod status.
+    ** Concepts are informative about what the product does and how. A topic about architecture is a concept. An intro file is also conceptual. 
+    ** References are also informative. A breakdown of an API or a glossary could be defined as a reference.    `      
+* Avoid internal terms to define a file. Name the file after what the user will read about the product in announcements and in the console. For instance, name a file `console_intro.adoc` and not `ui.intro.adoc` because the product refers to the _console_.
+* Headers: parallel language, separate headers with content. See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-headings
     - Choose gerunds for tasks
     - No code in headers
     - Use conrefs as necessary
-    - Make headers and anchors unique but intuitive (think about search engine optimization)
+    - Make headers and anchors unique but intuitive and concise (think about search engine optimization)
 
 ## Short descriptions
 
@@ -41,32 +49,22 @@ Most of the following content is addressed in the _IBM Style Manual_, the _Red H
 
 ## Concise, clear content
 
-* Analyze your sentence structure. Examples:
-  
-  - First draft: Only users belonging to the certain role can view data belonging to a certain namespace.
-  - Better draft: Only users who are assigned to a certain role can view data within a namespace.
-  - Why? Belonging is confusing and can mean many things, and it is used twice. A relative pronoun is better used to connect a clause or phrase to a noun or pronoun. The clause modifies, or describes, the noun. The most common relative pronouns are who, whom, whose, which, and that. 
-
-* Sometimes when and where can be used as relative pronouns, as well.
+* Analyze your sentence structure. Please review style manuals for more specifics. See some examples:
+* Use concise sentences. Remove extra words. 
+    - First draft: `There are many ways that you can use this feature, but this is one way.` 
+    - Second draft: `This is one of many procedures...`
+      - First draft: Only users belonging to the certain role can view data belonging to a certain namespace.
+      - Better draft: Only users who are assigned to a certain role can view data within a namespace.
+      - Why? Belonging is confusing and can mean many things, and it is used twice. A relative pronoun is better used to connect a clause or phrase to a noun or pronoun. The clause modifies, or describes, the noun. The most common relative pronouns are who, whom, whose, which, and that. Sometimes when and where can be used as relative pronouns, as well.
 * Mood and voice (avoid subjunctive mood, write in active voice): 
-  - Wish, desire, please –- all of these are not concrete, not imperative
-  - Should (rarely used, but needs clarification)
- * Tense: Always strive for present tense.  
+  - Wish, desire, please –- all of these are not concrete, not imperative. Avoid these.
+  - Should (rarely used, but needs clarification when used)
+* Tense: Always strive for present tense.  
   - First draft: If you were to save the file (not present, wordy, room for interpretation)
   - Better draft: If you save the file ... (Clear, concise)
 * Voice: Use active voice almost always:
-  - No: When the latch has been opened, the panel will slide forward.
+  - No: When the latch has been opened, the panel will slide forward. (It's not clear what or who takes the action, avoid passive and past participles)
   - Yes: When you open the latch, the panel slides forward.
- 
-The following tips help with translation, readability, usability, presentation, voice:
-
-* Use proper grammar and follow IBM style. (Style manuals are typical in most writing professions, all writers at Red Hat and IBM have access to the manuals and use them to create content.)
-* Use concise sentences. Remove extra words. (See more examples in the manuals.)
-    - First draft: `There are many ways that you can use this feature, but this is one way.` 
-    - Second draft: `This is one of many procedures...`
-* Write using minimalistic writing. Get to the point early. Bulleted lists and steps in place of cumbersome paragraphs.
-* Avoid dangling modifiers. Be sure subject and predicate agree.
-* See instructions for link & spell checker.
   
 ## Lists and tables
 
