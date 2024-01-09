@@ -5,28 +5,28 @@ permalink: Technical_writing_standards
 horizontal: false
 ---
 
-Most of the following content is addressed in the [_IBM Style Manual_](https://www.ibm.com/docs/en/ibm-style), the [_Red Hat Supplemental_ guide](https://redhat-documentation.github.io/supplementary-style-guide/#_about_this_guide), or [_PatternFly_](https://www.patternfly.org/ux-writing/about/). 
+Please read and study this information as a technical writer on the team, or a contributor. Most of the following content is addressed in the [_IBM Style Manual_](https://www.ibm.com/docs/en/ibm-style), the [_Red Hat Supplemental_ guide](https://redhat-documentation.github.io/supplementary-style-guide/#_about_this_guide), or [_PatternFly_](https://www.patternfly.org/ux-writing/about/).
 
 Many of the guidelines we adopt are industry standards for high quality writing, proper grammar, SEO, translation, accessibility, and readability.
 
-All technical writers should be very familiar with these standards for writing. Each contributor should refer to these manuals when creating content for the RHACM docs repository. Read more about the standards in the following sections, but see the manuals for more information.
+All technical writers should be very familiar with these standards for writing. Each contributor should refer to these manuals when creating content for the RHACM docs repository. Read more about the standards in the following sections, but see the manuals for more information:
 
-* [Reminders](#reminders)
+* [General reminders](#reminders)
 * [File names, titles, headers](#file-names-titles-headers)
 * [Short descriptions](#short-descriptions)
 * [Concise, clear content](#concise-clear-content)
 * [Lists and tables](#lists-and-tables)
 * [Requirements before merging PRs](#requirements-before-merging-prs)
 
-## Reminders
+## General reminders 
 
-* Use proper Global English.
-* Write using minimalistic writing. Get to the point early and use bulleted lists and steps in place of cumbersome paragraphs. Reduce wordy sentences.
-* Avoid dangling modifiers. Be sure subject and predicate agree.
+* Use proper Global English. Please read about [Global audiences](https://www.ibm.com/docs/en/ibm_style/global-audiences.html) in the _IBM Style Manual_.
+* Write using minimalistic writing. Get to the point early and use bulleted lists and steps in place of cumbersome paragraphs. Reduce wordy sentences. Read more about [Minimalism](https://redhat-documentation.github.io/supplementary-style-guide/#minimalism) and read about using [clear, succinct verbs](https://www.ibm.com/docs/en/ibm-style?topic=grammar-verbs).
+* Avoid dangling modifiers. Be sure subject and predicate agree. Read about [subject-verb agreement](https://www.ibm.com/docs/en/ibm-style?topic=grammar-verbs#subject-verb-agreement).
 * Know something about the technology: What is the purpose of the new function? Why should a customer use it? This will help you write your _short description_.
 * Ask where the user will interact with the feature:Day 1? Day 2? During the Application lifecycle? This will help with placement.
 * Seek guidance from the architect before creating a new guide or section if you are not sure about placement.
-
+ 
 ## File names, titles, headers
 
 * Guides with multiple files should begin with an _introductory_ file named, `folder_name/intro.adoc`, which only has conceptual information and links to the rest of the topics. Name the file `overview.adoc` if it is a larger collection that contains a few intros and guides.
@@ -35,13 +35,14 @@ All technical writers should be very familiar with these standards for writing. 
     ** _Tasks_ require gerunds ("ing" verbs) in the title and are procedures. (**Note:** a task is not a task if it just links to other tasks.)
     ** We ask for validation steps at the end, but you may not get them in your drafts. Those steps are concrete and produce a result, or just skip addint them. **Example:** Run `oc get status` to verify pod status.
     ** _Concepts_ are informative about what the product does and how. A topic about architecture is a concept. An intro file is also conceptual. 
-    ** _References_ are also informative. A breakdown of an API or a glossary could be defined as a reference.    `      
+    ** _References_ are also informative. A breakdown of an API or a glossary could be defined as a reference.
+    ** Although are RHACM doc repo is not set up this way because we came with established content and we collaborate with engineers in the same workspace, you can read more about concepts and procedures in [Writing modular documentation](https://redhat-documentation.github.io/modular-docs/#_creating_modules).   `      
 * Avoid internal terms to define a file. Name the file after what the user will read about the product in announcements and in the console. For instance, name a file `console_intro.adoc` and not `ui.intro.adoc` because the product refers to the _console_.
-* Headers: parallel language, separate headers with content. See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-headings
-    - Choose gerunds for tasks
-    - No code in headers
-    - Use conrefs as necessary
-    - Make headers and anchors unique but intuitive and concise (think about search engine optimization)
+* Use headers for two or more subsections.
+* Use parallel language for headers. Example: Creating your cluster, Importing your cluster, Destroying your cluster.
+* Separate headers with content. Headers should not be placed back-to-back with no content in between. 
+* Place no code block in headers because it renders oddly. We do use conrefs and itialics when needed instead of code block.
+* Make headers and anchors unique, but intuitive and concise. Think about search engine optimization and usability. 
 
 ## Short descriptions
 
