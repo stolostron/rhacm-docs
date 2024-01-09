@@ -1,37 +1,41 @@
 ---
 layout: page
-title: Basic content standards
-permalink: basic_content_standards
+title: Technical writing standards
+permalink: Technical_writing_standards
 horizontal: false
 ---
 
-Most of the following content is addressed in the _IBM Style Manual_, the _Red Hat Supplemental_ guide, or _PatternFly_. Refer to manuals to stay informed about corporate standards. Additionally, many of the guidelines we adopt are industry standards for high quality writing, for proper grammar, and used to engage with technical audiences who seek for quick answers and rely on SEO.
+Most of the following content is addressed in the [_IBM Style Manual_](https://www.ibm.com/docs/en/ibm-style), the [_Red Hat Supplemental_ guide](https://redhat-documentation.github.io/supplementary-style-guide/#_about_this_guide), or [_PatternFly_](https://www.patternfly.org/ux-writing/about/). 
 
-* Use proper grammar and follow IBM style. (Style manuals are typical in most writing professions, all writers at Red Hat and IBM have access to the manuals and use them to create content.)
+Many of the guidelines we adopt are industry standards for high quality writing, proper grammar, SEO, translation, accessibility, and readability.
 
-* Write using minimalistic writing. Get to the point early. Bulleted lists and steps in place of cumbersome paragraphs.
-* Avoid dangling modifiers. Be sure subject and predicate agree.
-* See instructions for link & spell checker.
-* * Know something about the technology so that you can better write about it. What is the purpose of the new function? Why should a customer use it? This will help as you build the file.
-* Ask where the user will interact with the feature. Day 1? Day 2? During the Application lifecycle? This will help you place the content.
-* Seek guidance from the architect before creating a new book or section so that the team can agree on the best placement for the new content.
+All technical writers should be very familiar with these standards for writing. Each contributor should refer to these manuals when creating content for the RHACM docs repository. Read more about the standards in the following sections, but see the manuals for more information.
 
-**Note:** Much of these points result from clean-up after the release. It's important that each writer seek these standards while working on refresh items and the current release so that the team is not addressing them later. 
-
+* [Reminders](#reminders)
 * [File names, titles, headers](#file-names-titles-headers)
 * [Short descriptions](#short-descriptions)
 * [Concise, clear content](#concise-clear-content)
 * [Lists and tables](#lists-and-tables)
 * [Requirements before merging PRs](#requirements-before-merging-prs)
 
+## Reminders
+
+* Use proper Global English.
+* Write using minimalistic writing. Get to the point early and use bulleted lists and steps in place of cumbersome paragraphs. Reduce wordy sentences.
+* Avoid dangling modifiers. Be sure subject and predicate agree.
+* Know something about the technology: What is the purpose of the new function? Why should a customer use it? This will help you write your _short description_.
+* Ask where the user will interact with the feature:Day 1? Day 2? During the Application lifecycle? This will help with placement.
+* Seek guidance from the architect before creating a new guide or section if you are not sure about placement.
+
 ## File names, titles, headers
 
-* Guides should begin with an _introductory_ file named, `folder_name/intro.adoc`, which only has conceptual information and links to the rest of the topics. Name the file `intro.adoc`, or `overview.adoc` if it contains a few intros and guides. You only need this if the component has multiple procedures and conceptual files.
-* Be sure file names increase UX and don't confuse the reader or writer. Proper and concise file names make our jobs easier. We can find and retrieve files easier and building URLs is easier. Example: `man_clu_set` changes to `manage_clusterset`, a file that is titled: _Managing ClusterSets_. This increases expectation about the contents of the file.
-* Recognize the goal of the content: Task, reference, concept. Topics will sometimes have a mix of these items. 
-    ** Tasks require gerunds ("ing" verbs) in the title and are procedures. (**Note:** a task is not a task if it just links to other tasks.) We ask for validation steps at the end but you may not get them. Those steps need to be concrete and produce a result, or just skip them. Example: Run `oc get` to verify pod status.
-    ** Concepts are informative about what the product does and how. A topic about architecture is a concept. An intro file is also conceptual. 
-    ** References are also informative. A breakdown of an API or a glossary could be defined as a reference.    `      
+* Guides with multiple files should begin with an _introductory_ file named, `folder_name/intro.adoc`, which only has conceptual information and links to the rest of the topics. Name the file `overview.adoc` if it is a larger collection that contains a few intros and guides.
+* Be sure file names increase usability and don't confuse the reader or writer. Why? Proper and concise file names make our jobs easier. We can find and retrieve files easier and build URLs is easier. **Example:** `man_clu_set.adoc` changes to `manage_clusterset.adoc`, a file that is titled: _Managing ClusterSets_. This increases expectation about the contents of the file.
+* Recognize the goal of the content: Task, reference, concept. (Topics will sometimes have a mix of these items.) 
+    ** _Tasks_ require gerunds ("ing" verbs) in the title and are procedures. (**Note:** a task is not a task if it just links to other tasks.)
+    ** We ask for validation steps at the end, but you may not get them in your drafts. Those steps are concrete and produce a result, or just skip addint them. **Example:** Run `oc get status` to verify pod status.
+    ** _Concepts_ are informative about what the product does and how. A topic about architecture is a concept. An intro file is also conceptual. 
+    ** _References_ are also informative. A breakdown of an API or a glossary could be defined as a reference.    `      
 * Avoid internal terms to define a file. Name the file after what the user will read about the product in announcements and in the console. For instance, name a file `console_intro.adoc` and not `ui.intro.adoc` because the product refers to the _console_.
 * Headers: parallel language, separate headers with content. See more guidance: https://www.ibm.com/docs/en/ibm-style?topic=format-headings
     - Choose gerunds for tasks
