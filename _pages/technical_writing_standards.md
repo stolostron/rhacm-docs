@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Technical writing standards
-permalink: Technical_writing_standards
+permalink: technical_writing_standards
 horizontal: false
 ---
 
@@ -35,7 +35,7 @@ All technical writers should be very familiar with these standards for writing. 
 * Be sure file names increase usability and don't confuse the reader or writer. Why? Proper and concise file names make our jobs easier. We can find and retrieve files easier and build URLs is easier. **Example:** `man_clu_set.adoc` changes to `manage_clusterset.adoc`, a file that is titled: _Managing ClusterSets_. This increases expectation about the contents of the file.
 * Recognize the goal of the content: Task, reference, concept. (Topics will sometimes have a mix of these items.) 
     ** _Tasks_ require gerunds ("ing" verbs) in the title and are procedures. (**Note:** a task is not a task if it just links to other tasks.)
-    ** We ask for validation steps at the end, but you may not get them in your drafts. Those steps are concrete and produce a result, or just skip addint them. **Example:** Run `oc get status` to verify pod status.
+    ** We ask for validation steps at the end, but you may not get them in your drafts. Those steps are concrete and produce a result, or just skip adding them. **Example:** Run `oc get status` to verify pod status.
     ** _Concepts_ are informative about what the product does and how. A topic about architecture is a concept. An intro file is also conceptual. 
     ** _References_ are also informative. A breakdown of an API or a glossary could be defined as a reference.
     ** See more about [procedures](https://www.ibm.com/docs/en/ibm-style?topic=format-procedures) in the IBM style manual.
@@ -44,7 +44,7 @@ All technical writers should be very familiar with these standards for writing. 
 * Use headers for two or more subsections. If you have more than three, create links for them at the beginning of the file for easy retrievabililty and UX.
 * Use parallel language for headers. Example: Creating your cluster, Importing your cluster, Destroying your cluster.
 * Separate headers with content. Headers should not be placed back-to-back with no content in between. 
-* Place no code block in headers because it renders oddly. We do use conrefs and itialics when needed instead of code block.
+* Place no code block in headers because it renders oddly. We do use conrefs and italics when needed instead of code block.
 * Make headers and anchors unique, but intuitive and concise. Think about search engine optimization and usability. 
 
 ## Short descriptions
@@ -82,7 +82,7 @@ Review the guidance for [lists](https://www.ibm.com/docs/en/ibm-style?topic=form
 * Use bullets for more than one item, but not just one item.
 * Avoid nesting lists more than two levels. If you are nesting that much, consider switching to headers.
 * Use parallelism.  
-* Definition lists are built with term in bold and colon. See example:
+* Definition lists are built with the term in bold and colon. See example:
     - **Definition list:** DLs look like this.
     - Choose complete sentences, or not, but commit and make them the same throughout the list
 * Use tables only when a list does not work. Tables can be hard to read, especially on a screen reader.
