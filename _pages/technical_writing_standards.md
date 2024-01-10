@@ -26,6 +26,8 @@ All technical writers should be very familiar with these standards for writing. 
 * Know something about the technology: What is the purpose of the new function? Why should a customer use it? This will help you write your _short description_.
 * Ask where the user will interact with the feature: Day 1? Day 2? During the Application lifecycle? This will help with placement.
 * Seek guidance from the architect before creating a new guide or section if you are not sure about placement.
+* Reduce lengthy output examples that the user will see in the terminal. We usually do not need to repeat outputs in the doc.
+* Consider using variable in versions within commands and samples so we don't get bugs or have to change them. Simply indicate that the user needs to insert the supported version. **Example:** `image: myregistry.example.com:5000/mirror/my-operator-index:v4.x,` replacing `4.x` with the current version.
  
 ## File names, titles, headers
 
