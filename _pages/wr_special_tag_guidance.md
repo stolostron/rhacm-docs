@@ -5,7 +5,7 @@ permalink: /wr_special_tag_guidance
 horizontal: false
 ---
 
-Special tags can be used to draw attention to content where necessary. Limit special tagging and make sure to use bold text for all special tags, including the colon.
+Special tags can be used to draw attention to content where necessary. Limit special tagging and make sure to use bold text for all special tags, including the colon. Red Hat calls these tags "Abominiations." We currently do not capitalize these in the RHACM docs.
 
 ## Table of special tags
 
@@ -15,7 +15,7 @@ Special tags can be used to draw attention to content where necessary. Limit spe
 | **Important:** | A little stronger than a note. |
 | **Optional:**  | For any step not required, but user may want to take or needs to take in certain cases. |
 | **Best practice:** | Use with caution. Avoid when possible by writing more descriptive text to guide the user. |
-| **Technology preview:** | Place at the highest level of the doc that is tech preview then on the title place (Technology Preview) (not bold). Include a bold special tag on the What's new entry. |
+| **Technology preview:** | Place at the highest level of the doc that is tech preview, then on the title place (Technology Preview) (not bold). Include a bold special tag on the What's new entry. |
 
 &nbsp;
 
