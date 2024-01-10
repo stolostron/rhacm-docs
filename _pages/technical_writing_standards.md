@@ -131,8 +131,14 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * Check for accessibility.
 * See if you can understand the diff. If something is confusing to you, it is probably confusing to the customer.
 
-## Supplemental resources
+## Additional resources 
 
+Review more standards and practices.
+
+* [Special considerations](https://github.com/stolostron/rhacm-docs/blob/gh-pages/_pages/special_considerations.md)
+* [Style resources](https://github.com/stolostron/rhacm-docs/blob/gh-pages/_pages/style_resources.md)
+* [UI writing](https://github.com/stolostron/rhacm-docs/blob/gh-pages/_pages/ui_writing.md)
+* [Special tagging](https://github.com/stolostron/rhacm-docs/blob/gh-pages/_pages/wr_special_tag_guidance.md)
 * [The 7 principles of naming](https://www.namingthings.co/naming-things-principles)
 * [What’s in a Name? Guidelines for Naming Files](https://techwhirl.com/whats-in-a-name-guidelines-for-naming-files/)
 
