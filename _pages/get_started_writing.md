@@ -107,7 +107,7 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 
 ## Comments in the source
 
-* Comments should be temporary. Comments often sit without being addressed because we are busy. They can then create more work for yourself as you eventually return to them or for ithers. 
+* Comments should be temporary. Comments often sit without being addressed because we are busy. They can then create more work for yourself as you eventually return to them or for others. 
 * If you are commenting about changes that need to be made, please create an issue and remove the comments as soon as possible as not to clutter the source. The source is open and should be as close to the product documentation as possible to follow `dev>test>prod` principle.
 * We only have permanent comments about format or issue numbers in Troubleshooting and Known issues. We do not need them in What's new or Errata.
 * When commenting in the source, avoid miscommunications by being specific about the context of the comment. Provide the following information when leaving comments: `//comment | initials or account name | date`
