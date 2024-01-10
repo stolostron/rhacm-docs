@@ -1,7 +1,7 @@
 ---
 layout: page
 title: GitHub
-permalink: /getting_started_github
+permalink: /get_started_github
 horizontal: false
 ---
 
