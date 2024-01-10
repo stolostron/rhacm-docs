@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Technical writing standards
-permalink: technical_writing_standards
+title: RHACM writing standards
+permalink: /get_started_writing
 horizontal: false
 ---
 

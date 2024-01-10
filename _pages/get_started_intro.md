@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Introduction
-permalink: /getting_started_intro
+permalink: /get_started_intro
 horizontal: false
 ---
 
