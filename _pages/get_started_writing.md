@@ -1,6 +1,6 @@
 ---
 layout: page
-title: RHACM writing standards
+title: Technical writing standards
 permalink: /get_started_writing
 horizontal: false
 ---

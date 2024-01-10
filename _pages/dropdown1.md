@@ -12,7 +12,7 @@ children:
     - title: GitHub
       permalink: /get_started_github
     - title: divider
-    - title: RHACM writing standards
+    - title: Technical writing standards
       permalink: /get_started_writing
     - title: divider
     - title: Learning Markdown
