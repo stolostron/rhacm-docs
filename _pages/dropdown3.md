@@ -6,9 +6,6 @@ nav: true
 nav_order: 3
 dropdown: true
 children: 
-    - title: Basic content standards
-      permalink: /basic_content_standards
-    - title: divider
     - title: Tools
       permalink: /wr_tools
     - title: divider
