@@ -5,7 +5,6 @@ One or more `PlacementDecision` kinds with the label `cluster.open-cluster-manag
 
 If a `ManagedCluster` is selected and added to a `PlacementDecision`, components that consume this placement might apply the workload on this `ManagedCluster`. After the `ManagedCluster` is no longer selected and is removed from the `PlacementDecision`, the workload that is applied on this `ManagedCluster` is removed. See _PlacementDecisions API_ to learn more about the API.
 
-
 See the following `PlacementDecision` example:
 
 [source,yaml]
@@ -34,7 +33,94 @@ status:
       reason: ''
 ----
 
+[#placement-decisionstrategy]
+= Dividing _PlacementDecision_ into groups by using _decisionStrategy_
+
+You can use the `decisionStrategy` spec in a `Placement` to divide the `PlacementDecision` you created into groups and define the number of clusters in each group.
+
+In the following example, the environment has 310 clusters. The clusters with the `prod-canary-west` and `prod-canary-east` labels are divided into two groups. The remaining clusters are grouped with a maximum of 150 clusters each:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement1
+  namespace: default
+spec:
+  clusterSets:
+    - global
+  decisionStrategy:
+    groupStrategy:
+      clustersPerDecisionGroup: 150 <1>
+      decisionGroups: <2>
+      - groupName: prod-canary-west <3>
+        groupClusterSelector: <4>
+          labelSelector:
+            matchExpressions:
+              - key: prod-canary-west
+                operator: Exists
+      - groupName: prod-canary-east
+        groupClusterSelector:
+          labelSelector:
+            matchExpressions:
+              - key: prod-canary-east
+                operator: Exists
+----
+
+<1> A specific number or percentage of the total selected clusters 
+<2> A list of predefined groups for adding decision results. Decision groups are initially made based on the `decisionGroups` field. Clusters that are not included in `decisionGroups` are then divided to other decision groups. The number of cluster in each decision group must be lower than the value of `clustersPerDecisionGroup`.
+<3> The name that is added as the value of the `cluster.open-cluster-management.io/decision-group-name` label key of the `PlacementDecision` you created.
+<4> Defines the `labelSelector` to select a cluster subset by using a label.
+
+After defining the decision strategy, the `Placement` `status` lists the group result, including the decision group name and index, cluster count, and the corresponding `PlacementDecision` names. See the following example:
+
+[source,yaml]
+----
+status:
+  decisionGroups:
+  - clusterCount: 10
+    decisionGroupIndex: 0
+    decisionGroupName: prod-canary-west
+    decisions:
+    - placement1-decision-1
+  - clusterCount: 10
+    decisionGroupIndex: 1
+    decisionGroupName: prod-canary-east
+    decisions:
+    - placement1-decision-2
+  - clusterCount: 150
+    decisionGroupIndex: 2
+    decisionGroupName: ""
+    decisions:
+    - placement1-decision-3
+    - placement1-decision-4
+  - clusterCount: 140
+    decisionGroupIndex: 3
+    decisionGroupName: ""
+    decisions:
+    - placement1-decision-5
+    - placement1-decision-6
+  numberOfSelectedClusters: 310
+----
+
+The `PlacementDecision` has the `cluster.open-cluster-management.io/decision-group-name` 
+and `cluster.open-cluster-management.io/decision-group-index` labels to indicate which grooup name and group index it belongs to. See the following example:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: PlacementDecision
+metadata:
+  labels:
+    cluster.open-cluster-management.io/placement: placement1
+    cluster.open-cluster-management.io/decision-group-index: "0"
+    cluster.open-cluster-management.io/decision-group-name: prod-canary-west
+  name: placement1-decision-1
+  namespace: default
+----
+
 [#placement-decision-resources]
 == Additional resources
 
--  See xref:../api/placementdecision.json.adoc#placementdecisions-api[PlacementDecisions API] fore more details.
+-  See xref:../api/placementdecision.json.adoc#placementdecisions-api[PlacementDecisions API] for more details.
