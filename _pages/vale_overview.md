@@ -81,7 +81,7 @@ To install the `RedHat` style package, complete the following steps:
 
     `vale sync`
 
-    A successful output looks similar to the following:
+    See the following example of a successful output:
 
     ```
     SUCCESS  Downloaded package 'RedHat'
@@ -91,7 +91,6 @@ To install the `RedHat` style package, complete the following steps:
 **Tip:** You can repeat step 2 to update Vale.
 
 **Note:** You can also add the configuration file to the repository of the project you are working on. If you add the configuration file to the repository, it overrides the settings of your local configuration file. 
-
 
 ## Using Vale with the command-line
 
