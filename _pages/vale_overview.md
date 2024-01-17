@@ -38,7 +38,8 @@ To install the `RedHat` style package, complete the following steps:
 
 1. Create the `.vale.ini` configuration file in your home directory and add the following content to it:
 
-    ```StylesPath = .vale/styles
+    ```
+    StylesPath = .vale/styles
 
     MinAlertLevel = suggestion
 
@@ -75,7 +76,7 @@ To install the `RedHat` style package, complete the following steps:
     RedHat.Spacing = NO
     RedHat.Spelling = NO
     RedHat.TermsSuggestions = NO
-    ``````
+    ```
 
 2. Save the file and run the following command:
 
@@ -119,3 +120,7 @@ To use Vale in the command-line, complete the following steps:
 ## Using Vale with Visual Studio Code
 
 After installing Vale on macOS, install the latest version of the `Vale VSCode` extension to enable real time Vale checks in Visual Studio Code.
+
+## Troubleshooting
+
+If you receive an error after running `vale sync`, check if the `.vale` folder was downloaded correctly to your home folder. If the folder is missing, download it from a team member and manually add it to your home folder.
