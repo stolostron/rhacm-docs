@@ -14,7 +14,7 @@ See the following topics to install Vale and the `RedHat` style package on macOS
 
 ### Prerequisite
 
-- You must have the latest Asciidoctor installed
+- You must have the latest Asciidoctor installed.
 
     **Tip:** You can check which Asciidoctor version is installed by running the following command: 
 
