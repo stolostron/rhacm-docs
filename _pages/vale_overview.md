@@ -119,7 +119,7 @@ To use Vale in the command-line, complete the following steps:
 
 ## Using Vale with Visual Studio Code
 
-After installing Vale on macOS, install the latest version of the `Vale VSCode` extension to enable real time Vale checks in Visual Studio Code.
+After installing Vale on macOS, install the latest version of the `Vale VSCode` extension to enable real time Vale checks in Visual Studio Code. After installing the extension, content that violates the style rules you set is highlighted in the code editor window. You can hover over the highlighted content to reveal details about the style issues.
 
 ## Troubleshooting
 
