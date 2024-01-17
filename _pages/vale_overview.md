@@ -16,13 +16,13 @@ See the following topics to install Vale and the `RedHat` style package on macOS
 
 - You must have the latest Asciidoctor installed
 
-**Tip:** You can check which Asciidoctor version is installed by running the following command: 
+    **Tip:** You can check which Asciidoctor version is installed by running the following command: 
 
-`asciidoctor -v`
+    `asciidoctor -v`
 
-You can install Asciidoctor by running the following:
+    You can install Asciidoctor by running the following:
 
-`brew install asciidoctor`
+    `brew install asciidoctor`
 
 ### Installing the Vale command-line tool
 
@@ -38,57 +38,57 @@ To install the `RedHat` style package, complete the following steps:
 
 1. Create the `.vale.ini` configuration file in your home directory and add the following content to it:
 
-```StylesPath = .vale/styles
+    ```StylesPath = .vale/styles
 
-MinAlertLevel = suggestion
+    MinAlertLevel = suggestion
 
-IgnoredScopes = code, tt, img, url, a, body.id
+    IgnoredScopes = code, tt, img, url, a, body.id
 
-SkippedScopes = script, style, pre, figure, code, tt, blockquote, listingblock, literalblock
+    SkippedScopes = script, style, pre, figure, code, tt, blockquote, listingblock, literalblock
 
-Packages = RedHat
+    Packages = RedHat
 
-[*.adoc]
+    [*.adoc]
 
-BasedOnStyles = RedHat
+    BasedOnStyles = RedHat
 
-[*.md]
+    [*.md]
 
-BasedOnStyles = RedHat
+    BasedOnStyles = RedHat
 
-# Ignore code surrounded by backticks or plus sign, parameters defaults, URLs.
-TokenIgnores = (\x60[^\n\x60]+\x60), ([^\n]+=[^\n]*), (\+[^\n]+\+), (http[^\n]+\[)
+    # Ignore code surrounded by backticks or plus sign, parameters defaults, URLs.
+    TokenIgnores = (\x60[^\n\x60]+\x60), ([^\n]+=[^\n]*), (\+[^\n]+\+), (http[^\n]+\[)
 
-# Match INI files. See: https://docs.errata.ai/vale/scoping
-[*.ini]
+    # Match INI files. See: https://docs.errata.ai/vale/scoping
+    [*.ini]
 
-BasedOnStyles = RedHat
+    BasedOnStyles = RedHat
 
-# Ignore code surrounded by backticks or plus sign, parameters defaults, URLs.
-TokenIgnores = (\x60[^\n\x60]+\x60), ([^\n]+=[^\n]*), (\+[^\n]+\+), (http[^\n]+\[)
+    # Ignore code surrounded by backticks or plus sign, parameters defaults, URLs.
+    TokenIgnores = (\x60[^\n\x60]+\x60), ([^\n]+=[^\n]*), (\+[^\n]+\+), (http[^\n]+\[)
 
-# Disabling rules (NO)
-RedHat.CaseSensitiveTerms = NO
-RedHat.ConfigMap = NO
-RedHat.Definitions = NO
-RedHat.Slash = NO
-RedHat.Spacing = NO
-RedHat.Spelling = NO
-RedHat.TermsSuggestions = NO
-``````
+    # Disabling rules (NO)
+    RedHat.CaseSensitiveTerms = NO
+    RedHat.ConfigMap = NO
+    RedHat.Definitions = NO
+    RedHat.Slash = NO
+    RedHat.Spacing = NO
+    RedHat.Spelling = NO
+    RedHat.TermsSuggestions = NO
+    ``````
 
 2. Save the file and run the following command:
 
     `vale sync`
 
-A successful output looks similar to the following:
+    A successful output looks similar to the following:
 
-```
-SUCCESS  Downloaded package 'RedHat'
-Downloading packages [1/1]
-```
+    ```
+    SUCCESS  Downloaded package 'RedHat'
+    Downloading packages [1/1]
+    ```
 
-You can repeat step 2 to update Vale.
+**Tip:** You can repeat step 2 to update Vale.
 
 **Note:** You can also add the configuration file to the repository of the project you are working on. If you add the configuration file to the repository, it overrides the settings of your local configuration file. 
 
@@ -105,17 +105,17 @@ To use Vale in the command-line, complete the following steps:
 
     `vale myfile.adoc`
 
-The output is a table with the following structure:
+    The output is a table with the following structure:
 
-Column 1: Line number
+    Column 1: Line number
 
-Column 2: Character number
+    Column 2: Character number
 
-Column 3: Type of warning
+    Column 3: Type of warning
 
-Column 4: Suggested improvement
+    Column 4: Suggested improvement
 
-Column 5: Origin of style rule
+    Column 5: Location of style rule
 
 ## Using Vale with Visual Studio Code
 
