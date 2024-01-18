@@ -70,7 +70,7 @@ You can then go through the process to commit and create a pull request, describ
   5. Copy that command and run it.
   6. Go to the browser and create your PR.
 
-You can also make changes to the repo from your branch in the browser, but that is only recommended for small changes. You can also create aliases for commands and so much more. Learn more at [Git alias](https://www.atlassian.com/git/tutorials/git-alias).
+You can also make changes to the repo from your branch in the browser, but that is only recommended for small changes. You can also create aliases for commands and so much more. Learn more at [Git alias](https://www.atlassian.com/git/tutorials/git-alias). Also read about `git stash`, resolving conflicts, etc... to help you with your workflow.
 
 ## Editing
    
