@@ -11,4 +11,6 @@ children:
     - title: divider
     - title: Git aliases
       permalink: /git_aliases
+    - title: Vale overview
+      permalink: /vale_overview
 ---
