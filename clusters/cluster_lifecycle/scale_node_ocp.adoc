@@ -1,0 +1,32 @@
+[#add-nodes-ocp-infra-env]
+== Adding worker nodes to {ocp-short} clusters
+
+Complete the following steps to add production environment worker nodes to {ocp-short} clusters:
+
+. Boot the machine that you want to use as a worker node from the ISO you previously downloaded.
++
+*Note:* Make sure that the worker node meets the requirements for an {ocp-short} worker node.
+
+. Wait for an agent to register after running the following command:
++
+----
+watch -n 5 "oc get agent -n managed-cluster"
+----
+
+. If the agent registration is succesful, an agent is listed. Approve the agent for installation. This can take a few minutes.
++
+*Note:* If the agent is not listed, exit the `watch` command by pressing Ctrl and C, then log in to the worker node to troubleshoot.
+
+. If you are using late binding, run the following command to associate pending unbound agents with your {ocp-short} cluster. Skip to step 5 if you are not using late binding:
++
+----
+oc get agent -n managed-cluster -ojson | jq -r '.items[] | select(.spec.approved==false) |select(.spec.clusterDeploymentName==null) | .metadata.name'| xargs oc -n managed-cluster patch -p '{"spec":{"clusterDeploymentName":{"name":"some-other-cluster","namespace":"managed-cluster"}}}' --type merge agent
+----
+
+. Approve any pending agents for installation by running the following command:
++
+----
+oc get agent -n managed-cluster -ojson | jq -r '.items[] | select(.spec.approved==false) | .metadata.name'| xargs oc -n managed-cluster patch -p '{"spec":{"approved":true}}' --type merge agent
+----
+
+Wait for the installation of the worker node. When the worker node installation is complete, the worker node contacts the managed cluster with a Certificate Signing Request (CSR) to start the joining process. The CSR is automatically signed.
