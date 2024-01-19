@@ -12,7 +12,7 @@ Our documentation source code resides in a GitHub repository. We use the Git con
 
 ## Prerequisites
 
-Review the Playbook first to understand general ACM processes, which includes some GitHub and Agile practices.
+Review the [ACM Playbook](https://docs.google.com/document/d/1YTqpZRH54Bnn4WJ2nZmjaCoiRtqmrc2w6DdQxe_yLZ8/edit#) first to understand general ACM processes, which includes some GitHub and Agile practices.
 
 ## Set up GitHub
 
