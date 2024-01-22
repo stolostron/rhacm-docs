@@ -10,7 +10,7 @@ children:
       permalink: /get_started_intro
     - title: divider
     - title: GitHub
-      permalink: /get_started_github
+      permalink: /get_started_git
     - title: divider
     - title: Technical writing standards
       permalink: /get_started_writing
