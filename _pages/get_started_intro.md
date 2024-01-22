@@ -52,3 +52,5 @@ The stream editor we use to build our documentation.
 ## Permissions
 
 Accessing some of our tools and processes requires specific permissions. As you follow various instructions on this website, please reach out to your manager whenever you run into permission issues.
+
+## Get started creating content
