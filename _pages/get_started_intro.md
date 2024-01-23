@@ -67,4 +67,4 @@ When you are ready, familiarize yourself with our standards and processes by rea
 * [Linking](wr_linking.md)
 * [Tools used to improve documentation quality](wr_tools.md)
 * [Accessibility](wr_accessibility.md)
-* [Createing builds](create_builds.md)
+* [Creating builds](create_builds.md)
