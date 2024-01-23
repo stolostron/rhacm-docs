@@ -5,11 +5,11 @@ permalink: special_considerations
 horizontal: false
 ---
 
-You might encounter some rare and specific writing cirumstances that require a workaround or special considerations. If you are encountering formatting or build issues, read the following topics.
+You might encounter some rare and specific writing circumstances that require a workaround or special considerations. If you are encountering formatting or build issues, read the following topics.
 
 ## Asterisks
 
-In AsciiDoc, `*` (asterisk symbol, Unicode `U+002A`) denotes the beginning of bold text or a bullet point. Sometimes using a dash (-) for bulleted lists can fix formatting issues that you may have in your PR.
+In AsciiDoc, `*` (asterisk symbol, Unicode `U+002A`) denotes the beginning of bold text or a bullet point. Sometimes, using a dash (-) for bulleted lists can fix formatting issues that appear in your PR.
 
 Asterisks can cause formatting issues when used for other purposes, such as for placeholders or as part of a command or code. See the following DNS example:
 
