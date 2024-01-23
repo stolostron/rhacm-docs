@@ -55,19 +55,16 @@ Accessing some of our tools and processes requires specific permissions. As you 
 
 ## Next steps
 
-Once ready, familiarize yourself with our standards and processes by reading the following topics:
+When you are ready, familiarize yourself with our standards and processes by reading the following topics:
 
 * [Technical writing standards](get_started_writing.md)
-* [Style resources](style_resource.md)
+* [Branch strategy](branch_strategy.md)
+* [Style resources](style_resources.md)
 * [Creating new guides](create_guides.md)
-* [UI writing guidance](.md)
-* [UI content](.md)
-
-* [Special considerations](https://github.com/stolostron/rhacm-docs/blob/gh-pages/_pages/special_considerations.md)
-
-
-* [Special considerations](https://github.com/stolostron/rhacm-docs/blob/gh-pages/_pages/special_considerations.md)
-
-* [UI writing](https://github.com/stolostron/rhacm-docs/blob/gh-pages/_pages/ui_writing.md)
-* [Special tagging](https://github.com/stolostron/rhacm-docs/blob/gh-pages/_pages/wr_special_tag_guidance.md)
-
+* [UI writing guidance](ui_writing.md)
+* [UI content](ui_content.md)
+* [Special tagging](wr_special_tag_guidance.md)
+* [Linking](wr_linking.md)
+* [Tools used to improve documentation quality](wr_tools.md)
+* [Accessibility](wr_accessibility.md)
+* [Createing builds](create_builds.md)
