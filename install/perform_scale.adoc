@@ -9,7 +9,8 @@
 
 * <<maximum-number-of-managed-clusters,Maximum number of managed clusters>>
 * <<search-scalability,Search scalability>>
-* <<scaling-for-observability,Scaling for observability>>
+* <<scaling-for-observability,Observability scalability>>
+* <<backup-restore-scalability,Backup and restore scalability>>
 
 [#maximum-number-of-managed-clusters]
 == Maximum number of managed clusters
@@ -67,7 +68,7 @@ For more information on role access, see link:https://docs.openshift.com/contain
 * The worst performance is observed for a request by a non-administrator user with access to all of the namespaces, or all of the managed clusters.
 
 [#scaling-for-observability]
-== Scaling for observability
+== Observability scalability
 
 You need to plan your environment if you want to enable and use the observability service. The resource consumption later is for the {ocp-short} project, where observability components are installed. Values that you plan to use are sums for all observability components.
 
@@ -203,3 +204,68 @@ Total usage in Amazon Simple Storage Service (S3) increases. The metrics data is
 | 20 clusters
 | 23.8
 |===
+
+[#backup-restore-scalability]
+== Backup and restore scalability
+
+The tests performed on large scaled environment show the following data for backup and restore:
+
+.Table of run times for managed cluster backups
+|===
+| Backups | Duration | Number of resources| Backup memory
+
+| credentials
+| 2m5s
+| 18272 resources
+| 55MiB backups size
+
+| managed clusters
+| 3m22s
+| 58655 resources
+| 38MiB backups size
+
+| resources
+| 1m34s
+| 1190 resources
+| 1.7MiB backups size
+
+| generic/user
+| 2m56s
+| 0 resources
+| 16.5KiB backups size
+|===
+
+The total backup time is `10m`.
+
+.Table of run time for restoring passive hub cluster
+|===
+| Backups | Duration | Number of resources 
+
+| redentials
+| 47m8s
+| 18272 resources
+
+| resources
+| 3m10s 
+| 1190 resources
+
+| generic/user backup
+| 0m 
+| 0 resources
+|===
+
+Total restore time is `50m18s`.
+
+The number of backup file are pruned using the `veleroTtl` parameter option set when the `BackupSchedule` is created. Any backups with a creation time older than the specified TTL (time to live) are expired and automatically deleted from the storage location by Velero.
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: BackupSchedule
+ metadata:
+ name:schedule-acm
+ namespace:open-cluster-management-backup
+spec:
+veleroSchedule:0 */1 * * *
+veleroTtl:120h
+----
