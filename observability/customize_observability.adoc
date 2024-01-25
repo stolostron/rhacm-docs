@@ -1,9 +1,9 @@
 [#customizing-observability]
 = Customizing observability configuration
 
-Customize the obseravbility configuration to the specific needs of your environment, after you enable observability.
+Customize the observability configuration to the specific needs of your environment, after you enable observability.
 
-Read the following sections to learn more about how you want to manage and view cluster fleet data that is collected by the observability service:
+To learn more about how you want to manage and view cluster fleet data that the observability service collects, read the following sections:
 
 *Required access:* Cluster administrator
 
@@ -22,18 +22,15 @@ Read the following sections to learn more about how you want to manage and view 
 
 Create custom rules for the observability installation by adding Prometheus link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource.
 
-** Recording rules provide you the ability to precalculate, or computate expensive expressions as needed. The results are saved as a new set of time series.
-** Alerting rules provide you the ability to specify the alert conditions based on how an alert should be sent to an external service.
+To precalculate expensive expressions, use the recording rules abilities. The results are saved as a new set of time series. With the alerting rules, you can specify the alert conditions based on how you want to send an alert to an external service.
+
+*Note:* When you update your custom rules, `observability-thanos-rule` pods restart automatically.
+
+Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. View the following examples of custom rules:
+
+- Create a custom alert rule. Create a config map named `thanos-ruler-custom-rules` in the `open-cluster-management-observability` namespace. You must name the key, `custom_rules.yaml`, as shown in the following example. You can create multiple rules in the configuration. 
 +
-Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. 
-+
-*Note:* When you update your custom rules, `observability-thanos-rule` pods are restarted automatically.
-+
-Create a ConfigMap named `thanos-ruler-custom-rules` in the `open-cluster-management-observability` namespace. The key must be named, `custom_rules.yaml`, as shown in the following example. You can create multiple rules in the configuration.
-+
-* By default, the out-of-the-box alert rules are defined in the `thanos-ruler-default-rules` ConfigMap in the `open-cluster-management-observability` namespace. 
-+
-For example, you can create a custom alert rule that notifies you when your CPU usage passes your defined value. Your YAML might resemble the following content: 
+* Create a custom alert rule that notifies you when your CPU usage passes your defined value. Your YAML might resemble the following content: 
 +
 [source,yaml]
 ----
@@ -54,10 +51,10 @@ data:
             prometheus: "{{ $labels.prometheus }}"
             severity: critical
 ----
-
-* You can also create a custom recording rule within the `thanos-ruler-custom-rules` ConfigMap.
 +
-For example, you can create a recording rule that provides you the ability to get the sum of the container memory cache of a pod. Your YAML might resemble the following content:
+* The default alert rules are in the `thanos-ruler-default-rules` config map of the `open-cluster-management-observability` namespace.
+
+- Create a custom recording rule within the `thanos-ruler-custom-rules` config map. Create a recording rule that gives you the ability to get the sum of the container memory cache of a pod. Your YAML might resemble the following content:
 +
 [source,yaml]
 ----
@@ -70,14 +67,14 @@ data:
           expr: sum(container_memory_cache{pod!=""}) BY (pod, container)
 ----
 +
-*Note:* If this is the first new custom rule, it is created immediately. For changes to the ConfigMap, the configuration is automatically reloaded. The configuration is reloaded because of the `config-reload` within the `observability-thanos-ruler` sidecar.
+*Note:* After you make changes to the config map, the configuration automatically reloads. The configuration reloads because of the `config-reload` within the `observability-thanos-ruler` sidecar.
 
-To verify that the alert rules are functioning correctly, launch the Grafana dashboard, navigate to the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if the alert is initiated. 
+- To verify that the alert rules are functioning correctly, go to the Grafana dashboard, select the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if you created the alert. 
 
 [#adding-custom-metrics]
 == Adding custom metrics
 
-Add metrics to the `metrics_list.yaml` file, to be collected from managed clusters. Complete the following steps:
+Add metrics to the `metrics_list.yaml` file to collect from managed clusters. Complete the following steps:
 
 . Before you add a custom metric, verify that `mco observability` is enabled with the following command: 
 +
@@ -93,14 +90,14 @@ oc get mco observability -o yaml
 Observability components are deployed and running
 ----
 
-. Create the `observability-metrics-custom-allowlist` ConfigMap in the `open-cluster-management-observability` namespace with the following command:
+. Create the `observability-metrics-custom-allowlist` config map in the `open-cluster-management-observability` namespace with the following command:
 +
 [source,bash]
 ----
 oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml
 ----
 
-. Add the name of the custom metric to the `metrics_list.yaml` parameter. Your YAML for the ConfigMap might resemble the following content:
+. Add the name of the custom metric to the `metrics_list.yaml` parameter. Your YAML for the config map might resemble the following content:
 +
 [source,yaml]
 ----
@@ -125,17 +122,19 @@ You can use either one or both of the sections.
 +
 For user workload metrics, see the _Adding user workload metrics_ section.
 
-. Verify that data from your custom metric is being collected by querying the metric from the *Explore* page, from the Grafana dashboard. You can also use the custom metrics in your own dashboard.
+. Verify the data collection from your custom metric by querying the metric from the Grafana dashboard *Explore* page. You can also use the custom metrics in your own dashboard.
 
 [#adding-user-workload-metrics]
 === Adding user workload metrics
 
-You can collect {ocp-short} user-defined metrics from workloads in {ocp-short}. You must enable monitoring on your {ocp-short} cluster. See _Enabling monitoring for user-defined projects_.
+Collect {ocp-short} user-defined metrics from workloads in {ocp-short} to display the metrics from your Grafana dashboard. Complete the following steps:
 
+. Enable monitoring on your {ocp-short} cluster. See _Enabling monitoring for user-defined projects_ in the _Additional resources_ section.
++
 If you have a managed cluster with monitoring for user-defined workloads enabled, the user workloads are located in the `test` namespace and generate metrics. These metrics are collected by Prometheus from the {ocp-short} user workload.
 
-Add user workload metrics to the `observability-metrics-custom-allowlist` ConfigMap to collect the metrics in the `test` namespace. View the following example:
-
+. Add user workload metrics to the `observability-metrics-custom-allowlist` config map to collect the metrics in the `test` namespace. View the following example:
++
 [source,yaml]
 ----
 kind: ConfigMap
@@ -148,20 +147,29 @@ data:
     names: <2>
       - sample_metrics
 ----
-
-<1> Enter the key for the ConfigMap data.
-<2> Enter the value of the ConfigMap data in YAML format. The `names` section includes the list of metric names, which you want to collect from the `test` namespace. After you create the ConfigMap, the specified metrics from the target namespace is collected by the observability collector and pushed to the hub cluster.
++
+<1> Enter the key for the config map data.
+<2> Enter the value of the config map data in YAML format. The `names` section includes the list of metric names, which you want to collect from the `test` namespace. After you create the config map, the observability collector collects and pushes the metrics from the target namespace to the hub cluster.
 
 [#removing-default-metrics]
 === Removing default metrics
 
-If you want data to not be collected in your managed cluster for a specific metric, remove the metric from the `observability-metrics-custom-allowlist.yaml` file. When you remove a metric, the metric data is not collected in your managed clusters. As mentioned previously, first verify that `mco observability` is enabled.
+If you do not want to collect data for a specific metric from your managed cluster, remove the metric from the `observability-metrics-custom-allowlist.yaml` file. When you remove a metric, the metric data is not collected from your managed clusters. Complete the following steps to remove a default metric:
 
-Complete the following steps to remove a default metric:
+. Verify that `mco observability` is enabled by using the following command: 
++
+[source,bash]
+----
+oc get mco observability -o yaml
+----
 
-. Add the name of the default metric to the `metrics_list.yaml` parameter with a hyphen `-` at the start of the metric name. For example, `-cluster_infrastructure_provider`.
+. Add the name of the default metric to the `metrics_list.yaml` parameter with a hyphen `-` at the start of the metric name. View the following metric example:
+[source,bash]
+----
+-cluster_infrastructure_provider`
+----
 
-. Create the `observability-metrics-custom-allowlist` ConfigMap in the 
+. Create the `observability-metrics-custom-allowlist` config map in the 
 `open-cluster-management-observability` namespace with the following command: 
 +
 [source,bash]
@@ -169,7 +177,7 @@ Complete the following steps to remove a default metric:
 oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml
 ----
 
-. Verify that the specific metric is not being collected from your managed clusters. When you query the metric from the Grafana dashboard, the metric is not displayed.
+. Verify that the observability service is not collecting the specific metric from your managed clusters. When you query the metric from the Grafana dashboard, the metric is not displayed.
 
 [#adding-advanced-config]
 == Adding advanced configuration for retention
@@ -335,8 +343,7 @@ Complete the following steps to customize certificates for accessing the object 
           insecure_skip_verify: false
 ----
 
-. Add the object store secret in the `open-cluster-management-observability` namespace. The secret must contain the `ca.crt` that you defined in the previous secret example.
-If you want to enable Mutual TLS, you need to provide `public.crt`, and `private.key` in the previous secret. View the following example:
+. Add the object store secret in the `open-cluster-management-observability` namespace. The secret must contain the `ca.crt` that you defined in the previous secret example. If you want to enable mutual TLS, you need to add the `public.crt` and `private.key` keys in the earlier secret. View the following example:
 +
 [source,yaml]
 ----
@@ -354,17 +361,18 @@ If you want to enable Mutual TLS, you need to provide `public.crt`, and `private
 +
 <1> The path to certificates and key values for the `thanos-object-storage` secret. 
 
-. Configure the secret name by updating the `TLSSecretName` parameter in the `MultiClusterObservability` custom resource. View the following example where the secret name is `tls-certs-secret`:
+. Configure the secret name and mount path by updating the `tlsSecretName` and `tlsSecretMountPath` parameters in the `MultiClusterObservability` custom resource. View the following example where the secret name is `tls-certs-secret` and the mount path for the certificates and key value is the directory that is used in the prior example:
 +
 [source,yaml]
 ----
 metricObjectStorage:
-  key: thanos.yaml
-  name: thanos-object-storage
-  tlsSecretName: tls-certs-secret
+      key: thanos.yaml
+      name: thanos-object-storage
+      tlsSecretName: tls-certs-secret
+      tlsSecretMountPath: /etc/minio/certs
 ----
 
-This secret can be mounted in the `tlsSecretMountPath` resource of all components that need to access the object store, and it includes the following components: `receiver`, `store`, `ruler`, `compact`.
+Mount the secret in the `tlsSecretMountPath` resource of all components that need to access the object store, and it includes the following components: `receiver`, `store`, `ruler`, `compact`.
 
 [#configuring-proxy-settings-for-observability-add-ons]
 == Configuring proxy settings for observability add-ons
