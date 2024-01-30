@@ -1,0 +1,198 @@
+[#handling-ingress-non-bm]
+= Handling ingress in a hosted cluster on non bare metal agent machines
+
+Every {ocp-short} cluster has a default application Ingress Controller that is expected to have an external DNS record associated with it. For example, if you create a HyperShift cluster named `example` with the base domain `krnl.es`, you can expect the wildcard domain
+`*.apps.example.krnl.es` to be routable.
+
+You can set up a load balancer and wildcard DNS record for the `*.apps`. The process requires deploying MetalLB, configuring a new load balancer service that routes to the ingress deployment, and assigning a wildcard DNS entry to the load balancer IP address. Complete the following steps:
+
+. Set up MetalLB so that when you create a service of the `LoadBalancer` type, MetalLB adds an external IP address for the service.
+
++
+.. Create a YAML file that contains the configuration for the MetalLB Operator:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: metallb
+  labels:
+    openshift.io/cluster-monitoring: "true"
+  annotations:
+    workload.openshift.io/allowed: management
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: metallb-operator-operatorgroup
+  namespace: metallb
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: metallb-operator
+  namespace: metallb
+spec:
+  channel: "stable"
+  name: metallb-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+----
+
+.. Save the file as `metallb-operator-config.yaml`.
+
+.. Enter the following command to apply the configuration:
+
++
+----
+oc apply -f metallb-operator-config.yaml
+----
+
+. After the Operator is running, create the MetalLB instance:
+
+
+.. Create a YAML file that contains the configuration for the MetalLB instance:
+
++
+[source,yaml]
+----
+apiVersion: metallb.io/v1beta1
+kind: MetalLB
+metadata:
+  name: metallb
+  namespace: metallb
+----
+
+.. Save the file as `metallb-instance-config.yaml`.
+
+.. Create the MetalLB instance by entering this command:
+
++
+----
+oc apply -f metallb-instance-config.yaml
+----
+
+. Configure the MetalLB Operator by creating two resources:
+
++
+** An `IPAddressPool` resource with a single IP address. This IP address must be on the same subnet as the network that the cluster nodes use.
+** A `BGPAdvertisement` resource to advertise the load balancer IP addresses that the `IPAddressPool` resource provides through the BGP protocol.
++
+**Important:** Change the `INGRESS_IP` environment variable to match your environment's address.
+
++
+.. Create a YAML file to contain the configuration:
+
++
+[source,yaml]
+----
+export INGRESS_IP=192.168.122.23
+
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: ingress-public-ip
+  namespace: metallb
+spec:
+  protocol: layer2
+  autoAssign: false
+  addresses:
+    - ${INGRESS_IP}-${INGRESS_IP}
+---
+apiVersion: metallb.io/v1beta1
+kind: BGPAdvertisement
+metadata:
+  name: ingress-public-ip
+  namespace: metallb
+spec:
+  ipAddressPools:
+    - ingress-public-ip
+----
+
++
+.. Save the file as `ipaddresspool-bgpadvertisement-config.yaml`.
+
++
+.. Create the resources by entering the following command:
+
++
+----
+oc apply -f ipaddresspool-bgpadvertisement-config.yaml
+----
+
+. Expose the {ocp-short} Router through MetalLB by following these steps:
+
+.. Create a YAML file to set up the LoadBalancer Service that routes ingress traffic to the ingress deployment:
+
++
+[source,yaml]
+----
+kind: Service
+apiVersion: v1
+metadata:
+  annotations:
+    metallb.universe.tf/address-pool: ingress-public-ip
+  name: metallb-ingress
+  namespace: openshift-ingress
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 443
+  selector:
+    ingresscontroller.operator.openshift.io/deployment-ingresscontroller: default
+  type: LoadBalancer
+----
+
+.. Save the file as `metallb-loadbalancer-service.yaml`.
+
+.. Enter the following command to apply the configuration from the YAML file:
+
++
+----
+oc apply -f metallb-loadbalancer-service.yaml
+----
+
+.. Enter the following command to reach the {ocp-short} console:
+
++
+----
+curl -kI https://console-openshift-console.apps.example.krnl.es
+
+HTTP/1.1 200 OK
+----
+
+.. Check the `clusterversion` and `clusteroperator` values to verify that everything is running. Enter the following command:
+
++
+----
+oc --kubeconfig ${HOSTED_CLUSTER_NAME}.kubeconfig get clusterversion,co
+----
+
++
+See the following example output:
+
++
+----
+NAME                                         VERSION           AVAILABLE   PROGRESSING   SINCE   STATUS
+clusterversion.config.openshift.io/version   4.x.0-multi       True        False         3m32s   Cluster version is 4.x.0-multi
+
+NAME                                                                           VERSION           AVAILABLE   PROGRESSING   DEGRADED   SINCE   MESSAGE
+clusteroperator.config.openshift.io/console                                    4.x.0-multi       True        False         False      3m50s
+clusteroperator.config.openshift.io/csi-snapshot-controller                    4.x.0-multi       True        False         False      25m
+clusteroperator.config.openshift.io/dns                                        4.x.0-multi       True        False         False      23m
+clusteroperator.config.openshift.io/image-registry                             4.x.0-multi       True        False         False      23m
+clusteroperator.config.openshift.io/ingress                                    4.x.0-multi       True        False         False      53m
+----
+
+[#handling-ingress-non-bmadditional-resources]
+== Additional resources
+
+* For more information about MetalLB, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/networking/load-balancing-with-metallb#about-metallb[About MetalLB and the MetalLB Operator] in the {ocp-short} documentation.
