@@ -1,7 +1,11 @@
 [#configuring-submariner]
 = Configuring Submariner
 
-{product-title} provides Submariner as an add-on for your hub cluster. You can find more information about Submariner in the link:https://submariner.io/[Submariner open source project documentation].
+{product-title} provides Submariner as an add-on for your hub cluster. To learn how to configure Submariner, read the following topics:
+
+- <<submariner-prereqs,Prerequisites>>
+- <<submariner-ports,Submariner ports table>>
+- <<submariner-globalnet,Globalnet>>
 
 [#submariner-prereqs]
 == Prerequisites
@@ -9,7 +13,7 @@
 Ensure that you have the following prerequisites before using Submariner:
 
 * A credential to access the hub cluster with `cluster-admin` permissions.
-* IP connectivity must be configured between the gateway nodes. When connecting two clusters, at least one of the clusters must be accessible to the gateway node using its public or private IP address designated to the gateway node. See link:https://submariner.io/operations/nat-traversal[Submariner NAT Traversal] for more information.
+* IP connectivity must be configured between the gateway nodes. When connecting two clusters, at least one of the clusters must be accessible to the gateway node by using its public or private IP address designated to the gateway node. See _Submariner NAT Traversal_ for more information.
 * If you are using OVN Kubernetes, clusters must be at {ocp} version 4.12 or later. 
 * If your {ocp} clusters use OpenShift SDN CNI, the firewall configuration across all nodes in each of the managed clusters must allow 4800/UDP in both directions.
 * The firewall configuration must allow 4500/UDP and 4490/UDP on the gateway nodes for establishing tunnels between the managed clusters.
@@ -26,7 +30,7 @@ Ensure that you have the following prerequisites before using Submariner:
 [#submariner-ports]
 == Submariner ports table
 
-View the following table to see which Submariner ports you need to enable:
+View the following table to see the Submariner ports that you must enable:
 
 |===
 | Name | Default value | Customizable | Optional or required
@@ -47,22 +51,27 @@ View the following table to see which Submariner ports you need to enable:
 | Required
 |===
 
-See the link:https://submariner.io/getting-started/#prerequisites[Submariner upstream prerequisites documentation] for more detailed information about the prerequisites.
-
 [#submariner-globalnet]
 == Globalnet
 
-Globalnet is a feature included with the Submariner add-on that supports connectivity between clusters with overlapping CIDRs. Globalnet is a cluster set wide configuration, and can be selected when the first managed cluster is added to the cluster set. When Globalnet is enabled, each managed cluster is allocated a global CIDR from the virtual Global Private Network. The global CIDR is used for supporting inter-cluster communication.
+Globalnet is a Submariner add-on feature that allows you to connect clusters with overlapping Classless Inter-Domain Routings (CIDRs), without changing the CIDRs on existing clusters. Globalnet is a cluster set-wide configuration that you can select when you add the first managed cluster to a cluster set.
+
+If you enable Globalnet, every managed cluster receives a global CIDR from the virtual Global Private Network, which is used to facilitate inter-cluster communication.
 
 *Important:* You must enable Globalnet when clusters in a cluster set might have overlapping CIDRs.
 
-After Submariner add-ons are installed on any clusters in the set, you cannot change the Globalnet setting. When using the console, the `ClusterAdmin` can enable Globalnet for a cluster set by selecting the option *Enable Globalnet* when enabling the Submariner add-on for clusters in the cluster set. After enabling Globalnet you cannot disable it, unless you remove Submariner.
+The `ClusterAdmin` can enable Globalnet in the console by selecting the option *Enable Globalnet* when enabling the Submariner add-on for clusters in the cluster set. If you want to disable Globalnet after enabling it, you must first remove all managed clusters from your cluster set.
+
+[#submariner-globalnet-enable]
+=== Enabling Globalnet by creating the _submariner-broker_ object
 
 When using the {product-title-short} APIs, the `ClusterAdmin` can enable Globalnet by creating a `submariner-broker` object in the `<ManagedClusterSet>-broker` namespace. 
 
-The `ClusterAdmin` role has the required permissions to create this object in the broker namespace. The `ManagedClusterSetAdmin` role, which is sometimes created to act as a proxy administrator for the cluster set, does not have the required permissions. To provide the required permissions, the `ClusterAdmin` must associate the role permissions for the `access-to-brokers-submariner-crd` to the `ManagedClusterSetAdmin` user.
+The `ClusterAdmin` role has the required permissions to create the `submariner-broker` object in the broker namespace. The `ManagedClusterSetAdmin` role, which is sometimes created to act as a proxy administrator for the cluster set, does not have the required permissions.
 
-Complete the following steps to create the `submariner-broker` object:
+To provide the required permissions, the `ClusterAdmin` must associate the role permissions for the `access-to-brokers-submariner-crd` to the `ManagedClusterSetAdmin` user.
+
+Complete the following steps to enable Globalnet by creating the `submariner-broker` object:
 
 . Retrieve the `<broker-namespace>` by running the following command:
 +
@@ -77,22 +86,41 @@ oc get ManagedClusterSet <cluster-set-name> -o jsonpath="{.metadata.annotations[
 apiVersion: submariner.io/v1alpha1
 kind: Broker
 metadata:
-  name: submariner-broker
-  namespace: <broker-namespace>
+  name: submariner-broker <1>
+  namespace: broker-namespace <2>
 spec:
-  globalnetEnabled: <true-or-false>
+  globalnetEnabled: true-or-false <3>
 ----
 +
-Replace `broker-namespace` with the name of your broker namespace. 
-+
-Replace `true-or-false` with `true` to enable Globalnet. 
-+
-*Note:* The `metadata` `name` parameter must be `submariner-broker`.
+<1> The name must be `submariner-broker`.
+<2> Replace `broker-namespace` with the name of your broker namespace.
+<3> Replace `true-or-false` with `true` to enable Globalnet.
 
-. Apply the file to your YAML file by entering the following command:
+. Apply the file by running the following command:
 +
 ----
 oc apply -f submariner-broker.yaml
-----  
+----
 
-For more information about Globalnet, see link:https://submariner.io/getting-started/architecture/globalnet/[Globalnet controller] in the Submariner documentation.
+[#subm-globalnet-numperip]
+=== Configuring the number of global IPs
+
+You can assign a configurable number of global IPs by changing the value of the `numberOfIPs` field in the `ClusterGlobalEgressIP` resource. The default value is 8. See the following example:
+
+[source,yaml]
+----
+apiVersion: submariner.io/v1
+kind: ClusterGlobalEgressIP
+metadata:
+  name: cluster-egress.submariner.io
+spec:
+  numberOfIPs: 8
+----
+
+[#subm-globalnet-resources]
+=== Additional resources
+
+- See the link:https://submariner.io/[Submariner documentation] to learn more about Submariner
+- See link:https://submariner.io/operations/nat-traversal[Submariner NAT Traversal] for more information about IP connectivity between gateway nodes.
+- See the link:https://submariner.io/getting-started/#prerequisites[Submariner prerequisites documentation] for more detailed information about the prerequisites.
+- See link:https://submariner.io/getting-started/architecture/globalnet/[Globalnet controller] in the Submariner documentation for more information about Globalnet.
