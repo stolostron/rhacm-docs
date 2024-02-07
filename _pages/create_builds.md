@@ -19,9 +19,11 @@ You must have the following:
 
 Complete the following steps:
 
-1. Create a new branch in the [rhacm-docs GitHub repository](https://github.com/open-cluster-management/rhacm-docs) for the new version. For example, 2.9_stage. For more information, see [Creating a branch](https://github.com/open-cluster-management/rhacm-docs/blob/gh-pages/_pages/arch_branching.md).
+1. Create a new branch in the [rhacm-docs GitHub repository](https://github.com/open-cluster-management/rhacm-docs) for the new version. For example, 2.9_stage. For more information, see [Branch strategy](branch_strategy.md).
 
-2. Navigate to the `modules/common-attributes.adoc` file that is in your _new_ branch to change the version for the `:product-version:` field. This value is used during the build process, and must be updated to your new version for the build to work. 
+2. Navigate to the `modules/common-attributes.adoc` file that is in your _new_ branch to change the version for the `:product-version:` field.
+
+      **Important:** The build process requires the `:product-version:` value. You must update the field to the new version for the build to work.
 
 3. Create a new branch for the new version in [GitLab](https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/tree/2.7), if it is not already there. Ex. `2.7`. You can create it from the branch from the previous version. 
 
@@ -29,7 +31,7 @@ Complete the following steps:
    2. Select **+** > **New branch**. 
    3. Name it the new version number. For example, name the branch _2.7_. **Note**: Do not include the `_stage` in this branch name, as you did with the GitHub branch.  
    
-   **Alternatively**: You can run the build script with the new version number to create a branch in GitLab. For more information about running the build, see [Build and publish](https://github.com/open-cluster-management/rhacm-docs/blob/gh-pages/_pages/arch_builds.md).
+   **Alternatively**: You can run the build script with the new version number to create a branch in GitLab. For more information about running the build, see [Refreshing builds](refresh_builds.md).
 
 4. Log in to Pantheon.
 
@@ -51,7 +53,7 @@ Complete the following steps:
     1. Click the drop-down arrow in the _Stage_ row of a specific book.
     2. Click **Edit configuration**.
     3. Set the version of the configuration to your new version.
-    4. Change the default setting for each book from **Use default content directory** to the actual name of your folder in _Content Directory_.
+    4. Add the actual name of your folder in _Content Directory_. You might need to disable the default settings before the _Content Directory_ field appears.
     5. Repeat these steps for each book in your Pantheon title to reference the new version and correct directory.
 
 7. Disable the preview feature by clicking the drop-down arrow in the _Preview_ row. Select **Disable Job**. We don't use this build.
