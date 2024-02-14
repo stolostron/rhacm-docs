@@ -1,24 +1,63 @@
 [#policy-controller-advanced-config]
 = Policy controller advanced configuration 
 
-You can customize policy controller configurations on your managed clusters by using the `ManagedClusterAddOn` custom resources. The following `ManagedClusterAddOns` configure the policy framework, `governance-policy-framework`, `config-policy-controller`, `cert-policy-controller`, and `iam-policy-controller`.
+You can customize policy controller configurations on your managed clusters by using the `ManagedClusterAddOn` custom resources. The following `ManagedClusterAddOns` configure the policy framework, Kubernetes configuration policy controller, Certificate policy controller, and IAM policy controller.
 
 *Required access:* Cluster administrator
 
-- <<configure-concurrency,Configure the concurrency>>
+- <<configure-gov-framework,Configure the concurrency of the governance framework>>
+- <<configure-concurrency,Configure the concurrency of the configuration policy controller>>
 - <<configure-qps-rates,Configure the rate of requests to the API server>>
 - <<configure-debug-log,Configure debug log>>
 - <<gov-metric,Governance metric>>
 - <<verify-configuration-changes,Verify configuration changes>>
 
-[#configure-concurrency] 
-== Configure the concurrency
+[#configure-gov-framework]
+== Configure the concurrency of the governance framework
 
-You can configure the concurrency of the configuration policy controller for each managed cluster to change how many configuration policies it can evaluate at the same time. To change the default value of `2`, set the `policy-evaluation-concurrency` annotation with a non-zero integer within quotation marks. Then set the value on the `ManagedClusterAddOn` object name to `config-policy-controller` in the managed cluster namespace of the hub cluster.
+Configure the concurrency of the governance framework for each managed cluster. To change the default value of `2`, set the `policy-evaluation-concurrency` annotation with a nonzero integer within quotation marks. Then set the value on the `ManagedClusterAddOn` object name to `governance-policy-framework` in the managed cluster namespace of the hub cluster.
+
+See the following YAML example where the concurrency is set to `2` on the managed cluster named `cluster1`:
+
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: governance-policy-framework
+  namespace: cluster1
+  annotations:
+    policy-evaluation-concurrency: "2"
+spec:
+  installNamespace: open-cluster-management-agent-addon
+----
+
+To set the `client-qps` and `client-burst` annotations, update the `ManagedClusterAddOn` resource and define the parameters.
+
+See the following YAML example where the queries for each second is set to `30` and the burst is set to `45` on the managed cluster called `cluster1`:
+
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: governance-policy-framework
+  namespace: cluster1
+  annotations:
+    client-qps: "30"
+    client-burst: "45"
+spec:
+  installNamespace: open-cluster-management-agent-addon
+----
+
+[#configure-concurrency] 
+== Configure the concurrency of the configuration policy controller
+
+You can configure the concurrency of the configuration policy controller for each managed cluster to change how many configuration policies it can evaluate at the same time. To change the default value of `2`, set the `policy-evaluation-concurrency` annotation with a nonzero integer within quotation marks. Then set the value on the `ManagedClusterAddOn` object name to `config-policy-controller` in the managed cluster namespace of the hub cluster.
 
 *Note:* Increased concurrency values increase CPU and memory utilization on the `config-policy-controller` pod, Kubernetes API server, and OpenShift API server.
 
-In the following YAML example, concurrency is set to `5` on the managed cluster that is named `cluster1`:
+See the following YAML example where the concurrency is set to `5` on the managed cluster named `cluster1`:
 
 [source,yaml]
 ----
@@ -38,9 +77,9 @@ spec:
 
 Configure the rate of requests to the API server that the configuration policy controller makes on each managed cluster. An increased rate improves the responsiveness of the configuration policy controller, which also increases the CPU and memory utilization of the Kubernetes API server and OpenShift API server. By default, the rate of requests scales with the `policy-evaluation-concurrency` setting and is set to `30` queries for each second (QPS), with a `45` burst value, representing a higher number of requests over short periods of time.
 
-You can configure the rate and burst by setting the `client-qps` and `client-burst` annotations with non-zero integers within quotation marks. You can set the value on the `ManagedClusterAddOn` object name to `config-policy-controller` in the managed cluster namespace of the hub cluster.
+You can configure the rate and burst by setting the `client-qps` and `client-burst` annotations with nonzero integers within quotation marks. You can set the value on the `ManagedClusterAddOn` object name to `config-policy-controller` in the managed cluster namespace of the hub cluster.
 
-In the following YAML example, the queries for each second is set to `20` and the burst is set to `100` on the managed cluster called `cluster1`:
+See the following YAML example where the queries for each second is set to `20` and the burst is set to `100` on the managed cluster called `cluster1`:
 
 [source,yaml]
 ----
@@ -93,10 +132,9 @@ The policy framework exposes metrics that show policy distribution and complianc
 [#metric-policy-governance-info]
 === Metric: policy_governance_info
 
-The `policy_governance_info` is collected by the {ocp-short} monitoring feature, and some aggregate data is collected by {product-title-short} observability, if it is enabled.
+The {ocp-short} monitoring component collects the `policy_governance_info` metric. If you enable observability, the component collects some aggregate data.
 
-*Note:* If observability is enabled, you can enter a query for the metric from the Grafana _Explore_ page. 
-When you create a policy, you are creating a _root_ policy. The framework watches for root policies, as well as `PlacementRules` (deprecated) or `Placement`, and `PlacementBindings` to determine where to create _propagated_ policies in order to distribute the policy to managed clusters.
+*Note:* If you enable observability, enter a query for the metric from the Grafana _Explore_ page. When you create a policy, you are creating a _root_ policy. The framework watches for root policies, `Placement` resources, and `PlacementBindings` resources to for information about where to create _propagated_ policies, to distribute the policy to managed clusters.
 
 For both root and propagated policies, a metric of `0` is recorded if the policy is compliant, and `1` if it is non-compliant.
 
@@ -104,12 +142,12 @@ The `policy_governance_info` metric uses the following labels:
 
 - `type`: The label values are `root` or `propagated`.
 - `policy`: The name of the associated root policy.
-- `policy_namespace`: The namespace on the hub cluster where the root policy was defined.
+- `policy_namespace`: The namespace on the hub cluster where the root policy is defined.
 - `cluster_namespace`: The namespace for the cluster where the policy is distributed.
 
 These labels and values enable queries that can show us many things happening in the cluster that might be difficult to track.
 
-*Note:* If the metrics are not needed, and there are any concerns about performance or security, this feature can be disabled. Set the `DISABLE_REPORT_METRICS` environment variable to `true` in the propagator deployment. You can also add `policy_governance_info` metric to the observability allowlist as a custom metric. See link:../observability/customize_observability.adoc#adding-custom-metrics[Adding custom metrics] for more details.
+*Note:* If you do not need the metrics, and you have any concerns about performance or security, you can disable the metric collection. Set the `DISABLE_REPORT_METRICS` environment variable to `true` in the propagator deployment. You can also add `policy_governance_info` metric to the observability allowlist as a custom metric. See link:../observability/customize_observability.adoc#adding-custom-metrics[Adding custom metrics] for more details.
 
 [#metric-config-policies-evaluation-duration]
 === Metric: _config_policies_evaluation_duration_seconds_
@@ -131,7 +169,7 @@ The `config-policy-controller` pod running on managed clusters in the `open-clus
 [#verify-configuration-changes]
 == Verify configuration changes
 
-When the new configuration is applied by the controller, the `ManifestApplied` parameter is updated in the `ManagedClusterAddOn`. That condition timestamp can be used to verify the configuration correctly. For example, this command can verify when the `cert-policy-controller` on the `local-cluster` was updated:
+When you apply the new configuration with the controller, the `ManifestApplied` parameter is updated in the `ManagedClusterAddOn`. That condition timestamp helps verify the configuration correctly. For example, this command can verify when the `cert-policy-controller` on the `local-cluster` was updated:
 
 ----
 oc get -n local-cluster managedclusteraddon cert-policy-controller | grep -B4 'type: ManifestApplied'
