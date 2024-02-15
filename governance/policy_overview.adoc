@@ -5,11 +5,12 @@ Use the {product-title} security policy framework to create and manage policies.
 
 Each {product-title-short} policy can have at least one or more templates. For more details about the policy elements, view the _Policy YAML table_ section on this page.
 
-The policy requires a `Placement` resource that defines the clusters that the policy document is applied to, and a `PlacementBinding` resource that binds the {product-title} policy. For more on how to define a `Placement` resource see link:../clusters/cluster_lifecycle/placement_overview.adoc#placement-overview[Placement overview] in the Cluster lifecycle documentation.
+The policy requires a `Placement` resource that defines the clusters that the policy document is applied to, and a `PlacementBinding` resource that binds the {product-title} policy. For more on how to define a `Placement` resource see link:../cluster_lifecycle/placement_overview.adoc#placement-overview[Placement overview] in the Cluster lifecycle documentation.
 
 *Important:*
 
 * You must create the `PlacementBinding` to bind your policy with a `Placement` in order to propagate the policy to the managed clusters.
+* In order to use a `Placement` resource, a `ManagedClusterSet` resource must be bound to the namespace of the `Placement` resource with a `ManagedClusterSetBinding` resource. Refer to link:../cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource] for additional details.
 
 *Best practice:* Use the command line interface (CLI) to make updates to the policies when you use the `Placement` resource.
 
@@ -24,7 +25,6 @@ Learn more details about the policy components in the following sections:
 * <<policy-yaml-structure,Policy YAML structure>>
 * <<policy-yaml-table,Policy YAML table>>
 * <<policy-sample-file,Policy sample file>>
-* <<placement-yaml-sample-file,Placement YAML sample file>>
 
 [#policy-yaml-structure]
 == Policy YAML structure
@@ -76,16 +76,16 @@ subjects:
   kind:
   apiGroup:
 ---
-apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
 metadata:
   name:
 spec:
-  clusterConditions:
-  - type:
-  clusterLabels:
-    matchLabels:
-      cloud:
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchLabels:
+        matchExpressions:
 ----
 
 [#policy-yaml-table]
@@ -213,61 +213,23 @@ metadata:
   name: binding-policy-role
 placementRef:
   name: placement-policy-role
-  kind: PlacementRule
-  apiGroup: apps.open-cluster-management.io
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
 subjects:
 - name: policy-role
   kind: Policy
   apiGroup: policy.open-cluster-management.io
 ---
-apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
 metadata:
   name: placement-policy-role
 spec:
-  clusterConditions:
-  - status: "True"
-    type: ManagedClusterConditionAvailable
-  clusterSelector:
-    matchExpressions:
-      - {key: environment, operator: In, values: ["dev"]}
-----
-
-[#placement-yaml-sample-file]
-== Placement YAML sample file
-
-The `PlacementBinding` and `Placement` resources can be combined with the previous policy example to deploy the policy using the cluster `Placement` API instead of the `PlacementRule` (Deprecated) API.
-
-[source,yaml]
-----
---- 
-apiVersion: policy.open-cluster-management.io/v1 
-kind: PlacementBinding 
-metadata: 
-  name: binding-policy-role
-bindingOverrides:
-  remediationAction: null
-subFilter: null
-placementRef: 
-  name: placement-policy-role 
-  kind: Placement 
-  apiGroup: cluster.open-cluster-management.io 
-subjects: 
-- name: policy-role 
-  kind: Policy 
-  apiGroup: policy.open-cluster-management.io 
---- 
-//Depends on if governance would like to use v1beta1
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: Placement 
-metadata: 
-  name: placement-policy-role 
-spec:
-  predicates: 
-  - requiredClusterSelector: 
-      labelSelector: 
-        matchExpressions: 
-          - {key: environment, operator: In, values: ["dev"]}
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - {key: environment, operator: In, values: ["dev"]}
 ----
 
 - Refer to xref:../governance/policy_controllers.adoc#policy-controllers[Policy controllers].
