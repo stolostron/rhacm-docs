@@ -112,3 +112,56 @@ export SERVICE_PORT=9091
 export SERVICE_PATH="api/v1/query?query=machine_cpu_sockets"
 curl --cacert hub-ca.crt $NEW_SERVER/api/v1/namespaces/$SERVICE_NAMESPACE/services/$SERVICE_NAME:$SERVICE_PORT/proxy-service/$SERVICE_PATH -H "Authorization: Bearer $PROMETHEUS_TOKEN"
 ----
+
+[#cluster-proxy-addon-settings]
+== Configuring proxy settings for cluster proxy add-ons
+
+You can configure the proxy settings for cluster proxy add-ons to allow a managed cluster to communicate with the hub cluster through a HTTP and HTTPS proxy server. You might need to configure the proxy settings if the cluster proxy add-on agent requires access to the hub cluster through the proxy server.
+
+To configure the proxy settings for the cluster proxy add-on, complete the following steps:
+
+. Create an `AddOnDeploymentConfig` resource on your hub cluster and add the `spec.proxyConfig` parameter. See the following example:
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: <1>
+  namespace: <2>
+spec:
+  agentInstallNamespace: open-cluster-managment-addon-observability
+  proxyConfig:
+  httpsProxy: "http://<username>:<password>@<ip>:<port>" <3>
+  noProxy: ".cluster.local,.svc,172.30.0.1" <4>
+  caBundle: <5>
+----
+<1> Add your add-on deployment config name.
+<2> Add your managed cluster name.
+<3> Specify either a HTTP proxy or a HTTPS proxy.
+<4> Add the IP address of the `kube-apiserver`. To get the IP address, run following command on your managed cluster: `oc -n default describe svc kubernetes | grep IP:`
+<5> If you specify a HTTPS proxy in the `httpsProxy` field, set the proxy server CA bundle.
+
+. Update the `ManagedClusterAddOn` resource by referencing the `AddOnDeploymentConfig` resource that you created. See the following example:
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: cluster-proxy
+  namespace: <1>
+spec:
+installNamespace: open-cluster-managment-addon
+configs:
+  group: addon.open-cluster-management.io
+  resource: AddonDeploymentConfig
+  name: <2>
+  namespace: <3>
+----
+
+<1> Add your managed cluster name.
+<2> Add your add-on deployment config name.
+<3> Add your managed cluster name.
+
+. Verify the proxy settings by checking if the cluster proxy agent pod in the `open-cluster-managment-addon` namespace has `HTTPS_PROXY` or `NO_PROXY` environment variables on the managed cluster.

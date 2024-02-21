@@ -17,13 +17,9 @@ You can create a security policy from the command line interface (CLI) or from t
 
 *Required access:* Cluster administrator
 
-*Important:* You must define a placement and placement binding to apply your policy to a specific cluster. Enter a valid value for the _Cluster selector_ field to define a `Placement` and `PlacementBinding`.
-
-See link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#resources-that-support-set-based-requirements[Resources that support support set-based requirements] in the Kubernetes documentation for a valid expression. View the definitions of the objects that are required for your {product-title-short} policy:
-
-* _PlacementBinding_: Binds the placement.
-
-View more descriptions of the policy YAML files in the xref:../governance/policy_overview.adoc#policy-overview[Policy overview]. 
+*Important:*
+* You must define a placement and placement binding to apply your policy to a specific cluster. The `PlacementBinding` resource binds the placement. Enter a valid value for the cluster _Label selector_ field to define a `Placement` and `PlacementBinding` resource.
+* In order to use a `Placement` resource, a `ManagedClusterSet` resource must be bound to the namespace of the `Placement` resource with a `ManagedClusterSetBinding` resource. Refer to link:../cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource] for additional details.  
 
 [#creating-a-security-policy-from-the-command-line-interface]
 === Creating a security policy from the command line interface
@@ -75,7 +71,7 @@ spec:
                   verbs: ["get", "list", "watch", "create", "delete","patch"]
 ----
 
-. Define a `PlacementBinding` to bind your policy to your `PlacementRule`(Deprecated). Your `PlacementBinding` might resemble the following YAML sample:
+. Define a `PlacementBinding` resource to bind your policy to your `Placement` resource. Your `PlacementBinding` resource might resemble the following YAML sample:
 +
 [source,yaml]
 ----
@@ -85,8 +81,8 @@ metadata:
   name: binding1
 placementRef:
   name: placement1
-  apiGroup: apps.open-cluster-management.io
-  kind: PlacementRule
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
 subjects:
 - name: policy1
   apiGroup: policy.open-cluster-management.io
@@ -157,33 +153,34 @@ See the following `PlacementBinding` example:
 +
 [source,yaml]
 ----
-apiVersion: apps.open-cluster-management.io/v1
+apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: binding-pod
 placementRef:
   name: placement-pod
-  kind: PlacementRule
-  apiGroup: apps.open-cluster-management.io
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
 subjects:
 - name: policy-pod
   kind: Policy
   apiGroup: policy.open-cluster-management.io
 ----
 +
-See the following `PlacementRule` example:
+See the following `Placement` example:
 +
 [source,yaml]
 ----
-apiVersion: apps.open-cluster-management.io/v1
- kind: PlacementRule
+apiVersion: cluster.open-cluster-management.io/v1beta1
+ kind: Placement
  metadata:
    name: placement-pod
 spec:
-  clusterConditions: []
-  clusterSelector:
-     matchLabels:
-       cloud: "IBM"
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchLabels:
+          cloud: "IBM"
 ----
 
 . *Optional:* Add a description for your policy. 
@@ -222,7 +219,7 @@ oc apply -f <policyset-filename>
 
 . Add the details for your policy set and select the *Submit* button.
 
-. View the stable `Policysets`, which require the Policy Generator for deployment, link:https://github.com/open-cluster-management/policy-collection/tree/main/policygenerator/policy-sets/stable[PolicySets-- Stable].
+Your policy is listed from the policy table. 
 
 [#updating-security-policies]
 == Updating security policies
@@ -247,7 +244,7 @@ oc edit policysets <your-policyset-name>
 oc apply -f <your-added-policy.yaml>
 ----
 
-`PlacementBinding` and `PlacementRule` are both created. 
+`PlacementBinding` and `Placement` are both created. 
 
 *Note:* If you delete the placement binding, the policy is still placed by the policy set.
 
@@ -298,9 +295,6 @@ Click *Remove*. From the _Remove policy_ dialog box, click *Remove policy*.
 
 . Click the *Delete* button.
 
-To manage other policies, see xref:../governance/create_policy.adoc#managing-security-policies[Managing security policies] for more information.
-Refer to xref:../governance/grc_intro.adoc#governance[Governance] for more topics about policies.
-
 [#cleaning-up-resources-from-policies]
 == Cleaning up resources that are created by policies
 
@@ -314,10 +308,19 @@ View the following descriptions of the values that can be used for the parameter
 
 You can set the value directly in the YAML file as you create a policy from the command line. 
 
-From the console, you can select the value in the _Prune Object Behavior_ section of the the _Policy templates_ step.
+From the console, you can select the value in the _Prune Object Behavior_ section of the _Policy templates_ step.
 
 *Notes:*
 
 - If a policy that installs an operator has the `pruneObjectBehavior` parameter defined, then additional clean up is needed to complete the operator uninstall. You might need to delete the operator `ClusterServiceVersion` object as part of this cleanup.
 
 - As you disable the `config-policy-addon` resource on the managed cluster, the `pruneObjbectBehavior` is ignored. To automatically clean up the related resources on the policies, you must remove the policies from the managed cluster before the add-on is disabled.
+
+[#additional-res-create-pol]
+== Additional resources
+
+* View more descriptions of the policy YAML files in the xref:../governance/policy_overview.adoc#policy-overview[Policy overview].
+* See link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#resources-that-support-set-based-requirements[Resources that support support set-based requirements] in the Kubernetes documentation for a valid expression.
+* View the stable `Policysets`, which require the Policy Generator for deployment, link:https://github.com/open-cluster-management/policy-collection/tree/main/policygenerator/policy-sets/stable[PolicySets-- Stable].
+* Refer to xref:../governance/grc_intro.adoc#governance[Governance] for more topics about policies.
+
