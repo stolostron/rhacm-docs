@@ -211,10 +211,14 @@ metadata:
 You might not be able to register a managed cluster on your {mce-short} hub cluster if intermediate components exist between the managed cluster and the hub cluster. Example intermediate components include a Virtual IP, load balancer, reverse proxy, or API gateway. If you have an intermediate component, you must use a custom server URL and CA bundle for the hub cluster API when importing a managed cluster.
 
 [#custom-server-url-ca-prereq]
-=== Prerequisite
+=== Prerequisites
 
 * The intermediate component is configured so that the hub cluster API server is accessible for the managed cluster. See _Adding API server certificates_ for more information.
-* Alternatively, you can bridge the SSL connections between the managed cluster and the hub cluster API server to pass the authentication information from the original requests the hub cluster API server back end. See _Optional: Bridging SSL between the managed cluster and hub cluster API server_ for more information.
+* If the intermediate component terminates the SSL connections between the managed cluster and hub cluster API server, you must bridge the SSL connections and pass the authentication information from the original requests to the back end of the hub cluster API server. You can use the User Impersonation feature of the Kubernetes API server to bridge the SSL connections.
++
+The intermediate component extracts the client certificate from the original requests, adds Common Name (CN) and Organization (O) of the certificate subject as impersonation headers, and then forwards the modified impersonation requests to the back end of the hub cluster API server.
++
+** **Note:** If you bridge the SSL connections, the cluster proxy add-on does not work.
 
 [#custom-server-url-ca-steps]
 === Customizing the server URL and hub cluster CA bundle
@@ -257,58 +261,6 @@ spec:
 <2> Add your cluster name.
 
 *Note:*  If you use the console, you might need to enable the YAML view to add the annotation to the `ManagedCluster` resource.
-
-[#ssl-bridge-managed-hub]
-=== Optional: Bridging SSL between the managed cluster and hub cluster API server
-
-If an intermediate component stops the SSL connections between the managed cluster and hub cluster API server, you must bridge the SSL connections and pass the authentication information from the original requests to the back end of the hub cluster API server.
-
-You can use the User Impersonation feature of the Kubernetes API server to bridge the SSL connections. The intermediate component forwards the original requests from {product-title-short} agents to the hub cluster Kube API server as impersonation requests by adding impersonation headers.
-
-*Note:* If you bridge the SSL connections, the cluster proxy add-on does not work.
-
-Complete the following steps to bridge the SSL connections:
-
-. Enable the client certificate authentication on the intermediate component for the incoming requests.
-
-. Fetch the CA certificates on the hub cluster by running the following command. The CA certificates used to verify the agent client certificates by the intermediate component must include the client CA certificates of the hub cluster API server:
-+
-----
-oc -n openshift-kube-apiserver get cm client-ca -o jsonpath='{.data.ca-bundle\.crt}'
-----
-+
-After the agent client authentication completes, the intermediate component extracts the subject of the agent client certificates and adds the following impersonation headers into the original requests:
-+
-- An Impersonate-User header with the value of Common Name (CN) in the certificate subject.
-- One or multiple Impersonate-Group headers with the value of Organization (O) in the certificate subject. If the Organization has multiple values, one header is added for each value.
-+
-The intermediate component then forwards the modified impersonation requests to the hub cluster API server back end. The requests first authenticate as the requesting user with either a `ServiceAccount` token or another client certificate, and then switch to the impersonated user.
-
-. Make sure that the requesting user has user impersonation permissions on the hub cluster. See the following example:
-+
-[source,yaml]
-----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: impersonator
-rules:
-- apiGroups: [""]
-  resources: ["users", "groups", "serviceaccounts"]
-  verbs: ["impersonate"]
-----
-
-. Fetch the default CA certificate by running the following command. The intermediate component needs the CA certificate of the hub API server in the CA bundle when sending the impersonation requests to the hub cluster API server back end:
-+
-----
-oc -n default get cm kube-root-ca.crt -o jsonpath='{.data.ca\.crt}'
-----
-
-. If a custom API certificate is configured, fetch the certificate by running the following command:
-+
-----
-oc get APIServer cluster -o jsonpath='{.spec.servingCerts.namedCertificates}'
-----
 
 [#add-resources-adv-cluster]
 == Additional resources
