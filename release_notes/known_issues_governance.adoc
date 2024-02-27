@@ -40,12 +40,6 @@ When you use an external identity provider to log in to {product-title-short}, y
 
 You must log out of the external identity provider before you attempt to log out of {product-title-short}. 
 
-[#gatekeeper-upgrade]
-== Gatekeeper operator installation fails
-//2.4:16673
-
-When you install the gatekeeper operator on {ocp} version 4.9, the installation fails. Before you upgrade {ocp-short} to version 4.9.0., you must upgrade the gatekeeper operator to version 0.2.0. See link:../governance/create_gatekeeper.adoc#upgrading-gatekeeper-gatekeeper-operator[Upgrading gatekeeper and the gatekeeper operator] for more information.
-
 [#config-policy-stuck]
 == Configuration policy listed complaint when namespace is stuck in _Terminating_ state
 //2.2:20715
@@ -86,7 +80,6 @@ The configuration policy resources are automatically removed from the cluster an
 [#pruneobjbeh-not-working-existing-config-policy]
 == _pruneObjectBehavior_ does not work when modifying existing configuration policy
 //2.6:25261
-//2.7+2.8:5939
 
 When you modify an existing configuration policy, `pruneObjectBehavior` does not work. View the following reasons why `pruneObjectBehavior` might not work:
 
@@ -106,10 +99,6 @@ To resolve the issue, disable the policy and compare the differences between `ob
 - The `objectDefinition` in the `ConfigurationPolicy` does not match because of Kubernetes processing the object when the policy is applied.
 +
 To resolve the issue, disable the policy and compare the differences between `objectDefinition` in the policy and the object on the managed cluster. If the keys are different or missing, Kubernetes might have processed the keys before applying them to the object, such as removing keys containing default or empty values.
-+
-*Note:* If `pruneObjectBehavior` is set to something other than `None`, disabling the policy causes the objects to be cleaned up. In this case, set `pruneObjectBehavior` to `None` so that the objects exist after the policy is disabled.
-
-For example, the `stringData` map in a `Secret` resource is converted by Kubernetes to `data` with `base64` encoded values. Instead of using `stringData`, use `data` directly with `base64` encoded values instead of strings.
 
 [#psp-not-supported-ocp]
 == Pod security policies not supported on {ocp-short} 4.12 and later
@@ -132,6 +121,7 @@ When you create a policy with identical policy template names, you receive incon
 When you disable governance deployments in the `MultiClusterHub` object, the deployments are not cleaned without errors. Complete the following steps to disable governance so that the deployments also get cleaned up:
 
 . Disable the `policyController` in the `KlusterletAddonConfig` for the managed cluster. If you do this for all managed clusters, run the following command:
+
 +
 [source,bash]
 ----
@@ -141,6 +131,7 @@ done
 ----
 
 . For local clusters only: Delete the `ManifestWork` for the local cluster and remove the finalizer on the `ManagedClusterAddon` if the `governance-policy-framework-uninstall` pod of a local cluster is in `CrashLoopBackOff`. Run the following commands:
+
 +
 [source,bash]
 ----
@@ -149,6 +140,7 @@ oc patch managedclusteraddon -n local-cluster governance-policy-framework --type
 ----
 
 . Disable governance globally, if required, by setting the `grc` element in the `spec.overrides` section to `false` in the `MultiClusterHub` object. Run the following command:
+
 +
 [source,bash]
 ----
@@ -156,6 +148,7 @@ oc edit multiclusterhub <name> -n <namespace>
 ----
 
 . For local clusters only: If there are any local cluster policies, you can delete the policies by running the following command:
+
 +
 [source,bash]
 ----
@@ -163,6 +156,7 @@ oc delete policies -n local-cluster --all
 ----
 
 . To re-enable governance in the `KlusterletAddonConfig`, re-enable the `grc` element of the `spec.overrides` section in the `MultiClusterHub`. Run the following command:
+
 +
 [source,bash]
 ----
@@ -172,35 +166,9 @@ done
 ----
 
 . If the deployments are unsuccessful, the `governance-policy-addon-controller` might have a stale lease. Delete the lease by using the following command:
+
 +
 [source,bash]
 ----
 oc delete lease governance-policy-addon-controller-lock -n <namespace> 
-----
-
-[#templating-errors]
-== Objects are deleted due to templating errors
-//2.8:ACM-5855
-
-When there are templating errors, such as incorrect syntax in a configuration policy, objects are deleted. Recreate your deleted object with the correct syntax. 
-
-
-[#duplicate-ansible-jobs]
-== Duplicate Ansible jobs are created for policy automations  
-//2.7+2.8:ACM-5644
-
-If you have a `PolicyAutomation` that is set to _Run once_ mode and disabled, an extra Ansible job is created. You can delete the extra Ansible job. Complete the following steps:
-
-. Run the following command to view the Ansible job list:
-+
-[source,bash]
-----
-oc get ansiblejob -n {namespace}
-----
-
-. Delete the duplicate Ansible job by using the following command:
-+
-[source,bash]
-----
-oc delete ansiblejob {ansiblejob name} -n {namespace}
 ----

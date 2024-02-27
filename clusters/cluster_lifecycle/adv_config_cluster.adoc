@@ -111,14 +111,15 @@ After about 15 minutes, the old certificate is removed from the CA bundle, and t
 
 *Note:* Managed clusters must use the host name `api.<cluster_name>.<base_domain>` to access the hub cluster. You cannot use named certificates that are configured with other host names.
 
-[#configuring-proxy-hub-and-managed-cluster]
+[#config-proxy-hub-cluster]
 == Configuring the proxy between hub cluster and managed cluster
 
-To register a managed cluster to your {mce-short} hub cluster, you need to transport the  managed cluster to your {mce-short} hub cluster. Sometimes your managed cluster cannot directly reach your {mce-short} hub cluster. In this instance, configure the proxy settings to allow the communications from the managed cluster to access the {mce-short} hub cluster through a HTTP or HTTPS proxy server.
+To register a managed cluster to your {mce} hub cluster, you need to transport the  managed cluster to your {mce-short} hub cluster. Sometimes your managed cluster cannot directly reach your {mce-short} hub cluster. In this instance, configure the proxy settings to allow the communications from the managed cluster to access the {mce-short} hub cluster through a HTTP or HTTPS proxy server.
 
 For example, the {mce-short} hub cluster is in a public cloud, and the managed cluster is in a private cloud environment behind firewalls. The communications out of the private cloud can only go through a HTTP or HTTPS proxy server. 
 
-== Prerequisites
+[#config-proxy-hub-cluster-prereq]
+=== Prerequisites
 
 - You have a HTTP or HTTPS proxy server running that supports HTTP tunnels. For example, HTTP connect method. 
 - You have a manged cluster that can reach the HTTP or HTTPS proxy server, and the proxy server can access the {mce-short} hub cluster. 
@@ -172,16 +173,16 @@ spec:
 + 
 *Note:* You might need to toggle the YAML view to add the annotation to the `ManagedCluster` resource when you operate on the {mce-short} console.
 
-[#disabling-proxy-between-hub-and-managed-cluster]
-== Disabling the proxy between hub cluster and managed cluster
+[#disable-proxy-hub-managed]
+=== Disabling the proxy between hub cluster and managed cluster
 
 If your development changes, you might need to disable the HTTP or HTTPS proxy. 
 
 . Go to `ManagedCluster` resource.
 . Remove the annotation, `agent.open-cluster-management.io/klusterlet-config`.
 
-[#create-cluster-configuring-nodeselector-tolerations]
-== Optional: Configuring the klusterlet to run on specific nodes
+[#config-klusterlet-nodes]
+=== Optional: Configuring the klusterlet to run on specific nodes
 
 When you create a cluster using {product-title}, you can specify which nodes you want to run the managed cluster klusterlet to run on by configuring the `nodeSelector` and `tolerations` annotation for the managed cluster. Complete the following steps to configure these settings: 
 
@@ -203,6 +204,63 @@ metadata:
     open-cluster-management/nodeSelector: '{"dedicated":"acm"}'
     open-cluster-management/tolerations: '[{"key":"dedicated","operator":"Equal","value":"acm","effect":"NoSchedule"}]' 
 ----
+
+[#custom-server-url-ca]
+== Customizing the server URL and CA bundle of the hub cluster API server when importing a managed cluster (Technology Preview)
+
+You might not be able to register a managed cluster on your {mce-short} hub cluster if intermediate components exist between the managed cluster and the hub cluster. Example intermediate components include a Virtual IP, load balancer, reverse proxy, or API gateway. If you have an intermediate component, you must use a custom server URL and CA bundle for the hub cluster API server when importing a managed cluster.
+
+[#custom-server-url-ca-prereq]
+=== Prerequisites
+
+* You must configure the intermediate component so that the hub cluster API server is accessible for the managed cluster.
+* If the intermediate component terminates the SSL connections between the managed cluster and hub cluster API server, you must bridge the SSL connections and pass the authentication information from the original requests to the back end of the hub cluster API server. You can use the User Impersonation feature of the Kubernetes API server to bridge the SSL connections.
++
+The intermediate component extracts the client certificate from the original requests, adds Common Name (CN) and Organization (O) of the certificate subject as impersonation headers, and then forwards the modified impersonation requests to the back end of the hub cluster API server.
++
+*Note:* If you bridge the SSL connections, the cluster proxy add-on does not work.
+
+[#custom-server-url-ca-steps]
+=== Customizing the server URL and hub cluster CA bundle
+
+To use a custom hub API server URL and CA bundle when importing a managed cluster, complete the following steps:
+
+. Create a `KlusterConfig` resource with the custom hub cluster API server URL and CA bundle. See the following example:
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: <1>
+spec:
+  hubKubeAPIServerURL: "https://api.example.com:6443" <2>
+  hubKubeAPIServerCABundle: "LS0tLS1CRU...LS0tCg==" <3>
+----
++
+<1> Add your klusterlet config name.
+<2> Add your custom server URL.
+<3> Add your custom CA bundle.
+
+. Select the `KlusterletConfig` resource when creating a managed cluster by adding an annotation that refers to the resource. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    agent.open-cluster-management.io/klusterlet-config: <1>
+  name: <2>
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+----
++
+<1> Add your klusterlet config name.
+<2> Add your cluster name.
+
+*Note:*  If you use the console, you might need to enable the YAML view to add the annotation to the `ManagedCluster` resource.
 
 [#add-resources-adv-cluster]
 == Additional resources

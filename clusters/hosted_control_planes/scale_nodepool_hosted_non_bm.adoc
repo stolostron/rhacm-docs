@@ -1,7 +1,7 @@
-[#scaling-the-nodepool]
+[#scaling-the-nodepool-non-bm]
 = Scaling the NodePool object for a hosted cluster
 
-To add nodes to your hosted cluster, scale the `NodePool` object. Complete the following steps:
+You add nodes to your hosted cluster by scaling the `NodePool` object.
 
 . Scale the `NodePool` object to two nodes:
 
@@ -56,11 +56,18 @@ BMH: ocp-worker-0 Agent: d9198891-39f4-4930-a679-65fb142b108b State: known-unbou
 BMH: ocp-worker-1 Agent: da503cf1-a347-44f2-875c-4960ddb04091 State: insufficient
 ----
 
-. After the agents reach the `added-to-existing-cluster` state, verify that you can see the {ocp-short} nodes by entering the following command:
+. Obtain the kubeconfig for your new hosted cluster by entering the extract command:
 
 +
 ----
-oc --kubeconfig <hosted-cluster-name>.kubeconfig get nodes
+oc extract -n <hosted-cluster-namespace> secret/<hosted-cluster-name>-admin-kubeconfig --to=- > kubeconfig-<hosted-cluster-name>
+----
+
+. After the agents reach the `added-to-existing-cluster` state, verify that you can see the {ocp-short} nodes in the hosted cluster by entering the following command:
+
++
+----
+oc --kubeconfig kubeconfig-<hosted-cluster-name> get nodes
 ----
 
 +
@@ -100,7 +107,7 @@ The `clusterversion` reconcile process eventually reaches a point where only Ing
 
 +
 ----
-oc --kubeconfig <hosted-cluster-name>.kubeconfig get clusterversion,co
+oc --kubeconfig kubeconfig-<hosted-cluster-name> get clusterversion,co
 ----
 
 +
@@ -134,12 +141,12 @@ clusteroperator.config.openshift.io/service-ca                                 4
 clusteroperator.config.openshift.io/storage                                    4.12z    True        False         False      11m
 ----
 
-[#adding-nodepool-bm]
+[#adding-nodepool-non-bm]
 == Adding node pools
 
 You can create node pools for a hosted cluster by specifying a name, number of replicas, and any additional information, such as an agent label selector.
 
-. To create a node pool, enter the following information. In this example, the node pool uses agents with the `size=large,zone notin (az1,az2)` label:
+. To create a node pool, enter the following information:
 
 +
 ----
@@ -150,9 +157,11 @@ hcp create nodepool agent \
   --cluster-name $CLUSTER_NAME \
   --name $NODEPOOL_NAME \
   --node-count $WORKER_COUNT \
-  --node-upgrade-type InPlace \
-  --agentLabelSelector 'size=large,zone notin (az1,az2)'
+  --agentLabelSelector '{"matchLabels": {"size": "medium"}}' <1>
 ----
+
++
+<1> The `--agentLabelSelector` is optional. The node pool uses agents with the `"size" : "medium"` label.
 
 . Check the status of the node pool by listing `nodepool` resources in the `clusters` namespace:
 
@@ -161,14 +170,29 @@ hcp create nodepool agent \
 oc get nodepools --namespace clusters
 ----
 
+. Extract the `hosted-admin-kubeconfig` secret by entering the following command:
+
++
+----
+oc extract -n clusters secret/hosted-admin-kubeconfig --to=./hostedcluster-secrets --confirm
+----
+
++
+See the following example output:
+
++
+----
+hostedcluster-secrets/kubeconfig
+----
+
 . After some time, you can check the status of the node pool by entering the following command:
 
 +
 ----
-oc --kubeconfig $CLUSTER_NAME-kubeconfig get nodes
+oc --kubeconfig ./hostedcluster-secrets get nodes
 ----
 
-. Verify that the node pool is in the status that you expect by entering this command:
+. Verify that the number of available node pools match with the number of expected node pools by entering this command:
 
 +
 ----
