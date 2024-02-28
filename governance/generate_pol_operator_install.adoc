@@ -1,0 +1,154 @@
+[#install-compliance-operator-policy]
+= Generating a policy that installs the Compliance Operator 
+
+Generate a policy that installs the Compliance Operator onto your clusters. For an operator that uses the _namespaced_ installation mode, such as the Compliance Operator, an `OperatorGroup` manifest is also required. 
+
+Complete the following steps:
+
+. Create a YAML file with a `Namespace`, a `Subscription`, and an `OperatorGroup` manifest called `compliance-operator.yaml`. The following example installs these manifests in the `compliance-operator` namespace:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-compliance
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: compliance-operator
+  namespace: openshift-compliance
+spec:
+  targetNamespaces:
+    - openshift-compliance
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: compliance-operator
+  namespace: openshift-compliance
+spec:
+  channel: release-0.1
+  name: compliance-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+----
+
+. Create a `PolicyGenerator` configuration file. View the following `PolicyGenerator` policy example that installs the Compliance Operator on all {ocp-short} managed clusters:
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: install-compliance-operator
+policyDefaults:
+  namespace: policies
+  placement:
+    labelSelector:
+      matchExpressions:
+        - key: vendor
+          operator: In
+          values:
+            - "OpenShift"
+policies:
+  - name: install-compliance-operator
+    manifests:
+      - path: compliance-operator.yaml
+----
+
+. Add the policy generator to your `kustomization.yaml` file. The `generators` section might resemble the following configuration:
++
+[source,yaml]
+----
+generators:
+  - policy-generator-config.yaml
+----
++
+As a result, the generated policy resembles the following file:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement-install-compliance-operator
+  namespace: policies
+spec:
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: In
+          values:
+          - OpenShift
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-install-compliance-operator
+  namespace: policies
+placementRef:
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+  name: placement-install-compliance-operator
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: install-compliance-operator
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/description:
+  name: install-compliance-operator
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: install-compliance-operator
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: openshift-compliance
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: Subscription
+                metadata:
+                  name: compliance-operator
+                  namespace: openshift-compliance
+                spec:
+                  channel: release-0.1
+                  name: compliance-operator
+                  source: redhat-operators
+                  sourceNamespace: openshift-marketplace
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1
+                kind: OperatorGroup
+                metadata:
+                  name: compliance-operator
+                  namespace: openshift-compliance
+                spec:
+                  targetNamespaces:
+                    - compliance-operator
+          remediationAction: enforce
+          severity: low
+----
+
+As a result, the generated policy is displayed.
