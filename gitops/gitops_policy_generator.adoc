@@ -3,10 +3,6 @@
 
 A common use of {product-title-short} policies is to install an Operator on one or more managed {ocp} clusters. Continue reading to learn how to generate policies by using the Policy Generator, and to install the {ocp-short} GitOps Operator with a generated policy:
 
-* <<policy-install-ocp-gitops,Generating a policy that installs {ocp-short} GitOps>>
-* <<policy-gen-install-compliance-operator,Generating a policy that installs the Compliance Operator>>
-* <<using-policy-dependencies-with-operatorgroups,Using policy dependencies with _OperatorGroups_>>
-
 [#policy-install-ocp-gitops]
 == Generating a policy that installs {ocp-short} GitOps
 
@@ -128,155 +124,6 @@ spec:
 
 Generated policies from manifests in the {ocp-short} documentation is supported. Any configuration guidance from the {ocp-short} documentation can be applied using the Policy Generator.
 
-[#policy-gen-install-compliance-operator]
-== Generating a policy that installs the Compliance Operator
-
-For an operator that uses the _namespaced_ installation mode, such as the Compliance Operator, an `OperatorGroup` manifest is also required. 
-
-Create a YAML file with a `Namespace`, a `Subscription`, and an `OperatorGroup` manifest called `compliance-operator.yaml`. The following example installs these manifests in the `compliance-operator` namespace:
-
-[source,yaml]
-----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: openshift-compliance
----
-apiVersion: operators.coreos.com/v1
-kind: OperatorGroup
-metadata:
-  name: compliance-operator
-  namespace: openshift-compliance
-spec:
-  targetNamespaces:
-    - compliance-operator
----
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: compliance-operator
-  namespace: openshift-compliance
-spec:
-  channel: release-0.1
-  name: compliance-operator
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
-----
-
-A `PolicyGenerator` configuration file is required. View the following `PolicyGenerator` policy example that installs the Compliance Operator on all {ocp-short} managed clusters:
-
-[source,yaml]
-----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PolicyGenerator
-metadata:
-  name: install-compliance-operator
-policyDefaults:
-  namespace: policies
-  placement:
-    clusterSelectors:
-      vendor: "OpenShift"
-  remediationAction: enforce
-policies:
-  - name: install-compliance-operator
-    manifests:
-      - path: compliance-operator.yaml
-----
-
-The last required file is `kustomization.yaml`, which requires the following configuration:
-
-[source,yaml]
-----
-generators:
-  - policy-generator-config.yaml
-----
-
-As a result, the generated policy resembles the following file:
-
-[source,yaml]
-----
-apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
-metadata:
-  name: placement-install-compliance-operator
-  namespace: policies
-spec:
-  clusterConditions:
-    - status: "True"
-      type: ManagedClusterConditionAvailable
-  clusterSelector:
-    matchExpressions:
-      - key: vendor
-        operator: In
-        values:
-          - OpenShift
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  name: binding-install-compliance-operator
-  namespace: policies
-placementRef:
-  apiGroup: apps.open-cluster-management.io
-  kind: PlacementRule
-  name: placement-install-compliance-operator
-subjects:
-  - apiGroup: policy.open-cluster-management.io
-    kind: Policy
-    name: install-compliance-operator
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: Policy
-metadata:
-  annotations:
-    policy.open-cluster-management.io/categories: CM Configuration Management
-    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
-    policy.open-cluster-management.io/standards: NIST SP 800-53
-    policy.open-cluster-management.io/description:
-  name: install-compliance-operator
-  namespace: policies
-spec:
-  disabled: false
-  policy-templates:
-    - objectDefinition:
-        apiVersion: policy.open-cluster-management.io/v1
-        kind: ConfigurationPolicy
-        metadata:
-          name: install-compliance-operator
-        spec:
-          object-templates:
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: v1
-                kind: Namespace
-                metadata:
-                  name: openshift-compliance
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: operators.coreos.com/v1alpha1
-                kind: Subscription
-                metadata:
-                  name: compliance-operator
-                  namespace: openshift-compliance
-                spec:
-                  channel: release-0.1
-                  name: compliance-operator
-                  source: redhat-operators
-                  sourceNamespace: openshift-marketplace
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: operators.coreos.com/v1
-                kind: OperatorGroup
-                metadata:
-                  name: compliance-operator
-                  namespace: openshift-compliance
-                spec:
-                  targetNamespaces:
-                    - compliance-operator
-          remediationAction: enforce
-          severity: low
-----
-
 [#using-policy-dependencies-with-operatorgroups]
 == Using policy dependencies with _OperatorGroups_
 
@@ -287,8 +134,9 @@ Set up policy dependencies by listing the manifests in the order that you want. 
 Enable the `policyDefaults.orderManifests` parameter and disable `policyDefaults.consolidateManifests` in the Policy Generator configuration manifest to automatically set up dependencies between the manifests.
 
 [#related-resource-grc-gitops]
-== Related resources
+== Additional resources
 
+* See link:../governance/generate_pol_operator_install.adoc#policy-gen-install-operator[Generating a policy that installs the Compliance Operator].
 * See link:../gitops/deploy_gitops.adoc#gitops-deploy-policies[Deploying policies by using GitOps] for more details.
 * Return to the link:../governance/third_party_policy.adoc#integrate-third-party-policy-controllers[Integrate third-party policy controllers] documentation.
 * See link:https://access.redhat.com/documentation/en-us/red_hat_openshift_gitops/1.11/html/understanding_openshift_gitops/index[Understanding OpenShift GitOps] and the link:https://cloud.redhat.com/learn/topics/operators[Operator] documentation for more details.
