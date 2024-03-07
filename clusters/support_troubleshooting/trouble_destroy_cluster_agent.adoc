@@ -1,0 +1,59 @@
+[#troubleshooting-destroy-cluster-fail]
+= Troubleshooting deletion failure of a hosted control plane cluster on the Agent platform
+
+When you destroy a hosted control plane cluster on the Agent platform, all the back-end resources are normally deleted. If the machine resources are not deleted properly, a cluster deletion fails. In that case, you must manually remove the remaining machine resources.
+
+[#symptom-destroy-cluster-fail]
+== Symptom: An error occurs when destroying a hosted control plane cluster
+
+After you attempt to destroy the hosted control plane cluster on the Agent platform, the `hcp destroy` command fails with the following error:
+
++
+----
+2024-02-22T09:56:19-05:00    ERROR    HostedCluster deletion failed    {"namespace": "clusters", "name": "hosted-0", "error": "context deadline exceeded"}
+2024-02-22T09:56:19-05:00    ERROR    Failed to destroy cluster    {"error": "context deadline exceeded"}
+----
+
+[#resolving-destroy-cluster-fail]
+== Resolving the problem: Remove the remaining machine resources manually
+
+Complete the following steps to destroy a hosted control plane cluster successfully on the Agent platform:
+
+. Run the following command to see the list of remaining machine resources by replacing `<hosted_cluster_namespace>` with the name of hosted cluster namespace:
+
++
+----
+oc get machine -n <hosted_cluster_namespace>
+----
+
++
+See the following example output:
+
++
+----
+NAMESPACE           NAME             CLUSTER          NODENAME   PROVIDERID   PHASE      AGE   VERSION
+clusters-hosted-0   hosted-0-9gg8b   hosted-0-nhdbp                           Deleting   10h   4.15.0-rc.8
+----
+
+. Run the following command to remove the `machine.cluster.x-k8s.io` finalizer attached to machine resources:
++
+----
+oc edit machines -n <hosted_cluster_namespace>
+----
+
+. Run the following command to verify you receive the `No resources found` message on your terminal:
+
++
+----
+oc get agentmachine -n <hosted_cluster_namespace>
+----
+
+. Run the following command to destroy a hosted control plane cluster on the Agent platform:
+
++
+----
+hcp destroy cluster agent --name <cluster_name>
+----
+
++
+Replace `<cluster_name>` with the name of your cluster.
