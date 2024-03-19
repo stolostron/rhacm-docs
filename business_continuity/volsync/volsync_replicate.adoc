@@ -1,0 +1,817 @@
+[#volsync-rep]
+= Replicating persistent volumes with VolSync
+
+You can use three supported methods to replicate persistent volumes with VolSync, which depend on the number of synchronization locations that you have: rsync, rsync-tls, restic, or Rclone. 
+
+[#volsync-prereq]
+== Prerequisites
+
+Before installing VolSync on your clusters, you must have the following requirements:
+
+* A configured {ocp} environment running a {product-title-short} version 2.4, or later, hub cluster
+
+* At least two configured clusters that are managed by the same {product-title-short} hub cluster
+
+* Network connectivity between the clusters that you are configuring with VolSync. If the clusters are not on the same network, you can configure the link:../../networking/submariner/subm_intro.adoc#submariner[Submariner multicluster networking and service discovery] and use the `ClusterIP` value for `ServiceType` to network the clusters, or use a load balancer with the `LoadBalancer` value for `ServiceType`.
+
+* The storage driver that you use for your source persistent volume must be CSI-compatible and able to support snapshots. 
+
+[#volsync-install-clusters]
+== Installing VolSync on the managed clusters
+
+To enable VolSync to replicate the persistent volume claim on one cluster to the persistent volume claim of another cluster, you must install VolSync on both the source and the target managed clusters.
+
+VolSync does not create its own namespace, so it is in the same namespace as other {ocp-short} all-namespace operators. Any changes that you make to the operator settings for VolSync also affects the other operators in the same namespace, such as if you change to manual approval for channel updates. 
+
+You can use either of two methods to install VolSync on two clusters in your environment. You can either add a label to each of the managed clusters in the hub cluster, or you can manually create and apply a `ManagedClusterAddOn`, as they are described in the following sections:
+
+[#volsync-install-label]
+=== Installing VolSync by using labels
+
+To install VolSync on the managed cluster by adding a label.
+
+* Complete the following steps from the {product-title-short} console:
+
++
+. Select one of the managed clusters from the `Clusters` page in the hub cluster console to view its details.
+
+. In the *Labels* field, add the following label: 
++
+----
+addons.open-cluster-management.io/volsync=true
+----
++
+The VolSync service pod is installed on the managed cluster. 
+
+. Add the same label the other managed cluster. 
+
+. Run the following command on each managed cluster to confirm that the VolSync operator is installed:
++
+----
+oc get csv -n openshift-operators
+----
++
+There is an operator listed for VolSync when it is installed.
+
+* Complete the following steps from the command-line interface:
+
++
+. Start a command-line session on the hub cluster. 
+
+. Enter the following command to add the label to the first cluster:
++
+----
+oc label managedcluster <managed-cluster-1> "addons.open-cluster-management.io/volsync"="true"
+----
++
+Replace `managed-cluster-1` with the name of one of your managed clusters.
+
+. Enter the following command to add the label to the second cluster: 
++
+----
+oc label managedcluster <managed-cluster-2> "addons.open-cluster-management.io/volsync"="true"
+----
++
+Replace `managed-cluster-2` with the name of your other managed cluster.
++
+A `ManagedClusterAddOn` resource should be created automatically on your hub cluster in the namespace of each corresponding managed cluster.
+
+[#volsync-install-mcaddon]
+=== Installing VolSync by using a ManagedClusterAddOn
+
+To install VolSync on the managed cluster by adding a `ManagedClusterAddOn` manually, complete the following steps:
+
+. On the hub cluster, create a YAML file called `volsync-mcao.yaml` that contains content that is similar to the following example: 
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: volsync
+  namespace: <managed-cluster-1-namespace>
+spec: {}
+----
++
+Replace `managed-cluster-1-namespace` with the namespace of one of your managed clusters. This namespace is the same as the name of the managed cluster.
++
+*Note:* The name must be `volsync`. 
+
+. Apply the file to your configuration by entering a command similar to the following example:
++
+----
+oc apply -f volsync-mcao.yaml
+----
+
+. Repeat the procedure for the other managed cluster.
++
+A `ManagedClusterAddOn` resource should be created automatically on your hub cluster in the namespace of each corresponding managed cluster.
+
+[#volsync-update-mcaddon]
+=== Updating the VolSync _ManagedClusterAddOn_
+
+Depending on what version of {product-title-short} you use, you might need to update your VolSync version. To update VolSync `ManagedClusterAddOn` resource, complete the following steps: 
+
+. Add the following annotation to your `ManagedClusterAddOn` resource:
++
+[source,yaml]
+----
+  annotations:
+       operator-subscription-channel: stable-0.9
+----
++
+. Define the `operator-subscription-channel` where you want VolySync deployed from. 
+. Verify that you updated your Volsync version by going to your `ManagedClusterAddOn` resource and confirming that your chosen `operator-subscription-channel` is included. 
+
+[#volsync-update-mcaddon]
+=== Updating the VolSync _ManagedClusterAddOn_
+
+Depending on what version of {product-title-short} you use, you might need to update your VolSync version. To update VolSync `ManagedClusterAddOn` resource, complete the following steps: 
+
+. Add the following annotation to your `ManagedClusterAddOn` resource:
++
+[source,yaml]
+----
+  annotations:
+       operator-subscription-channel: stable-0.9
+----
++
+. Define the `operator-subscription-channel` where you want VolySync deployed from. 
+. Verify that you updated your Volsync version by going to your `ManagedClusterAddOn` resource and confirming that your chosen `operator-subscription-channel` is included. 
+
+[#rsync-tls-replication-volsync]
+== Configuring an Rsync-TLS replication
+
+You can create a 1:1 asynchronous replication of persistent volumes by using an Rsync-TLS replication. You can use Rsync-TLS-based replication for disaster recovery or sending data to a remote site. When using Rsync-TLS, VolSync synchronizes data by using Rsync across a TLS-protected tunnel provided by stunnel. See the link:https://www.stunnel.org/docs.html[stunnel documentation] for more information.
+
+The following example shows how to configure by using the Rsync-TLS method. For additional information about Rsync-TLS, see link:https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation.
+
+[#volsync-rsync-tls-clusters]
+=== Configuring Rsync-TLS replication across managed clusters
+
+For Rsync-TLS-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and a TLS-protected tunnel provided by stunnel to ensure that the transferred data is secure.
+
+See the following information and examples to configure an Rsync-TLS replication from a persistent volume claim on the `source` cluster in the `source-ns` namespace to a persistent volume claim on a `destination` cluster in the `destination-ns` namespace. Replace the values where necessary:
+
+. Configure your destination cluster.
+
+.. Run the following command on the destination cluster to create the namespace:
++
+----
+oc create ns <destination-ns>
+----
++
+Replace `destination-ns` with the namespace where your replication destination is located.
+
+.. Create a new YAML file called `replication_destination` and copy the following content:
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: <destination>
+  namespace: <destination-ns>
+spec:
+  rsyncTLS:
+    serviceType: LoadBalancer <1>
+    copyMethod: Snapshot
+    capacity: 2Gi <2>
+    accessModes: [ReadWriteOnce]
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: csi-aws-vsc
+----
++
+<1> For this example, the `ServiceType` value of `LoadBalancer` is used. The load balancer service is created by the source cluster to enable your source managed cluster to transfer information to a different destination managed cluster. You can use `ClusterIP` as the service type if your source and destinations are on the same cluster, or if you have Submariner network service configured. Note the address and the name of the secret to refer to when you configure the source cluster.Make sure that the `capacity` value matches the capacity of the persistent volume claim that is being replicated.
+<2> Make sure that the `capacity` value matches the capacity of the persistent volume claim that is being replicated.
++ 
+*Optional:* Specify the values of the `storageClassName` and `volumeSnapshotClassName` parameters if you are using a storage class and volume snapshot class name that are different than the default values for your environment. 
+
+.. Run the following command on the destination cluster to create the `replicationdestination` resource:
++
+----
+oc create -n <destination-ns> -f replication_destination.yaml
+----
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+After the `replicationdestination` resource is created, the following parameters and values are added to the resource: 
++
+|==========
+| Parameter | Value
+
+| `.status.rsyncTLS.address` 
+| IP address of the destination cluster that is used to enable the source and destination clusters to communicate.
+
+| `.status.rsyncTLS.keySecret` 
+| Name of the secret containing the TLS key that authenticates the connection with the source cluster.
+|==========
+
+.. Run the following command to copy the value of `.status.rsyncTLS.address` to use on the source cluster. Replace `destination` with the name of your replication destination custom resource. Replace `destination-ns` with the name of the namespace where your destination is located:
++
+----
+ADDRESS=`oc get replicationdestination <destination> -n <destination-ns> --template={{.status.rsyncTLS.address}}`
+echo $ADDRESS
+----
++
+The output appears similar to the following, which is for an Amazon Web Services environment:
++
+----
+a831264645yhrjrjyer6f9e4a02eb2-5592c0b3d94dd376.elb.us-east-1.amazonaws.com
+----
+
+.. Run the following command to copy the name of the secret:
++
+----
+KEYSECRET=`oc get replicationdestination <destination> -n <destination-ns> --template={{.status.rsyncTLS.keySecret}}`
+echo $KEYSECRET
+----
++
+Replace `destination` with the name of your replication destination custom resource.
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+You will have to enter it on the source cluster when you configure the source. The output should be the name of your SSH keys secret file, which might resemble the following name:
++
+----
+volsync-rsync-tls-destination-name
+----
+
+.. Copy the key secret from the destination cluster by entering the following command against the destination cluster:
++
+----
+oc get secret -n <destination-ns> $KEYSECRET -o yaml > /tmp/secret.yaml
+----
++
+Replace `destination-ns` with the namespace where your replication destination is located.
+
+.. Open the secret file in the `vi` editor by entering the following command:
++
+----
+vi /tmp/secret.yaml
+----
+
+.. In the open secret file on the destination cluster, make the following changes:
++
+* Change the namespace to the namespace of your source cluster. For this example, it is `source-ns`.
+* Remove the owner references (`.metadata.ownerReferences`).
+
+.. On the source cluster, create the secret file by entering the following command on the source cluster:
++
+----
+oc create -f /tmp/secret.yaml
+----
+
+. Identify the source persistent volume claim that you want to replicate.
++
+*Note:* The source persistent volume claim must be on a CSI storage class.
+
+. Create the `ReplicationSource` items.
++
+.. Create a new YAML file called `replication_source` on the source cluster and copy the following content: 
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: <source> <1>
+  namespace: <source-ns> <2>
+spec:
+  sourcePVC: <persistent_volume_claim> <3>
+  trigger:
+    schedule: "*/3 * * * *" #/*
+  rsyncTLS:
+    keySecret: <mykeysecret> <4>
+    address: <my.host.com> <5>
+    copyMethod: Snapshot
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: gp2-csi
+----
++
+<1> Replace `source` with the name for your replication source custom resource. See step _3-vi_ of this procedure for instructions on how to replace this automatically.
+<2> Replace `source-ns` with the namespace of the persistent volume claim where your source is located. See step _3-vi_ of this procedure for instructions on how to replace this automatically. 
+<3> Replace `persistent_volume_claim` with the name of your source persistent volume claim.
+<4> Replace `mykeysecret` with the name of the secret that you copied from the destination cluster to the source cluster (the value of `$KEYSECRET`).
+<5> Replace `my.host.com` with the host address that you copied from the `.status.rsyncTLS.address` field of the `ReplicationDestination` when you configured it. You can find examples of `sed` commands in the next step.
++
+If your storage driver supports cloning, using `Clone` as the value for `copyMethod` might be a more streamlined process for the replication.
++ 
+*Optional:* Specify the values of the `storageClassName` and `volumeSnapshotClassName` parameters if you are using a storage class and volume snapshot class name that are different than the default values for your environment. 
++
+You can now set up the synchronization method of the persistent volume.
+
+.. On the source cluster, modify the `replication_source.yaml` file by replacing the value of the `address` and `keySecret` in the `ReplicationSource` object with the values that you noted from the destination cluster by entering the following commands:
++
+----
+sed -i "s/<my.host.com>/$ADDRESS/g" replication_source.yaml
+sed -i "s/<mykeysecret>/$KEYSECRET/g" replication_source.yaml
+oc create -n <source> -f replication_source.yaml
+----
++
+Replace `my.host.com` with the host address that you copied from the `.status.rsyncTLS.address` field of the `ReplicationDestination` when you configured it.
++
+Replace `keySecret` with the keys that you copied from the `.status.rsyncTLS.keySecret` field of the `ReplicationDestination` when you configured it.
++
+Replace `source` with the name of the persistent volume claim where your source is located.
++
+*Note:* You must create the file in the same namespace as the persistent volume claim that you want to replicate. 
+
+.. Verify that the replication completed by running the following command on the `ReplicationSource` object:
++
+----
+oc describe ReplicationSource -n <source-ns> <source>
+----
++
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
++
+Replace `source` with the name of your replication source custom resource. 
++
+If the replication was successful, the output should be similar to the following example:
++
+----
+Status:
+  Conditions:
+    Last Transition Time:  2021-10-14T20:48:00Z
+    Message:               Synchronization in-progress
+    Reason:                SyncInProgress
+    Status:                True
+    Type:                  Synchronizing
+    Last Transition Time:  2021-10-14T20:41:41Z
+    Message:               Reconcile complete
+    Reason:                ReconcileComplete
+    Status:                True
+    Type:                  Reconciled
+  Last Sync Duration:      5m20.764642395s
+  Last Sync Time:          2021-10-14T20:47:01Z
+  Next Sync Time:          2021-10-14T20:48:00Z
+----
++
+If the `Last Sync Time` has no time listed, then the replication is not complete.
+
+You have a replica of your original persistent volume claim. 
+
+[#rsync-replication-volsync]
+== Configuring an Rsync replication
+
+*Important:* Use Rsync-TLS instead of Rsync for enhanced security. By using Rsync-TLS, you can avoid using elevated user permissions that are not required for replicating persistent volumes.
+
+You can create a 1:1 asynchronous replication of persistent volumes by using an Rsync replication. You can use Rsync-based replication for disaster recovery or sending data to a remote site.
+
+The following example shows how to configure by using the Rsync method.  
+ 
+[#volsync-rsync-clusters]
+=== Configuring Rsync replication across managed clusters
+
+For Rsync-based replication, configure custom resources on the source and destination clusters. The custom resources use the `address` value to connect the source to the destination, and the `sshKeys` to ensure that the transferred data is secure.
+
+*Note:* You must copy the values for `address` and `sshKeys` from the destination to the source, so configure the destination before you configure the source.
+
+This example provides the steps to configure an Rsync replication from a persistent volume claim on the `source` cluster in the `source-ns` namespace to a persistent volume claim on a `destination` cluster in the `destination-ns` namespace. You can replace those values with other values, if necessary.
+
+. Configure your destination cluster.
+
+.. Run the following command on the destination cluster to create the namespace:
++
+----
+oc create ns <destination-ns>
+----
++
+Replace `destination-ns` with a name for the namespace that will contain your destination persistent volume claim.
+
+.. Copy the following YAML content to create a new file called `replication_destination.yaml`:
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: <destination>
+  namespace: <destination-ns>
+spec:
+  rsync:
+    serviceType: LoadBalancer
+    copyMethod: Snapshot
+    capacity: 2Gi
+    accessModes: [ReadWriteOnce]
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: csi-aws-vsc
+----
++
+*Note:* The `capacity` value should match the capacity of the persistent volume claim that is being replicated.
++
+Replace `destination` with the name of your replication destination CR.
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+For this example, the `ServiceType` value of `LoadBalancer` is used. The load balancer service is created by the source cluster to enable your source managed cluster to transfer information to a different destination managed cluster. You can use `ClusterIP` as the service type if your source and destinations are on the same cluster, or if you have Submariner network service configured. Note the address and the name of the secret to refer to when you configure the source cluster.
++ 
+The `storageClassName` and `volumeSnapshotClassName` are optional parameters. Specify the values for your environment, particularly if you are using a storage class and volume snapshot class name that are different than the default values for your environment. 
+
+.. Run the following command on the destination cluster to create the `replicationdestination` resource:
++
+----
+oc create -n <destination-ns> -f replication_destination.yaml
+----
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+After the `replicationdestination` resource is created, following parameters and values are added to the resource: 
++
+|==========
+| Parameter | Value
+
+| `.status.rsync.address` | IP address of the destination cluster that is used to enable the source and destination clusters to communicate.
+| `.status.rsync.sshKeys` | Name of the SSH key file that enables secure data transfer from the source cluster to the destination cluster. 
+|==========
+
+.. Run the following command to copy the value of `.status.rsync.address` to use on the source cluster:
++
+----
+ADDRESS=`oc get replicationdestination <destination> -n <destination-ns> --template={{.status.rsync.address}}`
+echo $ADDRESS
+----
++
+Replace `destination` with the name of your replication destination custom resource.
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+The output should appear similar to the following output, which is for an Amazon Web Services environment:
++
+----
+a831264645yhrjrjyer6f9e4a02eb2-5592c0b3d94dd376.elb.us-east-1.amazonaws.com
+----
+
+.. Run the following command to copy the name of the secret:
++
+----
+SSHKEYS=`oc get replicationdestination <destination> -n <destination-ns> --template={{.status.rsync.sshKeys}}`
+echo $SSHKEYS
+----
++
+Replace `destination` with the name of your replication destination custom resource.
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+You will have to enter it on the source cluster when you configure the source. The output should be the name of your SSH keys secret file, which might resemble the following name:
++
+----
+volsync-rsync-dst-src-destination-name
+----
+
+.. Copy the SSH secret from the destination cluster by entering the following command against the destination cluster:
++
+----
+oc get secret -n <destination-ns> $SSHKEYS -o yaml > /tmp/secret.yaml
+----
++
+Replace `destination-ns` with the namespace of the persistent volume claim where your destination is located.
+
+.. Open the secret file in the `vi` editor by entering the following command:
++
+----
+vi /tmp/secret.yaml
+----
+
+.. In the open secret file on the destination cluster, make the following changes:
++
+* Change the namespace to the namespace of your source cluster. For this example, it is `source-ns`.
+* Remove the owner references (`.metadata.ownerReferences`).
+
+.. On the source cluster, create the secret file by entering the following command on the source cluster:
++
+----
+oc create -f /tmp/secret.yaml
+----
+
+. Identify the source persistent volume claim that you want to replicate.
++
+*Note:* The source persistent volume claim must be on a CSI storage class.
+
+. Create the `ReplicationSource` items.
++
+.. Copy the following YAML content to create a new file called `replication_source.yaml` on the source cluster: 
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: <source>
+  namespace: <source-ns>
+spec:
+  sourcePVC: <persistent_volume_claim>
+  trigger:
+    schedule: "*/3 * * * *" #/*
+  rsync:
+    sshKeys: <mysshkeys>
+    address: <my.host.com>
+    copyMethod: Snapshot
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: gp2-csi
+----
++
+Replace `source` with the name for your replication source custom resource. See step _3-vi_ of this procedure for instructions on how to replace this automatically.
++
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located. See step _3-vi_ of this procedure for instructions on how to replace this automatically. 
++
+Replace `persistent_volume_claim` with the name of your source persistent volume claim.
++
+Replace `mysshkeys` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it. 
++
+Replace `my.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it. 
++
+If your storage driver supports cloning, using `Clone` as the value for `copyMethod` might be a more streamlined process for the replication.
++ 
+`StorageClassName` and `volumeSnapshotClassName` are optional parameters. If you are using a storage class and volume snapshot class name that are different than the defaults for your environment, specify those values. 
++
+You can now set up the synchronization method of the persistent volume.
+
+.. On the source cluster, modify the `replication_source.yaml` file by replacing the value of the `address` and `sshKeys` in the `ReplicationSource` object with the values that you noted from the destination cluster by entering the following commands:
++
+----
+sed -i "s/<my.host.com>/$ADDRESS/g" replication_source.yaml
+sed -i "s/<mysshkeys>/$SSHKEYS/g" replication_source.yaml
+oc create -n <source> -f replication_source.yaml
+----
++
+Replace `my.host.com` with the host address that you copied from the `.status.rsync.address` field of the `ReplicationDestination` when you configured it.
++
+Replace `mysshkeys` with the keys that you copied from the `.status.rsync.sshKeys` field of the `ReplicationDestination` when you configured it.
++
+Replace `source` with the name of the persistent volume claim where your source is located.
++
+*Note:* You must create the file in the same namespace as the persistent volume claim that you want to replicate. 
+
+.. Verify that the replication completed by running the following command on the `ReplicationSource` object:
++
+----
+oc describe ReplicationSource -n <source-ns> <source>
+----
++
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
++
+Replace `source` with the name of your replication source custom resource. 
++
+If the replication was successful, the output should be similar to the following example:
++
+----
+Status:
+  Conditions:
+    Last Transition Time:  2021-10-14T20:48:00Z
+    Message:               Synchronization in-progress
+    Reason:                SyncInProgress
+    Status:                True
+    Type:                  Synchronizing
+    Last Transition Time:  2021-10-14T20:41:41Z
+    Message:               Reconcile complete
+    Reason:                ReconcileComplete
+    Status:                True
+    Type:                  Reconciled
+  Last Sync Duration:      5m20.764642395s
+  Last Sync Time:          2021-10-14T20:47:01Z
+  Next Sync Time:          2021-10-14T20:48:00Z
+----
++
+If the `Last Sync Time` has no time listed, then the replication is not complete.
+
+You have a replica of your original persistent volume claim. 
+
+[#restic-backup-volsync]
+== Configuring a restic backup
+
+A restic-based backup copies a restic-based backup copy of the persistent volume to a location that is specified in your `restic-config.yaml` secret file. A restic backup does not synchronize data between the clusters, but provides data backup. 
+
+Complete the following steps to configure a restic-based backup:
+
+. Specify a repository where your backup images are stored by creating a secret that resembles the following YAML content:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: restic-config
+type: Opaque
+stringData:
+  RESTIC_REPOSITORY: <my-restic-repository>
+  RESTIC_PASSWORD: <my-restic-password>
+  AWS_ACCESS_KEY_ID: access
+  AWS_SECRET_ACCESS_KEY: password
+----
++
+Replace `my-restic-repository` with the location of the S3 bucket repository where you want to store your backup files.
++
+Replace `my-restic-password` with the encryption key that is required to access the repository. 
++ 
+Replace `access` and `password` with the credentials for your provider, if required. 
++
+If you need to prepare a new repository, see link:https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html[Preparing a new repository] for the procedure. If you use that procedure, skip the step that requires you to run the `restic init` command to initialize the repository. VolSync automatically initializes the repository during the first backup.
++
+*Important:* When backing up multiple persistent volume claims to the same S3 bucket, the path to the bucket must be unique for each persistent volume claim. Each persistent volume claim is backed up with a separate `ReplicationSource`, and each requires a separate restic-config secret.
++
+By sharing the same S3 bucket, each `ReplicationSource` has write access to the entire S3 bucket.
+
+. Configure your backup policy by creating a `ReplicationSource` object that resembles the following YAML content: 
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: mydata-backup
+spec:
+  sourcePVC: <source>
+  trigger:
+    schedule: "*/30 * * * *" #\*
+  restic:
+    pruneIntervalDays: 14
+    repository: <restic-config>
+    retain:
+      hourly: 6
+      daily: 5
+      weekly: 4
+      monthly: 2
+      yearly: 1
+    copyMethod: Clone
+  # The StorageClass to use when creating the PiT copy (same as source PVC if omitted)
+  #storageClassName: my-sc-name
+  # The VSC to use if the copy method is Snapshot (default if omitted)
+  #volumeSnapshotClassName: my-vsc-name
+----
++
+Replace `source` with the persistent volume claim that you are backing up. 
++
+Replace the value for `schedule` with how often to run the backup. This example has the schedule for every 30 minutes. See xref:../volsync/volsync_schedule.adoc#volsync-schedule[Scheduling your synchronization] for more information about setting up your schedule.
++
+Replace the value of `PruneIntervalDays` to the number of days that elapse between instances of repacking the data to save space. The prune operation can generate significant I/O traffic while it is running. 
++
+Replace `restic-config` with the name of the secret that you created in step 1. 
++
+Set the values for `retain` to your retention policy for the backed up images. 
++
+Best practice: Use `Clone` for the value of `CopyMethod` to ensure that a point-in-time image is saved.
+
+*Note:* Restic movers run without root permissions by default. If you want to run restic movers as root, run the following command to add the elevated permissions annotation to your namespace.
+
+----
+oc annotate namespace <namespace> volsync.backube/privileged-movers=true
+----
+
+Replace `<namespace>` with the name of your namespace.
+
+[#restore-restic-backup]
+=== Restoring a restic backup
+
+You can restore the copied data from a restic backup into a new persistent volume claim. *Best practice:* Restore only one backup into a new persistent volume claim. To restore the restic backup, complete the following steps:
+
+. Create a new persistent volume claim to contain the new data similar to the following example:
++
+[source,yaml]
+----
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: <pvc-name>
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+----
++
+Replace `pvc-name` with the name of the new persistent volume claim.
+
+. Create a `ReplicationDestination` custom resource that resembles the following example to specify where to restore the data:
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: <destination>
+spec:
+  trigger:
+    manual: restore-once
+  restic:
+    repository: <restic-repo>
+    destinationPVC: <pvc-name>
+    copyMethod: Direct
+----
++
+Replace `destination` with the name of your replication destination CR.
++
+Replace `restic-repo` with the path to your repository where the source is stored.
++
+Replace `pvc-name` with the name of the new persistent volume claim where you want to restore the data. Use an existing persistent volume claim for this, rather than provisioning a new one. 
+
+The restore process only needs to be completed once, and this example restores the most recent backup. For more information about restore options, see link:https://volsync.readthedocs.io/en/latest/usage/restic/index.html#restore-options[Restore options] in the VolSync documentation. 
+
+[#rclone-replication-volsync]
+== Configuring an Rclone replication
+
+An Rclone backup copies a single persistent volume to multiple locations by using Rclone through an intermediate object storage location, like AWS S3. It can be helpful when distributing data to multiple locations. 
+
+Complete the following steps to configure an Rclone replication:
+
+. Create a `ReplicationSource` custom resource that resembles the following example: 
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: <source>
+  namespace: <source-ns>
+spec:
+  sourcePVC: <source-pvc>
+  trigger:
+    schedule: "*/6 * * * *" #\*
+  rclone:
+    rcloneConfigSection: <intermediate-s3-bucket>
+    rcloneDestPath: <destination-bucket>
+    rcloneConfig: <rclone-secret>
+    copyMethod: Snapshot
+    storageClassName: <my-sc-name>
+    volumeSnapshotClassName: <my-vsc>
+----
++
+Replace `source-pvc` with the name for your replication source custom resource. 
++
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
++
+Replace `source` with the persistent volume claim that you are replicating.
++
+Replace the value of `schedule` with how often to run the replication. This example has the schedule for every 6 minutes. This value must be within quotation marks. See xref:../volsync/volsync_schedule.adoc#volsync-schedule[Scheduling your synchronization] for more information.
++
+Replace `intermediate-s3-bucket` with the path to the configuration section of the Rclone configuration file. 
++
+Replace `destination-bucket` with the path to the object bucket where you want your replicated files copied. 
++
+Replace `rclone-secret` with the name of the secret that contains your Rclone configuration information. 
++
+Set the value for `copyMethod` as `Clone`, `Direct`, or `Snapshot`. This value specifies whether the point-in-time copy is generated, and if so, what method is used for generating it.
++
+Replace `my-sc-name` with the name of the storage class that you want to use for your point-in-time copy. If not specified, the storage class of the source volume is used.
++
+Replace `my-vsc` with the name of the `VolumeSnapshotClass` to use, if you specified `Snapshot` as your `copyMethod`. This is not required for other types of `copyMethod`.
+
+. Create a `ReplicationDestination` custom resource that resembles the following example:
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: database-destination
+  namespace: dest
+spec:
+  trigger:
+    schedule: "3,9,15,21,27,33,39,45,51,57 * * * *" #/*
+  rclone:
+    rcloneConfigSection: <intermediate-s3-bucket>
+    rcloneDestPath: <destination-bucket>
+    rcloneConfig: <rclone-secret>
+    copyMethod: Snapshot
+    accessModes: [ReadWriteOnce]
+    capacity: 10Gi
+    storageClassName: <my-sc>
+    volumeSnapshotClassName: <my-vsc>
+----
++
+Replace the value for `schedule` with how often to move the replication to the destination. The schedules for the source and destination must be offset to allow the data to finish replicating before it is pulled from the destination. This example has the schedule for every 6 minutes, offset by 3 minutes. This value must be within quotation marks. See xref:../volsync/volsync_schedule.adoc#volsync-schedule[Scheduling your synchronization] for more information about scheduling.
++
+Replace `intermediate-s3-bucket` with the path to the configuration section of the Rclone configuration file.
++
+Replace `destination-bucket` with the path to the object bucket where you want your replicated files copied.
++
+Replace `rclone-secret` with the name of the secret that contains your Rclone configuration information.
++
+Set the value for `copyMethod` as `Clone`, `Direct`, or `Snapshot`. This value specifies whether the point-in-time copy is generated, and if so, which method is used for generating it.
++
+The value for `accessModes` specifies the access modes for the persistent volume claim. Valid values are `ReadWriteOnce` or `ReadWriteMany`.
++
+The `capacity` specifies the size of the destination volume, which must be large enough to contain the incoming data.
++
+Replace `my-sc` with the name of the storage class that you want to use as the destination for your point-in-time copy. If not specified, the system storage class is used.
++
+Replace `my-vsc` with the name of the `VolumeSnapshotClass` to use, if you specified `Snapshot` as your `copyMethod`. This is not required for other types of `copyMethod`. If not included, the system default `VolumeSnapshotClass` is used. 
+
+*Note:* Rclone movers run without root permissions by default. If you want to run Rclone movers as root, run the following command to add the elevated permissions annotation to your namespace.
+
+----
+oc annotate namespace <namespace> volsync.backube/privileged-movers=true
+----
+
+Replace `<namespace>` with the name of your namespace.
+
+[#volsync-add-resources]
+== Additional resources
+
+See the following topics for more information:
+
+- See xref:../volsync/adv_config_volsync.adoc#volsync-rsync-tls-clusters[Creating a secret for Rsync-TLS replication] to learn how to create your own secret for an Rsync-TLS replication.
+- For additional information about Rsync, see link:https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation.
+- For additional information about restic options, see link:https://volsync.readthedocs.io/en/latest/usage/restic/index.html#backup-options[Backup options] in the VolSync documentation.
+- Go back to <<volsync-install-clusters,Installing VolSync on the managed clusters>>
