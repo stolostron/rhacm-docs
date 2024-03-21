@@ -1,0 +1,171 @@
+[#compliance-history]
+= Policy compliance history (Technology Preview)
+
+The policy compliance history API is an optional technical preview feature if you want long-term storage of {product-title} policy compliance events in a queryable format. You can use the API to get additional details such as the `spec` field to audit and troubleshoot your policy, and get compliance events when a policy is disabled or removed from a cluster. The policy compliance history API can also generate a comma-separated values (CSV) spreadsheet of policy compliance events to help you with auditing and troubleshooting.
+
+The policy compliance history API can also generate a comma-separated values (CSV) spreadsheet of policy compliance events for further auditing and troubleshooting.
+
+[#prerequisites-compliance]
+== Prerequisites
+
+- The policy compliance history API requires a PostgreSQL server on version 13 or newer. 
+
+Some Red Hat supported options include using the `registry.redhat.io/rhel9/postgresql-15` container image, the `registry.redhat.io/rhel8/postgresql-13` container image, the `postgresql-server` RPM, or `postgresql/server` module. Review the applicable official Red Hat documentation on setup and configuration for the path you choose. The policy compliance history API is compatible with any standard PostgreSQL and is not limited to the official Red Hat supported offerings.
+
+- This PostgreSQL server must be reachable from the {product-title-short} hub cluster. If the PostgreSQL server is running externally of the hub cluster, ensure the routing and firewall configuration allows the hub cluster to connect to port 5432 of the PostgreSQL server. This port might be a different value if it is overridden in the PostgreSQL configuration.
+
+== Enable the compliance history API
+
+Configure your managed clusters to record policy compliance events to the API. You can enable this on all clusters or a subset of clusters. Complete the following steps:
+
+. Configure the PostgreSQL server as a cluster administrator.
+.. If you deployed PostgreSQL on your {product-title-short} hub cluster, temporarily port forward the PostgreSQL port to use the `psql` command. Run the following command:
++
+[source,bash]
+----
+oc -n <PostgreSQL namespace> port-forward <PostgreSQL pod name> 5432:5432
+----
+
+. In a different terminal, connect to the PostgreSQL server locally similar to the following command:
++
+[source,bash]
+----
+psql 'postgres://postgres:@127.0.0.1:5432/postgres'
+----
+
+. Create a user and database for your {product-title-short} hub cluster with the following SQL statements:
++
+[source,psql]
+----
+CREATE USER "rhacm-policy-compliance-history" WITH PASSWORD '<replace with password>';
+CREATE DATABASE "rhacm-policy-compliance-history" WITH OWNER="rhacm-policy-compliance-history";
+----
+
+. Create the `governance-policy-database` `Secret` resource in the namespace where {product-title-short} is installed. This is the `open-cluster-management` namespace by default and the example commands specify this as the namespace. This `Secret` resource instructs {product-title-short} to utilize this database for the policy compliance history API. If the PostgreSQL server is deployed on the {product-title-short} hub and it is not exposed outside of the cluster, the `Service` object created for it can be used for the host value. The format is `<service name>.<namespace>.svc`. Note that this approach depends on the network policies of the {product-title-short} hub cluster. Run the following command:
++
+[source,bash]
+----
+oc -n open-cluster-management create secret generic governance-policy-database \
+    --from-literal="user=rhacm-policy-compliance-history" \
+    --from-literal="password=rhacm-policy-compliance-history" \
+    --from-literal="host=<replace with host name of the Postgres server>" \ 
+    --from-literal="dbname=ocm-compliance-history" \
+  --from-literal="sslmode=verify-full" \
+    --from-file="ca=<replace>" <1>
+----
+<1> The `ca` data field must specify the Certificate Authority certificate file that is used to sign the TLS certificate used by PostgreSQL. If you do not provide this value, you must change the _sslmode_ value accordingly, though it is not recommended since it reduces the security of the database connection.
+
+. For more customization of the PostgreSQL connection, use the `connectionURL` data field directly and provide a value in the format of a PostgreSQL connection URI. Special characters in the password must be URL encoded. One option is to use Python to generate the URL encoded format of the password. For example, if the password is `$uper<Secr&t%>`, run the following Python command to get the output `%24uper%3CSecr%26t%25%3E`:
++
+[source,bash]
+----
+python -c 'import urllib.parse; import sys; print(urllib.parse.quote(sys.argv[1]))' '$uper<Secr&t%>'
+----
+
+. Run the command to test the policy compliance history API after you create the `governance-policy-database` `Secret`. An OpenShift `Route` object is automatically created in the same namespace. If routes on the {product-title-short} hub cluster do not utilize a trusted certificate, you can choose to provide the `-k` flag in the curl command to skip TLS verification, though this is not recommended:
++
+[source,bash]
+----
+curl -H "Authorization: Bearer $(oc whoami --show-token)" \
+    "https://$(oc -n open-cluster-management get route governance-history-api -o jsonpath='{.spec.host}')/api/v1/compliance-events"
+----
++
+* If successful, the curl command returns a value similar to the following message:
++
+----
+{"data":[],"metadata":{"page":1,"pages":0,"per_page":20,"total":0}}
+----
++
+* If it is not successful, the curl command might return either of the two examples:
+----
+{"message":"The database is unavailable"}
+
+{"message":"Internal Error"}
+----
+
+. Set the policy compliance history API URL. To enable the feature on managed clusters, retrieve the external URL of the policy compliance history API with the following command:
++
+[source,bash]
+----
+echo "https://$(oc -n open-cluster-management get route governance-history-api -o=jsonpath='{.spec.host}')"
+----
++
+The output might resemble the following information, with the domain name of your {product-title-short} hub cluster:
++
+----
+https://governance-history-api-open-cluster-management.apps.openshift.redhat.com
+----
+
+. Create an `AddOnDeploymentConfig` object similar to the following example:
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: governance-policy-framework
+  namespace: open-cluster-management
+spec:
+  customizedVariables:
+    - name: complianceHistoryAPIURL
+      value: <replace with URL from previous command>
+----
++
+- Replace the `value` parameter value with your compliance history external URL.
+
+. To enable the compliance history API on all managed clusters, configure the `governance-policy-framework` `ClusterManagementAddOn` object to utilize the `AddOnDeploymentConfig` with the following command:
++
+[source,bash]
+----
+oc edit ClusterManagementAddOn governance-policy-framework
+----
+
+. Add or update the `spec.supportedConfigs` array. Your resource might have the following configuration:
++
+[source,yaml]
+----
+  - group: addon.open-cluster-management.io
+    resource: addondeploymentconfigs
+    defaultConfig:
+      name: governance-policy-framework
+      namespace: open-cluster-management
+----
+
+. To enable the policy compliance history API on a single managed cluster, configure the `governance-policy-framework` `ManagedClusterAddOn` resource in the managed cluster namespace. Run the following command from your {product-title-short} hub cluster with the following command: 
++
+[source,bash]
+----
+oc -n <manage-cluster-namespace> edit ManagedClusterAddOn governance-policy-framework
+----
++
+- Replace the `<manage-cluster-namespace>` placeholder with the managed cluster name you intend to enable.
+
+. Add or update the `spec.configs` array to have an entry similar to the following example:
++
+[source,yaml]
+----
+- group: addon.open-cluster-management.io
+  resource: addondeploymentconfigs
+  name: governance-policy-framework
+  namespace: open-cluster-management
+----
+
+. To verify the configuration, confirm that the deployment on your managed cluster is using the `--compliance-api-url` container argument. Run the following command:
++
+[source,bash]
+----
+oc -n open-cluster-management-agent-addon get deployment governance-policy-framework -o jsonpath='{.spec.template.spec.containers[1].args}'
+----
++
+The output might resemble the following:
++
+----
+["--enable-lease=true","--hub-cluster-configfile=/var/run/klusterlet/kubeconfig","--leader-elect=false","--log-encoder=console","--log-level=0","--v=-1","--evaluation-concurrency=2","--client-max-qps=30","--client-burst=45","--disable-spec-sync=true","--cluster-namespace=local-cluster","--compliance-api-url=https://governance-history-api-open-cluster-management.apps.openshift.redhat.com"]
+----
+
+Any new policy compliance events are recorded in the policy compliance history API.
+
+[#add-compliance-history-resources]
+== Additional resource
+
+* See link:..apis/compliancehistory.json.adoc[Policy compliance history API (Technology Preview)].

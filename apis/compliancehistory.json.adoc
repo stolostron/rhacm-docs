@@ -1,0 +1,268 @@
+[#compliance-history-api]
+= Policy compliance history (Technology Preview)
+
+== Overview
+
+The policy compliance history API is an optional technical preview feature if you want long-term storage of {product-title} policy compliance events in a queryable format. You can use the API to get additional details such as the `spec` field to audit and troubleshoot your policy, and get compliance events when a policy is disabled or removed from a cluster. The policy compliance history API can also generate a comma-separated values (CSV) spreadsheet of policy compliance events to help you with auditing and troubleshooting.
+
+=== Version information
+[%hardbreaks]
+__Version__ : 2.10.0
+
+
+
+
+== API Endpoints
+
+=== Listing policy compliance events
+
+`/api/v1/compliance-events`
+
+This lists all policy compliance events that you have access to by default. The response format is as follows and is sorted by `event.timestamp` in descending order by default:
+
+[source,json]
+----
+{
+  "data": [
+    {
+      "id": 2,
+      "cluster": {
+        "name": "cluster1",
+        "cluster_id": "215ce184-8dee-4cab-b99b-1f8f29dff611"
+      },
+      "parent_policy": {
+        "id": 3,
+        "name": "configure-custom-app",
+        "namespace": "policies",
+        "catageories": ["CM Configuration Management"],
+        "controls": ["CM-2 Baseline Configuration"],
+        "standards": ["NIST SP 800-53"]
+      },
+      "policy": {
+        "apiGroup": "policy.open-cluster-management.io",
+        "id": 2,
+        "kind": "ConfigurationPolicy",
+        "name": "configure-custom-app",
+        "namespace": "",
+        // Only shown with `?include_spec`
+        "spec": {}
+      },
+      "event": {
+        "compliance": "NonCompliant",
+        "message": "configmaps [app-data] not found in namespace default",
+        "timestamp": "2023-07-19T18:25:43.511Z",
+        "metadata": {}
+      }
+    },
+    {
+      "id": 1,
+      "cluster": {
+        "name": "cluster2",
+        "cluster_id": "415ce234-8dee-4cab-b99b-1f8f29dff461"
+      },
+      "parent_policy": {
+        "id": 3,
+        "name": "configure-custom-app",
+        "namespace": "policies",
+        "catageories": ["CM Configuration Management"],
+        "controls": ["CM-2 Baseline Configuration"],
+        "standards": ["NIST SP 800-53"]
+      },
+      "policy": {
+        "apiGroup": "policy.open-cluster-management.io",
+        "id": 4,
+        "kind": "ConfigurationPolicy",
+        "name": "configure-custom-app",
+        "namespace": "",
+        // Only shown with `?include_spec`
+        "spec": {}
+      },
+      "event": {
+        "compliance": "Compliant",
+        "message": "configmaps [app-data] found as specified in namespace default",
+        "timestamp": "2023-07-19T18:25:41.523Z",
+        "metadata": {}
+      }
+    }
+  ],
+  "metadata": {
+    "page": 1,
+    "pages": 7,
+    "per_page": 20,
+    "total": 123
+  }
+}
+----
+
+The following optional query parameters are accepted. Notice that those without descriptions just filter on the field it references. The parameter value `null` represents no value. Additionally, multiple values can be specified with commas. For example, `?cluster.name=cluster1,cluster2` for "or" filtering. Commas can be escaped with `\`, if necessary.
+
+.Table of query parameters
+|===
+| Query argument | Description 
+
+| cluster.cluster_id
+|
+
+| cluster.name
+|
+
+| direction 
+| The direction to sort by. This defaults to `desc`, which represents descending order. The supported values are `asc` and `desc`. 
+
+| event.compliance
+|
+
+| event.message_includes
+| A filter for compliance messages that include the input string. Only a single value is supported.
+
+| event.message_like
+| A SQL `LIKE` filter for compliance messages. The percent sign (`%`) represents a wildcard of zero or more characters. The underscore sign (`_`) represents a wildcard of a single character. For example `%configmaps [%my-configmap%]%` matches any configuration policy compliance message that refers to the config map `my-configmap`.
+
+| event.reported_by
+|
+
+| event.timestamp
+|
+
+| event.timestamp_after
+| An RFC 3339 timestamp to indicate only compliance events after this time should be shown. For example, `2024-02-28T16:32:57Z`.
+
+| event.timestamp_before
+| An RFC 3339 timestamp to indicate only compliance events before this time should be shown. For example, `2024-02-28T16:32:57Z`.
+
+| id
+|
+
+| include_spec
+| A flag to include the `spec` field of the policy in the return value. This is not set by default.
+
+| page
+| The page number in the query. This defaults to `1`.
+
+| parent_policy.categories
+|
+
+| parent_policy.controls
+|
+
+| parent_policy.id
+|
+
+| parent_policy.name
+|
+
+| parent_policy.namespace
+|
+
+| parent_policy.standards
+|
+
+| per_page
+| The number of compliance events returned per page. This defaults to `20` and cannot be larger than `100`.
+
+| policy.apiGroup
+|
+
+| policy.id
+|
+
+| policy.kind
+|
+
+| policy.name
+|
+
+| policy.namespace
+|
+
+| policy.severity
+|
+
+| sort
+| The field to sort by. This defaults to `event.timestamp`. All fields except `policy.spec` and `event.metadata` are sortable by using dot notation. To specify multiple sort options, use commas such as `?sort=policy.name,policy.namespace`.
+|===
+
+=== Selecting a single policy compliance event 
+
+`/api/v1/compliance-events/<id>`
+
+You can select a single policy compliance event by specifying its database ID. For example, `/api/v1/compliance-events/1` selects the compliance event with the ID of 1. The format of the return value is the following JSON:
+
+[source,json]
+----
+{
+  "id": 1,
+  "cluster": {
+    "name": "cluster2",
+    "cluster_id": "415ce234-8dee-4cab-b99b-1f8f29dff461"
+  },
+  "parent_policy": {
+    "id": 2,
+    "name": "etcd-encryption",
+    "namespace": "policies",
+    "catageories": ["CM Configuration Management"],
+    "controls": ["CM-2 Baseline Configuration"],
+    "standards": ["NIST SP 800-53"]
+  },
+  "policy": {
+    "apiGroup": "policy.open-cluster-management.io",
+    "id": 4,
+    "kind": "ConfigurationPolicy",
+    "name": "etcd-encryption",
+    "namespace": "",
+    "spec": {}
+  },
+  "event": {
+    "compliance": "Compliant",
+    "message": "configmaps [app-data] found as specified in namespace default",
+    "timestamp": "2023-07-19T18:25:41.523Z",
+    "metadata": {}
+  }
+}
+----
+
+=== Generating a spreadsheet
+
+`/api/v1/reports/compliance-events`
+
+You can generate a comma separated value (CSV) spreadsheet of compliance events for auditing and troubleshooting. It outputs the same and accepts the same query arguments as the `/api/v1/compliance-events` API endpoint. By default there is no `per_page` limitation set and there is no maximum for the `per_page` query argument. All the CSV headers are the same as the `/api/v1/compliance-events` API endpoint with underscores separating JSON objects. For example, the event timestamp has a header of `event_timestamp`.
+
+== Authentication and Authorization
+The policy compliance history API utilizes the OpenShift instance used by the {product-title-short} hub cluster for authentication and authorization. You must provide your OpenShift token in the `Authorization` header of the HTTPS request.
+
+To find your token, run the following command:
+[source,bash]
+----
+oc whoami --show-token
+----
+
+=== Viewing compliance events
+
+To view the compliance events for a managed cluster, you need access to complete the `get` `verb` for the `ManagedCluster` object on the {product-title-short} hub cluster. For example, to view the compliance events of the `local-cluster` cluster, you might use the `open-cluster-management:view:local-cluster` `ClusterRole` or create your own resource as the following example:
+
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+ name: local-cluster-view
+rules:
+- apiGroups:
+ - cluster.open-cluster-management.io
+ resources:
+ - managedclusters
+ resourceNames:
+ - local-cluster
+ verbs:
+ - get
+----
+
+To verify your access to a particular managed cluster, use the `oc auth can-i` command. For example, to check if you have access to the `local-cluster` managed cluster, run the following command:
+
+----
+oc auth can-i get managedclusters.cluster.open-cluster-management.io/local-cluster
+----
+
+=== Recording a compliance event
+
+Users or service accounts with `patch` `verb` access in the `policies.policy.open-cluster-management.io/status` resource in the corresponding managed cluster namespace have access to record policy compliance events. The `governance-policy-framework` pod on managed clusters utilizes the `open-cluster-management-compliance-history-api-recorder` service account in the corresponding managed cluster namespace on the {product-title-short} hub cluster to record compliance events. Each service account has the `open-cluster-management:compliance-history-api-recorder` `ClusterRole` bound to the managed cluster namespace. Restrict user and service account `patch` verb access to the policy `status` to ensure the trustworthiness of the data stored in the policy compliance history API.

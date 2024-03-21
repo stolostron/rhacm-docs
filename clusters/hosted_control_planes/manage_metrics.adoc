@@ -1,0 +1,108 @@
+[#override-resource-utilization-measurements]
+= Overriding resource utilization measurements
+
+The set of baseline measurements for resource utilization can vary in every cluster. Fore more information, see _Hosted control plane sizing guidance_.
+
+You can override the resource utilization measurements based on the type and pace of your cluster workload. Complete the following steps:
+
+. Create the `ConfigMap` resource by running the following command:
+
++
+----
+oc create -f <your-config-map-file.yaml>
+----
++
+Replace `<your-config-map-file.yaml>` with the name of your YAML file that contains your `hcp-sizing-baseline` config map.
+
+. Create the `hcp-sizing-baseline` config map in the `local-cluster` namespace to specify the measurements you want to override. Your config map might resemble the following YAML file:
+
++
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: hcp-sizing-baseline
+  namespace: local-cluster
+data:
+  incrementalCPUUsagePer1KQPS: "9.0"
+  memoryRequestPerHCP: "18"
+  minimumQPSPerHCP: "50.0"
+----
+
+. Delete the `hypershift-addon-agent` deployment to restart the `hypershift-addon-agent` pod by running the following command:
+
++
+----
+oc delete deployment hypershift-addon-agent -n open-cluster-management-agent-addon
+----
+
+. Observe the `hypershift-addon-agent` pod logs. Verify that the overridden measurements are updated in the config map by running the following command:
+
++
+----
+oc logs hypershift-addon-agent -n open-cluster-management-agent-addon
+----
+
++
+Your logs might resemble the following output:
+
++
+----
+2024-01-05T19:41:05.392Z	INFO	agent.agent-reconciler	agent/agent.go:793	setting cpuRequestPerHCP to 5
+2024-01-05T19:41:05.392Z	INFO	agent.agent-reconciler	agent/agent.go:802	setting memoryRequestPerHCP to 18
+2024-01-05T19:53:54.070Z	INFO	agent.agent-reconciler	agent/hcp_capacity_calculation.go:141	The worker nodes have 12.000000 vCPUs
+2024-01-05T19:53:54.070Z	INFO	agent.agent-reconciler	agent/hcp_capacity_calculation.go:142	The worker nodes have 49.173369 GB memory
+----
++
+If the overridden measurements are not updated properly in the `hcp-sizing-baseline` config map, you might see the following error message in the `hypershift-addon-agent` pod logs:
++
+----
+2024-01-05T19:53:54.052Z	ERROR	agent.agent-reconciler	agent/agent.go:788	failed to get configmap from the hub. Setting the HCP sizing baseline with default values.	{"error": "configmaps \"hcp-sizing-baseline\" not found"}
+----
+
+[#hosted-disable-metrics-monitoring]
+== Disabling the metric service monitoring
+
+After enabling the `hypershift-addon` managed cluster addon, the metric service monitoring is configured by default so that {ocp-short} monitoring can gather metrics from `hypershift-addon`. You can disable the metric service monitoring by completing the following steps:
+
+. Log in to your hub cluster by running the following command:
+
++
+----
+oc login
+----
+
+. Open the `hypershift-addon-deploy-config` add-on deployment configuration specification for editing by running the following command:
+
++
+----
+oc edit addondeploymentconfig hypershift-addon-deploy-config -n multicluster-engine
+----
+
+. Add the `disableMetrics=true` customized variable to the specification, as shown in the following example:
+
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: hypershift-addon-deploy-config
+  namespace: multicluster-engine
+spec:
+  customizedVariables:
+  - name: hcMaxNumber
+    value: "80"
+  - name: hcThresholdNumber
+    value: "60"
+  - name: disableMetrics
+    value: "true"
+----
+
+. Save the changes. The `disableMetrics=true` customized variable disables the metric service monitoring configuration for both new and existing `hypershift-addon` managed cluster addons.
+
+[#override-resource-utilization-measurements-additional-resources]
+== Additional resources
+
+* xref:../hosted_control_planes/hosted_sizing_guidance.adoc#sizing-calculation-example[Hosted control plane sizing guidance]
