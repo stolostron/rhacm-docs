@@ -11,6 +11,7 @@ To learn more about how you want to manage and view cluster fleet data that the 
 - <<adding-custom-metrics, Adding custom metrics>>
 - <<adding-advanced-config,Adding _advanced_ configuration>>
 - <<updating-replicas,Updating the _MultiClusterObservability_ custom resource replicas from the console>>
+- <<increase-decrease-pv-pvc,Increasing and decreasing persistent volumes and persistent volume claims>>
 - <<customizing-route-cert,Customizing route certification>>
 - <<customizing-certificates-object-store,Customizing certificates for accessing the object store>>
 - <<configuring-proxy-settings-for-observability-add-ons,Configuring proxy settings for observability add-ons>>
@@ -311,6 +312,32 @@ spec:
 ----
 
 For more information about the parameters within the `mco observability` custom resource, see the _Observability API_ documentation.
+
+[#increase-decrease-pv-pvc]
+== Increasing and decreasing persistent volumes and persistent volume claims
+
+Increase and decrease the persistent volume and persistent volume claims to change the amount of storage in your storage class. Complete the following steps:
+
+. To increase the size of the persistent volume, update the `MultiClusterObservability` custom resource if the storage class support expanding volumes.        
+
+. To decrease the size of the persistent volumes remove the pods using the persistent volumes, delete the persistent volume and recreate them. You might experience data loss in the persistent volume. Complete the following steps:
++
+.. Pause the `MultiClusterObservability` operator by adding the annotation `mco-pause: "true"` to the `MultiClusterObservability` custom resource.
+
+.. Look for the stateful sets or deployments of the desired component. Change their replica count to `0`. This initiates a shutdown, which involves uploading local data when applicable to avoid data loss. For example, the Thanos `Receive` stateful set is named `observability-thanos-receive-default` and has three replicas by default. Therefore, you are looking for the following persistent volume claims:
++
+- `data-observability-thanos-receive-default-0`
+- `data-observability-thanos-receive-default-1`
+- `data-observability-thanos-receive-default-2`
+
+.. Delete the persistent volumes and persistent volume claims used by the desired component. 
+.. In the `MultiClusterObservability` custom resource, edit the storage size in the configuration of the component to the desired amount in the storage size field. Prefix with the name of the component.
+
+.. Unpause the `MultiClusterObservability` operator by removing the previously added annotation.
+
+.. To initiate a reconcilation after having the operator paused, delete the `multicluster-observability-operator` and `observatorium-operator` pods. The pods are recreated and reconciled immediately.
+
+. Verify that persistent volume and volume claims are updated by checking the `MultiClusterObservability` custom resource.
 
 [#customizing-route-cert]
 == Customizing route certificate
