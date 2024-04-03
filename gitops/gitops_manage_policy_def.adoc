@@ -87,7 +87,7 @@ There are labels and annotations used by Argo CD to track objects. For replicate
 Based on Argo CD, you can use {ocp-short} GitOps to generate policies by using the Policy Generator through GitOps. Since the Policy Generator does not come preinstalled in the {ocp-short} GitOps container image, some customization must take place. In order to follow along, you must have the {ocp-short} GitOps Operator installed on the {product-title-short} hub cluster and be sure to log in to the hub cluster.
 
 For {ocp-short} GitOps to have access to the Policy Generator when you run Kustomize, an Init Container is required to copy the Policy Generator binary from the {product-title-short} Application Subscription container image to the {ocp-short} GitOps container. Additionally, {ocp-short} GitOps must be configured to provide the `--enable-alpha-plugins` flag when it runs Kustomize. Complete the following steps:
-
++
 . Start editing the {ocp-short} GitOps `argocd` object with the following command:
 
 +
@@ -115,11 +115,10 @@ spec:
     initContainers:
     - args:
       - -c
-      - cp /etc/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator/PolicyGenerator
-        /policy-generator/PolicyGenerator
+      - cp /policy-generator/PolicyGenerator-not-fips-compliant /policy-generator/PolicyGenerator
       command:
       - /bin/bash
-      image: registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel8:v<version>
+      image: registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel9:v<version>
       name: policy-generator-install
       volumeMounts:
       - mountPath: /policy-generator
@@ -137,7 +136,7 @@ spec:
 +
 [source,yaml]
 ----
-image: 'registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel8:v{{ (lookup "operator.open-cluster-management.io/v1" "MultiClusterHub" "open-cluster-management" "multiclusterhub").status.currentVersion }}'
+image: '{{ (index (lookup "apps/v1" "Deployment" "open-cluster-management" "multicluster-operators-hub-subscription").spec.template.spec.containers 0).image }}'
 ----
 +
 If you want to enable the processing of Helm charts inside of a Kustomize directory before generating policies, set the environment variable `POLICY_GEN_ENABLE_HELM` to `"true"` for the Init Container:
