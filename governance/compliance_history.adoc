@@ -70,6 +70,7 @@ python -c 'import urllib.parse; import sys; print(urllib.parse.quote(sys.argv[1]
 curl -H "Authorization: Bearer $(oc whoami --show-token)" \
     "https://$(oc -n open-cluster-management get route governance-history-api -o jsonpath='{.spec.host}')/api/v1/compliance-events"
 ----
+//Is this info about success and failure important to the user? If we only provide 1 verification step to check if the password is specified correctly, can the user skip this? 
 +
 * If successful, the curl command returns a value similar to the following message:
 +
@@ -77,13 +78,39 @@ curl -H "Authorization: Bearer $(oc whoami --show-token)" \
 {"data":[],"metadata":{"page":1,"pages":0,"per_page":20,"total":0}}
 ----
 +
-* If it is not successful, the curl command might return either of the two examples:
+* If it is not successful, the curl command might return either of the two messages:
 +
 ----
 {"message":"The database is unavailable"}
 
 {"message":"Internal Error"}
 ----
++
+.. To address the connection failure, view the Kubernetes events in the `open-cluster-management` namespace with the following command:
++
+[source,bash]
+----
+oc -n open-cluster-management get events --field-selector reason=OCMComplianceEventsDBError
+----
++
+.. Instructions are displayed for you to view the `governance-policy-propagator` logs. Run the following command:
++
+[source,bash]
+----
+oc -n open-cluster-management logs -l name=governance-policy-propagator -f
+----
++
+.. You might see a similar error message, which indicates that the password is not correctly specified:
++
+----
+2024-03-05T12:17:14.500-0500	info	compliance-events-api	complianceeventsapi/complianceeventsapi_controller.go:261	The database connection failed: pq: password authentication failed for user "rhacm-policy-compliance-history"
+----
+//where can the user update the password specification? Do they update the compliance history API YAML? 
+
+[#set-compliance-history-url ]
+== Set the compliance history API URL
+
+Complete the following steps:
 
 . Set the policy compliance history API URL. To enable the feature on managed clusters, retrieve the external URL of the policy compliance history API with the following command:
 +
@@ -115,7 +142,12 @@ spec:
 +
 - Replace the `value` parameter value with your compliance history external URL.
 
-. To enable the compliance history API on all managed clusters, configure the `governance-policy-framework` `ClusterManagementAddOn` object to utilize the `AddOnDeploymentConfig` with the following command:
+[#enable-all-managed-clusters]
+=== Enable on all managed clusters
+
+Complete the following steps:
+
+. To enable the compliance history API on all managed clusters, configure the `governance-policy-framework` `ClusterManagementAddOn` object to use the `AddOnDeploymentConfig` with the following command:
 +
 [source,bash]
 ----
@@ -132,6 +164,11 @@ oc edit ClusterManagementAddOn governance-policy-framework
       name: governance-policy-framework
       namespace: open-cluster-management
 ----
+
+[#enable-single-managed-cluster]
+=== Enable a single managed cluster
+
+Complete the following steps:
 
 . To enable the policy compliance history API on a single managed cluster, configure the `governance-policy-framework` `ManagedClusterAddOn` resource in the managed cluster namespace. Run the following command from your {product-title-short} hub cluster with the following command: 
 +
@@ -164,8 +201,22 @@ The output might resemble the following:
 ----
 ["--enable-lease=true","--hub-cluster-configfile=/var/run/klusterlet/kubeconfig","--leader-elect=false","--log-encoder=console","--log-level=0","--v=-1","--evaluation-concurrency=2","--client-max-qps=30","--client-burst=45","--disable-spec-sync=true","--cluster-namespace=local-cluster","--compliance-api-url=https://governance-history-api-open-cluster-management.apps.openshift.redhat.com"]
 ----
-
++
 Any new policy compliance events are recorded in the policy compliance history API.
++
+.. If policy compliance events are not being recorded for a specific managed cluster, view the `governance-policy-framework` logs on the affected managed cluster:
++
+[source,bash]
+----
+oc -n open-cluster-management-agent-addon logs deployment/governance-policy-framework -f
+----
++
+.. Log messages similar to the following message are displayed. If the `message` value is empty, the policy compliance history API URL is incorrect or there is a network communication issue:
++
+----
+024-03-05T19:28:38.063Z        info    policy-status-sync      statussync/policy_status_sync.go:750    Failed to record the compliance event with the compliance API. Will requeue.       {"statusCode": 503, "message": ""}
+----
+//How can users fix this connection error? 
 
 [#add-compliance-history-resources]
 == Additional resource
