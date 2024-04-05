@@ -7,14 +7,14 @@ You can create a hosted cluster or import one. For instructions to import a host
 
 +
 ----
-export CLUSTERS_NAMESPACE="clusters"
+export HOSTED_CLUSTER_NAMESPACE="clusters"
 export HOSTED_CLUSTER_NAME="example"
-export HOSTED_CONTROL_PLANE_NAMESPACE="${CLUSTERS_NAMESPACE}-${HOSTED_CLUSTER_NAME}" <1>
+export HOSTED_CONTROL_PLANE_NAMESPACE="${HOSTED_CLUSTER_NAMESPACE}-${HOSTED_CLUSTER_NAME}" <1>
 export BASEDOMAIN="krnl.es"
 export PULL_SECRET_FILE=$PWD/pull-secret
 export MACHINE_CIDR=192.168.122.0/24
 export ETCD_STORAGE="lvm-storageclass"
-export OCP_RELEASE=4.14.0-multi       
+export OCP_RELEASE=4.x.0-multi <2>
 export SSH_KEY=${HOME}/.ssh/id_rsa.pub
 oc create ns ${HOSTED_CONTROL_PLANE_NAMESPACE}
 
@@ -26,14 +26,15 @@ hcp create cluster agent \
     --api-server-address=api.${HOSTED_CLUSTER_NAME}.${BASEDOMAIN} \
     --etcd-storage-class=${ETCD_STORAGE} \
     --ssh-key  ${SSH_KEY} \
-    --namespace ${CLUSTERS_NAMESPACE} \
+    --namespace ${HOSTED_CLUSTER_NAMESPACE} \
     --control-plane-availability-policy SingleReplica \
     --release-image=quay.io/openshift-release-dev/ocp-release:${OCP_RELEASE} \
     --api-server-address=api.${HOSTED_CLUSTER_NAME}.${BASEDOMAIN}
 ----
 
 +
-<1> Typically, the namespace is created by the HyperShift Operator, but agent cluster creation generates a cluster API provider role that needs the namespace to already exist.
+<1> Required by the agent cluster API provider and must already exist. Use this as the `--agent-namespace` flag in the `hcp create cluster` command. Ensure that agents are available in this namespace. You can find the list of agents by using the `oc get agent -n ${HOSTED_CONTROL_PLANE_NAMESPACE}` command.
+<2> Replace `4.x.0` with the supported version that you want to use.
 
 . After a few moments, verify that your hosted control plane pods are up and running by entering the following command:
 
@@ -54,28 +55,6 @@ certified-operators-catalog-884c756c4-zdt64      1/1     Running   0          2m
 cluster-api-f75d86f8c-56wfz                      1/1     Running   0          4m32s
 cluster-autoscaler-7977864686-2rz4c              1/1     Running   0          4m13s
 cluster-network-operator-754cf4ffd6-lwfm2        1/1     Running   0          2m51s
-cluster-policy-controller-784f995d5-7cbrz        1/1     Running   0          2m51s
-cluster-version-operator-5c68f7f4f8-lqzcm        1/1     Running   0          2m51s
-community-operators-catalog-58599d96cd-vpj2v     1/1     Running   0          2m51s
-control-plane-operator-f6b4c8465-4k5dh           1/1     Running   0          4m32s
-etcd-0                                           1/1     Running   0          4m13s
-hosted-cluster-config-operator-c4776f89f-dt46j   1/1     Running   0          2m51s
-ignition-server-7cd8676fc5-hjx29                 1/1     Running   0          4m22s
-ingress-operator-75484cdc8c-zhdz5                1/2     Running   0          2m51s
-konnectivity-agent-c5485c9df-jsm9s               1/1     Running   0          4m13s
-konnectivity-server-85dc754888-7z8vm             1/1     Running   0          4m13s
-kube-apiserver-db5fb5549-zlvpq                   3/3     Running   0          4m13s
-kube-controller-manager-5fbf7b7b7b-mrtjj         1/1     Running   0          90s
-kube-scheduler-776c59d757-kfhv6                  1/1     Running   0          3m12s
-machine-approver-c6b947895-lkdbk                 1/1     Running   0          4m13s
-oauth-openshift-787b87cff6-trvd6                 2/2     Running   0          87s
-olm-operator-69c4657864-hxwzk                    2/2     Running   0          2m50s
-openshift-apiserver-67f9d9c5c7-c9bmv             2/2     Running   0          89s
-openshift-controller-manager-5899fc8778-q89xh    1/1     Running   0          2m51s
-openshift-oauth-apiserver-569c78c4d-568v8        1/1     Running   0          2m52s
-packageserver-ddfffb8d7-wlz6l                    2/2     Running   0          2m50s
-redhat-marketplace-catalog-7dd77d896-jtxkd       1/1     Running   0          2m51s
-redhat-operators-catalog-d66b5c965-qwhn7         1/1     Running   0          2m51s
 ----
 
 [#hosted-create-bare-metal-console]
@@ -85,9 +64,9 @@ redhat-operators-catalog-d66b5c965-qwhn7         1/1     Running   0          2m
 
 . In the console header, ensure that **All Clusters** is selected.
 
-. Click **Infrastructure -> Clusters**.
+. Click **Infrastructure > Clusters**.
 
-. Click **Create cluster -> Host inventory -> Hosted control plane**.
+. Click **Create cluster > Host inventory > Hosted control plane**.
 
 +
 The **Create cluster** page is displayed.
@@ -110,7 +89,9 @@ The **Create cluster** page is displayed.
 +
 The **Hosted cluster** view is displayed.
 
-. Monitor the deployment of the hosted cluster in the **Hosted cluster** view. If you do not see information about the hosted cluster, ensure that **All Clusters** is selected, and click the cluster name.
+. Monitor the deployment of the hosted cluster in the **Hosted cluster** view.
+
+. If you do not see information about the hosted cluster, ensure that **All Clusters** is selected, then click the cluster name.
 
 . Wait until the control plane components are ready. This process can take a few minutes.
 
@@ -124,3 +105,5 @@ The **Hosted cluster** view is displayed.
 * To import a hosted cluster, see xref:../hosted_control_planes/import_hosted_cluster.adoc#importing-hosted-cluster[Manually importing a hosted control plane cluster].
 
 * To access a hosted cluster, see xref:../hosted_control_planes/access_hosted_cluster.adoc#access-hosted-cluster[Accessing the hosted cluster].
+
+* To add hosts to the host inventory by using the Discovery Image, see xref:../cluster_lifecycle/cim_add_host.adoc[Adding hosts to the host inventory by using the Discovery Image].
