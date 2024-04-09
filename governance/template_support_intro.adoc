@@ -5,9 +5,21 @@ Configuration policies support the inclusion of Golang text templates in the obj
 
 A configuration policy definition can contain both hub cluster and managed cluster templates. Hub cluster templates are processed first on the hub cluster, then the policy definition with resolved hub cluster templates is propagated to the target clusters. On the managed cluster, the `ConfigurationPolicyController` processes any managed cluster templates in the policy definition and then enforces or verifies the fully resolved object definition.
 
-The template syntax must be conformed to the Golang template language specification, and the resource definition generated from the resolved template must be a valid YAML. See the Golang documentation about _Package templates_ for more information. Any errors in template validation are recognized as policy violations. When you use a custom template function, the values are replaced at runtime.
+You must configure the template syntax according to the Golang template language specification, and the resource definition generated from the resolved template must be a valid YAML. See the Golang documentation about _Package templates_ for more information. Any errors in template validation are recognized as policy violations. When you use a custom template function, the values are replaced at runtime.
 
-*Important:* If you use hub cluster templates to propagate secrets or other sensitive data, the sensitive data exists in the managed cluster namespace on the hub cluster and on the managed clusters where that policy is distributed. The template content is expanded in the policy, and policies are not encrypted by the {ocp-short} ETCD encryption support. To address this, use `fromSecret` or `copySecretData`, which automatically encrypts the values from the secret, or `protect` to encrypt other values.
+*Important:*
+
+- If you use hub cluster templates to propagate secrets or other sensitive data, the sensitive data exists in the managed cluster namespace on the hub cluster and on the managed clusters where that policy is distributed. The template content is expanded in the policy, and policies are not encrypted by the {ocp-short} ETCD encryption support. To address this, use `fromSecret` or `copySecretData`, which automatically encrypts the values from the secret, or `protect` to encrypt other values.
+
+- When you add multiline string values such as, certificates, always add `| toRawJson | toLiteral` syntax at the end of the template pipeline to handle line breaks. For example, if you are copying a certificate from a `Secret` resource and including it in a `ConfigMap` resource, your template pipeline might be similar to the following syntax:
+
++
+----
+ca.crt: '{{ fromSecret "openshift-config" "ca-config-map-secret" "ca.crt"  | base64dec | toRawJson | toLiteral }}'
+----
++
+The `toRawJson` template function converts the input value to a JSON string with new lines escaped. The `toLiteral` template function removes the outer single quotes from the output. For example, when templates are processed for the `key: '{{ 'hello\nworld' | toRawJson }}'` template pipeline, the output is `key: '"hello\nworld"'`. The output of the `key: '{{ 'hello\nworld' | toRawJson |toLiteral }}'` template pipeline is `key: "hello\nworld"`.
+//what do you mean when you say escaped? Are the new lines ignored? 
 
 See the following table for a comparison of hub cluster and managed cluster templates:
 
