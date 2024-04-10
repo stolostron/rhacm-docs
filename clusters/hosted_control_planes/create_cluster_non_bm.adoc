@@ -1,0 +1,101 @@
+[#creating-a-hosted-cluster-non-bm]
+= Creating a hosted cluster on non bare metal agent machines
+
+You can create a hosted cluster or import one. For instructions to import a hosted cluster, see _Importing a hosted cluster_.
+
+. Verify that you have a default storage class configured for your cluster. Otherwise, you might end up with pending PVCs. Enter the following commands, replacing any example variables with your information:
+
++
+----
+export HOSTED_CLUSTER_NAMESPACE="clusters"
+export HOSTED_CLUSTER_NAME="example"
+export HOSTED_CONTROL_PLANE_NAMESPACE="${HOSTED_CLUSTER_NAMESPACE}-${HOSTED_CLUSTER_NAME}" <1>
+export BASEDOMAIN="krnl.es"
+export PULL_SECRET_FILE=$PWD/pull-secret
+export MACHINE_CIDR=192.168.122.0/24
+export ETCD_STORAGE="lvm-storageclass"
+export OCP_RELEASE=4.x.0-multi <2>
+export SSH_KEY=${HOME}/.ssh/id_rsa.pub
+oc create ns ${HOSTED_CONTROL_PLANE_NAMESPACE}
+
+hcp create cluster agent \
+    --name=${HOSTED_CLUSTER_NAME} \
+    --pull-secret=${PULL_SECRET_FILE} \
+    --agent-namespace=${HOSTED_CONTROL_PLANE_NAMESPACE} \
+    --base-domain=${BASEDOMAIN} \
+    --api-server-address=api.${HOSTED_CLUSTER_NAME}.${BASEDOMAIN} \
+    --etcd-storage-class=${ETCD_STORAGE} \
+    --ssh-key  ${SSH_KEY} \
+    --namespace ${HOSTED_CLUSTER_NAMESPACE} \
+    --control-plane-availability-policy SingleReplica \
+    --release-image=quay.io/openshift-release-dev/ocp-release:${OCP_RELEASE} \
+    --api-server-address=api.${HOSTED_CLUSTER_NAME}.${BASEDOMAIN}
+----
+
++
+<1> Required by the agent cluster API provider and must already exist. Use this as the `--agent-namespace` flag in the `hcp create cluster` command. Ensure that agents are available in this namespace. You can find the list of agents by using the `oc get agent -n ${HOSTED_CONTROL_PLANE_NAMESPACE}` command.
+<2> Replace `4.x.0` with the supported version that you want to use.
+
+. After a few moments, verify that your hosted control plane pods are up and running by entering the following command:
+
++
+----
+oc -n ${HOSTED_CONTROL_PLANE_NAMESPACE} get pods
+----
+
++
+See the following example output:
+
++
+----
+NAME                                             READY   STATUS    RESTARTS   AGE
+catalog-operator-6cd867cc7-phb2q                 2/2     Running   0          2m50s
+control-plane-operator-f6b4c8465-4k5dh           1/1     Running   0          4m32s
+----
+
+[#hosted-create-non-bare-metal-console]
+== Creating a hosted cluster on non bare metal agent machines by using the console
+
+. Open the {ocp-short} web console and log in by entering your administrator credentials. For instructions to open the console, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/web_console/web-console[Accessing the web console] in the {ocp-short} documentation.
+
+. In the console header, ensure that **All Clusters** is selected.
+
+. Click **Infrastructure > Clusters**.
+
+. Click **Create cluster  Host inventory > Hosted control plane**.
+
++
+The **Create cluster** page is displayed.
+
+. On the **Create cluster** page, follow the prompts to enter details about the cluster, node pools, networking, and automation.
+
++
+*Note:* As you enter details about the cluster, you might find the following tips useful:
+
+** If you want to use predefined values to automatically populate fields in the console, you can create a host inventory credential. For more information, see _Creating a credential for an on-premises environment_.
+
+** On the *Cluster details* page, the pull secret is your {ocp-short} pull secret that you use to access {ocp-short} resources. If you selected a host inventory credential, the pull secret is automatically populated.
+
+** On the *Node pools* page, the namespace contains the hosts for the node pool. If you created a host inventory by using the console, the console creates a dedicated namespace.
+
+** On the *Networking* page, you select an API server publishing strategy. The API server for the hosted cluster can be exposed either by using an existing load balancer or as a service of the `NodePort` type. A DNS entry must exist for the `api.${HOSTED_CLUSTER_NAME}.${BASEDOMAIN}` setting that points to the destination where the API server can be reached. This entry can be a record that points to one of the nodes in the management cluster or a record that points to a load balancer that redirects incoming traffic to the Ingress pods.
+
+. Review your entries and click **Create**.
+
++
+The **Hosted cluster** view is displayed.
+
+. Monitor the deployment of the hosted cluster in the **Hosted cluster** view. If you do not see information about the hosted cluster, ensure that **All Clusters** is selected, and click the cluster name. Wait until the control plane components are ready. This process can take a few minutes.
+
+. To view the node pool status, scroll to the **NodePool** section. The process to install the nodes takes about 10 minutes. You can also click **Nodes** to confirm whether the nodes joined the hosted cluster.
+
+[#hosted-create-non-bare-metal-additional-resources]
+== Additional resources
+
+* To create credentials that you can reuse when you create a hosted cluster with the console, see xref:../credentials/credential_on_prem.adoc#creating-a-credential-for-an-on-premises-environment[Creating a credential for an on-premises environment].
+
+* To import a hosted cluster, see xref:../hosted_control_planes/import_hosted_cluster.adoc#importing-hosted-cluster[Manually importing a hosted control plane cluster].
+
+* To access a hosted cluster, see xref:../hosted_control_planes/access_hosted_cluster.adoc#access-hosted-cluster[Accessing the hosted cluster].
+
+* To add hosts to the host inventory by using the Discovery Image, see xref:../cluster_lifecycle/cim_add_host.adoc#add-host-host-inventory[Adding hosts to the host inventory by using the Discovery Image].

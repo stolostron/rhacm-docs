@@ -27,6 +27,18 @@ For your {ocp} cluster, see link:https://access.redhat.com/documentation/en-us/o
 
 For more about deprecations and removals, see xref:../release_notes/deprecate_remove.adoc#deprecations-removals[Deprecations and removals].
 
+[#container-security-operator-not-available-ocp]
+== Container security operator is not available in {ocp-short} 3.11
+//2.10:10268
+
+The container security operator is not available in {ocp-short} 3.11. Therefore, you cannot take the policy template of `policy-imagemanifestvuln-sub` in the `ImageManifestVuln` policy and apply it for {ocp-short} 3.11 clusters. 
+
+If you try to apply the `ImageManifestVuln` policy, you receive the following violation message:
+
+```
+violation - couldn't find mapping resource with kind Subscription, please check if you have CRD deployed. 
+```
+
 [#grc-resources-not-cleaned-up]
 == Governance resources not cleaned up properly when the component is disabled 
 //2.9:8550
@@ -40,17 +52,11 @@ When you use an external identity provider to log in to {product-title-short}, y
 
 You must log out of the external identity provider before you attempt to log out of {product-title-short}. 
 
-[#gatekeeper-upgrade]
-== Gatekeeper operator installation fails
-//2.4:16673
-
-When you install the gatekeeper operator on {ocp} version 4.9, the installation fails. Before you upgrade {ocp-short} to version 4.9.0., you must upgrade the gatekeeper operator to version 0.2.0. See link:../governance/create_gatekeeper.adoc#upgrading-gatekeeper-gatekeeper-operator[Upgrading gatekeeper and the gatekeeper operator] for more information.
-
 [#config-policy-stuck]
 == Configuration policy listed complaint when namespace is stuck in _Terminating_ state
 //2.2:20715
 
-When you have a configuration policy that is configured with `mustnothave` for the `complianceType` parameter and `enforce` for the `remediationAction` parameter, the policy is listed as compliant after a deletion request is made to the Kubernetes API. Therefore, the Kubernetes object can be stuck in a `Terminating` state while the policy is listed as compliant.
+When you have a configuration policy that is configured with `mustnothave` for the `complianceType` parameter and `enforce` for the `remediationAction` parameter, the policy is listed as compliant when a deletion request is made to the Kubernetes API. Therefore, the Kubernetes object can be stuck in a `Terminating` state while the policy is listed as compliant.
 
 [#operators-deployed-with-policies]
 == Operators deployed with policies do not support ARM
@@ -61,32 +67,31 @@ While installation into an ARM environment is supported, operators that are depl
 * link:https://github.com/stolostron/policy-collection/blob/main/stable/CA-Security-Assessment-and-Authorization/policy-compliance-operator-install.yaml[{product-title-short} policy for the Compliance Operator]
 
 [#configurationpolicy-crd-terminating]
-== ConfigurationPolicy CRD is stuck in terminating
+== ConfigurationPolicy custom resource definition is stuck in terminating
 
-When you remove the `config-policy-controller` add-on from a managed cluster by disabling the policy controller in the `KlusterletAddonConfig` or by detaching the cluster, the `ConfigurationPolicy` CRD might get stuck in a terminating state. If the `ConfigurationPolicy` CRD is stuck in a terminating state, new policies might not be added to the cluster if the add-on is reinstalled later. You can also receive the following error:
+When you remove the `config-policy-controller` add-on from a managed cluster by disabling the policy controller in the `KlusterletAddonConfig` or by detaching the cluster, the `ConfigurationPolicy` custom resource definition might get stuck in a terminating state. If the `ConfigurationPolicy` custom resource definition is stuck in a terminating state, new policies might not be added to the cluster if the add-on is reinstalled later. You can also receive the following error:
 
 ----
 template-error; Failed to create policy template: create not allowed while custom resource definition is terminating
 ----
 
-Use the following command to check if the CRD is stuck: 
+Use the following command to check if the custom resource definition is stuck: 
 
 ----
 oc get crd configurationpolicies.policy.open-cluster-management.io -o=jsonpath='{.metadata.deletionTimestamp}'
 ----
 
-If a deletion timestamp is on the resource, the CRD is stuck. To resolve the issue, remove all finalizers from configuration policies that remain on the cluster. Use the following command on the managed cluster and replace `<cluster-namespace>` with the managed cluster namespace:
+If a deletion timestamp is on the resource, the custom resource definition is stuck. To resolve the issue, remove all finalizers from configuration policies that remain on the cluster. Use the following command on the managed cluster and replace `<cluster-namespace>` with the managed cluster namespace:
 
 ----
 oc get configurationpolicy -n <cluster-namespace> -o name | xargs oc patch -n <cluster-namespace> --type=merge -p '{"metadata":{"finalizers": []}}'
 ----
 
-The configuration policy resources are automatically removed from the cluster and the CRD exits its terminating state. If the add-on has already been reinstalled, the CRD is recreated automatically without a deletion timestamp.
+The configuration policy resources are automatically removed from the cluster and the custom resource definition exits its terminating state. If the add-on has already been reinstalled, the custom resource definition is recreated automatically without a deletion timestamp.
 
 [#pruneobjbeh-not-working-existing-config-policy]
 == _pruneObjectBehavior_ does not work when modifying existing configuration policy
 //2.6:25261
-//2.7+2.8:5939
 
 When you modify an existing configuration policy, `pruneObjectBehavior` does not work. View the following reasons why `pruneObjectBehavior` might not work:
 
@@ -106,10 +111,6 @@ To resolve the issue, disable the policy and compare the differences between `ob
 - The `objectDefinition` in the `ConfigurationPolicy` does not match because of Kubernetes processing the object when the policy is applied.
 +
 To resolve the issue, disable the policy and compare the differences between `objectDefinition` in the policy and the object on the managed cluster. If the keys are different or missing, Kubernetes might have processed the keys before applying them to the object, such as removing keys containing default or empty values.
-+
-*Note:* If `pruneObjectBehavior` is set to something other than `None`, disabling the policy causes the objects to be cleaned up. In this case, set `pruneObjectBehavior` to `None` so that the objects exist after the policy is disabled.
-
-For example, the `stringData` map in a `Secret` resource is converted by Kubernetes to `data` with `base64` encoded values. Instead of using `stringData`, use `data` directly with `base64` encoded values instead of strings.
 
 [#psp-not-supported-ocp]
 == Pod security policies not supported on {ocp-short} 4.12 and later
@@ -132,6 +133,7 @@ When you create a policy with identical policy template names, you receive incon
 When you disable governance deployments in the `MultiClusterHub` object, the deployments are not cleaned without errors. Complete the following steps to disable governance so that the deployments also get cleaned up:
 
 . Disable the `policyController` in the `KlusterletAddonConfig` for the managed cluster. If you do this for all managed clusters, run the following command:
+
 +
 [source,bash]
 ----
@@ -141,6 +143,7 @@ done
 ----
 
 . For local clusters only: Delete the `ManifestWork` for the local cluster and remove the finalizer on the `ManagedClusterAddon` if the `governance-policy-framework-uninstall` pod of a local cluster is in `CrashLoopBackOff`. Run the following commands:
+
 +
 [source,bash]
 ----
@@ -149,6 +152,7 @@ oc patch managedclusteraddon -n local-cluster governance-policy-framework --type
 ----
 
 . Disable governance globally, if required, by setting the `grc` element in the `spec.overrides` section to `false` in the `MultiClusterHub` object. Run the following command:
+
 +
 [source,bash]
 ----
@@ -156,6 +160,7 @@ oc edit multiclusterhub <name> -n <namespace>
 ----
 
 . For local clusters only: If there are any local cluster policies, you can delete the policies by running the following command:
+
 +
 [source,bash]
 ----
@@ -163,6 +168,7 @@ oc delete policies -n local-cluster --all
 ----
 
 . To re-enable governance in the `KlusterletAddonConfig`, re-enable the `grc` element of the `spec.overrides` section in the `MultiClusterHub`. Run the following command:
+
 +
 [source,bash]
 ----
@@ -172,35 +178,28 @@ done
 ----
 
 . If the deployments are unsuccessful, the `governance-policy-addon-controller` might have a stale lease. Delete the lease by using the following command:
+
 +
 [source,bash]
 ----
 oc delete lease governance-policy-addon-controller-lock -n <namespace> 
 ----
 
-[#templating-errors]
-== Objects are deleted due to templating errors
-//2.8:ACM-5855
+[#database-compliance-history-outage]
+== Database and policy compliance history API outage
 
-When there are templating errors, such as incorrect syntax in a configuration policy, objects are deleted. Recreate your deleted object with the correct syntax. 
+There is built-in resilience for database and policy compliance history API outages, however, any compliance events that cannot be recorded by a managed cluster are queued in memory until they are successfully recorded. This means that if there is an outage and the `governance-policy-framework` pod on the managed cluster restarts, all queued compliance events are lost.
 
+If you create or update a new policy during a database outage, any compliance events sent for this new policy cannot be recorded since the mapping of policies to database IDs cannot be updated. When the database is back online, the mapping is automatically updated and future compliance events from those policies are recorded.
 
-[#duplicate-ansible-jobs]
-== Duplicate Ansible jobs are created for policy automations  
-//2.7+2.8:ACM-5644
+[#postgresql-data-loss]
+== PostgreSQL data loss
 
-If you have a `PolicyAutomation` that is set to _Run once_ mode and disabled, an extra Ansible job is created. You can delete the extra Ansible job. Complete the following steps:
+If there is data loss to the PostgreSQL server such as restoring to a backup without the latest data, the governance policy propagator on the {product-title-hsort} hub cluster must be restarted so that it can update the mapping of policies to database IDs. Until you restart the governance policy propagator, new compliance events associated with policies that once existed in the database are no longer recorded. 
 
-. Run the following command to view the Ansible job list:
-+
+To restart the governance policy propagator, run the following command on the {product-title-short} hub cluster:
+
 [source,bash]
 ----
-oc get ansiblejob -n {namespace}
-----
-
-. Delete the duplicate Ansible job by using the following command:
-+
-[source,bash]
-----
-oc delete ansiblejob {ansiblejob name} -n {namespace}
+oc -n open-cluster-management rollout restart deployment/grc-policy-propagator
 ----

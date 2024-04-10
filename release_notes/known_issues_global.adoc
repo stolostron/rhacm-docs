@@ -23,6 +23,16 @@ Or consider a troubleshooting topic.
 
 Review the known issues for the {global-hub} Operator. The following list contains known issues for this release, or known issues that continued from the previous release. For your {ocp-short} cluster, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/release_notes/ocp-4-12-release-notes#ocp-4-12-known-issues[{ocp-short} known issues].
 
+[#kafka-operator-keeps-restarting]
+== Kafka operator keeps restarting 
+
+In the Federal Information Processing Standard (FIPS) environment, the Kafka operator keeps restarting because of the out-of-memory (OOM) state. To fix this issue, set the resource limit to at least `512M`. For detailed steps on how to set this limit, see link:https://access.redhat.com/documentation/en-us/red_hat_amq_streams/2.6/html/deploying_and_managing_amq_streams_on_openshift/deploy-intro_str#assembly-fips-support-str[amq stream doc].
+
+[#backup-and-restore-known-issues]
+== Backup and restore known issues 
+
+If your original {global-hub} cluster crashes, the {global-hub} loses its generated events and `cron` jobs. Even if you restore the new {global-hub} cluster, the events and `cron` jobs are not restored. To workaround this issue, you can manually run the `cron` job, see link:https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/multicluster_global_hub/multicluster-global-hub#global-hub-compliance-manual[Running the summarization process manually].
+
 [#managed-cluster-not-counted]
 == Managed cluster displays but is not counted
 
@@ -48,3 +58,71 @@ This is also an issue for the **Cluster Group Compliancy Overview**.
 If a managed hub cluster imports an {ocp-short} 3.11 cluster (deprecated) as managed cluster, it cannot redirect to the _Observability_ page in the *Global Hub* > *Overview* dashboard.
 
 You need to manually navigate to your target page.
+
+[#compliance-cron-job-error]
+== Compliance _cron_ job error
+
+Use the compliance `cron` job to view a summary of the daily job status of the policy by compliance and event tables. When you reimport the managed hub cluster to the {global-hub} cluster with a different name, this reimport might cause two events from the same policy but with different managed hub cluster names. These different events cause the daily compliance `cron` job status to run the error, `pq: ON CONFLICT DO UPDATE command cannot affect row a second time`. 
+
+To work around this error, complete the following steps:
+
+. Restart the managed hub cluster. 
+. Restore the compliance history data for yesterday by running the following SQL: 
+
++
+[source,sql]
+----
+INSERT INTO history.local_compliance (policy_id, cluster_id, leaf_hub_name, compliance_date, compliance, compliance_changed_frequency)
+WITH compliance_aggregate AS (
+    SELECT
+        cluster_id,
+        policy_id,
+        leaf_hub_name,
+        CASE
+            WHEN bool_or(compliance = 'non_compliant') THEN 'non_compliant'
+            WHEN bool_or(compliance = 'unknown') THEN 'unknown'
+            ELSE 'compliant'
+        END::local_status.compliance_type AS aggregated_compliance
+    FROM 
+        event.local_policies lp
+    WHERE 
+        created_at BETWEEN CURRENT_DATE - INTERVAL '1 days' AND CURRENT_DATE - INTERVAL '0 day'
+        AND EXISTS (
+            SELECT 1
+            FROM status.leaf_hubs lh
+            WHERE lh.leaf_hub_name = lp.leaf_hub_name AND deleted_at IS NULL
+        )
+    GROUP BY
+        cluster_id, policy_id, leaf_hub_name
+)
+SELECT
+    policy_id,
+    cluster_id,
+    leaf_hub_name,
+    (CURRENT_DATE - INTERVAL '1 day') AS compliance_date,
+    aggregated_compliance,
+    (
+        SELECT COUNT(1) FROM (
+            SELECT
+                created_at,
+                compliance,
+                LAG(compliance) OVER (PARTITION BY cluster_id, policy_id ORDER BY created_at ASC) AS prev_compliance
+            FROM
+                event.local_policies lp
+            WHERE
+                (lp.created_at BETWEEN CURRENT_DATE - INTERVAL '1 day' AND CURRENT_DATE - INTERVAL '0 day') 
+                AND lp.cluster_id = ca.cluster_id AND lp.policy_id = ca.policy_id
+            ORDER BY
+                created_at ASC
+        ) AS subquery
+        WHERE compliance <> prev_compliance
+    ) AS compliance_changed_frequency
+FROM
+    compliance_aggregate ca
+ORDER BY
+    cluster_id, policy_id;
+ON CONFLICT (leaf_hub_name, policy_id, cluster_id, compliance_date)
+DO UPDATE SET
+    compliance = EXCLUDED.compliance,
+    compliance_changed_frequency = EXCLUDED.compliance_changed_frequency;
+----

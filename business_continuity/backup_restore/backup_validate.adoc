@@ -1,11 +1,21 @@
 [#backup-validation-using-a-policy]
 = Validating your backup or restore configurations
+ 
+When you set the `cluster-backup` option to `true` on the `MultiClusterHub` resource, {mce-short} installs the cluster backup and restore operator Helm chart that is named the `cluster-backup-chart`. This chart then installs the `backup-restore-enabled` and `backup-restore-auto-import` policies. Use these policies to view information about issues with your backup and restore components.
 
-The cluster backup and restore operator Helm chart, `cluster-backup-chart`, installs the `backup-restore-enabled` policy on your hub cluster, which is used to inform you about issues with the backup and restore component. 
+*Note:* A hub cluster is automatically imported and managed by itself by using the `local-cluster` managed cluster. If you disable this by setting `disableHubSelfManagement=true` on the `MultiClusterHub` resource, the `backup-restore-enabled` policy is not placed on the hub cluster, and the policy templates do not produce any reports.
 
-*Note:* A hub cluster is automatically imported and managed by itself using the `local-cluster` managed cluster. If you disable this by setting `disableHubSelfManagement=true` on the `MultiClusterHub` resource, the `backup-restore-enabled` policy is not placed on the hub cluster and the policy templates do not produce any reports.
+If a cluster hub is managed by a global hub cluster, or if it is installed on a managed cluster instance, the `disableHubSelfManagement=true` setting is disabled. In this instance, you can enable the `backup-restore-enabled` policy. Enable the policy by setting the `is-hub=true` label on the `ManagedCluster` resource that represents the managed hub cluster. 
 
 The `backup-restore-enabled` policy includes a set of templates that check for the following constraints:
+
+- *OADP channel validation*
++
+* When you enable the backup component on the `MultiClusterHub`, the cluster backup and restore operator Helm chart installs the OADP operator. The `OADP-channel` template checks if the installed Red Hat OADP Operator version matches the version set by the {product-title-short} cluster backup and restore operator.
+* The template shows violations if it finds an installed Red Hat OADP Operator on the hub cluster, but the Red Hat OADP Operator does not match the version installed by the {product-title-short} cluster backup and restore operator Helm chart. The violation finds and shows a wrong version of the OADP Operator on the cluster. Since the OADP Operator and the Velero Custom Resource Definitions (CRDs) are `cluster-scoped`, you cannot have multiple versions of them installed on the same cluster. Instead, you must only install the right version.  
+* In the following examples, the backup and restore operator could run with wrong CRDs resulting in erroneous behavior: 
+** {product-title-short} has many installed versions of OADP. 
+** If the OADP version installed by `MultiClusterHub` is uninstalled, and you manually install a different version.
 
 - *Pod validation*
 +
@@ -46,10 +56,19 @@ For a definition of the `BackupCollision`, see xref:../backup_restore/backup_sch
 +
 * A `BackupSchedule.cluster.open-cluster-management.io` actively runs and saves new backups at the storage location. This validation is done by the `backup-schedule-cron-enabled` policy template. The template checks that there is a `Backup.velero.io` with `velero.io/schedule-name: acm-validation-policy-schedule` label at the storage location.
 +
-The `acm-validation-policy-schedule` backups are set to expire after the time is set for the backups cron schedule. If no cron job is running to create backups, the old `acm-validation-policy-schedule` backup is deleted because it expired and a new one is not created. As a result, if no `acm-validation-policy-schedule backups` exist at any moment, it means that there are no active cron jobs generating backups.
+* The `acm-validation-policy-schedule` backups are set to expire after the time is set for the backups cron schedule. If no cron job is running to create backups, the old `acm-validation-policy-schedule` backup is deleted because it expired and a new one is not created. As a result, if no `acm-validation-policy-schedule backups` exist at any moment, it means that there are no active cron jobs generating backups.
 +
-This policy is intended to help notify the hub cluster administrator of any backup issues when the hub cluster is active and produces or restore backups.
+* This policy is intended to help notify the hub cluster administrator of any backup issues when the hub cluster is active and produces or restore backups.
 
+The `backup-restore-auto-import` policy includes a set of templates that check for the following constraints:
+
+- *Auto import secret validation*
++
+* The `auto-import-account-secret` template checks whether a `ManagedServiceAccount` secret is created in the managed cluster namespaces other than the `local-cluster`. The backup controller regularly scans for imported managed clusters. As soon as a managed cluster is discovered, the backup controller creates the `ManagedServiceAccount` resource in the managed cluster namespace. This process initiates token creation on the managed cluster. However, if the managed cluster is not accessible at the time of this operation, the `ManagedServiceAccount` is unable to create the token. For example, if the managed cluster is hibernating, it is unable to create the token. So, if a hub backup is executed during this period, the backup then lacks a token for auto-importing the managed cluster.
+
+- *Auto import backup label validation*
++
+* The `auto-import-backup-label` template verifies the existence of a `ManagedServiceAccount` secret in the managed cluster namespaces other than the `local-cluster`. If the template finds the `ManagedServiceAccount` secret, then the template enforces the `cluster.open-cluster-management.io/backup` label on the secret. This label is crucial for including the `ManagedServiceAccount` secrets in {product-title-short} backups.
 
 [#protecting-data-using-server-side-encryption]
 == Protecting data using server-side encryption

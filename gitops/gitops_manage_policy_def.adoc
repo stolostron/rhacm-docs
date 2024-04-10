@@ -3,8 +3,11 @@
 
 *Deprecated:* `PlacementRule`
 
-{ocp-short} GitOps, based on Argo CD, can also be used to manage policy definitions. To allow this workflow, {ocp-short} GitOps must be granted access to create policies on the {product-title-short} hub cluster. Create the following `ClusterRole` resource called `openshift-gitops-policy-admin`, with access to create, read, update, and delete policies and placements. Your `ClusterRole` might resemble the following example:
+Based on Argo CD, you can use {ocp-short} GitOps to manage policy definitions. To allow this workflow, you must grant {ocp-short} GitOps access for you to create policies on the {product-title-short} hub cluster. Complete the following steps to create a `ClusterRole` resource for {ocp-short} GitOps, with access to create, read, update, and delete policies and placements:
 
+. Create a `ClusterRole` from the console. Your `ClusterRole` might resemble the following example:
+
++
 [source,yaml]
 ----
 kind: ClusterRole
@@ -55,8 +58,9 @@ rules:
       - placementdecisions/status
 ----
 
-Create a `ClusterRoleBinding` object to grant the {ocp-short} GitOps service account access to the `openshift-gitops-policy-admin` `ClusterRole` object. Your `ClusterRoleBinding` might resemble the following example:
+. Create a `ClusterRoleBinding` object to grant the {ocp-short} GitOps service account access to the `openshift-gitops-policy-admin` `ClusterRole` object. Your `ClusterRoleBinding` might resemble the following example:
 
++
 [source,yaml]
 ----
 kind: ClusterRoleBinding
@@ -75,23 +79,26 @@ roleRef:
 
 When a {product-title-short} policy definition is deployed with {ocp-short} GitOps, a copy of the policy is created in each managed cluster namespace. These copies are called replicated policies. To prevent {ocp-short} GitOps from repeatedly deleting this replicated policy or show that the ArgoCD `Application` is out of sync, the `argocd.argoproj.io/compare-options: IgnoreExtraneous` annotation is automatically set on each replicated policy by the {product-title-short} policy framework.
 
-There are labels and annotations used by ArgoCD to track objects. For replicated policies to not show up at all in ArgoCD, you can set `spec.copyPolicyMetadata` to `false` on the {product-title-short} policy definition to prevent these ArgoCD tracking labels and annotations from being copied to the replicated policy.
-
+There are labels and annotations used by Argo CD to track objects. For replicated policies to not show up at all in Argo CD, you can set `spec.copyPolicyMetadata` to `false` on the {product-title-short} policy definition to disable the Argo CD tracking labels and annotations from being copied to the replicated policy.
 
 [#policy-gen-install-on-openshift-gitops]
 == Integrating the Policy Generator with {ocp-short} GitOps (Argo CD)
 
-{ocp-short} GitOps, based on ArgoCD, can also be used to generate policies by using the Policy Generator through GitOps. Since the Policy Generator does not come preinstalled in the {ocp-short} GitOps container image, some customization must take place. In order to follow along, you must have the {ocp-short} GitOps Operator installed on the {product-title-short} hub cluster and be sure to log in to the hub cluster.
+Based on Argo CD, you can use {ocp-short} GitOps to generate policies by using the Policy Generator through GitOps. Since the Policy Generator does not come preinstalled in the {ocp-short} GitOps container image, some customization must take place. In order to follow along, you must have the {ocp-short} GitOps Operator installed on the {product-title-short} hub cluster and be sure to log in to the hub cluster.
 
-For {ocp-short} GitOps to have access to the Policy Generator when you run Kustomize, an Init Container is required to copy the Policy Generator binary from the {product-title-short} Application Subscription container image to the {ocp-short} GitOps container. Additionally, {ocp-short} GitOps must be configured to provide the `--enable-alpha-plugins` flag when it runs Kustomize. Start editing the {ocp-short} GitOps `argocd` object with the following command:
+For {ocp-short} GitOps to have access to the Policy Generator when you run Kustomize, an Init Container is required to copy the Policy Generator binary from the {product-title-short} Application Subscription container image to the {ocp-short} GitOps container. Additionally, {ocp-short} GitOps must be configured to provide the `--enable-alpha-plugins` flag when it runs Kustomize. Complete the following steps:
 
+. Start editing the {ocp-short} GitOps `argocd` object with the following command:
+
++
 [source,bash]
 ----
 oc -n openshift-gitops edit argocd openshift-gitops
 ----
 
-Then modify the {ocp-short} GitOps `argocd` object to contain the following additional YAML content. When a new major version of {product-title-short} is released and you want to update the Policy Generator to a newer version, you need to update the `registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel8` image used by the Init Container to a newer tag. View the following example and replace `<version>` with {product-version} or your desired {product-title-short} version:
+. Modify the {ocp-short} GitOps `argocd` object to contain the following additional YAML content. When a new major version of {product-title-short} is released and you want to update the Policy Generator to a newer version, you need to update the `registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel8` image used by the Init Container to a newer tag. View the following example and replace `<version>` with {product-version} or your desired {product-title-short} version:
 
++
 [source,yaml]
 ----
 apiVersion: argoproj.io/v1alpha1
@@ -108,15 +115,14 @@ spec:
     initContainers:
     - args:
       - -c
-      - cp /etc/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator/PolicyGenerator
-        /policy-generator/PolicyGenerator
+      - cp /policy-generator/PolicyGenerator-not-fips-compliant /policy-generator-tmp/PolicyGenerator
       command:
       - /bin/bash
-      image: registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel8:v<version>
+      image: registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel9:v<version>
       name: policy-generator-install
       volumeMounts:
       - mountPath: /policy-generator
-        name: policy-generator
+        name: policy-generator-tmp
     volumeMounts:
     - mountPath: /etc/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator
       name: policy-generator
@@ -124,11 +130,30 @@ spec:
     - emptyDir: {}
       name: policy-generator
 ----
++
+*Note:* Alternatively, you can create a `ConfigurationPolicy` resource that contains the `ArgoCD` manifest and template the version to match the version set in the `MulticlusterHub`:
 
-Now that {ocp-short} GitOps can use the Policy Generator, {ocp-short} GitOps must be granted access to create policies on the {product-title-short} hub cluster. Create the `ClusterRole` resource called `openshift-gitops-policy-admin`, with access to create, read, update, and delete policies and placements. Refer to the ealier `ClusterRole` example.
++
+[source,yaml]
+----
+image: '{{ (index (lookup "apps/v1" "Deployment" "open-cluster-management" "multicluster-operators-hub-subscription").spec.template.spec.containers 0).image }}'
+----
++
+If you want to enable the processing of Helm charts inside of a Kustomize directory before generating policies, set the environment variable `POLICY_GEN_ENABLE_HELM` to `"true"` in the `spec.repo.env` field:
 
-Additionally, create a `ClusterRoleBinding` object to grant the {ocp-short} GitOps service account access to the `openshift-gitops-policy-admin` `ClusterRole`. Your `ClusterRoleBinding` might resemble the following resource:
++
+[source,yaml]
+----
+env:
+- name: POLICY_GEN_ENABLE_HELM
+  value: "true"
+----
 
+. Now that {ocp-short} GitOps can use the Policy Generator, {ocp-short} GitOps must be granted access to create policies on the {product-title-short} hub cluster. Create the `ClusterRole` resource called `openshift-gitops-policy-admin`, with access to create, read, update, and delete policies and placements. Refer to the ealier `ClusterRole` resource example.
+
+. Create a `ClusterRoleBinding` object to grant the {ocp-short} GitOps service account access to the `openshift-gitops-policy-admin` `ClusterRole`. Your `ClusterRoleBinding` might resemble the following resource:
+
++
 [source,yaml]
 ----
 kind: ClusterRoleBinding
@@ -148,6 +173,6 @@ roleRef:
 [#additional-resource-policy-def]
 == Additional resources
 
-* Refer to link:https://argoproj.github.io/argo-cd/[ArgoCD] documentation.
+* Refer to link:https://argoproj.github.io/argo-cd/[Argo CD] documentation.
 
 
