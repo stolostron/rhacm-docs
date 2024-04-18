@@ -1,27 +1,26 @@
 [#create-hosted-multi-zone-aws]
 = Creating a hosted cluster in multiple zones on AWS
 
-Create a cluster, specifying the `BASE_DOMAIN` of the public zone, by entering the following commands:
+Create a cluster, specifying the base domain of the public zone, by entering the following command:
 
 ----
-REGION=us-east-1
-ZONES=us-east-1a,us-east-1b
-CLUSTER_NAME=example
-BASE_DOMAIN=example.com
-AWS_CREDS="$HOME/.aws/credentials"
-PULL_SECRET="$HOME/pull-secret"
-
 hcp create cluster aws \
---name $CLUSTER_NAME \
---node-pool-replicas=3 \
---base-domain $BASE_DOMAIN \
---pull-secret $PULL_SECRET \
---aws-creds $AWS_CREDS \
---region $REGION \
---zones $ZONES <1>
+--name <hosted-cluster-name> \ <1>
+--node-pool-replicas=<node-pool-replica-count> \ <2>
+--base-domain <basedomain> \ <3>
+--pull-secret <path-to-pull-secret> \ <4>
+--aws-creds <path-to-aws-credentials> \ <5>
+--region <region> \ <6>
+--zones <zones> <7>
 ----
 
-<1> The `--zones` flag must specify availability zones within the region, which is specified by the `--region` flag.
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the node pool replica count, for example, `2`.
+<3> Specify your base domain, for example, `example.com`.
+<4> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<5> Specify the path to your AWS credentials file, for example, `/user/name/.aws/credentials`.
+<6> Specify the AWS region name, for example, `us-east-1`.
+<7> Specify availability zones within your AWS region, for example, `us-east-1a`, and `us-east-1b`.
 
 For each specified zone, the following infrastructure is created:
 
@@ -46,39 +45,40 @@ See the following example:
 
 ----
 hcp create cluster aws \
---name $CLUSTER_NAME \
---node-pool-replicas=3 \
---base-domain $BASE_DOMAIN \
---pull-secret $PULL_SECRET \
---aws-creds $AWS_CREDS \
---region $REGION \
+--name <hosted-cluster-name> \ <1>
+--node-pool-replicas=<node-pool-replica-count> \ <2>
+--base-domain <basedomain> \ <3>
+--pull-secret <path-to-pull-secret> \ <4>
+--aws-creds <path-to-aws-credentials> \ <5>
+--region <region> <6>
 ----
+
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the node pool replica count, for example, `2`.
+<3> Specify your base domain, for example, `example.com`.
+<4> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<5> Specify the path to your AWS credentials file, for example, `/user/name/.aws/credentials`.
+<6> Specify the AWS region name, for example, `us-east-1`.
 
 [#create-hosted-multi-zone-aws-cloud-provider-secret]
 === Providing credentials by using the AWS cloud provider secret
 
-If you use the AWS cloud provider secret from {mce-short} to provide credentials, the secret has the following format:
+The secret contains the SSH keys, pull secret, base domain, and AWS credentials. Therefore, you can use the `hcp create cluster aws` command with the `--secret-creds` flag to provide AWS credentials. See the following example:
 
 ----
-apiVersion: v1
-metadata:
-  name: my-aws-cred <1>
-  namespace: clusters <2>   
-type: Opaque
-kind: Secret
-stringData:
-  ssh-publickey:          # Value
-  ssh-privatekey:         # Value
-  pullSecret:             # Value, required
-  baseDomain:             # Value, required
-  aws_secret_access_key:  # Value, required
-  aws_access_key_id:      # Value, required
+hcp create cluster aws \
+--name <hosted-cluster-name> \ <1>
+--region <region> \ <2>
+--namespace <hosted-cluster-namespace> \ <3>
+--secret-creds <my-aws-cred> <4>
 ----
 
-<1> Because the secret contains the SSH keys, pull secret, base domain, and AWS credentials, you can use the `hcp create cluster aws` command with the `--secret-creds <my_aws_cred>` flag, where `<my_aws_cred>` is the cloud provider secret name. 
-<2> If the secret is not in the default `clusters` namespace, you must specify the namespace; for example, `--secret-creds <my_aws_cred> --namespace <name_of_namespace>`.
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the AWS region name, for example, `us-east-1`.
+<3> If the secret is not in the default `clusters` namespace, specify your hosted cluster namespace.
+<4> Specify the AWS secret name, for example, `my-aws-cred`.
 
-When you use this secret, the following flags become optional. If you specify these flags with the `--secret-creds <my_aws_cred>` flag, these flags take precedence over the values in the cloud provider secret:
+When you use this secret, the following flags become optional. If you specify these flags with the `--secret-creds` flag, these flags take precedence over the values in the cloud provider secret:
 
 * `--aws-creds`
 * `--base-domain`
@@ -93,10 +93,31 @@ When you use this secret, the following flags become optional. If you specify th
 
 +
 ----
-$ oc create secret generic <my_secret> -n <namespace> --from-literal=baseDomain='your.domain.com' --from-literal=aws_access_key_id='your-aws-access-key' --from-literal=aws_secret_access_key='your-aws-secret-key' --from-literal=pullSecret='{"auths":{"cloud.openshift.com":{"auth":"auth-info", "email":"xx@redhat.com"}, "quay.io":{"auth":"auth-info", "email":"xx@redhat.com"} } }' --from-literal=ssh-publickey='your-ssh-publickey' --from-literal=ssh-privatekey='your-ssh-privatekey'
+$ oc create secret generic <my-secret> -n <namespace> --from-literal=baseDomain=<your-basedomain> --from-literal=aws_access_key_id=<your-aws-access-key> --from-literal=aws_secret_access_key=<your-aws-secret-key> --from-literal=pullSecret='{"auths":{"cloud.openshift.com":{"auth":"<auth>", "email":"<your-email>"}, "quay.io":{"auth":"<auth>", "email":"<your-email>"} } }' --from-literal=ssh-publickey=<your-ssh-publickey> --from-literal=ssh-privatekey=<your-ssh-privatekey>
 ----
 
 +
+The secret has the following format:
+
++
+[source,yaml]
+----
+apiVersion: v1
+metadata:
+  name: my-aws-cred <1>
+  namespace: clusters <2>
+type: Opaque
+kind: Secret
+stringData:
+  ssh-publickey:          # Value
+  ssh-privatekey:         # Value
+  pullSecret:             # Value, required
+  baseDomain:             # Value, required
+  aws_secret_access_key:  # Value, required
+  aws_access_key_id:      # Value, required
+----
+
+
 //lahinson - sept. 2023 - including comment to ensure proper formatting
 
 [#create-hosted-aws-additional-resources]
