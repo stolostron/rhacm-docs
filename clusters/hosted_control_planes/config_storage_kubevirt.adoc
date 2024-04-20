@@ -6,54 +6,58 @@ If no advanced configuration is provided, the default storage class is used for 
 [#storageclass-mapping]
 == Mapping KubeVirt CSI storage classes
 
-KubeVirt CSI permits any infrastructure storage class with the `ReadWriteMany` access mode to be exposed to the hosted cluster. This mapping of infrastructure cluster storage class to hosted cluster storage class can be configured during cluster creation by using the `hcp` command line interface and the `--infra-storage-class-mapping` argument.
+KubeVirt CSI permits any infrastructure storage class with the `ReadWriteMany` access mode to be exposed to the hosted cluster. You can configure this mapping of infrastructure cluster storage class to hosted cluster storage class during cluster creation by using the `--infra-storage-class-mapping` argument.
 
-To map infrastructure storage classes to hosted storage classes, see the following example. The example shows how to map two infrastructure storage classes called `infra-sc1` and `infra-sc2` to hosted storage classes called `guest-sc1` and `guest-sc2`. The `--infra-storage-class-mapping` argument can be used multiple times within the `create` command:
+To map infrastructure storage classes to hosted storage classes, see the following example:
 
 ----
-export CLUSTER_NAME=example
-export PULL_SECRET="$HOME/pull-secret"
-export MEM="6Gi"
-export CPU="2"
-export WORKER_COUNT="2"
-
 hcp create cluster kubevirt \
---name $CLUSTER_NAME \
---node-pool-replicas $WORKER_COUNT \
---pull-secret $PULL_SECRET \
---memory $MEM \
---cores $CPU \
---infra-storage-class-mapping=infra-sc1/guest-sc1 \
---infra-storage-class-mapping=infra-sc2/guest-sc2 
+--name <hosted-cluster-name> \ <1>
+--node-pool-replicas <worker-count> \ <2>
+--pull-secret <path-to-pull-secret> \ <3>
+--memory <value-for-memory> \ <4>
+--cores <value-for-cpu> \ <5>
+--infra-storage-class-mapping=<storage-class>/<hosted-storage-class> \ <6>
 ----
 
-After you create the hosted cluster, the `guest-sc1` and `guest-sc2` storage classes are visible within the hosted cluster. When you create a PVC within the hosted cluster that uses one of those storage classes, KubeVirt CSI provisions that volume by using the infrastructure storage class mapping that you configured during cluster creation.
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the worker count, for example, `2`.
+<3> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<4> Specify a value for memory, for example, `6Gi`.
+<5> Specify a value for CPU, for example, `2`.
+<6> Replace `<storage-class>` with the infrastructure storage class name and `<hosted-storage-class>` with the hosted cluster storage class name. You can use the `--infra-storage-class-mapping` argument multiple times within the `create` command.
+
+After you create the hosted cluster, the infrastructure storage class is visible within the hosted cluster. When you create a PVC within the hosted cluster that uses one of those storage classes, KubeVirt CSI provisions that volume by using the infrastructure storage class mapping that you configured during cluster creation.
 
 *Note:* KubeVirt CSI supports mapping only a infrastructure storage class that is capable of `ReadWriteMany` (RWX) access.
 
 [#kubevirt-vm-root-volume-config]
 == Configuring KubeVirt VM root volume
 
-At cluster creation time, you can configure the storage class that is used to host the KubeVirt VM root volumes by using the `hcp` command line interface and the `--root-volume-storage-class` argument. You can configure the size of the volume by using the `--root-volume-size` argument.
+At cluster creation time, you can configure the storage class that is used to host the KubeVirt VM root volumes by using the `--root-volume-storage-class` argument.
 
-To set a custom storage class and volume size for KubeVirt VMs, see the following example. In the example, the result is a hosted cluster with VMs that are hosted on 64Gi PVCs that are hosted by the `ocs-storagecluster-ceph-rdb` storage class:
+To set a custom storage class and volume size for KubeVirt VMs, see the following example:
 
 ----
-export CLUSTER_NAME=example
-export PULL_SECRET="$HOME/pull-secret"
-export MEM="6Gi"
-export CPU="2"
-export WORKER_COUNT="2"
-
 hcp create cluster kubevirt \
---name $CLUSTER_NAME \
---node-pool-replicas $WORKER_COUNT \
---pull-secret $PULL_SECRET \
---memory $MEM \
---cores $CPU \
---root-volume-storage-class ocs-storagecluster-ceph-rbd \
---root-volume-size 64
+--name <hosted-cluster-name> \ <1>
+--node-pool-replicas <worker-count> \ <2>
+--pull-secret <path-to-pull-secret> \ <3>
+--memory <value-for-memory> \ <4>
+--cores <value-for-cpu> \ <5>
+--root-volume-storage-class <root-volume-storage-class> \ <6>
+--root-volume-size <volume-size> <7>
 ----
+
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the worker count, for example, `2`.
+<3> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<4> Specify a value for memory, for example, `6Gi`.
+<5> Specify a value for CPU, for example, `2`.
+<6> Specify a name of the storage class that is used to host the KubeVirt VM root volumes, for example, `ocs-storagecluster-ceph-rbd`.
+<7> Specify the volume size, for example, `64`.
+
+The result is a hosted cluster with VMs that are hosted on PVCs that are hosted by the `ocs-storagecluster-ceph-rdb` storage class.
 
 [#kubevirt-vm-image-caching]
 == Enabling KubeVirt VM image caching
@@ -63,51 +67,52 @@ KubeVirt image caching is an advanced feature that you can use to optimize both 
 Image caching works as follows:
 
 . The VM image is imported to a PVC that is associated with the hosted cluster.
-. A unique clone of that PVC is created for every KubeVirt VM that is added as a worker node to the cluster. 
+. A unique clone of that PVC is created for every KubeVirt VM that is added as a worker node to the cluster.
 
 Image caching reduces VM startup time by requiring only a single image import. It can further reduce overall cluster storage usage when the storage class supports copy-on-write cloning.
 
-To enable image caching, during cluster creation, use the `hcp` command line interface and the `--root-volume-cache-strategy=PVC` argument, as shown in the following example:
+To enable image caching, during cluster creation, use the `--root-volume-cache-strategy=PVC` argument, as shown in the following example:
 
 ----
-export CLUSTER_NAME=example
-export PULL_SECRET="$HOME/pull-secret"
-export MEM="6Gi"
-export CPU="2"
-export WORKER_COUNT="2"
-
 hcp create cluster kubevirt \
---name $CLUSTER_NAME \
---node-pool-replicas $WORKER_COUNT \
---pull-secret $PULL_SECRET \
---memory $MEM \
---cores $CPU \
---root-volume-cache-strategy=PVC
+--name <hosted-cluster-name> \ <1>
+--node-pool-replicas <worker-count> \ <2>
+--pull-secret <path-to-pull-secret> \ <3>
+--memory <value-for-memory> \ <4>
+--cores <value-for-cpu> \ <5>
+--root-volume-cache-strategy=PVC <6>
 ----
+
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the worker count, for example, `2`.
+<3> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<4> Specify a value for memory, for example, `6Gi`.
+<5> Specify a value for CPU, for example, `2`.
+<6> Specify a strategy for image caching, for example, `PVC`.
 
 [#etcd-storage-configuration-kubevirt]
 == Configuring etcd storage
 
-At cluster creation time, you can configure the storage class that is used to host etcd data by using the `hcp` command line interface and the `--etcd-storage-class` argument. If you do not provide an `--etcd-storage-class` argument, the default storage class is used.
+At cluster creation time, you can configure the storage class that is used to host etcd data by using the `--etcd-storage-class` argument.
 
 To configure a storage class for etcd, see the following example:
 
 ----
-export CLUSTER_NAME=example
-export PULL_SECRET="$HOME/pull-secret"
-export MEM="6Gi"
-export CPU="2"
-export WORKER_COUNT="2"
-export ETCD_STORAGE="lvm-storageclass"
-
 hcp create cluster kubevirt \
---name $CLUSTER_NAME \
---node-pool-replicas $WORKER_COUNT \
---pull-secret $PULL_SECRET \
---memory $MEM \
---cores $CPU \
---etcd-storage-class=${ETCD_STORAGE}
+--name <hosted-cluster-name> \ <1>
+--node-pool-replicas <worker-count> \ <2>
+--pull-secret <path-to-pull-secret> \ <3>
+--memory <value-for-memory> \ <4>
+--cores <value-for-cpu> \ <5>
+--etcd-storage-class=<etcd-storage-class-name> <6>
 ----
+
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the worker count, for example, `2`.
+<3> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<4> Specify a value for memory, for example, `6Gi`.
+<5> Specify a value for CPU, for example, `2`.
+<6> Specify the etcd storage class name, for example, `lvm-storageclass`. If you do not provide an `--etcd-storage-class` argument, the default storage class is used.
 
 [#kubevirt-storage-config-additional-resources]
 === Additional resources
