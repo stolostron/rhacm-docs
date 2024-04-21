@@ -1,12 +1,12 @@
 [#dual-stack-hypervisor]
 = Configuring the hypervisor for a dual stack network
 
-The following information applies to virtual machine environments only.
+You can configure the hypervisor for a dual stack network in a virtual machine environments only.
 
 [#dual-stack-hypervisor-packages]
 == Accessing and deploying packages for a virtual {ocp-short} cluster
 
-. To deploy a virtual {ocp-short} management cluster, access the required packages by entering the following command:
+. To deploy a virtual {ocp-short} management cluster, install the required packages by entering the following command:
 
 +
 [source,bash]
@@ -22,7 +22,7 @@ sudo dnf install dnsmasq radvd vim golang podman bind-utils net-tools httpd-tool
 systemctl enable --now podman
 ----
 
-. To use `kcli` to deploy the {ocp-short} management cluster and other virtual components, install and configure the hypervisor by entering the following commands:
+. Install the required packages for the hypervisor by entering the following command:
 
 +
 [source,bash]
@@ -30,11 +30,15 @@ systemctl enable --now podman
 sudo yum -y install libvirt libvirt-daemon-driver-qemu qemu-kvm
 ----
 
+. Modify the user attributes by entering the following command:
+
 +
 [source,bash]
 ----
 sudo usermod -aG qemu,libvirt $(id -un)
 ----
+
+. Change to a `libvirt` group by entering the following command:
 
 +
 [source,bash]
@@ -42,11 +46,15 @@ sudo usermod -aG qemu,libvirt $(id -un)
 sudo newgrp libvirt
 ----
 
+. Enable and start the libvirt daemon by entering the following command:
+
 +
 [source,bash]
 ----
 sudo systemctl enable --now libvirtd
 ----
+
+. Enable the repository for the `kcli` utility by entering the following command:
 
 +
 [source,bash]
@@ -54,11 +62,15 @@ sudo systemctl enable --now libvirtd
 sudo dnf -y copr enable karmab/kcli
 ----
 
+. Install the `kcli` utility by entering the following command:
+
 +
 [source,bash]
 ----
 sudo dnf -y install kcli
 ----
+
+. Create a pool to store the libvirt images by running the following command:
 
 +
 [source,bash]
@@ -66,17 +78,23 @@ sudo dnf -y install kcli
 sudo kcli create pool -p /var/lib/libvirt/images default
 ----
 
+. Create the `kvm` host for your local machine by entering the following command:
+
 +
 [source,bash]
 ----
 kcli create host kvm -H 127.0.0.1 local
 ----
 
+. Grant the `rwx` permission to the `/var/lib/libvirt/images` directory by entering the following command:
+
 +
 [source,bash]
 ----
 sudo setfacl -m u:$(id -un):rwx /var/lib/libvirt/images
 ----
+
+. Create a network for the default libvirt IP address by entering the following command:
 
 +
 [source,bash]
@@ -95,7 +113,7 @@ kcli create network  -c 192.168.122.0/24 default
 #!/bin/bash
 
 export IP="192.168.126.1" <1>
-export BASE_RESOLV_CONF="/run/NetworkManager/resolv.conf"
+export <base-resolve-conf>="/run/NetworkManager/resolv.conf"
 
 if ! [[ `grep -q "$IP" /etc/resolv.conf` ]]; then
 export TMP_FILE=$(mktemp /etc/forcedns_resolv.conf.XXXXXX)
@@ -163,7 +181,7 @@ systemctl status ksushy
 
 If you are working in a development environment, configure the hypervisor system to allow various types of connections through different virtual networks within the environment.
 
-*Note:* If you are working in a production environment, you must establish proper rules for the `firewalld` service and configure SELinux policies to maintain a secure environment. 
+*Note:* If you are working in a production environment, you must establish proper rules for the `firewalld` service and configure SELinux policies to maintain a secure environment.
 
 * For SELinux, enter the following command:
 

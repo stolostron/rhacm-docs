@@ -13,21 +13,21 @@ You must have an {ocp-short} cluster that was installed on a 64-bit ARM infrastr
 
 To run a hosted cluster on an ARM64 {ocp-short} cluster, complete the following steps:
 
-. Create a hosted cluster that overrides the default release image with a multi-architecture release image. 
+. Create a hosted cluster that overrides the default release image with a multi-architecture release image.
 
 +
 For example, through the hosted control plane command line interface, `hcp`, enter the following commands, and replace the cluster name, node pool replicas, base domain, pull secret, AWS credentials, and region with your information:
 
 +
 ----
-hcp create cluster aws \ 
---name $CLUSTER_NAME \
---node-pool-replicas=$NODEPOOL_REPLICAS \
---base-domain $BASE_DOMAIN \
---pull-secret $PULL_SECRET \
---aws-creds $AWS_CREDS \
---region $REGION \
---release-image quay.io/openshift-release-dev/ocp-release:4.13.0-rc.0-multi
+hcp create cluster aws \
+--name <hosted-cluster-name> \
+--node-pool-replicas=<node-pool-replica-count> \
+--base-domain <basedomain> \
+--pull-secret <path-to-pull-secret> \
+--aws-creds <path-to-aws-creds> \
+--region <region> \
+--release-image quay.io/openshift-release-dev/ocp-release:4.x.y-x86_64
 ----
 
 +
@@ -41,9 +41,9 @@ For example, through the hosted control plane command line interface, `hcp`, ent
 +
 ----
 hcp create nodepool aws \
---cluster-name $CLUSTER_NAME \
---name $NODEPOOL_NAME \
---node-count=$NODEPOOL_REPLICAS
+--cluster-name <hosted-cluster-name> \
+--name <node-pool-name> \
+--node-count=<node-pool-replica-count>
 ----
 
 [#hosted-cluster-arm-node-pools]
@@ -80,7 +80,7 @@ error: the image is a manifest list and contains multiple images - use --filter-
 
 +
 ----
-hcp create nodepool aws --cluster-name $CLUSTER_NAME --name $ARM64_NODEPOOL_NAME --node-count=$NODEPOOL_REPLICAS --render > arm_nodepool_spec.yml
+hcp create nodepool aws --cluster-name <hosted-cluster-name> --name <arm64-node-pool-name> --node-count=<node-pool-replica-count> --render > <file-name>.yml
 ----
 
 +
@@ -93,11 +93,11 @@ apiVersion: hypershift.openshift.io/v1beta1
 kind: NodePool
 metadata:
   creationTimestamp: null
-  name: hypershift-arm-us-east-1a
+  name: <node-pool-name>
   namespace: clusters
 spec:
   arch: amd64
-  clusterName: hypershift-arm
+  clusterName: <hosted-cluster-name>
   management:
     autoRepair: false
     upgradeType: Replace
@@ -105,7 +105,7 @@ spec:
   platform:
     aws:
       instanceProfile: hypershift-arm-2m289-worker
-      instanceType: m5.large
+      instanceType: <instance-type>
       rootVolume:
         size: 120
         type: gp3
@@ -116,7 +116,7 @@ spec:
     type: AWS
   release:
     image: quay.io/openshift-release-dev/ocp-release-nightly@sha256:390a33cebc940912a201a35ca03927ae5b058fbdae9626f7f4679786cab4fb1c
-  replicas: 3
+  replicas: <replica-count>
 status:
   replicas: 0
 ----
@@ -125,14 +125,14 @@ status:
 
 +
 ----
-sed 's/arch: amd64/arch: arm64/g; s/instanceType: m5.large/instanceType: m6g.large/g' arm_nodepool_spec.yml > temp.yml && mv temp.yml arm_nodepool_spec.yml
+sed 's/arch: amd64/arch: arm64/g; s/instanceType: m5.large/instanceType: m6g.large/g' <file-name>.yml > temp.yml && mv temp.yml <file-name>.yml
 ----
 
 . Apply the rendered YAML file to the hosted cluster by entering the following command:
 
 +
 ----
-oc apply -f arm_nodepool_spec.yml
+oc apply -f <file-name>.yml
 ----
 
 +

@@ -1,23 +1,16 @@
 [#dual-stack-hosted-cluster]
-= Deploying the hosted cluster for a dual stack network
+= Deploying the hosted cluster for a dual stack network in a disconnected environment
 
 A hosted cluster is an {ocp-short} cluster with its control plane and API endpoint hosted on a management cluster. The hosted cluster includes the control plane and its corresponding data plane.
 
-Although you can use the console in {product-title-short} to create a hosted cluster, the following procedures use manifests, which provide more flexibility for modifying the related artifacts.
+You can use the {product-title-short} console and command-line interface (CLI) to create a hosted cluster. The following procedures use CLI to modify the manifests and artifacts.
 
 [#dual-stack-hosted-cluster-objects]
 == Deploying hosted cluster objects
 
-For the purposes of this procedure, the following values are used:
+Typically, the HyperShift Operator creates the hosted control plane namespace. However, you can include all the objects before the HyperShift Operator begins to reconcile the `HostedCluster` object. When the Operator starts the reconciliation process, finds all of the objects in place.
 
-* HostedCluster name: `hosted-dual`
-* HostedCluster namespace: `clusters`
-* Disconnected: `true`
-* Network stack: `Dual`
-
-Typically, the HyperShift Operator creates the `HostedControlPlane` namespace. However, in this case, you want to include all the objects before the HyperShift Operator begins to reconcile the `HostedCluster` object. Then, when the Operator starts the reconciliation process, it can find all of the objects in place.
-
-. Create a YAML file with the following information about the namespaces:
+. Create a YAML file for the hosted cluster and hosted control plane namespaces. See the following configuration:
 
 +
 [source,yaml]
@@ -27,7 +20,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   creationTimestamp: null
-  name: clusters-hosted-dual
+  name: <hosted_cluster_namespace> <1>
 spec: {}
 status: {}
 ---
@@ -35,12 +28,17 @@ apiVersion: v1
 kind: Namespace
 metadata:
   creationTimestamp: null
-  name: clusters
+  name: <hosted_control_plane_namespace> <2>
 spec: {}
 status: {}
 ----
 
-. Create a YAML file with the following information about the config maps and secrets to include in the `HostedCluster` deployment:
+<1> Specify the hosted cluster namespace, for example, `clusters`.
+<2> Specify the hosted control plane namespace, for example, `clusters-hosted-dual`.
+
+*Note: The hosted control plane namespace name must follow the format such as `<hosted_cluster_namespace>-<hosted_cluster_name>`. The hosted cluster name is `hosted-dual`.
+
+. Create a YAML file for the config maps and secrets to include in the `HostedCluster` deployment. See the following configuration:
 
 +
 [source,yaml]
@@ -53,8 +51,8 @@ data:
     -----END CERTIFICATE-----
 kind: ConfigMap
 metadata:
-  name: user-ca-bundle
-  namespace: clusters
+  name: <config-map-name> <1>
+  namespace: <hosted_cluster_namespace> <2>
 ---
 apiVersion: v1
 data:
@@ -62,16 +60,16 @@ data:
 kind: Secret
 metadata:
   creationTimestamp: null
-  name: hosted-dual-pull-secret
-  namespace: clusters
+  name: <secret_name> <3>
+  namespace: <hosted_cluster_namespace> <2>
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: sshkey-cluster-hosted-dual
-  namespace: clusters
+  name: <secret_name> <3>
+  namespace: <hosted_cluster_namespace> <2>
 stringData:
-  id_rsa.pub: ssh-rsa xxxxxxxxx
+  id_rsa.pub: <ssh_public_key_content> <4>
 ---
 apiVersion: v1
 data:
@@ -79,12 +77,17 @@ data:
 kind: Secret
 metadata:
   creationTimestamp: null
-  name: hosted-dual-etcd-encryption-key
-  namespace: clusters
+  name: <secret_name> <3>
+  namespace: <hosted_cluster_namespace> <2>
 type: Opaque
 ----
 
-. Create a YAML file that contains the RBAC roles so that Assisted Service agents can be in the same `HostedControlPlane` namespace as the hosted control plane and still be managed by the cluster API:
+<1> Specify the config map name.
+<2> Specify the hosted cluster namespace, for example, `clusters`.
+<3> Specify the secret name.
+<4> Enter your SSH public key content. The default path for your SSH public key is `~/.ssh/id_rsa.pub`.
+
+. Create a YAML file for the RBAC roles to configure Assisted Service agents and its API group in the hosted control plane namespace. See the following configuration:
 
 +
 [source,yaml]
@@ -93,8 +96,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   creationTimestamp: null
-  name: capi-provider-role
-  namespace: clusters-hosted-dual
+  name: <role_name> <1>
+  namespace: <hosted_control_plane_namespace> <2>
 rules:
 - apiGroups:
   - agent-install.openshift.io
@@ -104,7 +107,10 @@ rules:
   - '*'
 ----
 
-. Create a YAML file with information about the `HostedCluster` object, replacing values as necessary:
+<1> Specify the role name.
+<2> Specify the hosted control plane namespace, for example, `clusters-hosted-dual`.
+
+. Create a YAML file for the `HostedCluster` object. See the following configuration:
 
 +
 [source,yaml]
@@ -112,31 +118,31 @@ rules:
 apiVersion: hypershift.openshift.io/v1beta1
 kind: HostedCluster
 metadata:
-  name: hosted-dual
-  namespace: clusters
+  name: <hosted_cluster_name> <1>
+  namespace: <hosted_cluster_namespace> <2>
 spec:
   additionalTrustBundle:
     name: "user-ca-bundle"
   olmCatalogPlacement: guest
-  imageContentSources: <1>
+  imageContentSources: <3>
   - source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
     mirrors:
-    - registry.dns.base.domain.name:5000/openshift/release <2>
+    - registry.<basedomain-name>:5000/openshift/release  <4>
   - source: quay.io/openshift-release-dev/ocp-release
     mirrors:
-    - registry.dns.base.domain.name:5000/openshift/release-images
+    - registry.<basedomain-name>:5000/openshift/release-images
   - mirrors:
   ...
   ...
   autoscaling: {}
   controllerAvailabilityPolicy: SingleReplica
   dns:
-    baseDomain: dns.base.domain.name
+    baseDomain: <basedomain>
   etcd:
     managed:
       storage:
         persistentVolume:
-          size: 8Gi
+          size: <volume_size> <5>
         restoreSnapshotURL: null
         type: PersistentVolume
     managementType: Managed
@@ -151,45 +157,45 @@ spec:
     - cidr: fd02::/112
   platform:
     agent:
-      agentNamespace: clusters-hosted-dual
+      agentNamespace: <hosted_control_plane_namespace> <6>
     type: Agent
   pullSecret:
-    name: hosted-dual-pull-secret
+    name: <hosted_pull_secret_name> <7>
   release:
-    image: registry.dns.base.domain.name:5000/openshift/release-images:4.x.y-x86_64 <3>
+    image: registry.<basedomain>:5000/openshift/release-images:4.x.y-x86_64 <8>
   secretEncryption:
     aescbc:
       activeKey:
-        name: hosted-dual-etcd-encryption-key
+        name: <etcd_encryption_key_name> <9>
     type: aescbc
   services:
   - service: APIServer
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-dual.dns.base.domain.name
+        address: api.<hosted_cluster_name>.<basedomain>
       type: NodePort
   - service: OAuthServer
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-dual.dns.base.domain.name
+        address: api.<hosted_cluster_name>.<basedomain>
       type: NodePort
   - service: OIDC
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-dual.dns.base.domain.name
+        address: api.<hosted_cluster_name>.<basedomain>
       type: NodePort
   - service: Konnectivity
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-dual.dns.base.domain.name
+        address: api.<hosted_cluster_name>.<basedomain>
       type: NodePort
   - service: Ignition
     servicePublishingStrategy:
       nodePort:
-        address: api.hosted-dual.dns.base.domain.name
+        address: api.<hosted_cluster_name>.<basedomain>
       type: NodePort
   sshKey:
-    name: sshkey-cluster-hosted-dual
+    name: <hosted_ssh_key_name> <10>
 status:
   controlPlaneEndpoint:
     host: ""
@@ -197,10 +203,16 @@ status:
 ----
 
 +
-<1> The `imageContentSources` section contains mirror references for user workloads within the hosted cluster.
-<2> Throughout the YAML file, replace `_dns.base.domain.name_` with the DNS base domain name.
-<3> Replace `4.x.y` with the supported {ocp-short} version you want to use.
-
+<1> Specify the hosted cluster name, for example, `hosted-dual`.
+<2> Specify the hosted cluster namespace, for example, `clusters`.
+<3> Contains mirror references for user workloads within the hosted cluster.
+<4> Specify your base domain name, for example, `dns.base.domain.name`.
+<5> Specify the etcd volume size, for example, `8Gi`.
+<6> Specify the hosted control plane namespace, for example, `clusters-hosted-dual`. The agent namespace must be same as the hosted control plane namespace.
+<7> Specify the pull secret name.
+<8> Replace `4.x.y` with the supported {ocp-short} version you want to use.
+<9> Specify the encryption key name.
+<10> Specify the SSH key name.
 
 . Add an annotation in the `HostedCluster` object that points to the HyperShift Operator release in the {ocp-short} release:
 
@@ -208,11 +220,11 @@ status:
 
 +
 ----
-oc adm release info registry.dns.base.domain.name:5000/openshift-release-dev/ocp-release:4.x.y-x86_64 | grep hypershift
+oc adm release info registry.<dns_base_domain>:5000/openshift-release-dev/ocp-release:4.x.y-x86_64 | grep hypershift
 ----
 
 +
-where `_dns.base.domain.name_` is the DNS base domain name and `4.x.y` is the supported {ocp-short} version you want to use.
+where `<dns_base_domain>` is the DNS base domain name and `4.x.y` is the supported {ocp-short} version you want to use.
 
 .. See the following output:
 
@@ -225,80 +237,44 @@ hypershift                                     sha256:31149e3e5f8c5e5b5b100ff2d8
 
 +
 ----
-podman pull registry.dns.base.domain.name:5000/openshift-release-dev/ocp-v4.0-art-dev@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8
+podman pull registry.<dns-base-domain-name>:5000/openshift-release-dev/ocp-v4.0-art-dev@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8
 ----
 
 +
-where `_dns.base.domain.name_` is the DNS base domain name.
+where `<dns_base_domain>` is the DNS base domain name.
 
 .. See the following output:
 
 +
 ----
 podman pull registry.dns.base.domain.name:5000/openshift/release@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8
-Trying to pull registry.dns.base.domain.name:5000/openshift/release@sha256:31149e3e5f8c5e5b5b100ff2d89975cf5f7a73801b2c06c639bf6648766117f8...
 Getting image source signatures
 Copying blob d8190195889e skipped: already exists
-Copying blob c71d2589fba7 skipped: already exists
-Copying blob d4dc6e74b6ce skipped: already exists
-Copying blob 97da74cc6d8f skipped: already exists
-Copying blob b70007a560c9 done
-Copying config 3a62961e6e done
 Writing manifest to image destination
-Storing signatures
 3a62961e6ed6edab46d5ec8429ff1f41d6bb68de51271f037c6cb8941a007fde
 ----
 
 +
-*Note:* The release image that is set in the `HostedCluster` object must use the digest rather than the tag; for example, `quay.io/openshift-release-dev/ocp-release@sha256:e3ba11bd1e5e8ea5a0b36a75791c90f29afb0fdbe4125be4e48f69c76a5c47a0`.
+*Note:* The release image that is set in the `HostedCluster` object must use the digest rather than the tag. For example, `quay.io/openshift-release-dev/ocp-release@sha256:e3ba11bd1e5e8ea5a0b36a75791c90f29afb0fdbe4125be4e48f69c76a5c47a0`.
 
-. Create all of the objects that you defined in the YAML files by concatenating them into a file and applying them against the management cluster. To do so, enter the following command:
-
-+
-----
-oc apply -f 01-4.14-hosted_cluster-nodeport.yaml
-----
-
-. See the output for the hosted control plane:
+. Create all of the objects by applying your YAML file content in the management cluster. Enter the following command:
 
 +
 ----
-NAME                                                  READY   STATUS    RESTARTS   AGE
-capi-provider-5b57dbd6d5-pxlqc                        1/1     Running   0          3m57s
-catalog-operator-9694884dd-m7zzv                      2/2     Running   0          93s
-cluster-api-f98b9467c-9hfrq                           1/1     Running   0          3m57s
-cluster-autoscaler-d7f95dd5-d8m5d                     1/1     Running   0          93s
-cluster-image-registry-operator-5ff5944b4b-648ht      1/2     Running   0          93s
-cluster-network-operator-77b896ddc-wpkq8              1/1     Running   0          94s
-cluster-node-tuning-operator-84956cd484-4hfgf         1/1     Running   0          94s
-cluster-policy-controller-5fd8595d97-rhbwf            1/1     Running   0          95s
-cluster-storage-operator-54dcf584b5-xrnts             1/1     Running   0          93s
-cluster-version-operator-9c554b999-l22s7              1/1     Running   0          95s
-control-plane-operator-6fdc9c569-t7hr4                1/1     Running   0          3m57s
-csi-snapshot-controller-785c6dc77c-8ljmr              1/1     Running   0          77s
-csi-snapshot-controller-operator-7c6674bc5b-d9dtp     1/1     Running   0          93s
-csi-snapshot-webhook-5b8584875f-2492j                 1/1     Running   0          77s
-dns-operator-6874b577f-9tc6b                          1/1     Running   0          94s
-etcd-0                                                3/3     Running   0          3m39s
-hosted-cluster-config-operator-f5cf5c464-4nmbh        1/1     Running   0          93s
-ignition-server-6b689748fc-zdqzk                      1/1     Running   0          95s
-ignition-server-proxy-54d4bb9b9b-6zkg7                1/1     Running   0          95s
-ingress-operator-6548dc758b-f9gtg                     1/2     Running   0          94s
-konnectivity-agent-7767cdc6f5-tw782                   1/1     Running   0          95s
-kube-apiserver-7b5799b6c8-9f5bp                       4/4     Running   0          3m7s
-kube-controller-manager-5465bc4dd6-zpdlk              1/1     Running   0          44s
-kube-scheduler-5dd5f78b94-bbbck                       1/1     Running   0          2m36s
-machine-approver-846c69f56-jxvfr                      1/1     Running   0          92s
-oauth-openshift-79c7bf44bf-j975g                      2/2     Running   0          62s
-olm-operator-767f9584c-4lcl2                          2/2     Running   0          93s
-openshift-apiserver-5d469778c6-pl8tj                  3/3     Running   0          2m36s
-openshift-controller-manager-6475fdff58-hl4f7         1/1     Running   0          95s
-openshift-oauth-apiserver-dbbc5cc5f-98574             2/2     Running   0          95s
-openshift-route-controller-manager-5f6997b48f-s9vdc   1/1     Running   0          95s
-packageserver-67c87d4d4f-kl7qh                        2/2     Running   0          93s
+oc apply -f <hosted_cluster_nodeport>.yaml
 ----
 
-. See the output for the hosted cluster:
++
+Replace `<hosted_cluster_nodeport>.yaml` with your file name.
+
+. Verify that all of the pods in the hosted cluster namespace are in the `running` status. Enter the following command:
+
++
+----
+oc get pods -n <hosted_cluster_namespace>
+----
+
+. Verify that the hosted cluster is available by entering the following command:
 
 +
 ----
@@ -313,7 +289,7 @@ Next, create a `NodePool` object.
 
 A `NodePool` is a scalable set of worker nodes that is associated with a hosted cluster. `NodePool` machine architectures remain consistent within a specific pool and are independent of the machine architecture of the control plane.
 
-. Create a YAML file with the following information about the `NodePool` object, replacing values as necessary:
+. Create a YAML file for the `NodePool` object. See the following configuration:
 
 +
 [source,yaml]
@@ -322,35 +298,36 @@ apiVersion: hypershift.openshift.io/v1beta1
 kind: NodePool
 metadata:
   creationTimestamp: null
-  name: hosted-dual
+  name: <node_pool_name> <1>
   namespace: clusters
 spec:
   arch: amd64
   clusterName: hosted-dual
   management:
-    autoRepair: false <1>
-    upgradeType: InPlace <2>
+    autoRepair: false <2>
+    upgradeType: InPlace <3>
   nodeDrainTimeout: 0s
   platform:
     type: Agent
   release:
-    image: registry.dns.base.domain.name:5000/openshift/release-images:4.x.y-x86_64 <3>
+    image: registry.dns.base.domain.name:5000/openshift/release-images:4.x.y-x86_64 <4>
   replicas: 0
 status:
-  replicas: 0 <4>
+  replicas: 0 <5>
 ----
 
 +
-<1> The `autoRepair` field is set to `false` because the node will not be re-created if it is removed.
-<2> The `upgradeType` is set to `InPlace`, which indicates that the same bare metal node is reused during an upgrade.
-<3> All of the nodes included in this `NodePool` are based on the following {ocp-short} version: `4.x.y-x86_64`. Replace the `dns.base.domain.name` value with your DNS base domain name and the `4.x.y` value with the supported {ocp-short} version you want to use.
-<4> The `replicas` value is set to `0` so that you can scale them when needed. It is important to keep the `NodePool` replicas at 0 until all steps are completed.
+<1> Specify the name for the `NodePool` object.
+<2> The `autoRepair` field is set to `false` because the node will not be re-created if it is removed.
+<3> The `upgradeType` is set to `InPlace`, which indicates that the same bare metal node is reused during an upgrade.
+<4> All of the nodes included in this `NodePool` are based on the following {ocp-short} version: `4.x.y-x86_64`. Replace the `dns.base.domain.name` value with your DNS base domain name and the `4.x.y` value with the supported {ocp-short} version you want to use.
+<5> The `replicas` value is set to `0` so that you can scale them when needed. It is important to keep the `NodePool` replicas at 0 until all steps are completed.
 
 . Create the `NodePool` object by entering the following command:
 
 +
 ----
-oc apply -f 02-nodepool.yaml
+oc apply -f <nodepool_file_name>.yaml
 ----
 
 . See the output:
@@ -366,9 +343,9 @@ Next, create an `InfraEnv` resource.
 [#dual-stack-infraenv]
 == Creating an InfraEnv resource for the hosted cluster
 
-The `InfraEnv` resource is an Assisted Service object that includes essential details, such as the `pullSecretRef` and the `sshAuthorizedKey`. Those details are used to create the Red Hat Enterprise Linux CoreOS (RHCOS) boot image that is customized for the hosted cluster.
+The `InfraEnv` resource is an Assisted Service object that creates the Red Hat Enterprise Linux CoreOS (RHCOS) boot image for the hosted cluster.
 
-. Create a YAML file with the following information about the `InfraEnv` resource, replacing values as necessary:
+. Create a YAML file with the following `InfraEnv` resource configuration:
 
 +
 [source,yaml]
@@ -382,18 +359,18 @@ metadata:
 spec:
   pullSecretRef: <1>
     name: pull-secret
-  sshAuthorizedKey: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDk7ICaUE+/k4zTpxLk4+xFdHi4ZuDi5qjeF52afsNkw0w/glILHhwpL5gnp5WkRuL8GwJuZ1VqLC9EKrdmegn4MrmUlq7WTsP0VFOZFBfq2XRUxo1wrRdor2z0Bbh93ytR+ZsDbbLlGngXaMa0Vbt+z74FqlcajbHTZ6zBmTpBVq5RHtDPgKITdpE1fongp7+ZXQNBlkaavaqv8bnyrP4BWahLP4iO9/xJF9lQYboYwEEDzmnKLMW1VtCE6nJzEgWCufACTbxpNS7GvKtoHT/OVzw8ArEXhZXQUS1UY8zKsX2iXwmyhw5Sj6YboA8WICs4z+TrFP89LmxXY0j6536TQFyRz1iB4WWvCbH5n6W+ABV2e8ssJB1AmEy8QYNwpJQJNpSxzoKBjI73XxvPYYC/IjPFMySwZqrSZCkJYqQ023ySkaQxWZT7in4KeMu7eS2tC+Kn4deJ7KwwUycx8n6RHMeD8Qg9flTHCv3gmab8JKZJqN3hW1D378JuvmIX4V0= <2>
+  sshAuthorizedKey: <ssh_public_key_content> <2>
 ----
 
 +
 <1> The `pullSecretRef` refers to the config map reference in the same namespace as the `InfraEnv`, where the pull secret is used.
-<2> The `sshAuthorizedKey` represents the SSH public key that is placed in the boot image. The SSH key allows access to the worker nodes as the `core` user.
+<2> Enter your public SSH key content. Your SSH public key is placed in the boot image to allow access to the worker nodes as the `core` user.
 
 . Create the `InfraEnv` resource by entering the following command:
 
 +
 ----
-oc apply -f 03-infraenv.yaml
+oc apply -f <infraenv_file_name>.yaml
 ----
 
 . See the following output:
@@ -493,7 +470,7 @@ To create a bare metal host, complete the following steps:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: hosted-dual-worker0-bmc-secret
+  name: <worker_secret_name>
   namespace: clusters-hosted-dual
 data:
   password: YWRtaW4=
@@ -503,19 +480,19 @@ type: Opaque
 apiVersion: metal3.io/v1alpha1
 kind: BareMetalHost
 metadata:
-  name: hosted-dual-worker0
+  name: <worker_node_name>
   namespace: clusters-hosted-dual
   labels:
     infraenvs.agent-install.openshift.io: hosted-dual <1>
   annotations:
     inspect.metal3.io: disabled
-    bmac.agent-install.openshift.io/hostname: hosted-dual-worker0 <2>
+    bmac.agent-install.openshift.io/hostname: <worker_node_name> <2>
 spec:
   automatedCleaningMode: disabled <3>
   bmc:
     disableCertificateVerification: true <4>
-    address: redfish-virtualmedia://[192.168.126.1]:9000/redfish/v1/Systems/local/hosted-dual-worker0 <5>
-    credentialsName: hosted-dual-worker0-bmc-secret <6>
+    address: redfish-virtualmedia://[192.168.126.1]:9000/redfish/v1/Systems/local/<worker_node_name> <5>
+    credentialsName: <worker_secret_name> <6>
   bootMACAddress: aa:aa:aa:aa:02:11 <7>
   online: true <8>
 ----
@@ -534,7 +511,7 @@ spec:
 
 +
 ----
-oc apply -f 04-bmh.yaml
+oc apply -f <file_name>.yaml
 ----
 
 +
@@ -595,20 +572,36 @@ After you create the bare metal hosts, their statuses change from `Registering` 
 
 +
 ----
-oc -n clusters scale nodepool hosted-dual --replicas 3
+oc -n <hosted-cluster-namespace> scale nodepool <hosted-cluster-name> --replicas <replica-count>
 ----
 
-. After the scaling process is complete, notice that the agents are assigned to a hosted cluster:
+. Verify that the agents are assigned to a hosted cluster by entering the following command:
 
 +
 ----
-NAMESPACE         NAME                                   CLUSTER   APPROVED   ROLE          STAGE
-clusters-hosted   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0411   hosted    true       auto-assign
-clusters-hosted   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0412   hosted    true       auto-assign
-clusters-hosted   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0413   hosted    true       auto-assign
+oc get agents -n <hosted-control-plane-namespace>
 ----
 
-. Also notice that the node pool replicas are set:
++
+See the following output:
+
++
+----
+NAMESPACE              NAME                                   CLUSTER   APPROVED   ROLE          STAGE
+clusters-hosted-dual   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0411   hosted    true       auto-assign
+clusters-hosted-dual   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0412   hosted    true       auto-assign
+clusters-hosted-dual   aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0413   hosted    true       auto-assign
+----
+
+. Verify that the node pool replicas are set by entering the following command:
+
++
+----
+oc get nodepool -n <hosted-cluster-namespace>
+----
+
++
+See the following output:
 
 +
 ----
@@ -618,6 +611,8 @@ clusters    hosted   hosted    3                               False         Fal
 +
 Replace `4.x.y` with the supported {ocp-short} version that you want to use.
 
-. Wait until the nodes join the cluster. During the process, the agents provide updates on their stage and status.
+. Wait until the nodes join the cluster.
+
+// command to verify that nodes joined the cluster
 
 Next, monitor the deployment of the hosted cluster.

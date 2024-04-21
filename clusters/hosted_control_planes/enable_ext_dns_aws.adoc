@@ -18,7 +18,7 @@ A hosted control plane exposes four services:
 * `Konnectivity`
 * `Ignition`
 
-Each of those services is exposed by using `servicePublishingStrategy` in the `HostedCluster` specification. By default, for the `LoadBalancer` and `Route` types of `servicePublishingStrategy`, you publish the service in one of two ways: 
+Each of those services is exposed by using `servicePublishingStrategy` in the `HostedCluster` specification. By default, for the `LoadBalancer` and `Route` types of `servicePublishingStrategy`, you publish the service in one of two ways:
 
 * By using the hostname of the load balancer that is in the status of the `Service` with the `LoadBalancer` type
 * In the `status.host` field of the `Route`
@@ -147,7 +147,7 @@ This example shows the resulting `services` block for the hosted cluster:
 
 When the Control Plane Operator creates the `Services` and `Routes`, it annotates them with the `external-dns.alpha.kubernetes.io/hostname` annotation. The value is the `hostname` field in the `servicePublishingStrategy` for that type. The Control Plane Operator uses that name for the service endpoints, and it expects that if the hostname is set, a mechanism exists, such as external-dns or otherwise, which can create the DNS records.
 
-Only public services can have service-level DNS indirection. Private services use the `hypershift.local` private zone, and it is not valid to set `hostname` for services that are private for a given endpoint access type. 
+Only public services can have service-level DNS indirection. Private services use the `hypershift.local` private zone, and it is not valid to set `hostname` for services that are private for a given endpoint access type.
 
 The following table notes when it is valid to set `hostname` for a service and endpoint combination:
 
@@ -178,29 +178,34 @@ The following table notes when it is valid to set `hostname` for a service and e
 [#deploy-cluster-cli-external-dns-aws]
 == Deploying a cluster by using the command line interface and external DNS
 
-You need to deploy the `hypershift` and `external-dns` Operators when the external public hosted zone already exists. Ensure that the `external-dns` Operator is running and that the internal flags point to the public hosted zone by entering the following commands:
+You need to deploy the `hypershift` and `external-dns` Operators when the external public hosted zone already exists. Ensure that the `external-dns` Operator is running and that the internal flags point to the public hosted zone.
+
+. Export your management cluster kubeconfig file by entering the following command:
+
++
+----
+export KUBECONFIG=<path-to-management-cluster-kubeconfig>
+----
+
+. Create a hosted cluster by entering the following command:
 
 ----
-export KUBECONFIG=<path_to_management_cluster_kubeconfig>
-export AWS_CREDS=~/.aws/credentials
-export REGION=<region>
-
 hypershift create cluster aws \
-    --aws-creds ${AWS_CREDS} \
-    --instance-type m6i.xlarge \
-    --region ${REGION} \
+    --aws-creds <path-to-aws-creds> \
+    --instance-type <instance-type> \
+    --region <region> \
     --auto-repair \
     --generate-ssh \
-    --name <cluster_name> \
+    --name <hosted-cluster-name> \
     --namespace clusters \
-    --base-domain service-consumer-domain.com \ <1>
-    --node-pool-replicas 2 \
-    --pull-secret ${HOME}/pull_secret.json \
-    --release-image quay.io/openshift-release-dev/ocp-release:4.13.0-ec.3-x86_64 \
-    --external-dns-domain=service-provider-domain.com \ <2>
+    --base-domain <basedomain> \ <1>
+    --node-pool-replicas <node-pool-replica-count> \
+    --pull-secret <path-to-pull-secret> \
+    --release-image quay.io/openshift-release-dev/ocp-release:4.x.y-x86_64 \
+    --external-dns-domain=<external-dns-domain> \ <2>
     --endpoint-access=PublicAndPrivate <3>
 ----
 
-<1> Points to the public hosted zone, `service-consumer-domain.com`, which is typically in an AWS account that the service consumer owns.
-<2> Points to the public external DNS hosted zone, `service-provider-domain.com`, which is typically in an AWS account that the service provider owns.
-<3> Set as `PublicAndPrivate.` The external DNS can be used with only `Public` or `PublicAndPrivate` configurations.
+<1> Points to the public hosted zone, for example, `service-consumer-domain.com`, which is typically in an AWS account that the service consumer owns.
+<2> Points to the public external DNS hosted zone, for example, `service-provider-domain.com`, which is typically in an AWS account that the service provider owns.
+<3> Set as `PublicAndPrivate.` You can use the external DNS only with `Public` or `PublicAndPrivate` configurations.
