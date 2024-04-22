@@ -29,9 +29,9 @@ Many of the guidelines we adopt are industry standards for high quality writing,
 * Avoid dangling modifiers. Be sure subject and predicate agree. Read about [subject-verb agreement](https://www.ibm.com/docs/en/ibm-style?topic=grammar-verbs#subject-verb-agreement).
 * Know something about the technology: What is the purpose of the new function? Why should a customer use it? This will help you write your _short description_.
 * Use only approved abbreviations.
- - Check third-party official doc for abbreviations, for example AWS is used by Amazon. IBM uses few abbreviations.
- - Check manuals and the rest of the doc to see where we use abbreviations and where we don't.
- - Approved abbreviations are only used after initial full spelling and parenthesis: Custom Resource (CR)
+  - Check third-party official doc for abbreviations, for example AWS is used by Amazon. IBM uses few abbreviations.
+  - Check manuals and the rest of the doc to see where we use abbreviations and where we don't.
+  - Approved abbreviations are only used after initial full spelling and parenthesis: Custom Resource (CR)
 * Ask where the user will interact with the feature: Day 1? Day 2? During the Application lifecycle? This will help with placement.
 * Seek guidance from the architect before creating a new guide or section if you are not sure about placement.
 * Reduce lengthy output examples that the user will see in the terminal. We usually do not need to repeat outputs in the doc.
