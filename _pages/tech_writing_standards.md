@@ -5,14 +5,15 @@ permalink: /tech_writing_standards
 horizontal: false
 ---
 
-Use this file regularly to write high quality content. Please read and study this information as a technical writer on the team, or a contributor. Most of the following content is addressed in the following manuals or guidance:
+Use this file regularly to write high quality content. Please read and study this information as a technical writer on the team, or a contributor. 
+
+Most of the following content is addressed in the following manuals or guidance:
+
 * [_IBM Style Manual_](https://www.ibm.com/docs/en/ibm-style)
 * [_Red Hat Supplemental_ guide](https://redhat-documentation.github.io/supplementary-style-guide/#_about_this_guide)
 * [_Naming_](https://source.redhat.com/departments/marketing/brand/naming)
 
-Many of the guidelines we adopt are industry standards for high quality writing, proper grammar, SEO, translation, accessibility, and readability.
-
-All technical writers should be very familiar with these standards for writing. Each contributor should refer to these manuals when creating content for the RHACM docs repository. Read more about the standards in the following sections, but see the manuals for more information:
+Many of the guidelines we adopt are industry standards for high quality writing, proper grammar, SEO, translation, accessibility, and readability. All technical writers should be very familiar with these standards for writing. Each contributor should refer to these manuals when creating content for the RHACM docs repository. Read more about the standards in the following sections, but see the manuals for more information:
 
 * [General reminders](#reminders)
 * [File names, titles, headers](#file-names-titles-headers)
@@ -37,12 +38,12 @@ All technical writers should be very familiar with these standards for writing. 
 * Guides with multiple files should begin with an _introductory_ file named, `folder_name/intro.adoc`, which only has conceptual information and links to the rest of the topics. Name the file `overview.adoc` if it is a larger collection that contains a few intros and guides.
 * Be sure file names increase usability and don't confuse the reader or writer. Why? Proper and concise file names make our jobs easier. We can find and retrieve files easier and build URLs is easier. **Example:** `man_clu_set.adoc` changes to `manage_clusterset.adoc`, a file that is titled: _Managing ClusterSets_. This increases expectation about the contents of the file.
 * Recognize the goal of the content: Task, reference, concept. (Topics will sometimes have a mix of these items.) 
-    ** _Tasks_ require gerunds ("ing" verbs) in the title and are procedures. (**Note:** a task is not a task if it just links to other tasks.)
-    ** We ask for validation steps at the end, but you may not get them in your drafts. Those steps are concrete and produce a result, or just skip adding them. **Example:** Run `oc get status` to verify pod status.
-    ** _Concepts_ are informative about what the product does and how. A topic about architecture is a concept. An intro file is also conceptual. 
-    ** _References_ are also informative. A breakdown of an API or a glossary could be defined as a reference.
-    ** See more about [procedures](https://www.ibm.com/docs/en/ibm-style?topic=format-procedures) in the IBM style manual.
-    ** Although are RHACM doc repo is not set up this way because we came with established content and we collaborate with engineers in the same workspace, you can read more about concepts and procedures in [Red Hat: Writing modular documentation](https://redhat-documentation.github.io/modular-docs/#_creating_modules).   `      
+  - _Tasks_ require gerunds ("ing" verbs) in the title and are procedures. (**Note:** a task is not a task if it just links to other tasks.)
+  - We ask for validation steps at the end, but you may not get them in your drafts. Those steps are concrete and produce a result, or just skip adding them. **Example:** Run `oc get status` to verify pod status.
+  - _Concepts_ are informative about what the product does and how. A topic about architecture is a concept. An intro file is also conceptual. 
+  - _References_ are also informative. A breakdown of an API or a glossary could be defined as a reference.
+
+     
 * Avoid internal terms. Name the file and section after what the user reads about the product in announcements and in the console. For instance, name a file `console_intro.adoc` and not `ui.intro.adoc` because the product refers to the _console_. Another example is `spoke` cluster, which is an internal term for what we call and managed cluster.
 * Use headers for two or more subsections. If you have more than three, create links for them at the beginning of the file for easy retrievabililty and UX.
 * Use parallel language for headers. Example: Creating your cluster, Importing your cluster, Destroying your cluster.
@@ -63,13 +64,16 @@ All technical writers should be very familiar with these standards for writing. 
 
 * Analyze your sentence structure. See some examples:
 * Use concise sentences. Remove extra words. 
-    - First draft: `There are many ways that you can use this feature, but this is one way.` 
-    - Second draft: `This is one of many procedures...`
-      - First draft: Only users belonging to the certain role can view data belonging to a certain namespace.
-      - Better draft: Only users who are assigned to a certain role can view data within a namespace.
-      - Why? Belonging is confusing and can mean many things, and it is used twice. A relative pronoun is better used to connect a clause or phrase to a noun or pronoun. The clause modifies, or describes, the noun. The most common relative pronouns are who, whom, whose, which, and that. Sometimes when and where can be used as relative pronouns, as well.
+  - First draft: `There are many ways that you can use this feature, but this is one way.` 
+  - Better draft: `This is one of many procedures...`
+  - Even better draft: `Complete the following procedure to...`
+  - First draft: Only users belonging to the certain role can view data belonging to a certain namespace.
+  - Better draft: Only users who are assigned to a certain role can view data within a namespace.
+    - Belonging is confusing and can mean many things, and it is used twice.
+    - A relative pronoun is better used to connect a clause or phrase to a noun or pronoun. The clause modifies, or describes, the noun.
+    - The most common relative pronouns are who, whom, whose, which, and that. Sometimes when and where can be used as relative pronouns, as well.
 * Mood and voice (avoid subjunctive mood, write in active voice): 
-  - Wish, desire, please –- all of these are not concrete, not imperative. Avoid these.
+  - Wish, desire, please, recommend –- all of these are not concrete, not imperative. Avoid these.
   - Should (rarely used, but needs clarification when used)
 * Tense: Always strive for present tense.  
   - First draft: If you were to save the file (not present, wordy, room for interpretation)
@@ -154,12 +158,14 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
  - Is the content in active voice and present tense?
  - Do you find wordy content that can be removed or merged?
  - Examples of wordy content:
-   *** "In other words...", this can be removedm just write the words
-   *** "...from being automatically imported", can be something like "...from automatic import"
-   *** Before: "Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list."
-   *** After: "Add the managed cluster lable to the `ignore_labels` list to exclude it from the _Label_ drop-down filter
+   - "In other words...", this can be removedm just write the words
+   -  "...from being automatically imported", can be something like "...from automatic import"
+   - Before: "Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list."
+   - After: "Add the managed cluster lable to the `ignore_labels` list to exclude it from the _Label_ drop-down filter
 
 ## Additional resources
 
 * [The 7 principles of naming](https://www.namingthings.co/naming-things-principles)
 * [What’s in a Name? Guidelines for Naming Files](https://techwhirl.com/whats-in-a-name-guidelines-for-naming-files/)
+*  See more about [procedures](https://www.ibm.com/docs/en/ibm-style?topic=format-procedures) in the IBM style manual.
+* Although are RHACM doc repo is not set up the same because we came with established content and collaborate with engineers in the same workspace, you can read more about concepts and procedures in [Red Hat: Writing modular documentation](https://redhat-documentation.github.io/modular-docs/#_creating_modules).   ` 
