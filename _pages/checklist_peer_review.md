@@ -7,7 +7,8 @@ horizontal: false
 
 ## Peer review checklist 
 
-- [ ] Are file names, headers, and titles consistent with the feature and the rest of the doc?
+- [ ] Are file names, headers, and titles consistent with the feature and the rest of the component doc?
+- [ ] For bugs, is the diff clearly addressing the customer concern or code change?
 - [ ] Are file names, headers, and titles concise?
 - [ ] Does the file have a meaningful short description that tells you why the user wants to use the feature?
 - [ ] Are prerequisites clear?
@@ -27,11 +28,11 @@ horizontal: false
 - [ ] Does the content cross features and if so, have tech leads discussed best placement for it?
 - [ ] Are there any long paragraphs that should be broken up into lists or concise paragraphs?
 - [ ] Do you understand what the change is about? 
-- [ ] Is content grammtically correct and concise?
- - Are modals used properly?
- - Is the content in active voice and present tense?
- - Do you find wordy content that can be removed or merged?
- - Examples of wordy content:
+- [ ] Is content grammatically correct and concise?
+  - [ ] Are modals used properly?
+  - [ ] Is the content in active voice and present tense?
+  - [ ] Do you find wordy content that can be removed or merged?
+  - Examples of wordy content:
    - "In other words...", this can be removedm just write the words
    -  "...from being automatically imported", can be something like "...from automatic import"
    - Before: "Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list."
