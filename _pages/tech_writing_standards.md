@@ -130,38 +130,6 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`.
 * Ensure your peer reviews and contributions are in your goals.
 
-## Peer review checklist 
-(move this to a new file with this file as the prerequitite
-
-* Are file names, headers, and titles consistent with the feature and the rest of the doc?
-* Are file names, headers, and titles concise?
-* Does the file have a meaningful short description that tells you why the user wants to use the feature?
-* Are prerequisites clear?
-* Are there any obvious prerequisites that can be removed, such as "You must install the RHACM" in an area where that is understood?
-* Are there any red links when you preview and run Check my links?
-* Are product or technology names consistent with the rest of the documentation, content references, or official guidlelines?
-* Are there introductions after headers and before main content?
-* Do you see directional language such as "below" or "above"?
-* Are variables tagged properly and consistently?
-* Do you find commands that are presented together instead of as separate steps?
-* If versions are listed in examples or commands, do they need to be specific or can we build like user input/variables?
-* Does the PR format need to be fixed because commands or sample files are not grayed out?
-* Are there many inline links and are they necessary?
-* Does this require a What's new entry?
-* Is this a known issue or troubleshooting entry that follows the proper format?
-* Does the content present RHACM features inside the MCE doc and if so, is that intentional with tech lead visibility?
-* Does the content cross features and if so, have tech leads discussed best placement for it?
-* Are there any long paragraphs that should be broken up into lists or concise paragraphs?
-* Do you understand what the change is about? 
-* Is grammar correct?
- - Are modals used properly?
- - Is the content in active voice and present tense?
- - Do you find wordy content that can be removed or merged?
- - Examples of wordy content:
-   - "In other words...", this can be removedm just write the words
-   -  "...from being automatically imported", can be something like "...from automatic import"
-   - Before: "Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list."
-   - After: "Add the managed cluster lable to the `ignore_labels` list to exclude it from the _Label_ drop-down filter
 
 ## Additional resources
 
