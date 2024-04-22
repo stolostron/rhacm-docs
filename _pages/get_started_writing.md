@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Technical writing standards
-permalink: /get_started_writing
+permalink: /tech_writing_standards
 horizontal: false
 ---
 
@@ -49,7 +49,8 @@ All technical writers should be very familiar with these standards for writing. 
 
 ## Short descriptions
 
-* Use complete, but concise sentences with no more than 50 words at a time. 
+* Use complete, but concise sentences with no more than 50 words at a time.
+* You also need a short introduction after each header.
 * Avoid self-referential language when you can: “This topic...” (Obviously the user knows they are reading this topic.) See more about [Grammer](https://www.ibm.com/docs/en/ibm_style/global-audiences.html#grammar).
 * Don't repeat the title in the description.
 * Give the user a little knowledge in just a couple sentences about what the topic is about. This requires some knowledge about the function.
@@ -122,16 +123,32 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`.
 * Ensure your peer reviews and contributions are in your goals.
 
-## Peer review checklist
+## Peer review checklist 
+(move this to a new file with this file as the prerequitite
 
-* For new files, review file names, headers, and titles to ensure they are concise and match the content purpose.
-* Read short descriptions and introductions and check for clarity.
-* Check links.
-* Check for conciseness and offer edits for wordy content.
-* Check for IBM/Red Hat styled terms and product names.
-* Check for grammar.
-* Check for accessibility.
-* See if you can understand the diff. If something is confusing to you, it is probably confusing to the customer.
+* Are file names, headers, and titles consistent?
+* Are file names, headers, and titles concise?
+* Does the file have a meaningful short description that tells you why the user wants to use the feature?
+* Are prerequisites clear?
+* Are there any obvious prerequitsites that can be removed, such as "You must install the RHACM"?
+* Are there any red links when you preview and run Check my links?
+* Are there long paragraphs that should be broken up into lists or concise paragraphs?* Is grammar correct?
+* Are modals used properly?
+* Is the content in active voice and present tense?
+* Do you find wordy content that can be removed or merged? Examples: "In other words...", "...from being automatically imported" "Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list."
+* Are product names consistent with the rest of the documentation, content references, or guidlelines?
+* Do you see directional language such as "below" or "above"?
+* Is something is confusing to you? If so, it will likely confuse the customer?
+* Are variables tagged properly and consistently?
+* Do you find commands that are presented together instead of as separate steps?
+* If versions are listed in examples, do they need to be specific?
+* Does the content present RHACM features, but inside the MCE doc and if so, is that intentional with tech lead visibility?
+* Does the content cross features and if so, have tech leads discussed best placement for it?
+* Does the PR format need to be fixed?
+* Are there many inline links and are they necessary?
+* Does this require a What's new entry?
+* Is this a known issue or troubleshooting entry that follows the format?
+  
 
 ## Additional resources
 
