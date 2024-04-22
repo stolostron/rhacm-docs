@@ -13,7 +13,7 @@ children:
       permalink: /get_started_git
     - title: divider
     - title: Technical writing standards
-      permalink: /get_started_writing
+      permalink: /tech_writing_standards
     - title: divider
     - title: Learning Markdown
       permalink: /learning_md
