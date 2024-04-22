@@ -59,7 +59,7 @@ Many of the guidelines we adopt are industry standards for high quality writing,
 
 * Use complete, but concise sentences with no more than 50 words at a time.
 * You also need a short introduction after each header.
-* Avoid self-referential language when you can: “This topic...” (Obviously the user knows they are reading this topic.) See more about [Grammer](https://www.ibm.com/docs/en/ibm_style/global-audiences.html#grammar).
+* Avoid self-referential language when you can: “This topic...” (Obviously the user knows they are reading this topic.) See more about [Grammar](https://www.ibm.com/docs/en/ibm_style/global-audiences.html#grammar).
 * Don't repeat the title in the description.
 * Give the user a little knowledge in just a couple sentences about what the topic is about. This requires some knowledge about the function.
 * If it is a task, make it clear that it is a procedure in the description. If it is a reference, be sure the user knows to refer to the topic for information. If it is just a concept, make it clear it is only for details about a component or function.
@@ -127,7 +127,7 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 ## Requirements before merging PRs
 
 * Request peer reviews for all new topics and other changes that result in more than a typo or small correction.
-* Request peer reviews when developers make changes with PRs.
+* Request peer reviews when developers make changes with PRs, meaning you and another writer review a PR sent from Engineering or QE.
 * Request technical review for any changes other than typos or broken links. 
 * Check broken links as you build content. Use the easy _Check my links_ plug-in on each PR in preview mode.
 * Check your PR _requests_ from team members regularly. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
