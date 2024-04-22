@@ -148,16 +148,16 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * Does the content present RHACM features inside the MCE doc and if so, is that intentional with tech lead visibility?
 * Does the content cross features and if so, have tech leads discussed best placement for it?
 * Are there any long paragraphs that should be broken up into lists or concise paragraphs?
+* Do you understand what the change is about? 
 * Is grammar correct?
-** Are modals used properly?
-** Is the content in active voice and present tense?
-** Do you find wordy content that can be removed or merged?
-** Examples of wordy content:
+ - Are modals used properly?
+ - Is the content in active voice and present tense?
+ - Do you find wordy content that can be removed or merged?
+ - Examples of wordy content:
    *** "In other words...", this can be removedm just write the words
    *** "...from being automatically imported", can be something like "...from automatic import"
    *** Before: "Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list."
    *** After: "Add the managed cluster lable to the `ignore_labels` list to exclude it from the _Label_ drop-down filter
-* Do you understand what the change is about? 
 
 ## Additional resources
 
