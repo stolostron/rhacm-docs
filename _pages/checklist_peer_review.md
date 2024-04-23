@@ -1,9 +1,11 @@
 ---
 layout: page
-title: Technical writing standards
-permalink: /tech_writing_standards
+title: Peer review checklist
+permalink: /checklist_peer_review
 horizontal: false
 ---
+
+See the following list for guidance when peer reviewing pull requests.
 
 ## Peer review checklist 
 
@@ -14,7 +16,7 @@ horizontal: false
 - [ ] Are prerequisites clear?
 - [ ] Are there any obvious prerequisites that can be removed, such as "You must install the RHACM" in an area where that is understood?
 - [ ] Are there any red links when you preview and run Check my links?
-- [ ] Are product or technology names consistent with the rest of the documentation, content references, or official guidlelines?
+- [ ] Are product or technology names consistent with the rest of the documentation, content references, or official guidelines?
 - [ ] Are there introductions after headers and before main content?
 - [ ] Do you see directional language such as "below" or "above"?
 - [ ] Are variables tagged properly and consistently?
@@ -33,8 +35,8 @@ horizontal: false
   - [ ] Is the content in active voice and present tense?
   - [ ] Do you find wordy content that can be removed or merged?
   - Examples of wordy content:
-   - "In other words...", this can be removedm just write the words
+   - "In other words...", this can be removed just write the words
    -  "...from being automatically imported", can be something like "...from automatic import"
    - Before: "Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list."
-   - After: "Add the managed cluster lable to the `ignore_labels` list to exclude it from the _Label_ drop-down filter
+   - After: "Add the managed cluster label to the `ignore_labels` list to exclude it from the _Label_ drop-down filter
 
