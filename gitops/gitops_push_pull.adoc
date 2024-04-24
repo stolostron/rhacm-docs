@@ -1,9 +1,7 @@
 [#gitops-push-pull]
 = Deploying Argo CD with Push and Pull model
 
-Using a _Push model_, The Argo CD server on the hub cluster deploys the application resources on the managed clusters. For the _Pull model_(Technology Preview), the application resources are propagated by the _Propagation controller_ to the managed clusters by using `manifestWork`.
-
-*Technology Preview:* Pull model has limited support this release.
+Using a _Push model_, The Argo CD server on the hub cluster deploys the application resources on the managed clusters. For the _Pull model_, the application resources are propagated by the _Propagation controller_ to the managed clusters by using `manifestWork`.
 
 For both models, the same `ApplicationSet` CRD is used to deploy the application to the managed cluster.
 
@@ -17,12 +15,37 @@ For both models, the same `ApplicationSet` CRD is used to deploy the application
 [#prereqs-pull-model]
 == Prerequisites
 
-* *Important:* If your `openshift-gitops-ArgoCD-application-controller` service account is _not_ assigned as a cluster administrator, the GitOps application controller might not deploy resources. The application status might send an error similar to the following error:
+View the following prerequisites for the Argo CD Pull model:
+ 
+*Important:* 
+
+* If your `openshift-gitops-ArgoCD-application-controller` service account is _not_ assigned as a cluster administrator, the GitOps application controller might not deploy resources. The application status might send an error similar to the following error:
 
 ----
 cannot create resource "services" in API group "" in the namespace
 "mortgage",deployments.apps is forbidden: User
 "system:serviceaccount:openshift-gitops:openshift-gitops-Argo CD-application-controller"
+----
+
+* After you install the `OpenShift Gitops` operator on the managed clusters, you must create the `ClusterRoleBinding` cluster administrator privileges on the same managed clusters. 
+
+* To add the `ClusterRoleBinding` cluster administrator privileges to your managed clusters, see the following example YAML: 
+
++
+[source,yaml]
+----
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: argo-admin
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
 ----
 
 * If you are not a cluster administrator and need to resolve this issue, complete the following steps:
@@ -77,12 +100,12 @@ For both Push and Pull model, the _Argo CD ApplicationSet controller_ on the hub
 
 - Push model implementation only contains the Argo CD application on the hub cluster, which has credentials for managed clusters. The Argo CD application on the hub cluster can deploy the applications to the managed clusters.
 
-- *Important:* With a large number of managed clusters that require resource application, consider potential strain on the {ocp-short} GitOps controller memory and CPU usage. To optimize resource management, refer to link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/cicd/gitops#configuring-resource-quota[Configuring resource quota or requests].
+- *Important:* With a large number of managed clusters that require resource application, consider potential strain on the {ocp-short} GitOps controller memory and CPU usage. To optimize resource management, refer to link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/cicd/gitops#configuring-resource-quota[Configuring resource quota or requests].
 
 - By default, the Push model is used to deploy the application unless you add the `apps.open-cluster-management.io/ocm-managed-cluster` and `apps.open-cluster-management.io/pull-to-ocm-managed-cluster` annotations to the template section of the `ApplicationSet`.
 
 [#arch-pull]
-=== Architecture Pull model (Technology Preview)
+=== Architecture Pull model
 
 - Pull model can provide scalability relief compared to the push model by reducing stress on the controller in the hub cluster, but with more requests and status reporting required.
 
@@ -228,7 +251,7 @@ statuses:
 [#pull-push-resources]
 == Additional resources
 
- - See  link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/cicd/gitops#configuring-an-openshift-cluster-by-deploying-an-application-with-cluster-configurations[Configuring an OpenShift cluster by deploying an application with cluster configurations] in the {ocp-short} documentation.
+ - See  link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/cicd/gitops#configuring-an-openshift-cluster-by-deploying-an-application-with-cluster-configurations[Configuring an OpenShift cluster by deploying an application with cluster configurations] in the {ocp-short} documentation.
 
 
-- See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/cicd/gitops#setting-up-argocd-instance[Setting up an Argo CD instance] in the {ocp-short} documentation.
+- See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/cicd/gitops#setting-up-argocd-instance[Setting up an Argo CD instance] in the {ocp-short} documentation.

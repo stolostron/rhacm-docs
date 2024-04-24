@@ -32,6 +32,18 @@ For more about deprecations and removals, see xref:../release_notes/deprecate_re
 
 Backup and restore known issues and limitations are listed here, along with workarounds if they are available.
 
+[#open-cluster-namespace-stuck-terminating]
+=== The _open-cluster-management-backup_ namespace is stuck in the _Terminating_ state
+//2.10:ACM-10292
+
+When the cluster-backup component is disabled on the `MultiClusterHub` resource, the `open-cluster-management-backup` namespace is stuck in the `Terminating` state if you have a Velero restore resource created by a {product-title-short} restore operation.
+
+The `Terminating` state is a result of the Velero restore resources waiting on the `restores.velero.io/external-resources-finalizer` to complete. To workaround this issue, complete the following steps:
+
+. Delete all {product-title-short} restore resources and wait for the Velero restore to be cleaned up before you disable the cluster backup option on the `MultiClusterHub` resource. 
+. If your `open-cluster-management-backup` namespace is already stuck in the `Terminating` state, edit all the Velero restore resources and remove the finalizers. 
+. Allow the Velero resources to delete the namespaces and resources. 
+
 [#bare-metal-reintall]
 === Bare metal managed clusters deployed with the Infrastructure Operator by using the ZTP flow perform reinstall nodes 
 //2.9:ACM-8627
@@ -112,50 +124,6 @@ For more information, see the link:../business_continuity/backup_restore/backup_
 === Passive configurations do not display managed clusters
 
 Managed clusters are only displayed when the activation data is restored on the passive hub cluster.
-
-[#upgrade-limitation]
-=== Cluster backup and restore upgrade limitation
-
-If you upgrade your cluster from {product-version-prev} to {product-version} with the `enableClusterBackup` parameter set to `true`, the following message appears:
-
-----
-When upgrading from version 2.4 to 2.5, cluster backup must be disabled
-----
-
-Before you upgrade your cluster, disable cluster backup and restore by setting the `enableClusterBackup` parameter to `false`. The `components` section in your `MultiClusterHub` resource might resemble the following YAML file:
-
-You can reenable the backup and restore component when the upgrade is complete. View the following sample:
-
-[source,yaml]
-----
-overrides:
-      components:
-        - enabled: true
-          name: multiclusterhub-repo
-        - enabled: true
-          name: search
-        - enabled: true
-          name: management-ingress
-        - enabled: true
-          name: console
-        - enabled: true
-          name: insights
-        - enabled: true
-          name: grc
-        - enabled: true
-          name: cluster-lifecycle
-        - enabled: true
-          name: volsync
-        - enabled: true
-          name: multicluster-engine
-        - enabled: false
-          name: cluster-proxy-addon
-        - enabled: true <<<<<<<< 
-          name: cluster-backup
-    separateCertificateManagement: false
-----
-
-If you have manually installed OADP, you must manually uninstall OADP before you upgrade. After the upgrade is successful and backup and restore is reenabled, OADP is installed automatically.
 
 [#managed-cluster-resources-not-restored]
 === Managed cluster resource not restored

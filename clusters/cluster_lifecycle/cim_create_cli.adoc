@@ -73,7 +73,7 @@ oc apply -f pull-secret.yaml
 
 . Create the infrastructure environment.
 
-.. Create the `infra-env.yaml` file and add the following content. Replace values where needed, but the only required property in the `spec` field is `pullSecretRef`:
+.. Create the `infra-env.yaml` file and add the following content. Replace values where needed:
 +
 [source,yaml]
 ----
@@ -83,48 +83,100 @@ metadata:
   name: myinfraenv
   namespace: <your_namespace>
 spec:
-  proxy: <1>
-    httpProxy: <http://user:password@ipaddr:port> <2>
-    httpsProxy: <http://user:password@ipaddr:port> <3>
-    noProxy: <4>
-  additionalNTPSources: <5>
-  sshAuthorizedKey: <6>
+  proxy:
+    httpProxy: <http://user:password@ipaddr:port>
+    httpsProxy: <http://user:password@ipaddr:port>
+    noProxy:
+  additionalNTPSources:
+  sshAuthorizedKey:
   pullSecretRef:
-    name: <name> <7>
-  agentLabels: <8>
+    name: <name>
+  agentLabels:
     <key>: <value>
-  nmStateConfigLabelSelector: <9>
+  nmStateConfigLabelSelector:
     matchLabels:
       <key>: <value>
-  clusterRef: <10>
+  clusterRef:
     name: <cluster_name>
-    namespace: <projecct_name>
-  ignitionConfigOverride: '{"ignition": {"version": "3.1.0"}, …}' <11>
-  cpuArchitecture: x86_64 <12>
-  ipxeScriptType: DiscoveryImageAlways <13>
-  kernelArguments: <14>
+    namespace: <project_name>
+  ignitionConfigOverride: '{"ignition": {"version": "3.1.0"}, …}'
+  cpuArchitecture: x86_64
+  ipxeScriptType: DiscoveryImageAlways
+  kernelArguments:
     - operation: append
       value: audit=0
-  additionalTrustBundle: <bundle> <15>
-  osImageVersion: <version> <16>
+  additionalTrustBundle: <bundle>
+  osImageVersion: <version>
 ----
-+
-<1> Defines the proxy settings for agents and clusters that use the `InfraEnv` resource. If you do not set the `proxy` value, agents are not configured to use a proxy.
-<2> The URL of the proxy for HTTP requests. The URL must start with `http`. HTTPS is not supported.
-<3> The URL of the proxy for HTTP requests. The URL must start with `http`. HTTPS is not supported.
-<4> A list of domains and CIDRs separated by commas that you do not want to use the proxy with.
-<5> A list of Network Time Protocol (NTP) sources (hostname or IP) to add to all hosts. They are added to NTP sources that are configured by using other options, such as DHCP.
-<6> SSH public keys that are added to all hosts for use in debugging during the discovery phase. The discovery phase is when the host boots the Discovery Image.
-<7> The name of the Kubernetes secret containing your pull secret.
-<8> Labels that are automatically added to the `Agent` resources representing the hosts that are discovered with your `InfraEnv`. Make sure to add your key and value.
-<9> Consolidates advanced network configuration such as static IPs, bridges, and bonds for the hosts. The host network configuration is specified in one or more `NMStateConfig` resources with labels you choose. The `nmStateConfigLabelSelector` property is a Kubernetes label selector that matches your chosen labels. The network configuration for all `NMStateConfig` labels that match this label selector is included in the Discovery Image.  When you boot, each host compares each configuration to its network interfaces and applies the appropriate configuration. To learn more about advanced network configuration, see link to section _Configuring advanced networking for a host inventory_. 
-<10> References an existing `ClusterDeployment` resource that describes a standalone on-premises cluster. Not set by default. If `clusterRef` is not set, then the hosts can be bound to one or more clusters at a later time. The hosts can also be removed from one cluster and added to another.  However, if clusterRef is set, then all hosts discovered with this InfraEnv are automatically bound to the specified cluster. If the cluster has not yet been installed, then all discovered hosts are part of its installation. If the cluster has already been installed, then all discovered hosts are added.
-<11> Modifies the ignition configuration of the Red Hat CoreOS live image, such as adding files. Make sure to only use `ignitionConfigOverride` if you need it. Must use ignition version 3.1.0, regardless of the cluster version.
-<12> Choose one of the following supported CPU architectures: x86_64, aarch64, ppc64le, or s390x. The default value is x86_64.
-<13> Causes the image service to always serve the iPXE script when set to the default value of `DiscoveryImageAlways` and when you are using iPXE to boot. As a result, the host boots from the network discovery image. Setting the value to `BootOrderControl` causes the image service to determine when to return the iPXE script, depending on the host state, which causes the host to boot from the disk when the host is provisioned and is part of a cluster.
-<14> Allows modifying the kernel arguments for when the Discovery Image boots. Possible values for `operation` are `append`, `replace`, or `delete`.
-<15> A PEM-encoded X.509 certificate bundle, usually needed if the hosts are in a network with a re-encrypting man-in-the-middle (MITM) proxy, or if the hosts need to trust certificates for other purposes, such as container image registries. Hosts discovered by your `InfraEnv` trust the certificates in this bundle. Clusters created from the hosts discovered by your `InfraEnv` also trust the certificates in this bundle.
-<16> The Red Hat CoreOS image version to use for your `InfraEnv`. Make sure the version refers to the OS image specified in either the `AgentServiceConfig.spec.osImages` or in the default OS images list. Each release has a specific set of Red Hat CoreOS image versions. The `OSImageVersion` must match an {ocp-short} version in the OS images list. You cannot specify `OSImageVersion` and `ClusterRef` at the same time. If you want to use another version of the Red Hat CoreOS image that does not exist by default, then you must manually add the version by specifying it in the `AgentServiceConfig.spec.osImages`. To learn more about adding versions, see _Enabling the central infrastructure management service_. 
+
+.InfraEnv field table
+|===
+| Field | Optional or required | Description
+
+| `proxy`
+| Optional
+| Defines the proxy settings for agents and clusters that use the `InfraEnv` resource. If you do not set the `proxy` value, agents are not configured to use a proxy.
+
+| `httpProxy`
+| Optional
+| The URL of the proxy for HTTP requests. The URL must start with `http`. HTTPS is not supported..
+
+| `httpsProxy`
+| Optional
+| The URL of the proxy for HTTP requests. The URL must start with `http`. HTTPS is not supported.
+
+| `noProxy`
+| Optional
+| A list of domains and CIDRs separated by commas that you do not want to use the proxy with.
+
+| `additionalNTPSources`
+| Optional
+| A list of Network Time Protocol (NTP) sources (hostname or IP) to add to all hosts. They are added to NTP sources that are configured by using other options, such as DHCP.
+
+| `sshAuthorizedKey`
+| Optional
+| SSH public keys that are added to all hosts for use in debugging during the discovery phase. The discovery phase is when the host boots the Discovery Image.
+
+| `name`
+| Required
+| The name of the Kubernetes secret containing your pull secret.
+
+| `agentLabels`
+| Optional
+| Labels that are automatically added to the `Agent` resources representing the hosts that are discovered with your `InfraEnv`. Make sure to add your key and value.
+
+| `nmStateConfigLabelSelector`
+| Optional
+| Consolidates advanced network configuration such as static IPs, bridges, and bonds for the hosts. The host network configuration is specified in one or more `NMStateConfig` resources with labels you choose. The `nmStateConfigLabelSelector` property is a Kubernetes label selector that matches your chosen labels. The network configuration for all `NMStateConfig` labels that match this label selector is included in the Discovery Image.  When you boot, each host compares each configuration to its network interfaces and applies the appropriate configuration. To learn more about advanced network configuration, see link to section _Configuring advanced networking for a host inventory_. 
+
+| `clusterRef`
+| Optional
+| References an existing `ClusterDeployment` resource that describes a standalone on-premises cluster. Not set by default. If `clusterRef` is not set, then the hosts can be bound to one or more clusters later. You can remove the host from one cluster and add it to another. If `clusterRef` is set, then all hosts discovered with your `InfraEnv` are automatically bound to the specified cluster. If the cluster is not installed yet, then all discovered hosts are part of its installation. If the cluster is already installed, then all discovered hosts are added.
+
+| `ignitionConfigOverride`
+| Optional
+| Modifies the ignition configuration of the Red Hat CoreOS live image, such as adding files. Make sure to only use `ignitionConfigOverride` if you need it. Must use ignition version 3.1.0, regardless of the cluster version.
+
+| `cpuArchitecture`
+| Optional
+| Choose one of the following supported CPU architectures: x86_64, aarch64, ppc64le, or s390x. The default value is x86_64.
+
+| `ipxeScriptType`
+| Optional
+| Causes the image service to always serve the iPXE script when set to the default value of `DiscoveryImageAlways` and when you are using iPXE to boot. As a result, the host boots from the network discovery image. Setting the value to `BootOrderControl` causes the image service to decide when to return the iPXE script, depending on the host state, which causes the host to boot from the disk when the host is provisioned and is part of a cluster.
+
+| `kernelArguments`
+| Optional
+| Allows modifying the kernel arguments for when the Discovery Image boots. Possible values for `operation` are `append`, `replace`, or `delete`.
+
+| `additionalTrustBundle`
+| Optional
+| A PEM-encoded X.509 certificate bundle, usually needed if the hosts are in a network with a re-encrypting man-in-the-middle (MITM) proxy, or if the hosts need to trust certificates for other purposes, such as container image registries. Hosts discovered by your `InfraEnv` trust the certificates in this bundle. Clusters created from the hosts discovered by your `InfraEnv` also trust the certificates in this bundle.
+
+| `osImageVersion`
+| Optional
+| The Red Hat CoreOS image version to use for your `InfraEnv`. Make sure the version refers to the OS image specified in either the `AgentServiceConfig.spec.osImages` or in the default OS images list. Each release has a specific set of Red Hat CoreOS image versions. The `OSImageVersion` must match an {ocp-short} version in the OS images list. You cannot specify `OSImageVersion` and `ClusterRef` at the same time. If you want to use another version of the Red Hat CoreOS image that does not exist by default, then you must manually add the version by specifying it in the `AgentServiceConfig.spec.osImages`. To learn more about adding versions, see _Enabling the central infrastructure management service_.
+|===
 
 .. Apply the YAML content by running the following command:
 +
@@ -133,7 +185,7 @@ oc apply -f infra-env.yaml
 ----
 
 .. To verify that your host inventory is created, check the status with the following command:
-
++
 ----
 oc describe infraenv myinfraenv -n <your_namespace>
 ----

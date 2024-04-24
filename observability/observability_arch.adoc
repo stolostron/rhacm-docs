@@ -3,8 +3,10 @@
 
 The `multiclusterhub-operator` enables the `multicluster-observability-operator` pod by default. You must configure the `multicluster-observability-operator` pod.
 
-When you enable the service, the `observability-endpoint-operator` is automatically deployed to each imported or created cluster. This controller collects the data from {ocp} Prometheus, then sends it to the {product-title-short} hub cluster. If the hub cluster imports itself is self-managed and imports itself as the `local-cluster`, observability is also enabled on it and metrics are collected from the hub cluster. As a reminder, when the hub cluster is self-managed the `disableHubSelfManagement` parameter is set to `false`.
- 
+When you enable the Observability service by defining a `MultiClusterObservability` custom resource, the `observability-endpoint-operator` is automatically deployed to each imported or created managed cluster. This controller starts a metrics collector that collects the data from {ocp} Prometheus, then sends the data to the {product-title-short} hub cluster. 
+
+When the Observability service is enabled, the hub cluster is always configured to collect and send metrics to the configured Thanos instance, regardless of whether hub self-management is enabled or not. When the hub cluster is self-managed, the `disableHubSelfManagement` parameter is set to `false`, which is the default setting. Metrics and alerts for the hub cluster appear in the `local-cluster` namespace. The `local-cluster` only appears in the cluster list drop-down menu if hub self-management is enabled. You can query the `local-cluster` metrics in the Grafana explorer.
+
 The following diagram shows the components of observability:
 
 image:../images/observability-arch-29.png[Multicluster observability architecture]
@@ -53,17 +55,17 @@ When you install {product-title-short} the following persistent volumes (PV) mus
 
 .Table list of persistent volumes
 |===
-| Persistent volume name | Purpose 
-| alertmanager 
+| Persistent volume name | Purpose
+| alertmanager
 | Alertmanager stores the `nflog` data and silenced alerts in its storage. `nflog` is an append-only log of active and resolved notifications along with the notified receiver, and a hash digest of contents that the notification identified.
 
-| thanos-compact 
+| thanos-compact
 | The compactor needs local disk space to store intermediate data for its processing, as well as bucket state cache. The required space depends on the size of the underlying blocks. The compactor must have enough space to download all of the source blocks, then build the compacted blocks on the disk. On-disk data is safe to delete between restarts and should be the first attempt to get crash-looping compactors unstuck. However, it is recommended to give the compactor persistent disks in order to effectively use bucket state cache in between restarts.
 
-| thanos-rule 
-| The thanos ruler evaluates Prometheus recording and alerting rules against a chosen query API by issuing queries at a fixed interval. Rule results are written back to the disk in the Prometheus 2.0 storage format. The amount of hours or days of data retained in this stateful set was fixed in the API version `observability.open-cluster-management.io/v1beta1`. It has been exposed as an API parameter in `observability.open-cluster-management.io/v1beta2`: `_RetentionInLocal_` 
+| thanos-rule
+| The thanos ruler evaluates Prometheus recording and alerting rules against a chosen query API by issuing queries at a fixed interval. Rule results are written back to the disk in the Prometheus 2.0 storage format. The amount of hours or days of data retained in this stateful set was fixed in the API version `observability.open-cluster-management.io/v1beta1`. It has been exposed as an API parameter in `observability.open-cluster-management.io/v1beta2`: `_RetentionInLocal_`
 
-| thanos-receive-default 
+| thanos-receive-default
 | Thanos receiver accepts incoming data (Prometheus remote-write requests) and writes these into a local instance of the Prometheus TSDB. Periodically (every 2 hours), TSDB blocks are uploaded to the object storage for long term storage and compaction. The amount of hours or days of data retained in this stateful set, which acts a local cache was fixed in API Version `observability.open-cluster-management.io/v1beta`. It has been exposed as an API parameter in `observability.open-cluster-management.io/v1beta2`: `_RetentionInLocal_`
 
 | thanos-store-shard

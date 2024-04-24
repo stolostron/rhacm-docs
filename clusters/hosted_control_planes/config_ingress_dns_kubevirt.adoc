@@ -33,33 +33,29 @@ If you do not want to use the default ingress and DNS behavior, you can configur
 [#deploy-hosted-cluster-base-domain]
 === Deploying a hosted cluster that specifies the base domain
 
-. To create a hosted cluster that specifies the base domain, enter the following commands:
+. To create a hosted cluster that specifies the base domain, enter the following command:
 
 +
 ----
-export CLUSTER_NAME=example <1>
-export PULL_SECRET="$HOME/pull-secret"
-export MEM="6Gi"
-export CPU="2"
-export WORKER_COUNT="2"
-export BASE_DOMAIN=hypershift.lab <2>
-
 hcp create cluster kubevirt \
---name $CLUSTER_NAME \
---node-pool-replicas $WORKER_COUNT \
---pull-secret $PULL_SECRET \
---memory $MEM \
---cores $CPU \
---base-domain $BASE_DOMAIN
+--name <hosted-cluster-name> \ <1>
+--node-pool-replicas <worker-count> \ <2>
+--pull-secret <path-to-pull-secret> \ <3>
+--memory <value-for-memory> \ <4>
+--cores <value-for-cpu> \ <5>
+--base-domain <basedomain> <6>
 ----
-+
-<1> The name of the hosted cluster, which for example purposes, is `example`.
-+
-<2> The base domain, which for example purposes, is `hypershift.lab`.
-+
-The result is a hosted cluster that has an ingress wildcard that is configured for the cluster name and the base domain, or as shown in this example, `.apps.example.hypershift.lab`. The hosted cluster does not finish the deployment, but remains in `Partial` status. Because you configured a base domain, you must ensure that the required DNS records and load balancer are in place.
 
-. Enter the following command:
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the worker count, for example, `2`.
+<3> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<4> Specify a value for memory, for example, `6Gi`.
+<5> Specify a value for CPU, for example, `2`.
+<6> Specify the base domain, for example, `hypershift.lab`.
+
+As a result, the hosted cluster has an ingress wildcard that is configured for the cluster name and the base domain, for example, `.apps.example.hypershift.lab`. The hosted cluster remains in `Partial` status. Because, after creating a hosted cluster with unique base domain, you must configure the required DNS records and load balancer.
+
+. View the status of your hosted cluster by entering the following command:
 
 +
 ----
@@ -79,12 +75,12 @@ example                   example-admin-kubeconfig         Partial    True      
 
 +
 ----
-hcp create kubeconfig --name $CLUSTER_NAME > $CLUSTER_NAME-kubeconfig
+hcp create kubeconfig --name <hosted-cluster-name> > <hosted-cluster-name>-kubeconfig
 ----
 
 +
 ----
-oc --kubeconfig $CLUSTER_NAME-kubeconfig get co
+oc --kubeconfig <hosted-cluster-name>-kubeconfig get co
 ----
 
 +
@@ -93,32 +89,45 @@ See the following example output:
 +
 ----
 NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE   MESSAGE
-console                                    4.14.0    False       False         False      30m     RouteHealthAvailable: failed to GET route (https://console-openshift-console.apps.example.hypershift.lab): Get "https://console-openshift-console.apps.example.hypershift.lab": dial tcp: lookup console-openshift-console.apps.example.hypershift.lab on 172.31.0.10:53: no such host
-.
-.
-.
-ingress                                    4.14.0    True        False         True       28m     The "default" ingress controller reports Degraded=True: DegradedConditions: One or more other status conditions indicate a degraded state: CanaryChecksSucceeding=False (CanaryChecksRepetitiveFailures: Canary route checks for the default ingress controller are failing)
+console                                    4.x.0     False       False         False      30m     RouteHealthAvailable: failed to GET route (https://console-openshift-console.apps.example.hypershift.lab): Get "https://console-openshift-console.apps.example.hypershift.lab": dial tcp: lookup console-openshift-console.apps.example.hypershift.lab on 172.31.0.10:53: no such host
+ingress                                    4.x.0     True        False         True       28m     The "default" ingress controller reports Degraded=True: DegradedConditions: One or more other status conditions indicate a degraded state: CanaryChecksSucceeding=False (CanaryChecksRepetitiveFailures: Canary route checks for the default ingress controller are failing)
 ----
++
+Replace `4.x.0` with the supported {ocp-short} version that you want to use.
 
 +
 The next steps fixes the errors in the output.
 +
-*Note:* If your cluster is on bare metal, you might need MetalLB so that you can set up load balancer services. For more information, see _Optional: Configuring MetalLB_.
+*Note:* If your hosted cluster is on bare metal, you might need MetalLB to set up load balancer services. For more information, see _Optional: Configuring MetalLB_.
 
 [#set-up-load-balancer]
-=== Setting up the load balancer 
+=== Setting up the load balancer
 
-Set up the load balancer that routes to the KubeVirt VMs and assign a wildcard DNS entry to the load balancer IP address. You need to create a load balancer service that routes ingress traffic to the KubeVirt VMs. A `NodePort` service that exposes the hosted cluster ingress already exists, so you can export the node ports and create the load balancer service that targets those ports.
+Set up the load balancer service that routes ingress traffic to the KubeVirt VMs and assigns a wildcard DNS entry to the load balancer IP address.
 
-. Export the node ports by entering the following commands:
+. A `NodePort` service that exposes the hosted cluster ingress already exists. You can export the node ports and create the load balancer service that targets those ports.
+
+.. Get the HTTP node port by entering the following command:
 
 +
 ----
-export HTTP_NODEPORT=$(oc --kubeconfig $CLUSTER_NAME-kubeconfig get services -n openshift-ingress router-nodeport-default -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')
-export HTTPS_NODEPORT=$(oc --kubeconfig $CLUSTER_NAME-kubeconfig get services -n openshift-ingress router-nodeport-default -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
+oc --kubeconfig <hosted-cluster-name>-kubeconfig get services -n openshift-ingress router-nodeport-default -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}'
 ----
 
-. Create the load balancer service by entering the following commands:
++
+Note the HTTP node port value to use in the next step.
+
+.. Get the HTTPS node port by entering the following command:
+
++
+----
+oc --kubeconfig <hosted-cluster-name>-kubeconfig get services -n openshift-ingress router-nodeport-default -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}'
+----
+
++
+Note the HTTPS node port value to use in the next step.
+
+. Create the load balancer service by entering the following command:
 
 +
 ----
@@ -127,37 +136,49 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: $CLUSTER_NAME
-  name: $CLUSTER_NAME-apps
-  namespace: clusters-$CLUSTER_NAME
+    app: <hosted-cluster-name>
+  name: <hosted-cluster-name>-apps
+  namespace: clusters-<hosted-cluster-name>
 spec:
   ports:
   - name: https-443
     port: 443
     protocol: TCP
-    targetPort: ${HTTPS_NODEPORT}
+    targetPort: <https-node-port> <1>
   - name: http-80
     port: 80
     protocol: TCP
-    targetPort: ${HTTP_NODEPORT}
+    targetPort: <http-node-port> <2>
   selector:
     kubevirt.io: virt-launcher
   type: LoadBalancer
 ----
 
++
+<1> Specify the HTTPS node port value that you noted in the previous step.
+<2> Specify the HTTP node port value that you noted in the previous step.
+
 [#set-up-wildcard-dns]
-=== Setting up a wildcard DNS 
+=== Setting up a wildcard DNS
 
 Set up up a wildcard DNS record or CNAME that references the external IP of the load balancer service.
 
-. Export the external IP by entering the following command:
+. Get the external IP address by entering the following command:
 
 +
 ----
-export EXTERNAL_IP=$(oc -n clusters-$CLUSTER_NAME get service $CLUSTER_NAME-apps -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+oc -n clusters-<hosted-cluster-name> get service <hosted-cluster-name>-apps -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 ----
 
-. Configure a wildcard DNS entry that references the IP that is stored in the `$EXTERNAL_IP` path. View the following example DNS entry:
++
+See the following example output:
+
++
+----
+192.168.20.30
+----
+
+. Configure a wildcard DNS entry that references the external IP address. View the following example DNS entry:
 
 +
 [source,bash]
@@ -166,7 +187,7 @@ export EXTERNAL_IP=$(oc -n clusters-$CLUSTER_NAME get service $CLUSTER_NAME-apps
 ----
 
 +
-The DNS entry must be able to route inside and outside of the cluster. If you use the example input from step 1, for the cluster that has an external IP value of `192.168.20.30`, the DNS resolutions look like this example:
+The DNS entry must be able to route inside and outside of the cluster. See the following DNS resolutions example:
 
 +
 ----
@@ -175,7 +196,7 @@ dig +short test.apps.example.hypershift.lab
 192.168.20.30
 ----
 
-. Check the hosted cluster status and ensure that it has moved from `Partial` to `Completed` by entering the following command:
+. Check that hosted cluster status has moved from `Partial` to `Completed` by entering the following command:
 
 +
 ----
@@ -188,8 +209,10 @@ See the following example output:
 +
 ----
 NAME            VERSION   KUBECONFIG                       PROGRESS    AVAILABLE   PROGRESSING   MESSAGE
-example         4.14.0    example-admin-kubeconfig         Completed   True        False         The hosted control plane is available
+example         4.x.0     example-admin-kubeconfig         Completed   True        False         The hosted control plane is available
 ----
++
+Replace `4.x.0` with the supported {ocp-short} version that you want to use.
 
 [#default-ingress-dns-additional-resources]
 === Additional resources

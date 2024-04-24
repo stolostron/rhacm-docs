@@ -1,24 +1,19 @@
 [#policy-overview]
 = Policy overview
 
-Use the {product-title} security policy framework to create and manage policies. Kubernetes custom resource definition instances are used to create policies.
+To create and manage policies, gain visibility and remediate configurations to meet standards, use the {product-title} security policy framework. Kubernetes custom resource definition instances are used to create policies. You can create a policy in any namespace on the hub cluster except the managed cluster namespaces. If you create a policy in a managed cluster namespace, it is deleted by {product-title-short}. Each {product-title-short} policy can be organized into one or more policy template definitions. For more details about the policy elements, view the _Policy YAML table_ section on this page.
 
-Each {product-title-short} policy can have at least one or more templates. For more details about the policy elements, view the _Policy YAML table_ section on this page.
+You are responsible for ensuring that the managed cloud environment meets internal enterprise security standards for software engineering, secure engineering, resiliency, security, and regulatory compliance for workloads hosted on Kubernetes clusters.
 
-The policy requires a `Placement` resource that defines the clusters that the policy document is applied to, and a `PlacementBinding` resource that binds the {product-title} policy. For more on how to define a `Placement` resource see link:../cluster_lifecycle/placement_overview.adoc#placement-overview[Placement overview] in the Cluster lifecycle documentation.
+[#prereqs-policy-overview]
+== Prerequisites
 
-*Important:*
-
+* Each policy requires a `Placement` resource that defines the clusters that the policy document is applied to, and a `PlacementBinding` resource that binds the {product-title} policy. For more on how to define a `Placement` resource see link:../clusters/cluster_lifecycle/placement_overview.adoc#placement-overview[Placement overview] in the Cluster lifecycle documentation.
 * You must create the `PlacementBinding` to bind your policy with a `Placement` in order to propagate the policy to the managed clusters.
-* In order to use a `Placement` resource, a `ManagedClusterSet` resource must be bound to the namespace of the `Placement` resource with a `ManagedClusterSetBinding` resource. Refer to link:../cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource] for additional details.
+* To use a `Placement` resource, you must bind a `ManagedClusterSet` resource to the namespace of the `Placement` resource with a `ManagedClusterSetBinding` resource. Refer to link:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource] for additional details.
+* When you create a `Placement` resource for your policy from the console, the status of the placement toleration is automatically added to the `Placement` resource. See link:../clusters/cluster_lifecycle/taints_tolerations.adoc#adding-a-toleration-to-a-placement[Adding a toleration to a placement] for more details.  
 
 *Best practice:* Use the command line interface (CLI) to make updates to the policies when you use the `Placement` resource.
-
-* You can create a policy in any namespace on the hub cluster except the cluster namespace. If you create a policy in the cluster namespace, it is deleted by {product-title}.
-
-* Each client and provider is responsible for ensuring that their managed cloud environment meets internal enterprise security standards for software engineering, secure engineering, resiliency, security, and regulatory compliance for workloads hosted on Kubernetes clusters.
-
-Use the governance and security capability to gain visibility and remediate configurations to meet standards.
 
 Learn more details about the policy components in the following sections:
 
@@ -29,8 +24,7 @@ Learn more details about the policy components in the following sections:
 [#policy-yaml-structure]
 == Policy YAML structure
 
-When you create a policy, you must include required parameter fields and values.
-Depending on your policy controller, you might need to include other optional fields and values. View the following YAML structure for policies:
+When you create a policy, you must include required parameter fields and values. Depending on your policy controller, you might need to include other optional fields and values. View the following YAML structure for policies:
 
 [source,yaml]
 ----
@@ -44,6 +38,8 @@ metadata:
     policy.open-cluster-management.io/controls:
     policy.open-cluster-management.io/description:
 spec:
+  disabled:
+  remediationAction:
   dependencies:
   - apiVersion: policy.open-cluster-management.io/v1
     compliance:
@@ -57,10 +53,8 @@ spec:
         metadata:
           name:
         spec:
-  remediationAction:
-  disabled:
 ---
-apiVersion: apps.open-cluster-management.io/v1
+apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
 bindingOverrides:
@@ -69,8 +63,8 @@ subFilter:
   name:
 placementRef:
   name:
-  kind:
-  apiGroup:
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
 subjects:
 - name:
   kind:
@@ -81,11 +75,6 @@ kind: Placement
 metadata:
   name:
 spec:
-  predicates:
-  - requiredClusterSelector:
-      labelSelector:
-        matchLabels:
-        matchExpressions:
 ----
 
 [#policy-yaml-table]
@@ -138,6 +127,18 @@ For example, a System and Information Integrity category might indicate that you
 | The name of the security control that is being checked.
 For example, Access Control or System and Information Integrity.
 
+| `spec.disabled`
+| Required
+| Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.
+
+| `spec.remediationAction`
+| Optional
+| Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. If specified, the `spec.remediationAction` value that is defined overrides any `remediationAction` parameter defined in the child policies in the `policy-templates` section. For example, if the `spec.remediationAction` value is set to `enforce`, then the `remediationAction` in the `policy-templates` section is set to `enforce` during runtime.
+
+| `spec.copyPolicyMetadata`
+| Optional
+| Specifies whether the labels and annotations of a policy should be copied when replicating the policy to a managed cluster. If you set to `true`, all of the labels and annotations of the policy are copied to the replicated policy. If you set to `false`, only the policy framework specific policy labels and annotations are copied to the replicated policy.
+
 | `spec.dependencies`
 | Optional
 | Used to create a list of dependency objects detailed with extra considerations for compliance.
@@ -153,14 +154,6 @@ For example, Access Control or System and Information Integrity.
 | `spec.policy-templates.ignorePending`
 | Optional
 | Used to mark a policy template as compliant until the dependency criteria is verified. 
-
-| `spec.disabled`
-| Required
-| Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.
-
-| `spec.remediationAction`
-| Optional
-| Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. If specified, the `spec.remediationAction` value that is defined overrides any `remediationAction` parameter defined in the child policies in the `policy-templates` section. For example, if the `spec.remediationAction` value is set to `enforce`, then the `remediationAction` in the `policy-templates` section is set to `enforce` during runtime.
 
 *Important:* Some policy kinds might not support the enforce feature.
 |===
@@ -232,7 +225,10 @@ spec:
         - {key: environment, operator: In, values: ["dev"]}
 ----
 
-- Refer to xref:../governance/policy_controllers.adoc#policy-controllers[Policy controllers].
+[#add-resources-policy-overview]
+== Additional resources
+
+- Refer to xref:../governance/policy_controllers_intro.adoc#policy-controllers[Policy controllers].
 
 - See xref:../governance/create_policy.adoc#managing-security-policies[Managing security policies] to create and update a policy. You can also enable and update {product-title-short} policy controllers to validate the compliance of your policies.
 
