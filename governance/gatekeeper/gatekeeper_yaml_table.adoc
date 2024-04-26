@@ -1,0 +1,260 @@
+[#gatekeeper-operator-sample-{gk-tag}]
+== {gk-operator} custom resource
+
+[source,yaml]
+----
+apiVersion: operator.gatekeeper.sh/v1alpha1
+kind: Gatekeeper
+metadata:
+  name: gatekeeper
+spec:
+  audit:
+    auditInterval: 60s
+    constraintViolationLimit: 20
+    auditFromCache: Disabled
+    auditChunkSize: 500
+    emitAuditEvents: Disabled
+ifeval::[{gk-y-ver} >= 14]
+    auditEventsInvolvedNamespace: Disabled <.>
+endif::[]
+    logLevel: INFO
+    replicas: 1
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 512Mi
+  validatingWebhook: Enabled
+  mutatingWebhook: Enabled
+  webhook:
+    emitAdmissionEvents: Disabled
+ifeval::[{gk-y-ver} >= 14]
+    admissionEventsInvolvedNamespace: Disabled <.>
+endif::[]
+    failurePolicy: Fail
+    namespaceSelector:
+      matchLabels: {}
+      matchExpressions:
+      - key: admission.gatekeeper.sh/ignore
+        operator: DoesNotExist
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        - gatekeeper-system
+ifeval::[{gk-y-ver} >= 14]
+    operations: <.>
+     - CREATE
+     - UPDATE
+endif::[]
+    disabledBuiltins:
+     - http.send
+ifeval::[{gk-y-ver} >= 14]
+    logMutations: Disabled
+    mutationAnnotations: Disabled
+endif::[]
+    logLevel: INFO
+    replicas: 1
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 512Mi
+  config:
+    matches:
+     - excludedNamespaces: []
+       processes: []
+    disableDefaultMatches: false
+  nodeSelector: {}
+  affinity:
+    podAffinity: {}
+  tolerations: []
+  podAnnotations: {}
+----
+ifeval::[{gk-y-ver} >= 14]
+<.> Enable the `auditEventsInvolvedNamespace` parameter to manage which namespace audit event to create. As a result, the following argument is added to the Gatekeeper controller deployment, `--audit-events-involved-namespace=true`.
+<.> Enable the `admissionEventsInvolvedNamespace` parameter to manage which namespace admission event to create. As a result, the following argument is added to the Gatekeeper controller deployment, `--admission-events-involved-namespace=true`.
+<.> You can use the following values to manage your webhook operations. Use the following values for the `operations` parameter, `"CREATE"`, `"UPDATE"`, `"CONNECT"`, and `"DELETE"`.
+endif::[]
+
+[#gatekeeper-yaml-table-{gk-tag}]
+== Gatekeeper YAML table
+
+Gatekeeper is the schema for the gatekeepers API. Gatekeeper contains configurations for the {gk-operator}, which deploys Open Policy Agent Gatekeeper, a policy engine that enforces policies through admission controller webhooks. See https://github.com/open-policy-agent/gatekeeper.
+
+*NOTE:* You can find this information by issuing an `oc explain --api-version=operator.gatekeeper.sh/v1alpha1 Gatekeeper.<field-path>` command, replacing `<field-path>` with the path to the field you're looking for.
+
+.ParameterTable
+|===
+
+| Field | Optional or required | Description
+
+| `apiVersion`
+| Required
+| Set the value to `operator.gatekeeper.sh/v1alpha1`.
+
+| `kind`
+| Required
+| Set the value to `Gatekeeper`.
+
+| `spec`
+| Optional
+| GatekeeperSpec specifies how the operator should deploy Gatekeeper to the cluster.
+
+| `spec.affinity`
+| Optional
+| Affinity is a node affinity specification to add to the Gatekeeper deployment Pods. See https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/.
+
+| `spec.audit`
+| Optional
+| Audit specifies the configuration for the Gatekeeper auditing function. See https://open-policy-agent.github.io/gatekeeper/website/docs/audit.
+
+| `spec.audit.auditChunkSize`
+| Optional
+| AuditChunkSize causes audit list requests against the Kubernetes API to be paginated, reducing memory usage. Setting to zero disables pagination. The default value is 500. See https://open-policy-agent.github.io/gatekeeper/website/docs/performance-tuning/#audit-chunk-size.
+
+ifeval::[{gk-y-ver} >= 14]
+| `spec.audit.auditEventsInvolvedNamespace`
+| Optional
+| AuditEventsInvolvedNamespace controls in which namespace the audit events are created. When you set it to Enabled, audit events are created in the namespace of the object violating the constraint. If you set the parameter to Disabled, it causes all audit events to be created in the Gatekeeper namespace. The default value is Disabled. See https://open-policy-agent.github.io/gatekeeper/website/docs/customize-startup/#alpha-emit-admission-and-audit-events.
+endif::[]
+
+| `spec.audit.auditFromCache`
+| Optional
+ifeval::[{gk-y-ver} == 11]
+| AuditFromCache sets whether a cache is used for auditing. The parameter value options are Enabled and Disabled.
+endif::[]
+ifeval::[{gk-y-ver} >= 14]
+| AuditFromCache sets whether a cache is used for auditing. The parameter value options are Enabled, Disabled, and Automatic. If you set the parameter to Automatic, the {gk-operator} manages the syncOnly field in the Config resource. It is not recommended to use Automatic when using referential constraints since those are not detected. See https://open-policy-agent.github.io/gatekeeper/website/docs/sync/#replicating-data-with-config.
+endif::[]
+
+| `spec.audit.auditInterval`
+| Optional
+| AuditInterval configures how often an audit is run on the cluster. The default value is 60s. See https://open-policy-agent.github.io/gatekeeper/website/docs/performance-tuning/#audit-interval.
+
+| `spec.audit.constraintViolationLimit`
+| Optional
+| ConstraintViolationLimit configures how many violations are reported in a given Constraint resource. The default value is 20. See https://open-policy-agent.github.io/gatekeeper/website/docs/performance-tuning/#constraint-violations-limit.
+
+| `spec.audit.emitAuditEvents`
+| Optional
+| EmitAuditEvents enables the emission of all admission violations as Kubernetes events. The default value is Disabled. See https://open-policy-agent.github.io/gatekeeper/website/docs/customize-startup/#alpha-emit-admission-and-audit-events.
+
+| `spec.audit.logLevel`
+| Optional
+| LogLevel specifies the verbosity of the Pod logs. The supported parameter values are DEBUG, INFO, WARNING, or ERROR. The parameter value DEBUG produces the most logs, while ERROR produces the least. The default value is INFO.
+
+| `spec.audit.replicas`
+| Optional
+| Replicas is the number of desired pods for auditing.
+
+| `spec.audit.resources`
+| Optional
+| Resources describes the compute resource requirements for the auditing pods.
+
+ifeval::[{gk-y-ver} >= 15]
+| `spec.config`
+| Optional
+| Config specifies configurations for the configs.config.gatekeeper.sh API, allowing high-level configuration of Gatekeeper.
+
+| `spec.config.disableDefaultMatches`
+| Optional
+| DisableDefaultMatches is a boolean parameter to disable appending default exempt namespaces of the {gk-operator} to spec.config.matches. The default value is false to enable appending default namespaces of the operator.
+
+| `spec.config.matches[]`
+| Optional
+| Matches is a list of exempt namespaces for specified processes. If you specify the namespaces, the Matches are set on the existing Config spec.match. See https://open-policy-agent.github.io/gatekeeper/website/docs/exempt-namespaces.
+endif::[]
+
+| `spec.image`
+| Optional
+| Image specifies the configuration for handling Gatekeeper deployment images.
+
+ifeval::[{gk-y-ver} <= 14]
+| `spec.image.image`
+| Optional
+| Deprecated: Image is deprecated. If you decide to use Image, the operator displays a warning and message about removal in a future release. To address this, the operator relies on the environment variable set in its manifest at deployment time and is the expected behavior after this field is removed. Image to pull including registry (optional), repository, name, and tag e.g. quay.io/gatekeeper/gatekeeper-operator:latest
+endif::[]
+
+| `spec.image.imagePullPolicy`
+| Optional
+| PullPolicy describes a policy for if/when to pull a container image
+
+| `spec.mutatingWebhook`
+| Optional
+| MutatingWebhook specifies whether the Gatekeeper mutating admission webhook is enabled. The default value is Enabled. See https://open-policy-agent.github.io/gatekeeper/website/docs/mutation.
+
+| `spec.nodeSelector`
+| Optional
+| NodeSelector is a map of node selectors to add to the Gatekeeper deployment Pods. See https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/.
+
+| `spec.podAnnotations`
+| Optional
+| PodAnnotations is a map of additional annotations to be added to the Gatekeeper deployment Pods.
+
+| `spec.tolerations[]`
+| Optional
+| Tolerations is an array of tolerations to add to the Gatekeeper deployment Pods. See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/.
+
+| `spec.validatingWebhook`
+| Optional
+| ValidatingWebhook specifies whether the Gatekeeper validating admission webhook is enabled. The default value is Enabled.
+
+| `spec.webhook`
+| Optional
+| Webhook specifies the configuration for the Gatekeeper admission webhook.
+
+ifeval::[{gk-y-ver} >= 14]
+| `spec.webhook.admissionEventsInvolvedNamespace`
+| Optional
+| AdmissionEventsInvolvedNamespace controls in which namespace admission events are created. When set to true, admission events are created in the namespace of the object violating the constraint. If you set the parameter to Disabled, it causes all admission events to be created in the Gatekeeper namespace. The default value is Disabled. See https://open-policy-agent.github.io/gatekeeper/website/docs/customize-startup/#alpha-emit-admission-and-audit-events.
+endif::[]
+
+| `spec.webhook.disabledBuiltins[]`
+| Optional
+| DisabledBuiltins is a list of specific OPA built-in functions to disable. By default, http.send is disabled. See https://open-policy-agent.github.io/gatekeeper/website/docs/customize-startup#disable-opa-built-in-functions.
+
+| `spec.webhook.emitAdmissionEvents`
+| Optional
+| EmitAdmissionEvents enables the emission of all admission violations as Kubernetes events. The default value is Disabled. See https://open-policy-agent.github.io/gatekeeper/website/docs/customize-startup/#alpha-emit-admission-and-audit-events.
+
+| `spec.webhook.failurePolicy`
+| Optional
+| FailurePolicyType specifies a failure policy that defines how unrecognized errors from the admission endpoint are handled.
+
+| `spec.webhook.logLevel`
+| Optional
+| LogLevel specifies the verbosity of the Pod logs. The supported parameter values are DEBUG, INFO, WARNING, or ERROR. The parameter value DEBUG produces the most logs, while ERROR produces the least. The default value is INFO.
+
+ifeval::[{gk-y-ver} >= 14]
+| `spec.webhook.logMutations`
+| Optional
+| LogMutations enables the logging of mutation events and errors. The default value is Disabled. See https://open-policy-agent.github.io/gatekeeper/website/docs/customize-startup#beta-enable-mutation-logging-and-annotations.
+
+| `spec.webhook.mutationAnnotations`
+| Optional
+| MutationAnnotations adds the gatekeeper.sh/mutation-id and gatekeeper.sh/mutations annotations to mutated objects. The default value is Disabled. See https://open-policy-agent.github.io/gatekeeper/website/docs/customize-startup#beta-enable-mutation-logging-and-annotations.
+endif::[]
+
+| `spec.webhook.namespaceSelector`
+| Optional
+| NamespaceSelector is a label selector to define which namespaces should be handled by the admission webhook.
+
+ifeval::[{gk-y-ver} >= 14]
+| `spec.webhook.operations[]`
+| Optional
+| Operations specifies a list of API operations to be checked by the admission webhook. The default value is ["CREATE","UPDATE"]. See https://open-policy-agent.github.io/gatekeeper/website/docs/customize-admission/#enable-validation-of-delete-operations.
+endif::[]
+
+| `spec.webhook.replicas`
+| Optional
+| Replicas is the number of desired pods for the admission webhook.
+
+| `spec.webhook.resources`
+| Optional
+| Resources describes the compute resource requirements for the admission webhook pods.
+
+|===
