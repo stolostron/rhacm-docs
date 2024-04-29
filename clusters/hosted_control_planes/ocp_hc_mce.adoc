@@ -1,0 +1,175 @@
+[#ocp-hosting-cluster-mce]
+= Using the {ocp-short} cluster as a hosting cluster managed by {mce-short}
+
+The {mce-short} hub cluster can manage one or more {ocp-short} clusters. To use the {ocp-short} cluster as a hosting cluster, create a hosted cluster in {ocp-short} and import it in the {mce-short} as a managed cluster.
+
+You must enable the `hypershift-addon` managed cluster add-on manually for the {ocp-short} managed cluster. The add-on agent installs the HyperShift Operator in the {ocp-short} managed cluster and configures it as a hosting cluster.
+
+You can enable `hypershift-addon` by using the `clusteradm` CLI and `ManagedClusterAddon` resource.
+
+[#enable-hypershift-addon-clusteradm]
+== Enabling hypershift-addon by using the `clusteradm` CLI
+
+You can download and install the `clusteradm` CLI by navigating to the link:https://open-cluster-management.io/getting-started/quick-start/#install-clusteradm-cli-tool[Open Cluster Management site]. After installing the `clusteradm` CLI, complete the following steps:
+
+. To enable `hypershift-addon` for managed {ocp-short} cluster, run the following command:
+
++
+----
+clusteradm addon enable --names hypershift-addon --clusters <openshift_managed_cluster_name>
+----
++
+Replace `<openshift_managed_cluster_name>` with the name of your {ocp-short} cluster managed by the {mce-short}.
+
+. To verify that `hypershift-addon` is added to your managed {ocp-short} cluster, run the following command:
+
++
+----
+oc get managedclusteraddon -n <openshift_managed_cluster_name>
+----
+
++
+See the following example output:
+
++
+----
+NAME               AVAILABLE   DEGRADED   PROGRESSING
+hypershift-addon   True        False
+----
+
+[#ocp-managed-enable-hypershift-addon]
+== Enabling hypershift-addon by creating the ManagedClusterAddon resource
+
+You can enable `hypershift-addon` for the {ocp-short} managed cluster by creating the `ManagedClusterAddon` custom resource (CR). Complete the following steps:
+
+. Create the `ManagedClusterAddon` CR in the {mce-short} hub cluster by using the following example configuration:
+
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: hypershift-addon <1>
+  namespace: <openshift_managed_cluster_name> <2>
+spec:
+  installNamespace: open-cluster-management-agent-addon
+----
+
+<1> Specifies the managed cluster add-on name, `hypershift-addon`.
+<2> Replace `<openshift_managed_cluster_name>` with the name of your {ocp-short} cluster managed by the {mce-short}.
+
+. To verify that `hypershift-addon` is added to your managed {ocp-short} cluster, run the following command:
+
++
+----
+oc get managedclusteraddon -n <openshift_managed_cluster_name>
+----
+
++
+See the following example output:
+
++
+----
+NAME               AVAILABLE   DEGRADED   PROGRESSING
+hypershift-addon   True        False
+----
+
+. After enabling `hypershift-addon`, log into your {ocp-short} managed cluster to check that the `hypershift-addon-agent` deployment is available. Run the following command:
+
++
+----
+oc get deployment -n open-cluster-management-agent-addon
+----
+
++
+See the following example output:
+
++
+----
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+hypershift-addon-agent      1/1     1            1           2m25s
+----
+
+. To verify that the HyperShift Operator is available in the `hypershift` namespace, run the following command:
+
++
+----
+oc get deployment -n hypershift
+----
+
++
+See the following example output:
+
++
+----
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+operator   2/2     2            2           3m14s
+----
+
+[#ocp-managed-config-hypershift-operator]
+== Configuring the HyperShift Operator in the {ocp-short} managed cluster
+
+When you configure the HyperShift Operator in the {ocp-short} managed cluster, you must replace `local-cluster` with the name of the {ocp-short} managed cluster.
+
+For example, to configure the Hypershift Operator in the {ocp-short} managed cluster, you can use the AWS OIDC S3 secret. See the following command:
+
++
+----
+oc create secret generic hypershift-operator-oidc-provider-s3-credentials --from-file=credentials=/.aws/credentials --from-literal=bucket=<my_s3_bucket> --from-literal=region=<region> -n <openshift_managed_cluster_name>
+----
+
+The `hypershift-addon` agent automatically reconciles the HyperShift Operator in the {ocp-short} managed cluster.
+
+[#ocp-managed-create-hosted-cluster]
+== Creating a hosted cluster on the {ocp-short} managed cluster
+
+You cannot create a hosted cluster from the {mce-short} hub cluster. You can log into the {ocp-short} managed cluster and create the hosted cluster by running the `hcp create cluster` command.
+
+[#ocp-managed-import-hosted-cluster]
+== Importing a hosted cluster into the {mce-short}
+
+You must import the hosted cluster that you created in the {ocp-short} managed cluster manually into the {mce-short} hub cluster. Complete the following steps:
+
+. Create the `ManagedCluster` CR in the {mce-short} hub cluster.
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    import.open-cluster-management.io/hosting-cluster-name: <openshift_managed_cluster_name> <1>
+    import.open-cluster-management.io/klusterlet-deploy-mode: Hosted <2>
+    open-cluster-management/created-via: hypershift
+  name: <hosted_cluster_name> <3>
+spec:
+  hubAcceptsClient: true
+----
+
+<1> This annotation must have the {ocp-short} managed cluster name where you created your hosted cluster.
+<2> Ensure to include this mandatory annotation.
+<3> The name must match the hosted cluster name that you created in the {ocp-short} managed cluster.
+
+After creating the `ManagedCluster` resource, the hosted cluster is imported into the {mce-short} hub cluster.
+
+. To verify that the hosted cluster is now imported into {product-title-short}, run the following command:
+
++
+----
+oc get managedcluster
+----
+
++
+See the following example:
+
++
+----
+NAME                HUB ACCEPTED   MANAGED CLUSTER URLS                                                                         JOINED   AVAILABLE   AGE
+local-cluster       true           https://api.app-aws-east2-414-hub-2pqrq.dev11.red-chesterfield.com:6443                      True     True        4h27m
+managed-mce-1       true           https://api.app-aws-east2-414-hub-mhmkb.dev11.red-chesterfield.com:6443                      True     True        85m
+managed-mce-hcp-1   true           https://a6b99565aac5747f4918144af59638d5-d21907a61cad03d2.elb.us-east-2.amazonaws.com:6443   True     True        2m19s
+----
+
+You can use all the {product-title-short} features on the hosted cluster, but you cannot manage the lifecycle operations such as upgrade, scaling from the {mce-short} hub cluster. However, you can manage the lifecycle operations by using the `HostedCluster` or `NodePool` resources from the {ocp-short} managed hosting cluster.
