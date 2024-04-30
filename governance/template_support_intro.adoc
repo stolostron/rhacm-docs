@@ -1,9 +1,9 @@
 [#template-processing]
 = Template processing introduction
 
-Configuration policies support the inclusion of Golang text templates in the object definitions. These templates are resolved at runtime either on the hub cluster or the target managed cluster using configurations related to that cluster. This gives you the ability to define configuration policies with dynamic content, and inform or enforce Kubernetes resources that are customized to the target cluster.
+Configuration policies and operator policies support the inclusion of Golang text templates. These templates are resolved at runtime either on the hub cluster or the target managed cluster using configurations related to that cluster. This gives you the ability to define policies with dynamic content, and inform or enforce Kubernetes resources that are customized to the target cluster.
 
-A configuration policy definition can contain both hub cluster and managed cluster templates. Hub cluster templates are processed first on the hub cluster, then the policy definition with resolved hub cluster templates is propagated to the target clusters. On the managed cluster, the `ConfigurationPolicyController` processes any managed cluster templates in the policy definition and then enforces or verifies the fully resolved object definition.
+A policy definition can contain both hub cluster and managed cluster templates. Hub cluster templates are processed first on the hub cluster, then the policy definition with resolved hub cluster templates is propagated to the target clusters. A controller on the managed cluster processes any managed cluster templates in the policy definition and then enforces or verifies the fully resolved object definition.
 
 The template must conform to the Golang template language specification, and the resource definition generated from the resolved template must be a valid YAML. See the Golang documentation about _Package templates_ for more information. Any errors in template validation are recognized as policy violations. When you use a custom template function, the values are replaced at runtime.
 
@@ -54,12 +54,12 @@ The equivalent call might use the following syntax: `{{hub "(lookup "v1" "Secret
 | A set of template functions support dynamic access to Kubernetes resources and string manipulation. See _Template functions_ for more information.
 
 | Function output storage
-| The output of template functions are stored in `Policy` resource objects in each applicable managed cluster namespace on the hub cluster, before it is synced to the managed cluster. This means that any sensitive results from template functions are readable by anyone with read access to the `Policy` resource objects on the hub cluster, and read access with `ConfigurationPolicy` resource objects on the managed clusters. Additionally, if etcd encryption is enabled, the `Policy` and `ConfigurationPolicy` resource objects are not encrypted. It is best to carefully consider this when using template functions that return sensitive output (e.g. from a secret).
+| The output of template functions are stored in `Policy` resource objects in each applicable managed cluster namespace on the hub cluster, before it is synced to the managed cluster. This means that any sensitive results from template functions are readable by anyone with read access to the `Policy` resource objects on the hub cluster, and anyone with read access to the `ConfigurationPolicy` or `OperatorPolicy` resource objects on the managed clusters. Additionally, if etcd encryption is enabled, the policy resource objects are not encrypted. It is best to carefully consider this when using template functions that return sensitive output (e.g. from a secret).
 | The output of template functions are not stored in policy related resource objects.
 
 | Processing
 | Processing occurs at runtime on the hub cluster during propagation of replicated policies to clusters. Policies and the hub cluster templates within the policies are processed on the hub cluster only when templates are created or updated.
-| Processing occurs in the `ConfigurationPolicyController` on the managed cluster. Policies are processed periodically, which automatically updates the resolved object definition with data in the referenced resources.
+| Processing occurs on the managed cluster. ConfigurationPolicies are processed periodically, which automatically updates the resolved object definition with data in the referenced resources. OperatorPolicies automatically update whenever a referenced resource changes.
 
 | Processing errors
 | Errors from the hub cluster templates are displayed as violations on the managed clusters the policy applies to.
