@@ -108,7 +108,7 @@ In the Solution section be sure to refer users to the product documentation
 7. When it’s time to do the docs errata, the doc team runs a query for issues with both of the following specifications: 
 
 - z-stream release that matches: example ‘ACM 2.9.1’ and ‘MCE 2.4.1’ 
-- The ‘errata’ label. **Note:** Remember not to filter on the ‘Documentation’ component at this point because the other issues should be dev issues and have their components listed. 
+- The `errata` label. **Note:** Remember not to filter on the ‘Documentation’ component at this point because the other issues should be dev issues and have their components listed. 
 
 8. The results of that query should be what you will include in the docs errata. The summary should be provided in the issue. If not, you can add a comment for the creator to request a summary. 
 
