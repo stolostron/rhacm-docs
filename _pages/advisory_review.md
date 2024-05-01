@@ -11,11 +11,12 @@ Advisories are released for General Availability (GA) release, z-streams (x.y.z)
 
 ## Communications
 
-Feature complete (FC): A build is ran to check for feature updates
-Release Candidate (RC): A build is ran to check for bugs
+Engineers create status threads for upcoming z-streams through the Slack channel, _acm-release_. The status threads are created for the following types of updates:
 
+- Feature complete (FC): A build is ran to check for feature updates
+- Release candidate (RC): A build is ran to check for bugs
 
-Example of Slack thread announcement: `MCE 2.2.12 RC1 Status Thread`
+View the following example of Slack thread announcement: `MCE 2.2.12 RC1 Status Thread`
 
 **Reminders:**
 
