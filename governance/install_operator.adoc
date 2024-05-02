@@ -1,55 +1,50 @@
 [#install-operator-with-policy]
 = Installing an operator by using the _OperatorPolicy_ resource (Technology Preview)
 
-To install Operator Lifecycle Manager (OLM) operators on your managed clusters, use the `OperatorPolicy` resource. When you have OLM operators on your managed clusters, OLM operators automate the installation processes of your various applications.  
+To install Operator Lifecycle Manager (OLM) managed operators on your managed clusters, use an `OperatorPolicy` policy template in a `Policy` definition.
 
 [#create-operator-policy]
 == Creating an _OperatorPolicy_ resource to install Quay
-To install the Quay operator on to your cluster, run the following command to create and apply the `OperatorPolicy` resource:
 
-----
-oc apply -f OperatorPolicy.yaml -n <policy-namespace>
-----
-
-Your `OperatorPolicy` resource might resemble the following sample:
+See the following operator policy sample that installs the latest Quay operator in the `stable-3.11` channel using the Red Hat operator catalog:
 
 [source,yaml]
 ----
-apiVersion: policy.open-cluster-management.io/v1beta1
-kind: OperatorPolicy
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
 metadata:
-  name: install-quay-operator
+  name: install-quay
+  namespace: open-cluster-management-global-set
 spec:
-  remediationAction: enforce
-  severity: medium
-  complianceType: musthave
-  operatorGroup:
-    name: scoped-operator-group
-    namespace: quay-operator-ns
-    targetNamespaces:
-      - quay-operator-ns
-  subscription:
-    channel: stable-3.8
-    name: project-quay
-    namespace: quay-operator-ns
-    installPlanApproval: Automatic
-    source: operatorhubio-catalog
-    sourceNamespace: olm
-    startingCSV: quay-operator.v3.8.1
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-quay
+        spec:
+          remediationAction: enforce
+          severity: critical
+          complianceType: musthave
+          subscription:
+            channel: stable-3.11
+            installPlanApproval: Automatic
+            name: quay-operator
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
 ----
 
+After you add the `OperatorPolicy` policy template, the `operatorGroup` and `subscription` objects are created on the cluster by using the controller. As a result, the rest of the installation is completed by OLM. You can view the health of owned resources in the `.status.Conditions` and `.status.relatedObjects` fields of the `OperatorPolicy` resource on the managed cluster.
 
-After you apply a valid `OperatorPolicy` resource, the controller creates the `operatorGroup` and `subscription` objects on the cluster. This prompts OLM to handle the rest of the installation process. The controller reports the health of owned resources in the `.status.Conditions` and `.status.relatedObjects` fields of the `OperatorPolicy` resource on the managed cluster.
-
-To verify that the operator policy is created, run the following command:
+To verify the operator policy status, run the following command on the managed cluster:
 
 [source,bash]
 ----
-oc get operatorpolicy install-quay-operator -n <policy-namespace>
+oc -n <managed cluster namespace> get operatorpolicy install-quay
 ----
 
 [#add-resources-install-operator-pol]
 == Additional resources
 
 See xref:../governance/policy_operator.adoc#policy-operator[Operator policy controller (Technology Preview)]
-
