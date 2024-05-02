@@ -105,7 +105,78 @@ spec:
 == Service account does not have automatic secrets
 //2.9:ACM-10439
 
-When you create a service account in {ocp} 4.15 provisioned by IBM VMware, the account does not automatically create a secret. Therefore, the {product-title-short} `gitopsCluster` controller fails to generate the managed cluster secret for the Argo CD push model. {ocp} 4.14 provisioned by IBM VMware and {ocp} 4.15 with any provider, do not observe this issue. 
+When you create a service account in {ocp} 4.15 provisioned by some cloud providers, such as IBM VMware and Bare Metal, then the account does not automatically create a secret. Therefore, the {product-title-short} `gitopsCluster` controller fails to generate the managed cluster secret for the Argo CD push model. 
+
+This issue does not occur in {ocp} 4.15 provisioned by AWS. However, the issue can occur in {ocp} 4.15 provisioned by other cloud providers. This issue is delivered in {product-title-short} 2.10.3 and in {product-title-short} 2.9.4. 
+
+To workaround this issue, you must manually create a secret and attach it to your service account, `open-cluster-management-agent-addon/application-manager`. To do this, complete the following steps:
+
+. Log in to your managed cluster. 
+. Create a secret by running the following secret template: 
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: application-manager-dockercfg
+  namespace: open-cluster-management-agent-addon
+  annotations:
+    kubernetes.io/service-account.name: application-manager
+    openshift.io/token-secret.name: application-manager-dockercfg
+    openshift.io/token-secret.value: application-manager-dockercfg
+type: kubernetes.io/service-account-token 
+----
+. Retrieve the token from your created secret by running the following command:
+
++
+[source,bash]
+----
+% oc get secrets -n open-cluster-management-agent-addon application-manager-dockercfg -o yaml 
+data:
+  token: <token1>
+----
+. Decode the `data.token` by running the following command:
+
++
+[source,bash]
+----
+echo <token1 copied from data.token> |base64 -d 
+----
+. Update the token to the created secret annotation by running the following command: 
+
++
+[source,bash]
+----
+% oc edit secrets -n open-cluster-management-agent-addon application-manager-dockercfg
+metadata:
+  annotations:
+    openshift.io/token-secret.value: <paste the decoded token>
+----
+. Link the modified secret to your service account by running the following command: 
+
++
+[source,bash]
+----
+% oc edit sa -n open-cluster-management-agent-addon application-manager
+....
+secrets:
+- name: application-manager-dockercfg
+----
+
+To verify that you successfully created a secret and attached it to your service account, complete the following steps: 
+
+. Go to your cluster namespace in your hub cluster. 
+. Verify your cluster secret is generated there by running the following command: 
+
++
+[source,bash]
+----
+% oc get secrets -n perf5 perf5-cluster-secret         
+NAME                   TYPE     DATA   AGE
+perf5-cluster-secret   Opaque   3      7m40s
+----
 
 [#editing-subscription-placement-rule]
 == Editing subscription applications with _PlacementRule_ does not display the subscription YAML in editor
