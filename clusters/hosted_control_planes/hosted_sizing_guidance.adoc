@@ -22,66 +22,61 @@ For bare-metal nodes, the default `maxPods` setting of 250 is likely to be a lim
 [#hosted-sizing-guidance-request-based-limit]
 == Request-based resource limit
 
-To understand the request-based resource limit, consider the total request value of a hosted control plane. To calculate that value, add the request values of all highly available hosted control plane pods across the namespace. See the following examples:
+The maximum number of hosted control planes that the cluster can host is calculated based on the hosted control plane pod CPU and memory requests. 
 
-* Five vCPU requests for each highly available hosted control plane
-* 18 GiB memory requests for each highly available hosted control plane
+A highly available hosted control plane consists of 78 pods that request 5 vCPUs and 18 GB memory. This base line numbers are compared to the cluster worker node resource capacities to estimate the maximum number of hosted control planes. 
 
 [#hosted-sizing-guidance-load-based-limit]
 == Load-based limit
 
-Request-based sizing provides a maximum number of hosted control planes that can run based on the minimum request totals for the `Burstable` class, which meet the average resource usage. For sizing guidance that is tuned to higher levels of hosted cluster load, the load-based approach demonstrates resource usage at increasing API rates. The load-based approach builds in resource capacity for each hosted control plane to handle higher API load points.
+The maximum number of hosted control planes the cluster can host is calculated based on the hosted control plane pods CPU and memory utilizations when some workload is put on the hosted control plane Kubernetes API server. 
 
-For example, to demonstrate resource scaling with API load, consider the following workload configuration:
+The following method is used to measure the hosted control plane resource utilizations as the workload increases:
 
-* One hosted cluster with 9 workers (8 vCPU, 32 GiB each), using the KubeVirt provider
-* Benchmark tool: link:https://github.com/cloud-bulldozer/kube-burner[Kube-burner]
-* The workload profile is a cluster density test that is configured to focus on API control-plane stress, based on this definition:
+* One hosted cluster with 9 workers (8 vCPU, 32 GiB each) while using the KubeVirt provider
+* The workload test profile is configured to focus on API control-plane stress, based on this definition:
 
++
 ** Creates objects per namespace, scaling up to 100 namespaces total
-** The `churn` parameter is enabled to cause additional API stress with continuous object deletion and creation
-** The workload queries per second (QPS) and `Burst` settings are set high to remove any client-side throttling
++       
+** Additional API stress with continuous object deletion and creation
++      
+** The workload queries per second (QPS) and Burst settings are set high to remove any client-side throttling
 
-Resource utilization is measured as the workload increased to the total namespace count. This data provided an estimation factor to increase the compute resource capacity based on the expected API load. Exact utilization rates can vary based on the type and pace of the cluster workload.
+This test provides an estimation factor to increase the compute resource utlization based on the expected API load. Exact utilization rates can vary based on the type and pace of the cluster workload.
+
 
 |===
 | Hosted control plane resource utilization scaling | vCPUs | Memory (GiB)
 
-| Default requests
-| 5
-| 18
-
-| Usage when idle
+| Resource utlization with no load 
 | 2.9
 | 11.1
 
-| Incremental usage per 1000 increase in API rate
+| Resource utlization with 1000 QPS
 | 9.0
 | 2.5
+
 |===
 
-By using these examples, you can factor in a load-based limit that is based on the expected rate of stress on the API, which is measured as the aggregated QPS across the 3 hosted API servers. For general sizing purposes, consider a 1000 QPS API rate to be a medium hosted cluster load and a 2000 QPS API to be a heavy hosted cluster load.
+As the load increases by 1000 QPS, the hosted control plane resource utilization increases by 9 vCPUs and 2.5 GB memory. 
 
-To determine the API rate of an active hosted cluster, measure the number of queries per second for the appropriate hosted namespace by using the following metric, which you can query from the Administrator perspective in the {ocp-short} web console by selecting *Observe* -> *Metrics*:
-
-----
-sum(rate(apiserver_request_total{namespace=~"clusters-$name*"}[2m])) by (namespace)
-----
+For general sizing purposes, consider a 1000 QPS API rate to be a medium hosted cluster load and a 2000 QPS API to be a heavy hosted cluster load.
 
 The following example shows hosted control plane resource scaling for the workload and API rate definitions:
 
 |===
 | QPS (API rate) | vCPU usage | Memory usage (GiB)
 
-| Less than 50 QPS (low)
+| Low load (Less than 50 QPS)
 | 2.9
 | 11.1
 
-| 1000 QPS (medium)
+| Medium load (1000 QPS)
 | 11.9
 | 13.6
 
-| 2000 QPS (high)
+| High load (2000 QPS) 
 | 20.9
 | 16.1
 |===
