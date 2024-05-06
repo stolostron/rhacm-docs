@@ -73,6 +73,8 @@ View the following example of Slack thread announcement: `MCE 2.2.12 RC1 Status 
 
 There is an exception for CVEs to be listed in RHBA and RHEA. When the CVE fix becomes available in the base image, the `Freshmaker` tool runs a build for each impacted z-stream in the field to automatically update the base image for each impacted container and rebuild the image(s). Freshmaker uses the `BOTAS` tool to generate a new advisory for each impacted z-stream in the field to attach the rebuilt images. The release manager agrees to ship this advisory, unless a new z-stream is going to ship before the container grades drop. Then the team ships the new z-stream with the CVE fixes and drop the advisory created by Freshmaker/BOTAS.
 
+Example: https://errata.devel.redhat.com/docs/show/130499
+
 ## Review process
 
 Before you review, verify that there is a doc issue that has a link to the advisory and a release date in the title of the issue. Complete the following steps during review:
