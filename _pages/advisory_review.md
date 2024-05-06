@@ -16,7 +16,7 @@ Engineers create status threads for upcoming z-streams through the Slack channel
 - Feature complete (FC): A build is ran to check for feature updates
 - Release candidate (RC): A build is ran to check for bugs
 
-View the following example of Slack thread announcement: `MCE 2.2.12 RC1 Status Thread`
+View the following example of a Slack thread announcement: `MCE 2.2.12 RC1 Status Thread`
 
 **Reminders:**
 
