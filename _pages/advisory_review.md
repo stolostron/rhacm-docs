@@ -34,7 +34,7 @@ View the following example of a Slack thread announcement: `MCE 2.2.12 RC1 Statu
 
 * Product Security must approve before you can approve. Patrick Hickey normally gets the security information ready before Owen Watkins and you sign off on it.
 
-* Topic should contain text similar to the following: “Red Hat Product Security has rated this update as having a security impact of Critical. A Common Vulnerability Scoring System (CVSS) base score, which gives a detailed severity rating, is available for each vulnerability from the CVE links in the References section.” “Critical” might be replaced with “important”, “medium”, or “low”. This should match the severity drop-down in the advisory.
+* Before you approve the topic, it should contain text similar to the following: “Red Hat Product Security has rated this update as having a security impact of Critical. A Common Vulnerability Scoring System (CVSS) base score, which gives a detailed severity rating, is available for each vulnerability from the CVE links in the References section.” “Critical” might be replaced with “important”, “medium”, or “low”. This should match the severity drop-down in the advisory.
 
 * Ensure that the standard text for the product and list of _public_ Jira issues that were addressed are in the **Problem description** section.
 
