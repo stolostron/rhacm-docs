@@ -38,7 +38,7 @@ View the following example of a Slack thread announcement: `MCE 2.2.12 RC1 Statu
 
 * Ensure that the standard text for the product and list of _public_ Jira issues that were addressed are in the **Problem description** section.
 
-   **Note**: Be sure to remove version numbers from the title.
+   **Note**: Remove version numbers from the title.
 
 * In the **Solution** section be sure to refer users to the product documentation.
 
