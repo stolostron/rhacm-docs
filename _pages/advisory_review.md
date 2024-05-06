@@ -40,7 +40,7 @@ View the following example of a Slack thread announcement: `MCE 2.2.12 RC1 Statu
 
    **Note**: Remove version numbers from the title.
 
-* In the **Solution** section be sure to refer users to the product documentation.
+* In the **Solution** section,  refer users to the product documentation.
 
 ### RHBA (bug)
 
