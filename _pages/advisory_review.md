@@ -44,29 +44,29 @@ View the following example of a Slack thread announcement: `MCE 2.2.12 RC1 Statu
 
 ### RHBA (bug)
 
-* Verify that "Security" is not mentioned in the _Synopsis_. Ensure that "Bug fixes" are mentioned. There can be others, but not security. 
+* Verify that "Security" is not mentioned in the _Synopsis_. Ensure that "Bug fixes" are mentioned. You can mention others, but you cannot mention "Security." 
 
 * Topic section should not have the security statement mentioned.
   
 * Ensure that the standard text for the product and list of _public_ Jira issues that were addressed are in the **Problem description** section.
-  **Note**: Be sure to remove version numbers from the title.
+  **Note**: Remove version numbers from the title.
 
 * No CVEs
   
-* In the **Solution** section be sure to refer users to the product documentation.
+* In the **Solution** section, refer users to the product documentation.
 
 ### RHEA (enhancement)
 
-* Verify that "Security" is not mentioned in the _Synopsis_. Ensure that "Enhancements" are mentioned, and sometimes "Bug fixes". There can be others, but not security.
+* Verify that "Security" is not mentioned in the _Synopsis_. Ensure that "Enhancements" are mentioned, and sometimes "Bug fixes".  You can mention others, but you cannot mention "Security." 
 
 * Topic section should not have the security statement mentioned.
 
 * Ensure that the standard text for the product and list of _public_ Jira issues that were addressed are in the **Problem description** section.
-  **Note**: Be sure to remove version numbers from the title.
+  **Note**: Remove version numbers from the title.
 
 * No CVEs
 
-* In the **Solution** section be sure to refer users to the product documentation.
+* In the **Solution** section, refer users to the product documentation.
 
 
 ## CVE fixes into Submariner/Volsync/Gatekeeper/GlobalHub
@@ -79,7 +79,7 @@ Example: https://errata.devel.redhat.com/docs/show/130499
 
 Before you review, verify that there is a doc issue that has a link to the advisory and a release date in the title of the issue. Complete the following steps during review:
 
-1. Be attentive to the `acm-release` Slack channel for announcement threads.
+1. Monitor the `acm-release` Slack channel for announcement threads.
 
 2. Log on to VPN and log in to the errata tool with the `kinit` command. Run the following command:
    ```
@@ -88,7 +88,7 @@ Before you review, verify that there is a doc issue that has a link to the advis
 
 3. Open the advisory in Google chrome browser or Firefox browser.
 
-4. There are a list of issues from the _Summary_ tab. If you do not see any issues, reach out to the release manager to verify if other issues should be added.
+4. View the list of issues from the _Summary_ tab. If you do not see any issues, reach out to the release manager to verify if other issues should be added.
 
    **Note**: We document Erratas from the Customer portal documentation for only ACM and MCE. We do not document Erratas for other operators and add-ons. If you are documenting Errata, check for a summary of the fix from the issue that is linked. For all of the issues marked with the ‘errata’ label, the release manager should ask the dev team to provide a brief (one or two sentence) summary of the issue resolution that the customer can understand. The release manager creates a doc issue for the doc team to create a docs errata for the z-stream. This issue is opened for that z-stream with the `Documentation` component and the `errata` label. This is the only doc issue that should have the `errata` label. Other issues with the label should be dev issues.
 
