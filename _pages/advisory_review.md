@@ -32,90 +32,72 @@ View the following example of Slack thread announcement: `MCE 2.2.12 RC1 Status 
 
 ### RHSA (security)
 
-Requirements:
-Product Security has to approve before you can approve. Patrick Hickey normally gets the security information ready before Owen Watkins and you sign off on it.
+* Product Security must approve before you can approve. Patrick Hickey normally gets the security information ready before Owen Watkins and you sign off on it.
 
+* Topic should contain text similar to the following: “Red Hat Product Security has rated this update as having a security impact of Critical. A Common Vulnerability Scoring System (CVSS) base score, which gives a detailed severity rating, is available for each vulnerability from the CVE links in the References section.” “Critical” might be replaced with “important”, “medium”, or “low”. This should match the severity drop-down in the advisory.
 
-Topic should contain text similar to the following: “Red Hat Product Security has rated this update as having a security impact of Critical. A Common Vulnerability Scoring System (CVSS) base score, which gives a detailed severity rating, is available for each vulnerability from the CVE links in the References section.” “Critical” might be replaced with “important”, “medium”, or “low”. This should match the severity drop-down in the advisory.
+* Ensure that the standard text for the product and list of _public_ Jira issues that were addressed are in the **Problem description** section.
 
+   **Note**: Be sure to remove version numbers from the title.
 
-Problem description updates:
-Should contain the standard text for the product 
-A list of public Jira issues that were addressed (be sure to remove version numbers out)
-
-
-In the Solution section be sure to refer users to the product documentation
+* In the **Solution** section be sure to refer users to the product documentation.
 
 ### RHBA (bug)
 
-Requirements:
-Security is not mentioned in the Synopsis. “Bug fixes” is mentioned. There can be others, but not security. 
-The problem description should contain the standard text for the product and a list of public Jira issues that were addressed.
+* Verify that "Security" is not mentioned in the _Synopsis_. Ensure that "Bug fixes" are mentioned. There can be others, but not security. 
 
+* Topic section should not have the security statement mentioned.
+  
+* Ensure that the standard text for the product and list of _public_ Jira issues that were addressed are in the **Problem description** section.
+  **Note**: Be sure to remove version numbers from the title.
 
-Topic section should not have the security statement mentioned.
-Problem description updates:
-Should contain the standard text for the product 
-A list of public Jira issues that were addressed (be sure to remove version numbers out)
-No CVEs
-
-
-In the Solution section be sure to refer users to the product documentation
+* No CVEs
+  
+* In the **Solution** section be sure to refer users to the product documentation.
 
 ### RHEA (enhancement)
 
-Requirements:
-Security is not mentioned in the Synopsis. “enhancements” is mentioned. There can be others, but not security.
-The problem description should contain the standard text for the product and a list of public Jira issues that were addressed. 
+* Verify that "Security" is not mentioned in the _Synopsis_. Ensure that "Enhancements" are mentioned, and sometimes "Bug fixes". There can be others, but not security.
+
+* Topic section should not have the security statement mentioned.
+
+* Ensure that the standard text for the product and list of _public_ Jira issues that were addressed are in the **Problem description** section.
+  **Note**: Be sure to remove version numbers from the title.
+
+* No CVEs
+
+* In the **Solution** section be sure to refer users to the product documentation.
 
 
-Topic section should not have the security statement mentioned.
+## CVE fixes into Submariner/Volsync/Gatekeeper/GlobalHub
 
-
-Problem description updates:
-Should contain the standard text for the product 
-A list of public Jira issues that were addressed (be sure to remove version numbers out)
-
-
-No CVEs
-
-
-In the Solution section be sure to refer users to the product documentation
-
-## Advisory logic
-
-RHBA & RHEA
-Topic section should not have the security statement mentioned.
-No CVEs
-RHBA & RHEA & RHSA
-They are all advisories 
-The problem description should contain the standard text for the product and a list of public Jira issues that were addressed.
-In the Solution section be sure to refer users to the product documentation
+There is an exception for CVEs to be listed in RHBA and RHEA. When the CVE fix becomes available in the base image, the `Freshmaker` tool runs a build for each impacted z-stream in the field to automatically update the base image for each impacted container and rebuild the image(s). Freshmaker uses the `BOTAS` tool to generate a new advisory for each impacted z-stream in the field to attach the rebuilt images. The release manager agrees to ship this advisory, unless a new z-stream is going to ship before the container grades drop. Then the team ships the new z-stream with the CVE fixes and drop the advisory created by Freshmaker/BOTAS.
 
 ## Review process
 
-1. Brian creates the advisory as an RHSA when he sets up the project build.
+Before you review, verify that there is a doc issue that has a link to the advisory and a release date in the title of the issue. Complete the following steps during review:
 
-2. When we are close to GA, the release manager adds the resolved Jira issues to the advisory.
+1. Be attentive to the `acm-release` Slack channel for announcement threads.
 
-3. That might also be a good time for the release manager to tag the Jira issues with the `errata` label for the ones that should be included in the docs errata. These are most often the customer issues. Only the issues with the ‘errata’ label will be included in the docs errata. For all of the issues marked with the ‘errata’ label, the release manager should ask the dev team to provide a brief (one or two sentence) summary of the issue resolution that the customer will understand.
+2. Log on to VPN and log in to the errata tool with the `kinit` command. Run the following command:
+   ```
+   kinit <your_usename>@IPA.REDHAT.COM
+   ```
 
-4. Patrick either adds prod sec CVEs to the advisory or determines that there are no prod sec CVEs that apply to that release. If none, Owen or Borja have to change the advisory from RHSA to RHBA or RHEA.
+3. Open the advisory in Google chrome browser or Firefox browser.
 
-5. After all of that is done for the advisory, make sure that the docs tab is correct according to the list at the beginning of this document.
+4. There are a list of issues from the _Summary_ tab. If you do not see any issues, reach out to the release manager to verify if other issues should be added.
 
-6. The release manager creates a doc issue for the doc team to create a docs errata for the z-stream. This issue is opened for that z-stream with the ‘Documentation’ component and the ‘errata’ label. This is the only doc issue that should have the ‘errata’ label. Other issues with the label should be dev issues.
+   **Note**: We document Erratas from the Customer portal documentation for only ACM and MCE. We do not document Erratas for other operators and add-ons. If you are documenting Errata, check for a summary of the fix from the issue that is linked. For all of the issues marked with the ‘errata’ label, the release manager should ask the dev team to provide a brief (one or two sentence) summary of the issue resolution that the customer can understand. The release manager creates a doc issue for the doc team to create a docs errata for the z-stream. This issue is opened for that z-stream with the `Documentation` component and the `errata` label. This is the only doc issue that should have the `errata` label. Other issues with the label should be dev issues.
 
-7. When it’s time to do the docs errata, the doc team runs a query for issues with both of the following specifications: 
+5. Patrick either adds prod sec CVEs to the advisory or determines that there are no prod sec CVEs that apply to that release. If none, Owen or Borja have to change the advisory from RHSA to RHBA or RHEA.
 
-- z-stream release that matches: example ‘ACM 2.9.1’ and ‘MCE 2.4.1’ 
-- The `errata` label. **Note:** Remember not to filter on the ‘Documentation’ component at this point because the other issues should be dev issues and have their components listed. 
+6. After all of that is done for the advisory, make sure that the docs tab is correct according to the list at the beginning of this document.
+   **Note**: Be sure to update the reviewer section.
 
-8. The results of that query should be what you will include in the docs errata. The summary should be provided in the issue. If not, you can add a comment for the creator to request a summary. 
+7. Sign off on the advisory when it is correct. 
 
-9. Sign off on the advisory when it is correct. 
-
-10. Create the docs errata with the information that you just pulled up. 
+8. Create the docs errata with the information that you just pulled up. 
 
 - If no issues, then just add the container image statement only. 
 - If there are CVEs and no issues, then use the container images and security updates statement. We don’t list CVEs in the doc errata, as they are covered in the advisory. 
