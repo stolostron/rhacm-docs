@@ -32,7 +32,7 @@ View the following example of a Slack thread announcement: `MCE 2.2.12 RC1 Statu
 
 ### RHSA (security)
 
-* Product Security must approve before you can approve. Patrick Hickey normally gets the security information ready before Owen Watkins and you sign off on it.
+* Product Security must approve before you can approve. Contact the Product Security team or ask the release manager to help connect you with them.
 
 * Before you approve the topic, it should contain text similar to the following: “Red Hat Product Security has rated this update as having a security impact of Critical. A Common Vulnerability Scoring System (CVSS) base score, which gives a detailed severity rating, is available for each vulnerability from the CVE links in the References section.” “Critical” might be replaced with “important”, “medium”, or “low”. This should match the severity drop-down in the advisory.
 
@@ -92,7 +92,7 @@ Before you review, verify that there is a doc issue that has a link to the advis
 
    **Note**: We document Erratas from the Customer portal documentation for only ACM and MCE. We do not document Erratas for other operators and add-ons. If you are documenting Errata, check for a summary of the fix from the issue that is linked. For all of the issues marked with the ‘errata’ label, the release manager should ask the dev team to provide a brief (one or two sentence) summary of the issue resolution that the customer can understand. The release manager creates a doc issue for the doc team to create a docs errata for the z-stream. This issue is opened for that z-stream with the `Documentation` component and the `errata` label. This is the only doc issue that should have the `errata` label. Other issues with the label should be dev issues.
 
-5. Patrick either adds prod sec CVEs to the advisory or determines that there are no prod sec CVEs that apply to that release. If none, Owen or Borja have to change the advisory from RHSA to RHBA or RHEA.
+5. A developer from the Product Security team adds CVEs to the advisory or determines that there are no prod sec CVEs that apply to that release. If none, make a request to change the advisory from RHSA to RHBA or RHEA.
 
 6. After all of that is done for the advisory, make sure that the docs tab is correct according to the list at the beginning of this document.
    **Note**: Be sure to update the reviewer section.
