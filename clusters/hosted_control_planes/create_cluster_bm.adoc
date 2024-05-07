@@ -48,7 +48,7 @@ hcp create cluster agent \
 +
 [source,bash]
 ----
-oc -n <hosted-control-plane-namespace> get pods
+oc -n <hosted_control_plane_namespace> get pods
 ----
 
 +
@@ -102,6 +102,56 @@ The **Hosted cluster** view is displayed.
 . Wait until the control plane components are ready. This process can take a few minutes.
 
 . To view the node pool status, scroll to the **NodePool** section. The process to install the nodes takes about 10 minutes. You can also click **Nodes** to confirm whether the nodes joined the hosted cluster.
+
+[#creating-a-hosted-cluster-bm-icsp]
+== Creating a hosted cluster on bare metal by using a mirror registry
+
+You can use a mirror registry to create a hosted cluster on bare metal by specifying the `--image-content-sources` flag in the `hcp create cluster` command. Complete the following steps:
+
+. Create a YAML file to define Image Content Source Policies (ICSP). See the following example:
+
++
+[source,yaml]
+----
+- mirrors:
+  - brew.registry.redhat.io
+  source: registry.redhat.io
+- mirrors:
+  - brew.registry.redhat.io
+  source: registry.stage.redhat.io
+- mirrors:
+  - brew.registry.redhat.io
+  source: registry-proxy.engineering.redhat.com
+----
+
+. Save the file as `icsp.yaml`. This file contains your mirror registries.
+
+. To create a hosted cluster by using your mirror registries, run the following command:
+
++
+[source,bash]
+----
+hcp create cluster agent \
+    --name=<hosted_cluster_name> \ <1>
+    --pull-secret=<path_to_pull_secret> \ <2>
+    --agent-namespace=<hosted_control_plane_namespace> \ <3>
+    --base-domain=<basedomain> \ <4>
+    --api-server-address=api.<hosted_cluster_name>.<basedomain> \
+    --image-content-sources icsp.yaml  \ <5>
+    --ssh-key  <path_to_ssh_key> \ <6>
+    --namespace <hosted_cluster_namespace> \ <7>
+    --release-image=quay.io/openshift-release-dev/ocp-release:<ocp_release_image> <8>
+----
+
++
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<3> Specify your hosted control plane namespace, for example, `clusters-example`. Ensure that agents are available in this namespace by using the `oc get agent -n <hosted-control-plane-namespace>` command.
+<4> Specify your base domain, for example, `krnl.es`.
+<5> Specify the `icsp.yaml` file that defines ICSP and your mirror registries.
+<6> Specify the path to your SSH public key. The default file path is `~/.ssh/id_rsa.pub`.
+<7> Specify your hosted cluster namespace.
+<8> Specify the supported {ocp-short} version that you want to use, for example, `4.14.0-x86_64`. If you are using a disconnected environment, replace `<ocp_release_image>` with the digest image. To extract the {ocp-short} release image digest, see _Extracting the {ocp-short} release image digest_.
 
 [#hosted-create-bare-metal-additional-resources]
 == Additional resources
