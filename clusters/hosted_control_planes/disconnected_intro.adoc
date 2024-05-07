@@ -1,29 +1,29 @@
 [#configure-hosted-disconnected]
 = Configuring hosted control planes in a disconnected environment
 
-In the context of hosted control planes, a disconnected environment is an {ocp-short} deployment that is not connected to the internet and that uses hosted control planes as a base.
+A disconnected environment is an {ocp-short} cluster that is not connected to the internet and that uses hosted control planes as a base.
 
 **Technology Preview:** You can deploy hosted control planes in a disconnected environment on bare-metal platforms by using an IPv4 or IPv6 network. In addition, hosted control planes in a disconnected environment is available on a dual-stack network as a Technology Preview feature. If you use the {ocp-virt} platform, hosted control planes in a disconnected environment is available as a Technology Preview feature only.
 
 [#mce_and_agent]
 == Disconnected environment architecture
 
-When you provision hosted control planes on bare metal, you use the Agent platform. The Agent platform and {mce-short} work together to enable disconnected deployments. The Agent platform uses the central infrastructure management service to add worker nodes to a hosted cluster. For an introduction to the central infrastructure management service, see xref:../cluster_lifecycle/cim_enable.adoc#enable-cim[Enabling the central infrastructure management service].
+You can provision hosted control planes on bare metal by using the Agent platform. The Agent platform uses the central infrastructure management service to add worker nodes to a hosted cluster. For an introduction to the central infrastructure management service, see xref:../cluster_lifecycle/cim_enable.adoc#enable-cim[Enabling the central infrastructure management service].
 
-The following diagram illustrates an example architecture of a disconnected environment:
+See the following architecture diagram of a disconnected environment:
 
 image:../images/489_RHACM_HyperShift_on_bare_metal_1223.png[Disconnected architecture diagram]
 
-. You configure infrastructure services, including the registry certificate deployment with TLS support, web server, and DNS, to ensure that the disconnected deployment works.
-. You create a config map in the `openshift-config` namespace. In this example, the config map is named `registry-config`. The content of the config map is the Registry CA certificate. The data field of the config map must contain the following key/value:
+. Configure infrastructure services, including the registry certificate deployment with TLS support, web server, and DNS, to ensure that the disconnected deployment works.
+. Create a config map in the `openshift-config` namespace. The content of the config map is the Registry CA certificate. The data field of the config map must contain the following key and value:
 
 * Key: `<registry_dns_domain_name>..<port>`, for example, `registry.hypershiftdomain.lab..5000:`. Ensure that you place `..` after the registry DNS domain name when you specify a port.
 * Value: The certificate content
 
 +
 For more information about creating a config map, see _Configuring TLS certificates for an IPv4 network_.
-. You modify the `images.config.openshift.io` custom resource (CR) specification and adds a new field named `additionalTrustedCA` with a value of `name: registry-config`.
-. You create a config map that contains two data fields. One field contains the `registries.conf` file in `RAW` format, and the other field contains the Registry CA and is named `ca-bundle.crt`. The config map belongs to the `multicluster-engine` namespace, and the config map name is referenced in other objects. For an example of a config map, see the following sample configuration:
+. Add the `additionalTrustedCA` field with a value of `name: registry-config` in the `images.config.openshift.io` custom resource (CR).
+. Create a config map in the `multicluster-engine` namespace. See the following sample configuration:
 
 +
 ----
@@ -35,13 +35,13 @@ metadata:
   labels:
     app: assisted-service
 data:
-  ca-bundle.crt: |
+  ca-bundle.crt: | <1>
     -----BEGIN CERTIFICATE-----
     ...
     ...
     ...
     -----END CERTIFICATE-----
-  registries.conf: |
+  registries.conf: | <2>
     unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
 
     [[registry]]
@@ -60,34 +60,43 @@ data:
 ...
 ----
 
+<1> Contains the CA certificate of registries.
+<2> Contains the `registries.conf` file content in a `RAW` format.
+
 . In the {mce-short} namespace, you create the `multiclusterengine` CR, which enables both the Agent and `hypershift-addon` add-ons. The {mce-short} namespace must contain the config maps to modify behavior in a disconnected deployment. The namespace also contains the `multicluster-engine`, `assisted-service`, and `hypershift-addon-manager` pods.
-. You create the objects that are necessary to deploy the hosted cluster, which include the following components:
+. Create objects for the following components to deploy the hosted cluster:
 
 ** Secrets: Secrets contain the pull secret, SSH key, and etcd encryption key.
 ** Config map: The config map contains the CA certificate of the private registry.
-** `HostedCluster`: The `HostedCluster` resource defines the configuration of the cluster that the user intends to create.
+** `HostedCluster`: The `HostedCluster` resource defines the configuration for your hosted cluster.
 ** `NodePool`: The `NodePool` resource identifies the node pool that references the machines to use for the data plane.
 
-. After you create the hosted cluster objects, the HyperShift Operator establishes the `HostedControlPlane` namespace to accommodate control plane pods. The namespace also hosts components such as Agents, bare metal hosts (BMHs), and the `InfraEnv` resource. Later, you create the `InfraEnv` resource, and after ISO creation, you create the BMHs and their secrets that contain baseboard management controller (BMC) credentials.
+. After you create the hosted cluster objects, the HyperShift Operator creates control plane pods in the `HostedControlPlane` namespace. The `HostedControlPlane` namespace also hosts components such as Agents, bare metal hosts, and the `InfraEnv` resource.
 
-. The Metal3 Operator in the `openshift-machine-api` namespace inspects the new BMHs. Then, the Metal3 Operator tries to connect to the BMCs to start them by using the configured `LiveISO` and `RootFS` values that are specified through the `AgentServiceConfig` CR in the {mce-short} namespace.
+. Create the `InfraEnv` resource. After generating an ISO image, create the bare metal hosts and their secrets that contain baseboard management controller (BMC) credentials.
 
-. After the worker nodes of the `HostedCluster` resource are started, an Agent container is started. This agent establishes contact with the Assisted Service, which orchestrates the actions to complete the deployment. Initially, you need to scale the `NodePool` resource to the number of worker nodes for the `HostedCluster` resource. The Assisted Service manages the remaining tasks.
+. The Metal3 Operator in the `openshift-machine-api` namespace inspects the new bare metal hosts.
 
-. At this point, you wait for the deployment process to be completed.
+. The Metal3 Operator tries to connect and start the BMCs by using the `LiveISO` and `RootFS` values. You can specify the `LiveISO` and `RootFS` values through the `AgentServiceConfig` CR in the {mce-short} namespace.
+
+. After the worker nodes of the `HostedCluster` resource are started, an Agent container is started.
+
+. Scale the `NodePool` resource to the number of worker nodes for the `HostedCluster` resource.
+
+. Wait for the deployment process to be completed.
 
 [#configure-hosted-disconnected-networks-prereqs]
 == Prerequisites
 
 To configure hosted control planes in a disconnected environment, you must meet the following prerequisites:
 
-- CPU: The number of CPUs provided determines how many hosted clusters can run concurrently. In general, use 16 CPUs for each node for 3 nodes. For minimal development, you can use 12 CPUs for each node for 3 nodes.
-- Memory: The amount of RAM affects how many hosted clusters can be hosted. Use 48 GB of RAM for each node. For minimal development, 18 GB of RAM might be sufficient.
+- CPU: The number of CPUs provided determines how many hosted clusters can run at the same time. In general, use 16 CPUs for each node for 3 nodes. For minimal development, you can use 12 CPUs for each node for 3 nodes.
+- Memory: The amount of RAM affects how many hosted clusters you can host. Use 48 GB of RAM for each node. For minimal development, 18 GB of RAM might be sufficient.
 - Storage: Use SSD storage for {mce-short}.
 * Management cluster: 250 GB.
-* Registry: The storage needed depends on the number of releases, operators, and images that are hosted. An acceptable number might be 500 GB, preferably separated from the disk that hosts the hosted cluster.
-* Web server: The storage needed depends on the number of ISOs and images that are hosted. An acceptable number might be 500 GB.
-- Production: For a production environment, separate the management cluster, the registry, and the web server on different disks. This example illustrates a possible configuration for production:
+* Registry: The required registry storage depends on the number of releases, operators, and images that are hosted. You might require 500 GB, preferably separated from the disk that hosts the hosted cluster.
+* Web server: The required web server storage depends on the number of ISOs and images that are hosted. You might require 500 GB.
+- Production: For a production environment, separate the management cluster, the registry, and the web server on different disks. See the following example configuration for production:
 * Registry: 2 TB
 * Management cluster: 500 GB
 * Web server: 2 TB
