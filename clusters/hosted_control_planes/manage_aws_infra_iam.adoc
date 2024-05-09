@@ -1,7 +1,7 @@
 [#hosted-control-planes-manage-aws-infra-iam]
 = Managing AWS infrastructure and IAM permissions for hosted control planes (Technology Preview)
 
-When you use hosted control planes for {ocp} on AWS, the infrastructure requirements vary based on your setup. 
+When you use hosted control planes for {ocp} on AWS, the infrastructure requirements vary based on your setup.
 
 * <<hosted-aws-infra-iam-prereqs,Prerequisites>>
 * <<hosting-cluster-aws-infra-reqs,AWS infrastructure requirements>>
@@ -29,7 +29,7 @@ _Prerequired_ means that hosted control planes requires AWS infrastructure to pr
 [#infra-prerequired-unmanaged-for-ho]
 === Prerequired and unmanaged infrastructure for the HyperShift Operator in an arbitrary AWS account
 
-An arbitrary AWS account depends on the provider of the hosted control planes service. 
+An arbitrary AWS account depends on the provider of the hosted control planes service.
 
 In self-managed hosted control planes, the cluster service provider controls the AWS account. The _cluster service provider_ is the administrator who hosts cluster control planes and is responsible for uptime. In managed hosted control planes, the AWS account belongs to Red&nbsp;Hat.
 
@@ -463,40 +463,16 @@ The roles that hosted control planes uses are shown in the following examples:
 [#hosting-cluster-aws-infra-iam-separate]
 == Creating AWS infrastructure and IAM resources separately
 
-By default, the `hcp create cluster aws` command creates cloud infrastructure with the hosted cluster and applies it. You can create the cloud infrastructure portion separately so that the `hcp create cluster aws` command can be used only to create the cluster, or render it so that you can modify it before you apply it. 
+By default, the `hcp create cluster aws` command creates cloud infrastructure with the hosted cluster and applies it. You can create the cloud infrastructure portion separately so that the `hcp create cluster aws` command can be used only to create the cluster, or render it so that you can modify it before you apply it.
 
 To create the cloud infrastructure portion separately, you need to create the AWS infrastructure, create the AWS Identity and Access (IAM) resources, and create the cluster.
 
 [#hosting-cluster-create-aws-infra]
 === Creating the AWS infrastructure
 
-To create the AWS infrastructure, enter the following command:
-//lahinson - july 2023 - update hypershift cli command here
-----
-hypershift create infra aws --name CLUSTER_NAME \ <1>
-    --aws-creds AWS_CREDENTIALS_FILE \ <2>
-    --base-domain BASEDOMAIN \ <3>
-    --infra-id INFRA_ID \ <4>
-    --region REGION \ <5>
-    --output-file OUTPUT_INFRA_FILE <6>
-----
+You can create your infrastructure, for example, by using GitOps.
 
-<1> Replace `CLUSTER_NAME` with the name of the hosted cluster that you are creating. This value is used for creating the Route 53 private hosted zones for the cluster.
-<2> Replace `AWS_CREDENTIALS_FILE` with the name of the AWS credentials file that has permissions to create infrastructure resources for your cluster, such as VPCs, subnets, and NAT gateways. This value must correspond to the AWS account for your guest cluster, where workers reside.
-<3> Replace `BASEDOMAIN` with the name of the base domain what you plan to use for your hosted cluster Ingress. This value must correspond to a Route 53 public zone that you can create records in.
-<4> Replace `INFRA_ID` with a unique name that identifies your infrastructure by using tags. This value is used by the cloud controller manager in Kubernetes and the cluster API manager to identify infrastructure for your cluster. Typically, this value is the name of your cluster (`CLUSTER_NAME`) with a suffix appended to it.
-<5> Replace `REGION` with the region where you want to create the infrastructure for your cluster.
-<6> Replace `OUTPUT_INFRA_FILE` with the name of the file where you want to store the IDs of the infrastructure in JSON format. You can use this file as input to the `hcp create cluster aws` command to populate fields in the `HostedCluster` and `NodePool` resouces.
-
-*Note:* The `hypershift` CLI is not available to download. Use the following commands to extract it by using the HyperShift Operator pod present in the `hypershift` namespace. Replace `<hypershift-operator-pod-name>` with your HyperShift Operator pod name.
-+
-----
-oc project hypershift
-oc rsync <hypershift-operator-pod-name>:/usr/bin/hypershift-no-cgo .
-mv hypershift-no-cgo hypershift
-----
-
-After you enter the command, the following resources are created:
+After creating your infrastructure, the following resources are created:
 
 * One VPC
 * One DHCP option
@@ -508,7 +484,30 @@ After you enter the command, the following resources are created:
 * Two route tables: 1 private and 1 public
 * Two private hosted zones: 1 for cluster Ingress and 1 for PrivateLink, in case you create a private cluster
 
-All of those resources contain the `kubernetes.io/cluster/INFRA_ID=owned` tag, where `INFRA_ID` is the value that you specified in the command.
+See the following example configuration for the hosted cluster namespace:
+
+[source,yaml]
+----
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: clusters
+spec: {}
+status: {}
+---
+apiVersion: v1
+data:
+  .dockerconfigjson: xxxxxxxxxxx
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    hypershift.openshift.io/safe-to-delete-with-cluster: "true"
+  name: jparrill-hosted2-pull-secret
+  namespace: clusters
+----
 
 [#hosting-cluster-create-aws-iam]
 === Creating the AWS IAM resources
@@ -516,7 +515,7 @@ All of those resources contain the `kubernetes.io/cluster/INFRA_ID=owned` tag, w
 To create the AWS IAM resources, enter the following command:
 //lahinson - july 2023 - update hypershift cli command here
 ----
-hypershift create iam aws --infra-id INFRA_ID \ <1>
+hcp create iam aws --infra-id INFRA_ID \ <1>
     --aws-creds AWS_CREDENTIALS_FILE \ <2>
     --oidc-storage-provider-s3-bucket-name OIDC_BUCKET_NAME \ <3>
     --oidc-storage-provider-s3-region OIDC_BUCKET_REGION \ <4>
@@ -574,4 +573,3 @@ After you run the command, the following resources are applied to your cluster:
 * A `NodePool`
 * Three AWS STS secrets for control plane components
 * One SSH key secret if you specified the `--generate-ssh` flag.
-
