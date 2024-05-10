@@ -98,3 +98,59 @@ oc -n <managed-cluster> patch managedclusteraddons <addon-name> --type='json' -p
 * Replace `config-name` with the name of the `AddonDeploymentConfig` that you just created
 
 The new configuration that you referenced in the add-on `ManagedClusterAddon` overrides the global default configuration that you previously defined in the `ClusterManagementAddon` add-on.
+
+After you configure the add-on tolerations, then the cluster-proxy add-ons should run on your managed clusters and use the new add-on tolerations. If the cluster-proxy add-ons do not use your add-on tolerations, or specifically, they do not run in the infra node, then you receive errors. To workaround these errors, complete the following steps: 
+
+. To ensure your configuration for the add-on tolerations get pushed to your managed cluster, create a  `cluster-proxy add-on supportconfig` by using the following template: 
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ClusterManagementAddOn
+metadata:
+  name: cluster-proxy
+spec:
+  addOnMeta:
+    description: cluster-proxy
+    displayName: cluster-proxy
+  installStrategy:
+    type: Manual
+  supportedConfigs:
+  - group: proxy.open-cluster-management.io
+    resource: managedproxyconfigurations
+    defaultConfig:
+      name: cluster-proxy
+  - defaultConfig:
+      name: klusterlet-addon-deploy-config
+      namespace: open-cluster-management-hub
+    group: addon.open-cluster-management.io
+    resource: addondeploymentconfigs
+----
++
+
+. To ensure the pods, like the cluster-proxy-proxy-agent, on your managed cluster gets configured with the add-on tolerations, verify that your `ClusterManagementAddon` looks like the following sample: 
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ClusterManagementAddOn
+metadata:
+  name: cluster-proxy
+spec:
+  addOnMeta:
+    description: cluster-proxy
+    displayName: cluster-proxy
+  installStrategy:
+    type: Manual
+  supportedConfigs:
+  - group: proxy.open-cluster-management.io
+    resource: managedproxyconfigurations
+    defaultConfig:
+      name: cluster-proxy
+  - defaultConfig:
+      name: klusterlet-addon-deploy-config
+      namespace: open-cluster-management-hub
+    group: addon.open-cluster-management.io
+    resource: addondeploymentconfigs
+----
++
