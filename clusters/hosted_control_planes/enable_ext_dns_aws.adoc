@@ -1,47 +1,49 @@
 [#hosted-enable-ext-dns-aws]
 = Enabling external DNS
 
-Because the control plane and the data plane are separate in hosted control planes, you can configure DNS in two independent areas:
+The control plane and the data plane are separate in hosted control planes. You can configure DNS in two independent areas:
 
 - Ingress for workloads within the hosted cluster, such as the following domain: `*.apps.service-consumer-domain.com`
 
 - Ingress for service endpoints within the management cluster, such as API or OAUTH endpoints through the service provider domain: `*.service-provider-domain.com`
 
-The input for the `hostedCluster.spec.dns` dictates the Ingress for workloads within the hosted cluster. The input for `hostedCluster.spec.services.servicePublishingStrategy.route.hostname` dictates the Ingress for service endpoints within the management cluster.
+The input for the `hostedCluster.spec.dns` manages the ingress for workloads within the hosted cluster. The input for `hostedCluster.spec.services.servicePublishingStrategy.route.hostname` manages the ingress for service endpoints within the management cluster.
 
-External DNS creates name records for hosted cluster `Services` that specify a publishing type of `LoadBalancer` or `Route` and provide a hostname for that publishing type. For hosted clusters with `Private` or `PublicAndPrivate` endpoint access types, only the `APIServer` and `OAuth` services support hostnames. For `Private` hosted clusters, the DNS record resolves to a private IP of a Virtual Private Cloud (VPC) Endpoint in your VPC.
+External DNS creates name records for hosted cluster `Services` that specify a publishing type of `LoadBalancer` or `Route` and provide a hostname for that publishing type. For hosted clusters with `Private` or `PublicAndPrivate` endpoint access types, only the `APIServer` and `OAuth` services support hostnames. For `Private` hosted clusters, the DNS record resolves to a private IP of a Virtual Private Cloud (VPC) endpoint in your VPC.
 
-A hosted control plane exposes four services:
+A hosted control plane exposes the following services:
 
 * `APIServer`
 * `OAuthServer`
 * `Konnectivity`
 * `Ignition`
+* `OVNSbDb`
+* `OIDC`
 
-Each of those services is exposed by using `servicePublishingStrategy` in the `HostedCluster` specification. By default, for the `LoadBalancer` and `Route` types of `servicePublishingStrategy`, you publish the service in one of two ways: 
+Each of those services is exposed by using `servicePublishingStrategy` in the `HostedCluster` specification. By default, for the `LoadBalancer` and `Route` types of `servicePublishingStrategy`, you can publish the service by using one of the following ways:
 
 * By using the hostname of the load balancer that is in the status of the `Service` with the `LoadBalancer` type
-* In the `status.host` field of the `Route`
+* In the `status.host` field of the `Route` resource
 
-However, when you deploy hosted control planes in a managed service context, those methods can expose the Ingress subdomain of the underlying management cluster and limit options for the management cluster lifecycle and disaster recovery.
+However, when you deploy hosted control planes in a managed service context, those methods can expose the ingress subdomain of the underlying management cluster and limit options for the management cluster lifecycle and disaster recovery.
 
-When a DNS indirection is layered on the `LoadBalancer` and `Route` publishing types, a managed service operator can publish all public hosted cluster services by using a service-level domain. This architecture allows remapping on the DNS name to a new `LoadBalancer` or `Route` and does not expose the Ingress domain of the management cluster. Hosted control planes uses external DNS to achieve that indirection layer.
+When a DNS indirection is layered on the `LoadBalancer` and `Route` publishing types, a managed service operator can publish all public hosted cluster services by using a service-level domain. This architecture allows remapping on the DNS name to a new `LoadBalancer` or `Route` and does not expose the ingress domain of the management cluster. Hosted control planes uses external DNS to achieve that indirection layer.
 
-You can deploy `external-dns` alongside the `hypershift` Operator in the `hypershift` namespace of the management cluster. The external DNS watches for `Services` or `Routes` that have the `external-dns.alpha.kubernetes.io/hostname` annotation. That annotation is used to create a DNS record that points to the `Service`, such as a record, or the `Route`, such as a CNAME record.
+You can deploy `external-dns` alongside the HyperShift Operator in the `hypershift` namespace of the management cluster. External DNS watches for `Services` or `Routes` that have the `external-dns.alpha.kubernetes.io/hostname` annotation. That annotation is used to create a DNS record that points to the `Service`, such as a record, or the `Route`, such as a CNAME record.
 
 [#external-dns-prereqs-aws]
 == Prerequisites
 
 Before you can set up external DNS for hosted control planes, you must meet the following prerequisites:
 
-* An external public domain that you can point to
+* You have created an external public domain
 
-* Access to the AWS Route53 Management console
+* You have access to the AWS Route53 Management console
 
 [#set-up-external-dns-aws]
 == Setting up external DNS for hosted control planes
 
-If you plan to provision hosted control plane clusters with service-level DNS (external DNS), complete the following steps:
+To provision hosted control plane clusters with service-level DNS (external DNS), complete the following steps:
 
 . Create an AWS credential secret for the HyperShift Operator and name it `hypershift-operator-external-dns-credentials` in the `local-cluster` namespace.
 
@@ -76,14 +78,16 @@ If you plan to provision hosted control plane clusters with service-level DNS (e
 The following example shows the sample `hypershift-operator-external-dns-credentials` secret template:
 
 +
+[source,bash]
 ----
-oc create secret generic hypershift-operator-external-dns-credentials --from-literal=provider=aws --from-literal=domain-filter=service.my.domain.com --from-file=credentials=<credentials-file> -n local-cluster
+oc create secret generic hypershift-operator-external-dns-credentials --from-literal=provider=aws --from-literal=domain-filter=<domain_name> --from-file=credentials=<path_to_aws_credentials_file> -n local-cluster
 ----
 
 +
-*Note:* Disaster recovery backup for the secret is not automatically enabled. To add the label that enables the `hypershift-operator-external-dns-credentials` secret to be backed up for disaster recovery, enter the following command:
+*Note:* Disaster recovery backup for the secret is not automatically enabled. To back up the secret for disaster recovery, add the `hypershift-operator-external-dns-credentials` by entering the following command:
 
 +
+[source,bash]
 ----
 oc label secret hypershift-operator-external-dns-credentials -n local-cluster cluster.open-cluster-management.io/backup=""
 ----
@@ -91,7 +95,7 @@ oc label secret hypershift-operator-external-dns-credentials -n local-cluster cl
 [#create-public-dns-hosted-zone-aws]
 == Creating the public DNS hosted zone
 
-You can create the public DNS hosted zone to use as the external DNS domain-filter in the AWS Route 53 management console:
+You can create the public DNS hosted zone to use as the external DNS domain-filter. Complete the following steps in the AWS Route 53 management console:
 
 . In the Route 53 management console, click *Create hosted zone*.
 
@@ -111,15 +115,18 @@ dig +short test.user-dest-public.aws.kerberos.com
 192.168.1.1
 ----
 
-. To create a hosted cluster that sets the hostname for `LoadBalancer` and `Route` services, enter the following command, where `external-dns-domain` matches the public hosted zone that you created:
+. To create a hosted cluster that sets the hostname for `LoadBalancer` and `Route` services, enter the following command:
 
 +
 ----
-hcp create cluster aws --name=example --endpoint-access=PublicAndPrivate --external-dns-domain=service-provider-domain.com ...
+hcp create cluster aws --name=<hosted_cluster_name> --endpoint-access=PublicAndPrivate --external-dns-domain=<public_hosted_zone> ...
 ----
++
+Replace `public_hosted_zone` with the public hosted zone that you created.
 
 This example shows the resulting `services` block for the hosted cluster:
 
++
 [source,yaml]
 ----
   platform:
@@ -147,7 +154,7 @@ This example shows the resulting `services` block for the hosted cluster:
 
 When the Control Plane Operator creates the `Services` and `Routes`, it annotates them with the `external-dns.alpha.kubernetes.io/hostname` annotation. The value is the `hostname` field in the `servicePublishingStrategy` for that type. The Control Plane Operator uses that name for the service endpoints, and it expects that if the hostname is set, a mechanism exists, such as external-dns or otherwise, which can create the DNS records.
 
-Only public services can have service-level DNS indirection. Private services use the `hypershift.local` private zone, and it is not valid to set `hostname` for services that are private for a given endpoint access type. 
+You can configure service-level DNS indirection for public services only. You cannot set `hostname` for private services because they use the `hypershift.local` private zone.
 
 The following table notes when it is valid to set `hostname` for a service and endpoint combination:
 
@@ -178,29 +185,43 @@ The following table notes when it is valid to set `hostname` for a service and e
 [#deploy-cluster-cli-external-dns-aws]
 == Deploying a cluster by using the command line interface and external DNS
 
-You need to deploy the `hypershift` and `external-dns` Operators when the external public hosted zone already exists. Ensure that the `external-dns` Operator is running and that the internal flags point to the public hosted zone by entering the following commands:
+You need to deploy the HyperShift Operator and the External DNS Operator when the external public hosted zone already exists.
 
+. To access your management cluster, enter the following command:
+
++
+[source,bash]
 ----
 export KUBECONFIG=<path_to_management_cluster_kubeconfig>
-export AWS_CREDS=~/.aws/credentials
-export REGION=<region>
-
-hypershift create cluster aws \
-    --aws-creds ${AWS_CREDS} \
-    --instance-type m6i.xlarge \
-    --region ${REGION} \
-    --auto-repair \
-    --generate-ssh \
-    --name <cluster_name> \
-    --namespace clusters \
-    --base-domain service-consumer-domain.com \ <1>
-    --node-pool-replicas 2 \
-    --pull-secret ${HOME}/pull_secret.json \
-    --release-image quay.io/openshift-release-dev/ocp-release:4.13.0-ec.3-x86_64 \
-    --external-dns-domain=service-provider-domain.com \ <2>
-    --endpoint-access=PublicAndPrivate <3>
 ----
 
-<1> Points to the public hosted zone, `service-consumer-domain.com`, which is typically in an AWS account that the service consumer owns.
-<2> Points to the public external DNS hosted zone, `service-provider-domain.com`, which is typically in an AWS account that the service provider owns.
-<3> Set as `PublicAndPrivate.` The external DNS can be used with only `Public` or `PublicAndPrivate` configurations.
+. Verify that the External DNS Operator is running and the internal flags point to the public hosted zone by entering the following command:
+
++
+[source,bash]
+----
+hypershift create cluster aws \
+    --aws-creds <path_to_aws_credentials_file> \
+    --instance-type <instance_type> \ <1>
+    --region <region> \ <2>
+    --auto-repair \
+    --generate-ssh \
+    --name <hosted_cluster_name> \ <3>
+    --namespace clusters \
+    --base-domain service-consumer-domain.com \ <4>
+    --node-pool-replicas <node_replica_count> \ <5>
+    --pull-secret <path_to_your_pull_secret> \ <6>
+    --release-image quay.io/openshift-release-dev/ocp-release:<ocp_release_image> \ <7>
+    --external-dns-domain=<service_provider_domain> \ <8>
+    --endpoint-access=PublicAndPrivate <9>
+----
+
+<1> Specify the instance type, for example, `m6i.xlarge`.
+<2> Specify the AWS region, for example, `us-east-1`.
+<3> Specify your hosted cluster name, for example, `my-external-aws`.
+<4> Points to the public hosted zone that the service consumer owns, for example, `service-consumer-domain.com`.
+<5> Specify the node replica count, for example, `2`.
+<6> Specify the path to your pull secret file.
+<7> Specify the supported {ocp-short} version that you want to use, for example, `4.14.0-x86_64`.
+<8> Points to the public external DNS hosted zone that the service provider owns, for example, `service-provider-domain.com`.
+<9> Set as `PublicAndPrivate.` You can use external DNS with `Public` or `PublicAndPrivate` configurations only.
