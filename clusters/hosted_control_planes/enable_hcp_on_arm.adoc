@@ -1,60 +1,63 @@
 [#hosted-cluster-arm-aws]
 = Enabling hosted control planes on an ARM64 {ocp-short} cluster (Technology Preview)
 
-You can enable an ARM64-hosted control plane to operate with an {ocp-short} ARM64 data plane in a management cluster environment. This feature is available for hosted control planes on AWS only.
+You can enable hosted control planes based on an ARM64 architecture to operate with an {ocp-short} ARM64 data plane in a management cluster environment. This feature is available for hosted control planes on AWS only.
 
 [#prerequisites-hosted-arm]
 == Prerequisites
 
-You must have an {ocp-short} cluster that was installed on a 64-bit ARM infrastructure. For more information, see link:https://console.redhat.com/openshift/install/aws/arm[Create an OpenShift Cluster: AWS (ARM)].
+You must have an {ocp-short} cluster installed on a 64-bit ARM infrastructure. For more information, see link:https://console.redhat.com/openshift/install/aws/arm[Create an OpenShift Cluster: AWS (ARM)].
 
 [#hosted-cluster-arm64]
 == Running a hosted cluster on an ARM64 {ocp-short} cluster
 
 To run a hosted cluster on an ARM64 {ocp-short} cluster, complete the following steps:
 
-. Create a hosted cluster that overrides the default release image with a multi-architecture release image. 
+. Create a hosted cluster that overrides the default release image with a multi-architecture release image by entering the following command:
 
 +
-For example, through the hosted control plane command line interface, `hcp`, enter the following commands, and replace the cluster name, node pool replicas, base domain, pull secret, AWS credentials, and region with your information:
-
-+
+[source,bash]
 ----
-hcp create cluster aws \ 
---name $CLUSTER_NAME \
---node-pool-replicas=$NODEPOOL_REPLICAS \
---base-domain $BASE_DOMAIN \
---pull-secret $PULL_SECRET \
---aws-creds $AWS_CREDS \
---region $REGION \
---release-image quay.io/openshift-release-dev/ocp-release:4.13.0-rc.0-multi
+hcp create cluster aws \
+--name <hosted_cluster_name> \ <1>
+--node-pool-replicas <node_pool_replica_count> \ <2>
+--base-domain <basedomain> \ <3>
+--pull-secret <path_to_pull_secret> \ <4>
+--aws-creds <path_to_aws_credentials_file> \ <5>
+--region <region> \ <6>
+--release-image quay.io/openshift-release-dev/ocp-release:<ocp_release_image> <7>
 ----
 
-+
-This example adds a default `NodePool` object through the `--node-pool-replicas` flag.
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the node replica count, for example, `2`.
+<3> Specify your base domain, for example, `krnl.es`.
+<4> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<5> Specify the path to your AWS credentials file, for example, `/user/name/.aws/credentials`.
+<6> Specify the AWS region name, for example, `us-east-1`.
+<7> Specify the supported {ocp-short} version that you want to use, for example, `4.14.0-x86_64`.
 
-. Add a 64-bit x_86 `NodePool` object to the hosted cluster.
+. Add a 64-bit x_86 `NodePool` object to the hosted cluster by entering the following command:
 
 +
-For example, through the hosted control plane command line interface, `hcp`, enter the following commands, being careful to replace the cluster name, node pool name, and node pool replicas with your information:
-
-+
+[source,bash]
 ----
 hcp create nodepool aws \
---cluster-name $CLUSTER_NAME \
---name $NODEPOOL_NAME \
---node-count=$NODEPOOL_REPLICAS
+--cluster-name <hosted_cluster_name> \
+--name <node_pool_name> \
+--node-count <node_count>
 ----
 
 [#hosted-cluster-arm-node-pools]
 == Creating ARM NodePool objects on AWS hosted clusters
 
-You can schedule application workloads (`NodePool` objects) on 64-bit ARM and AMD64 from the same hosted control plane. To do so, you define the `arch` field in the `NodePool` specification to set the required processor architecture for the `NodePool` object. The valid values for the `arch` field are as follows:
+You can schedule application workloads, that is, `NodePool` objects on 64-bit ARM and AMD64 from the same hosted control plane.
+
+You can set the following valid architecture values for the `arch` field in the `NodePool` object:
 
 * `arm64`
 * `amd64`
 
-If you do not specify a value for the `arch` field, the `amd64` value is used by default.
+The default value is `amd64`.
 
 To create an ARM `NodePool` object on a hosted cluster on AWS, complete the following steps:
 
@@ -76,15 +79,15 @@ error: the image is a manifest list and contains multiple images - use --filter-
   linux/arm64   sha256:1d93a6beccc83e2a4c56ecfc37e921fe73d8964247c1a3ec34c4d66f175d9b3d
 ----
 
-. Render the `NodePool` object by entering the following command on the hosted control plane command line interface, `hcp`:
+. Render the `NodePool` object to create a YAML file that specifies the CPU architecture by entering the following command:
 
 +
 ----
-hcp create nodepool aws --cluster-name $CLUSTER_NAME --name $ARM64_NODEPOOL_NAME --node-count=$NODEPOOL_REPLICAS --render > arm_nodepool_spec.yml
+hcp create nodepool aws --cluster-name <hosted_cluster_name> --name <arm64_node_pool_name> --node-count=<node_pool_replica_count> --render > arm_nodepool_spec.yml
 ----
 
 +
-The command creates a YAML file that specifies the CPU architecture for the `NodePool` object, as shown in the following example:
+See the following example configuration for the `NodePool` object:
 
 +
 [source,yaml]
@@ -121,11 +124,11 @@ status:
   replicas: 0
 ----
 
-. Modify the `arch` and `instanceType` values in the YAML file by entering the following command. In the command, the ARM instance type is `m6g.large`, but any ARM instance type works:
+. Modify the `arch` and `instanceType` values in the YAML file by entering the following command:
 
 +
 ----
-sed 's/arch: amd64/arch: arm64/g; s/instanceType: m5.large/instanceType: m6g.large/g' arm_nodepool_spec.yml > temp.yml && mv temp.yml arm_nodepool_spec.yml
+sed 's/arch: amd64/arch: arm64/g; s/instanceType: <enter_instance_type>/instanceType: <enter_instance_type>/g' arm_nodepool_spec.yml > temp.yml && mv temp.yml arm_nodepool_spec.yml
 ----
 
 . Apply the rendered YAML file to the hosted cluster by entering the following command:
