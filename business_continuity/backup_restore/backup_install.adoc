@@ -3,29 +3,6 @@
 
 The cluster backup and restore operator is not installed automatically. Continue reading to learn how to install and enable the operator.
 
-*Notes:*
-
-- Custom resource definitons are cluster-scoped, so you cannot have two different versions of OADP or Velero installed on the same cluster. If you have two different versions, one version runs with the wrong custom resource definitions.
-
-- If you did not enable the cluster backup and restore operator on the `MultiClusterHub` resource, the OADP Operator and Velero custom resource definition are still installed on the hub cluster. The `MultiClusterHub` resource reconciles the OADP and Velero custom resource definitions with the version that is used by the OADP Operator, which is installed when you enabled the cluster backup and restore operator. As a result, you cannot install another version of OADP or Velero on the hub cluster, unless your version uses the same custom resource definitions as the OADP Operator that is installed when you enabled the backup and restore operator.
-
-- The backup component works with the OADP Operator that is installed in the component namespace. 
-
-- Before you can use the backup and restore operator, you must set up hub clusters. 
-
-*Important:*
-
-If you manually install the OADP operator, the custom resource definition version of the OADP operator and Velereo must exactly match. If these versions do not exactly match one another, you encounter problems. If you have previously installed and used the OADP Operator on the hub cluster in a namespace different from the backup component namespace, uninstall this version.
-
-Velero is installed with the OADP Operator on the {product-title} hub cluster. It is used to backup and restore {product-title-short} hub cluster resources. 
-
-For a list of supported storage providers for Velero, see link:https://docs.openshift.com/container-platform/4.14/backup_and_restore/application_backup_and_restore/installing/about-installing-oadp.html[About installing OADP].
-
-To install and enable the operator, you must complete the following tasks:
-
-* <<setting-up-hub-clusters-for-backup-and-restore-operators,Setting up hub clusters for backup and restore operators>>
-* <<enabling-backup-restore,Enabling the backup and restore operator>>
-
 [#setting-up-hub-clusters-for-backup-and-restore-operators]
 == Setting up hub clusters for backup and restore operators 
 
@@ -45,13 +22,45 @@ To create a storage location secret, complete the following steps:
 To enable backup operator for your active and passive hub clusters, complete the following steps:
 
 . From your {ocp} cluster, install the {product-title} operator version {product-version}.x. The `MultiClusterHub` resource is automatically created when you install {product-title-short}, and displays the following status: `Running`.
-. Manually install the cluster backup and restore operator. Enable the cluster backup and restore operator (`cluster-backup`). Edit the `MultiClusterHub` resource by setting the `cluster-backup` parameter to `true`. This installs the OADP operator in the same namespace with the backup component.
+. Manually install the cluster backup and restore operator. Enable the cluster backup and restore operator (`cluster-backup`). Edit the `MultiClusterHub` resource by setting the `cluster-backup` parameter to `true`. If this hub cluster does not have the AWS Security Token Service (STS) option enabled, the OADP operator is also installed in the same namespace with the backup component. For hub clusters where the STS option is enabled, you must manually install the OADP operator. 
 . Before you run the restore operation on the passive hub cluster, complete the following steps:
 .. Manually configure the hub cluster and install all operators on the active hub cluster and in the same namespace as the active hub cluster. 
 .. Verify that other operators, like: {aap-short}, {ocp} GitOps, or certificate manager, are installed. By verifying, you ensure that the new hub cluster is configured the same way as the initial hub cluster.
 .. Ensure that the passive hub cluster uses the same namespace name as the initial hub cluster when you install the backup and restore operator and any operators that are configured on the previous hub cluster. 
 . Create the `DataProtectionApplication resource` on the passive hub cluster. 
 . Connect the passive hub cluster to the same storage location where the initial hub cluster backed up the data.
+
+[#installing-the-oadp-operator]
+=== Installing the OADP operator 
+
+For hub clusters where you enabled the AWS Security Token Service (STS) option, the OADP operator is not installed when you installed the cluster backup and restore operator on the hub cluster. To pass the STS `role_arn` to the OADP operator, you must manually install the OADP operator. 
+
+For hub clusters where you did not enable the STS option, the OADP operator is automatically installed when you installed the cluster backup and restore operator on the hub cluster. 
+
+When you enable the backup option on the `MultiClusterHub`, the backup option remains in the `Pending` state until you install the OADP operator in the `open-cluster-management-backup` namespace. If you use the chart, the OADP operator is automatically installed. If you use the STS option, you must manually install the OADP operator. 
+
+To learn more about installing the OADP operator with the STS option, see link:https://docs.openshift.com/rosa/rosa_backing_up_and_restoring_applications/backing-up-applications.html[Installing OADP on ROSA with STS]. 
+
+*Notes:*
+
+- Custom resource definitons are cluster-scoped, so you cannot have two different versions of OADP or Velero installed on the same cluster. If you have two different versions, one version runs with the wrong custom resource definitions.
+
+- If you did not enable the cluster backup and restore operator on the `MultiClusterHub` resource, the OADP Operator and Velero custom resource definition are still installed on the hub cluster. The `MultiClusterHub` resource reconciles the OADP and Velero custom resource definitions with the version that is used by the OADP Operator, which is installed when you enabled the cluster backup and restore operator. As a result, you cannot install another version of OADP or Velero on the hub cluster, unless your version uses the same custom resource definitions as the OADP Operator that is installed when you enabled the backup and restore operator.
+
+- The backup component works with the OADP Operator that is installed in the component namespace. 
+
+*Important:*
+
+If you manually install the OADP operator, the custom resource definition version of the OADP operator and Velereo must exactly match. If these versions do not exactly match one another, you encounter problems. 
+
+Velero is installed with the OADP Operator on the {product-title} hub cluster. It is used to backup and restore {product-title-short} hub cluster resources. 
+
+For a list of supported storage providers for Velero, see link:https://docs.openshift.com/container-platform/4.14/backup_and_restore/application_backup_and_restore/installing/about-installing-oadp.html[About installing OADP].
+
+To install and enable the operator, you must complete the following tasks:
+
+* <<setting-up-hub-clusters-for-backup-and-restore-operators,Setting up hub clusters for backup and restore operators>>
+* <<enabling-backup-restore,Enabling the backup and restore operator>>
 
 [#creating-a-dataprotectionapplication-resource]
 === Creating a `DataProtectionApplication` resource 
