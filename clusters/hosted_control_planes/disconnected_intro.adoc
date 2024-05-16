@@ -14,16 +14,16 @@ The following diagram illustrates an example architecture of a disconnected envi
 
 image:../images/489_RHACM_HyperShift_on_bare_metal_1223.png[Disconnected architecture diagram]
 
-. You configure infrastructure services, including the registry certificate deployment with TLS support, web server, and DNS, to ensure that the disconnected deployment works.
-. You create a config map in the `openshift-config` namespace. In this example, the config map is named `registry-config`. The content of the config map is the Registry CA certificate. The data field of the config map must contain the following key/value: 
+. Configure infrastructure services, including the registry certificate deployment with TLS support, web server, and DNS, to ensure that the disconnected deployment works.
+. Create a config map in the `openshift-config` namespace. In this example, the config map is named `registry-config`. The content of the config map is the Registry CA certificate. The data field of the config map must contain the following key/value:
 
-* Key: `<registry_dns_domain_name>..<port>`
+* Key: `<registry_dns_domain_name>..<port>`, for example, `registry.hypershiftdomain.lab..5000:`. Ensure that you place `..` after the registry DNS domain name when you specify a port.
 * Value: The certificate content
 
 +
 For more information about creating a config map, see _Configuring TLS certificates for an IPv4 network_.
-. You modify the `images.config.openshift.io` custom resource (CR) specification and adds a new field named `additionalTrustedCA` with a value of `name: registry-config`.
-. You create a config map that contains two data fields. One field contains the `registries.conf` file in `RAW` format, and the other field contains the Registry CA and is named `ca-bundle.crt`. The config map belongs to the `multicluster-engine` namespace, and the config map name is referenced in other objects. For an example of a config map, see the following sample configuration:
+. Modify the `images.config.openshift.io` custom resource (CR) specification and adds a new field named `additionalTrustedCA` with a value of `name: registry-config`.
+. Create a config map that contains two data fields. One field contains the `registries.conf` file in `RAW` format, and the other field contains the Registry CA and is named `ca-bundle.crt`. The config map belongs to the `multicluster-engine` namespace, and the config map name is referenced in other objects. For an example of a config map, see the following sample configuration:
 
 +
 ----
@@ -61,7 +61,7 @@ data:
 ----
 
 . In the {mce-short} namespace, you create the `multiclusterengine` CR, which enables both the Agent and `hypershift-addon` add-ons. The {mce-short} namespace must contain the config maps to modify behavior in a disconnected deployment. The namespace also contains the `multicluster-engine`, `assisted-service`, and `hypershift-addon-manager` pods.
-. You create the objects that are necessary to deploy the hosted cluster, which include the following components:
+. Create the following objects that are necessary to deploy the hosted cluster:
 
 ** Secrets: Secrets contain the pull secret, SSH key, and etcd encryption key.
 ** Config map: The config map contains the CA certificate of the private registry.
@@ -77,13 +77,13 @@ data:
 . At this point, you wait for the deployment process to be completed.
 
 [#configure-hosted-disconnected-networks-prereqs]
-== Prerequisites 
+== Prerequisites
 
 To configure hosted control planes in a disconnected environment, you must meet the following prerequisites:
 
 - CPU: The number of CPUs provided determines how many hosted clusters can run concurrently. In general, use 16 CPUs for each node for 3 nodes. For minimal development, you can use 12 CPUs for each node for 3 nodes.
 - Memory: The amount of RAM affects how many hosted clusters can be hosted. Use 48 GB of RAM for each node. For minimal development, 18 GB of RAM might be sufficient.
-- Storage: Use SSD storage for {mce-short}. 
+- Storage: Use SSD storage for {mce-short}.
 * Management cluster: 250 GB.
 * Registry: The storage needed depends on the number of releases, operators, and images that are hosted. An acceptable number might be 500 GB, preferably separated from the disk that hosts the hosted cluster.
 * Web server: The storage needed depends on the number of ISOs and images that are hosted. An acceptable number might be 500 GB.
@@ -92,7 +92,34 @@ To configure hosted control planes in a disconnected environment, you must meet 
 * Management cluster: 500 GB
 * Web server: 2 TB
 
+[#configure-hosted-disconnected-digest-image]
+== Extracting the {ocp-short} release image digest
+
+You can extract the {ocp-short} release image digest by using the tagged image. Complete the following steps:
+
+. Obtain the image digest by running the following command:
+
++
+[source,bash]
+----
+oc adm release info <tagged_openshift_release_image> | grep "Pull From"
+----
++
+Replace `<tagged_openshift_release_image>` with the tagged image for the supported {ocp-short} version, for example, `quay.io/openshift-release-dev/ocp-release:4.14.0-x8_64`.
+
++
+See the following example output:
+
++
+----
+Pull From: quay.io/openshift-release-dev/ocp-release@sha256:69d1292f64a2b67227c5592c1a7d499c7d00376e498634ff8e1946bc9ccdddfe
+----
++
+To know more about the image tag and digest, see _Referencing images in imagestreams_ in the {ocp-short} documentation.
+
 [#disconnected-intro-additional-resources]
 === Additional resources
 
 * xref:../hosted_control_planes/ipv4_tls_certs.adoc#ipv4-tls-certs[Configuring TLS certificates for an IPv4 network]
+
+* link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/images/managing-images#images-referencing-images-imagestreams_tagging-images[Referencing images in imagestreams]
