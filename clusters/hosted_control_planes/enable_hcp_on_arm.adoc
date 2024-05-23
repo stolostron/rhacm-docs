@@ -1,55 +1,66 @@
 [#hosted-cluster-arm-aws]
 = Enabling hosted control planes on an ARM64 {ocp-short} cluster (Technology Preview)
 
-You can enable an ARM64-hosted control plane to operate with an {ocp-short} ARM64 data plane in a management cluster environment. This feature is available for hosted control planes on AWS only.
+You can enable an ARM64 hosted control plane to operate with an {ocp-short} ARM64 data plane in a management cluster.
 
 [#prerequisites-hosted-arm]
 == Prerequisites
 
-You must have an {ocp-short} cluster that was installed on a 64-bit ARM infrastructure. For more information, see link:https://console.redhat.com/openshift/install/aws/arm[Create an OpenShift Cluster: AWS (ARM)].
+* You must have an {ocp-short} cluster with a 64-bit ARM infrastructure that is installed on Amazon Web Serivces (AWS). For more information, see link:https://console.redhat.com/openshift/install/aws/arm[Create an OpenShift Cluster: AWS (ARM)].
+* You must create an AWS Identity and Access Management (IAM) role and AWS Security Token Service (STS) credentials. See xref:../../clusters/hosted_control_planes/create_role_sts_aws.adoc#create-role-sts-aws[Creating an AWS IAM role and STS credentials].
 
 [#hosted-cluster-arm64]
 == Running a hosted cluster on an ARM64 {ocp-short} cluster
 
-To run a hosted cluster on an ARM64 {ocp-short} cluster, complete the following steps:
+You can run a hosted cluster on an ARM64 {ocp-short} cluster by overriding the default release image with a multi-architecture release image. Complete the following steps:
 
-. Create a hosted cluster that overrides the default release image with a multi-architecture release image. 
-
-+
-For example, through the hosted control plane command line interface, `hcp`, enter the following commands, and replace the cluster name, node pool replicas, base domain, pull secret, AWS credentials, and region with your information:
+. Create a hosted cluster by running the following command:
 
 +
+[source,bash]
 ----
-hcp create cluster aws \ 
---name $CLUSTER_NAME \
---node-pool-replicas=$NODEPOOL_REPLICAS \
---base-domain $BASE_DOMAIN \
---pull-secret $PULL_SECRET \
---aws-creds $AWS_CREDS \
---region $REGION \
---release-image quay.io/openshift-release-dev/ocp-release:4.13.0-rc.0-multi
+hcp create cluster aws \
+--name <hosted_cluster_name> \ <1>
+--node-pool-replicas <node_pool_replica_count> \ <2>
+--base-domain <basedomain> \ <3>
+--pull-secret <path_to_pull_secret> \ <4>
+--sts-creds <path_to_sts_credential_file> \ <5>
+--region <region> \ <6>
+--release-image quay.io/openshift-release-dev/ocp-release:<ocp_release_image> <7>
+--role-arn <role_name> <8>
 ----
 
 +
-This example adds a default `NodePool` object through the `--node-pool-replicas` flag.
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the node pool replica count, for example, `3`.
+<3> Specify your base domain, for example, `example.com`.
+<4> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<5> Specify the path to your AWS STS credentials file, for example, `/home/user/sts-creds/sts-creds.json`.
+<6> Specify the AWS region name, for example, `us-east-1`.
+<7> Specify the supported {ocp-short} version that you want to use, for example, `4.14.0-x86_64`. If you are using a disconnected environment, replace `<ocp_release_image>` with the digest image. To extract the {ocp-short} release image digest, see _Extracting the {ocp-short} release image digest_.
+<8> Specify the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`.
 
-. Add a 64-bit x_86 `NodePool` object to the hosted cluster.
+. Add a 64-bit x_86 `NodePool` object to the hosted cluster by running the following command:
 
 +
-For example, through the hosted control plane command line interface, `hcp`, enter the following commands, being careful to replace the cluster name, node pool name, and node pool replicas with your information:
-
-+
+[source,bash]
 ----
 hcp create nodepool aws \
---cluster-name $CLUSTER_NAME \
---name $NODEPOOL_NAME \
---node-count=$NODEPOOL_REPLICAS
+--cluster-name <hosted_cluster_name> \ <1>
+--name <nodepool_name> \ <2>
+--node-count <node_pool_replica_count> <3>
 ----
+
++
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the node pool name.
+<3> Specify the node pool replica count, for example, `3`.
+
 
 [#hosted-cluster-arm-node-pools]
 == Creating ARM NodePool objects on AWS hosted clusters
 
-You can schedule application workloads (`NodePool` objects) on 64-bit ARM and AMD64 from the same hosted control plane. To do so, you define the `arch` field in the `NodePool` specification to set the required processor architecture for the `NodePool` object. The valid values for the `arch` field are as follows:
+You can schedule application workloads (`NodePool` objects) on 64-bit ARM and AMD64 from the same hosted control plane. You can define the `arch` field in the `NodePool` specification to set the required processor architecture for the `NodePool` object. The valid values for the `arch` field are as follows:
 
 * `arm64`
 * `amd64`
@@ -58,30 +69,23 @@ If you do not specify a value for the `arch` field, the `amd64` value is used by
 
 To create an ARM `NodePool` object on a hosted cluster on AWS, complete the following steps:
 
-. Ensure that you have a multi-architecture image for the `HostedCluster` custom resource to use. You can access multi-architecture nightly images at link:https://multi.ocp.releases.ci.openshift.org/[https://multi.ocp.releases.ci.openshift.org/].
+. To render the `NodePool` object configuration in a YAML format, run the following command:
 
 +
-A multi-architecture nightly image resembles the following example:
+[source,bash]
+----
+hcp create nodepool aws \
+cluster-name <hosted_cluster_name> \ <1>
+--name <arm64_node_pool_name> \ <2>
+--node-count <node_pool_replica_count> \ <3>
+--render > arm64-nodepool.yml <4>
+----
 
 +
-----
-% oc image info quay.io/openshift-release-dev/ocp-release-nightly@sha256:9b992c71f77501678c091e3dc77c7be066816562efe3d352be18128b8e8fce94 -a ~/pull-secrets.json
-
-error: the image is a manifest list and contains multiple images - use --filter-by-os to select from:
-
-  OS            DIGEST
-  linux/amd64   sha256:c9dc4d07788ebc384a3d399a0e17f80b62a282b2513062a13ea702a811794a60
-  linux/ppc64le sha256:c59c99d6ff1fe7b85790e24166cfc448a3c2ac3ef3422fce3c7259e48d2c9aab
-  linux/s390x   sha256:07fcd16d5bee95196479b1e6b5b3b8064dd5359dac75e3d81f0bd4be6b8fe208
-  linux/arm64   sha256:1d93a6beccc83e2a4c56ecfc37e921fe73d8964247c1a3ec34c4d66f175d9b3d
-----
-
-. Render the `NodePool` object by entering the following command on the hosted control plane command line interface, `hcp`:
-
-+
-----
-hcp create nodepool aws --cluster-name $CLUSTER_NAME --name $ARM64_NODEPOOL_NAME --node-count=$NODEPOOL_REPLICAS --render > arm_nodepool_spec.yml
-----
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify the node pool name.
+<3> Specify the node pool replica count, for example, `3`.
+<4> The `NodePool` object configuration is saved in the `arm64-nodepool.yml` file.
 
 +
 The command creates a YAML file that specifies the CPU architecture for the `NodePool` object, as shown in the following example:

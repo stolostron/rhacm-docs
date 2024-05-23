@@ -1,7 +1,7 @@
 [#deploying-aws-private-clusters]
 = Deploying a private hosted cluster on AWS (Technology Preview)
 
-After you set up the hosted control planes command line interface, `hcp`, and enable the `local-cluster` as the hosting cluster, you can deploy a hosted cluster or a private hosted cluster on AWS. To deploy a public hosted cluster on AWS, see _Deploying a hosted cluster on AWS_.
+After you set up the hosted control planes command line interface, `hcp`, and enable the `local-cluster` as the hosting cluster, you can deploy a hosted cluster or a private hosted cluster on Amazon Web Services (AWS). To deploy a public hosted cluster on AWS, see _Deploying a hosted cluster on AWS_.
 
 By default, hosted control plane guest clusters are publicly accessible through public DNS and the default router for the management cluster.
 
@@ -17,70 +17,28 @@ For private clusters on AWS, all communication with the guest cluster occurs ove
 [#prerequisites-aws-private-clusters]
 == Prerequisites
 
-To enable private hosted clusters for AWS, you must first enable AWS PrivateLink. For more information, see xref:../../clusters/hosted_control_planes/enable_aws_private_link.adoc#hosted-enable-private-link[Enabling AWS PrivateLink].
+* To enable private hosted clusters for AWS, you must first enable AWS PrivateLink. For more information, see xref:../../clusters/hosted_control_planes/enable_aws_private_link.adoc#hosted-enable-private-link[Enabling AWS PrivateLink].
+
+* You must create an AWS Identity and Access Management (IAM) role and AWS Security Token Service (STS) credentials. See xref:../../clusters/hosted_control_planes/create_role_sts_aws.adoc#create-role-sts-aws[Creating an AWS IAM role and STS credentials].
 
 [#create-aws-private-hosted-cluster]
 == Creating a private hosted cluster on AWS
 
-. Create the private cluster IAM policy document by entering the following command:
-+
-----
-cat << EOF >> policy.json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ec2:CreateVpcEndpointServiceConfiguration",
-        "ec2:DescribeVpcEndpointServiceConfigurations",
-        "ec2:DeleteVpcEndpointServiceConfigurations",
-        "ec2:DescribeVpcEndpointServicePermissions",
-        "ec2:ModifyVpcEndpointServicePermissions",
-        "ec2:CreateTags",
-        "elasticloadbalancing:DescribeLoadBalancers"
-      ],
-      "Resource": "\*"
-    }
-  ]
-}
-----
-
-. Create the IAM policy in AWS by entering the following command:
-+
-----
-aws iam create-policy --policy-name=hypershift-operator-policy --policy-document=file://policy.json
-----
-
-. Create a `hypershift-operator` IAM user by entering the following command:
-+
-----
-aws iam create-user --user-name=hypershift-operator
-----
-
-. Attach the policy to the `hypershift-operator` user by entering this command, replacing `<policy-arn>` with the ARN of the policy that you created:
-+
-----
-aws iam attach-user-policy --user-name=hypershift-operator --policy-arn=<policy-arn>
-----
-
-. Create an IAM access key for the user by entering this command:
-+
-----
-aws iam create-access-key --user-name=hypershift-operator
-----
+To create a private hosted cluster on AWS, complete the following steps:
 
 . Create a private hosted cluster by entering the following command, replacing variables with your values as needed:
 +
+[source,bash]
 ----
 hcp create cluster aws \
---name <hosted-cluster-name> \ <1>
---node-pool-replicas=<node-pool-replica-count> \ <2>
+--name <hosted_cluster_name> \ <1>
+--node-pool-replicas=<node_pool_replica_count> \ <2>
 --base-domain <basedomain> \ <3>
---pull-secret <path-to-pull-secret> \ <4>
---aws-creds <path-to-aws-credentials> \ <5>
+--pull-secret <path_to_pull_secret> \ <4>
+--sts-creds <path_to_sts_credential_file> \ <5>
 --region <region> \ <6>
 --endpoint-access Private <7>
+--role-arn <role_name> <8>
 ----
 
 +
@@ -88,9 +46,10 @@ hcp create cluster aws \
 <2> Specify the node pool replica count, for example, `3`.
 <3> Specify your base domain, for example, `example.com`.
 <4> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
-<5> Specify the path to your AWS credentials file, for example, `/user/name/.aws/credentials`.
+<5> Specify the path to your AWS STS credentials file, for example, `/home/user/sts-creds/sts-creds.json`.
 <6> Specify the AWS region name, for example, `us-east-1`.
 <7> Defines whether a cluster is public or private.
+<8> Specify the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`.
 
 +
 The API endpoints for the cluster are accessible through a private DNS zone:
@@ -103,56 +62,62 @@ The API endpoints for the cluster are accessible through a private DNS zone:
 
 You can access a private cluster by using a bastion instance.
 
-//lahinson - july 2023 - update hypershift cli command here
 . Start a bastion instance by entering the following command:
 +
+[source,bash]
 ----
-hypershift create bastion aws --aws-creds=<aws-creds> --infra-id=<infra-id> --region=<region> --ssh-key-file=<ssh-key>
+hypershift create bastion aws \
+--sts-creds <path_to_sts_credential_file> \ <1>
+--role-arn <role_name> \ <2>
+--infra-id <infra_id> \ <3>
+--region <region> \ <4>
+--ssh-key-file <ssh_key> <5>
 ----
 
-+
-Replace `<ssh-key>` with the SSH public key file to connect to the bastion. The default location for the SSH public key file is `~/.ssh/id_rsa.pub`. Replace `<aws-creds>` with the path to your AWS credentials file, for example, `/user/name/.aws/credentials`.
-
-*Note:* The `hypershift` CLI is not available to download. Use the following commands to extract it by using the HyperShift Operator pod present in the `hypershift` namespace. Replace `<hypershift-operator-pod-name>` with your HyperShift Operator pod name.
-
-----
-oc project hypershift
-oc rsync <hypershift-operator-pod-name>:/usr/bin/hypershift-no-cgo .
-mv hypershift-no-cgo hypershift
-----
+<1> Specify the path to your AWS STS credentials file, for example, `/home/user/sts-creds/sts-creds.json`.
+<2> Specify the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`.
+<3> Specify the infrastructure name for your hosted cluster.
+<4> Specify the AWS region name, for example, `us-east-1`.
+<5> Specify the SSH public key file to connect to the bastion. The default location for the SSH public key file is `~/.ssh/id_rsa.pub`.
 
 . Find the private IPs of nodes in the cluster node pool by entering the following command:
 +
+[source,bash]
 ----
-aws ec2 describe-instances --filter="Name=tag:kubernetes.io/cluster/<infra-id>,Values=owned" | jq '.Reservations[] | .Instances[] | select(.PublicDnsName=="") | .PrivateIpAddress'
+aws ec2 describe-instances --filter="Name=tag:kubernetes.io/cluster/<infra_id>,Values=owned" | jq '.Reservations[] | .Instances[] | select(.PublicDnsName=="") | .PrivateIpAddress'
 ----
 
-. Create a `kubeconfig` file for the cluster that can be copied to a node by entering the following command:
+. Create a `kubeconfig` file for the hosted cluster that you can copy to a node by entering the following command:
 +
+[source,bash]
 ----
-hcp create kubeconfig > <cluster-kubeconfig>
+hcp create kubeconfig > <hosted_cluster_kubeconfig>
 ----
 
 . Enter the following command to SSH into one of the nodes through the bastion by using the IP that is printed from the `create bastion` command:
 +
+[source,bash]
 ----
-ssh -o ProxyCommand="ssh ec2-user@<bastion-ip> -W %h:%p" core@<node-ip>
+ssh -o ProxyCommand="ssh ec2-user@<bastion_ip> -W %h:%p" core@<node_ip>
 ----
 
 . From the SSH shell, copy the `kubeconfig` file contents to a file on the node by entering the following command:
 +
+[source,bash]
 ----
-mv <path-to-kubeconfig-file> <new-file-name>
+mv <path_to_kubeconfig_file> <new_file_name>
 ----
 
 . Export the kubeconfig file by entering the following command:
 +
+[source,bash]
 ----
-export KUBECONFIG=<path-to-kubeconfig-file>
+export KUBECONFIG=<path_to_kubeconfig_file>
 ----
 
 . Observe the guest cluster status by entering the following command:
 +
+[source,bash]
 ----
 oc get clusteroperators clusterversion
 ----
