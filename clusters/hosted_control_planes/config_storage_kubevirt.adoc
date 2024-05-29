@@ -1,12 +1,12 @@
 [#configuring-storage-kubevirt]
 = Configuring storage for hosted control planes on OpenShift Virtualization
 
-If no advanced configuration is provided, the default storage class is used for the KubeVirt virtual machine (VM) images, the KubeVirt CSI mapping, and the etcd volumes.
+If no advanced configuration is provided, the default storage class is used for the KubeVirt virtual machine (VM) images, the KubeVirt Container Storage Interface (CSI) mapping, and the etcd volumes.
 
 [#storageclass-mapping]
 == Mapping KubeVirt CSI storage classes
 
-KubeVirt CSI permits any infrastructure storage class with the `ReadWriteMany` access mode to be exposed to the hosted cluster. You can configure this mapping of infrastructure cluster storage class to hosted cluster storage class during cluster creation by using the `--infra-storage-class-mapping` argument.
+KubeVirt CSI permits any infrastructure storage class with the `ReadWriteMany` (RWX) access mode to be exposed to the hosted cluster. You can configure this mapping of infrastructure cluster storage class to hosted cluster storage class during cluster creation by using the `--infra-storage-class-mapping` argument.
 
 To map infrastructure storage classes to hosted storage classes, see the following example:
 
@@ -27,32 +27,32 @@ hcp create cluster kubevirt \
 <5> Specify a value for CPU, for example, `2`.
 <6> Replace `<storage-class>` with the infrastructure storage class name and `<hosted-storage-class>` with the hosted cluster storage class name. You can use the `--infra-storage-class-mapping` argument multiple times within the `create` command.
 
-The following table shows which infrastructure CSI volume and access mode capabilities can be mapped to KubeVirt CSI:
+After you create the hosted cluster, the infrastructure storage class is visible within the hosted cluster. When you create a PVC within the hosted cluster that uses one of those storage classes, KubeVirt CSI provisions that volume by using the infrastructure storage class mapping that you configured during cluster creation.
 
-.Volume mode and access mode
+*Note:* KubeVirt CSI supports mapping only an infrastructure storage class that is capable of RWX access.
+
+The following table shows how volume and access mode capabilities map to KubeVirt CSI storage classes:
+
+.Mapping KubeVirt CSI storage classes to access and volume modes
 |===
-| Infrastructure CSI capability | Guest CSI capability | VM Live migration support | Notes
+| Infrastructure CSI capability | Guest CSI capability | VM live migration support | Notes
 
-| RWX: Block or file system
-| RWO Block or File system RWX Block only
+| RWX: `Block` or `Filesystem`
+| `ReadWriteOnce` (RWO) `Block` or `Filesystem` RWX `Block` only
 | Supported
-| Infra block mode is preferred because infra file system volume mode results in degraded guest block mode performance. Guest support for RWX block volume mode is supported only when the guest cluster is {ocp-short} 4.16 or later.
+| `Block` mode is preferred because `Filesystem` volume mode results in degraded guest `Block` mode performance. Guest support for RWX `Block` volume mode is supported only when the guest cluster is {ocp-short} 4.16 or later.
 
-| RWO Block
-| RWO Block or File system
+| RWO `Block` storage
+| RWO `Block` storage or `Filesystem`
 | Not supported
 | Lack of live migration support affects the ability to update the underlying infrastructure cluster that hosts the KubeVirt VMs.
 
-| RWO Block
-| RWO Block or File system
+| RWO `Block`
+| RWO `Block` or `Filesystem`
 | Not supported
-| Lack of live migration support affects the ability to update the underlying infrastructure cluster that hosts the KubeVirt VMs. The Infra File system volume mode results in degraded guest block mode performance.
+| Lack of live migration support affects the ability to update the underlying infrastructure cluster that hosts the KubeVirt VMs. The `Filesystem` volume mode results in degraded guest `Block` mode performance.
 
 |===
-
-After you create the hosted cluster, the infrastructure storage class is visible within the hosted cluster. When you create a PVC within the hosted cluster that uses one of those storage classes, KubeVirt CSI provisions that volume by using the infrastructure storage class mapping that you configured during cluster creation.
-
-*Note:* KubeVirt CSI supports mapping only a infrastructure storage class that is capable of `ReadWriteMany` (RWX) access.
 
 [#kubevirt-vm-root-volume-config]
 == Configuring KubeVirt VM root volume
