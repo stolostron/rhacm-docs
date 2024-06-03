@@ -47,6 +47,90 @@ virt-install \
 ----
 
 [#hosted-bare-metal-adding-agents-ibmz-zvm]
+== Adding agents for IBM Z with LPAR
+
+{ocp-short} 4.16 allows you to add the Logical Partition (LPAR) on IBM Z or IBM LinuxONE , as a **Compute node** in the a hosted control plane.
+
+=== Prerequisite:
+
+* Red Hat Enterprise Linux CoreOS must be installed on the LPAR.
+
+=== Procedure
+
+. Create a parameter file for the agents.
+
+Create a .txt file with the following entries and save it as a .parm file. 
++
+Sample parameter file:
+
+[source,yaml]
+----
+rd.neednet=1 coreos.live.rootfs_url=<rootfs_url> ip=<IP_guest_vm>::<nameserver>:255.255.255.0::<network_adaptor>:none nameserver=<nameserver> ai.ip_cfg_override=1 rd.znet=qeth,<network_adaptor_range>,layer2=1 rd.<disk_type>=<storage> random.trust_cpu=on rd.luks.options=discard ignition.firstboot ignition.platform.id=metal console=tty1 console=ttyS1,115200n8 coreos.inst.persistent-kargs=console=tty1 console=ttyS1,115200n8
+----
+
+The .ins file is a special file that is present on the FTP server and can be accessed from the HMC system.
+
+This file contains details such as mapping of the location of installation data on the disk or FTP server, the memory locations where the data is to be copied.
+
+**Note**: In {ocp-short} 4.16, the .ins file and initrd.img.addrsize are not automatically generated as part of boot-artifacts from the installer. You must generate these files manually.
+
+. Generate .ins file and initrd.img.addrsize:
+.. Run the following commands to get the size of the kernel and initrd. 
++
+[source,yaml]
+----
+KERNEL_IMG_PATH='./kernel.img'
+INITRD_IMG_PATH='./initrd.img'
+CMDLINE_PATH='./generic.prm'
+kernel_size=$(stat -c%s $KERNEL_IMG_PATH )
+initrd_size=$(stat -c%s $INITRD_IMG_PATH)
+----
+.. Round the kernel size up to the next MiB boundary. This will be the starting address of initrd.img.
++
+[source,yaml]
+----
+offset=$(( (kernel_size + 1048575) / 1048576 * 1048576 ))
+----
+.. Create the kernel binary patch file holding the initrd address and size.
++
+[source,yaml]
+----
+INITRD_IMG_NAME=$(echo $INITRD_IMG_PATH | rev | cut -d '/' -f 1 | rev)
+# the kernel always sits at offset 0x00
+KERNEL_OFFSET=0x00000000
+KERNEL_CMDLINE_OFFSET=0x00010480
+INITRD_ADDR_SIZE_OFFSET=0x00010408
+OFFSET_HEX=$(printf '0x%08x\n' $offset)
+
+
+# Convert address and size to binary format
+printf "$(printf '%016x\n' $offset)" | xxd -r -p > temp_address.bin
+printf "$(printf '%016x\n' $initrd_size)" | xxd -r -p > temp_size.bin
+
+# Concatenate address and size binaries
+cat temp_address.bin temp_size.bin > "$INITRD_IMG_NAME.addrsize"
+
+# Clean up temporary files
+rm -rf temp_address.bin temp_size.bin
+----
+.. Create the .ins file based on the paths of these files (kernel.img, initrd.img , initrd.img.addrsize, cmdline) and the memory locations where the data is to be copied.
++
+[source,yaml]
+----
+# Create generic.ins file
+cat > generic.ins <<EOF
+$KERNEL_IMG_PATH $KERNEL_OFFSET
+$INITRD_IMG_PATH $OFFSET_HEX
+$INITRD_IMG_NAME.addrsize $INITRD_ADDR_SIZE_OFFSET
+$CMDLINE_PATH $KERNEL_CMDLINE_OFFSET
+EOF
+----
+.. Transfer the initrd, kernel, generic.ins , initrd.img.addrsize ,  parameter file to the File server. For details on how to transfer the files with FTP and boot, see xref:https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_a_standard_rhel_8_installation/installing-in-an-lpar_installing-rhel[Installing in an LPAR].
+.. Restart the machine
+
+Repeat the procedure for all the other machines in the cluster.
+
+[#hosted-bare-metal-adding-agents-ibmz-zvm]
 == Adding agents for IBM with z/VM
 
 *Note:*  If you want to use a static IP for z/VM guest, you must configure the `NMStateConfig` attribute for the z/VM agent so that the IP parameter persists in the second boot.
@@ -61,16 +145,17 @@ See the following example parameter file:
 +
 [source,yaml]
 ----
-rd.neednet=1 \ 
+rd.neednet=1 \
 console=ttysclp0  \
+ai.ip_cfg_override=1 \
 coreos.live.rootfs_url=<rootfs_url> \
-ip=<IP_guest_vm>::<nameserver>:255.255.255.0::<network_adaptor>:none \ 
-nameserver=<nameserver> \ 
-zfcp.allow_lun_scan=0 \ <1>
+ip=<IP_guest_vm>::<nameserver>:255.255.255.0::<network_adaptor>:none \
+nameserver=<nameserver> \
+zfcp.allow_lun_scan=0 \ 
 rd.znet=qeth,<network_adaptor_range>,layer2=1 \
-rd.<disk_type>=<storage> random.trust_cpu=on \ <2>
-rd.luks.options=discard \ 
-ignition.firstboot ignition.platform.id=metal \ 
+rd.<disk_type>=<storage> random.trust_cpu=on \ 
+rd.luks.options=discard \
+ignition.firstboot ignition.platform.id=metal \
 console=tty1 console=ttyS1,115200n8 \
 coreos.inst.persistent-kargs="console=tty1 console=ttyS1,115200n8
 ----
