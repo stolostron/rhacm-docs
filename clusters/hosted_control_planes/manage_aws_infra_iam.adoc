@@ -470,33 +470,7 @@ To create the cloud infrastructure portion separately, you need to create the AW
 [#hosting-cluster-create-aws-infra]
 === Creating the AWS infrastructure
 
-To create the AWS infrastructure, enter the following command:
-//lahinson - july 2023 - update hypershift cli command here
-----
-hypershift create infra aws --name CLUSTER_NAME \ <1>
-    --aws-creds AWS_CREDENTIALS_FILE \ <2>
-    --base-domain BASEDOMAIN \ <3>
-    --infra-id INFRA_ID \ <4>
-    --region REGION \ <5>
-    --output-file OUTPUT_INFRA_FILE <6>
-----
-
-<1> Replace `CLUSTER_NAME` with the name of the hosted cluster that you are creating. This value is used for creating the Route 53 private hosted zones for the cluster.
-<2> Replace `AWS_CREDENTIALS_FILE` with the name of the AWS credentials file that has permissions to create infrastructure resources for your cluster, such as VPCs, subnets, and NAT gateways. This value must correspond to the AWS account for your guest cluster, where workers reside.
-<3> Replace `BASEDOMAIN` with the name of the base domain what you plan to use for your hosted cluster Ingress. This value must correspond to a Route 53 public zone that you can create records in.
-<4> Replace `INFRA_ID` with a unique name that identifies your infrastructure by using tags. This value is used by the cloud controller manager in Kubernetes and the cluster API manager to identify infrastructure for your cluster. Typically, this value is the name of your cluster (`CLUSTER_NAME`) with a suffix appended to it.
-<5> Replace `REGION` with the region where you want to create the infrastructure for your cluster.
-<6> Replace `OUTPUT_INFRA_FILE` with the name of the file where you want to store the IDs of the infrastructure in JSON format. You can use this file as input to the `hcp create cluster aws` command to populate fields in the `HostedCluster` and `NodePool` resouces.
-
-*Note:* The `hypershift` CLI is not available to download. Use the following commands to extract it by using the HyperShift Operator pod present in the `hypershift` namespace. Replace `<hypershift-operator-pod-name>` with your HyperShift Operator pod name.
-+
-----
-oc project hypershift
-oc rsync <hypershift-operator-pod-name>:/usr/bin/hypershift-no-cgo .
-mv hypershift-no-cgo hypershift
-----
-
-After you enter the command, the following resources are created:
+To create the AWS infrastructure, use an infrastructure tool such as Terraform, Pulumi, or your own automation to create a YAML file that includes the following fields:
 
 * One VPC
 * One DHCP option
@@ -510,11 +484,173 @@ After you enter the command, the following resources are created:
 
 All of those resources contain the `kubernetes.io/cluster/INFRA_ID=owned` tag, where `INFRA_ID` is the value that you specified in the command.
 
+.Example YAML file
+[source,yaml]
+----
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: clusters
+spec: {}
+status: {}
+---
+apiVersion: v1
+data:
+  .dockerconfigjson: xxxxxxxxxxx
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    hypershift.openshift.io/safe-to-delete-with-cluster: "true"
+  name: jparrill-hosted2-pull-secret
+  namespace: clusters
+---
+apiVersion: v1
+data:
+  key: xxxxxxxxxxxxxxxxx
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    hypershift.openshift.io/safe-to-delete-with-cluster: "true"
+  name: jparrill-hosted2-etcd-encryption-key
+  namespace: clusters
+type: Opaque
+---
+apiVersion: v1
+data:
+  id_rsa: xxxxxxxxx
+  id_rsa.pub: xxxxxxxxx
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    hypershift.openshift.io/safe-to-delete-with-cluster: "true"
+  name: jparrill-hosted2-ssh-key
+  namespace: clusters
+---
+apiVersion: hypershift.openshift.io/v1beta1
+kind: HostedCluster
+metadata:
+  creationTimestamp: null
+  name: jparrill-hosted2
+  namespace: clusters
+spec:
+  autoscaling: {}
+  configuration: {}
+  controllerAvailabilityPolicy: SingleReplica
+  dns:
+    baseDomain: jpdev.hypershift.devcluster.openshift.com
+    privateZoneID: xxxxxxxx
+    publicZoneID: xxxxxxxx
+  etcd:
+    managed:
+      storage:
+        persistentVolume:
+          size: 8Gi
+          storageClassName: gp3-csi
+        type: PersistentVolume
+    managementType: Managed
+  fips: false
+  infraID: jparrill-hosted2-hqn46
+  issuerURL: https://jparrill-hosted-us-west-1.s3.us-west-1.amazonaws.com/jparrill-hosted2-hqn46
+  networking:
+    clusterNetwork:
+    - cidr: 10.132.0.0/14
+    machineNetwork:
+    - cidr: 10.0.0.0/16
+    networkType: OVNKubernetes
+    serviceNetwork:
+    - cidr: 172.31.0.0/16
+  olmCatalogPlacement: management
+  platform:
+    aws:
+      cloudProviderConfig:
+        subnet:
+          id: subnet-04839d7ee947c9c5a
+        vpc: vpc-008885fd2a9502c66
+        zone: us-west-1b
+      endpointAccess: Public
+      multiArch: false
+      region: us-west-1
+      rolesRef:
+        controlPlaneOperatorARN: arn:aws:iam::820196288204:role/jparrill-hosted2-hqn46-control-plane-operator
+        imageRegistryARN: arn:aws:iam::820196288204:role/jparrill-hosted2-hqn46-openshift-image-registry
+        ingressARN: arn:aws:iam::820196288204:role/jparrill-hosted2-hqn46-openshift-ingress
+        kubeCloudControllerARN: arn:aws:iam::820196288204:role/jparrill-hosted2-hqn46-cloud-controller
+        networkARN: arn:aws:iam::820196288204:role/jparrill-hosted2-hqn46-cloud-network-config-controller
+        nodePoolManagementARN: arn:aws:iam::820196288204:role/jparrill-hosted2-hqn46-node-pool
+        storageARN: arn:aws:iam::820196288204:role/jparrill-hosted2-hqn46-aws-ebs-csi-driver-controller
+    type: AWS
+  pullSecret:
+    name: jparrill-hosted2-pull-secret
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:4.15.9-x86_64
+  secretEncryption:
+    aescbc:
+      activeKey:
+        name: jparrill-hosted2-etcd-encryption-key
+    type: aescbc
+  services:
+  - service: APIServer
+    servicePublishingStrategy:
+      type: LoadBalancer
+  - service: OAuthServer
+    servicePublishingStrategy:
+      type: Route
+  - service: Konnectivity
+    servicePublishingStrategy:
+      type: Route
+  - service: Ignition
+    servicePublishingStrategy:
+      type: Route
+  - service: OVNSbDb
+    servicePublishingStrategy:
+      type: Route
+  sshKey:
+    name: jparrill-hosted2-ssh-key
+status:
+  controlPlaneEndpoint:
+    host: ""
+    port: 0
+---
+apiVersion: hypershift.openshift.io/v1beta1
+kind: NodePool
+metadata:
+  creationTimestamp: null
+  name: jparrill-hosted2-us-west-1b
+  namespace: clusters
+spec:
+  arch: amd64
+  clusterName: jparrill-hosted2
+  management:
+    autoRepair: true
+    upgradeType: Replace
+  nodeDrainTimeout: 0s
+  platform:
+    aws:
+      instanceProfile: jparrill-hosted2-hqn46-worker
+      instanceType: m6i.xlarge
+      rootVolume:
+        size: 120
+        type: gp3
+      subnet:
+        id: subnet-04839d7ee947c9c5a
+    type: AWS
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:4.15.9-x86_64
+  replicas: 2
+status:
+  replicas: 0
+----
+
 [#hosting-cluster-create-aws-iam]
 === Creating the AWS IAM resources
 
 To create the AWS IAM resources, enter the following command:
-//lahinson - july 2023 - update hypershift cli command here
+//lahinson - june 2024 - replace hypershift create command here
 ----
 hypershift create iam aws --infra-id INFRA_ID \ <1>
     --aws-creds AWS_CREDENTIALS_FILE \ <2>
