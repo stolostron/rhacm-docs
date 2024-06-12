@@ -35,15 +35,10 @@ The container security operator is not available in {ocp-short} 3.11. Therefore,
 
 If you try to apply the `ImageManifestVuln` policy, you receive the following violation message:
 
-```
+[source,bash]
+----
 violation - couldn't find mapping resource with kind Subscription, please check if you have CRD deployed. 
-```
-
-[#grc-resources-not-cleaned-up]
-== Governance resources not cleaned up properly when the component is disabled 
-//2.9:8550
-
-Governance resources are not cleaned up properly. When the component is set to `false` or is disabled in the `MultiClusterHub` operator, the governance component is removed before it can clean up the add-ons that it manages. 
+----
 
 [#unable-to-log-out]
 == Unable to log out from Red Hat Advanced Cluster Management
@@ -127,64 +122,6 @@ violation - couldn't find mapping resource with kind PodSecurityPolicy, please c
 
 When you create a policy with identical policy template names, you receive inconsistent results that are not detected, but you might not know the cause. For example, defining a policy with multiple configuration policies named `create-pod` causes inconsistent results. *Best practice:* Avoid using duplicate names for policy templates.
 
-[#disabling-grc]
-== Governance deployments do not shut down without errors when disabled
-
-When you disable governance deployments in the `MultiClusterHub` object, the deployments are not cleaned without errors. Complete the following steps to disable governance so that the deployments also get cleaned up:
-
-. Disable the `policyController` in the `KlusterletAddonConfig` for the managed cluster. If you do this for all managed clusters, run the following command:
-
-+
-[source,bash]
-----
-for CLUSTER in $(oc get managedclusters -o jsonpath='{.items[].metadata.name}'); do
-  oc patch -n ${CLUSTER} klusterletaddonconfig ${CLUSTER} --type=merge --patch='{"spec":{"policyController":{"enabled":false}}}'
-done
-----
-
-. For local clusters only: Delete the `ManifestWork` for the local cluster and remove the finalizer on the `ManagedClusterAddon` if the `governance-policy-framework-uninstall` pod of a local cluster is in `CrashLoopBackOff`. Run the following commands:
-
-+
-[source,bash]
-----
-oc delete manifestwork -n local-cluster -l open-cluster-management.io/addon-name=governance-policy-framework
-oc patch managedclusteraddon -n local-cluster governance-policy-framework --type=merge --patch='{"metadata":{"finalizers":[]}}'
-----
-
-. Disable governance globally, if required, by setting the `grc` element in the `spec.overrides` section to `false` in the `MultiClusterHub` object. Run the following command:
-
-+
-[source,bash]
-----
-oc edit multiclusterhub <name> -n <namespace>
-----
-
-. For local clusters only: If there are any local cluster policies, you can delete the policies by running the following command:
-
-+
-[source,bash]
-----
-oc delete policies -n local-cluster --all
-----
-
-. To re-enable governance in the `KlusterletAddonConfig`, re-enable the `grc` element of the `spec.overrides` section in the `MultiClusterHub`. Run the following command:
-
-+
-[source,bash]
-----
-for CLUSTER in $(oc get managedclusters -o jsonpath='{.items[].metadata.name}'); do
-  oc patch -n ${CLUSTER} klusterletaddonconfig ${CLUSTER} --type=merge --patch='{"spec":{"policyController":{"enabled":true}}}'
-done
-----
-
-. If the deployments are unsuccessful, the `governance-policy-addon-controller` might have a stale lease. Delete the lease by using the following command:
-
-+
-[source,bash]
-----
-oc delete lease governance-policy-addon-controller-lock -n <namespace> 
-----
-
 [#database-compliance-history-outage]
 == Database and policy compliance history API outage
 
@@ -195,7 +132,7 @@ If you create or update a new policy during a database outage, any compliance ev
 [#postgresql-data-loss]
 == PostgreSQL data loss
 
-If there is data loss to the PostgreSQL server such as restoring to a backup without the latest data, the governance policy propagator on the {product-title-hsort} hub cluster must be restarted so that it can update the mapping of policies to database IDs. Until you restart the governance policy propagator, new compliance events associated with policies that once existed in the database are no longer recorded. 
+If there is data loss to the PostgreSQL server such as restoring to a backup without the latest data, you must restart the governance policy propagator on the {product-title-short} hub cluster so that it can update the mapping of policies to database IDs. Until you restart the governance policy propagator, new compliance events associated with policies that once existed in the database are no longer recorded. 
 
 To restart the governance policy propagator, run the following command on the {product-title-short} hub cluster:
 
