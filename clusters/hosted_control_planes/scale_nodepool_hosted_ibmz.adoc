@@ -141,7 +141,56 @@ For each component of your cluster, the output shows the following cluster opera
 
 For an output example, see the link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/installing/installing-on-ibm-z-and-ibm-linuxone#installation-operators-config_installing-ibm-z[Initial Operator configuration] section in the {ocp-short} documentation.
 
-[#scale-nodepool-ibmz-additional-resources]
-== Additional resources
+[#destroying-hosted-clusted-x86bm-ibmz]
+== Destroying a hosted cluster on `x86` bare metal with IBM Z compute nodes
 
-* To scale down the data plane to zero, see xref:..
+. Run the following command to scale the `NodePool` object to zero (0) nodes:
+
++
+[source,bash]
+----
+oc -n ${clusters_namespace} scale nodepool ${nodepool_name} --replicas 0
+----
+
++
+After scaling the nodepool to 0 , the compute nodes will get detached from the hosted cluster. If the computed nodes are not detached from the hosted cluster or stuck in `Notready` state, delete the compute nodes manually by running the following command: 
+
++
+[source,bash]
+----
+oc --kubeconfig ${hosted_clusted_name}.kubeconfig delete node <comopute_node_name>
+----
+
++
+. Verify the compute nodes status by entering the following command:
+
++
+[source,bash]
+----
+oc --kubeconfig <hosted_cluster_name>.kubeconfig get nodes
+----
+
+. Delete the agents from the cluster 
++
+After the compute nodes are detached from the hosted cluster, the status of the agents is changed to `auto-assign`.
++
+Delete the agents from the cluster by running the following command:
+
++
+[source,bash]
+----
+oc -n ${hosted_control_plane_namespace} delete agent <agent_name>
+----
+
++
+**Note:** You can delete the Virtual Machines that you created as agents after deleting the agents from the cluster.
+
+. Destroy the hosted control plane. 
++
+Run the following command using the hypershift command-line to destroy the hosted control plane:
+
++
+[source,bash]
+----
+hcp destroy cluster agent --name ${hosted_cluster_name} --namespace ${clusters_namepsace}
+----
