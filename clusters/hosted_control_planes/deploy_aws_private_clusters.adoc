@@ -24,8 +24,8 @@ To enable private hosted clusters for AWS, you must first enable AWS PrivateLink
 
 . Create the private cluster IAM policy document by entering the following command:
 +
+[source,bash]
 ----
-cat << EOF >> policy.json
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -48,30 +48,36 @@ cat << EOF >> policy.json
 
 . Create the IAM policy in AWS by entering the following command:
 +
+[source,bash]
 ----
 aws iam create-policy --policy-name=hypershift-operator-policy --policy-document=file://policy.json
 ----
 
 . Create a `hypershift-operator` IAM user by entering the following command:
 +
+[source,bash]
 ----
 aws iam create-user --user-name=hypershift-operator
 ----
 
 . Attach the policy to the `hypershift-operator` user by entering this command, replacing `<policy-arn>` with the ARN of the policy that you created:
 +
+[source,bash]
 ----
 aws iam attach-user-policy --user-name=hypershift-operator --policy-arn=<policy-arn>
 ----
 
 . Create an IAM access key for the user by entering this command:
 +
+[source,bash]
 ----
 aws iam create-access-key --user-name=hypershift-operator
 ----
 
 . Create a private hosted cluster by entering the following command, replacing variables with your values as needed:
+
 +
+[source,bash]
 ----
 hcp create cluster aws \
 --name <hosted-cluster-name> \ <1>
@@ -106,6 +112,7 @@ You can access a private cluster by using a bastion instance.
 //lahinson - june 2024 - replace hypershift create command here
 . Start a bastion instance by entering the following command:
 +
+[source,bash]
 ----
 hypershift create bastion aws --aws-creds=<aws-creds> --infra-id=<infra-id> --region=<region> --ssh-key-file=<ssh-key>
 ----
@@ -113,8 +120,11 @@ hypershift create bastion aws --aws-creds=<aws-creds> --infra-id=<infra-id> --re
 +
 Replace `<ssh-key>` with the SSH public key file to connect to the bastion. The default location for the SSH public key file is `~/.ssh/id_rsa.pub`. Replace `<aws-creds>` with the path to your AWS credentials file, for example, `/user/name/.aws/credentials`.
 
++
 *Note:* The `hypershift` CLI is not available to download. Use the following commands to extract it by using the HyperShift Operator pod present in the `hypershift` namespace. Replace `<hypershift-operator-pod-name>` with your HyperShift Operator pod name.
 
++
+[source,bash]
 ----
 oc project hypershift
 oc rsync <hypershift-operator-pod-name>:/usr/bin/hypershift-no-cgo .
@@ -123,36 +133,42 @@ mv hypershift-no-cgo hypershift
 
 . Find the private IPs of nodes in the cluster node pool by entering the following command:
 +
+[source,bash]
 ----
 aws ec2 describe-instances --filter="Name=tag:kubernetes.io/cluster/<infra-id>,Values=owned" | jq '.Reservations[] | .Instances[] | select(.PublicDnsName=="") | .PrivateIpAddress'
 ----
 
 . Create a `kubeconfig` file for the cluster that can be copied to a node by entering the following command:
 +
+[source,bash]
 ----
 hcp create kubeconfig > <cluster-kubeconfig>
 ----
 
 . Enter the following command to SSH into one of the nodes through the bastion by using the IP that is printed from the `create bastion` command:
 +
+[source,bash]
 ----
 ssh -o ProxyCommand="ssh ec2-user@<bastion-ip> -W %h:%p" core@<node-ip>
 ----
 
 . From the SSH shell, copy the `kubeconfig` file contents to a file on the node by entering the following command:
 +
+[source,bash]
 ----
 mv <path-to-kubeconfig-file> <new-file-name>
 ----
 
 . Export the kubeconfig file by entering the following command:
 +
+[source,bash]
 ----
 export KUBECONFIG=<path-to-kubeconfig-file>
 ----
 
 . Observe the guest cluster status by entering the following command:
 +
+[source,bash]
 ----
 oc get clusteroperators clusterversion
 ----
