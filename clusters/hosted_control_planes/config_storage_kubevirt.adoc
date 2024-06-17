@@ -1,7 +1,7 @@
 [#configuring-storage-kubevirt]
 = Configuring storage for hosted control planes on {ocp-virt-short}
 
-If you do not provide any advanced storage configuration, the default storage class is used for the KubeVirt virtual machine (VM) images, the KubeVirt CSI mapping, and the etcd volumes.
+If you do not provide any advanced storage configuration, the default storage class is used for the KubeVirt virtual machine (VM) images, the KubeVirt Container Storage Interface (CSI) mapping, and the etcd volumes.
 
 [#storageclass-mapping]
 == Mapping KubeVirt CSI storage classes
@@ -18,7 +18,7 @@ hcp create cluster kubevirt \
 --pull-secret <path_to_pull_secret> \ <3>
 --memory <memory> \ <4>
 --cores <cpu> \ <5>
---infra-storage-class-mapping=<infrastructure_storage_class>/<guest_storage_class> \ <6>
+--infra-storage-class-mapping=<infrastructure_storage_class>/<hosted_storage_class> \ <6>
 ----
 
 <1> Specify the name of your hosted cluster, for instance, `example`.
@@ -26,16 +26,41 @@ hcp create cluster kubevirt \
 <3> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
 <4> Specify a value for memory, for example, `8Gi`.
 <5> Specify a value for CPU, for example, `2`.
-<6> Replace `<infrastructure_storage_class>` with the infrastructure storage class name and `<guest_storage_class>` with the hosted cluster storage class name. You can use the `--infra-storage-class-mapping` argument multiple times within the `hcp create cluster` command.
+<6> Replace `<infrastructure_storage_class>` with the infrastructure storage class name and `<hosted_storage_class>` with the hosted cluster storage class name. You can use the `--infra-storage-class-mapping` argument multiple times within the `hcp create cluster` command.
 
 After you create the hosted cluster, the infrastructure storage class is visible within the hosted cluster. When you create a Persistent Volume Claim (PVC) within the hosted cluster that uses one of those storage classes, KubeVirt CSI provisions that volume by using the infrastructure storage class mapping that you configured during cluster creation.
+
+*Note:* KubeVirt CSI supports mapping only an infrastructure storage class that is capable of RWX access.
+
+The following table shows how volume and access mode capabilities map to KubeVirt CSI storage classes:
+
+.Mapping KubeVirt CSI storage classes to access and volume modes
+|===
+| Infrastructure CSI capability | Hosted cluster CSI capability | VM live migration support | Notes
+
+| RWX: `Block` or `Filesystem`
+| `ReadWriteOnce` (RWO) `Block` or `Filesystem` RWX `Block` only
+| Supported
+| Use `Block` mode because `Filesystem` volume mode results in degraded hosted `Block` mode performance. RWX `Block` volume mode is supported only when the hosted cluster is {ocp-short} 4.16 or later.
+
+| RWO `Block` storage
+| RWO `Block` storage or `Filesystem`
+| Not supported
+| Lack of live migration support affects the ability to update the underlying infrastructure cluster that hosts the KubeVirt VMs.
+
+| RWO `FileSystem`
+| RWO `Block` or `Filesystem`
+| Not supported
+| Lack of live migration support affects the ability to update the underlying infrastructure cluster that hosts the KubeVirt VMs. Use of the infrastructure `Filesystem` volume mode results in degraded hosted `Block` mode performance.
+
+|===
 
 [#csi-snapshot-mapping]
 == Mapping a single KubeVirt CSI volume snapshot class
 
-You can expose your infrastructure volume snapshot class to the guest cluster by using KubeVirt CSI.
+You can expose your infrastructure volume snapshot class to the hosted cluster by using KubeVirt CSI.
 
-To map your volume snapshot class to the guest cluster, use the `--infra-volumesnapshot-class-mapping` argument when creating a hosted cluster. Run the following command:
+To map your volume snapshot class to the hosted cluster, use the `--infra-volumesnapshot-class-mapping` argument when creating a hosted cluster. Run the following command:
 
 [source,bash]
 ----
@@ -45,8 +70,8 @@ hcp create cluster kubevirt \
 --pull-secret <path_to_pull_secret> \ <3>
 --memory <memory> \ <4>
 --cores <cpu> \ <5>
---infra-storage-class-mapping=<infrastructure_storage_class>/<guest_storage_class> \ <6>
---infra-volumesnapshot-class-mapping=<infrastructure_volume_snapshot_class>/<guest_volume_snapshot_class> <7>
+--infra-storage-class-mapping=<infrastructure_storage_class>/<hosted_storage_class> \ <6>
+--infra-volumesnapshot-class-mapping=<infrastructure_volume_snapshot_class>/<hosted_volume_snapshot_class> <7>
 ----
 
 <1> Specify the name of your hosted cluster, for instance, `example`.
@@ -54,17 +79,17 @@ hcp create cluster kubevirt \
 <3> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
 <4> Specify a value for memory, for example, `8Gi`.
 <5> Specify a value for CPU, for example, `2`.
-<6> Replace `<infrastructure_storage_class>` with the storage class present in the infrastructure cluster. Replace `<guest_storage_class>` with the storage class present in the guest cluster.
-<7> Replace `<infrastructure_volume_snapshot_class>` with the volume snapshot class present in the infrastructure cluster. Replace `<guest_volume_snapshot_class>` with the volume snapshot class present in the guest cluster.
+<6> Replace `<infrastructure_storage_class>` with the storage class present in the infrastructure cluster. Replace `<hosted_storage_class>` with the storage class present in the hosted cluster.
+<7> Replace `<infrastructure_volume_snapshot_class>` with the volume snapshot class present in the infrastructure cluster. Replace `<hosted_volume_snapshot_class>` with the volume snapshot class present in the hosted cluster.
 +
 *Note:* If you do not use the `--infra-storage-class-mapping` and `--infra-volumesnapshot-class-mapping` arguments, a hosted cluster is created with the default storage class and the volume snapshot class. Therefore, you must set the default storage class and the volume snapshot class in the infrastructure cluster.
 
 [#csi-multiple-snapshots-mapping]
-=== Mapping multiple KubeVirt CSI volume snapshot classes
+== Mapping multiple KubeVirt CSI volume snapshot classes
 
-You can map multiple volume snapshot classes to the guest cluster by assigning them to a specific group. The infrastructure storage class and the volume snapshot class are compatible with each other only if they belong to a same group.
+You can map multiple volume snapshot classes to the hosted cluster by assigning them to a specific group. The infrastructure storage class and the volume snapshot class are compatible with each other only if they belong to a same group.
 
-To map multiple volume snapshot classes to the guest cluster, use the `group` option when creating a hosted cluster. Run the following command:
+To map multiple volume snapshot classes to the hosted cluster, use the `group` option when creating a hosted cluster. Run the following command:
 
 [source,bash]
 ----
@@ -74,11 +99,11 @@ hcp create cluster kubevirt \
 --pull-secret <path_to_pull_secret> \ <3>
 --memory <memory> \ <4>
 --cores <cpu> \ <5>
---infra-storage-class-mapping=<infrastructure_storage_class>/<guest_storage_class>,group=<group_name> \ <6>
---infra-storage-class-mapping=<infrastructure_storage_class>/<guest_storage_class>,group=<group_name> \
---infra-storage-class-mapping=<infrastructure_storage_class>/<guest_storage_class>,group=<group_name> \
---infra-volumesnapshot-class-mapping=<infrastructure_volume_snapshot_class>/<guest_volume_snapshot_class>,group=<group_name> \ <7>
---infra-volumesnapshot-class-mapping=<infrastructure_volume_snapshot_class>/<guest_volume_snapshot_class>,group=<group_name>
+--infra-storage-class-mapping=<infrastructure_storage_class>/<hosted_storage_class>,group=<group_name> \ <6>
+--infra-storage-class-mapping=<infrastructure_storage_class>/<hosted_storage_class>,group=<group_name> \
+--infra-storage-class-mapping=<infrastructure_storage_class>/<hosted_storage_class>,group=<group_name> \
+--infra-volumesnapshot-class-mapping=<infrastructure_volume_snapshot_class>/<hosted_volume_snapshot_class>,group=<group_name> \ <7>
+--infra-volumesnapshot-class-mapping=<infrastructure_volume_snapshot_class>/<hosted_volume_snapshot_class>,group=<group_name>
 ----
 
 <1> Specify the name of your hosted cluster, for instance, `example`.
@@ -86,8 +111,8 @@ hcp create cluster kubevirt \
 <3> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
 <4> Specify a value for memory, for example, `8Gi`.
 <5> Specify a value for CPU, for example, `2`.
-<6> Replace `<infrastructure_storage_class>` with the storage class present in the infrastructure cluster. Replace `<guest_storage_class>` with the storage class present in the guest cluster. Replace `<group_name>` with the group name. For example, `infra-storage-class-mygroup/guest-storage-class-mygroup,group=mygroup` and `infra-storage-class-mymap/guest-storage-class-mymap,group=mymap`.
-<7> Replace `<infrastructure_volume_snapshot_class>` with the volume snapshot class present in the infrastructure cluster. Replace `<guest_volume_snapshot_class>` with the volume snapshot class present in the guest cluster. For example, `infra-vol-snap-mygroup/guest-vol-snap-mygroup,group=mygroup` and `infra-vol-snap-mymap/guest-vol-snap-mymap,group=mymap`.
+<6> Replace `<infrastructure_storage_class>` with the storage class present in the infrastructure cluster. Replace `<hosted_storage_class>` with the storage class present in the hosted cluster. Replace `<group_name>` with the group name. For example, `infra-storage-class-mygroup/hosted-storage-class-mygroup,group=mygroup` and `infra-storage-class-mymap/hosted-storage-class-mymap,group=mymap`.
+<7> Replace `<infrastructure_volume_snapshot_class>` with the volume snapshot class present in the infrastructure cluster. Replace `<hosted_volume_snapshot_class>` with the volume snapshot class present in the hosted cluster. For example, `infra-vol-snap-mygroup/hosted-vol-snap-mygroup,group=mygroup` and `infra-vol-snap-mymap/hosted-vol-snap-mymap,group=mymap`.
 
 [#kubevirt-vm-root-volume-config]
 == Configuring KubeVirt VM root volume
