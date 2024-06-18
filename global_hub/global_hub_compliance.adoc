@@ -1,57 +1,24 @@
 [#global-hub-compliance-manual]
 = Running the summarization process manually
 
-You can also run the summarization process manually. This can be helpful when you are trying to investigate a problem or need a report sooner than the next scheduled routine. 
+You can manually run the summarization process to help you investigate a problem or get a report sooner than the next scheduled routine. To manually run the summarization process complete the following steps: 
 
-The manual summarization process consists of two subtasks:
-
-* Insert the cluster policy data of that day from link:https://www.postgresql.org/docs/current/rules-materializedviews.html[Materialized View]  `local_compliance_view_<yyyy_MM_dd>` to `history.local_compliance`.
-
-* Update the `compliance` and policy flip `frequency` of that day to `history.local_compliance` based on `event.local_policies`.
-
-Complete the following steps to run the summarization process manually: 
-
+. Use the earlier day's history as the initial state for the recover day's history. 
 . Connect to the database.
 + 
-You can use clients such as pgAdmin, tablePlush, and so on, to connect to the {global-hub} database to run the SQL statements in the next few steps. You can directly connect to the database on the cluster by running the following command:
+You can use clients such as pgAdmin and tablePlush to connect to the {global-hub} database. Or, you can directly connect to the database on the cluster by running the following command:
 +
 ----
-oc exec -it multicluster-global-hub-postgres-0 -n multicluster-global-hub -- psql -d hoh
+kubectl exec -it multicluster-global-hub-postgres-0 -n multicluster-global-hub -- psql -d hoh
 ----
        
-. Determine the date when it needs to be run, such as `2023-07-06`.
+. Decide the date when you want the summarization process to run, for example: `2023-07-06` 
 +
-If you find that there is no compliance information on the dashboard for `2023-07-06`, then find the job failure information of the day following this day in the `history.local_compliance_job_log`. In this case, it is `2023-07-07`. It can be determined that `2023-07-06` is the date when we need to manually run the summary processes.
+Find the local compliance job failure information from the dashboard metrics or the table, `history.local_compliance_job_log`. In this example, the date is, `2023-07-07`, so you know that `2023-07-06` is the date when you need to manually run the summary processes.
 
-. Check whether the Materialized View of `history.local_compliance_view_2023_07_06` exists by running the following command:
+. Recover the initial compliance of `2023-07-06` by running the following SQL: 
 +
 ----
-select * from history.local_compliance_view_2023_07_06;
-----
-+
-If the view exists, load the view records to `history.local_compliance` by runnning the following command:
-+
-----
--- exec the insert func for that day '2023_07_06'
-SELECT history.insert_local_compliance_job('2023_07_06');
-----
-+
-If the view does not exist, inherit the history compliance records of the day before that day, in this example, it might be `2023_07_05`.
-+
-----
--- call the func to generate the data of '2023_07_06' by inheriting '2023_07_05'
-CALL history.inherit_local_compliance_job('2023_07_05', '2023_07_06');
-----
-
-. Update the `compliance` and `frequency` information of that day to `history.local_compliance`.
-+
-----
--- call the func to update records start with '2023-07-06', end with '2023-07-07'
-SELECT history.update_local_compliance_job('2023_07_06', '2023_07_07');
-----
-
-. Find the records of that day generated in `history.local_compliance`. You can safely delete the Materialized View `history.local_compliance_view_2023_07_06` by running the following command:
-+
-----
-DROP MATERIALIZED VIEW IF EXISTS history.local_compliance_view_2023_07_06;
+-- call the func to generate the initial data of '2023-07-07' by inheriting '2023-07-06'
+CALL history.generate_local_compliance('2024-07-07');
 ----
