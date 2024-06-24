@@ -135,6 +135,7 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * Check your PR _requests_ from team members regularly. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
 * Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`.
 * Ensure your peer reviews and contributions are in your goals.
+* Use [The peer review checklist](pages/checklist_peer_review.md).
 
 
 ## Additional resources
