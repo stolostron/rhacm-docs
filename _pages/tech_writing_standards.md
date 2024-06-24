@@ -20,6 +20,7 @@ Many of the guidelines we adopt are industry standards for high quality writing,
 * [Short descriptions](#short-descriptions)
 * [Concise, clear content](#concise-clear-content)
 * [Lists and tables](#lists-and-tables)
+* [Adding links](#adding-links)
 * [Requirements before merging PRs](#requirements-before-merging-prs)
 
 ## General reminders 
@@ -109,12 +110,13 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 "Embedded links are links that appear mid-sentence or mid-paragraph. Such links are disruptive because the user must decide whether to go immediately to the information..." (263)
 
 * Careful with inline links. If user needs lots of links, consider a section within the topic named: _Additional resources_.
-* You do not need to put a link to _Additional Resources_ in the table of contents for that file.
+* You do not need to put a link to _Additional Resources_ in the table of contents if you don't have links to add.
 * Name the link such that the user sees value in the title and can better decide whether to click or come back later. Don't name the link [here].
 * URLs to Jira issues are usually long and uninformative. Take the extra step to define the link with a good link title. (This is only used in support docs or release notes.)
 * Never link to internal files, other internal-only docs like scripts. Have the developer replace a script with steps. Some initial drafts can require this removal. Ensure linked materials are from public spaces.
 * Do not link to blogs, temporary repositories, or anything that cannot be validated by the Support Team or QE.
-* Avoid linking to upstream documentation and community policies unless necessary.
+* Avoid linking to upstream documentation and community policies unless necessary. Check with Lead/CS and Support for outliers.
+* Because we offer features with other Kubernetes providers, we will at times link to third-party official doc, like AWS.
 * When you change a file name, any links to that file also need to change or we will have broken links.
 
 ## Comments in the source
