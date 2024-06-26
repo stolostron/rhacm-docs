@@ -9,18 +9,20 @@ hcp create cluster aws \
 --node-pool-replicas=<node-pool-replica-count> \ <2>
 --base-domain <basedomain> \ <3>
 --pull-secret <path-to-pull-secret> \ <4>
---aws-creds <path-to-aws-credentials> \ <5>
---region <region> \ <6>
---zones <zones> <7>
+--sts-creds <path-to-aws-credentials> \ <5>
+--role-arn <cli-role-arn> \ <6>
+--region <region> \ <7>
+--zones <zones> <8>
 ----
 
 <1> Specify the name of your hosted cluster, for instance, `example`.
 <2> Specify the node pool replica count, for example, `2`.
 <3> Specify your base domain, for example, `example.com`.
 <4> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
-<5> Specify the path to your AWS credentials file, for example, `/user/name/.aws/credentials`.
-<6> Specify the AWS region name, for example, `us-east-1`.
-<7> Specify availability zones within your AWS region, for example, `us-east-1a`, and `us-east-1b`.
+<5> Specify the path to your AWS Security Token Service (STS) credentials file, for example, `/user/name/.aws/credentials`. This can be generated with "aws sts get-session-token --output json" command
+<6> Specify the hcp CLI role ARN to assume. 
+<7> Specify the AWS region name, for example, `us-east-1`.
+<8> Specify availability zones within your AWS region, for example, `us-east-1a`, and `us-east-1b`.
 
 For each specified zone, the following infrastructure is created:
 
@@ -34,12 +36,7 @@ One `NodePool` resource is created for each zone. The node pool name is suffixed
 [#create-hosted-multi-zone-aws-credentials]
 == Providing credentials for creating a hosted cluster on AWS
 
-When you create a hosted cluster by using the `hcp create cluster aws` command, you need to provide AWS account credentials that have permissions to create infrastructure resources for your cluster. Examples of infrastructure resources include VPCs, subnets, and NAT gateways. You can provide the AWS credentials in two ways: by using the `--aws-creds` flag or by using the AWS cloud provider secret from {mce-short}.
-
-[#create-hosted-multi-zone-aws-creds-flag]
-=== Providing credentials by using the --aws-creds flag
-
-If you use the `--aws-creds` flag to provide credentials, use that flag with the value of the AWS credentials file path.
+When you create a hosted cluster by using the `hcp create cluster aws` command, you need to provide AWS account Security Token Service credentials that have permissions to create infrastructure resources for your cluster and a hcp CLI assume role ARN. Examples of infrastructure resources include VPCs, subnets, and NAT gateways.
 
 See the following example:
 
@@ -49,74 +46,18 @@ hcp create cluster aws \
 --node-pool-replicas=<node-pool-replica-count> \ <2>
 --base-domain <basedomain> \ <3>
 --pull-secret <path-to-pull-secret> \ <4>
---aws-creds <path-to-aws-credentials> \ <5>
---region <region> <6>
+--sts-creds <path-to-aws-credentials> \ <5>
+--role-arn <cli-role-arn> \ <6>
+--region <region> <7>
 ----
 
 <1> Specify the name of your hosted cluster, for instance, `example`.
 <2> Specify the node pool replica count, for example, `2`.
 <3> Specify your base domain, for example, `example.com`.
 <4> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
-<5> Specify the path to your AWS credentials file, for example, `/user/name/.aws/credentials`.
-<6> Specify the AWS region name, for example, `us-east-1`.
-
-[#create-hosted-multi-zone-aws-cloud-provider-secret]
-=== Providing credentials by using the AWS cloud provider secret
-
-The secret contains the SSH keys, pull secret, base domain, and AWS credentials. Therefore, you can use the `hcp create cluster aws` command with the `--secret-creds` flag to provide AWS credentials. See the following example:
-
-----
-hcp create cluster aws \
---name <hosted-cluster-name> \ <1>
---region <region> \ <2>
---namespace <hosted-cluster-namespace> \ <3>
---secret-creds <my-aws-cred> <4>
-----
-
-<1> Specify the name of your hosted cluster, for instance, `example`.
-<2> Specify the AWS region name, for example, `us-east-1`.
-<3> If the secret is not in the default `clusters` namespace, specify your hosted cluster namespace.
-<4> Specify the AWS secret name, for example, `my-aws-cred`.
-
-When you use this secret, the following flags become optional. If you specify these flags with the `--secret-creds` flag, these flags take precedence over the values in the cloud provider secret:
-
-* `--aws-creds`
-* `--base-domain`
-* `--pull-secret`
-* `--ssh-key`
-
-//lahinson - sept. 2023 - including comment to ensure proper formatting
-
-. To create the secret by using the {mce-shortF} console, from the navigation menu, select *Credentials* and follow the credential creation steps in the console.
-
-. To create the secret on the command line, enter the following command:
-
-+
-----
-$ oc create secret generic <my-secret> -n <namespace> --from-literal=baseDomain=<your-basedomain> --from-literal=aws_access_key_id=<your-aws-access-key> --from-literal=aws_secret_access_key=<your-aws-secret-key> --from-literal=pullSecret='{"auths":{"cloud.openshift.com":{"auth":"<auth>", "email":"<your-email>"}, "quay.io":{"auth":"<auth>", "email":"<your-email>"} } }' --from-literal=ssh-publickey=<your-ssh-publickey> --from-literal=ssh-privatekey=<your-ssh-privatekey>
-----
-
-+
-The secret has the following format:
-
-+
-[source,yaml]
-----
-apiVersion: v1
-metadata:
-  name: my-aws-cred <1>
-  namespace: clusters <2>
-type: Opaque
-kind: Secret
-stringData:
-  ssh-publickey:          # Value
-  ssh-privatekey:         # Value
-  pullSecret:             # Value, required
-  baseDomain:             # Value, required
-  aws_secret_access_key:  # Value, required
-  aws_access_key_id:      # Value, required
-----
-
+<5> Specify the path to your AWS Security Token Service (STS) credentials file, for example, `/user/name/.aws/credentials`. This can be generated with "aws sts get-session-token --output json" command
+<6> Specify the hcp CLI role ARN to assume. 
+<7> Specify the AWS region name, for example, `us-east-1`.
 
 //lahinson - sept. 2023 - including comment to ensure proper formatting
 
