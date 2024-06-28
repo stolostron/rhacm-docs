@@ -224,6 +224,31 @@ spec:
 
 For descriptions of all the parameters that can added into the `advanced` configuration, see the _Observability API_ documentation.
 
+The default retention for all resolution levels, such as `retentionResolutionRaw`, `retentionResolution5m`, or `retentionResolution1h`, is 365 days (`365d`). You must set an explicit value for the resolution retention in your `MultiClusterObservability` `spec.advanced.retentionConfig` parameter.
+
+If you upgraded from an earlier version and want to keep that version retention configuration, complete the following steps: 
+
+. Go to your `MultiClusterObservability` resource by running the following `oc` binary in your CLI: 
+
++
+[source,bash]
+----
+edit mco observability
+----
+
+. In the `spec.advanced.retentionConfig` parameter, apply the following configuration: 
+
++
+[source,bash]
+----
+spec:
+  advanced:
+    retentionConfig:
+      retentionResolutionRaw: 30d
+      retentionResolution5m: 180d
+      retentionResolution1h: 0d
+----
+
 [#dynamic-metrics-for-sno]
 == Dynamic metrics for {sno} clusters
 
@@ -504,9 +529,11 @@ If your development needs change, you might need to disable the proxy setting fo
 . Remove the referenced `AddOnDeploymentConfig` resource.
 
 [#custom-obervatorium-alert-url]
-== Customizing the managed cluster Observatorium API and Alertmanager URLs
+== Customizing the managed cluster Observatorium API and Alertmanager URLs (Technology Preview)
 
-You can customize the Observatorium API and Alertmanager URLs that the managed cluster uses to communicate with the hub cluster. To customize the URLs, add your URLs to the `advanced` section of the `MultiClusterObservability` `spec`. See the following example:
+You can customize the Observatorium API and Alertmanager URLs that the managed cluster uses to communicate with the hub cluster to maintain all {product-title-short} functions when you use a load balancer or reserve proxy. To customize the URLs, complete the following steps:
+
+. Add your URLs to the `advanced` section of the `MultiClusterObservability` `spec`. See the following example:
 
 [source,yaml]
 ----
@@ -521,6 +548,53 @@ spec:
 * Only HTTPS URLs are supported. If you do not add `https://` to your URL, the scheme is added automatically.
 * You can include the standard path for the Remote Write API, `/api/metrics/v1/default/api/v1/receive` in the `customObservabilityHubURL` `spec`. If you do not include the path, the Observability service automatically adds the path at runtime.
 * Any intermediate component you use for the custom Observability hub cluster URL cannot use TLS termination because the component relies on MTLS authentication. The custom Alertmanager hub cluster URL supports intermediate component TLS termination by using the existing bring your own certificate instructions.
+
+. If you are using a `customObservabilityHubURL`, create a route object by using the following template. Replace `<intermediate_component_url>` with the intermediate component URL:
+
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: proxy-observatorium-api
+  namespace: open-cluster-management-observability
+spec:
+  host: <intermediate_component_url>
+  port:
+    targetPort: public
+  tls:
+    insecureEdgeTerminationPolicy: None
+    termination: passthrough
+  to:
+    kind: Service
+    name: observability-observatorium-api
+    weight: 100
+  wildcardPolicy: None
+----
+
+. If you are using a `customAlertmanagerHubURL`, create a route object by using the following template. Replace `<intermediate_component_url>` with the intermediate component URL:
+
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: alertmanager-proxy
+  namespace: open-cluster-management-observability
+spec:
+  host: <intermediate_component_url>
+  path: /api/v2
+  port:
+    targetPort: oauth-proxy
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: reencrypt
+  to:
+    kind: Service
+    name: alertmanager
+    weight: 100
+  wildcardPolicy: None
+----
 
 [#additional-resource-custom-obs]
 == Additional resources
