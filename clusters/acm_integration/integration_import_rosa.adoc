@@ -2,24 +2,133 @@
 = Automating import for discovered OpenShift Service on AWS clusters
 
 Automate the import of Red Hat OpenShift Service on AWS clusters by using policy enforcement.
-//why do this?
+//why do this
 
 [#auto-import-disc-prereqs]
 == Prerequisites
-//I need some stuff here
+//I need 
 
-The following policy and procedure is an example of how to import all discovered OpenShift Service on AWS clusters automatically. 
+
+[#importing-disc-]
+== Importing 
+
+The following policy and procedure is an example of how to import all your discovered {rosa} clusters automatically. 
 
 To create the policy in the console, see Creating a cluster security policy from the console (link). By default this policy does not make changes to your cluster. 
 
-. Create the following YAML file:
+Complete the following procedure using the terminal:
+
+. Create a YAML file with the following example and the changes that are displayed:
 
 +
 [source,yaml]
 ----
-
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-rosa-autoimport
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/description: OpenShift Service on AWS discovered clusters can be automatically imported into
+Red Hat Advanced Cluster Management as managed clusters with this policy. You can select and configure those managed clusters so you can import. Configure filters or add an annotation if you do not want all of your OpenShift Service on AWS clusters to be automatically imported.      
+spec: 
+  remediationAction: inform <1>
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: rosa-autoimport-config
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ConfigMap
+                metadata:
+                  name: discovery-config
+                  namespace: open-cluster-management-global-set
+                data:
+                  rosa-filter: ""
+          remediationAction: enforce
+          severity: low
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-rosa-autoimport
+        spec:
+          remediationAction: enforce
+          severity: low
+          object-templates-raw: |
+            {{- /* find the ROSA DiscoveredClusters */ -}}
+            {{- range $dc := (lookup "discovery.open-cluster-management.io/v1" "DiscoveredCluster" "" "").items }}
+              {{- /* Check for the flag that indicates the import should be skipped */ -}}
+              {{- $skip := "false" -}}
+              {{- range $key, $value := $dc.metadata.annotations }}
+                {{- if and (eq $key "discovery.open-cluster-management.io/previously-auto-imported")
+                           (eq $value "true") }}
+                  {{- $skip = "true" }}
+                {{- end }}
+              {{- end }}
+              {{- /* if the type is ROSA and the status is Active */ -}}
+              {{- if and (eq $dc.spec.status "Active") 
+                         (contains (fromConfigMap "open-cluster-management-global-set" "discovery-config" "rosa-filter") $dc.spec.displayName)
+                         (eq $dc.spec.type "ROSA")
+                         (eq $skip "false") }}
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: discovery.open-cluster-management.io/v1
+                kind: DiscoveredCluster
+                metadata:
+                  name: {{ $dc.metadata.name }}
+                  namespace: {{ $dc.metadata.namespace }}
+                spec:
+                  importAsManagedCluster: true
+              {{- end }}
+            {{- end }}
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-rosa-managedcluster-status
+        spec:
+          remediationAction: enforce
+          severity: low
+          object-templates-raw: |
+            {{- /* Use the same DiscoveredCluster list to check ManagedCluster status */ -}}
+            {{- range $dc := (lookup "discovery.open-cluster-management.io/v1" "DiscoveredCluster" "" "").items }}
+              {{- /* Check for the flag that indicates the import should be skipped */ -}}
+              {{- $skip := "false" -}}
+              {{- range $key, $value := $dc.metadata.annotations }}
+                {{- if and (eq $key "discovery.open-cluster-management.io/previously-auto-imported")
+                           (eq $value "true") }}
+                  {{- $skip = "true" }}
+                {{- end }}
+              {{- end }}
+              {{- /* if the type is ROSA and the status is Active */ -}}
+              {{- if and (eq $dc.spec.status "Active")
+                         (contains (fromConfigMap "open-cluster-management-global-set" "discovery-config" "rosa-filter") $dc.spec.displayName)
+                         (eq $dc.spec.type "ROSA")
+                         (eq $skip "false") }}
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: cluster.open-cluster-management.io/v1
+                kind: ManagedCluster
+                metadata:
+                  name: {{ $dc.spec.displayName }}
+                  namespace: {{ $dc.spec.displayName }}
+                status:
+                  conditions:
+                    - type: ManagedClusterConditionAvailable
+                      status: "True"
+              {{- end }}
+            {{- end }}
 ----
-
+1. Remove the default remediation below to enforce the policies.
 
 
 2. Run `oc apply -f filename.yaml -n namespace` to apply the file.
