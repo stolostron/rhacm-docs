@@ -1,24 +1,23 @@
 [#import-discover-rosa]
 = Automating import for discovered OpenShift Service on AWS clusters
 
-Automate the import of Red Hat OpenShift Service on AWS clusters by using policy enforcement.
+Automate the import of Red Hat OpenShift Service on AWS clusters by using {product-title-short} policy enforcement.
 //why do this
 
 [#auto-import-disc-prereqs]
 == Prerequisites
 //I need 
 
+[#create?]
+== Creating the automatic import
 
-[#importing-disc-]
-== Importing 
-
-The following policy and procedure is an example of how to import all your discovered {rosa} clusters automatically. 
+The following policy and procedure is an example of how to import all your discovered {:rosa:} clusters automatically. 
 
 To create the policy in the console, see Creating a cluster security policy from the console (link). By default this policy does not make changes to your cluster. 
 
-Complete the following procedure using the terminal:
+Complete the following procedure by using the terminal:
 
-. Create a YAML file with the following example and the changes that are displayed:
+. Create a YAML file with the following example and the changes that follow the example.
 
 +
 [source,yaml]
@@ -128,15 +127,61 @@ spec:
               {{- end }}
             {{- end }}
 ----
-1. Remove the default remediation below to enforce the policies.
+1. To enable automatic import, change the `spec.remediationAction` to `enforce`. 
+2. The `ConfigMap` has a key named, `rosa-filter`, which by default has no value. Specify a string value to select a subset of the matching {rosa} clusters that are based on _discovered_ matching {rosa} cluster names. 
 
+. Run `oc apply -f filename.yaml -n namespace` to apply the file.
 
-2. Run `oc apply -f filename.yaml -n namespace` to apply the file.
+. Managed clusters that are imported are added to the default `clusterset`. If you want to change this default setting, update the policy to use a different `clusterset`. 
+//hwo do they do this? do they know?
+
+. Verify?
+//this we need
+
 3. Deploy the policy to managed clusters with placement and placement binding send to the policy doc? (we need this from engineers) 
 
+[#bind-policy]
+== Binding the policy to a placement definition
 
-To enable automatic import the policy must be changed from an inform policy to enforce. (line 16-optional)
-The policy creates a ConfigMap with a key named rosa-filter.  By default the key’s value is empty.  Specifying a string value for this key will select a subset of the matching ROSA clusters based on whether the string value provided matches any discovered ROSA cluster names. (line 34 change to filter value)
-Managed Clusters that are imported are added to the default clusterset, update the policy to use a different clusterset if desired.
+After you create the policy, bind the policy to a placement definition. Since `DiscoveredCluster` resources are only created on the hub cluster, you only need to deploy to that cluster. 
 
+. Create the placement definition that selects only the hub cluster. Use the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement-openshift-plus-hub
+spec:
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: name
+      	    operator: In
+      	    values:
+      	    - local-cluster
+----
+
+. Run `oc apply -f placement.yaml -n namespace`, where `namespace` matches the namespace you used for the policy that you previously created. See the following example `PlacementBinding`:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-rosa-autoimport
+placementRef:
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+  name: placement-policy-rosa-autoimport
+subjects:
+- apiGroup: policy.open-cluster-management.io
+  kind: Policy
+  name: policy-rosa-autoimport
+----
+//check yaml spacing here
 
