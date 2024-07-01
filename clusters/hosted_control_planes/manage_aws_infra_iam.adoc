@@ -1,7 +1,7 @@
 [#hosted-control-planes-manage-aws-infra-iam]
 = Managing AWS infrastructure and IAM permissions for hosted control planes
 
-When you use hosted control planes for {ocp} on AWS, the infrastructure requirements vary based on your setup. 
+When you use hosted control planes for {ocp} on Amazon Web Services (AWS), the infrastructure requirements vary based on your setup.
 
 * <<hosted-aws-infra-iam-prereqs,Prerequisites>>
 * <<hosting-cluster-aws-infra-reqs,AWS infrastructure requirements>>
@@ -11,7 +11,8 @@ When you use hosted control planes for {ocp} on AWS, the infrastructure requirem
 [#hosted-aws-infra-iam-prereqs]
 == Prerequisites
 
-You must configure hosted control planes before you can create hosted control plane clusters. See xref:../../clusters/hosted_control_planes/aws_intro.adoc#hosting-service-cluster-configure-aws[Configuring hosted control plane clusters on AWS] for more information.
+* You must configure hosted control planes before you can create hosted control plane clusters. See xref:../../clusters/hosted_control_planes/aws_intro.adoc#hosting-service-cluster-configure-aws[Configuring hosted control plane clusters on AWS] for more information.
+* You must create an AWS Identity and Access Management (IAM) role and AWS Security Token Service (STS) credentials. See xref:../../clusters/hosted_control_planes/create_role_sts_aws.adoc#create-role-sts-aws[Creating an AWS IAM role and STS credentials].
 
 [#hosting-cluster-aws-infra-reqs]
 == AWS infrastructure requirements
@@ -29,7 +30,7 @@ _Prerequired_ means that hosted control planes requires AWS infrastructure to pr
 [#infra-prerequired-unmanaged-for-ho]
 === Prerequired and unmanaged infrastructure for the HyperShift Operator in an arbitrary AWS account
 
-An arbitrary AWS account depends on the provider of the hosted control planes service. 
+An arbitrary AWS account depends on the provider of the hosted control planes service.
 
 In self-managed hosted control planes, the cluster service provider controls the AWS account. The _cluster service provider_ is the administrator who hosts cluster control planes and is responsible for uptime. In managed hosted control planes, the AWS account belongs to Red&nbsp;Hat.
 
@@ -463,7 +464,7 @@ The roles that hosted control planes uses are shown in the following examples:
 [#hosting-cluster-aws-infra-iam-separate]
 == Creating AWS infrastructure and IAM resources separately
 
-By default, the `hcp create cluster aws` command creates cloud infrastructure with the hosted cluster and applies it. You can create the cloud infrastructure portion separately so that the `hcp create cluster aws` command can be used only to create the cluster, or render it so that you can modify it before you apply it. 
+By default, the `hcp create cluster aws` command creates cloud infrastructure with the hosted cluster and applies it. You can create the cloud infrastructure portion separately so that the `hcp create cluster aws` command can be used only to create the cluster, or render it so that you can modify it before you apply it.
 
 To create the cloud infrastructure portion separately, you need to create the AWS infrastructure, create the AWS Identity and Access (IAM) resources, and create the cluster.
 
@@ -471,24 +472,31 @@ To create the cloud infrastructure portion separately, you need to create the AW
 === Creating the AWS infrastructure
 
 To create the AWS infrastructure, enter the following command:
-//lahinson - july 2023 - update hypershift cli command here
+
++
 ----
-hypershift create infra aws --name CLUSTER_NAME \ <1>
-    --aws-creds AWS_CREDENTIALS_FILE \ <2>
-    --base-domain BASEDOMAIN \ <3>
-    --infra-id INFRA_ID \ <4>
-    --region REGION \ <5>
-    --output-file OUTPUT_INFRA_FILE <6>
+hypershift create infra aws \
+    --name <hosted_cluster_name> \ <1>
+    --sts-creds <path_to_sts_credential_file> \ <2>
+    --base-domain <basedomain> \ <3>
+    --infra-id <infra_id> \ <4>
+    --region <region> \ <5>
+    --output-file <output_infra_file> <6>
+    --role-arn <role_name> \ <7>
 ----
 
-<1> Replace `CLUSTER_NAME` with the name of the hosted cluster that you are creating. This value is used for creating the Route 53 private hosted zones for the cluster.
-<2> Replace `AWS_CREDENTIALS_FILE` with the name of the AWS credentials file that has permissions to create infrastructure resources for your cluster, such as VPCs, subnets, and NAT gateways. This value must correspond to the AWS account for your guest cluster, where workers reside.
-<3> Replace `BASEDOMAIN` with the name of the base domain what you plan to use for your hosted cluster Ingress. This value must correspond to a Route 53 public zone that you can create records in.
-<4> Replace `INFRA_ID` with a unique name that identifies your infrastructure by using tags. This value is used by the cloud controller manager in Kubernetes and the cluster API manager to identify infrastructure for your cluster. Typically, this value is the name of your cluster (`CLUSTER_NAME`) with a suffix appended to it.
-<5> Replace `REGION` with the region where you want to create the infrastructure for your cluster.
-<6> Replace `OUTPUT_INFRA_FILE` with the name of the file where you want to store the IDs of the infrastructure in JSON format. You can use this file as input to the `hcp create cluster aws` command to populate fields in the `HostedCluster` and `NodePool` resouces.
++
+<1> Replace `<hosted_cluster_name>` with the name of the hosted cluster that you are creating. This value is used for creating the Route 53 private hosted zones for the cluster.
+<2> Replace `<path_to_sts_credential_file>` with the name of the STS credentials file that has permissions to create infrastructure resources for your cluster, such as VPCs, subnets, and NAT gateways. This value must correspond to the AWS account for your guest cluster, where workers reside.
+<3> Replace `<basedomain>` with the name of the base domain what you plan to use for your hosted cluster Ingress. This value must correspond to a Route 53 public zone that you can create records in.
+<4> Replace `<infra_id>` with a unique name that identifies your infrastructure by using tags. This value is used by the cloud controller manager in Kubernetes and the cluster API manager to identify infrastructure for your cluster. Typically, this value is the name of your cluster, `<hosted_cluster_name>`, with a suffix appended to it.
+<5> Replace `<region>` with the region where you want to create the infrastructure for your cluster.
+<6> Replace `<output_infra_file>` with the name of the file where you want to store the IDs of the infrastructure in JSON format. You can use this file as input to the `hcp create cluster aws` command to populate fields in the `HostedCluster` and `NodePool` resouces.
+<7> Replace `<role_name>` with the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`.
+
 
 *Note:* The `hypershift` CLI is not available to download. Use the following commands to extract it by using the HyperShift Operator pod present in the `hypershift` namespace. Replace `<hypershift-operator-pod-name>` with your HyperShift Operator pod name.
+
 +
 ----
 oc project hypershift
@@ -514,28 +522,33 @@ All of those resources contain the `kubernetes.io/cluster/INFRA_ID=owned` tag, w
 === Creating the AWS IAM resources
 
 To create the AWS IAM resources, enter the following command:
-//lahinson - july 2023 - update hypershift cli command here
+
++
 ----
-hypershift create iam aws --infra-id INFRA_ID \ <1>
-    --aws-creds AWS_CREDENTIALS_FILE \ <2>
-    --oidc-storage-provider-s3-bucket-name OIDC_BUCKET_NAME \ <3>
-    --oidc-storage-provider-s3-region OIDC_BUCKET_REGION \ <4>
-    --region REGION \ <5>
-    --public-zone-id PUBLIC_ZONE_ID \ <6>
-    --private-zone-id PRIVATE_ZONE_ID \ <7>
-    --local-zone-id LOCAL_ZONE_ID \ <8>
-    --output-file OUTPUT_IAM_FILE <9>
+hypershift create iam aws --infra-id <infra_id> \ <1>
+    --sts-creds <path_to_sts_credential_file> \ <2>
+    --oidc-storage-provider-s3-bucket-name <oidc_bucket_name> \ <3>
+    --oidc-storage-provider-s3-region <oidc_bucket_region> \ <4>
+    --region <region> \ <5>
+    --public-zone-id <public_zone_id> \ <6>
+    --private-zone-id <private_zone_id> \ <7>
+    --local-zone-id <local_zone_id> \ <8>
+    --output-file <output_iam_file> <9>
+    --role-arn <role_name> \ <10>
 ----
 
-<1> Replace `INFRA_ID` with the same ID that you specified in the `create infra aws` command. This value identifies the IAM resources that are associated with the hosted cluster.
-<2> Replace `AWS_CREDENTIALS_FILE` with the name of the AWS credentials file that has permissions to create IAM resources, such as roles. This file does not need to be the same credentials file that you specified to create the infrastructure, but it must correspond to the same AWS account.
-<3> Replace `OIDC_BUCKET_NAME` with the name of the bucket that stores the OIDC documents. This bucket was created as a prerequisite for installing hosted control planes. The name of the bucket is used to construct URLs for the OIDC provider that is created by this command.
-<4> Replace `OIDC_BUCKET_REGION` with the region where the OIDC bucket resides.
-<5> Replace `REGION` with the region where the infrastructure of the cluster is located. This value is used to create a worker instance profile for the machines that belong to the hosted cluster.
-<6> Replace `PUBLIC_ZONE_ID` with the ID of the public zone for the guest cluster. This value is used to create the policy for the Ingress Operator. You can find this value in the `OUTPUT_INFRA_FILE` that is generated by the `create infra aws` command.
-<7> Replace `PRIVATE_ZONE_ID` with the ID of the private zone for the guest cluster. This value is used to create the policy for the Ingress Operator. You can find this value in the `OUTPUT_INFRA_FILE` that is generated by the `create infra aws` command.
-<8> Replace `LOCAL_ZONE_ID` with the ID of the local zone for the guest cluster when you create a private cluster. This value is used to create the policy for the Control Plane Operator so that it can manage records for the PrivateLink endpoint. You can find this value in the `OUTPUT_INFRA_FILE` that is generated by the `create infra aws` command.
-<9> Replace `OUTPUT_IAM_FILE` with the name of the file where you plan to store the IDs of the IAM resources in JSON format. You can then use this file as input to the `hcp create cluster aws` command to populate the fields in the `HostedCluster` and `NodePool` resources.
++
+<1> Replace `<infra_id>` with the same ID that you specified in the `create infra aws` command. This value identifies the IAM resources that are associated with the hosted cluster.
+<2> Replace `<path_to_sts_credential_file>` with the name of the AWS credentials file that has permissions to create IAM resources, such as roles. This file does not need to be the same credentials file that you specified to create the infrastructure, but it must correspond to the same AWS account.
+<3> Replace `<oidc_bucket_name>` with the name of the bucket that stores the OIDC documents. This bucket was created as a prerequisite for installing hosted control planes. The name of the bucket is used to construct URLs for the OIDC provider that is created by this command.
+<4> Replace `<oidc_bucket_region>` with the region where the OIDC bucket resides.
+<5> Replace `<region>` with the region where the infrastructure of the cluster is located. This value is used to create a worker instance profile for the machines that belong to the hosted cluster.
+<6> Replace `<public_zone_id>` with the ID of the public zone for the guest cluster. This value is used to create the policy for the Ingress Operator. You can find this value in the `<output_infra_file>` that is generated by the `create infra aws` command.
+<7> Replace `<private_zone_id>` with the ID of the private zone for the guest cluster. This value is used to create the policy for the Ingress Operator. You can find this value in the `<output_infra_file>` that is generated by the `create infra aws` command.
+<8> Replace `<local_zone_id>` with the ID of the local zone for the guest cluster when you create a private cluster. This value is used to create the policy for the Control Plane Operator so that it can manage records for the PrivateLink endpoint. You can find this value in the `<output_infra_file>` that is generated by the `create infra aws` command.
+<9> Replace `<output_iam_file>` with the name of the file where you plan to store the IDs of the IAM resources in JSON format. You can then use this file as input to the `hcp create cluster aws` command to populate the fields in the `HostedCluster` and `NodePool` resources.
+<10> Replace `<role_name>` with the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`.
+
 
 After you enter the command, the following resources are created:
 
@@ -550,19 +563,21 @@ To create the cluster, enter the following command:
 
 ----
 hcp create cluster aws \
-    --infra-id INFRA_ID \ <1>
-    --name CLUSTER_NAME \ <2>
-    --aws-creds AWS_CREDENTIALS \ <3>
-    --pull-secret PULL_SECRET_FILE \ <4>
+    --infra-id <infra_id> \ <1>
+    --name <hosted_cluster_name> \ <2>
+    --sts-creds <path_to_sts_credential_file> \ <3>
+    --pull-secret <path_to_pull_secret> \ <4>
     --generate-ssh \ <5>
     --node-pool-replicas 3
+    --role-arn <role_name> <6>
 ----
 
-<1> Replace `INFRA_ID` with the same ID that you specified in the `create infra aws` command. This value identifies the IAM resources that are associated with the hosted cluster.
-<2> Replace `CLUSTER_NAME` with the same name that you specified in the `create infra aws` command.
-<3> Replace `AWS_CREDENTIALS` with the same value that you specified in the `create infra aws` command.
-<4> Replace `PULL_SECRET_FILE` with the name of the file that contains a valid {ocp-short} pull secret.
+<1> Replace `<infra_id>` with the same ID that you specified in the `create infra aws` command. This value identifies the IAM resources that are associated with the hosted cluster.
+<2> Replace `<hosted_cluster_name>` with the name of your hosted cluster.
+<3> Replace `<path_to_sts_credential_file>` with the same name that you specified in the `create infra aws` command.
+<4> Replace `<path_to_pull_secret>` with the name of the file that contains a valid {ocp-short} pull secret.
 <5> The `--generate-ssh` flag is optional, but is good to include in case you need to SSH to your workers. An SSH key is generated for you and is stored as a secret in the same namespace as the hosted cluster.
+<6> Replace `<role_name>` with the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`.
 
 You can also add the `--render` flag to the command and redirect output to a file where you can edit the resources before you apply them to the cluster.
 
@@ -574,4 +589,3 @@ After you run the command, the following resources are applied to your cluster:
 * A `NodePool`
 * Three AWS STS secrets for control plane components
 * One SSH key secret if you specified the `--generate-ssh` flag.
-
