@@ -1,65 +1,56 @@
 [#hosted-deploy-cluster-aws]
 = Deploying a hosted cluster on AWS
 
-After you set up the hosted control plane command line interface, `hcp`, and enable the `local-cluster` as the hosting cluster, you can deploy a hosted cluster on AWS by completing the following steps. To deploy a private hosted cluster, see _Deploying a private hosted cluster on AWS_.
+Before you deploy a hosted cluster on Amazon Web Services (AWS), you must perform the following actions:
 
-. Set environment variables as follows, replacing variables as needed with your credentials:
+* Set up the hosted control plane command line interface, `hcp`.
+* Enable the `local-cluster` managed cluster as the hosting cluster.
+* Create an AWS Identity and Access Management (IAM) role and AWS Security Token Service (STS) credentials. See xref:../../clusters/hosted_control_planes/create_role_sts_aws.adoc#create-role-sts-aws[Creating an AWS IAM role and STS credentials].
 
-+
-----
-export REGION=us-east-1
-export CLUSTER_NAME=clc-name-hs1
-export INFRA_ID=clc-name-hs1
-export BASE_DOMAIN=dev09.red-chesterfield.com
-export AWS_CREDS=$HOME/name-aws
-export PULL_SECRET=/Users/username/pull-secret.txt
-export BUCKET_NAME=acmqe-hypershift
-export BUCKET_REGION=us-east-1
-----
+If you want to deploy a private hosted cluster, see _Deploying a private hosted cluster on AWS_.
 
-+
-. Verify that `CLUSTER_NAME` and `INFRA_ID` have the same values, otherwise the cluster might not appear correctly in the {mce} console. To see descriptions for each variable, run the following command:
+To deploy a hosted cluster on AWS, complete the following steps:
 
-+
-[source,bash]
-----
-hcp create cluster aws --help
-----
-
-. Verify that you are logged into your hub cluster.
-
-. Run the following command to create the hosted cluster:
+. To create the hosted cluster, run the following command:
 
 +
 [source,bash]
 ----
 hcp create cluster aws \
-    --name $CLUSTER_NAME \
-    --infra-id $INFRA_ID \
-    --base-domain $BASE_DOMAIN \
-    --aws-creds $AWS_CREDS \
-    --pull-secret $PULL_SECRET \
-    --region $REGION \
+    --name <hosted_cluster_name> \ <1>
+    --infra-id <infra_id> \ <2>
+    --base-domain <basedomain> \ <3>
+    --sts-creds <path_to_sts_credential_file> \ <4>
+    --pull-secret <path_to_pull_secret> \ <5>
+    --region <region> \ <6>
     --generate-ssh \
-    --node-pool-replicas 3 \
-    --namespace <hypershift-hosting-service-cluster>
+    --node-pool-replicas <node_pool_replica_count> \ <7>
+    --namespace <hosted_cluster_namespace> \ <8>
+    --role-arn <role_name> <9>
 ----
 
-+
-*Note:* By default, all `HostedCluster` and `NodePool` custom resources are created in the `clusters` namespace. If you specify the `--namespace <namespace>` parameter, `HostedCluster` and `NodePool` custom resources are created in the namespace you chose.
+<1> Specify the name of your hosted cluster, for instance, `example`.
+<2> Specify your infrastructure name. You must provide the same value for `<hosted_cluster_name>` and `<infra_id>`. Otherwise the cluster might not appear correctly in the {mce} console.
+<3> Specify your base domain, for example, `example.com`.
+<4> Specify the path to your AWS STS credentials file, for example, `/home/user/sts-creds/sts-creds.json`.
+<5> Specify the path to your pull secret, for example, `/user/name/pullsecret`.
+<6> Specify the AWS region name, for example, `us-east-1`.
+<7> Specify the node pool replica count, for example, `3`.
+<8> By default, all `HostedCluster` and `NodePool` custom resources are created in the `clusters` namespace. You can use the `--namespace <namespace>` parameter, to create the `HostedCluster` and `NodePool` custom resources in a specific namespace.
+<9> Specify the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`.
 
-. You can check the status of your hosted cluster by running the following command:
+. Verify the status of your hosted cluster to check that the value of `AVAILABLE` is `True`. Run the following command:
 
 +
 [source,bash]
 ----
-oc get hostedclusters -n <hypershift-hosting-service-cluster>
+oc get hostedclusters -n <hosted_cluster_namespace>
 ----
 
-. You can check your node pools by running the following command:
+. Get a list of your node pools by running the following command:
 
 +
 [source,bash]
 ----
-oc get nodepools --namespace clusters
+oc get nodepools --namespace <hosted_cluster_namespace>
 ----
