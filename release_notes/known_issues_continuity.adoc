@@ -44,9 +44,9 @@ The `Terminating` state is a result of the Velero restore resources waiting on t
 . If your `open-cluster-management-backup` namespace is already stuck in the `Terminating` state, edit all the Velero restore resources and remove the finalizers. 
 . Allow the Velero resources to delete the namespaces and resources. 
 
-[#bare-metal-reintall]
-=== Bare metal managed clusters deployed with the Infrastructure Operator by using the ZTP flow perform reinstall nodes 
-//2.9:ACM-8627
+[#bare-metal-resources]
+=== Bare metal hub resources not backed up by
+//2.11:ACM-11766
 
 If the resources for the bare metal cluster are backed up and restored to a secondary hub cluster by using the {product-title-short} back up and restore feature, the managed cluster reinstalls on the nodes, which destroys the existing managed cluster. 
 
@@ -54,60 +54,12 @@ If the resources for the bare metal cluster are backed up and restored to a seco
 
 If a `BareMetalHost` resource was not used in the deployment of the managed cluster, there is no negative impact.
 
-To work around this issue, exclude managed `BareMetalHost` resources on the primary hub cluster from performing back up and restore to the secondary hub cluster. 
+To work around this issue, ensure that the managed `BareMetalHost` resources on the primary hub cluster are no longer backed up with the managed cluster backup
 
-Add the following label to the `BareMetalHost` resources on the primary hub cluster: `velero.io/exclude-from-backup: "true"`.
+If you want the managed `BareMetalHost` resources on the primary hub cluster to be backed up, add the following backup label to the `BareMetalHost` resources on the primary hub cluster: `cluster.open-cluster-management.io/backup`.
 
-This label excludes any resource from the back up procedure. 
-
-When you exclude the `BareMetalHost` resource from restore, removing a cluster by using zero touch provisioning does not fully function because `BareMetalHost` manages power for the bare metal nodes. 
-
-[#backup-oadp-failed-validation]
-=== _BackupSchedule_ shows a _FailedValidation_ status when using OADP 1.1.2, or later
-//2.8:OADP-1511
-
-After you enable the {product-title-short} backup and restore component and successfully create a `DataProtectionApplication` resource, a `BackupStorageLocation` resource is created with a status of `Available`. When you are using OADP version 1.1.2 or later, you might receive the following message after you create a `BackupSchedule` resource and the status is `FailedValidation`:
-
-----
-oc get backupschedule -n open-cluster-management-backup
-NAME PHASE MESSAGE
-rosa-backup-schedule FailedValidation Backup storage location is not available. Check velero.io.BackupStorageLocation and validate storage credentials.
-----
-
-The error is caused by a missing value for `ownerReference` in the `BackupStorageLocation` resource. The value of the `DataProtectionApplication` resource should be used as the value of the `ownerReference`.
-
-To work around the problem, manually add the `ownerReference` to the `BackupStorageLocation`:
-
-. Open the `oadp-operator.v1.1.2` file by running the following command:
-
-+
-----
-oc edit csv -n open-cluster-management-backup oadp-operator.v1.1.2
-----
-
-. Edit the value of `spec.deployments.label.spec.replicas` by replacing the `1` with a `0` in the OADP operator CSV.
-
-. Patch the `ownerReference` annotations in the YAML script as shown in the following example:
-
-+
-[source,yaml]
-----
-metadata:
-resourceVersion: '273482'
-name: dpa-sample-1
-uid: 4701599a-cdf5-48ac-9264-695a95b935a0
-namespace: open-cluster-management-backup
-ownerReferences: <<
-
-apiVersion: oadp.openshift.io/v1alpha1
-blockOwnerDeletion: true
-controller: true
-kind: DataProtectionApplication
-name: dpa-sample
-uid: 52acd151-52fd-440a-a846-95a0d7368ff7
-----
-
-. Change the value of `spec.deployments.label.spec.replicas` back to `1` to start the data protection application process with the new settings. 
+To learn more about using this backup label to backup generic resources, see link:../business_continuity/backup_restore/backup_arch.adoc#resources-that-are-backed-up[Cleaning the hub cluster after restore] topic. 
+ 
 
 [#restore-limitations]
 === Velero restore limitations
@@ -118,7 +70,7 @@ Velero skips existing resources if they are not part of the restored backup, so 
 
 To address this limitation, the cluster backup and restore operator runs a post restore operation to clean up the resources created by the user or a different restore operation when a `restore.cluster.open-cluster-management.io` resource is created.
 
-For more information, see the link:../business_continuity/backup_restore/backup_install.adoc#dr4hub-install-backup-and-restore[Installing the backup and restore operator] topic. 
+For more information, see the link:../business_continuity/backup_restore/backup_restore.adoc#clean-hub-restore[Cleaning the hub cluster after restore] topic. 
 
 [#imported-clusters-not-displayed]
 === Passive configurations do not display managed clusters
