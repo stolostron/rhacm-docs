@@ -1,7 +1,7 @@
 [#hosted-bare-metal-adding-agents-ibmz]
 = Adding IBM Z agents to the InfraEnv resource (Technology Preview)
 
-To attach compute nodes to a hosted control plane, create agents that will help you to scale the node pool. Adding agents in an IBM Z environment requires additional steps, which are described in detail in this section. 
+To attach compute nodes to a hosted control plane, create agents that help you to scale the node pool. Adding agents in an IBM Z environment requires additional steps, which are described in detail in this section.  
 
 *Note:* Unless stated otherwise, these procedures apply to both z/VM and RHEL KVM installations on IBM Z and IBM LinuxONE.
 
@@ -54,7 +54,7 @@ virt-install \
 <1> Specify the name of the virtual machine.
 <2> Specify the Mac address.
 <3> Specify the location of the `image.iso` file.
-<4> Specify the Operating system version that you are using.
+<4> Specify the pperating system version that you are using.
 
 [#hosted-bare-metal-adding-agents-ibmz-zvm]
 == Adding IBM Z LPAR as agents
@@ -78,10 +78,10 @@ zfcp.allow_lun_scan=0
 ai.ip_cfg_override=1 \// <4>
 random.trust_cpu=on rd.luks.options=discard
 ----
-<1> For the `coreos.live.rootfs_url` artifact, specify the matching `rootfs` artifact for the `kernel` and `initramfs` that you are booting. Only HTTP and HTTPS protocols are supported.
-<2> For the `ip` parameter, assign manually assign the IP address, as described in "Installing a cluster with z/VM on {ibm-z-name} and {ibm-linuxone-name}".
-<3> For installations on DASD-type disks, use `rd.dasd` to specify the DASD where {op-system-first} is to be installed. For installations on FCP-type disks, use `rd.zfcp=<adapter>,<wwpn>,<lun>` to specify the FCP disk where {op-system} is to be installed.
-<4> Specify this parameter when using an OSA network adapter or Hipersockets.
+<1> For the `coreos.live.rootfs_url` artifact, specify the matching `rootfs` artifact for the `kernel` and `initramfs` that you are starting. Only HTTP and HTTPS protocols are supported.
+<2> For the `ip` parameter, manually assign the IP address, as described in _Installing a cluster with z/VM on IBM Z and IBM LinuxONE_.
+<3> For installations on DASD-type disks, use `rd.dasd` to specify the DASD where Red Hat Enterprise Linux CoreOS (RHCOS) is to be installed. For installations on FCP-type disks, use `rd.zfcp=<adapter>,<wwpn>,<lun>` to specify the FCP disk where RHCOS is to be installed.
+<4> Specify this parameter when you use an Open Systems Adapter (OSA) or HiperSockets.
 
 . Generate the `.ins` and `initrd.img.addrsize` files.
 +
@@ -89,9 +89,9 @@ The .ins file is a special file that includes installation data and is present o
 +
 This file contains details such as mapping of the location of installation data on the disk or FTP server, the memory locations where the data is to be copied.
 +
-**Note**: In {ocp-short} 4.16, the .ins file and 'initrd.img.addrsize' are not automatically generated as part of boot-artifacts from the installer. You must generate these files manually.
+*Note*: In {ocp-short} 4.16, the .ins file and 'initrd.img.addrsize' are not automatically generated as part of boot-artifacts from the installer. You must manually generate these files.
 
-.. Run the following commands to get the size of the kernel and initrd. 
+.. Run the following commands to get the size of the `kernel` and `initrd`: 
 +
 [source,yaml]
 ----
@@ -101,13 +101,13 @@ CMDLINE_PATH='./generic.prm'
 kernel_size=$(stat -c%s $KERNEL_IMG_PATH )
 initrd_size=$(stat -c%s $INITRD_IMG_PATH)
 ----
-.. Round the kernel size up to the next MiB boundary. This will be the starting address of initrd.img.
+.. Round the `kernel` size up to the next MiB boundary. This value  is the starting address of `initrd.img`.
 +
 [source,bash]
 ----
 offset=$(( (kernel_size + 1048575) / 1048576 * 1048576 ))
 ----
-.. Create the kernel binary patch file holding the `initrd` address and size by running the following commands:
+.. Create the kernel binary patch file that contains the `initrd` address and size by running the following commands:
 +
 [source,bash]
 ----
@@ -118,29 +118,28 @@ INITRD_ADDR_SIZE_OFFSET=0x00010408
 OFFSET_HEX=$(printf '0x%08x\n' $offset)
 ----
 
-.. Convert address and size to binary format by running the following commands:
+.. Convert the address and size to binary format by running the following commands:
 +
 [source,bash]
 ----
-printf "$(printf '%016x\n' $offset)" | xxd -r -p > temp_address.bin
 printf "$(printf '%016x\n' $initrd_size)" | xxd -r -p > temp_size.bin
 ----
 
-.. Concatenate address and size binaries
+.. Concatenate the address and size binaries by running the following command:
 +
 [source,bash]
 ----
 cat temp_address.bin temp_size.bin > "$INITRD_IMG_NAME.addrsize"
 ----
 
-.. Clean up temporary files
+.. Clean up temporary files by running the following command:
 +
 [source,bash]
 ----
 rm -rf temp_address.bin temp_size.bin
 ----
 
-.. Create the .ins file based on the paths of these files (kernel.img, initrd.img , initrd.img.addrsize, cmdline) and the memory locations where the data is to be copied.
+.. Create the `.ins` file. The file is based on the paths of the `kernel.img`, `initrd.img`, `initrd.img.addrsize`, and `cmdline` files and the memory locations where the data is to be copied.
 +
 [source,yaml]
 ----
@@ -150,7 +149,7 @@ $INITRD_IMG_NAME.addrsize $INITRD_ADDR_SIZE_OFFSET
 $CMDLINE_PATH $KERNEL_CMDLINE_OFFSET
 ----
 
-. Transfer the `initrd`, `kernel`, `generic.ins` and the `initrd.img.addrsize` parameter files* to the File server. For details on how to transfer the files with FTP and boot, see link:https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_a_standard_rhel_8_installation/installing-in-an-lpar_installing-rhel[Installing in an LPAR].    
+. Transfer the `initrd`, `kernel`, `generic.ins`, and `initrd.img.addrsize` parameter files to the file server. For more information about how to transfer the files with FTP and boot, see link:https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_a_standard_rhel_8_installation/installing-in-an-lpar_installing-rhel[Installing in an LPAR].    
 
 . Start the machine.
 
@@ -159,7 +158,7 @@ $CMDLINE_PATH $KERNEL_CMDLINE_OFFSET
 [#hosted-bare-metal-adding-agents-ibmz-zvm-lpar]
 == Adding IBM z/VM as agents
 
-If you want to use a static IP for z/VM guest, you must configure the `NMStateConfig` attribute for the z/VM agent so that the IP parameter persists in the second boot.
+If you want to use a static IP for z/VM guest, you must configure the `NMStateConfig` attribute for the z/VM agent so that the IP parameter persists in the second start.
 
 Complete the following steps to start your IBM Z environment with the downloaded PXE images from the `InfraEnv` resource. After the Agents are created, the host communicates with the Assisted Service and registers in the same namespace as the `InfraEnv` resource on the management cluster.
 
@@ -182,10 +181,10 @@ rd.<disk_type>=<adapter> \// <3>
 zfcp.allow_lun_scan=0
 ai.ip_cfg_override=1 \// <4>
 ----
-<1> For the `coreos.live.rootfs_url` artifact, specify the matching `rootfs` artifact for the `kernel` and `initramfs` that you are booting. Only HTTP and HTTPS protocols are supported.
-<2> For the `ip` parameter, assign manually assign the IP address, as described in "Installing a cluster with z/VM on {ibm-z-name} and {ibm-linuxone-name}".
-<3> For installations on DASD-type disks, use `rd.dasd` to specify the DASD where {op-system-first} is to be installed. For installations on FCP-type disks, use `rd.zfcp=<adapter>,<wwpn>,<lun>` to specify the FCP disk where {op-system} is to be installed.
-<4> Specify this parameter when using an OSA network adapter or Hipersockets.
+<1> For the `coreos.live.rootfs_url` artifact, specify the matching `rootfs` artifact for the `kernel` and `initramfs` that you are starting. Only HTTP and HTTPS protocols are supported.
+<2> For the `ip` parameter, manually assign the IP address, as described in _Installing a cluster with z/VM on IBM Z and IBM LinuxONE_.
+<3> For installations on DASD-type disks, use `rd.dasd` to specify the DASD where Red Hat Enterprise Linux CoreOS (RHCOS) is to be installed. For installations on FCP-type disks, use `rd.zfcp=<adapter>,<wwpn>,<lun>` to specify the FCP disk where RHCOS is to be installed.
+<4> Specify this parameter when you use an Open Systems Adapter (OSA) or HiperSockets.
 
 . Move `initrd`, kernel images, and the parameter file to the guest VM by running the following commands:
 
