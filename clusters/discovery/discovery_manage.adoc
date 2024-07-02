@@ -1,17 +1,61 @@
 [#managing-discovery]
-= Managing Discovery services
+= Manage the Discovery service
 
-Review the following sections to learn more about detaching managed cluster instances and importing non-ROSA clusters.
+Review the following sections to learn more about importing discovered clusters for {rosa}, detaching managed cluster instances, and importing non-{rosa} clusters.
 
+[#import-discovered-auto-rosa]
+== Import discovered clusters automatically for {rosa} clusters
+//since I mention ACM, should this be added to the new acm_integration folder instead? | MJ | 07/02
+Automatically import {rosa} clusters into your {product-title} hub cluster with the `discovery-operator`.
 
-* <<detach-managed-cluster,Detaching managed clusters for Discovery>>
-* <<import-non-rosa-clusters,Importing non-ROSA clusters automatically>>
+=== Prerequisites
+
+* You must access the cluster as the cluster administrator.
+* You must have access to the namespaces that were used to configure the discovery service.
+* You must have permission to import your cluster to enable automatic import.
+
+[import-discovered-rosa-console]
+=== Import from the console
+
+To automatically import the `DiscoveredCluster` resource, you must modify the resource and set the `importAsManagedCluster` field to `true`. 
+
+. Log in to your hub cluster from the console.
+. Select *Search* from the navigation menu. 
+. From the search bar, enter the following query: "DiscoveredCluster".
+. The `DiscoveredCluster` resource results appear.
+. Go to the `DiscoveredCluster` resource and set `importAsManagedCluster` to `true`. By setting the field to `true`, the `discovery-operator` imports the `DiscoveredCluster` resource, and creates a `ManagedCluster`, `KlusterletAddOnConfig`, (only if {product-title-short} is installed) and create `Secret` resources for your automatic import.
++
+Your `DiscoveredCluster` resource might resemble the following instance:
+
++
+[source,yaml]
+----
+apiVersion: discovery.open-cluster-management.io/v1
+kind: DiscoveredCluster
+metadata:
+  name: 28c17977-fc73-4050-b5cc-a5aa2d1d6892
+  namespace: discovery
+spec:
+  openshiftVersion: 4.14.26
+  isManagedCluster: false
+  cloudProvider: aws   
+  name: 28c17977-fc73-4050-b5cc-a5aa2d1d6892   
+  displayName: rosa-dc
+  status: Active
+  importAsManagedCluster: true
+  type: ROSA
+----
+
+. To verify that the `DiscoveredCluster` resource is imported, go to the *Clusters* page. Verify the import status of your cluster from the _Cluster list_ tab.
+
+[import-discovered-rosa-cli]
+=== Import from the command line interface
 
 [#detach-managed-cluster]
 == Detaching managed clusters for Discovery
 
-Detach managed clusters for Discovey to prevent reimporting automatically. Complete the following steps:
-//need to confirm steps
+Detach managed clusters for Discovery to prevent automatic reimport. Complete the following steps:
+
 . Log in to your {product-title} cluster.
 . Select the `DiscoverCluster` resource of the `ManagedCluster` instance that is managed by the hub cluster. 
 . To detach your cluster, select the *Action menu* icon. 
@@ -29,7 +73,7 @@ metadata:
     discovery.open-cluster-management.io/previously-auto-imported: 'true'
 ----
 
-. To verify that the `DiscoveredCluster` resource is not reimported automatically, check for the following message during your reimport attempt:
+. To verify that the `DiscoveredCluster` resource is not reimported automatically, check for the following message in the `DiscoveredCluster` logs:
 
 +
 [source,bash]
@@ -41,8 +85,8 @@ existing 'discovery.open-cluster-management.io/previously-auto-imported' annotat
 . If you want to reimport the `DiscoveredCluster` resource automatically, you must remove the previously mentioned annotation.
 
 [#import-non-rosa-clusters]
-== Importing non-ROSA clusters automatically
+== Importing non-{rosa} clusters automatically
 
-If you want to automatically import a non-ROSA cluster, the import does not initiate. You must import other infrastructure provider `DiscoveredCluster` resources manually. You must directly apply Kubernetes configurations to the other types of `DiscoveredCluster` resources. If you enable the `importAsManagedCluster` field from the `DiscoveredCluster` resource, it is not imported due to the Discovery webhook. 
+If you want to automatically import a non-ROSA cluster, the import does not initiate. You must import other infrastructure provider `DiscoveredCluster` resources manually. You must directly apply Kubernetes configurations to the other types of `DiscoveredCluster` resources. If you enable the `importAsManagedCluster` field from the `DiscoveredCluster` resource, it is not imported due to the Discovery webhook. See, link:../discovery/config_ui.adoc#import-discovered[Import discovered clusters from the console].
 
-*Note:* If there is a `MultiClusterEngineHCP` type for the `DiscoveredCluster` resource you can automatically import it. However, the `DiscoveredCluster` resource is provided through only HyperShift. For more details see, 
+//*Note:* If there is a `MultiClusterEngineHCP` type for the `DiscoveredCluster` resource you can automatically import it. However, the `DiscoveredCluster` resource is provided through only HyperShift. For more details see, 
