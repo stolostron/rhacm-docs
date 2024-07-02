@@ -10,16 +10,16 @@
 * <<ansible-template-create,Creating an Automation template>>
 * <<ansible-status-job-cluster,Viewing the status of an Ansible job>>
 * <<push-cl-cr-job-pod,Pushing custom labels from the _ClusterCurator_ resource to the automation job pod>>
+* <<eus-upgrades, Using the _ClusterCurator_ for Extended Update Support (EUS) upgrades>>
 
 [#prerequisites-for-ansible-integration-cluster]
 == Prerequisites
 
 You must meet the following prerequisites to run Automation templates on your clusters:
 
-* {ocp-short} 4.13 or later
+* Install {ocp-short}.
 
 * Install the {aap-short} Resource Operator to connect Ansible jobs to the lifecycle of Git subscriptions. For best results when using the Automation template to launch {aap-short} jobs, the {aap-short} job template should be idempotent when it is run. You can find the {aap-short} Resource Operator in the {ocp-short} _OperatorHub_. 
-
 
 [#ansible-template-run-cluster-console]
 == Configuring an _Automation_ template to run on a cluster by using the console
@@ -117,7 +117,7 @@ After adding the content, a new job is created to run the Ansible posthook.
 == Specifying an Ansible inventory to use for all jobs
 
 You can use the `ClusterCurator` resource to specify an Ansible inventory to use for all jobs. See the following example:
-
++
 [source,yaml]
 ----
 apiVersion: cluster.open-cluster-management.io/v1beta1
@@ -177,4 +177,64 @@ metadata:
         name: Demo Job Template
         type: Job
     towerAuthSecret: toweraccess
+----
+
+[#eus-upgrades]
+== Using the _ClusterCurator_ for Extended Update Support (EUS) upgrades
+
+You can use the `ClusterCurator` resource to perform an easier, automatic upgrade between EUS releases. 
+
+. Add `spec.upgrade.intermediateUpdate` to the `ClusterCurator` resource with the intermediate release value. See the following sample, where the intermediate release is `4.13.x`, and the `desiredUpdate` is `4.14.x`:
+
++
+[source,yaml]
+----
+spec:
+  desiredCuration: upgrade
+  upgrade:
+    intermediateUpdate: 4.13.x
+    desiredUpdate: 4.14.x
+    monitorTimeout: 120
+----
+
+. *Optional:* You can pause the `machineconfigpools` to skip the intermediate release for faster upgrade. Enter `Unpause machinepool` in the `posthook` job, and `pause machinepool` in the `prehook` job. See the following example:
+
++
+[source,yaml]
+----
+    posthook:
+      - extra_vars: {}
+        name: Unpause machinepool
+        type: Job
+    prehook:
+      - extra_vars: {}
+        name: Pause machinepool
+        type: Job
+----
+
+See the following full example of the `ClusterCurator` that is configured to upgrade EUS to EUS:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: ClusterCurator
+metadata:
+  annotations:
+    cluster.open-cluster-management.io/upgrade-clusterversion-backoff-limit: "10"
+  name: your-name
+  namespace: your-namespace
+spec:
+  desiredCuration: upgrade
+ upgrade:
+    intermediateUpdate: 4.13.x
+    desiredUpdate: 4.14.x
+    monitorTimeout: 120
+    posthook:
+      - extra_vars: {}
+        name: Unpause machinepool
+        type: Job
+    prehook:
+      - extra_vars: {}
+        name: Pause machinepool
+        type: Job
 ----

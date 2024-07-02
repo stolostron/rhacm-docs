@@ -15,14 +15,19 @@ Continue reading the following topics:
 [#creating-search-configurable-collection]
 == Creating search configurable collection
 
-Create the `search-collector-config` ConfigMap to define which Kubernetes resources get collected from the cluster by listing the resources in the allow and deny list section. List the resources in the `data.AllowedResources` and `data.DeniedResources` sections within the ConfigMap. Run the following command to create the resource:
+To define which Kubernetes resources get collected from the cluster, create the `search-collector-config` config map. Complete the following steps: 
 
+. Run the following command to create the `search-collector-config` config map: 
+
++
+[source,bash]
 ----
-oc apply -f yourconfigMapFile.yaml
+oc apply -f <your-search-collector-config>.yaml
 ----
 
-Your ConfigMap might resemble the following YAML file: 
+. List the resources in the allow (`data.AllowedResources`) and deny list (`data.DeniedResources`) sections within the config map. Your config map might resemble the following YAML file: 
 
++
 [source,yaml]
 ----
 apiVersion: v1
@@ -31,10 +36,10 @@ metadata:
  name: search-collector-config
  namespace: <namespace where search-collector add-on is deployed>
 data:
- AllowedResources: |-
+ AllowedResources: |- <1>
    - apiGroups:
        - "*"
-     resources:
+     resources: 
        - services
        - pods
    - apiGroups:
@@ -42,7 +47,7 @@ data:
        - authentication.k8s.io
      resources:
        - "*"
- DeniedResources: |-
+ DeniedResources: |- <2>
    - apiGroups:
        - "*"
      resources:
@@ -54,29 +59,78 @@ data:
        - iampolicies
        - certificatepolicies
 ----
-
-The previous ConfigMap example allows `services` and `pods` to be collected from all `apiGroups`, while allowing all resources to be collected from the `admission.k8s.io` and `authentication.k8s.io` `apiGroups`. At the same time, the ConfigMap example also prevents the central collection of `secrets` from all `apiGroups` while preventing the collection of `policies`, `iampolicies`, and `certificatepolicies` from the `apiGroup` `admission.k8s.io`.
-
-*Note:* If you do not provide a ConfigMap, all resources are collected by default. If you only provide `AllowedResources`, all resources not listed in `AllowedResources` are automatically excluded. Resources listed in `AllowedResources` and `DeniedResources` at the same time are also  excluded. 
++
+<1> The previous config map example displays `services` and `pods` to be collected from all `apiGroups`, while allowing all resources to be collected from the `admission.k8s.io` and `authentication.k8s.io` `apiGroups`. 
+<2> The config map example also prevents the central collection of `secrets` from all `apiGroups` while preventing the collection of `policies`, `iampolicies`, and `certificatepolicies` from the `apiGroup` `admission.k8s.io`.
++
+*Note:* If you do not provide a config map, all resources are collected by default. If you only provide `AllowedResources`, all resources not listed in `AllowedResources` are automatically excluded. Resources listed in `AllowedResources` and `DeniedResources` at the same time are also  excluded. 
 
 [#customizing-search-console]
 == Customizing the search console
 
-You can customize the search result limit from the {ocp-short} console. Update the `console-mce-config` in the `multicluster-engine` namespace. These settings apply to all users and might affect performance. View the following performance parameter descriptions:
+Customize your search results and limits. Complete the following tasks to perform the customization:
 
-- `SAVED_SEARCH_LIMIT` - The maximum amount of saved searches per user. By default, there is a limit of ten saved searches for each user. The default value is `10`. To update the limit, add the following key value to the `console-config` ConfigMap: `SAVED_SEARCH_LIMIT: x`.
+. Customize the search result limit from the {ocp-short} console.
+.. Update the `console-mce-config` in the `multicluster-engine` namespace. These settings apply to all users and might affect performance. View the following performance parameter descriptions:
++
+- `SAVED_SEARCH_LIMIT` - The maximum amount of saved searches for each user. By default, there is a limit of ten saved searches for each user. The default value is `10`. To update the limit, add the following key value to the `console-config` config map: `SAVED_SEARCH_LIMIT: x`.
 - `SEARCH_RESULT_LIMIT` - The maximum amount of search results displayed in the console. Default value is `1000`. To remove this limit set to `-1`.
 - `SEARCH_AUTOCOMPLETE_LIMIT` - The maximum number of suggestions retrieved for the search bar typeahead. Default value is `10,000`. To remove this limit set to `-1`.
 
-Run the following `patch` command from the {ocp-short} console to change the search result to 100 items:
+.. Run the following `patch` command from the {ocp-short} console to change the search result to 100 items:
+
++
+[source,bash]
 ----
 oc patch configmap console-mce-config -n multicluster-engine --type merge -p '{"data":{"SEARCH_RESULT_LIMIT":"100"}}'
 ----
 
+. To add, edit, or remove suggested searches, create a config map named `console-search-config` and configure the `suggestedSearches` section. Suggested searches that are listed are also displayed from the console. It is required to have an `id, name, and searchText` for each search object. View the following config map example:
+
++
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: console-search-config
+  namespace: <acm-namespace> <1>
+data:
+  suggestedSearches: |-
+    [
+      {
+        "id": "search.suggested.workloads.name",
+        "name": "Workloads",
+        "description": "Show workloads running on your fleet",
+        "searchText": "kind:DaemonSet,Deployment,Job,StatefulSet,ReplicaSet"
+      },
+      {
+        "id": "search.suggested.unhealthy.name",
+        "name": "Unhealthy pods",
+        "description": "Show pods with unhealthy status",
+        "searchText": "kind:Pod status:Pending,Error,Failed,Terminating,ImagePullBackOff,CrashLoopBackOff,RunContainerError,ContainerCreating"
+      },
+      {
+        "id": "search.suggested.createdLastHour.name",
+        "name": "Created last hour",
+        "description": "Show resources created within the last hour",
+        "searchText": "created:hour"
+      },
+      {
+        "id": "search.suggested.virtualmachines.name",
+        "name": "Virtual Machines",
+        "description": "Show virtual machine resources",
+        "searchText": "kind:VirtualMachine"
+      }
+    ] 
+----
++
+<1> Add the namespace where search is enabled.
+
 [#querying-in-the-console]
 == Querying in the console
 
-You can type any text value in the _Search box_ and results include anything with that value from any property, such as a name or namespace. Users are unable to search for values that contain an empty space.
+You can type any text value in the _Search box_ and results include anything with that value from any property, such as a name or namespace. Queries that contain an empty space are not supported.
 
 For more specific search results, include the property selector in your search. You can combine related values for the property for a more precise scope of your search. For example, search for `cluster:dev red` to receive results that match the string "red" in the `dev` cluster. 
 
@@ -111,14 +165,19 @@ See the following examples that you can select for filtering: `name`, `namespace
 
 To collect the Kubernetes objects from the managed clusters, the `klusterlet-addon-search` pod is run on all the managed clusters where search is enabled. This deployment is run in the `open-cluster-management-agent-addon` namespace. A managed cluster with a high number of resources might require more memory for the `klusterlet-addon-search` deployment to function.
 
-Resource requirements for the `klusterlet-addon-search` pod in a managed cluster can be specified in the `ManagedClusterAddon` custom resource in your {product-title-short} hub cluster. There is a namespace for each managed cluster with the managed cluster name. Edit the `ManagedClusterAddon` custom resource from the namespace matching the managed cluster name. Run the following command to update the resource requirement in `xyz` managed cluster:
+Resource requirements for the `klusterlet-addon-search` pod in a managed cluster can be specified in the `ManagedClusterAddon` custom resource in your {product-title-short} hub cluster. There is a namespace for each managed cluster with the managed cluster name. Complete the following steps:
 
+. Edit the `ManagedClusterAddon` custom resource from the namespace matching the managed cluster name. Run the following command to update the resource requirement in `xyz` managed cluster:
+
++
+[source,bash]
 ----
 oc edit managedclusteraddon search-collector -n xyz
 ----
 
-Append the resource requirements as annotations. View the following example:
+. Append the resource requirements as annotations. View the following example:
 
++
 [source,yaml]
 ----
 apiVersion: addon.open-cluster-management.io/v1alpha1
@@ -132,4 +191,7 @@ The annotation overrides the resource requirements on the managed clusters and a
 
 *Note:* You can discover all resources defined in your managed cluster by using the API Explorer in the console. Alternatively, you can discover all resources by running the following command: `oc api-resources`
 
-Return to xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
+[#add-resources-search]
+== Additional resources
+
+See xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observing environments introduction].
