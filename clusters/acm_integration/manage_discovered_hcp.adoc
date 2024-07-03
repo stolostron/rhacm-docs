@@ -1,41 +1,36 @@
 [#discovering-hcp-acm]
-= Discovering and managing hosted clusters 
+= Discovering {mce-short} hosted clusters in {product-title-short}
 
-If you have {mce-short} clusters that are hosting many hosted clusters, you can bring these hosted clusters to a {product-title-short} hub cluster for management.
-
-By using {product-title-short} management components, such a _Application lifecycle_ and _Governance_, you can import existing {mce-short} clusters to a {product-title-short} hub cluster. 
-//local cluster?
+If you have {mce-short} clusters that are hosting many hosted clusters, you can bring these hosted clusters to a {product-title-short} hub cluster to manage with {product-title-short} management components, such as _Application lifecycle_ and _Governance_.
 
 You can have those hosted clusters automatically discovered and imported as managed clusters.
-//check this order of paragraphs
+
+Since the hosted control planes run on the managed {mce-short} cluster nodes, the number of hosted control planes the cluster can host is determined by the resource availability of managed {mce-short} cluster nodes, as well as the number of managed {mce-short} clusters. 
+
+You can add more nodes or managed clusters to host more hosted control planes.
+
+*Required access:* Cluster administrator
 
 * <<-manage-discover-prereqs,Prerequisites>>
+* Configuring {product-title-short} to import {mce-short} clusters
+* Importing {mce-short} 
+* Discovering hosted clusters from MCE
+* This requires `oc` and `clusteradm` CLIs.
+//find this link
 
 [#manage-discover-prereqs]
 == Prerequisites
 
 * You need one or more {mce-short} hosting clusters that are _managed_ clusters. These clusters are not {ocp} or {product-title-short} clusters because {mce-short} installs other operators, such as Hive and BareMetal infrastructure operators that you need.
 
-* Install {product-title-short}. See the {product-title-short} link:../../install/install_overview.adoc#installing[Installing and upgrading] documentation.
-
 * You need a {product-title-short} cluster as your hub cluster.
 
 [#manage-discover-scale]
-== Scaling
-//title and location
-
-Since the hosted control planes run on the managed {mce-short} cluster nodes, the number of hosted control planes the cluster can host is determined by the resource availability of managed {mce-short} cluster nodes, as well as the number of managed {mce-short} clusters. 
-
-You can add more nodes or managed clusters to host more hosted control planes.
-
-Importing an {mce-short} cluster into {product-title-short}
-
-[#manage-discover-scale]
-== Configuring for import
+== Configuring {product-title-short} to import {mce-short} clusters
 //check this order of tasks if we break out this in to two files: Disover/Manage and Auto import
 
-{mce-short} has a self-managed cluster called `local-cluster` and the default add-ons are enabled for this managed cluster.
-//we  define this as hub that is managed in the doc
+{mce-short} has a `local-cluster`, which is a hub cluster that is managed. The default add-ons are enabled for this `local-cluster`.
+
 
 //what are we asking them to do here? Double check my work:
 
@@ -82,7 +77,7 @@ managed-serviceaccount-add-ons-agent   1/1     1            1           25h
 ----
 
 [#install-add-onss-mce]
-=== Installing add-ons 
+=== Configuring add-ons 
 // Check the order here of the tasks, has import happened?
 
 When this {mce-short} is imported into {product-title-short}, {product-title-short} enables the same set of add-ons to manage the {mce-short}. 
@@ -209,9 +204,7 @@ spec:
 ----
 
 The add-ons for the {product-title-short} `local-cluster` and all other managed clusters are re-installed into the namespace that you specified. 
-//way to verify?
 
-//Not sure what this is -- to check??:
 +
 [source,bash]
 ----
@@ -255,7 +248,6 @@ spec:
 
 [#backup-restore-discover]
 === Configure for backup and restore
-//location of this section?Needs to be a task?
 
 Since you have {product-title-short} installed, you can use the _Backup and restore_ feature.
 
@@ -335,55 +327,84 @@ spec:
 //this is a mouthful
 
 The managed cluster and the namespace is created in the {product-title-short} cluster. 
-//verify?
+//verify: Roke will add more steps.
 
-Follow https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html-single/clusters/index#importing-clusters-auto-import-secret to create the auto-import secret to complete the {mce-short} auto-import process. Once the auto import secret is created in the {mce-short} managed cluster namespace in the {product-title-short} cluster, the managed cluster gets registered and you should see the managed cluster status like this.
-//This is a step.
+. Add the auto import secret. Follow https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html-single/clusters/index#importing-clusters-auto-import-secret to create the auto-import secret to complete the {mce-short} auto-import process. 
 
+After the auto import secret is created in the {mce-short} managed cluster namespace in the {product-title-short} cluster, the managed cluster gets registered and you should see the managed cluster status:
 
++
+[source,bash]
 ----
 oc get managedcluster
+----
+
+See following output with the status of managed clusters:
++
+[source,bash]
+----
 NAME            HUB ACCEPTED   MANAGED CLUSTER URLS                                         JOINED   AVAILABLE   AGE
 local-cluster   true           https://api.acm-hub-hs-aws.dev09.red-chesterfield.com:6443   True     True        44h
 mce-a           true           https://api.clc-hs-mce-a.dev09.red-chesterfield.com:6443     True     True        27s
 ----
 
-Important: DO NOT enable any other {product-title-short} add-ons for the imported {mce-short}.
+*Important:* Do not enable any other {product-title-short} add-ons for the imported {mce-short}.
 
-## Enabling the hypershift add-ons for {mce-short}
+== Discovering hosted clusters
 
-After all {mce-short} clusters are imported into {product-title-short}, you need to enable the hypershift add-ons for those managed {mce-short} clusters. Run the following commands in the {product-title-short} hub cluster to enable it. Similar to how the default add-ons are intalled into a different namespace in the previous section, these commands are for installing the hypershift add-ons into a different namespace in {mce-short} as well so that the hypershift add-ons agent for {mce-short}'s local-cluster and the agent for {product-title-short} can co-exist in {mce-short}. This requires `oc` and `clusteradm` CLIs.
-//fix
+After all {mce-short} clusters are imported into {product-title-short}, you need to enable the hypershift add-on for those managed {mce-short} clusters to discover the hosted clusters.
 
+in the {product-title-short} hub cluster to enable the hypershift add-on. Similar to how the default add-ons are intalled into a different namespace in the previous section, these commands are for installing the hypershift add-ons into a different namespace in {mce-short} as well so that the hypershift add-ons agent for {mce-short}'s local-cluster and the agent for {product-title-short} can co-exist in {mce-short}. 
+
+. Run the following commands to set the `agentInstallNamespace` namespace of the add-on to `open-cluster-management-agent-add-ons-discovery`:
 ----
 oc patch add-onsdeploymentconfig hypershift-add-ons-deploy-config -n multicluster-engine --type=merge -p '{"spec":{"agentInstallNamespace":"open-cluster-management-agent-add-ons-discovery"}}'
-
-oc patch add-onsdeploymentconfig hypershift-add-ons-deploy-config -n multicluster-engine --type=merge -p '{"spec":{"customizedVariables":[{"name":"disableMetrics","value": "true"},{"name":"disableHOManagement","value": "true"}]}}'
-
-% clusteradm add-ons enable --names hypershift-add-ons --clusters <{mce-short} managed cluster names>
 ----
 
-Replace <{mce-short} managed cluster names> with the actual managed cluster names for {mce-short}, comma separated. You can get the {mce-short} managed cluster names by running the following command in {product-title-short}.
+. Run the following commands to disable metrics and to disable the hypershift operator management:
+
+----
+oc patch add-onsdeploymentconfig hypershift-add-ons-deploy-config -n multicluster-engine --type=merge -p '{"spec":{"customizedVariables":[{"name":"disableMetrics","value": "true"},{"name":"disableHOManagement","value": "true"}]}}'
+----
+. Run the following commands to enable the hypershift add-on for {mce-short}:
+
+----
+clusteradm add-ons enable --names hypershift-addon --clusters <managed cluster names>
+----
+
+Replace <managed cluster names> with the actual managed cluster names for {mce-short}, comma separated. 
+
+. You can get the {mce-short} managed cluster names by running the following command in {product-title-short}.
 
 ----
 oc get managedcluster
 ----
 
-Log into {mce-short} clusters and verify that the hypershift add-ons is installed in the specified namespace.
+. Log into {mce-short} clusters and verify that the hypershift add-on is installed in the specified namespace. Run the following command:
 
 ----
 oc get deployment -n open-cluster-management-agent-add-ons-discovery
+----
+
+----
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 klusterlet-add-ons-workmgr             1/1     1            1           24h
 hypershift-add-ons-agent               1/1     1            1           24h
 managed-serviceaccount-add-ons-agent   1/1     1            1           24h
 ----
 
-This hypershift add-ons deployed by {product-title-short} acts as a discovery agent that discovers hosted clusters from {mce-short} and create corresponding `DiscoveredCluster` CR in the {mce-short}'s managed cluster namespace in the {product-title-short} hub cluster when the hosted cluster's kube API server becomes available. Log into {product-title-short} hub console, navigate to All Clusters -> Infrastructure -> Clusters and `Discovered clusters` tab to view all discovered hosted clusters from {mce-short} with type `MultiClusterEngineHCP`. 
+This hypershift add-on is deployed by {product-title-short} acts as a discovery agent that discovers hosted clusters from {mce-short} and create corresponding `DiscoveredCluster` CR in the {mce-short}'s managed cluster namespace in the {product-title-short} hub cluster when the hosted cluster's kube API server becomes available. 
+
+Log into {product-title-short} hub console, navigate to *All Clusters* > *Infrastructure* > *Clusters*. Find the _Discovered clusters_ tab to view all discovered hosted clusters from {mce-short} with type `MultiClusterEngineHCP`. 
+
+
+Next go to the HCP Import
+
+New File:
+
 
 [#import-discover-hcp]
-== Automating import for discovered hosted clusters
-//I think this needs to be a separate file like the ROSA file this will be built similar to ROSA
+= Automating import for discovered hosted clusters
 
 Automate the import of hosted clusters by using the `DiscoveredCluster` resource for faster cluster management, without manually importing individual clusters.
 
@@ -392,6 +413,9 @@ When a discovered hosted cluster is auto-imported into {product-title-short}, al
 The hosted cluster is also auto-imported into {mce-short}. Through the {mce-short} console, you can manage the hosted cluster's life-cycle. You cannot manage the hosted cluster life-cycle from the {product-title-short} console.
 
 *Required access:* Cluster administrator
+
+Prereqs
+Importing
 
 [#autoimport-hcp]
 == Prerequisites
@@ -445,14 +469,15 @@ Setting the `spec.importAsManagedCluster` to `true` triggers {product-title-shor
 Setting `spec.importAsManagedCluster` to `true` can be automated by applying the following policy to {product-title-short}. This policy ensures that a DiscoveredCluster with type `MultiClusterEngineHCP` is set for auto-importing.
 
 [#creating-rosa-policy]
-== Creating the automatic import policy
+=== Creating the automatic import policy
 
 The following policy and procedure is an example of how to import all your discovered hosted clusters automatically. 
  
 Log in to your hub cluster from the CLI to complete the following procedure:
 
-. Create a YAML file with the following example and apply the changes that are referenced:
+. Create a YAML file with the following example and apply the changes that are referenced. To enable automatic import, change the `spec.remediationAction` to `enforce`:
 
+//replace with Roke's
 +
 [source,yaml] 
 ----
@@ -471,8 +496,7 @@ metadata:
       Fine tuning MultiClusterEngineHCP clusters to be automatically imported
       can be done by configure filters at the configMap or add annotation to the discoverd cluster.
 spec:
-  # Remove the default remediation below to enforce the policies.
-  # remediationAction: inform
+  remediationAction: inform  # Remove the default remediation below to enforce the policies. <1>
   disabled: false
   policy-templates:
     - objectDefinition:
@@ -490,7 +514,7 @@ spec:
                   name: discovery-config
                   namespace: open-cluster-management-global-set
                 data:
-                  rosa-filter: ""
+                  rosa-filter: "" <2> 
           remediationAction: enforce
           severity: low
     - objectDefinition:
@@ -529,7 +553,8 @@ spec:
               {{- end }}
             {{- end }}
 ----
-//we need to pull the steps and call outs here, see the rosa file for how I set this up from a large YAML file with no steps in the draft.
+
+. Run `oc apply -f <filename>.yaml -n <namespace>` to apply the file.
 
 [#create-hcp-placement]
 == Creating the placement definition 
