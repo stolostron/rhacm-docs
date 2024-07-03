@@ -1,0 +1,247 @@
+
+[#import-discover-hcp]
+= Automating import for discovered hosted clusters
+
+Automate the import of hosted clusters by using the `DiscoveredCluster` resource for faster cluster management, without manually importing individual clusters.
+
+When a discovered hosted cluster is auto-imported into {product-title-short}, all {product-title-short} add-ons are enabled as well so you can start managing the hosted clusters using the available management tools.
+
+The hosted cluster is also auto-imported into {mce-short}. Through the {mce-short} console, you can manage the hosted cluster's life-cycle. You cannot manage the hosted cluster life-cycle from the {product-title-short} console.
+
+*Required access:* Cluster administrator
+
+Prereqs
+Importing
+
+[#autoimport-hcp]
+== Prerequisites
+
+. Install {product-title-short}. See the {product-title-short} link:../../install/install_overview.adoc#installing[Installing and upgrading] documentation.
+//check
+
+[#importing-disc-hcp]
+== Importing
+//work on this title
+
+The following procedure is an example of how to import all your discovered hosted clusters automatically. 
+ 
+Log in to your hub cluster from the CLI to complete the following procedure:
+
+. Create a YAML file with the following example and apply the changes that are referenced:
+
+A `DiscoveredCluster` CR that is created by {product-title-short}'s hypershift add-ons agent looks like this.
+
++
+[source,yaml]
+----
+apiVersion: discovery.open-cluster-management.io/v1
+kind: DiscoveredCluster
+metadata:
+  creationTimestamp: "2024-05-30T23:05:39Z"
+  generation: 1
+  labels:
+    hypershift.open-cluster-management.io/hc-name: hosted-cluster-1
+    hypershift.open-cluster-management.io/hc-namespace: clusters
+  name: hosted-cluster-1
+  namespace: mce-1
+  resourceVersion: "1740725"
+  uid: b4c36dca-a0c4-49f9-9673-f561e601d837
+spec:
+  apiUrl: https://a43e6fe6dcef244f8b72c30426fb6ae3-ea3fec7b113c88da.elb.us-west-1.amazonaws.com:6443
+  cloudProvider: aws
+  creationTimestamp: "2024-05-30T23:02:45Z"
+  credential: {}
+  displayName: mce-1-hosted-cluster-1
+  importAsManagedCluster: false
+  isManagedCluster: false
+  name: hosted-cluster-1
+  openshiftVersion: 0.0.0
+  status: Active
+  type: MultiClusterEngineHCP
+----
+
+Setting the `spec.importAsManagedCluster` to `true` triggers {product-title-short}'s discovery operator to start the auto-importing process and soon, you will see a managed cluster that is named the same as `spec.displayName` in the `DiscoveredCluster`. 
+
+Setting `spec.importAsManagedCluster` to `true` can be automated by applying the following policy to {product-title-short}. This policy ensures that a DiscoveredCluster with type `MultiClusterEngineHCP` is set for auto-importing.
+
+[#creating-rosa-policy]
+=== Creating the automatic import policy
+
+The following policy and procedure is an example of how to import all your discovered hosted clusters automatically. 
+ 
+Log in to your hub cluster from the CLI to complete the following procedure:
+
+. Create a YAML file with the following example and apply the changes that are referenced. To enable automatic import, change the `spec.remediationAction` to `enforce`:
+
+//replace with Roke's
++
+[source,yaml] 
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-mce-hcp-autoimport
+  namespace: open-cluster-management-global-set
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/description: Discovered clusters that are of
+      type MultiClusterEngineHCP can be automatically imported into {product-title-short} as managed clusters.
+      This policy configure those discovered clusters so they are automatically imported. 
+      Fine tuning MultiClusterEngineHCP clusters to be automatically imported
+      can be done by configure filters at the configMap or add annotation to the discoverd cluster.
+spec:
+  remediationAction: inform  # Remove the default remediation below to enforce the policies. <1>
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: mce-hcp-autoimport-config
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ConfigMap
+                metadata:
+                  name: discovery-config
+                  namespace: open-cluster-management-global-set
+                data:
+                  rosa-filter: "" <2> 
+          remediationAction: enforce
+          severity: low
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-mce-hcp-autoimport
+        spec:
+          remediationAction: enforce
+          severity: low
+          object-templates-raw: |
+            {{- /* find the MultiClusterEngineHCP DiscoveredClusters */ -}}
+            {{- range $dc := (lookup "discovery.open-cluster-management.io/v1" "DiscoveredCluster" "" "").items }}
+              {{- /* Check for the flag that indicates the import should be skipped */ -}}
+              {{- $skip := "false" -}}
+              {{- range $key, $value := $dc.metadata.annotations }}
+                {{- if and (eq $key "discovery.open-cluster-management.io/previously-auto-imported")
+                           (eq $value "true") }}
+                  {{- $skip = "true" }}
+                {{- end }}
+              {{- end }}
+              {{- /* if the type is MultiClusterEngineHCP and the status is Active */ -}}
+              {{- if and (eq $dc.spec.status "Active") 
+                         (contains (fromConfigMap "open-cluster-management-global-set" "discovery-config" "mce-hcp-filter") $dc.spec.displayName)
+                         (eq $dc.spec.type "MultiClusterEngineHCP")
+                         (eq $skip "false") }}
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: discovery.open-cluster-management.io/v1
+                kind: DiscoveredCluster
+                metadata:
+                  name: {{ $dc.metadata.name }}
+                  namespace: {{ $dc.metadata.namespace }}
+                spec:
+                  importAsManagedCluster: true
+              {{- end }}
+            {{- end }}
+----
+
+. Run `oc apply -f <filename>.yaml -n <namespace>` to apply the file.
+
+[#create-hcp-placement]
+== Creating the placement definition 
+
+You need to create a placement definition that specifies the managed cluster for the policy deployment.
+
+. Create the placement definition that selects only the `local-cluster`, which is a hub cluster that is managed. Use the following YAML sample:
+
++
+[source,yaml] 
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: policy-mce-hcp-autoimport-placement
+  namespace: open-cluster-management-global-set
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+    - key: cluster.open-cluster-management.io/unavailable
+      operator: Exists
+  clusterSets:
+    - global
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: local-cluster
+              operator: In
+              values:
+                - "true"
+----
+
+. Run `oc apply -f placement.yaml -n <namespace>`, where `namespace` matches the namespace that you used for the policy that you previously created. 
+
+[#bind-hcp-placement]
+== Binding the import policy to a placement definition
+
+After you create the policy and the placement, you need to connect the two resources.
+
+. Connect the resources by using a `PlacementBinding`. See the following example where `placementRef` points to the `Placement` that you created, and `subjects` points to the `Policy` that you created:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: policy-mce-hcp-autoimport-placement-binding
+  namespace: open-cluster-management-global-set
+placementRef:
+  name: policy-mce-hcp-autoimport-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: policy-mce-hcp-autoimport
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+----
+//work live with roke, I set this up like the rosa file
+
+. To verify, run the following command:
+
++
+----
+oc get policy policy-mce-hcp-autoimport -n <namespace>
+---- 
+
+## Detaching hosted clusters from {product-title-short}
+
+An imported hosted cluster can be detached from {product-title-short} using the detach option in the {product-title-short} console or by removing the corresponsing `ManagedCluster` CR from the command line. It is recommended to detach the managed hosted cluster before destroying the hosted cluster.
+
+When a discovered cluster is detached, the following annotation is added to the DiscoveredCluster resource to prevent the policy to import the discovered cluster again.
+
+----
+  annotations:
+    discovery.open-cluster-management.io/previously-auto-imported: "true"
+----
+
+If you want the detached discovered cluster to be re-imported, this annotation needs to be remove
+
+## Limitations
+//these should either be in limitations or weaved into the doc
+
+- The discovered cluster name link on the discovered cluster list UI does not open the console for discovered cluster with `MultiClusterEngineHCP` type.
+
+<img width="1098" alt="image" src="https://github.com/rokej/hypershift-add-ons-operator/assets/41969005/ae9efc82-f4b2-462c-862f-0da62e8f1b87">
+
+- The "Import cluster" discovered cluster action menu option should not be used to import `MultiClusterEngineHCP` type discovered clusters. The only way to import them is through the auto-import policy.
+
+<img width="1138" alt="image" src="https://github.com/rokej/hypershift-add-ons-operator/assets/41969005/a86a0f73-04e0-4a89-a355-43c15565ef66">
+
+- The "Last active" column for `MultiClusterEngineHCP` type discovered clusters is always "N/A".
