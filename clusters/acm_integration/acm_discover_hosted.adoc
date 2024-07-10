@@ -1,40 +1,35 @@
 [#discovering-hcp-acm]
 = Discovering {mce-short} hosted clusters in {product-title-short}
 
-If you have {mce-short} clusters that are hosting many hosted clusters, you can bring these hosted clusters to a {product-title-short} hub cluster to manage with {product-title-short} management components, such as _Application lifecycle_ and _Governance_.
+If you have {mce-short} clusters that are hosting multiple _hosted clusters_, you can bring those hosted clusters to a {product-title-short} hub cluster to manage with {product-title-short} management components, such as _Application lifecycle_ and _Governance_.
 
 You can have those hosted clusters automatically discovered and imported as managed clusters.
 
-Since the hosted control planes run on the managed {mce-short} cluster nodes, the number of hosted control planes the cluster can host is determined by the resource availability of managed {mce-short} cluster nodes, as well as the number of managed {mce-short} clusters. 
-
-You can add more nodes or managed clusters to host more hosted control planes.
+*Note:* Since the hosted control planes run on the managed {mce-short} cluster nodes, the number of hosted control planes that the cluster can host is determined by the resource availability of managed {mce-short} cluster nodes, as well as the number of managed {mce-short} clusters.You can add more nodes or managed clusters to host more hosted control planes.
 
 *Required access:* Cluster administrator
 
-* <<-manage-discover-prereqs,Prerequisites>>
+* <<discover-hosted-acm-prereqs, Prerequisites>>
 * Configuring {product-title-short} to import {mce-short} clusters
 * Importing {mce-short} 
 * Discovering hosted clusters from MCE
 * This requires `oc` and `clusteradm` CLIs.
 //find this link
 
-[#manage-discover-prereqs]
+[#discover-hosted-acm-prereqs]
 == Prerequisites
 
 * You need one or more {mce-short} hosting clusters that are _managed_ clusters. These clusters are not {ocp} or {product-title-short} clusters because {mce-short} installs other operators, such as Hive and BareMetal infrastructure operators that you need.
 
-* You need a {product-title-short} cluster as your hub cluster.
+* You need a {product-title-short} cluster set as your hub cluster.
 
-[#manage-discover-scale]
-== Configuring {product-title-short} to import {mce-short} clusters
-//check this order of tasks if we break out this in to two files: Disover/Manage and Auto import
+[#config-acm-import-hosted]
+== Configuring {product-title-short} to import hosted clusters
 
-{mce-short} has a `local-cluster`, which is a hub cluster that is managed. The default add-ons are enabled for this `local-cluster`.
+{mce-short} has a `local-cluster`, which is a hub cluster that is managed. The default add-ons are enabled for this `local-cluster`. Complete the following procedure to configure your local cluster to import:
 
 
-//what are we asking them to do here? Double check my work:
-
-. Run the following command to get the `managedclusteradd-ons` status for your `local-cluster`:
+. Run the following command to get the list of `managedclusteradd-ons` for your `local-cluster`:
 
 +
 [source,bash]
@@ -42,19 +37,19 @@ You can add more nodes or managed clusters to host more hosted control planes.
 oc get managedclusteradd-ons -n local-cluster
 ----
 
-See the example output:
+See the example output of available add-ons:
 
 +
 [source,bash]
 ----
 NAME                     AVAILABLE   DEGRADED   PROGRESSING
 cluster-proxy            True                   False
-hypershift-add-ons         True        False      False
+hypershift-add-ons       True        False      False
 managed-serviceaccount   True                   False
 work-manager             True                   False
 ----
 
-. Run the following command to 
+. Run the following command to get your add-ons:
 //what are they doing here?
 
 +
@@ -63,32 +58,29 @@ work-manager             True                   False
 oc get deployment -n open-cluster-management-agent-add-ons
 ----
 
-See the following output...:
+See the following output:
 //what are they looking for here?
 
 +
 [source,bash]
 ----
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-cluster-proxy-proxy-agent            1/1     1            1           25h
-hypershift-add-ons-agent               1/1     1            1           25h
-klusterlet-add-ons-workmgr             1/1     1            1           25h
-managed-serviceaccount-add-ons-agent   1/1     1            1           25h
+cluster-proxy-proxy-agent              1/1     1            1         25h
+hypershift-add-ons-agent               1/1     1            1         25h
+klusterlet-add-ons-workmgr             1/1     1            1         25h
+managed-serviceaccount-add-ons-agent   1/1     1            1         25h
 ----
 
-[#install-add-onss-mce]
+[#config-add-ons-mce]
 === Configuring add-ons 
-// Check the order here of the tasks, has import happened?
 
-When this {mce-short} is imported into {product-title-short}, {product-title-short} enables the same set of add-ons to manage the {mce-short}. 
+When your {mce-short} is imported into {product-title-short}, {product-title-short} enables the same set of add-ons to manage the {mce-short}. 
 
-Install those add-ons in a different namespace in {mce-short} so that {mce-short} can still self-manage with the `local-cluster` add-ons while {mce-short} can be managed by {product-title-short} at the same time.
+Install those add-ons in a different {mce-short} namespace so that the {mce-short} can self-manage with the `local-cluster` add-ons while  {product-title-short} manages {mce-short} at the same time. Complete the following procedure:
 
 . Log in to your {product-title-short} with the CLI.
-//hub cluster? 
 
 . Create the `add-onsDeploymentConfig` resource to specify a different add-on installation namespace. See the following example where `agentInstallNamespace` points to `open-cluster-management-agent-add-ons-discovery`:
-//check what we want to highlight here?
 
 +
 [source,yaml]
@@ -102,7 +94,8 @@ spec:
   agentInstallNamespace: open-cluster-management-agent-add-ons-discovery
 ----
 
-. Update the existing `ClusterManagementadd-ons` resources for these add-ons so that the add-ons have the `agentInstallNamespace` namespace that you created in the  `add-onsDeploymentConfig` resource.
+. Update the existing `ClusterManagementadd-ons` resources for the add-ons so that the `add-onsDeploymentConfig` resource have the `agentInstallNamespace` namespace that you created.
+//is this the highlevel step and adding work manager is part 1? this is simlar to the step after it.
 
 See the following `ClusterManagementadd-ons` example resource for the `work-manager` add-on:
 
@@ -203,7 +196,12 @@ spec:
     type: Placements
 ----
 
+//we need to apply the file.
+
 The add-ons for the {product-title-short} `local-cluster` and all other managed clusters are re-installed into the namespace that you specified. 
+
+Run the following command to verify:
+//??
 
 +
 [source,bash]
@@ -225,12 +223,15 @@ managed-serviceaccount-add-ons-agent   1/1     1            1           24h
 [#create-klusterletconfig]
 === Creating a _KlusterletConfig_ resource
 
-You need to create a `KlusterletConfig` resource that is used by `ManagedCluster` resources to import {mce-short} clusters. 
+When a `ManagedCluster` references the `KlusterletConfig` resource, the managed cluster `klusterlet` is installed in the namespace that you specified in the `KlusterletConfig`. 
 
-When a `ManagedCluster` references this `KlusterletConfig` resource, the managed cluster klusterlet is installed in the namespace that you specified in the `KlusterletConfig`. 
+Create a `KlusterletConfig` resource that is used by `ManagedCluster` resources to import {mce-short} clusters. 
 
-You can import the {product-title-short} klusterlet to be installed in a different namespace than the {mce-short} klusterlet for the self-managed `local-cluster`` managed cluster in the {mce-short} cluster.
-//fix this--this is a bit hard to understand, and use steps to lead to the YAML:
+You can import the {product-title-short} klusterlet to be installed in a different namespace than the {mce-short} klusterlet for the `local-cluster` in the {mce-short} cluster.
+//still struggling with this
+
+. Create a `KlusterletConfig` using the following example:
+//?
 
 +
 [source,yaml]
@@ -245,19 +246,20 @@ spec:
     noOperator:
        postfix: mce-import
 ----
+//apply?
 
 [#backup-restore-discover]
 === Configure for backup and restore
 
-Since you have {product-title-short} installed, you can use the _Backup and restore_ feature.
+Since you installed {product-title-short} , you can also use the _Backup and restore_ feature.
 
-If the hub cluster is restored in a disaster recovery scenario, the imported {mce-short} clusters and the hosted clusters are imported to the newer {product-title-short} hub cluster. 
+If the hub cluster is restored in a disaster recovery scenario, the imported {mce-short} clusters and hosted clusters are imported to the newer {product-title-short} hub cluster. 
 
-The previous configurations need to be restored as part of {product-title-short} hub cluster restore. 
+In this scenario, you need to restore the previous configurations as part of {product-title-short} hub cluster restore. 
 
-Add `backup=true`  to those resources to enable backup. See the following commands:
+Add `backup=true` to enable backup. See the following steps for each add-on:
 
-. For your `add-ons-ns-config`, run the following command:
+* For your `add-ons-ns-config`, run the following command:
 
 +
 [source,bash]
@@ -265,7 +267,7 @@ Add `backup=true`  to those resources to enable backup. See the following comman
 oc label add-onsdeploymentconfig add-ons-ns-config -n multicluster-engine cluster.open-cluster-management.io/backup=true
 ----
 
-. For your `hypershift-add-ons-deploy-config`, run the following command:
+* For your `hypershift-add-ons-deploy-config`, run the following command:
 
 +
 [source,bash]
@@ -273,7 +275,7 @@ oc label add-onsdeploymentconfig add-ons-ns-config -n multicluster-engine cluste
 oc label add-onsdeploymentconfig hypershift-add-ons-deploy-config -n multicluster-engine cluster.open-cluster-management.io/backup=true
 ----
 
-. For your `work-manager`, run the following command:
+* For your `work-manager`, run the following command:
 
 +
 [source,bash]
@@ -281,7 +283,7 @@ oc label add-onsdeploymentconfig hypershift-add-ons-deploy-config -n multicluste
 oc label clustermanagementadd-ons work-manager cluster.open-cluster-management.io/backup=true
 ----
 
-. For your `cluster-proxy `, run the following command:
+* For your `cluster-proxy `, run the following command:
 
 +
 [source,bash]
@@ -289,14 +291,15 @@ oc label clustermanagementadd-ons work-manager cluster.open-cluster-management.i
 oc label clustermanagementadd-ons cluster-proxy cluster.open-cluster-management.io/backup=true
 ----
 
-. For your `managed-serviceaccount`, run the following command:
+* For your `managed-serviceaccount`, run the following command:
+
 +
 [source,bash]
 ----
 oc label clustermanagementadd-ons managed-serviceaccount cluster.open-cluster-management.io/backup=true
 ----
 
-. For your `mce-import-klusterlet-config`, run the following command:
+* For your `mce-import-klusterlet-config`, run the following command:
 
 +
 [source,bash]
@@ -305,9 +308,9 @@ oc label KlusterletConfig mce-import-klusterlet-config cluster.open-cluster-mana
 ----
 
 [#import]
-== Importing {mce-short} 
+== Importing {mce-short} manually
 
-. From your {product-title-short} cluster, create a `ManagedCluster` resource manually to import an {mce-short} cluster. See the following resource to import an {mce-short} managed cluster named `mce-a`.
+. From your {product-title-short} cluster, create a `ManagedCluster` resource manually to import an {mce-short} cluster. 
 
 +
 [source,yaml]
@@ -316,22 +319,25 @@ apiVersion: cluster.open-cluster-management.io/v1
 kind: ManagedCluster
 metadata:
   annotations:
-    agent.open-cluster-management.io/klusterlet-config: mce-import-klusterlet-config
-  name: mce-a
+    agent.open-cluster-management.io/klusterlet-config: mce-import-klusterlet-config <1>
+  name: mce-a <2>
 spec:
   hubAcceptsClient: true
   leaseDurationSeconds: 60
 ----
 
-*Note:* See the  `agent.open-cluster-management.io/klusterlet-config: mce-import-klusterlet-config` annotation that references the `KlusterletConfig` resource that you created in the previous step to install the {product-title-short} klusterlet into a different namespace in {mce-short}.
-//this is a mouthful
+1. The `mce-import-klusterlet-config` annotation references the `KlusterletConfig` resource that you created in the previous step to install the {product-title-short} klusterlet into a different namespace in {mce-short}.
+2. The example imports an {mce-short} managed cluster named `mce-a`.
 
 The managed cluster and the namespace is created in the {product-title-short} cluster. 
-//verify: Roke will add more steps.
+//verify
+????
 
 . Add the auto import secret. Follow https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html-single/clusters/index#importing-clusters-auto-import-secret to create the auto-import secret to complete the {mce-short} auto-import process. 
 
-After the auto import secret is created in the {mce-short} managed cluster namespace in the {product-title-short} cluster, the managed cluster gets registered and you should see the managed cluster status:
+After you create the auto import secret in the {mce-short} managed cluster namespace in the {product-title-short} cluster, the managed cluster gets registered.
+
+Run the following command to get the status:
 
 +
 [source,bash]
