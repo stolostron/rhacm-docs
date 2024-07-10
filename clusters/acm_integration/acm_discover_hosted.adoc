@@ -9,12 +9,10 @@ You can have those hosted clusters automatically discovered and imported as mana
 
 *Required access:* Cluster administrator
 
-* <<discover-hosted-acm-prereqs, Prerequisites>>
-* Configuring {product-title-short} to import {mce-short} clusters
-* Importing {mce-short} 
-* Discovering hosted clusters from MCE
-* This requires `oc` and `clusteradm` CLIs.
-//find this link
+* <<discover-prereqs, Prerequisites>>
+* <<config-acm-import, Configuring {product-title-short} to import {mce-short} clusters>>
+* <<import-mce-manually,Importing {mce-short} manually>>
+* <<discover-hosted-acm-mce, Discovering hosted clusters from {mce-short}>>
 
 [#discover-hosted-acm-prereqs]
 == Prerequisites
@@ -23,11 +21,12 @@ You can have those hosted clusters automatically discovered and imported as mana
 
 * You need a {product-title-short} cluster set as your hub cluster.
 
+* You need the `clusteradm` CLI in addition to `oc`.
+
 [#config-acm-import-hosted]
 == Configuring {product-title-short} to import hosted clusters
 
 {mce-short} has a `local-cluster`, which is a hub cluster that is managed. The default add-ons are enabled for this `local-cluster`. Complete the following procedure to configure your local cluster to import:
-
 
 . Run the following command to get the list of `managedclusteradd-ons` for your `local-cluster`:
 
@@ -60,7 +59,6 @@ oc get deployment -n open-cluster-management-agent-add-ons
 
 See the following output:
 //what are they looking for here?
-
 +
 [source,bash]
 ----
@@ -96,7 +94,6 @@ spec:
 
 . Update the existing `ClusterManagementadd-ons` resources for the add-ons so that the `add-onsDeploymentConfig` resource have the `agentInstallNamespace` namespace that you created.
 //is this the highlevel step and adding work manager is part 1? this is simlar to the step after it.
-
 See the following `ClusterManagementadd-ons` example resource for the `work-manager` add-on:
 
 +
@@ -232,7 +229,6 @@ You can import the {product-title-short} klusterlet to be installed in a differe
 
 . Create a `KlusterletConfig` using the following example:
 //?
-
 +
 [source,yaml]
 ----
@@ -247,7 +243,6 @@ spec:
        postfix: mce-import
 ----
 //apply?
-
 [#backup-restore-discover]
 === Configure for backup and restore
 
@@ -326,18 +321,16 @@ spec:
   leaseDurationSeconds: 60
 ----
 
-1. The `mce-import-klusterlet-config` annotation references the `KlusterletConfig` resource that you created in the previous step to install the {product-title-short} klusterlet into a different namespace in {mce-short}.
-2. The example imports an {mce-short} managed cluster named `mce-a`.
+<1> The `mce-import-klusterlet-config` annotation references the `KlusterletConfig` resource that you created in the previous step to install the {product-title-short} klusterlet into a different namespace in {mce-short}.
+<2> The example imports an {mce-short} managed cluster named `mce-a`.
 
 The managed cluster and the namespace is created in the {product-title-short} cluster. 
-//verify
-????
+//verify?
+. Create a secret that references the `kubeconfig`` file of the cluster. Go to xref:../cluster_lifecycle/import_cli.adoc#importing-clusters-auto-import-secret [Importing a cluster by using the auto import secret] to add the auto import secret to complete the {mce-short} auto-import process. 
 
-. Add the auto import secret. Follow https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html-single/clusters/index#importing-clusters-auto-import-secret to create the auto-import secret to complete the {mce-short} auto-import process. 
+After you create the auto import secret in the {mce-short} managed cluster namespace in the {product-title-short} cluster, the managed cluster is registered.
 
-After you create the auto import secret in the {mce-short} managed cluster namespace in the {product-title-short} cluster, the managed cluster gets registered.
-
-Run the following command to get the status:
+. Run the following command to get the status:
 
 +
 [source,bash]
@@ -345,58 +338,77 @@ Run the following command to get the status:
 oc get managedcluster
 ----
 
-See following output with the status of managed clusters:
+See following example output with the status and example urls of managed clusters:
+
 +
 [source,bash]
 ----
-NAME            HUB ACCEPTED   MANAGED CLUSTER URLS                                         JOINED   AVAILABLE   AGE
-local-cluster   true           https://api.acm-hub-hs-aws.dev09.red-chesterfield.com:6443   True     True        44h
-mce-a           true           https://api.clc-hs-mce-a.dev09.red-chesterfield.com:6443     True     True        27s
+NAME           HUB ACCEPTED   MANAGED CLUSTER URLS            JOINED   AVAILABLE   AGE
+local-cluster  true           https://<api.acm-hub.com:port>  True     True        44h
+mce-a          true           https://<api.mce-a.com:port>    True     True        27s
 ----
 
 *Important:* Do not enable any other {product-title-short} add-ons for the imported {mce-short}.
 
+[discover-hosted-clusters]
 == Discovering hosted clusters
 
-After all {mce-short} clusters are imported into {product-title-short}, you need to enable the hypershift add-on for those managed {mce-short} clusters to discover the hosted clusters.
+After all your {mce-short} clusters are imported into {product-title-short}, you need to enable the hypershift add-on for those managed {mce-short} clusters to discover the hosted clusters.
 
-in the {product-title-short} hub cluster to enable the hypershift add-on. Similar to how the default add-ons are intalled into a different namespace in the previous section, these commands are for installing the hypershift add-ons into a different namespace in {mce-short} as well so that the hypershift add-ons agent for {mce-short}'s local-cluster and the agent for {product-title-short} can co-exist in {mce-short}. 
+Similar to how the default add-ons are intalled into a different namespace in the previous procedures, these commands are for installing the hypershift add-ons into a different namespace in {mce-short} so that the hypershift add-ons agent for {mce-short} local-cluster and the agent for {product-title-short} can co-exist in {mce-short}. 
 
-. Run the following commands to set the `agentInstallNamespace` namespace of the add-on to `open-cluster-management-agent-add-ons-discovery`:
+For all the following commands, replace <managed-cluster-names> with comma-separated managed cluster names for {mce-short}.
+
+. Run the following command to set the `agentInstallNamespace` namespace of the add-on to `open-cluster-management-agent-add-ons-discovery`:
+
++
+[source,bash]
 ----
 oc patch add-onsdeploymentconfig hypershift-add-ons-deploy-config -n multicluster-engine --type=merge -p '{"spec":{"agentInstallNamespace":"open-cluster-management-agent-add-ons-discovery"}}'
 ----
 
-. Run the following commands to disable metrics and to disable the hypershift operator management:
+. Run the following command to disable metrics and to disable the hypershift operator management:
 
++
+[source,bash]
 ----
 oc patch add-onsdeploymentconfig hypershift-add-ons-deploy-config -n multicluster-engine --type=merge -p '{"spec":{"customizedVariables":[{"name":"disableMetrics","value": "true"},{"name":"disableHOManagement","value": "true"}]}}'
 ----
-. Run the following commands to enable the hypershift add-on for {mce-short}:
 
+. Run the following command to enable the hypershift add-on for {mce-short}:
+
++
+[source,bash]
 ----
 clusteradm add-ons enable --names hypershift-addon --clusters <managed cluster names>
 ----
 
-Replace <managed cluster names> with the actual managed cluster names for {mce-short}, comma separated. 
-
 . You can get the {mce-short} managed cluster names by running the following command in {product-title-short}.
 
++
+[source,bash]
 ----
 oc get managedcluster
 ----
 
 . Log into {mce-short} clusters and verify that the hypershift add-on is installed in the specified namespace. Run the following command:
 
++
+[source,bash]
 ----
 oc get deployment -n open-cluster-management-agent-add-ons-discovery
 ----
+ 
+See the following example output:
 
++
+[source,bash]
+----
 ----
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-klusterlet-add-ons-workmgr             1/1     1            1           24h
-hypershift-add-ons-agent               1/1     1            1           24h
-managed-serviceaccount-add-ons-agent   1/1     1            1           24h
+klusterlet-add-ons-workmgr           1/1     1            1           24h
+hypershift-add-ons-agent             1/1     1            1           24h
+managed-serviceaccount-add-ons-agent 1/1     1            1           24h
 ----
 
 This hypershift add-on is deployed by {product-title-short} acts as a discovery agent that discovers hosted clusters from {mce-short} and create corresponding `DiscoveredCluster` CR in the {mce-short}'s managed cluster namespace in the {product-title-short} hub cluster when the hosted cluster's kube API server becomes available. 
