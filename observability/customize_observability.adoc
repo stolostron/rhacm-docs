@@ -596,6 +596,63 @@ spec:
   wildcardPolicy: None
 ----
 
+[#configure-fine-grain-rbac]
+== Configuring fine-grain RBAC (Technology Preview)
+
+To restrict metrics access to specific namespaces within the cluster, use fine-grain role based access control (RBAC). Using fine-grain RBAC, you can allow application teams to only view the metrics for the namespaces that you gave them permission to access. 
+
+You must configure metrics access control on the hub cluster for the users of that hub cluster. On this hub cluster, a `ManagedCluster` custom resource represents every managed cluster. To configure RBAC and to choose the allowed namespaces, use the rules and action verbs specified in the `ManagedCluster` custom resources. 
+
+For example, you have an application named, `my-awesome-app`, and this application is on two different managed clusters, `devcluster1` and `devcluster2`. Consequently, the application is deployed into two namespaces on the manged clusters: `AwesomeAppNS1` and `AwesomeAppNS2`. You have an admin user group named, `my-awesome-app-admins`, and you want to restrict this user group to only have access to metrics from only these two namespaces on the hub cluster. 
+
+In this example, to use fine-grain RBAC to restrict the user group access, complete the following steps: 
+
+. Define a `ClusterRole` with permissions to access metrics by using the following YAML: 
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+ name: awesome-app-metrics-role
+rules:
+ - apiGroups:
+     - "cluster.open-cluster-management.io"
+   resources:
+     - managedclusters # fixed
+   resourceNames: # represents list of managed clusters
+     - devcluster1
+     - devcluster2
+   Verbs: # represents namespaces of managed clusters
+     - metrics/AwesomeAppNS1
+     - metrics/AwesomeAppNS2
+----
++
+. Define a `ClusterRoleBinding` that binds the group, `admy-awesome-app-admins my-awesome-app-admins`, with the `ClusterRole` for the `awesome-app-metrics-role`. Use the following YAML: 
++
+[source,yaml]
+----
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+ name: awesome-app-metrics-role-binding
+subjects:
+ - kind: Group
+   apiGroup: rbac.authorization.k8s.io
+   name: my-awesome-app-admins
+roleRef:
+ apiGroup: rbac.authorization.k8s.io
+ kind: ClusterRole
+ name: awesome-app-metrics-role
+----
++
+. Define separate `ClusterRoles` and `ClusterRoleBindings` to represent the different managed clusters in the namespaces. 
+
+After completing these steps, when the users in the `my-awesome-app-admins` log into the Grafana console, they have the following restrictions: 
+
+* Users see no data for dashboards that summarize fleet level data. 
+* Users can only select managed clusters and namespaces specified in the `ClusterRole`.   
+
 [#additional-resource-custom-obs]
 == Additional resources
 
