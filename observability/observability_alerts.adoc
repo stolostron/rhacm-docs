@@ -152,6 +152,23 @@ amtool silence expire --alertmanager.url="http://localhost:9093" "d839aca9-ed46-
 amtool silence expire --alertmanager.url="http://localhost:9093" $(amtool silence query --alertmanager.url="http://localhost:9093" -q) 
 ----
 
+[#migrating-observability-storage]
+=== Migrating observability storage
+
+If you are using alert silencers, but you want to migrate your observability storage, complete the following steps:
+
+. In the `MultiClusterObservability`, set the field, `.spec.storageConfig.storageClass` to the new storage class that you chose. 
+. To ensure the data of the old `PersistentVolumes` is retained even when you delete the `PersistentVolumeClaim`, go to all your existing `PersistentVolumes` and change the `reclaimPolicy` to `"Retain": `oc patch pv <your-pv-name> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'`. 
++
+*Note:* Continuing to the next step, you have a risk of loosing ephemeral data. If you want to ensure you do not loose any data, see link:https://access.redhat.com/solutions/6922821[Migrate persistent data to another Storage Class in DG 8 Operator in OCP 4]. If you are unconcerned of losing ephemeral data, you can continue to the next step. 
+. Delete both the `StatefulSet` and the `PersistentVolumeClaim` in the following `StatefulSet` cases:
+.. `alertmanager-db-observability-alertmanager`
+.. `data-observability-thanos-compact`
+.. `data-observability-thanos-receive-default`
+.. `data-observability-thanos-store-shard`
+.. *Note:* You might need to delete then recreate the `MultiClusterObservability` Operator Pod so that you can create the new `StatefulSet`. 
+. Verify that the new `StatefulSet` and `PersistentVolumes` use the new `StorageClass` that you chose.  
+
 [#supress-alerts]
 == Suppressing alerts
 
