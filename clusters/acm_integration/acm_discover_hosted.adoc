@@ -17,9 +17,11 @@ You can have those hosted clusters automatically discovered and imported as mana
 [#discover-hosted-acm-prereqs]
 == Prerequisites
 
-* You need one or more {mce-short} hosting clusters that are _managed_ clusters. These clusters are not {ocp} or {product-title-short} clusters because {mce-short} installs other operators, such as Hive and BareMetal infrastructure operators that you need.
+* You need one or more {mce-short} clusters.
 
 * You need a {product-title-short} cluster set as your hub cluster.
+
+* Install the `clusteradm` CLI by running the following command:
 
 +
 [source,bash]
@@ -28,7 +30,7 @@ curl -L https://raw.githubusercontent.com/open-cluster-management-io/clusteradm/
 ----
 
 [#config-acm-import-hosted]
-== Configuring {product-title-short} to import hosted clusters
+== Configuring {product-title-short} to import {mce-short} clusters
 
 {mce-short} has a `local-cluster`, which is a hub cluster that is managed. The default addons are enabled for this `local-cluster`. Complete the following procedure to configure your local cluster to import:
 
@@ -95,10 +97,9 @@ spec:
   agentInstallNamespace: open-cluster-management-agent-addons-discovery
 ----
 
-. Update the existing `ClusterManagementaddons` resources for the addons so that the addonsDeploymentConfig` resource have the `agentInstallNamespace` namespace that you created.
+. Run `oc apply -f <filename>.yaml` to apply the file.
 
-+
-See the following `ClusterManagementaddons` example resource for the `work-manager` addon:
+. Update the existing `ClusterManagementaddons` resources for the addons so that the addons are installed in the `open-cluster-management-agent-addons-discovery` namespace that is specified in the `addonsDeploymentConfig` resource that you created. See the following example with `open-cluster-management-global-set` as the namespace:
 
 +
 [source,yaml]
@@ -119,7 +120,7 @@ spec:
     type: Placements
 ----
 
-. Add the `addonsDeploymentConfig` to the `ClusterManagementaddons`. See the following example:
+.. Add the `addonsDeploymentConfigs` to the `ClusterManagementaddons`. See the following example:
 
 +
 [source,yaml]
@@ -145,7 +146,7 @@ spec:
     type: Placements
 ----
 
-. Add the `addonsDeploymentConfig` to the `managed-serviceaccount`. See the following example:
+.. Add the `addonsDeploymentConfig` to the `managed-serviceaccount`. See the following example:
 
 +
 [source,yaml]
@@ -171,7 +172,7 @@ spec:
     type: Placements
 ----
 
-. Add the `addonsDeploymentConfig` to the `cluster-proxy` addons. See the following example:
+.. Add the `addonsDeploymentConfig` to the `cluster-proxy` addons. See the following example:
 
 +
 [source,yaml]
@@ -320,11 +321,10 @@ spec:
   hubAcceptsClient: true
   leaseDurationSeconds: 60
 ----
-
-<1> The `mce-import-klusterlet-config` annotation references the `KlusterletConfig` resource that you created in the previous step to install the {product-title-short} klusterlet into a different namespace in {mce-short}.
+<1> The `mce-import-klusterlet-config` annotation references the `KlusterletConfig` resource that you created in the previous step to install the {product-title-short} klusterlet with a different name in {mce-short}.
 <2> The example imports an {mce-short} managed cluster named `mce-a`.
 
-. Create a secret that references the `kubeconfig`` file of the cluster. Go to xref:../cluster_lifecycle/import_cli.adoc#importing-clusters-auto-import-secret [Importing a cluster by using the auto import secret] to add the auto import secret to complete the {mce-short} auto-import process. 
+. Create the `auto-import-secret` secret that references the `kubeconfig` of the {mce-short} cluster. Go to xref:../cluster_lifecycle/import_cli.adoc#importing-clusters-auto-import-secret [Importing a cluster by using the auto import secret] to add the auto import secret to complete the {mce-short} auto-import process. 
 
 After you create the auto import secret in the {mce-short} managed cluster namespace in the {product-title-short} cluster, the managed cluster is registered.
 
@@ -403,9 +403,10 @@ See the following example output that lists the addons:
 [source,bash]
 ----
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-klusterlet-addons-workmgr           1/1     1            1           24h
-hypershift-addons-agent             1/1     1            1           24h
-managed-serviceaccount-addons-agent 1/1     1            1           24h
+cluster-proxy-proxy-agent            1/1     1            1           24h
+klusterlet-addons-workmgr            1/1     1            1           24h
+hypershift-addons-agent              1/1     1            1           24h
+managed-serviceaccount-addons-agent  1/1     1            1           24h
 ----
 
 {product-title-short} deploys the `hypershift-addon`, which is the discovery agent that discovers hosted clusters from {mce-short}. The agent creates the corresponding `DiscoveredCluster` custom resource in the {mce-short} managed cluster namespace in the {product-title-short} hub cluster when the hosted cluster kube API server becomes available. 
