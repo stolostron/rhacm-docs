@@ -32,47 +32,11 @@ curl -L https://raw.githubusercontent.com/open-cluster-management-io/clusteradm/
 [#config-acm-import-hosted]
 == Configuring {product-title-short} to import {mce-short} clusters
 
-{mce-short} has a `local-cluster`, which is a hub cluster that is managed. The default addons are enabled for this `local-cluster`. Complete the following procedure to configure your local cluster to import:
+{mce-short} has a `local-cluster`, which is a hub cluster that is managed. The following default `addons` are enabled for this `local-cluster` in the `open-cluster-management-agent-addon` namespace:
 
-. Run the following command to get the list of `managedclusteraddons` for your `local-cluster`:
-
-+
-[source,bash]
-----
-oc get managedclusteraddons -n local-cluster
-----
-
-See the example output of available addons:
-
-+
-[source,bash]
-----
-NAME                     AVAILABLE   DEGRADED   PROGRESSING
-cluster-proxy            True                   False
-hypershift-addons       True        False      False
-managed-serviceaccount   True                   False
-work-manager             True                   False
-----
-
-. Run the following command to get your addons:
-
-+
-[source,bash]
-----
-oc get deployment -n open-cluster-management-agent-addons
-----
-
-See the following output that lists the agent addons:
-
-+
-[source,bash]
-----
-NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-cluster-proxy-proxy-agent             1/1     1            1         25h
-hypershift-addons-agent               1/1     1            1         25h
-klusterlet-addons-workmgr             1/1     1            1         25h
-managed-serviceaccount-addons-agent   1/1     1            1         25h
-----
+- `cluster-proxy`
+- `managed-serviceaccount`
+- `work-manager`
 
 [#config-addons-mce]
 === Configuring addons 
@@ -83,7 +47,7 @@ Install those addons in a different {mce-short} namespace so that the {mce-short
 
 . Log in to your {product-title-short} with the CLI.
 
-. Create the addonsDeploymentConfig` resource to specify a different addon installation namespace. See the following example where `agentInstallNamespace` points to `open-cluster-management-agent-addons-discovery`:
+. Create the `addonsDeploymentConfig` resource to specify a different addon installation namespace. See the following example where `agentInstallNamespace` points to `open-cluster-management-agent-addons-discovery`:
 
 +
 [source,yaml]
@@ -198,7 +162,7 @@ spec:
     type: Placements
 ----
 
-The addons for the {product-title-short} `local-cluster` and all other managed clusters are re-installed into the namespace that you specified. 
+The addons for the {product-title-short} `local-cluster` are re-installed into the namespace that you specified.
 
 . Run the following command to verify:
 
@@ -222,13 +186,15 @@ managed-serviceaccount-addons-agent   1/1     1            1           24h
 [#create-klusterletconfig]
 === Creating a _KlusterletConfig_ resource
 
-When a `ManagedCluster` references the `KlusterletConfig` resource, the managed cluster `klusterlet` is installed in the namespace that you specified in the `KlusterletConfig`. 
+{mce-short} has a local-cluster, which is a hub cluster that is managed. A resource named `klusterlet` is created for this local-cluster.
 
-Create a `KlusterletConfig` resource that is used by `ManagedCluster` resources to import {mce-short} clusters. 
+When your {mce-short} is imported into {product-title-short}, {product-title-short} installs the klusterlet with the same name, `klusterlet`, to manage the {mce-short}, which conflicts with the {mce-short} local-cluster. klusterlet.
 
-You can import the {product-title-short} klusterlet to be installed in a different namespace than the {mce-short} klusterlet for the {mce-short} `local-cluster`.
+Install those addons in a _different_ {mce-short} namespace so that the {mce-short} can self-manage with the `local-cluster` addons, while {product-title-short} manages {mce-short} at the same time. 
 
-. Create a `KlusterletConfig` using the following example:
+You need to create a `KlusterletConfig` resource that is used by `ManagedCluster` resources to import {mce-short} clusters so that the klusterlet is installed with a different name to avoid the conflict. Complete the following procedure:
+
+. Create a `KlusterletConfig` using the following example. When this `KlusterletConfig` is referenced in a `ManagedCluster`, the value in the `spec.installMode.noOperator.postfix` field is used as a suffix to the klusterlet name, such as `klusterlet-mce-import`:
 
 +
 [source,yaml]
@@ -243,6 +209,8 @@ spec:
     noOperator:
        postfix: mce-import
 ----
+
+. Run `oc apply -f <filename>.yaml` to apply the file.
 
 [#backup-restore-discover]
 === Configure for backup and restore
@@ -306,7 +274,7 @@ oc label KlusterletConfig mce-import-klusterlet-config cluster.open-cluster-mana
 [#import]
 == Importing {mce-short} manually
 
-. From your {product-title-short} cluster, create a `ManagedCluster` resource manually to import an {mce-short} cluster. 
+. From your {product-title-short} cluster, create a `ManagedCluster` resource manually to import an {mce-short} cluster. See the following file example:
 
 +
 [source,yaml]
@@ -323,6 +291,8 @@ spec:
 ----
 <1> The `mce-import-klusterlet-config` annotation references the `KlusterletConfig` resource that you created in the previous step to install the {product-title-short} klusterlet with a different name in {mce-short}.
 <2> The example imports an {mce-short} managed cluster named `mce-a`.
+
+. Run `oc apply -f <filename>.yaml` to apply the file.
 
 . Create the `auto-import-secret` secret that references the `kubeconfig` of the {mce-short} cluster. Go to xref:../cluster_lifecycle/import_cli.adoc#importing-clusters-auto-import-secret [Importing a cluster by using the auto import secret] to add the auto import secret to complete the {mce-short} auto-import process. 
 
