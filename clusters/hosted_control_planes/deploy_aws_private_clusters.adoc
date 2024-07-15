@@ -7,7 +7,7 @@ By default, hosted control plane guest clusters are publicly accessible through 
 
 For private clusters on AWS, all communication with the guest cluster occurs over AWS PrivateLink. To configure hosted control planes for private cluster support on AWS, take the following steps.
 
-*Important:* Although public clusters can be created in any region, private clusters can be created only in the region that is specified by `--aws-private-region`.
+*Important:* Although public clusters can be created in any region, you can create private clusters only in the region that is specified by the `--aws-private-region` flag.
 
 * <<prerequisites-aws-private-clusters,Prerequisites>>
 * <<create-aws-private-hosted-cluster,Creating a private hosted cluster on AWS>>
@@ -17,9 +17,11 @@ For private clusters on AWS, all communication with the guest cluster occurs ove
 [#prerequisites-aws-private-clusters]
 == Prerequisites
 
-* To enable private hosted clusters for AWS, you must first enable AWS PrivateLink. For more information, see xref:../../clusters/hosted_control_planes/enable_aws_private_link.adoc#hosted-enable-private-link[Enabling AWS PrivateLink].
+* To enable private hosted clusters for AWS, you must first enable AWS PrivateLink. For more information, see xref:../hosted_control_planes/enable_aws_private_link.adoc#hosted-enable-private-link[Enabling AWS PrivateLink].
 
-* You must create an AWS Identity and Access Management (IAM) role and AWS Security Token Service (STS) credentials. See xref:../../clusters/hosted_control_planes/create_role_sts_aws.adoc#create-role-sts-aws[Creating an AWS IAM role and STS credentials].
+* You must create an AWS Identity and Access Management (IAM) role and AWS Security Token Service (STS) credentials. For more information, see xref:../hosted_control_planes/create_role_sts_aws.adoc#create-role-sts-aws[Creating an AWS IAM role and STS credentials] and xref:../hosted_control_planes/manage_aws_infra_iam.adoc#iam_aws[Identity and Access Management (IAM) permissions].
+
+* To access a private cluster, you need a bastion instance on AWS. For more information, see link:https://aws.amazon.com/solutions/implementations/linux-bastion/[Linux Bastion Hosts on AWS] in the AWS documentation.
 
 [#create-aws-private-hosted-cluster]
 == Creating a private hosted cluster on AWS
@@ -27,6 +29,7 @@ For private clusters on AWS, all communication with the guest cluster occurs ove
 To create a private hosted cluster on AWS, complete the following steps:
 
 . Create a private hosted cluster by entering the following command, replacing variables with your values as needed:
+
 +
 [source,bash]
 ----
@@ -49,36 +52,23 @@ hcp create cluster aws \
 <5> Specify the path to your AWS STS credentials file, for example, `/home/user/sts-creds/sts-creds.json`.
 <6> Specify the AWS region name, for example, `us-east-1`.
 <7> Defines whether a cluster is public or private.
-<8> Specify the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`.
+<8> Specify the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`. For more information about ARN roles, see _Identity and Access Management (IAM) permissions_.
 
 +
 The API endpoints for the cluster are accessible through a private DNS zone:
 
-- `api.<hosted-cluster-name>.hypershift.local`
-- `*.apps.<hosted-cluster-name>.hypershift.local`
+- `api.<hosted_cluster_name>.hypershift.local`
+- `*.apps.<hosted_cluster_name>.hypershift.local`
+
+[#addl-rs-private-hc-aws]
+=== Additional resources
+
+* For more information about deploying a public hosted cluster on AWS, see xref:../hosted_control_planes/managing_hosted_aws.adoc#hosted-deploy-cluster-aws[Deploying a hosted cluster on AWS].
+
+* For more information about the ARN roles that you need to create a hosted cluster, see xref:../hosted_control_planes/manage_aws_infra_iam.adoc#iam_aws[Identity and Access Management (IAM) permissions].
 
 [#access-aws-private-hosted-cluster]
 == Accessing a private hosting cluster on AWS
-
-You can access a private cluster by using a bastion instance.
-
-. Start a bastion instance by entering the following command:
-+
-[source,bash]
-----
-hypershift create bastion aws \
---sts-creds <path_to_sts_credential_file> \ <1>
---role-arn <role_name> \ <2>
---infra-id <infra_id> \ <3>
---region <region> \ <4>
---ssh-key-file <ssh_key> <5>
-----
-
-<1> Specify the path to your AWS STS credentials file, for example, `/home/user/sts-creds/sts-creds.json`.
-<2> Specify the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`.
-<3> Specify the infrastructure name for your hosted cluster.
-<4> Specify the AWS region name, for example, `us-east-1`.
-<5> Specify the SSH public key file to connect to the bastion. The default location for the SSH public key file is `~/.ssh/id_rsa.pub`.
 
 . Find the private IPs of nodes in the cluster node pool by entering the following command:
 +
@@ -94,7 +84,7 @@ aws ec2 describe-instances --filter="Name=tag:kubernetes.io/cluster/<infra_id>,V
 hcp create kubeconfig > <hosted_cluster_kubeconfig>
 ----
 
-. Enter the following command to SSH into one of the nodes through the bastion by using the IP that is printed from the `create bastion` command:
+. Enter the following command to SSH into one of the nodes through the bastion:
 +
 [source,bash]
 ----
@@ -121,8 +111,3 @@ export KUBECONFIG=<path_to_kubeconfig_file>
 ----
 oc get clusteroperators clusterversion
 ----
-
-[#additional-resources-private-hosted-cluster-aws]
-== Additional resources
-
-For more information about deploying a public hosted cluster on AWS, see xref:../hosted_control_planes/managing_hosted_aws.adoc#hosted-deploy-cluster-aws[Deploying a hosted cluster on AWS].
