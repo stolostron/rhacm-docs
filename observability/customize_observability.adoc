@@ -387,9 +387,40 @@ For more details, see _Replacing certificates for alertmanager route_ in the Gov
 [#customizing-certificates-object-store]
 == Customizing certificates for accessing the object store
 
-Complete the following steps to customize certificates for accessing the object store:
+To customize certificates for accessing the object store, complete the following steps:
 
-. Edit the `http_config` section by adding the certificate in the object store secret. View the following example:
+. Create the secret with the `ca.crt` certificate. If you want to enable mutual TLS, you need to add the `public.crt` and `private.key` keys in the earlier secret. View the following example:
+
++
+[source,yaml]
+----
+ thanos.yaml: |
+    type: s3
+    config:
+      ...
+      http_config:
+        tls_config:
+          ca_file: /etc/minio/certs/ca.crt <1>
+          cert_file: /etc/minio/certs/public.crt
+          key_file: /etc/minio/certs/private.key
+          insecure_skip_verify: false
+----
++
+<1> The path to certificates and key values for the `thanos-object-storage` secret.
+
+. Configure the secret name and mount path by updating the `tlsSecretName` and `tlsSecretMountPath` parameters in the `MultiClusterObservability` custom resource. View the following example where the secret name is `tls-certs-secret` and the mount path for the certificates and key value is the directory that is used in the prior example:
+
++
+[source,yaml]
+----
+metricObjectStorage:
+      key: thanos.yaml
+      name: thanos-object-storage
+      tlsSecretName: tls-certs-secret
+      tlsSecretMountPath: /etc/minio/certs
+----
+
+. Update the `thanos.yaml` definition in the `thanos-object-storage` secret by adding the `http_config` section and add the certificate in the object store secret. View the following example:
 
 +
 [source,yaml]
@@ -408,24 +439,6 @@ Complete the following steps to customize certificates for accessing the object 
           insecure_skip_verify: false
 ----
 
-. Add the object store secret in the `open-cluster-management-observability` namespace. The secret must contain the `ca.crt` that you defined in the previous secret example. If you want to enable mutual TLS, you need to add the `public.crt` and `private.key` keys in the earlier secret. View the following example:
-
-+
-[source,yaml]
-----
- thanos.yaml: |
-    type: s3
-    config:
-      ...
-      http_config:
-        tls_config:
-          ca_file: /etc/minio/certs/ca.crt <1>
-          cert_file: /etc/minio/certs/public.crt
-          key_file: /etc/minio/certs/private.key
-          insecure_skip_verify: false
-----
-+
-<1> The path to certificates and key values for the `thanos-object-storage` secret. 
 
 . Configure the secret name and mount path by updating the `tlsSecretName` and `tlsSecretMountPath` parameters in the `MultiClusterObservability` custom resource. View the following example where the secret name is `tls-certs-secret` and the mount path for the certificates and key value is the directory that is used in the prior example:
 
