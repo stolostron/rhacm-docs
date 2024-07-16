@@ -385,9 +385,15 @@ After this setting is changed, the clusters install.
 
 [#deploy-managed-stuck-pending]
 === Managed cluster stuck in _Pending_ status after deployment
-//2.8:ACM-5813
+//2.11:ACM-12722
 
-If the Assisted Installer agent starts slowly and you deploy a managed cluster, the managed cluster might become stuck in the `Pending` status and not have any agent resources. You can work around the issue by disabling converged flow. Complete the following steps:
+The converged flow is the default process of provisioning. When you use the `BareMetalHost` resource for the Bare Metal Operator (BMO) to connect your host to a live ISO, the ironic agent runs. First, the ironic agent runs the steps in the Bare Metal installer-provisioned-infrastructure. Then, the ironic agent starts the Assisted Installer agent, and the agent handles the rest of the install and provisioning process. 
+
+If the Assisted Installer agent starts slowly and you deploy a managed cluster, the managed cluster might become stuck in the `Pending` status and not have any agent resources. You can work around the issue by disabling the converged flow. 
+
+*IMPORTANT:* When you disable the converged flow, only the Assisted Installer agent runs in the live ISO, reducing the number of open ports and disabling any features enabled by the ironic agent. 
+
+To disable the converged flow, complete the following steps:
 
 . Create the following ConfigMap on the hub cluster:
 +
@@ -399,8 +405,9 @@ metadata:
   name: my-assisted-service-config
   namespace: multicluster-engine
 data:
-  ALLOW_CONVERGED_FLOW: "false"
+  ALLOW_CONVERGED_FLOW: "false" <1> 
 ----
+<1> When you set the parameter value to "false", you also disable any features enabled by the ironic agent. 
 
 . Apply the ConfigMap by running the following command:
 +
