@@ -1,0 +1,225 @@
+[#auto-import-hcp]
+= Automating import for discovered hosted clusters
+
+Automate the import of hosted clusters by using the `DiscoveredCluster` resource for faster cluster management, without manually importing individual clusters. 
+
+When you automatically import a discovered hosted cluster into {product-title-short}, all {product-title-short} add-ons are enabled so that you can start managing the hosted clusters with the available management tools.
+
+The hosted cluster is also _auto-imported_ into {mce-short}. Through the {mce-short} console, you can manage the hosted cluster lifecycle. However, you cannot manage the hosted cluster lifecycle from the {product-title-short} console.
+
+*Required access:* Cluster administrator
+
+* <<auto-hcp-import-preq,Prerequisites>>
+* <<config-hcp-autoimport,Configure settings for automatic import>>
+* <<create-hcp-placement,Creating the placement definition>>
+* <<bind-hcp-placement,Binding the import policy to a placement definition>>
+
+[#auto-import-hcp-preq]
+== Prerequisites
+
+* You need {product-title-short} installed. See the {product-title-short} link:../../install/install_overview.adoc#installing[Installing and upgrading] documentation.
+
+* You need to learn about _Policies_. See the introduction to link:../../governance/grc_intro.adoc#governance[Governance] in the {product-title-short} documentation.
+
+[#config-hcp-autoimport]
+== Configuring settings for automatic import
+
+Discovered hosted clusters from managed {mce-short} clusters are represented in `DiscoveredCluster` custom resources, which are located in the managed {mce-short} cluster namespace in {product-title-short}. See the following `DiscoveredCluster` resource and namespace example:
+
+[source,yaml]
+----
+apiVersion: discovery.open-cluster-management.io/v1
+kind: DiscoveredCluster
+metadata:
+  creationTimestamp: "2024-05-30T23:05:39Z"
+  generation: 1
+  labels:
+    hypershift.open-cluster-management.io/hc-name: hosted-cluster-1
+    hypershift.open-cluster-management.io/hc-namespace: clusters
+  name: hosted-cluster-1
+  namespace: mce-1
+  resourceVersion: "1740725"
+  uid: b4c36dca-a0c4-49f9-9673-f561e601d837
+spec:
+  apiUrl: https://a43e6fe6dcef244f8b72c30426fb6ae3-ea3fec7b113c88da.elb.us-west-1.amazonaws.com:6443
+  cloudProvider: aws
+  creationTimestamp: "2024-05-30T23:02:45Z"
+  credential: {}
+  displayName: mce-1-hosted-cluster-1
+  importAsManagedCluster: false
+  isManagedCluster: false
+  name: hosted-cluster-1
+  openshiftVersion: 0.0.0
+  status: Active
+  type: MultiClusterEngineHCP
+----
+These discovered hosted clusters are not automatically imported into {product-title-short} until the `spec.importAsManagedCluster` field is set to `true`. Learn how to use a {product-title-short} policy to automatically set this field to `true` for all `type.MultiClusterEngineHCP` within `DiscoveredCluster` resources so that discovered hosted clusters are immediately automatically imported into {product-title-short}.
+
+Configure your Policy to import all your discovered hosted clusters automatically. Log in to your hub cluster from the CLI to complete the following procedure:
+
+. Create a YAML file for your `DiscoveredCluster` custom resource and edit the configuration that is referenced in the following example:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-mce-hcp-autoimport
+  namespace: open-cluster-management-global-set
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/description: Discovered clusters that are of
+      type MultiClusterEngineHCP can be automatically imported into ACM as managed clusters.
+      This policy configure those discovered clusters so they are automatically imported. 
+      Fine tuning MultiClusterEngineHCP clusters to be automatically imported
+      can be done by configure filters at the configMap or add annotation to the discoverd cluster.
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: mce-hcp-autoimport-config
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ConfigMap
+                metadata:
+                  name: discovery-config
+                  namespace: open-cluster-management-global-set
+                data:
+                  rosa-filter: "" 
+          remediationAction: enforce <1>
+          severity: low
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-mce-hcp-autoimport
+        spec:
+          remediationAction: enforce
+          severity: low
+          object-templates-raw: |
+            {{- /* find the MultiClusterEngineHCP DiscoveredClusters */ -}}
+            {{- range $dc := (lookup "discovery.open-cluster-management.io/v1" "DiscoveredCluster" "" "").items }}
+              {{- /* Check for the flag that indicates the import should be skipped */ -}}
+              {{- $skip := "false" -}}
+              {{- range $key, $value := $dc.metadata.annotations }}
+                {{- if and (eq $key "discovery.open-cluster-management.io/previously-auto-imported")
+                           (eq $value "true") }}
+                  {{- $skip = "true" }}
+                {{- end }}
+              {{- end }}
+              {{- /* if the type is MultiClusterEngineHCP and the status is Active */ -}}
+              {{- if and (eq $dc.spec.status "Active") 
+                         (contains (fromConfigMap "open-cluster-management-global-set" "discovery-config" "mce-hcp-filter") $dc.spec.displayName)
+                         (eq $dc.spec.type "MultiClusterEngineHCP")
+                         (eq $skip "false") }}
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: discovery.open-cluster-management.io/v1
+                kind: DiscoveredCluster
+                metadata:
+                  name: {{ $dc.metadata.name }}
+                  namespace: {{ $dc.metadata.namespace }}
+                spec:
+                  importAsManagedCluster: true <2>
+              {{- end }}
+            {{- end }}
+----
+<1> To enable automatic import, change the `spec.remediationAction` to `enforce`. 
+<2> To enable automatic import, change `spec.importAsManagedCluster` to `true`. 
+
+. Run `oc apply -f <filename>.yaml -n <namespace>` to apply the file.
+
+[#create-hcp-placement]
+== Creating the placement definition 
+
+You need to create a placement definition that specifies the managed cluster for the policy deployment. Complete the following procedure:
+
+. Create the `Placement` definition that selects only the `local-cluster`, which is a hub cluster that is managed. Use the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: policy-mce-hcp-autoimport-placement
+  namespace: open-cluster-management-global-set
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+    - key: cluster.open-cluster-management.io/unavailable
+      operator: Exists
+  clusterSets:
+    - global
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: local-cluster
+              operator: In
+              values:
+                - "true"
+----
+
+. Run `oc apply -f placement.yaml -n <namespace>`, where `namespace` matches the namespace that you used for the policy that you previously created. 
+
+[#bind-hcp-placement]
+== Binding the import policy to a placement definition
+
+After you create the policy and the placement, you need to connect the two resources. Complete the following steps:
+
+. Connect the resources by using a `PlacementBinding` resource. See the following example where `placementRef` points to the `Placement` that you created, and `subjects` points to the `Policy` that you created:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: policy-mce-hcp-autoimport-placement-binding
+  namespace: open-cluster-management-global-set
+placementRef:
+  name: policy-mce-hcp-autoimport-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: policy-mce-hcp-autoimport
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+----
+
++
+. To verify, run the following command:
+
++
+[source,bash]
+----
+oc get policy policy-mce-hcp-autoimport -n <namespace>
+---- 
+
+[#detach-hcp-clusters]
+== Detaching hosted clusters from {product-title-short}
+
+You can _detach_ a hosted cluster from {product-title-short} by using the *Detach* option in the {product-title-short} console, or by removing the corresponding `ManagedCluster` custom resource from the command line. 
+
+For best results, detach the managed hosted cluster before _destroying_ the hosted cluster.
+
+When a discovered cluster is detached, the following annotation is added to the `DiscoveredCluster` resource to prevent the policy to import the discovered cluster again.
+
+[source,bash]
+----
+  annotations:
+    discovery.open-cluster-management.io/previously-auto-imported: "true"
+----
+
+If you want the detached discovered cluster to be reimported, remove this annotation.
