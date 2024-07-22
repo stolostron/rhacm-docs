@@ -1,7 +1,16 @@
 [#hosted-cluster-arm-aws]
-= Enabling hosted control planes on an ARM64 {ocp-short} cluster (Technology Preview)
+= Enabling hosted clusters to run on different architectures (Technology Preview)
 
-You can enable an ARM64 hosted control plane to operate with an {ocp-short} ARM64 data plane in a management cluster.
+By default for hosted control planes on AWS, you use an AMD64 hosted cluster. However, you can enable hosted control planes to run on an ARM64 hosted cluster. 
+
+You can also create node pools of different architecture types for the same hosted cluster. See the following table for compatible combinations of node pools and hosted clusters:
+
+|===
+| Hosted cluster | Node pool
+| AMD64 | AMD64 or ARM64
+| ARM64 | ARM64 or AMD64
+
+|===
 
 [#prerequisites-hosted-arm]
 == Prerequisites
@@ -26,8 +35,9 @@ hcp create cluster aws \
 --pull-secret <path_to_pull_secret> \ <4>
 --sts-creds <path_to_sts_credential_file> \ <5>
 --region <region> \ <6>
---release-image quay.io/openshift-release-dev/ocp-release:<ocp_release_image> <7>
---role-arn <role_name> <8>
+--release-image quay.io/openshift-release-dev/ocp-release:<ocp_release_image> \ <7>
+--role-arn <role_name> \ <8>
+--multi-arch <9>
 ----
 
 +
@@ -39,8 +49,9 @@ hcp create cluster aws \
 <6> Specify the AWS region name, for example, `us-east-1`.
 <7> Specify the supported {ocp-short} version that you want to use, for example, `4.14.0-x86_64`. If you are using a disconnected environment, replace `<ocp_release_image>` with the digest image. To extract the {ocp-short} release image digest, see _Extracting the {ocp-short} release image digest_.
 <8> Specify the Amazon Resource Name (ARN), for example, `arn:aws:iam::820196288204:role/myrole`.
+<9> The `multi-arch` flag indicates that the hosted cluster supports both `amd64` and `arm64` node pools. When you set the flag and supply a release image, the release image must be a multi-architecture release image. When you set the flag and supply a release stream, the release stream must be a multi-architecture release stream. If you do not set the `multi-arch` flag, the management cluster and node pool CPU architectures must match. Otherwise, a warning is displayed. A node pool supports only one CPU architecture within the same node pool.
 
-. Add a 64-bit x_86 `NodePool` object to the hosted cluster by running the following command:
+. Add a `NodePool` object to the hosted cluster by running the following command:
 
 +
 [source,bash]
@@ -67,77 +78,30 @@ You can schedule application workloads (`NodePool` objects) on 64-bit ARM and AM
 
 If you do not specify a value for the `arch` field, the `amd64` value is used by default.
 
-To create an ARM `NodePool` object on a hosted cluster on AWS, complete the following steps:
+[#hc-arm-nodepools-prereqs]
+=== Prerequisites
 
-. To render the `NodePool` object configuration in a YAML format, run the following command:
+You must have a multi-architecture image for the `HostedCluster` custom resource to use. You can access multi-architecture nightly images at https://multi.ocp.releases.ci.openshift.org/.
+
+[#hc-arm-nodepools-aws]
+=== Creating an ARM or AMD NodePool object on an AWS hosted cluster
+
+To create an ARM or AMD `NodePool` object on a hosted cluster on AWS, complete the following steps:
+
+. Add a `NodePool` object to the hosted cluster by running the following command:
 
 +
 [source,bash]
 ----
 hcp create nodepool aws \
-cluster-name <hosted_cluster_name> \ <1>
---name <arm64_node_pool_name> \ <2>
---node-count <node_pool_replica_count> \ <3>
---render > arm64-nodepool.yml <4>
+--cluster-name <hosted_cluster_name> \ <1>
+--name <node_pool_name> \ <2>
+--node-count <node_pool_replica_count> <3>
+--arch <architecture> <4>
 ----
 
 +
 <1> Specify the name of your hosted cluster, for instance, `example`.
 <2> Specify the node pool name.
 <3> Specify the node pool replica count, for example, `3`.
-<4> The `NodePool` object configuration is saved in the `arm64-nodepool.yml` file.
-
-+
-The command creates a YAML file that specifies the CPU architecture for the `NodePool` object, as shown in the following example:
-
-+
-[source,yaml]
-----
-apiVersion: hypershift.openshift.io/v1beta1
-kind: NodePool
-metadata:
-  creationTimestamp: null
-  name: hypershift-arm-us-east-1a
-  namespace: clusters
-spec:
-  arch: amd64
-  clusterName: hypershift-arm
-  management:
-    autoRepair: false
-    upgradeType: Replace
-  nodeDrainTimeout: 0s
-  platform:
-    aws:
-      instanceProfile: hypershift-arm-2m289-worker
-      instanceType: m5.large
-      rootVolume:
-        size: 120
-        type: gp3
-      securityGroups:
-      - id: sg-064ea63968d258493
-      subnet:
-        id: subnet-02c74cf1cf1e7413f
-    type: AWS
-  release:
-    image: quay.io/openshift-release-dev/ocp-release-nightly@sha256:390a33cebc940912a201a35ca03927ae5b058fbdae9626f7f4679786cab4fb1c
-  replicas: 3
-status:
-  replicas: 0
-----
-
-. Modify the `arch` and `instanceType` values in the YAML file by entering the following command. In the command, the ARM instance type is `m6g.large`, but any ARM instance type works:
-
-+
-----
-sed 's/arch: amd64/arch: arm64/g; s/instanceType: m5.large/instanceType: m6g.large/g' arm_nodepool_spec.yml > temp.yml && mv temp.yml arm_nodepool_spec.yml
-----
-
-. Apply the rendered YAML file to the hosted cluster by entering the following command:
-
-+
-----
-oc apply -f arm_nodepool_spec.yml
-----
-
-+
-//lahinson - sept. 2023 - adding comment to ensure proper formatting
+<4> Specify the architecture type, such as `arm64` or `amd64`.
