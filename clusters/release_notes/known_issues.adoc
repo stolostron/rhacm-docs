@@ -385,9 +385,24 @@ After this setting is changed, the clusters install.
 
 [#deploy-managed-stuck-pending]
 === Managed cluster stuck in _Pending_ status after deployment
-//2.8:ACM-5813
+//2.11:ACM-12722
 
-If the Assisted Installer agent starts slowly and you deploy a managed cluster, the managed cluster might become stuck in the `Pending` status and not have any agent resources. You can work around the issue by disabling converged flow. Complete the following steps:
+The converged flow is the default process of provisioning. When you use the `BareMetalHost` resource for the Bare Metal Operator (BMO) to connect your host to a live ISO, the Ironic Python Agent does the following actions:
+
+* It runs the steps in the Bare Metal installer-provisioned-infrastructure. 
+* It starts the Assisted Installer agent, and the agent handles the rest of the install and provisioning process. 
+
+If the Assisted Installer agent starts slowly and you deploy a managed cluster, the managed cluster might become stuck in the `Pending` status and not have any agent resources. You can work around the issue by disabling the converged flow. 
+
+*Important:* When you disable the converged flow, only the Assisted Installer agent runs in the live ISO, reducing the number of open ports and disabling any features you enabled with the  Ironic Python Agent agent, including the following:
+
+* Pre-provisioning disk cleaning 
+* iPXE boot firmware 
+* BIOS configuration 
+
+To decide what port numbers you want to enable or disable without disabling the converged flow, see link:../../clusters/about/mce_networking.adoc#mce-network-configuration[Network configuration]. 
+
+To disable the converged flow, complete the following steps:
 
 . Create the following ConfigMap on the hub cluster:
 +
@@ -399,8 +414,9 @@ metadata:
   name: my-assisted-service-config
   namespace: multicluster-engine
 data:
-  ALLOW_CONVERGED_FLOW: "false"
+  ALLOW_CONVERGED_FLOW: "false" <1> 
 ----
+<1> When you set the parameter value to "false", you also disable any features enabled by the Ironic Python Agent. 
 
 . Apply the ConfigMap by running the following command:
 +
