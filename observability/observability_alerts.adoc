@@ -152,14 +152,20 @@ amtool silence expire --alertmanager.url="http://localhost:9093" "d839aca9-ed46-
 amtool silence expire --alertmanager.url="http://localhost:9093" $(amtool silence query --alertmanager.url="http://localhost:9093" -q) 
 ----
 
-[#migrating-storage-pv]
-=== Migrating storage for Persistent Volumes used by observability pods
+[#migrating-observability-storage]
+=== Migrating observability storage
 
-When you use alert silencers, you can also migrate storage for the Persistent Volumes (PVs) used by the observability pods. 
+When you use alert silencers, you can migrate your {product-title-short} observability storage by creating new `StatefulSets` and `Persistent Volumes` to use your chosen `StorageClass`. By creating new `StatefulSets` and PVs, you have more control over where your data is stored and how it is used in storage.
 
 *Note:* The storage for PVs is different from the object storage used to store the metrics collected from your clusters.  
 
-To migrate your PV storage, complete the following steps:
+When you use `StatefulSets` and PVs to migrate your observability storage, it stores the following data components:
+
+- *Observatorium:* Uploads its data to the object storage. Other component areas do not store data that can be lost; instead, they automatically regenerate what they need during a reboot. 
+- *Alertmanager:* Only stores silenced alerts. If you want to keep these silenced alerts, you must migrate that data to the new PV. 
+- *Metrics collector:* Deploys as deployments on the managed clusters. 
+
+To migrate your observability storage, complete the following steps:
 
 . In the `MultiClusterObservability`, set the `.spec.storageConfig.storageClass` field to the new storage class. 
 . To ensure the data of the earlier `PersistentVolumes` is retained even when you delete the `PersistentVolumeClaim`, go to all your existing `PersistentVolumes`.
@@ -171,6 +177,8 @@ To migrate your PV storage, complete the following steps:
 .. `data-observability-thanos-receive-default`
 .. `data-observability-thanos-store-shard`
 .. *Note:* You might need to delete, then re-create, the `MultiClusterObservability` operator pod so that you can create the new `StatefulSet`. 
+. Re-create a new `PersistentVolumeClaim` with the same name but the correct `StorageClass`. 
+. Create a new `PersistentVolumeClaim` referring to the old `PersistentVolume`.  
 . Verify that the new `StatefulSet` and `PersistentVolumes` use the new `StorageClass` that you chose.  
 
 [#supress-alerts]
