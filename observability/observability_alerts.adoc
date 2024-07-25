@@ -92,10 +92,10 @@ To disable alert forwarding for managed clusters, add the following annotation t
 ----
 metadata:
       annotations:
-        mco-disable-alerting: true
+        mco-disable-alerting: "true"
 ----
 
-When you set the annotation, the alert forwarding configuration on the managed clusters is reverted. Any changes made to the `ocp-monitoring-config` ConfigMap in the `openshift-monitoring` namespace are also reverted. Setting the annotation ensures that the `ocp-monitoring-config` ConfigMap is no longer managed or updated by the observability operator endpoint. After you update the configuration, the Prometheus instance on your managed cluster restarts.
+When you set the annotation, the alert forwarding configuration on the managed clusters is reverted. Any changes made to the `ocp-monitoring-config` config map in the `openshift-monitoring` namespace are also reverted. Setting the annotation ensures that the `ocp-monitoring-config` config map is no longer managed or updated by the observability operator endpoint. After you update the configuration, the Prometheus instance on your managed cluster restarts.
 
 *Important:* Metrics on your managed cluster are lost if you have a Prometheus instance with a persistent volume for metrics, and the Prometheus instance restarts. Metrics from the hub cluster are not affected.
 
@@ -151,6 +151,27 @@ amtool silence expire --alertmanager.url="http://localhost:9093" "d839aca9-ed46-
 ----
 amtool silence expire --alertmanager.url="http://localhost:9093" $(amtool silence query --alertmanager.url="http://localhost:9093" -q) 
 ----
+
+[#migrating-storage-pv]
+=== Migrating storage for Persistent Volumes used by observability pods
+
+When you use alert silencers, you can also migrate storage for the Persistent Volumes (PVs) used by the observability pods. 
+
+*Note:* The storage for PVs is different from the object storage used to store the metrics collected from your clusters.  
+
+To migrate your PV storage, complete the following steps:
+
+. In the `MultiClusterObservability`, set the `.spec.storageConfig.storageClass` field to the new storage class. 
+. To ensure the data of the earlier `PersistentVolumes` is retained even when you delete the `PersistentVolumeClaim`, go to all your existing `PersistentVolumes`.
+. Change the `reclaimPolicy` to `"Retain": `oc patch pv <your-pv-name> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'`. 
+. *Optional:* To avoid losing data, see link:https://access.redhat.com/solutions/6922821[Migrate persistent data to another Storage Class in DG 8 Operator in OCP 4].
+. Delete both the `StatefulSet` and the `PersistentVolumeClaim` in the following `StatefulSet` cases:
+.. `alertmanager-db-observability-alertmanager`
+.. `data-observability-thanos-compact`
+.. `data-observability-thanos-receive-default`
+.. `data-observability-thanos-store-shard`
+.. *Note:* You might need to delete, then re-create, the `MultiClusterObservability` operator pod so that you can create the new `StatefulSet`. 
+. Verify that the new `StatefulSet` and `PersistentVolumes` use the new `StorageClass` that you chose.  
 
 [#supress-alerts]
 == Suppressing alerts
