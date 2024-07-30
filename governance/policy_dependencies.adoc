@@ -1,7 +1,9 @@
 [#policy-dependencies]
 = Policy dependencies
 
-Dependencies can be used to activate a policy or policy template when the dependency criteria are satisfied. The following fields are checked on the managed cluster, `dependencies` and `extraDependencies`. When a dependency is not met, the template status of the replicated policy template displays more details.
+Dependencies can be used to activate a policy only when other policies on your cluster are in a certain state. When the dependency criteria is not met, the policy is labeled as `Pending` and resources are not created on your managed cluster. There are more details about the the criteria status in the policy status.
+
+You can use policy dependencies to control the ordering of how objects are applied. For example, if you have a policy for an operator, and another policy for a resource that operator manages, setting a dependency on the second policy so that it does not attempt to create the resource until the operator is installed could help performance on the managed cluster.
 
 *Required access:* Policy administrator
 
@@ -20,7 +22,7 @@ metadata:
   name: moderate-compliance-scan
   namespace: default
 spec:
-  dependencies:
+  dependencies: <1>
   - apiVersion: policy.open-cluster-management.io/v1
     compliance: Compliant
     kind: Policy
@@ -56,5 +58,9 @@ spec:
         remediationAction: enforce
         severity: low
 ----
-
+//we need to add the parameters to the sample: extraDependencies and ignorePending | MJ | 07/30
 *Note:* A dependency cannot be used to apply a policy on one cluster based on the status of a policy in another cluster. 
+<1> The `dependencies` field is set on a `Policy` object, and the requirements apply to all policy templates in the policy. 
+<2> The `extraDependencies` field can be set on individual policy template. For example the parameter can be set in a configuration policy, and defines criteria that must be satisfied in addition to any `dependencies` set in the policy.
+<3> The `ignorePending` field can be set on individual policy templates, and configures whether the `Pending` status on a template is considered as `Compliant` or `NonCompliant` when the overall policy compliance is calculated. By default, this is set to `false`, and a `Pending` template means that the policy is `NonCompliant`. When you set this to `true` it is useful when the expected status of the template `Pending`.
+
