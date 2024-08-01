@@ -1,7 +1,9 @@
 [#policy-dependencies]
 = Policy dependencies
 
-Dependencies can be used to activate a policy or policy template when the dependency criteria are satisfied. The following fields are checked on the managed cluster, `dependencies` and `extraDependencies`. When a dependency is not met, the template status of the replicated policy template displays more details.
+Dependencies can be used to activate a policy only when other policies on your cluster are in a certain state. When the dependency criteria is not met, the policy is labeled as `Pending` and resources are not created on your managed cluster. There are more details about the the criteria status in the policy status.
+
+You can use policy dependencies to control the ordering of how objects are applied. For example, if you have a policy for an operator and another policy for a resource that the operator manages, you can set a dependency on the second policy so that it does not attempt to create the resource until the operator is installed. This can help with the performance on the managed cluster.
 
 *Required access:* Policy administrator
 
@@ -20,7 +22,7 @@ metadata:
   name: moderate-compliance-scan
   namespace: default
 spec:
-  dependencies:
+  dependencies: <1>
   - apiVersion: policy.open-cluster-management.io/v1
     compliance: Compliant
     kind: Policy
@@ -28,7 +30,13 @@ spec:
     namespace: default
   disabled: false
   policy-templates:
-  - objectDefinition:
+  - extraDependencies: <2>
+    - apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      name: scan-setting-prerequisite
+      compliance: Compliant
+    ignorePending: false <3>
+    objectDefinition:
       apiVersion: policy.open-cluster-management.io/v1
       kind: ConfigurationPolicy
       metadata:
@@ -56,5 +64,9 @@ spec:
         remediationAction: enforce
         severity: low
 ----
+<1> The `dependencies` field is set on a `Policy` object, and the requirements apply to all policy templates in the policy. 
+<2> The `extraDependencies` field can be set on individual policy template. For example the parameter can be set for a configuration policy, and defines criteria that must be satisfied in addition to any `dependencies` set in the policy.
+<3> The `ignorePending` field can be set on each individual policy template, and configures whether the `Pending` status on that template is considered as `Compliant` or `NonCompliant` when the overall policy compliance is calculated. By default, this is set to `false` and a `Pending` template causes the policy to be `NonCompliant`. When you set this to `true` the policy can still be `Compliant` when this template is `Pending`, which is useful when that is expected status of the template.
 
-*Note:* A dependency cannot be used to apply a policy on one cluster based on the status of a policy in another cluster. 
+*Note:* You cannot use a dependency to apply a policy on one cluster based on the status of a policy in another cluster.
+
