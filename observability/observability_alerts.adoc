@@ -13,14 +13,19 @@ Receive and define alerts for the observability service to be notified of hub cl
 
 Integrate external messaging tools such as email, Slack, and PagerDuty to receive notifications from Alertmanager. You must override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for Alertmanager. Complete the following steps to update the custom receiver rules:
 
+//didn't add observability because its a secret name and not a pod name, still need confirmation
 . Extract the data from the `alertmanager-config` secret. Run the following command:
+
 +
+[source,bash]
 ----
 oc -n open-cluster-management-observability get secret alertmanager-config --template='{{ index .data "alertmanager.yaml" }}' |base64 -d > alertmanager.yaml
 ----
 
 . Edit and save the `alertmanager.yaml` file configuration by running the following command:
+
 +
+[source,bash]
 ----
 oc -n open-cluster-management-observability create secret generic alertmanager-config --from-file=alertmanager.yaml --dry-run -o=yaml |  oc -n open-cluster-management-observability replace secret --filename=-
 ----
@@ -110,44 +115,58 @@ Add alerts that you do not want to receive. You can silence alerts by the alert 
 
 Continue reading for ways to silence alerts:
 
-- To silence a {product-title-short} alert, you must have access to the `alertmanager-main` pod in the `open-cluster-management-observability` namespace. For example, enter the following command in the pod terminal to silence `SampleAlert`:
+- To silence a {product-title-short} alert, you must have access to the `observability-alertmanager-main` pod in the `open-cluster-management-observability` namespace. For example, enter the following command in the pod terminal to silence `SampleAlert`:
+
 +
+[source,bash]
 ----
 amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" alertname="SampleAlert"
 ----
 
 - Silence an alert by using multiple match labels. The following command uses `match-label-1` and `match-label-2`:
+
 +
+[source,bash]
 ----
 amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" <match-label-1>=<match-value-1> <match-label-2>=<match-value-2>
 ----
 
 - If you want to silence an alert for a specific period of time, use the `--duration` flag. Run the following command to silence the `SampleAlert` for an hour:
+
 +
+[source,bash]
 ----
 amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" --duration="1h" alertname="SampleAlert"
 ----
 +
 You can also specify a start or end time for the silenced alert. Enter the following command to silence the `SampleAlert` at a specific start time:
+
 +
+[source,bash]
 ----
 amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" --start="2023-04-14T15:04:05-07:00" alertname="SampleAlert"
 ----
 
 - To view all silenced alerts that are created, run the following command:
+
 +
+[source,bash]
 ----
 amtool silence --alertmanager.url="http://localhost:9093"
 ----
 
 - If you no longer want an alert to be silenced, end the silencing of the alert by running the following command:
+
 +
+[source,bash]
 ----
 amtool silence expire --alertmanager.url="http://localhost:9093" "d839aca9-ed46-40be-84c4-dca8773671da"
 ----
-+
+
 - To end the silencing of all alerts, run the following command:
+
 +
+[source,bash]
 ----
 amtool silence expire --alertmanager.url="http://localhost:9093" $(amtool silence query --alertmanager.url="http://localhost:9093" -q) 
 ----
@@ -166,8 +185,8 @@ To migrate your PV storage, complete the following steps:
 . Change the `reclaimPolicy` to `"Retain": `oc patch pv <your-pv-name> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'`. 
 . *Optional:* To avoid losing data, see link:https://access.redhat.com/solutions/6922821[Migrate persistent data to another Storage Class in DG 8 Operator in OCP 4].
 . Delete both the `StatefulSet` and the `PersistentVolumeClaim` in the following `StatefulSet` cases:
-.. `alertmanager-db-observability-alertmanager`
-.. `data-observability-thanos-compact`
+.. `alertmanager-db-observability-alertmanager-<REPLICA_NUMBER>`
+.. `data-observability-thanos-<COMPONENT_NAME>`
 .. `data-observability-thanos-receive-default`
 .. `data-observability-thanos-store-shard`
 .. *Note:* You might need to delete, then re-create, the `MultiClusterObservability` operator pod so that you can create the new `StatefulSet`. 
@@ -193,13 +212,15 @@ inhibit_rules:<1>
       severity: warning|info
 ----
 <1> The `inhibit_rules` parameter section is defined to look for alerts in the same namespace. When a `critical` alert is initiated within a namespace and if there are any other alerts that contain the severity level `warning` or `info` in that namespace, only the `critical` alerts are routed to the Alertmanager receiver. The following alerts might be displayed when there are matches:
+
 +
 ----
 ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
 ALERTS{alertname="foo", namespace="ns-1", severity="warning"}
 ----
-+
+
 <2> If the value of the `source_match` and `target_match_re` parameters do not match, the alert is routed to the receiver:
+
 +
 ----
 ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
@@ -207,7 +228,9 @@ ALERTS{alertname="foo", namespace="ns-2", severity="warning"}
 ----
 
 - To view suppressed alerts in {product-title-short}, enter the following command:
+
 +
+[source,bash]
 ----
 amtool alert --alertmanager.url="http://localhost:9093" --inhibited
 ----
