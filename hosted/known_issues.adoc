@@ -1,0 +1,94 @@
+[#known-issues-hcp]
+= Hosted control planes known issues
+
+////
+Please follow this format:
+
+Title of known issue, be sure to match header and make title, header unique
+
+Hidden comment: Release: #issue
+Known issue process and when to write:
+
+- Doesn't work the way it should
+- Straightforward to describe
+- Good to know before getting started
+- Quick workaround, of any
+- Applies to most, if not all, users
+- Something that is likely to be fixed next release (never preannounce)
+- Always comment with the issue number and version: //2.4:19417
+- Link to customer BugZilla ONLY if it helps; don't link to internal BZs and GH issues.
+
+Or consider a troubleshooting topic.
+////
+
+Review the known issues for cluster lifecycle with {mce-short}. The following list contains known issues for this release, or known issues that continued from the previous release. For your {ocp-short} cluster, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14[{ocp-short} release notes].
+
+[#console-hosted-pending-import]
+=== Console displays hosted cluster as Pending import 
+//2.7:25594
+
+If the annotation and `ManagedCluster` name do not match, the console displays the cluster as `Pending import`. The cluster cannot be used by the {mce-short}. The same issue happens when there is no annotation and the `ManagedCluster` name does not match the `Infra-ID` value of the `HostedCluster` resource."
+
+[#add-node-pool-duplicate-version]
+=== Console might list the same version multiple times when adding a node pool to a hosted cluster 
+//2.7:ACM-2664
+
+When you use the console to add a new node pool to an existing hosted cluster, the same version of {ocp-short} might appear more than once in the list of options. You can select any instance in the list for the version that you want. 
+
+[#deleted-nodes-shown-in-console]
+=== The web console lists nodes even after they are removed from the cluster and returned to the infrastructure environment
+//2.9:ACM-8334
+
+When a node pool is scaled down to 0 workers, the list of hosts in the console still shows nodes in a `Ready` state. You can verify the number of nodes in two ways:
+
+* In the console, go to the node pool and verify that it has 0 nodes.
+* On the command line interface, run the following commands:
+
+** Verify that 0 nodes are in the node pool by running the following command:
+
++
+[source,bash]
+----
+oc get nodepool -A
+----
+
+** Verify that 0 nodes are in the cluster by running the following command:
+
++
+[source,bash]
+----
+oc get nodes --kubeconfig
+----
+
+** Verify that 0 agents are reported as bound to the cluster by running the following command:
+
++
+[source,bash]
+----
+oc get agents -A
+----
+
+[#hosted-cluster-dual-stack]
+=== Potential DNS issues in hosted clusters configured for a dual-stack network
+//2.9:ACM-8527
+
+When you create a hosted cluster in an environment that uses the dual-stack network, you might encounter the following DNS-related issues:
+
+* `CrashLoopBackOff` state in the `service-ca-operator` pod: When the pod tries to reach the Kubernetes API server through the hosted control plane, the pod cannot reach the server because the data plane proxy in the `kube-system` namespace cannot resolve the request. This issue occurs because in the HAProxy setup, the front end uses an IP address and the back end uses a DNS name that the pod cannot resolve.
+* Pods stuck in `ContainerCreating` state: This issue occurs because the `openshift-service-ca-operator` cannot generate the `metrics-tls` secret that the DNS pods need for DNS resolution. As a result, the pods cannot resolve the Kubernetes API server.
+
+To resolve those issues, configure the DNS server settings by following the guidelines in link:../hosted_control_planes/dual_stack_dns.adoc#dual-stack-dns[Configuring DNS for a dual stack network].
+
+[#hosted-agent-ignition-bug]
+=== On bare metal platforms, Agent resources might fail to pull ignition 
+//2.9:ACM-8736
+
+On the bare metal (Agent) platform, the hosted control planes feature periodically rotates the token that the Agent uses to pull ignition. A bug causes the new token to not be propagated. As a result, if you have an Agent resource that was created some time ago, it might fail to pull ignition.
+
+As a workaround, in the Agent specification, delete the secret that the `IgnitionEndpointTokenReference` property refers to, and then add or modify any label on the Agent resource. The system can then detect that the Agent resource was modified and re-create the secret with the new token.
+
+[#ibmz-hosts-restart-loop]
+=== IBM Z hosts restart in a loop
+//2.11:MGMT-17103
+
+In hosted control planes on the IBM Z platform, when you unbind the hosts with the cluster, the hosts restart in loop and are not ready to be used. For a workaround for this issue, see link:../../clusters/hosted_control_planes/destroy_hosted_cluster_x86bm_ibmz.adoc#destroy-hosted-cluster-x86bm-ibmz[Destroying a hosted cluster on x86 bare metal with IBM Z compute nodes].
