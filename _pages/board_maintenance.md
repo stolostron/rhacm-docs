@@ -22,7 +22,7 @@ Everyone helps maintain Jira issues with the following guidance:
   
 ## Existing issues
 
-  - Only update previous releases for customer reported issues from support. The `Linked cases` tab should contain the customer case. If from PM or Engineering, only update if they can show the customer scenario.
+  - Only update previous releases for customer reported issues from support or high impact topics. The `Linked cases` tab should contain the customer case. If from PM, TAM, or Engineering, only update if they can show where it will break the customer.
   - If an enhancement or an addition is requested internally, but did not make the last release GA, see if that work can be added to the active and next release.
   - Do not switch `Train-XX` labels on doc issues because we need to track velocity and reasons for not completing `Train-XX` work for future improvements.
   - It's OK to complete work from a previous `Train-XX`, though the goal is to merge your doc along with `Train-XX` development issues.
@@ -33,17 +33,16 @@ Everyone helps maintain Jira issues with the following guidance:
 ## Pipelines/Columns used for sprint planning
 
   - Jira tasks and bugs have different status indicators, which are used in the pipelines. (These are not flexible, so the pipelines are fixed.)
-  - Issues remain in `UNTRIAGED` until the `doc-ack` label is added and `doc-awaiting-info` is removed (if it was previously added).
+  - Issues remain in `UNTRIAGED` until the `doc-ack` label is added and `doc-awaiting-info` is removed, if it was added.
   - The `IN PROGRESS` column contains Bugs and Tasks that are triaged and ready to work. 
-  - Labels within the `IN PROGRESS` pipeline will relate to trains, example: `Train-XX`.
+  - Labels within the `IN PROGRESS` pipeline will relate to trains if they are part of a feature, example: `Train-XX`.
   - Issues that are ready for a PR review can move to `REVIEW` for tech review, QE review, and peer review.
   - Blogs are `IN PROGRESS` when the editor (us) is reviewing the blog. Move to `Review` when the editor has completed their part. Close when the Google form has been submitted. Track these stages in issue comments.
+  - For `ContentX_CY24`, label issues also `high-impact` for doc all customers need (install, support matrix, upgrade), `pm-ask` and `tam-ask` if the request comes from PMs or TAMs, even on Slack, and `doc-customer` if linked to a customer case. Broken links, Typos, most internal issues, are not ContentX.
   - Use meetings to plan work for the train and update the team on progress. Also redistribute work as needed on the board.
   - Bring up any `unplanned` work that got in the way on progress; use the `unplanned` label.
   - Label any JIRA issues that close without work as `not-started`.
   - The `DONE` column will contain closed items for a certain amount of time.
-    
-   ![Pipeline status indicators](../assets/img/pipeline_jira_2.8.jpg) <!-- Brandi to change -->
 
 ## Board review in scrums
 
@@ -63,6 +62,5 @@ Everyone helps maintain Jira issues with the following guidance:
   - Internal docs are owned and updated by all, with most major changes being discussed in meetings or a PR.
   - Feel free to create an issue dedicated to learning and close when complete.
   - Use the learning issue for many purposes, including learning, development, training, experimentation, and other work that you would like to complete but feel like you don't get time to. 
-  - If you want to track training time, open an issue and label it `Discovery`. <!-- Mikela to raise in the next meeting what is the best label; please just pick one. -->
-
+  - If you want to track training time, open an issue and label it `Discovery`.
   

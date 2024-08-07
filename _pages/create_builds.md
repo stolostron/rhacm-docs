@@ -35,7 +35,9 @@ Complete the following steps:
 
 4. Log in to Pantheon.
 
-5. Select all of the books. Select **Bulk actions** > **Clone**, then enter the new version. The configuration of the build is also cloned.
+5. Select all of the books by checking the box next to the title. 
+
+6. Select **Bulk actions** > **Clone**, then enter the new version. The configuration of the build is also cloned.
 
    * Alternatively, you can create a new title manually. Complete the following steps to create a new title in Pantheon: 
 

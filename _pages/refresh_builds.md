@@ -35,7 +35,7 @@ Use this process to refresh a public version or build internally.
 1. Run the following command, where `X.X doc_branch` is the version number and either `stage` for daily work, or `prod` for a live refresh. 
 
    ```
-   ./acm_sync_asciidoc.sh <X.X X.X_branch>
+   ./acm_sync_asciidoc.sh <X.X> <X.X_branch>
    ```
    Example:
 
