@@ -1,30 +1,122 @@
-[#add-nodes-ocp-infra-env]
-== Adding worker nodes to {ocp-short} clusters
+[#add-nodes-cim-ocp]
+= Adding worker nodes to {ocp-short} clusters
 
-Complete the following steps to add production environment worker nodes to {ocp-short} clusters:
+If you are using central infrastructure management, you can customize your {ocp-short} clusters by adding additional production environment nodes.
+
+*Required access:* Administrator
+
+* <<add-nodes-cim-ocp-prereqs,Prerequisite>>
+* <<add-nodes-cim-ocp-create-config,Creating a valid `kubeconfig`>>
+* <<add-nodes-cim-ocp-procedure,Adding worker nodes>>
+
+[#add-nodes-cim-ocp-prereqs]
+== Prerequisite
+
+You must have the new CA certificates required to trust the managed cluster API.
+
+[#add-nodes-cim-ocp-create-config]
+== Creating a valid `kubeconfig`
+
+Before adding production environment worker nodes to {ocp-short} clusters, you must check if you have a valid `kubeconfig`.
+
+If the API certificates in your managed cluster changed, complete the following steps to update the `kubeconfig` with new CA certificates:
+
+. Check if the `kubeconfig` for your `clusterDeployment` is valid by running the following commands. Replace `<kubeconfig_name>` with the name of your current `kubeconfig` and replace `<cluster_name>` with the name of your cluster:
+
++
+[source,bash]
+----
+export <kubeconfig_name>=$(oc get cd $<cluster_name> -o "jsonpath={.spec.clusterMetadata.adminKubeconfigSecretRef.name}")
+oc extract secret/$<kubeconfig_name> --keys=kubeconfig --to=- > original-kubeconfig
+oc --kubeconfig=original-kubeconfig get node
+----
+
+. If you receive the following error message, you must update your `kubeconfig` secret. If you receive no error message, continue to <<add-nodes-cim-ocp-procedure,Adding worker nodes>>:
+
++
+----
+Unable to connect to the server: tls: failed to verify certificate: x509: certificate signed by unknown authority
+----
+
+. Get the `base64` encoded certificate bundle from your `kubeconfig` `certificate-authority-data` field and decode it by running the following command:
+
++
+[source,bash]
+----
+echo <base64 encoded blob> | base64 --decode > decoded-existing-certs.pem
+----
+
+. Create an updated `kubeconfig` file by copying your original file. Run the following command and replace `<new_kubeconfig_name>` with the name of your new `kubeconfig` file:
+
++
+[source,bash]
+----
+cp original-kubeconfig <new_kubeconfig_name>
+----
+
+. Append new certificates to the decoded pem by running the following command:
+
++
+[source,bash]
+----
+cat decoded-existing-certs.pem new-ca-certificate.pem | openssl base64 -A
+----
+
+. Add the `base64` output from the previous command as the value of the `certificate-authority-data` key in your new `kubeconfig` file by using a text editor.
+
+. Check if the new `kubeconfig` is valid by querying the API with the new `kubeconfig`. Run the following command. Replace `<new_kubeconfig_name>` with the name of your new `kubeconfig` file:
+
++
+[source,bash]
+----
+KUBECONFIG=<new_kubeconfig_name> oc get nodes
+----
++
+If you receive a successful output, the `kubeconfig` is valid.
+
+. Update the `kubeconfig` secret in the {acm-short} hub cluster by running the following command. Replace `<new_kubeconfig_name>` with the name of your new `kubeconfig` file:
+
++
+[source,bash]
+----
+oc patch secret $original-kubeconfig --type='json' -p="[{'op': 'replace', 'path': '/data/kubeconfig', 'value': '$(openssl base64 -A -in <new_kubeconfig_name>)'},{'op': 'replace', 'path': '/data/raw-kubeconfig', 'value': '$(openssl base64 -A -in <new_kubeconfig_name>)'}]"
+----
+
+[#add-nodes-cim-ocp-procedure]
+== Adding worker nodes
+
+If you have a valid `kubeconfig`, complete the following steps to add production environment worker nodes to {ocp-short} clusters:
 
 . Boot the machine that you want to use as a worker node from the ISO you previously downloaded.
+
 +
 *Note:* Make sure that the worker node meets the requirements for an {ocp-short} worker node.
 
 . Wait for an agent to register after running the following command:
+
 +
+[source,bash]
 ----
 watch -n 5 "oc get agent -n managed-cluster"
 ----
 
 . If the agent registration is succesful, an agent is listed. Approve the agent for installation. This can take a few minutes.
+
 +
 *Note:* If the agent is not listed, exit the `watch` command by pressing Ctrl and C, then log in to the worker node to troubleshoot.
 
 . If you are using late binding, run the following command to associate pending unbound agents with your {ocp-short} cluster. Skip to step 5 if you are not using late binding:
+
 +
+[source,bash]
 ----
 oc get agent -n managed-cluster -ojson | jq -r '.items[] | select(.spec.approved==false) |select(.spec.clusterDeploymentName==null) | .metadata.name'| xargs oc -n managed-cluster patch -p '{"spec":{"clusterDeploymentName":{"name":"some-other-cluster","namespace":"managed-cluster"}}}' --type merge agent
 ----
 
 . Approve any pending agents for installation by running the following command:
+
 +
+[source,bash]
 ----
 oc get agent -n managed-cluster -ojson | jq -r '.items[] | select(.spec.approved==false) | .metadata.name'| xargs oc -n managed-cluster patch -p '{"spec":{"approved":true}}' --type merge agent
 ----

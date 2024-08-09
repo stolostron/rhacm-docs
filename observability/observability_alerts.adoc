@@ -110,7 +110,7 @@ Add alerts that you do not want to receive. You can silence alerts by the alert 
 
 Continue reading for ways to silence alerts:
 
-- To silence a {product-title-short} alert, you must have access to the `alertmanager-main` pod in the `open-cluster-management-observability` namespace. For example, enter the following command in the pod terminal to silence `SampleAlert`:
+- To silence a {acm-short} alert, you must have access to the `alertmanager-main` pod in the `open-cluster-management-observability` namespace. For example, enter the following command in the pod terminal to silence `SampleAlert`:
 +
 ----
 amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" alertname="SampleAlert"
@@ -152,31 +152,38 @@ amtool silence expire --alertmanager.url="http://localhost:9093" "d839aca9-ed46-
 amtool silence expire --alertmanager.url="http://localhost:9093" $(amtool silence query --alertmanager.url="http://localhost:9093" -q) 
 ----
 
-[#migrating-storage-pv]
-=== Migrating storage for Persistent Volumes used by observability pods
+[#migrating-observability-storage]
+=== Migrating observability storage
 
-When you use alert silencers, you can also migrate storage for the Persistent Volumes (PVs) used by the observability pods. 
+If you use alert silencers, you can migrate observability storage while retaining the silencers from its earlier state. To do this, migrate your {acm-short} observability storage by creating new `StatefulSets` and `PersistentVolumes` (PV) resources that use your chosen `StorageClass` resource. 
 
 *Note:* The storage for PVs is different from the object storage used to store the metrics collected from your clusters.  
 
-To migrate your PV storage, complete the following steps:
+When you use `StatefulSets` and PVs to migrate your observability data to new storage, it stores the following data components:
+
+- *Observatorium or Thanos:* Receives data then uploads it to object storage. Some of its components store data in PVs. For this data, the Observatorium or Thanos automatically regenerates the object storage on a startup, so there is no consequence if you lose this data.  
+- *Alertmanager:* Only stores silenced alerts. If you want to keep these silenced alerts, you must migrate that data to the new PV. 
+
+To migrate your observability storage, complete the following steps:
 
 . In the `MultiClusterObservability`, set the `.spec.storageConfig.storageClass` field to the new storage class. 
 . To ensure the data of the earlier `PersistentVolumes` is retained even when you delete the `PersistentVolumeClaim`, go to all your existing `PersistentVolumes`.
 . Change the `reclaimPolicy` to `"Retain": `oc patch pv <your-pv-name> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'`. 
 . *Optional:* To avoid losing data, see link:https://access.redhat.com/solutions/6922821[Migrate persistent data to another Storage Class in DG 8 Operator in OCP 4].
-. Delete both the `StatefulSet` and the `PersistentVolumeClaim` in the following `StatefulSet` cases:
+. Delete both the `StatefulSet` and the `PersistentVolumeClaim` in the following `StatefulSet` resources:
 .. `alertmanager-db-observability-alertmanager`
 .. `data-observability-thanos-compact`
 .. `data-observability-thanos-receive-default`
 .. `data-observability-thanos-store-shard`
-.. *Note:* You might need to delete, then re-create, the `MultiClusterObservability` operator pod so that you can create the new `StatefulSet`. 
+.. *Important:* You might need to delete, then re-create, the `MultiClusterObservability` operator pod so that you can create the new `StatefulSet`. 
+. Re-create a new `PersistentVolumeClaim` with the same name but the correct `StorageClass`. 
+. Create a new `PersistentVolumeClaim` referring to the old `PersistentVolume`.  
 . Verify that the new `StatefulSet` and `PersistentVolumes` use the new `StorageClass` that you chose.  
 
 [#supress-alerts]
 == Suppressing alerts
 
-Suppress {product-title-short} alerts across your clusters globally that are less severe. Suppress alerts by defining an inhibition rule in the `alertmanager-config` in the `open-cluster-management-observability` namespace. 
+Suppress {acm-short} alerts across your clusters globally that are less severe. Suppress alerts by defining an inhibition rule in the `alertmanager-config` in the `open-cluster-management-observability` namespace. 
 
 An inhibition rule mutes an alert when there is a set of parameter matches that match another set of existing matchers. In order for the rule to take effect, both the target and source alerts must have the same label values for the label names in the `equal` list. Your `inhibit_rules` might resemble the following:
 
@@ -206,7 +213,7 @@ ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
 ALERTS{alertname="foo", namespace="ns-2", severity="warning"}
 ----
 
-- To view suppressed alerts in {product-title-short}, enter the following command:
+- To view suppressed alerts in {acm-short}, enter the following command:
 +
 ----
 amtool alert --alertmanager.url="http://localhost:9093" --inhibited
