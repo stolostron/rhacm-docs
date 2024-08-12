@@ -8,8 +8,52 @@ You are responsible for ensuring that the managed cloud environment meets intern
 [#prereqs-policy-overview]
 == Prerequisites
 
-* Each policy requires a `Placement` resource that defines the clusters that the policy document is applied to, and a `PlacementBinding` resource that binds the {acm} policy. For more on how to define a `Placement` resource see link:../clusters/cluster_lifecycle/placement_overview.adoc#placement-overview[Placement overview] in the Cluster lifecycle documentation.
-* You must create the `PlacementBinding` to bind your policy with a `Placement` in order to propagate the policy to the managed clusters.
+* Each policy requires a `Placement` resource that defines the clusters that the policy document is applied to, and a `PlacementBinding` resource that binds the {acm} policy. 
+
++
+Policy resources are applied to cluster based on an associated `Placement` definition, where you can view a list of managed clusters that match a certain criteria. A sample `Placement` resource that matches all clusters that have the `environment=dev` label resembles the following YAML:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement-policy-role
+spec:
+  predicates:
+  - requiredClusterSelector:
+    labelSelector:
+    matchExpressions:
+      - {key: environment, operator: In, values: ["dev"]}
+----
+
++
+To learn more about placement and the supported criteria, see link:../clusters/cluster_lifecycle/placement_overview.adoc#placement-overview[Placement overview] in the Cluster lifecycle documentation.
+
+
+* In addition to the `Placement` resource, you must create a `PlacementBinding` to bind your `Placement` resource to a policy. A sample `PLacement` resource that matches all clusters that have the `environment=dev` label resembles the following YAML:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-role
+placementRef:
+  name: placement-policy-role <1>
+  kind: Placement 
+  apiGroup: cluster.open-cluster-management.io
+subjects: <2>
+- name: policy-role
+  kind: Policy 
+  apiGroup: policy.open-cluster-management.io
+----
++
+<1> If you use the previous sample, make sure you update the name of the `Placement` resource in the `placementRef` section to match your placement name.
+<2> You must update the name of the policy in the `subjects` section to match your policy name. Use the `oc apply -f resource.yaml -n namespace` command to apply both the `Placement` and the `Placementbinding` resources. Make sure the policy, placement and placement binding are all created in the same namespace.
+
 * To use a `Placement` resource, you must bind a `ManagedClusterSet` resource to the namespace of the `Placement` resource with a `ManagedClusterSetBinding` resource. Refer to link:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource] for additional details.
 * When you create a `Placement` resource for your policy from the console, the status of the placement toleration is automatically added to the `Placement` resource. See link:../clusters/cluster_lifecycle/taints_tolerations.adoc#adding-a-toleration-to-a-placement[Adding a toleration to a placement] for more details.  
 
