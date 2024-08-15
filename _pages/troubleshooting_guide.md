@@ -1,4 +1,27 @@
+Here is where you find a basic format, as well as other considerations for Troubleshooting. 
 
+**Note:** The format for RHAMC troubelshooting doc comes from feedback from developers and support teams.
+
+- Troubleshooting files are located in the _Troubleshooting_ folder.
+- Create the files with the same format:
+  - Title
+  - Symptom
+  - Identifying the problem: Not needed only is the symptom covers this. Needed if the user completes an action to find the problem.
+  - Resolving the problem
+- Identifying the problem is not needed only if the symptom covers this. It is needed if the user completes an action to find the problem. See the following example:
+  
+```
+Identifying the problem: Cluster with pending import status
+Run the following command on the managed cluster to view the Kubernetes pod names that are having the issue:
+
+kubectl get pod -n open-cluster-management-agent | grep klusterlet-registration-agent
+Run the following command on the managed cluster to find the log entry for the error:
+
+kubectl logs <registration_agent_pod> -n open-cluster-management-agent
+Replace registration_agent_pod with the pod name that you identified in step 1.
+
+Search the returned results for text that indicates there was a networking connectivity problem. Example includes: no such host.
+```
 ```
 [#trouble-grafana-timeout]
 = Troubleshooting Grafana 
