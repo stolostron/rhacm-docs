@@ -387,9 +387,77 @@ For more details, see _Replacing certificates for alertmanager route_ in the Gov
 [#customizing-certificates-object-store]
 == Customizing certificates for accessing the object store
 
-Complete the following steps to customize certificates for accessing the object store:
+You can configure secure connections with the observability object store by creating a `Secret` resource that contains the certificate authority and configuring the `MultiClusterObservability` custom resource. Complete the following steps:
 
-. Edit the `http_config` section by adding the certificate in the object store secret. View the following example:
+. To validate the object store connection, create the `Secret` object in the file that contains the certificate authority by using the following command:
+
++
+[source,bash]
+----
+oc create secret generic <tls_secret_name> --from-file=ca.crt=<path_to_file> -n open-cluster-management-observability
+----
+
+.. Alternatively, you can apply the following YAML to create the secret:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: <tls_secret_name>
+  namespace: open-cluster-management-observability
+type: Opaque
+data:
+  ca.crt: <base64_encoded_ca_certificate>
+----
+*Optional:* If you want to enable mutual TLS, you need to add the `public.crt` and `private.key` keys in the previous secret.
+
+. Add the TLS secret details to the `metricObjectStorage` section by using the following command:
+
++
+[source,bash]
+----
+oc edit mco observability -o yaml
+----
+
++
+Your file might resemble the following YAML:
+
++
+[source,yaml]
+----
+metricObjectStorage:
+  key: thanos.yaml
+  name: thanos-object-storage
+  tlsSecretName: tls-certs-secret <1>
+  tlsSecretMountPath: /etc/minio/certs <2>
+----
+<1> The value for `tlsSecretName` is the name of the `Secret` object that you previously created.
+<2> The `/etc/minio/certs/` path defined for the `tlsSecretMountPath` parameter specifies where the certificates are mounted in the Observability components. This path is required for the next step.
+
+. Update the `thanos.yaml` definition in the `thanos-object-storage` secret by adding the `http_config.tls_config` section with the certificate details. View the following example:
+
++
+[source,yaml]
+----
+thanos.yaml: |
+   type: s3
+   config:
+     bucket: "thanos"
+     endpoint: "minio:9000"
+     insecure: false <1>
+     access_key: "minio"
+     secret_key: "minio123"
+     http_config:
+       tls_config:
+         ca_file: /etc/minio/certs/ca.crt <2>
+         insecure_skip_verify: false
+----
+<1> Set the `insecure` parameter to `false` to enable HTTPS.
+<2> The path for the `ca_file` parameter must match the `tlsSecretMountPath` from the `MultiClusterObservability` custom resource. The `ca.crt` must match the key in the `<tls_secret_name>` `Secret` resource.
++
+*Optional:* If you want to enable mutual TLS, you need to add the `cert_file` and `key_file` keys to the `tls_config` section. See the following example:
 
 +
 [source,yaml]
@@ -404,65 +472,27 @@ Complete the following steps to customize certificates for accessing the object 
       secret_key: "minio123"
       http_config:
         tls_config:
-          ca_file: /etc/minio/certs/ca.crt
-          insecure_skip_verify: false
-----
-
-. Add the object store secret in the `open-cluster-management-observability` namespace. The secret must contain the `ca.crt` that you defined in the previous secret example. If you want to enable mutual TLS, you need to add the `public.crt` and `private.key` keys in the earlier secret. View the following example:
-
-+
-[source,yaml]
-----
- thanos.yaml: |
-    type: s3
-    config:
-      ...
-      http_config:
-        tls_config:
           ca_file: /etc/minio/certs/ca.crt <1>
           cert_file: /etc/minio/certs/public.crt
           key_file: /etc/minio/certs/private.key
           insecure_skip_verify: false
 ----
-+
-<1> The path to certificates and key values for the `thanos-object-storage` secret. 
+<1> The path for `ca_file`, `cert_file`, and `key_file` must match the `tlsSecretMountPath` from the `MultiClusterObservability` custom resource. The `ca.crt`, `public.crt`, and `private.crt` must match the respective key in the `tls_secret_name>` `Secret` resource.
 
-. Configure the secret name and mount path by updating the `tlsSecretName` and `tlsSecretMountPath` parameters in the `MultiClusterObservability` custom resource. View the following example where the secret name is `tls-certs-secret` and the mount path for the certificates and key value is the directory that is used in the prior example:
-
-+
-[source,yaml]
-----
-metricObjectStorage:
-      key: thanos.yaml
-      name: thanos-object-storage
-      tlsSecretName: tls-certs-secret
-      tlsSecretMountPath: /etc/minio/certs
-----
-
-. Mount the secret in the `tlsSecretMountPath` resource of all components that need to access the object store by renaming the existing TLS. See the following example:
+. To verify that you can access the object store, check that the pods are deployed. Run the following command:
 
 +
-[source,yaml]
+[source,bash]
 ----
-metricObjectStorage:
-      key: thanos.yaml
-      name: thanos-object-storage
-      tlsSecretName: <existing-tls-certs-secret>
-      tlsSecretMountPath: /etc/minio/certs
-        receiver:
-        store:
-        ruler:
-        compact:
+oc -n open-cluster-management-observability get pods -l app.kubernetes.io/name=thanos-store
 ----
-
-. To verify that you can access the object store, check that the pods are displayed.
 
 [#configuring-proxy-settings-for-observability-add-ons]
 == Configuring proxy settings for observability add-ons
 
 Configure the proxy settings to allow the communications from the managed cluster to access the hub cluster through a HTTP and HTTPS proxy server. Typically, add-ons do not need any special configuration to support HTTP and HTTPS proxy servers between a hub cluster and a managed cluster. But if you enabled the observability add-on, you must complete the proxy configuration. 
 
-== Prerequisite 
+=== Prerequisite 
 
 - You have a hub cluster. 
 - You have enabled the proxy settings between the hub cluster and managed cluster. 
@@ -537,6 +567,7 @@ You can customize the Observatorium API and Alertmanager URLs that the managed c
 
 . Add your URLs to the `advanced` section of the `MultiClusterObservability` `spec`. See the following example:
 
++
 [source,yaml]
 ----
 spec:
@@ -544,7 +575,7 @@ spec:
     customObservabilityHubURL: <yourURL>
     customAlertmanagerHubURL: <yourURL>
 ----
-
++
 *Notes*:
 
 * Only HTTPS URLs are supported. If you do not add `https://` to your URL, the scheme is added automatically.
@@ -553,6 +584,7 @@ spec:
 
 . If you are using a `customObservabilityHubURL`, create a route object by using the following template. Replace `<intermediate_component_url>` with the intermediate component URL:
 
++
 [source,yaml]
 ----
 apiVersion: route.openshift.io/v1
@@ -576,6 +608,7 @@ spec:
 
 . If you are using a `customAlertmanagerHubURL`, create a route object by using the following template. Replace `<intermediate_component_url>` with the intermediate component URL:
 
++
 [source,yaml]
 ----
 apiVersion: route.openshift.io/v1
@@ -684,5 +717,4 @@ To set up different types of user access, define separate `ClusterRoles` and `Cl
 
 - See link:https://github.com/openshift/enhancements/blob/master/enhancements/workload-partitioning/management-workload-partitioning.md#management-workload-partitioning[Management Workload Partitioning] for more information.
 
-- Return to the beginning of this topic, <<customizing-observability,Customizing observability>>.
 
