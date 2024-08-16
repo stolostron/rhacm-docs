@@ -37,7 +37,6 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
 
 - When you build a `.adoc` file, you do not have to repeat the title in the ID. You can keep the ID short. 
 
-
     `[#trouble-grafana-timeout]`
     `= Troubleshooting Grafana explorer gateway timeout`
 
@@ -45,7 +44,7 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
 
 - If you do not, don't assume the result. For example, don't write: `The import issue is resolved`. 
 
-- Example of a verification step:
+  Example of a verification step:
 
   `Refresh the Grafana page and try to query the metrics again.`
 
