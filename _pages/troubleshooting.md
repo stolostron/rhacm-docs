@@ -17,13 +17,13 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
 
 - Identifying the problem is not needed only if the symptom gives enough detail. It is needed if the user completes an action to find more about the problem. 
 
-See the following examples:
+  See the following examples:
   
-**Example Symptom: Cluster with pending import status**
+    **Example Symptom: Cluster with pending import status**
   
-Your cluster is stuck in `pending import` status with no error.
+  Your cluster is stuck in `pending import` status with no error.
 
-**Example Identifying the problem: Cluster with pending import status**
+  **Example Identifying the problem: Cluster with pending import status**
 
 1. Run the following command on the managed cluster to view the Kubernetes pods that have the issue:
 
