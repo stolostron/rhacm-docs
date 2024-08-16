@@ -19,26 +19,26 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
 
   See the following examples:
   
-    **Example Symptom: Cluster with pending import status**
+  **Example Symptom: Cluster with pending import status**
   
-  Your cluster is stuck in `pending import` status with no error.
+    Your cluster is stuck in `pending import` status with no error.
 
   **Example Identifying the problem: Cluster with pending import status**
 
   Run the following command on the managed cluster to view the Kubernetes pods that have the issue:
 
-    `kubectl get pod -n open-cluster-management-agent | grep klusterlet-registration-agent`
+  `kubectl get pod -n open-cluster-management-agent | grep klusterlet-registration-agent`
 
   Run the following command on the managed cluster to find the log entry for the error:
 
-    `kubectl logs <registration_agent_pod> -n open-cluster-management-agent`
+  `kubectl logs <registration_agent_pod> -n open-cluster-management-agent`
 
   Search the returned results for text that indicates there was a networking connectivity problem. Example includes: `no such host.`
 
 - When you build a `.adoc` file, you do not have to repeat the title in the ID. You can keep the ID short. 
 
-    `[#trouble-grafana-timeout]`
-    `= Troubleshooting Grafana explorer gateway timeout`
+  `[#trouble-grafana-timeout]`
+  `= Troubleshooting Grafana explorer gateway timeout`
 
 - You should have a verification step from the tech leads that tells the user how to check for success. 
 
