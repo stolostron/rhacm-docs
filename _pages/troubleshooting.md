@@ -33,8 +33,7 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
 
     `kubectl logs <registration_agent_pod> -n open-cluster-management-agent`
 
-
-4. Search the returned results for text that indicates there was a networking connectivity problem. Example includes: `no such host.`
+  Search the returned results for text that indicates there was a networking connectivity problem. Example includes: `no such host.`
 
 - When you build a `.adoc` file, you do not have to repeat the title in the ID. You can keep the ID short. 
 
