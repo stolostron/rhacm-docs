@@ -7,7 +7,7 @@ horizontal: false
 
 ## Background
 
-Advisories are released for General Availability (GA) release, z-streams (x.y.z), and for all operator releases (Submariner, VolSync, Gatekeeper, and Global Hub). Announcements about the build of advisories are announced by the CI/CD team. 
+Advisories are released for General Availability (GA) release, z-streams (x.y.z), and for all operator releases (Submariner, VolSync, Gatekeeper, and Global Hub). Announcements about the build of advisories come from the the CI/CD team. 
 
 ## Communications
 
@@ -21,7 +21,8 @@ View the following example of a Slack thread announcement: `MCE 2.2.12 RC1 Statu
 **Reminders:**
 
 - Check Slack channel for review during RC announcements
-- View advisories from Firefox
+- View advisories from Firefox if you have trouble in Chrome
+- You may see you don't have access until you run `kinit` to sign in from the terminal. This is described in the _Review process_ of this document.
 
 
 ## Types of advisories
