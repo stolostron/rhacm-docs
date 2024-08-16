@@ -21,7 +21,7 @@ View the following example of a Slack thread announcement: `MCE 2.2.12 RC1 Statu
 **Reminders:**
 
 - Check Slack channel for review during RC announcements
-- View advisories from Firefox if you have trouble in Chrome
+- View advisories from Firefox if you have trouble in Chrome.
 - You may see you don't have access until you run `kinit` to sign in from the terminal. This is described in the _Review process_ of this document.
 
 
