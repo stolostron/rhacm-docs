@@ -15,41 +15,39 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
 
 ## Considerations
 
-- Identifying the problem is not needed only if the symptom gives enough detail. It is needed if the user completes an action to find more about the problem. See the following examples:
-  
+- Identifying the problem is not needed only if the symptom gives enough detail. It is needed if the user completes an action to find more about the problem. 
 
-### Example Symptom: Cluster with pending import status**
+See the following examples:
+  
+**Example Symptom: Cluster with pending import status**
   
 Your cluster is stuck in `pending import` status with no error.
 
-### Example Identifying the problem: Cluster with pending import status
+**Example Identifying the problem: Cluster with pending import status**
 
-Run the following command on the managed cluster to view the Kubernetes pods that have the issue:
+1. Run the following command on the managed cluster to view the Kubernetes pods that have the issue:
 
-kubectl get pod -n open-cluster-management-agent | grep klusterlet-registration-agent
+    `kubectl get pod -n open-cluster-management-agent | grep klusterlet-registration-agent`
 
-Run the following command on the managed cluster to find the log entry for the error:
+2. Run the following command on the managed cluster to find the log entry for the error:
 
-kubectl logs <registration_agent_pod> -n open-cluster-management-agent
-Replace registration_agent_pod with the pod name that you identified in step 1.
+    `kubectl logs <registration_agent_pod> -n open-cluster-management-agent`
 
-Search the returned results for text that indicates there was a networking connectivity problem. Example includes: `no such host.`
+
+4. Search the returned results for text that indicates there was a networking connectivity problem. Example includes: `no such host.`
 
 - When you build a `.adoc` file, you do not have to repeat the title in the ID. You can keep the ID short. 
 
-```
-[#trouble-grafana-timeout]
-= Troubleshooting Grafana explorer gateway timeout
-```
 
-- You should have a verification step from the tech leads that tell the user how to check for success. 
+    `[#trouble-grafana-timeout]`
+    `= Troubleshooting Grafana explorer gateway timeout`
 
-- If you do not, don't write: `The import issue is resolved`. It may not be. 
+- You should have a verification step from the tech leads that tells the user how to check for success. 
 
-- It is understood that if this doesn't work, users should contact support or check for other problems.
+- If you do not, don't assume the result. For example, don't write: `The import issue is resolved`. 
 
 - Example of a verification step:
 
-```
-Refresh the Grafana page and try to query the metrics again.
-```
+  `Refresh the Grafana page and try to query the metrics again.`
+
+- It is understood that if this doesn't work, users should contact support or check for other problems.
