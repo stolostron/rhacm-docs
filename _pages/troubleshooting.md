@@ -25,11 +25,11 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
 
   **Example Identifying the problem: Cluster with pending import status**
 
-1. Run the following command on the managed cluster to view the Kubernetes pods that have the issue:
+  Run the following command on the managed cluster to view the Kubernetes pods that have the issue:
 
     `kubectl get pod -n open-cluster-management-agent | grep klusterlet-registration-agent`
 
-2. Run the following command on the managed cluster to find the log entry for the error:
+  Run the following command on the managed cluster to find the log entry for the error:
 
     `kubectl logs <registration_agent_pod> -n open-cluster-management-agent`
 
