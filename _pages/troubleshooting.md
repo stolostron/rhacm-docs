@@ -1,3 +1,10 @@
+---
+layout: page
+title: Troubleshooting guidance
+permalink: /troubleshooting
+horizontal: false
+---
+
 Learn the basic format and elements of a troubleshooting topic, as well as other considerations.
 
 **Note:** The format for RHAMC troubelshooting doc comes from feedback from developers and support focals.
@@ -5,17 +12,17 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
 ## Location and basic format
 
 - Troubleshooting files are located in the _Troubleshooting_ folder.
-- For MCE, or the _Cluster lifeycle_ feature for RHACM, there is a separate Troubleshooting guide.
-- When placing the new file, writers need to know if the issue is for ACM with the MCE operator, or for MCE-only (cluster only).
+- For MCE, which is the _Cluster lifeycle_ feature for RHACM, there is a separate Troubleshooting guide.
+- When placing the new file, writers need to know if the issue is for ACM (MCH operator with the MCE operator), or for MCE-only (cluster only, without MCH).
 - Create the files with the same format:
-  - Title: Ensure the title is specific and concise
-  - Symptom: Explain what the user sees or experiences that indicates a problem.
-  - Identifying the problem: The user further completes a procedure to find the specific problem.
-  - Resolving the problem: User action to workaround or resolve the issue.
+  - **Title:** Ensure the title is specific and concise.
+  - **Symptom:** Explain what the user sees or experiences that indicates there is a problem.
+  - **Identifying the problem:** Write how the user further completes a procedure to find the specific problem.
+  - **Resolving the problem:** Write the user action to work around or resolve the issue.
 
 ## Considerations
 
-- Identifying the problem is not needed only if the symptom gives enough detail. It is needed if the user completes an action to find more about the problem. 
+- _Identifying the problem_ is not needed if the symptom gives enough detail. It is needed if the user completes an action to find more about the problem. 
 
   See the following examples:
   
