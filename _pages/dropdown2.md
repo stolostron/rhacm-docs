@@ -17,10 +17,4 @@ children:
     - title: divider
     - title: Branch strategy
       permalink: /branch_strategy
-    - title: divider
-    - title: Deprecating and removing
-      permalink: /deprecate_remove
-    - title: divider
-    - title: Maintaining scrum board
-      permalink: /board_maintenance
 ---

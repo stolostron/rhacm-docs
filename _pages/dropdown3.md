@@ -24,11 +24,11 @@ children:
     - title: Troubleshooting guidance
       permalink: /wr_troubleshooting
     - title: divider
+    - title: Deprecating and removing
+      permalink: /deprecate_remove
+    - title: divider  
     - title: Special considerations
       permalink: /special_considerations
-    - title: divider
-    - title: Writing and reviewing checklist
-      permalink: /checklist
     - title: divider
     - title: UI writing
       permalink: /ui_writing

@@ -5,7 +5,7 @@ permalink: /checklist
 horizontal: false
 ---
 
-See the following list for guidance when peer reviewing pull requests.
+See the following list for guidance when creating or updating content. Also use this when peer reviewing pull requests, as well. See _Technical writing standards_ for more details and access to style manuals and other information.
 
 ## Writing and reviewing checklist 
 
