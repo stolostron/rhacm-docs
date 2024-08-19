@@ -19,6 +19,7 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
   - **Symptom:** Explain what the user sees or experiences that indicates there is a problem.
   - **Identifying the problem:** Write how the user further completes a procedure to find the specific problem.
   - **Resolving the problem:** Write the user action to work around or resolve the issue.
+  - Title the files in a similar format as all the other files.
 
 ## Considerations
 
@@ -56,3 +57,7 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
   `Refresh the Grafana page and try to query the metrics again.`
 
 - It is understood that if this doesn't work, users should contact support or check for other problems.
+
+- We do not link to these files in the main documentation. Sometimes we will be asked and the response is usually that if so many customers need this, the procedure should change rather than interrupting the user with a fix or scenario.
+
+- There is an option to put them in related links at the bottom, but keep in mind when we do that, we have to maintain that link and remove it when the scenario is no longer valid.

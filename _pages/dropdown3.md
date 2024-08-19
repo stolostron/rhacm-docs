@@ -27,8 +27,8 @@ children:
     - title: Special considerations
       permalink: /special_considerations
     - title: divider
-    - title: Peer review checklist
-      permalink: /checklist_peer_review
+    - title: Writing and reviewing checklist
+      permalink: /checklist
     - title: divider
     - title: UI writing
       permalink: /ui_writing
