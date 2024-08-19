@@ -1,13 +1,13 @@
 ---
 layout: page
-title: Peer review checklist
-permalink: /checklist_peer_review
+title: Writing and reviewing checklist
+permalink: /checklist
 horizontal: false
 ---
 
 See the following list for guidance when peer reviewing pull requests.
 
-## Peer review checklist 
+## Writing and reviewing checklist 
 
 - [ ] Are file names, headers, and titles consistent with the feature and the rest of the component doc?
 - [ ] For bugs, is the diff clearly addressing the customer concern or code change?
