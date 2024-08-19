@@ -21,6 +21,9 @@ children:
     - title: Writing and reviewing checklist
       permalink: /checklist
     - title: divider
+      title: Reviewing release advisories
+      permalink: advisory_review
+    - title: divider
     - title: Learning Markdown
       permalink: /learning_md
     - title: divider

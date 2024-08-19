@@ -34,9 +34,9 @@ Everyone helps maintain Jira issues with the following guidance:
 
   - Jira tasks and bugs have different status indicators, which are used in the pipelines. (These are not flexible, so the pipelines are fixed.)
   - Issues remain in `UNTRIAGED` until the `doc-ack` label is added and `doc-awaiting-info` is removed, if it was added.
-  - The `IN PROGRESS` column contains Bugs and Tasks that are triaged and ready to work. 
+  - The `IN PROGRESS` column contains Bugs and Tasks that are triaged and ready to work. Keep issues in this status while you are working.
   - Labels within the `IN PROGRESS` pipeline will relate to trains if they are part of a feature, example: `Train-XX`.
-  - Issues that are ready for a PR review can move to `REVIEW` for tech review, QE review, and peer review.
+  - Issues that are ready for a PR review can move to `REVIEW` for tech review, QE review, and peer review. Use this column when the basic content standards are mostly met and you are ready for a final review.
   - Blogs are `IN PROGRESS` when the editor (us) is reviewing the blog. Move to `Review` when the editor has completed their part. Close when the Google form has been submitted. Track these stages in issue comments.
   - For `ContentX_CY24`, label issues also `high-impact` for doc all customers need (install, support matrix, upgrade), `pm-ask` and `tam-ask` if the request comes from PMs or TAMs, even on Slack, and `doc-customer` if linked to a customer case. Broken links, Typos, most internal issues, are not ContentX.
   - Use meetings to plan work for the train and update the team on progress. Also redistribute work as needed on the board.
