@@ -20,12 +20,15 @@ children:
     - title: divider
     - title: Special tag guidance
       permalink: /wr_special_tag_guidance
+      title: divider
+    - title: Troubleshooting guidance
+      permalink: /wr_troubleshooting
     - title: divider
+    - title: Deprecating and removing
+      permalink: /deprecate_remove
+    - title: divider  
     - title: Special considerations
       permalink: /special_considerations
-    - title: divider
-    - title: Peer review checklist
-      permalink: /checklist_peer_review
     - title: divider
     - title: UI writing
       permalink: /ui_writing

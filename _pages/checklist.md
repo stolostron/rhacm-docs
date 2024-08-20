@@ -1,32 +1,32 @@
 ---
 layout: page
-title: Peer review checklist
-permalink: /checklist_peer_review
+title: Writing and reviewing checklist
+permalink: /checklist
 horizontal: false
 ---
 
-See the following list for guidance when peer reviewing pull requests.
+See the following list for guidance when creating or updating content. Use this when peer reviewing pull requests, as well. See _Technical writing standards_ for more details and access to style manuals and other information.
 
-## Peer review checklist 
+## Writing and reviewing checklist 
 
 - [ ] Are file names, headers, and titles consistent with the feature and the rest of the component doc?
-- [ ] For bugs, is the diff clearly addressing the customer concern or code change?
+- [ ] For bugs, is the diff clearly addressing the customer concern or code change and is it signed of by QE/Dev?
 - [ ] Are file names, headers, and titles concise?
 - [ ] Does the file have a meaningful short description that tells you why the user wants to use the feature?
-- [ ] Are prerequisites clear?
+- [ ] Are prerequisites clear and imperative?
 - [ ] Are there any obvious prerequisites that can be removed, such as "You must install the RHACM" in an area where that is understood?
-- [ ] Are there any red links when you preview and run Check my links?
-- [ ] Are product or technology names consistent with the rest of the documentation, content references, or official guidelines?
+- [ ] Are there any red links when you preview and run _Check my links_?
+- [ ] Are product or technology names consistent with the rest of the documentation, content references, third-party official doc, or Red Hat official naming guidelines?
 - [ ] Are there introductions after headers and before main content?
 - [ ] Do you see directional language such as "below" or "above"?
 - [ ] Are variables tagged properly and consistently?
 - [ ] Do you find commands that are presented together instead of as separate steps?
-- [ ] If versions are listed in examples or commands, do they need to be specific or can we build like user input/variables?
+- [ ] If versions are listed in examples or commands, do they need to be specific or can we build with user input/variables?
 - [ ] Does the PR format need to be fixed because commands or sample files are not grayed out?
 - [ ] Are there many inline links and are they necessary?
-- [ ] Does this require a What's new entry?
-- [ ] Is this a known issue or troubleshooting entry that follows the proper format?
-- [ ] Does the content present RHACM features inside the MCE doc and if so, is that intentional with tech lead visibility?
+- [ ] Does this require a _What's new_ entry?
+- [ ] Is this a _known issue_ or _troubleshooting_ entry that follows the proper format?
+- [ ] Does the content present RHACM features inside the MCE doc? If yes, it may be missplaced.
 - [ ] Does the content cross features and if so, have tech leads discussed best placement for it?
 - [ ] Are there any long paragraphs that should be broken up into lists or concise paragraphs?
 - [ ] Do you understand what the change is about? 

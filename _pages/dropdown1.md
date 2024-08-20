@@ -12,8 +12,17 @@ children:
     - title: GitHub
       permalink: /get_started_git
     - title: divider
+    - title: Maintaining scrum board
+      permalink: /board_maintenance
+    - title: divider
     - title: Technical writing standards
       permalink: /tech_writing_standards
+    - title: divider
+    - title: Writing and reviewing checklist
+      permalink: /checklist
+    - title: divider
+      title: Reviewing release advisories
+      permalink: advisory_review
     - title: divider
     - title: Learning Markdown
       permalink: /learning_md

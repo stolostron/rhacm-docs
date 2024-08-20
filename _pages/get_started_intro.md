@@ -60,6 +60,7 @@ When you are ready, familiarize yourself with our standards and processes by rea
 * [Technical writing standards](get_started_writing.md)
 * [Branch strategy](branch_strategy.md)
 * [Style resources](style_resources.md)
+* [Writing and reviewing checklist](checklist.md)
 * [Creating new guides](create_guides.md)
 * [UI writing guidance](ui_writing.md)
 * [UI content](ui_content.md)
