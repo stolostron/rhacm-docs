@@ -7,22 +7,22 @@ nav_order: 3
 dropdown: true
 children: 
     - title: Tools
-      permalink: /wr_tools
+      permalink: /tools
     - title: divider
     - title: Linking
-      permalink: /wr_linking
+      permalink: /linking
     - title: divider
     - title: Images
       permalink: /images_guide
     - title: divider
     - title: Accessibility
-      permalink: /wr_accessibility
+      permalink: /accessibility
     - title: divider
     - title: Special tag guidance
-      permalink: /wr_special_tag_guidance
+      permalink: /special_tag_guidance
       title: divider
     - title: Troubleshooting guidance
-      permalink: /wr_troubleshooting
+      permalink: /troubleshooting
     - title: divider
     - title: Deprecating and removing
       permalink: /deprecate_remove
