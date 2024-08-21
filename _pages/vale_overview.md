@@ -6,7 +6,7 @@ horizontal: false
 render_with_liquid: false
 ---
 
-Vale is a command-line tool that can check your writing against a set of style or grammar rules. You can use Vale in your workflow to improve the accuracy of your writing and fix styles issues before creating a PR.
+Vale is a command-line tool that can check your writing against a set of style or grammar rules. You can use Vale in your workflow to improve the accuracy of your writing and fix style issues before creating a PR.
 
 ## Installing Vale on macOS
 
