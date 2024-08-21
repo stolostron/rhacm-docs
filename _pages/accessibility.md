@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Accessibility
-permalink: /wr_accessibility
+title: Writing for accessibility
+permalink: /accessibility
 horizontal: false
 ---
 

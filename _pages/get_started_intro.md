@@ -7,7 +7,7 @@ horizontal: false
 
 We (the documentation squad) are part of the ACM team and are responsible for documenting Red Hat Advanced Cluster Management for Kubernetes. We also work on a variety of other tasks, such as reviewing and editing technical blogs, reviewing UI content with designers, and resolving bugs and issues by using agile scrum techniques. We use the `Documentation` component as an identifier on Jira and work closely with developers to maintain the documentation.
 
-**Important:** See the ACM Playbook for details about how to work as part of the ACM team. The ACM Playbook also includes the link to a general onboarding guide. This website primarily serves as internal documentation for the documentation squad. It outlines our work processes and standards. However, other ACM team members might find the resources and information listed on this website useful as well.
+**Important:** See the ACM Playbook for details about how to work as part of the ACM team. The ACM Playbook also includes the link to a general onboarding guide. This website primarily serves as internal documentation for the documentation squad. It outlines our work processes and standards. However, other ACM team members and contributors might find the resources and information listed on this website useful as well.
 
 ## Hardware
 
@@ -51,21 +51,20 @@ The stream editor we use to build our documentation.
 
 ## Permissions
 
-Accessing some of our tools and processes requires specific permissions. As you follow various instructions on this website, please reach out to your manager whenever you run into permission issues.
+Accessing some of our tools and processes requires specific permissions. As you follow various instructions on this website, reach out to your manager whenever you run into permission issues.
 
 ## Next steps
 
 When you are ready, familiarize yourself with our standards and processes by reading the following topics:
 
-* [Technical writing standards](get_started_writing.md)
-* [Branch strategy](branch_strategy.md)
-* [Style resources](style_resources.md)
+* [Following tech writing standards](tech_writing_standards.md)
+* [Writing for accessibility](wr_accessibility.md)
+* [Building links](wr_linking.md)
 * [Writing and reviewing checklist](checklist.md)
-* [Creating new guides](create_guides.md)
-* [UI writing guidance](ui_writing.md)
-* [UI content](ui_content.md)
 * [Special tagging](wr_special_tag_guidance.md)
-* [Linking](wr_linking.md)
-* [Tools used to improve documentation quality](wr_tools.md)
-* [Accessibility](wr_accessibility.md)
+* [Writing for UI](ui_writing.md)
+* [Using tools to improve documentation quality](wr_tools.md)
+* [Style resources](style_resources.md)
+* [Branch strategy](branch_strategy.md)
+* [Creating new guides](create_guides.md)
 * [Creating builds](create_builds.md)

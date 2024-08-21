@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Get started
+title: Getting started
 permalink:
 nav: true
 nav_order: 1
@@ -9,23 +9,20 @@ children:
     - title: Introduction
       permalink: /get_started_intro
     - title: divider
-    - title: GitHub
+    - title: Setting up GitHub
       permalink: /get_started_git
     - title: divider
-    - title: Maintaining scrum board
-      permalink: /board_maintenance
-    - title: divider
-    - title: Technical writing standards
+    - title: Following tech writing standards
       permalink: /tech_writing_standards
     - title: divider
     - title: Writing and reviewing checklist
       permalink: /checklist
     - title: divider
-      title: Reviewing release advisories
-      permalink: advisory_review
-    - title: divider
     - title: Learning Markdown
       permalink: /learning_md
+   - title: divider
+    - title: Maintaining scrum board
+      permalink: /board_maintenance
     - title: divider
     - title: Technical resources
       permalink: /technical_resources

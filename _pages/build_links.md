@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Linking
-permalink: /wr_linking
+title: Building links
+permalink: /build_links
 horizontal: false
 ---
 
