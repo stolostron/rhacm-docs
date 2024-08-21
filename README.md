@@ -183,7 +183,7 @@ Use images and screenshots sparingly and adhere to the following rules when usin
   - Screenshot size must be 400x300 pixels.
   - The naming convention for the file must follow `##-name`.
 - Save screenshots as a `.png` file in `/assets/img/`.
-- Only screenshots website content. No user interface elements must be visible.
+- Only screenshot website content. No user interface elements must be visible.
 - Remove sensitive information from the screenshot by painting over it. Do not use blur.
 
 ## Easter eggs
