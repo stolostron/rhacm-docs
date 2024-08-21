@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Using writing tools to improve documentation quality
-permalink: /wr_tools
+permalink: /tools
 horizontal: false
 ---
 
