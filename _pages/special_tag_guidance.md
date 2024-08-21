@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Special tag guidance
-permalink: /wr_special_tag_guidance
+permalink: /special_tag_guidance
 horizontal: false
 ---
 

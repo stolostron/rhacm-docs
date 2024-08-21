@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Tools used to improve documentation quality
+title: Using writing tools to improve documentation quality
 permalink: /wr_tools
 horizontal: false
 ---

@@ -6,33 +6,33 @@ nav: true
 nav_order: 3
 dropdown: true
 children: 
-    - title: Tools
+    - title: Using writing tools
       permalink: /tools
     - title: divider
-    - title: Linking
-      permalink: /linking
+    - title: Building links
+      permalink: /build_links
     - title: divider
-    - title: Images
-      permalink: /images_guide
+    - title: Inserting images
+      permalink: /insert_images
     - title: divider
-    - title: Accessibility
+    - title: Writing for accessibility
       permalink: /accessibility
-    - title: divider
-    - title: Special tag guidance
-      permalink: /special_tag_guidance
-      title: divider
-    - title: Troubleshooting guidance
-      permalink: /troubleshooting
     - title: divider
     - title: Deprecating and removing
       permalink: /deprecate_remove
     - title: divider  
+    - title: Reviewing release advisories
+      permalink: advisory_review
+    - title: divider
+    - title: Troubleshooting guidance
+      permalink: /troubleshooting
+    - title: divider
+    - title: Writing for UI
+      permalink: /ui_writing
+    -  title: divider
+    - title: Special tag guidance
+      permalink: /special_tag_guidance
+    - title: divider
     - title: Special considerations
       permalink: /special_considerations
-    - title: divider
-    - title: UI writing
-      permalink: /ui_writing
-    - title: divider
-    - title: UI content
-      permalink: /ui_content
 ---

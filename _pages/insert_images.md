@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Creating and editing images
-permalink: /images_guide
+title: Inserting images
+permalink: /insert_images
 horizontal: false
 ---
 

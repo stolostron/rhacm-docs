@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Technical writing standards
+title: Following technical writing standards
 permalink: /tech_writing_standards
 horizontal: false
 ---

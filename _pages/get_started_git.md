@@ -1,11 +1,11 @@
 ---
 layout: page
-title: GitHub
+title: Setting up GitHub
 permalink: /get_started_git
 horizontal: false
 ---
 
-Our documentation source code resides in a GitHub repository. We use the Git control system (terminal) to manage and update the content. The following quick guide will help you get started with GitHub and Git, but for more information, please see the following resoruces:
+Our documentation source code resides in a GitHub repository. We use the Git control system (terminal) to manage and update the content. The following quick guide will help you get started with GitHub and Git, but for more information, please see the following resources:
 
 - [GitHub documentation](https://docs.github.com/)
 - [Git documentation](https://git-scm.com/doc)
