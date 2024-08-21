@@ -20,7 +20,7 @@ children:
     - title: divider
     - title: Learning Markdown
       permalink: /learning_md
-   - title: divider
+    - title: divider
     - title: Maintaining scrum board
       permalink: /board_maintenance
     - title: divider
