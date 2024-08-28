@@ -1,9 +1,7 @@
 [#using-backup-restore]
-= Scheduling and restoring backups
+= Scheduling backups
 
-Complete the following steps to schedule and restore backups:
-
-. Use the backup and restore operator, `backupschedule.cluster.open-cluster-management.io`, to create a backup schedule and use the `restore.cluster.open-cluster-management.io` resources to restore a backup.
+Complete the following steps to schedule backups:
 
 . Run the following command to create a `backupschedule.cluster.open-cluster-management.io` resource:
 +
@@ -23,15 +21,21 @@ metadata:
 spec:
   veleroSchedule: 0 */2 * * * <1>
   veleroTtl: 120h <2>
+useManagedServiceAccount: true <3> 
+paused: false <4>
 ----
 +
-<1> Create a backup every 2 hours
+<1> Creates a backup every 2 hours
 <2> *Optional:* Deletes scheduled backups after 120h. If not specified, the maximum Velero default value of 720h is used.
+<3> *Optional:* If you set it to `true`, it enables the automatic import feature, importing clusters in a restore operation.
+<4> *Optional:*  If you set it to `true`, it pauses the backup schedule, deleting all Velero schedules created by this resource. 
 +
 View the following descriptions of the `backupschedule.cluster.open-cluster-management.io` `spec` properties:
 +
 ** `veleroSchedule` is a required property and defines a cron job for scheduling the backups.
 ** `veleroTtl` is an optional property and defines the expiration time for a scheduled backup resource. If not specified, the maximum default value set by Velero is used, which is `720h`.
+** `useManagedServiceAccount` is an optional property which can enable the automatic import feature, importing clusters in a restore operation. 
+** `paused` is an optional property which can can pause the backup schedule, deleting all Velero schedules created by the resource. 
 
 . Check the status of your `backupschedule.cluster.open-cluster-management.io` resource, which displays the definition for the three `schedule.velero.io` resources. Run the following command:
 +
@@ -39,56 +43,9 @@ View the following descriptions of the `backupschedule.cluster.open-cluster-mana
 oc get BackupSchedule -n open-cluster-management-backup
 ----
 
-. As a reminder, the restore operation is run on a different hub cluster for restore scenarios. To initiate a restore operation, create a `restore.cluster.open-cluster-management.io` resource on the hub cluster where you want to restore backups.
+. Since the restore operation runs on a different hub cluster for restore scenarios, initiate a restore operation by creating a `restore.cluster.open-cluster-management.io` resource on the hub cluster where you want to restore backups.
 +
-*Note:* When you restore a backup on a new hub cluster, make sure that you shut down the previous hub cluster where the backup was created. If it is running, the previous hub cluster tries to reimport the managed clusters as soon as the managed cluster reconciliation finds that the managed clusters are no longer available.
-+
-You can use the cluster backup and restore operator, `backupschedule.cluster.open-cluster-management.io` and `restore.cluster.open-cluster-management.io` resources, to create a backup or restore resource. See the _cluster-backup-operator_ samples.
-+
-. Run the following command to create a `restore.cluster.open-cluster-management.io` resource:
-+
-----
-oc create -f cluster_v1beta1_backupschedule.yaml
-----
-+
-Your resource might resemble the following file:
-+
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: Restore
-metadata:
-  name: restore-acm
-  namespace: open-cluster-management-backup
-spec:
-  veleroManagedClustersBackupName: latest
-  veleroCredentialsBackupName: latest
-  veleroResourcesBackupName: latest
-----
-
-. View the Velero `Restore` resource by running the following command:
-+
-----
-oc get restore.velero.io -n open-cluster-management-backup
-----
-
-. View the {acm-short} `Restore` events by running the following command:
-+
-----
-oc describe restore.cluster.open-cluster-management.io -n open-cluster-management-backup
-----
-
-For descriptions of the parameters and samples of `Restore` YAML resources, see the _Restoring a backup_ section.
-
-[#extend-backup-data]
-== Extending backup data
-
-You can backup third-party resources with cluster backup and restore by adding the `cluster.open-cluster-management.io/backup` label to the resources. The value of the label can be any string, including an empty string. Use a value that can help you identify the component that you are backing up. For example, use the `cluster.open-cluster-management.io/backup: idp` label if the components are provided by an IDP solution.
-
-*Note:* Use the `cluster-activation` value for the `cluster.open-cluster-management.io/backup` label if you want the resources to be restored when the managed clusters activation resources are restored. Restoring the managed clusters activation resources result in managed clusters being actively managed by the hub cluster, where the restore was started.
-
-[#schedule-backup]
-== Scheduling a cluster backup
+*Note:* When you restore a backup on a new hub cluster, make sure that you shut down the earlier hub cluster wher you created  the backup. If it is running, the earlier hub cluster tries to reimport the managed clusters as soon as the managed cluster reconciliation finds that the managed clusters are no longer available.
 
 A backup schedule is activated when you create the `backupschedule.cluster.open-cluster-management.io` resource. View the following `backupschedule.cluster.open-cluster-management.io` sample:
 
