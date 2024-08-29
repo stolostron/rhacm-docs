@@ -21,8 +21,8 @@ metadata:
 spec:
   veleroSchedule: 0 */2 * * * <1>
   veleroTtl: 120h <2>
-useManagedServiceAccount: true <3> 
-paused: false <4>
+  useManagedServiceAccount: true <3> 
+  paused: false <4>
 ----
 +
 <1> Creates a backup every 2 hours
@@ -42,72 +42,6 @@ View the following descriptions of the `backupschedule.cluster.open-cluster-mana
 ----
 oc get BackupSchedule -n open-cluster-management-backup
 ----
-
-. Since the restore operation runs on a different hub cluster for restore scenarios, initiate a restore operation by creating a `restore.cluster.open-cluster-management.io` resource on the hub cluster where you want to restore backups.
-+
-*Note:* When you restore a backup on a new hub cluster, make sure that you shut down the earlier hub cluster wher you created  the backup. If it is running, the earlier hub cluster tries to reimport the managed clusters as soon as the managed cluster reconciliation finds that the managed clusters are no longer available.
-
-A backup schedule is activated when you create the `backupschedule.cluster.open-cluster-management.io` resource. View the following `backupschedule.cluster.open-cluster-management.io` sample:
-
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: BackupSchedule
-metadata:
-  name: schedule-acm
-  namespace: open-cluster-management-backup
-spec:
-  veleroSchedule: 0 */2 * * *
-  veleroTtl: 120h
-----
-
-After you create a `backupschedule.cluster.open-cluster-management.io` resource, run the following command to get the status of the scheduled cluster backups:
-
-----
-oc get BackupSchedule -n open-cluster-management-backup
-----
-
-The `backupschedule.cluster.open-cluster-management.io` resource creates six `schedule.velero.io` resources, which are used to generate backups. Run the following command to view the list of the backups that are scheduled:
-
-----
-oc get schedules -A | grep acm
-----
-
-Resources are separately backed up in the groups as seen in the following table:
-
-.Resource groups table
-|===
-| Resource | Description
-
-| `Credentials` backup
-| Backup file that stores Hive credentials, {acm-short}, and user-created credentials and ConfigMaps.
-
-| `Resources` backup
-| Contains one backup for the {acm-short} resources and one for generic resources. These resources use the `cluster.open-cluster-management.io/backup` label.
-
-| `ManagedClusters` backup
-| Contains only resources that activate the managed cluster connection to the hub cluster, where the backup is restored.
-|===
-
-*Note:* The _resources backup_ file contains managed cluster-specific resources, but does not contain the subset of resources that connect managed clusters to the hub cluster. The resources that connect managed clusters are called activation resources and are contained in the managed clusters backup. When you restore backups only for the _credentials_ and _resources_ backup on a new hub cluster, the new hub cluster shows all managed clusters that are created by using the Hive API in a detached state. The managed clusters that are imported on the primary hub cluster by using the import operation appear only when the activation data is restored on the passive hub cluster. The managed clusters are still connected to the original hub cluster that created the backup files.
-
-When the activation data is restored, only managed clusters created by using the Hive API are automatically connected with the new hub cluster. All other managed clusters appear in a _Pending_ state. You need to manually reattach them to the new cluster.
-
-For descriptions of the various `BackupSchedule` statuses, see the following table: 
-
-.BackupSchedule status table
-|===
-| `BackupSchedule` status | Description
-
-| `Enabled`
-| The `BackupSchedule` is running and generating backups.
-
-| `FailedValidation`
-| An error prevents the `BackupSchedule` from running. As a result, the `BackupSchedule` is not generating backups, but instead, it is reconciling and waiting for the error to be fixed. Look at the `BackupSchedule` status section for the reason why the resource is not valid. After the error is addressed, the `BackupSchedule` status changes to `Enabled`, and the resource starts generating backups.
-
-| `BackupCollision`
-| The `BackupSchedule` is not generating backups. Look at the `BackupSchedule` status section for the reason why the resource status is `BackupCollision`. To start creating backups, delete this resource and create a new one. 
-|===
 
 [#avoid-backup-collision]
 === Avoiding backup collisions
