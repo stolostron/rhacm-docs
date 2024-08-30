@@ -9,7 +9,7 @@ To learn more about how you want to manage and view cluster fleet data that the 
 
 - <<creating-custom-rules,Creating custom rules>>
 - <<adding-custom-metrics, Adding custom metrics>>
-- <<adding-advanced-config,Adding _advanced_ configuration>>
+- <<adding-advanced-config,Adding _advanced_ configuration for retention>>
 - <<updating-replicas,Updating the _MultiClusterObservability_ custom resource replicas from the console>>
 - <<increase-decrease-pv-pvc,Increasing and decreasing persistent volumes and persistent volume claims>>
 - <<customizing-route-cert,Customizing route certification>>
@@ -23,16 +23,9 @@ To learn more about how you want to manage and view cluster fleet data that the 
 
 Create custom rules for the observability installation by adding Prometheus link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource.
 
-To precalculate expensive expressions, use the recording rules abilities. The results are saved as a new set of time series. With the alerting rules, you can specify the alert conditions based on how you want to send an alert to an external service.
+To precalculate expensive expressions, use the recording rules abilities with Prometheus to create alert conditions and send notifications based on how you want to send an alert to an external service. The results are saved as a new set of time series. View the following examples to create a custom alert rule within the `observability-thanos-rule-custom-rules` config map:
 
-*Note:* When you update your custom rules, `observability-thanos-rule` pods restart automatically.
-
-Define custom rules with Prometheus to create alert conditions, and send notifications to an external messaging service. View the following examples of custom rules:
-
-- Create a custom alert rule. Create a config map named `thanos-ruler-custom-rules` in the `open-cluster-management-observability` namespace. You must name the key, `custom_rules.yaml`, as shown in the following example. You can create multiple rules in the configuration. 
-
-+
-* Create a custom alert rule that notifies you when your CPU usage passes your defined value. Your YAML might resemble the following content: 
+- To get a notification for when your CPU usage paases your defined value, create the following custom alert rule:
 
 +
 [source,yaml]
@@ -54,10 +47,16 @@ data:
             prometheus: "{{ $labels.prometheus }}"
             severity: critical
 ----
-+
-* The default alert rules are in the `thanos-ruler-default-rules` config map of the `open-cluster-management-observability` namespace.
 
-- Create a custom recording rule within the `thanos-ruler-custom-rules` config map. Create a recording rule that gives you the ability to get the sum of the container memory cache of a pod. Your YAML might resemble the following content:
++
+*Notes:*
+
+* When you update your custom rules, `observability-thanos-rule` pods restart automatically.
+* You can create multiple rules in the configuration. 
+* The default alert rules are in the `observability-thanos-rule-default-rules` config map of the `open-cluster-management-observability` namespace.
+
++
+- To create a custom recording rule to get the sum of the container memory cache of a pod, create the following custom rule:
 
 +
 [source,yaml]
@@ -70,10 +69,11 @@ data:
         - record: pod:container_memory_cache:sum
           expr: sum(container_memory_cache{pod!=""}) BY (pod, container)
 ----
-+
-*Note:* After you make changes to the config map, the configuration automatically reloads. The configuration reloads because of the `config-reload` within the `observability-thanos-ruler` sidecar.
 
-- To verify that the alert rules are functioning correctly, go to the Grafana dashboard, select the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if you created the alert. 
++
+*Note:* After you make changes to the config map, the configuration automatically reloads. The configuration reloads because of the `config-reload` within the `observability-thanos-rule` sidecar.
+
+To verify that the alert rules are functioning correctly, go to the Grafana dashboard, select the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if you created the alert. 
 
 [#adding-custom-metrics]
 == Adding custom metrics
@@ -195,17 +195,19 @@ oc apply -n open-cluster-management-observability -f observability-metrics-custo
 [#adding-advanced-config]
 == Adding advanced configuration for retention
 
-Add the `advanced` configuration section to update the retention for each observability component, according to your needs. 
+To update the retention for each observability component according to your need, add the `advanced` configuration section. Complete the following steps:
 
-Edit the `MultiClusterObservability` custom resource and add the `advanced` section with the following command:
+. Edit the `MultiClusterObservability` custom resource with the following command:
 
++
 [source,bash]
 ----
 oc edit mco observability -o yaml
 ----
 
-Your YAML file might resemble the following contents:
+. Add the `advanced` section to the file. Your YAML file might resemble the following contents:
 
++
 [source,yaml]
 ----
 spec:
@@ -214,9 +216,9 @@ spec:
       blockDuration: 2h
       deleteDelay: 48h
       retentionInLocal: 24h
-      retentionResolutionRaw: 30d
-      retentionResolution5m: 180d
-      retentionResolution1h: 0d
+      retentionResolutionRaw: 365d
+      retentionResolution5m: 365d
+      retentionResolution1h: 365d
     receive:
       resources:
         limits:
@@ -224,13 +226,16 @@ spec:
       replicas: 3 
 ----
 
-For descriptions of all the parameters that can added into the `advanced` configuration, see the _Observability API_ documentation.
++
+*Notes:*
 
-The default retention for all resolution levels, such as `retentionResolutionRaw`, `retentionResolution5m`, or `retentionResolution1h`, is 365 days (`365d`). You must set an explicit value for the resolution retention in your `MultiClusterObservability` `spec.advanced.retentionConfig` parameter.
+- For descriptions of all the parameters that can added into the `advanced` configuration, see the _Observability API_ documentation.
 
-If you upgraded from an earlier version and want to keep that version retention configuration, complete the following steps: 
+- The default retention for all resolution levels, such as `retentionResolutionRaw`, `retentionResolution5m`, or `retentionResolution1h`, is 365 days (`365d`). You must set an explicit value for the resolution retention in your `MultiClusterObservability` `spec.advanced.retentionConfig` parameter.
 
-. Go to your `MultiClusterObservability` resource by running the following `oc` binary in your CLI: 
+. If you upgraded from an earlier version and want to keep that version retention configuration, add the configuration previously mentioned. Complete the following steps: 
+
+.. Go to your `MultiClusterObservability` resource by running the following command: 
 
 +
 [source,bash]
@@ -238,7 +243,7 @@ If you upgraded from an earlier version and want to keep that version retention 
 edit mco observability
 ----
 
-. In the `spec.advanced.retentionConfig` parameter, apply the following configuration: 
+.. In the `spec.advanced.retentionConfig` parameter, apply the following configuration: 
 
 +
 [source,bash]
@@ -246,9 +251,9 @@ edit mco observability
 spec:
   advanced:
     retentionConfig:
-      retentionResolutionRaw: 30d
-      retentionResolution5m: 180d
-      retentionResolution1h: 0d
+      retentionResolutionRaw: 365d
+      retentionResolution5m: 365d
+      retentionResolution1h: 365d
 ----
 
 [#dynamic-metrics-for-sno]
@@ -387,9 +392,77 @@ For more details, see _Replacing certificates for alertmanager route_ in the Gov
 [#customizing-certificates-object-store]
 == Customizing certificates for accessing the object store
 
-Complete the following steps to customize certificates for accessing the object store:
+You can configure secure connections with the observability object store by creating a `Secret` resource that contains the certificate authority and configuring the `MultiClusterObservability` custom resource. Complete the following steps:
 
-. Edit the `http_config` section by adding the certificate in the object store secret. View the following example:
+. To validate the object store connection, create the `Secret` object in the file that contains the certificate authority by using the following command:
+
++
+[source,bash]
+----
+oc create secret generic <tls_secret_name> --from-file=ca.crt=<path_to_file> -n open-cluster-management-observability
+----
+
+.. Alternatively, you can apply the following YAML to create the secret:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: <tls_secret_name>
+  namespace: open-cluster-management-observability
+type: Opaque
+data:
+  ca.crt: <base64_encoded_ca_certificate>
+----
+*Optional:* If you want to enable mutual TLS, you need to add the `public.crt` and `private.key` keys in the previous secret.
+
+. Add the TLS secret details to the `metricObjectStorage` section by using the following command:
+
++
+[source,bash]
+----
+oc edit mco observability -o yaml
+----
+
++
+Your file might resemble the following YAML:
+
++
+[source,yaml]
+----
+metricObjectStorage:
+  key: thanos.yaml
+  name: thanos-object-storage
+  tlsSecretName: tls-certs-secret <1>
+  tlsSecretMountPath: /etc/minio/certs <2>
+----
+<1> The value for `tlsSecretName` is the name of the `Secret` object that you previously created.
+<2> The `/etc/minio/certs/` path defined for the `tlsSecretMountPath` parameter specifies where the certificates are mounted in the Observability components. This path is required for the next step.
+
+. Update the `thanos.yaml` definition in the `thanos-object-storage` secret by adding the `http_config.tls_config` section with the certificate details. View the following example:
+
++
+[source,yaml]
+----
+thanos.yaml: |
+   type: s3
+   config:
+     bucket: "thanos"
+     endpoint: "minio:9000"
+     insecure: false <1>
+     access_key: "minio"
+     secret_key: "minio123"
+     http_config:
+       tls_config:
+         ca_file: /etc/minio/certs/ca.crt <2>
+         insecure_skip_verify: false
+----
+<1> Set the `insecure` parameter to `false` to enable HTTPS.
+<2> The path for the `ca_file` parameter must match the `tlsSecretMountPath` from the `MultiClusterObservability` custom resource. The `ca.crt` must match the key in the `<tls_secret_name>` `Secret` resource.
++
+*Optional:* If you want to enable mutual TLS, you need to add the `cert_file` and `key_file` keys to the `tls_config` section. See the following example:
 
 +
 [source,yaml]
@@ -404,58 +477,20 @@ Complete the following steps to customize certificates for accessing the object 
       secret_key: "minio123"
       http_config:
         tls_config:
-          ca_file: /etc/minio/certs/ca.crt
-          insecure_skip_verify: false
-----
-
-. Add the object store secret in the `open-cluster-management-observability` namespace. The secret must contain the `ca.crt` that you defined in the previous secret example. If you want to enable mutual TLS, you need to add the `public.crt` and `private.key` keys in the earlier secret. View the following example:
-
-+
-[source,yaml]
-----
- thanos.yaml: |
-    type: s3
-    config:
-      ...
-      http_config:
-        tls_config:
           ca_file: /etc/minio/certs/ca.crt <1>
           cert_file: /etc/minio/certs/public.crt
           key_file: /etc/minio/certs/private.key
           insecure_skip_verify: false
 ----
-+
-<1> The path to certificates and key values for the `thanos-object-storage` secret. 
+<1> The path for `ca_file`, `cert_file`, and `key_file` must match the `tlsSecretMountPath` from the `MultiClusterObservability` custom resource. The `ca.crt`, `public.crt`, and `private.crt` must match the respective key in the `tls_secret_name>` `Secret` resource.
 
-. Configure the secret name and mount path by updating the `tlsSecretName` and `tlsSecretMountPath` parameters in the `MultiClusterObservability` custom resource. View the following example where the secret name is `tls-certs-secret` and the mount path for the certificates and key value is the directory that is used in the prior example:
-
-+
-[source,yaml]
-----
-metricObjectStorage:
-      key: thanos.yaml
-      name: thanos-object-storage
-      tlsSecretName: tls-certs-secret
-      tlsSecretMountPath: /etc/minio/certs
-----
-
-. Mount the secret in the `tlsSecretMountPath` resource of all components that need to access the object store by renaming the existing TLS. See the following example:
+. To verify that you can access the object store, check that the pods are deployed. Run the following command:
 
 +
-[source,yaml]
+[source,bash]
 ----
-metricObjectStorage:
-      key: thanos.yaml
-      name: thanos-object-storage
-      tlsSecretName: <existing-tls-certs-secret>
-      tlsSecretMountPath: /etc/minio/certs
-        receiver:
-        store:
-        ruler:
-        compact:
+oc -n open-cluster-management-observability get pods -l app.kubernetes.io/name=thanos-store
 ----
-
-. To verify that you can access the object store, check that the pods are displayed.
 
 [#configuring-proxy-settings-for-observability-add-ons]
 == Configuring proxy settings for observability add-ons
@@ -545,7 +580,7 @@ spec:
     customAlertmanagerHubURL: <yourURL>
 ----
 
-*Notes*:
+*Notes:*
 
 * Only HTTPS URLs are supported. If you do not add `https://` to your URL, the scheme is added automatically.
 * You can include the standard path for the Remote Write API, `/api/metrics/v1/default/api/v1/receive` in the `customObservabilityHubURL` `spec`. If you do not include the path, the Observability service automatically adds the path at runtime.
@@ -683,6 +718,4 @@ To set up different types of user access, define separate `ClusterRoles` and `Cl
 - For more topics about the observability service, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service].
 
 - See link:https://github.com/openshift/enhancements/blob/master/enhancements/workload-partitioning/management-workload-partitioning.md#management-workload-partitioning[Management Workload Partitioning] for more information.
-
-- Return to the beginning of this topic, <<customizing-observability,Customizing observability>>.
 
