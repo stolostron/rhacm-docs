@@ -1,28 +1,34 @@
 [#template-functions]
 = Template functions
 
-Template functions, such as resource-specific and generic `lookup` template functions, are available for referencing Kubernetes resources on the hub cluster (using the `{{hub ... hub}}` delimiters), or on the managed cluster (using the `{{ ... }}` delimiters). See _Template processing_ for more details. The resource-specific functions are used for convenience and makes content of the resources more accessible. If you use the generic function, `lookup`, which is more advanced, familiarize yourself with the YAML structure of the resource that is being looked up. In addition to these functions, utility functions such as `base64enc`, `base64dec`, `indent`, `autoindent`, `toInt`, `toBool`, and more are also available.
+Reference Kubernetes resources such as resource-specific and generic template functions on your hub cluster by using the `{{hub ... hub}}` delimiters, or on your managed cluster by using the `{{ ... }}` delimiters. You can use resource-specific functions for convenience and to make the content of your resources more accessible.
 
-To conform templates with YAML syntax, templates must be set in the policy resource as strings using quotes or a block character (`|` or `>`). This causes the resolved template value to also be a string. To override this, use `toInt` or `toBool` as the final function in the template to initiate further processing that forces the value to be interpreted as an integer or boolean respectively. Continue reading to view descriptions and examples for some of the custom template functions that are supported:
+== Template function descriptions
 
-* <<fromsecret-func,_fromSecret_ function>>
-* <<fromConfigMap-func,_fromConfigMap_ function>>
-* <<fromclusterclaim-func,_fromClusterClaim_ function>>
-* <<lookup-func,_lookup_ function>>
-* <<base64enc-func,_base64enc_ function>>
-* <<base64dec-func,_base64dec_ function>>
-* <<indent-function,_indent_ function>>
-* <<autoindent-function,_autoindent_ function>>
-* <<toInt-function,_toInt_ function>>
-* <<toBool-function,_toBool_ function>>
-* <<protect-function,_protect_ function>>
-* <<toliteral-function,_toLiteral_ function>>
-* <<copysecretdata-function,_copySecretData_ function>>
-* <<copyConfigMapData,_copyConfigMapData_ function>>
-* <<open-source-community-functions,Supported Sprig open source functions>>
+If you use the generic function, `lookup`, which is more advanced, familiarize yourself with the YAML structure of the resource that is being looked up. In addition to these functions, utility functions such as `base64enc`, `base64dec`, `indent`, `autoindent`, `toInt`, `toBool`, and more are available.
+
+To conform templates with YAML syntax, you must define templates in the policy resource as strings using quotes or a block character (`|` or `>`). This causes the resolved template value to also be a string. To override this, use `toInt` or `toBool` as the final function in the template to initiate further processing that forces the value to be interpreted as an integer or boolean respectively.
+
+Continue reading to view the descriptions and examples for some of the custom template functions that are supported:
+
+* <<fromsecret-func,_fromSecret_>>
+* <<fromConfigMap-func,_fromConfigMap_>>
+* <<fromclusterclaim-func,_fromClusterClaim_>>
+* <<lookup-func,_lookup_>>
+* <<base64enc-func,_base64enc_>>
+* <<base64dec-func,_base64dec_>>
+* <<indent-function,_indent_>>
+* <<autoindent-function,_autoindent_>>
+* <<toInt-function,_toInt_>>
+* <<toBool-function,_toBool_>>
+* <<protect-function,_protect_>>
+* <<toliteral-function,_toLiteral_>>
+* <<copysecretdata-function,_copySecretData_>>
+* <<copyConfigMapData,_copyConfigMapData_>>
+* <<open-source-community-functions,Sprig open source>>
 
 [#fromsecret-func]
-== _fromSecret_ function
+=== _fromSecret_
 
 The `fromSecret` function returns the value of the given data key in the secret. View the following syntax for the function:
 
@@ -32,9 +38,7 @@ func fromSecret (ns string, secretName string, datakey string) (dataValue string
 
 When you use this function, enter the namespace, name, and data key of a Kubernetes `Secret` resource. You must use the same namespace that is used for the policy when using the function in a hub cluster template. See _Template processing_ for more details.
 
-*Note:* When you use this function with hub cluster templates, the output is automatically encrypted using the <<protect-function,protect function>>. 
-
-You receive a policy violation if the Kubernetes `Secret` resource does not exist on the target cluster. If the data key does not exist on the target cluster, the value becomes an empty string. View the following configuration policy that enforces a `Secret` resource on the target cluster. The value for the `PASSWORD` data key is a template that references the secret on the target cluster:
+View the following configuration policy that enforces a `Secret` resource on the target cluster:
 
 [source,yaml]
 ----
@@ -53,10 +57,10 @@ spec:
   - complianceType: musthave
     objectDefinition:
       apiVersion: v1
-      data:
+      data: <1>
         USER_NAME: YWRtaW4=
-        PASSWORD: '{{ fromSecret "default" "localsecret" "PASSWORD" }}'
-      kind: Secret
+        PASSWORD: '{{ fromSecret "default" "localsecret" "PASSWORD" }}' <2>
+      kind: Secret <3>
       metadata:
         name: demosecret
         namespace: test
@@ -64,6 +68,9 @@ spec:
   remediationAction: enforce
   severity: low
 ----
+<1> When you use this function with hub cluster templates, the output is automatically encrypted using the <<protect-function,protect>> function.
+<2> The value for the `PASSWORD` data key is a template that references the secret on the target cluster.
+<3> You receive a policy violation if the Kubernetes `Secret` resource does not exist on the target cluster. If the data key does not exist on the target cluster, the value becomes an empty string.
 
 *Important:* When you add multiline string values such as, certificates, always add `| toRawJson | toLiteral` syntax at the end of the template pipeline to handle line breaks. For example, if you are copying a certificate from a `Secret` resource and including it in a `ConfigMap` resource, your template pipeline might be similar to the following syntax:
 
@@ -71,18 +78,21 @@ spec:
 ca.crt: '{{ fromSecret "openshift-config" "ca-config-map-secret" "ca.crt"  | base64dec | toRawJson | toLiteral }}'
 ----
 
-The `toRawJson` template function converts the input value to a JSON string with new lines escaped to not affect the YAML structure. The `toLiteral` template function removes the outer single quotes from the output. For example, when templates are processed for the `key: '{{ 'hello\nworld' | toRawJson }}'` template pipeline, the output is `key: '"hello\nworld"'`. The output of the `key: '{{ 'hello\nworld' | toRawJson | toLiteral }}'` template pipeline is `key: "hello\nworld"`.
+- The `toRawJson` template function converts the input value to a JSON string with new lines escaped to not affect the YAML structure.
+- The `toLiteral` template function removes the outer single quotes from the output. For example, when templates are processed for the `key: '{{ 'hello\nworld' | toRawJson }}'` template pipeline, the output is `key: '"hello\nworld"'`. The output of the `key: '{{ 'hello\nworld' | toRawJson | toLiteral }}'` template pipeline is `key: "hello\nworld"`.
 
 [#fromConfigMap-func]
-== _fromConfigmap_ function
+=== _fromConfigmap_
 
-The `fromConfigMap` function returns the value of the given data key in the ConfigMap. View the following syntax for the function:
+The `fromConfigMap` function returns the value of the given data key in the config map. When you use this function, enter the namespace, name, and data key of a Kubernetes `ConfigMap` resource. You must use the same namespace that is used for the policy using the function in a hub cluster template. See _Template processing_ for more details.
+
+View the following syntax for the function:
 
 ----
 func fromConfigMap (ns string, configmapName string, datakey string) (dataValue string, err Error)
 ----
 
-When you use this function, enter the namespace, name, and data key of a Kubernetes `ConfigMap` resource. You must use the same namespace that is used for the policy using the function in a hub cluster template. See  _Template processing_ for more details. You receive a policy violation if the Kubernetes `ConfigMap` resource does not exist on the target cluster. If the data key does not exist on the target cluster, the value becomes an empty string. View the following configuration policy that enforces a Kubernetes resource on the target managed cluster. The value for the `log-file` data key is a template that retrieves the value of the `log-file` from the ConfigMap, `logs-config` from the `default` namespace, and the `log-level` is set to the data key `log-level`.
+View the following configuration policy that enforces a Kubernetes resource on the target managed cluster:
 
 [source,yaml]
 ----
@@ -100,22 +110,26 @@ spec:
   object-templates:
   - complianceType: musthave
     objectDefinition:
-      kind: ConfigMap
+      kind: ConfigMap <1>
       apiVersion: v1
       metadata:
         name: demo-app-config
         namespace: test
-      data:
+      data: <2>
         app-name: sampleApp
         app-description: "this is a sample app"
-        log-file: '{{ fromConfigMap "default" "logs-config" "log-file" }}'
-        log-level: '{{ fromConfigMap "default" "logs-config" "log-level" }}'
+        log-file: '{{ fromConfigMap "default" "logs-config" "log-file" }}' <3>
+        log-level: '{{ fromConfigMap "default" "logs-config" "log-level" }}' <4>
   remediationAction: enforce
   severity: low
 ----
+<1> You receive a policy violation if the Kubernetes `ConfigMap` resource does not exist on the target cluster.
+<2> If the `data` key does not exist on the target cluster, the value becomes an empty string.
+<3> The value for the `log-file` data key is a template that retrieves the value of the `log-file` from the `logs-config` config map in the `default` namespace.
+<4> The `log-level` is a tempalte that retrieves the value of the `log-level` data key in the `default` namespace.
 
 [#fromclusterclaim-func]
-== _fromClusterClaim_ function
+=== _fromClusterClaim_
 
 The `fromClusterClaim` function returns the value of the `Spec.Value` in the `ClusterClaim` resource. View the following syntax for the function:
 
@@ -123,14 +137,14 @@ The `fromClusterClaim` function returns the value of the `Spec.Value` in the `Cl
 func fromClusterClaim (clusterclaimName string) (dataValue string, err Error)
 ----
 
-When you use this function, enter the name of a Kubernetes `ClusterClaim` resource. You receive a policy violation if the `ClusterClaim` resource does not exist. View the following example of the configuration policy that enforces a Kubernetes resource on the target managed cluster. The value for the `platform` data key is a template that retrieves the value of the `platform.open-cluster-management.io` cluster claim. Similarly, it retrieves values for `product` and `version` from the `ClusterClaim`:
+View the following example of the configuration policy that enforces a Kubernetes resource on the target managed cluster:
 
 [source,yaml]
 ----
 apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
-  name: demo-clusterclaims
+  name: demo-clusterclaims <1>
   namespace: default
 spec:
   namespaceSelector:
@@ -146,21 +160,25 @@ spec:
       metadata:
         name: sample-app-config
         namespace: default
-      data:
-        # Configuration values can be set as key-value properties
-        platform: '{{ fromClusterClaim "platform.open-cluster-management.io" }}'
+      data: <2>
+        platform: '{{ fromClusterClaim "platform.open-cluster-management.io" }}' <3>
         product: '{{ fromClusterClaim "product.open-cluster-management.io" }}'
         version: '{{ fromClusterClaim "version.openshift.io" }}'
   remediationAction: enforce
   severity: low
 ----
+<1> When you use this function, enter the name of a Kubernetes `ClusterClaim` resource. You receive a policy violation if the `ClusterClaim` resource does not exist.
+<2> Configuration values can be set as key-value properties.
+<3> The value for the `platform` data key is a template that retrieves the value of the `platform.open-cluster-management.io` cluster claim. Similarly, it retrieves values for `product` and `version` from the `ClusterClaim` resource.
 
 [#lookup-func]
-== _lookup_ function
+=== _lookup_
 
-The `lookup` function returns the Kubernetes resource as a JSON compatible map. If the requested resource does not exist, an empty map is returned. If the resource does not exist and the value is provided to another template function, you might get the following error: `invalid value; expected string`.
+The `lookup` function returns the Kubernetes resource as a JSON compatible map. When you use this function, enter the API version, kind, namespace, name, and optional label selectors of the Kubernetes resource. You must use the same namespace that is used for the policy within the hub cluster template. See _Template processing_ for more details.
 
-*Note:* Use the `default` template function, so the correct type is provided to later template functions. See the _Supported Sprig open source functions_ section.
+If the requested resource does not exist, an empty map is returned. If the resource does not exist and the value is provided to another template function, you might get the following error: `invalid value; expected string`.
+
+*Note:* Use the `default` template function, so the correct type is provided to later template functions. See the _Sprig open source_ section.
 
 View the following syntax for the function:
 
@@ -168,7 +186,7 @@ View the following syntax for the function:
 func lookup (apiversion string, kind string, namespace string, name string, labelselector ...string) (value string, err Error)
 ----
 
-When you use this function, enter the API version, kind, namespace, name, and optional label selectors of the Kubernetes resource. You must use the same namespace that is used for the policy within the hub cluster template. See _Template processing_ for more details. For label selector examples, see the reference to the _Kubernetes labels and selectors_ documentation, in the _Additional resources_ section. View the following example of the configuration policy that enforces a Kubernetes resource on the target managed cluster. The value for the `metrics-url` data key is a template that retrieves the `v1/Service` Kubernetes resource `metrics` from the `default` namespace, and is set to the value of the `Spec.ClusterIP` in the queried resource:
+For label selector examples, see the reference to the _Kubernetes labels and selectors_ documentation, in the _Additional resources_ section. View the following example of the configuration policy that enforces a Kubernetes resource on the target managed cluster:
 
 [source,yaml]
 ----
@@ -191,26 +209,27 @@ spec:
       metadata:
         name: demo-app-config
         namespace: test
-      data:
-        # Configuration values can be set as key-value properties
+      data: <1>
         app-name: sampleApp
         app-description: "this is a sample app"
-        metrics-url: |
+        metrics-url: | <2>
           http://{{ (lookup "v1" "Service" "default" "metrics").spec.clusterIP }}:8080
   remediationAction: enforce
   severity: low
 ----
+<1> Configuration values can be set as key-value properties.
+<2> The value for the `metrics-url` data key is a template that retrieves the `v1/Service` Kubernetes resource `metrics` from the `default` namespace, and is set to the value of the `Spec.ClusterIP` in the queried resource.
 
 [#base64enc-func]
-== _base64enc_ function
+=== _base64enc_
 
-The `base64enc` function returns a `base64` encoded value of the input `data string`. View the following syntax for the function:
+The `base64enc` function returns a `base64` encoded value of the input `data string`. When you use this function, enter a string value. View the following syntax for the function:
 
 ----
 func base64enc (data string) (enc-data string)
 ----
 
-When you use this function, enter a string value. View the following example of the configuration policy that uses the `base64enc` function:
+View the following example of the configuration policy that uses the `base64enc` function:
 
 [source,yaml]
 ----
@@ -234,15 +253,15 @@ spec:
 ----
 
 [#base64dec-func]
-== _base64dec_ function
+=== _base64dec_
 
-The `base64dec` function returns a `base64` decoded value of the input `enc-data string`. View the following syntax for the function:
+The `base64dec` function returns a `base64` decoded value of the input `enc-data string`. When you use this function, enter a string value. View the following syntax for the function:
 
 ----
 func base64dec (enc-data string) (data string)
 ----
 
-When you use this function, enter a string value. View the following example of the configuration policy that uses the `base64dec` function:
+View the following example of the configuration policy that uses the `base64dec` function:
 
 [source,yaml]
 ----
@@ -267,15 +286,15 @@ spec:
 ----
 
 [#indent-function]
-== _indent_ function
+=== _indent_
 
-The `indent` function returns the padded `data string`. View the following syntax for the function:
+The `indent` function returns the padded `data string`. When you use this function, enter a data string with the specific number of spaces. View the following syntax for the function:
 
 ----
 func indent (spaces  int,  data string) (padded-data string)
 ----
 
-When you use this function, enter a data string with the specific number of spaces. View the following example of the configuration policy that uses the `indent` function:
+View the following example of the configuration policy that uses the `indent` function:
 
 [source,yaml]
 ----
@@ -300,9 +319,11 @@ spec:
 ----
 
 [#autoindent-function]
-== _autoindent_ function
+=== _autoindent_
 
-The `autoindent` function acts like the `indent` function that automatically determines the number of leading spaces based on the number of spaces before the template. View the following example of the configuration policy that uses the `autoindent` function:
+The `autoindent` function acts like the `indent` function that automatically determines the number of leading spaces based on the number of spaces before the template.
+
+View the following example of the configuration policy that uses the `autoindent` function:
 
 [source,yaml]
 ----
@@ -327,15 +348,15 @@ spec:
 ----
 
 [#toInt-function]
-== _toInt_ function
+=== _toInt_
 
-The `toInt` function casts and returns the integer value of the input value. Also, when this is the last function in the template, there is further processing of the source content. This is to ensure that the value is interpreted as an integer by the YAML. View the following syntax for the function:
+The `toInt` function casts and returns the integer value of the input value. When this is the last function in the template, there is further processing of the source content. This is to ensure that the value is interpreted as an integer by the YAML. When you use this function, enter the data that needs to be casted as an integer. View the following syntax for the function:
 
 ----
 func toInt (input interface{}) (output int)
 ----
 
-When you use this function, enter the data that needs to be casted as an integer. View the following example of the configuration policy that uses the `toInt` function:
+View the following example of the configuration policy that uses the `toInt` function:
 
 [source,yaml]
 ----
@@ -360,15 +381,15 @@ spec:
 ----
 
 [#toBool-function]
-== _toBool_ function
+=== _toBool_
 
-The `toBool` function converts the input string into a boolean, and returns the boolean. Also, when this is the last function in the template, there is further processing of the source content. This is to ensure that the value is interpreted as a boolean by the YAML. View the following syntax for the function:
+The `toBool` function converts the input string into a boolean, and returns the boolean. When this is the last function in the template, there is further processing of the source content. This is to ensure that the value is interpreted as a boolean by the YAML. When you use this function, enter the string data that needs to be converted to a boolean. View the following syntax for the function:
 
 ----
 func toBool (input string) (output bool)
 ----
 
-When you use this function, enter the string data that needs to be converted to a boolean. View the following example of the configuration policy that uses the `toBool` function:
+View the following example of the configuration policy that uses the `toBool` function:
 
 [source,yaml]
 ----
@@ -393,7 +414,7 @@ spec:
 ----
 
 [#protect-function]
-== _protect_ function
+=== _protect_
 
 The `protect` function enables you to encrypt a string in a hub cluster policy template. It is automatically decrypted on the managed cluster when the policy is evaluated. View the following example of the configuration policy that uses the `protect` function:
 
@@ -428,9 +449,9 @@ This ensures that your decrypted value is to never be stored in the policy on th
 To force an immediate rotation, delete the `policy.open-cluster-management.io/last-rotated` annotation on the `policy-encryption-key` Secret in the managed cluster namespace on the hub cluster. Policies are then reprocessed to use the new encryption key. 
 
 [#toliteral-function]
-== _toLiteral_ function
+=== _toLiteral_
 
-The `toLiteral` function removes any quotation marks around the template string after it is processed. You can use this function to convert a JSON string from a ConfigMap field to a JSON value in the manifest. Run the following function to remove quotation marks from the `key` parameter value:
+The `toLiteral` function removes any quotation marks around the template string after it is processed. You can use this function to convert a JSON string from a config map field to a JSON value in the manifest. Run the following function to remove quotation marks from the `key` parameter value:
 
 ----
 key: '{{ "[\"10.10.10.10\", \"1.1.1.1\"]" | toLiteral }}'
@@ -443,7 +464,7 @@ key: ["10.10.10.10", "1.1.1.1"]
 ----
 
 [#copysecretdata-function]
-== _copySecretData_ function
+=== _copySecretData_
 
 The `copySecretData` function copies all of the `data` contents of the specified secret. View the following sample of the function:
 
@@ -455,15 +476,14 @@ complianceType: musthave
         kind: Secret
         metadata:
           name: my-secret-copy
-        data: '{{ copySecretData "default" "my-secret" }}'
+        data: '{{ copySecretData "default" "my-secret" }}' <1>
 ----
-
-*Note:* When you use this function with hub cluster templates, the output is automatically encrypted using the <<protect-function,protect function>>.
+<1> When you use this function with hub cluster templates, the output is automatically encrypted using the <<protect-function,protect>> function.
 
 [#copyConfigMapData]
-== _copyConfigMapData_ function
+=== _copyConfigMapData_
 
-The `copyConfigMapData` function copies all of the `data` content of the specified ConfigMap. View the following sample of the function:
+The `copyConfigMapData` function copies all of the `data` content of the specified config map. View the following sample of the function:
 
 [source,yaml]
 ----
@@ -477,9 +497,9 @@ complianceType: musthave
 ----
 
 [#open-source-community-functions]
-== Supported Sprig open source functions
+== Sprig open source
 
-Additionally, {acm-short} supports the following template functions that are included from the `sprig` open source project:
+{acm-short} supports the following template functions that are included from the `sprig` open source project:
 
 .Table of supported, community Sprig functions
 |===
