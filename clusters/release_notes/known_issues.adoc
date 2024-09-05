@@ -1,4 +1,4 @@
-[#known-issues-cluster]
+[#known-issues-mce]
 = Cluster lifecycle known issues
 
 ////
@@ -25,10 +25,12 @@ Review the known issues for cluster lifecycle with {mce-short}. The following li
 
 Cluster lifecycle known issues and limitations are part of the Cluster lifecycle with {mce-short} documentation.
 
-[#cluster-lifecycle-issues-mce]
-== Cluster management
+* <<cluster-lifecycle-issues-mce,Cluster lifecycle>>
+* <<cluster-lifecycle-issues-cim,Central infrastructure management>>
+* <<cluster-lifecycle-issues-ms,Managed Service Account add-on>>
 
-Cluster lifecycle known issues and limitations are part of the Cluster lifecycle with {mce-short} documentation.
+[#cluster-lifecycle-issues-mce]
+== Cluster lifecycle
 
 [#limitation-with-nmstate]
 === Limitation with _nmstate_
@@ -74,39 +76,6 @@ Change to the right channel in the {ocp-short} console. Click **Administration**
 
 When you create an on-premises cluster using the console, you must select an available subnet for your cluster. It is not marked as a required field. 
 
-[#iso-image-name-too-long]
-=== Cluster provisioning with Infrastructure Operator fails
-//2.4:17411
-
-When creating {ocp-short} clusters using the Infrastructure Operator, the file name of the ISO image might be too long. The long image name causes the image provisioning and the cluster provisioning to fail. To determine if this is the problem, complete the following steps: 
-
-. View the bare metal host information for the cluster that you are provisioning by running the following command: 
-+
-----
-oc get bmh -n <cluster_provisioning_namespace>
-----
-
-. Run the `describe` command to view the error information:
-+
-----
-oc describe bmh -n <cluster_provisioning_namespace> <bmh_name>
-----
-
-. An error similar to the following example indicates that the length of the filename is the problem: 
-+
-----
-Status:
-  Error Count:    1
-  Error Message:  Image provisioning failed: ... [Errno 36] File name too long ...
-----
-
-If this problem occurs, it is typically on the following versions of {ocp-short}, because the infrastructure operator was not using image service:
-
-* 4.8.17 and earlier
-* 4.9.6 and earlier
-
-To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9.7 or later.
-
 [#cluster-provision-fails-ansible-proxy]
 === Cluster provision with Ansible automation fails in proxy environment
 //2.4:17659
@@ -121,13 +90,6 @@ An Automation template that is configured to automatically provision a managed c
 //2.3:13474
 
 You cannot delete the namespace of a managed cluster manually. The managed cluster namespace is automatically deleted after the managed cluster is detached. If you delete the managed cluster namespace manually before the managed cluster is detached, the managed cluster shows a continuous terminating  status after you delete the managed cluster. To delete this terminating managed cluster, manually remove the finalizers from the managed cluster that you detached.
-
-[#importing-certain-versions-of-ibm-red-hat-openshift-kubernetes-service-clusters-is-not-supported]
-=== Importing certain versions of IBM {ocp-short} Kubernetes Service clusters is not supported
-// 1.0.0:2179
-
-You cannot import IBM {ocp-short} Kubernetes Service version 3.11 clusters.
-Later versions of IBM OpenShift Kubernetes Service are supported.
 
 [#automatic-secret-updates-for-provisioned-clusters-is-not-supported]
 === Automatic secret updates for provisioned clusters is not supported
@@ -239,49 +201,6 @@ To work around the issue, run the following command to remove the `finalizers` b
 oc patch clusterdeployment <clusterdeployment-name> -p '{"metadata":{"finalizers":null}}' --type=merge 
 ----
 
-[#discon-disc-iso-cluster-no-install]
-=== A cluster deployed in a disconnected environment by using the central infrastructure management service might not install
-//2.7:ACM3209
-
-When you deploy a cluster in a disconnected environment by using the central infrastructure management service, the cluster nodes might not start installing. 
-
-This issue occurs because the cluster uses a discovery ISO image that is created from the Red Hat Enterprise Linux CoreOS live ISO image that is shipped with {ocp-short} versions 4.12.0 through 4.12.2. The image contains a restrictive `/etc/containers/policy.json` file that requires signatures for images sourcing from `registry.redhat.io` and `registry.access.redhat.com`. In a disconnected environment, the images that are mirrored might not have the signatures mirrored, which results in the image pull failing for cluster nodes at discovery. The Agent image fails to connect with the cluster nodes, which causes communication with the assisted service to fail.
-
-To work around this issue, apply an ignition override to the cluster that sets the `/etc/containers/policy.json` file to unrestrictive. The ignition override can be set in the `InfraEnv` custom resource definition. The following example shows an `InfraEnv` custom resource definition with the override:
-
-[source.yaml]
-----
-apiVersion: agent-install.openshift.io/v1beta1
-kind: InfraEnv
-metadata:
-  name: cluster
-  namespace: cluster
-spec:
-  ignitionConfigOverride: '{"ignition":{"version":"3.2.0"},"storage":{"files":[{"path":"/etc/containers/policy.json","mode":420,"overwrite":true,"contents":{"source":"data:text/plain;charset=utf-8;base64,ewogICAgImRlZmF1bHQiOiBbCiAgICAgICAgewogICAgICAgICAgICAidHlwZSI6ICJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIgogICAgICAgIH0KICAgIF0sCiAgICAidHJhbnNwb3J0cyI6CiAgICAgICAgewogICAgICAgICAgICAiZG9ja2VyLWRhZW1vbiI6CiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgIiI6IFt7InR5cGUiOiJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIn1dCiAgICAgICAgICAgICAgICB9CiAgICAgICAgfQp9"}}]}}' 
-----
-
-The following example shows the unrestrictive file that is created:
-----
-{
-    "default": [
-        {
-            "type": "insecureAcceptAnything"
-        }
-    ],
-    "transports": {
-        "docker-daemon": {
-        "": [
-        {
-            "type": "insecureAcceptAnything"
-        }
-        ]
-    }
-    }
-}
-----
- 
-After this setting is changed, the clusters install. 
-
 [#deploy-managed-stuck-pending]
 === Managed cluster stuck in _Pending_ status after deployment
 //2.11:ACM-12722
@@ -344,11 +263,110 @@ Error querying resource logs:
 Service unavailable
 ----
 
-[#manageserviceaccount-addon-limitation]
-=== Managed Service Account add-on limitations
-//2.9:ACM-8586
+[#bulk-destroy-kubevirt-hosted]
+=== Bulk destroy option on KubeVirt hosted cluster does not destroy hosted cluster
+//2.10:ACM-10174
 
-The following are known issues and limitations for the `managed-serviceaccount` add-on:
+Using the bulk destroy option in the console on KubeVirt hosted clusters does not destroy the KubeVirt hosted clusters.
+
+Use the row action drop-down menu to destroy the KubeVirt hosted cluster instead.
+
+[#ocp-ded-support-curator]
+=== The Cluster curator does not support {ocp-short} Dedicated clusters
+//2.10:ACM-10154
+
+When you upgrade an {ocp-short} Dedicated cluster by using the `ClusterCurator` resource, the upgrade fails because the Cluster curator does not support {ocp-short} Dedicated clusters.
+
+[#custom-ingress-domain-limitation]
+=== Custom ingress domain is not applied correctly
+//2.8:ACM-6279
+
+You can specify a custom ingress domain by using the `ClusterDeployment` resource while installing a managed cluster, but the change is only applied after the installation by using the `SyncSet` resource. As a result, the `spec` field in the `clusterdeployment.yaml` file displays the custom ingress domain you specified, but the `status` still displays the default domain.
+
+[#cluster-lifecycle-issues-cim]
+== Central infrastructure management
+
+[#discon-disc-iso-cluster-no-install]
+=== A cluster deployed in a disconnected environment by using the central infrastructure management service might not install
+//2.7:ACM3209
+
+When you deploy a cluster in a disconnected environment by using the central infrastructure management service, the cluster nodes might not install. 
+
+This issue occurs because the cluster uses a discovery ISO image that is created from the Red Hat Enterprise Linux CoreOS live ISO image that is shipped with {ocp-short} versions 4.12.0 to 4.12.2. The image contains a restrictive `/etc/containers/policy.json` file that requires signatures for images sourcing from `registry.redhat.io` and `registry.access.redhat.com`.
+
+In a disconnected environment, the images that are mirrored might not have the signatures mirrored, which results in the image pull failing for cluster nodes at discovery. The Agent image fails to connect to the cluster nodes, which causes communication with the assisted service to fail.
+
+To work around this issue, apply an ignition override to the cluster that sets the `/etc/containers/policy.json` file to unrestrictive. You can set the ignition override in the `InfraEnv` custom resource definition. The following example shows an `InfraEnv` custom resource definition with the override:
+
+[source.yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: cluster
+  namespace: cluster
+spec:
+  ignitionConfigOverride: '{"ignition":{"version":"3.2.0"},"storage":{"files":[{"path":"/etc/containers/policy.json","mode":420,"overwrite":true,"contents":{"source":"data:text/plain;charset=utf-8;base64,ewogICAgImRlZmF1bHQiOiBbCiAgICAgICAgewogICAgICAgICAgICAidHlwZSI6ICJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIgogICAgICAgIH0KICAgIF0sCiAgICAidHJhbnNwb3J0cyI6CiAgICAgICAgewogICAgICAgICAgICAiZG9ja2VyLWRhZW1vbiI6CiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgIiI6IFt7InR5cGUiOiJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIn1dCiAgICAgICAgICAgICAgICB9CiAgICAgICAgfQp9"}}]}}' 
+----
+
+The following example shows the unrestrictive file that is created:
+
+----
+{
+    "default": [
+        {
+            "type": "insecureAcceptAnything"
+        }
+    ],
+    "transports": {
+        "docker-daemon": {
+        "": [
+        {
+            "type": "insecureAcceptAnything"
+        }
+        ]
+    }
+    }
+}
+----
+ 
+After changing the setting, the clusters install.
+
+[#iso-image-name-too-long]
+=== Cluster provisioning with Infrastructure Operator fails
+//2.4:17411
+
+When creating {ocp-short} clusters by using the Infrastructure Operator, the file name of the ISO image might be too long. The long image name causes the image provisioning and the cluster provisioning to fail. To determine if this is the problem, complete the following steps: 
+
+. View the bare metal host information for the cluster that you are provisioning by running the following command: 
++
+----
+oc get bmh -n <cluster_provisioning_namespace>
+----
+
+. Run the `describe` command to view the error information:
++
+----
+oc describe bmh -n <cluster_provisioning_namespace> <bmh_name>
+----
+
+. An error similar to the following example indicates that the length of the filename is the problem: 
++
+----
+Status:
+  Error Count:    1
+  Error Message:  Image provisioning failed: ... [Errno 36] File name too long ...
+----
+
+If this problem occurs, it is typically on the following versions of {ocp-short}, because the infrastructure operator was not using image service:
+
+* 4.8.17 and earlier
+* 4.9.6 and earlier
+
+To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9.7 or later.
+
+[#cluster-lifecycle-issues-msa]
+== Managed Service Account add-on
 
 [#installnamespace-field-limit]
 === _installNamespace_ field can only have one value
@@ -371,23 +389,3 @@ If the `managed-serviceaccount` add-on is required, you can work around the issu
 . Update the `managed-serviceaccount` `ManagedClusterAddon` in the local cluster namespace to use the `addonDeploymentConfig` custom resource you created.
 
 See link:../../add-ons/configure_nodeselector_tolerations_addons.adoc#configure-nodeselector-tolerations-addons[Configuring nodeSelectors and tolerations for klusterlet add-ons] to learn more about how to use the `addonDeploymentConfig` custom resource to configure `tolerations` and `nodeSelector` for add-ons.
-
-[#bulk-destroy-kubevirt-hosted]
-=== Bulk destroy option on KubeVirt hosted cluster does not destroy hosted cluster
-//2.10:ACM-10174
-
-Using the bulk destroy option in the console on KubeVirt hosted clusters does not destroy the KubeVirt hosted clusters.
-
-Use the row action drop-down menu to destroy the KubeVirt hosted cluster instead.
-
-[#ocp-ded-support-curator]
-=== The Cluster curator does not support {ocp-short} Dedicated clusters
-//2.10:ACM-10154
-
-When you upgrade an {ocp-short} Dedicated cluster by using the `ClusterCurator` resource, the upgrade fails because the Cluster curator does not support {ocp-short} Dedicated clusters.
-
-[#custom-ingress-domain-limitation]
-=== Custom ingress domain is not applied correctly
-//2.8:ACM-6279
-
-You can specify a custom ingress domain by using the `ClusterDeployment` resource while installing a managed cluster, but the change is only applied after the installation by using the `SyncSet` resource. As a result, the `spec` field in the `clusterdeployment.yaml` file displays the custom ingress domain you specified, but the `status` still displays the default domain.
