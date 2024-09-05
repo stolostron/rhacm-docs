@@ -20,7 +20,7 @@ A removed item is typically function that was deprecated in previous releases an
 
 ## Process
 
-* A developer story or epic would indicated if something is deprecated or removed. They will create a doc issue to deprecate or remove an item.
+A developer story or epic would indicated if something is deprecated or removed. They will create a doc issue to deprecate or remove an item.
 
  1. Update the table in the _Deprecations and removals_ part of the release notes. These do not go in the new release notes.
  2. Go to places where the item is documented and highlight it with **Deprecation**, or remove the file or section if it is a removal.
