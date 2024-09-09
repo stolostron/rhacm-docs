@@ -23,117 +23,11 @@ Or consider a troubleshooting topic.
 
 Review the known issues for application management. The following list contains known issues for this release, or known issues that continued from the previous release. 
 
-For your {ocp} cluster, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/release_notes/ocp-4-12-release-notes#ocp-4-12-known-issues[{ocp-short} known issues]. 
+For your {ocp} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/release_notes/ocp-4-12-release-notes#ocp-4-12-known-issues[{ocp-short} known issues]. 
 
 For more about deprecations and removals, see xref:../release_notes/deprecate_remove.adoc#deprecations-removals[Deprecations and removals].
 
 See the following known issues for the Application lifecycle component.
-
-[#app-topology-311]
-== Application topology error for subscription deployed {ocp-short} 3.11
-//2.10:ACM-10551
-
-*Note:* {acm-short} support of {ocp-short} 3.11 is deprecated.
-
-After you create a subscription application that targets a {ocp-short} 3.11 cluster, the application topology displays incorrectly for `ReplicaSet` and `Pod` resources because of a defect in Kubernetes. This defect is where the `pod-template-hash` does not match the hash in the `ReplicaSet` or `Pod` resource name. Later Kubernetes version are corrected, but {ocp-short} 3.11 is not fixed. See link:https://github.com/kubernetes/kubernetes/issues/55346[Kubernetes bug reference] for details.
-
-Because of this bug, the topology might not reflect the status of resources. For example, `pod` and `replicaset` are not reflected, but those resources exist.
-
-* See the following managed cluster command and output for `pod`:
-
-+
-----
-oc get pod -n test-helloworld
-----
-+
-----
-NAME                                     READY   STATUS    RESTARTS   AGE
-helloworld-app-deploy-596765ff66-ndrv8   1/1     Running   0          20m
-----
-
-* See the following managed cluster command and output for `replicaset`:
-
-+
-----
-oc get replicaset -n test-helloworld
-----
-+
-----
-NAME                               DESIRED   CURRENT   READY   AGE
-helloworld-app-deploy-596765ff66   1         1         1       20m 
-----
-
-[#app-addon-missing-311]
-== Application Kubernetes Lease API missing for {ocp-short} 3.11 managed clusters
-//2.10:ACM-10528
-
-The application add-on component uses the _Kubernetes Lease API_ ,`leases.coordination.k8s.io`, which is missing for {ocp-short} 3.11 users. The Kubernetes Lease API was introduced in Kubernetes 1.14, but {ocp-short} 3.11 bundles Kubernetes version 1.11. 
-
-To resolve this issue, manually apply the following Kubernetes Lease API `CustomResourceDefinition` to the {ocp-short} 3.11 managed cluster:
-
-[source,yaml]
-----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: leases.coordination.k8s.io
-spec:
-  group: coordination.k8s.io
-  names:
-    kind: Lease
-    listKind: LeaseList
-    plural: leases
-    singular: lease
-    shortNames:
-    - ls
-  scope: Namespaced
-  versions:
-  - name: v1
-    served: true    storage: true    schema:
-      openAPIV3Schema:
-        description: Lease defines a lease concept.
-        type: object
-        properties:
-          apiVersion:
-            type: string
-          kind:
-            type: string
-          metadata:
-            type: object
-          spec:
-            type: object
-            properties:
-              acquireTime:
-                format: date-time
-                type: string
-              holderIdentity:
-                type: string
-              leaseDurationSeconds:
-                format: int64
-                type: integer
-              leaseTransitions:
-                format: int64
-                type: integer
-              renewTime:
-                format: date-time
-                type: string
-            required:
-            - holderIdentity
-            - leaseDurationSeconds
-            - renewTime
-        required:
-        - kind
-        - metadata
-        - spec
-  additionalPrinterColumns:
-  - JSONPath: .metadata.creationTimestamp
-    name: Age
-    type: date
-  subresources:
-    status: {}
-----
-
-*Note:* {acm-short} support of {ocp-short} 3.11 is deprecated.
 
 [#editing-subscription-placement-rule]
 == Editing subscription applications with _PlacementRule_ does not display the subscription YAML in editor
@@ -158,12 +52,6 @@ credentials:
 ----
 
 The Helm Chart with secret dependencies is only supported in the Helm binary CLI. It is not supported in the operator SDK Helm library. The {acm-short} subscription controller applies the operator SDK Helm library to install and upgrade the Helm Chart. Therefore, the {acm-short} subscription cannot deploy the Helm Chart with secret dependencies. 
-
-[#creating-cluster-secrets-not-supported]
-== Creating cluster secrets for Argo CD Push model is not supported
-//2.9:ACM-8472
-
-Customized cluster secrets cannot be created for the Argo CD Push model on your {ocp-short} 3.11 managed clusters. This occurs because the managed service account add-on is not supported on {ocp-short} 3.11 managed clusters.
 
 [#argo-pull-model-topology]
 == Topology does not correctly display for Argo CD pull model `ApplicationSet` application 
@@ -439,18 +327,3 @@ The _Console_ and _Topology_ for _Application_ changes for the {product-version}
 // 2.6:25445
 
 The `allow` and `deny` list feature does not work in Object storage application subscriptions.
-
-[#hub-cluster-one-way-limits]
-=== Hub cluster communication limitations
-//2.9:ACM-6292
-
-The following limitations occur if the hub cluster is not able to reach or communicate with the managed cluster:
-
-- You cannot create a new managed cluster by using the console. You are still able to import a managed cluster manually by using the command line interface or by using the *Run import commands manually* option in the console.
-- If you deploy an Application or ApplicationSet by using the console, or if you import a managed cluster into ArgoCD, the hub cluster ArgoCD controller calls the managed cluster API server. You can use AppSub or the ArgoCD pull model to work around the issue.
-- The console page for pod logs does not work, and an error message that resembles the following appears:
-+
-----
-Error querying resource logs:
-Service unavailable
-----
