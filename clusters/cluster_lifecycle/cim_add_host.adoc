@@ -1,9 +1,15 @@
 [#add-host-host-inventory]
 = Adding hosts to the host inventory by using the Discovery Image
 
-After creating your host inventory (infrastructure environment) you can discover your hosts and add them to your inventory. To add hosts to your inventory, choose a method to download an ISO and attach it to each server. For example, you can download ISOs by using a virtual media or writing the ISO to a USB drive.
+After you create your host inventory (infrastructure environment), you can discover your hosts and add them to your inventory. 
 
-*Important:* To prevent the installation from failing, keep the Discovery ISO media connected to the device during the installation process and set each host to boot from the device one time.
+To add hosts to your inventory, choose a method to download an ISO file and attach it to each server. For example, you can download ISO files by using a virtual media, or by writing the ISO file to a USB drive.
+
+*Important:* To prevent the installation from failing, keep the Discovery ISO media connected to the device during the installation process, and set each host to boot from the device one time.
+
+* <<add-host-prereqs,Prerequisites>>
+* <<add-host-steps-console,Adding hosts by using the console>>
+* <<add-host-steps-cli,Adding hosts by using the command line interface>>
 
 [#add-host-prereqs]
 == Prerequisites
@@ -14,7 +20,7 @@ After creating your host inventory (infrastructure environment) you can discover
 [#add-host-steps-console]
 == Adding hosts by using the console
 
-Download the ISO by completing the following steps:
+Download the ISO file by completing the following steps:
 
 . Select *Infrastructure* > *Host inventory* in the console.
 
@@ -22,14 +28,84 @@ Download the ISO by completing the following steps:
 
 . Click *Add hosts* and select *With Discovery ISO*.
 
-You now see a URL to download the ISO. Booted hosts appear in the host inventory table. Hosts might take a few minutes to appear. You must approve each host before you can use it. You can select hosts from the inventory table by clicking *Actions* and selecting *Approve*.
++
+You now see a URL to download the ISO file. Booted hosts appear in the host inventory table. Hosts might take a few minutes to appear. 
+
++
+*Note:* By default, the ISO that is provided is a _minimal_ ISO. The minimal ISO does not contain the root file system, `RootFS`. The `RootFS` is downloaded later. To display full ISO, replace `minimal.iso` in the URL with `full.iso`.
+
+. Approve each host so that you can use it. You can select hosts from the inventory table by clicking *Actions* and selecting *Approve*.
 
 [#add-host-steps-cli]
 == Adding hosts by using the command line interface
 
-You can see the URL to download the ISO in the `isoDownloadURL` property in the status of your `InfraEnv` resource. See Creating a host inventory by using the command line interface for more information about the `InfraEnv` resource.
+The URL to download the ISO file in the `isoDownloadURL` property is in the status of your `InfraEnv` resource. See _Creating a host inventory by using the command line interface_ for more information about the `InfraEnv` resource.
 
-Each booted host creates an `Agent` resource in the same namespace. You must approve each host before you can use it.
+Each booted host creates an `Agent` resource in the same namespace. 
+
+. Run the following command to view the download URL in the `InfraEnv` custom resource:
+
++
+[source,bash]
+----
+oc get infraenv -n <infra env namespace> <infra env name> -o jsonpath='{.status.isoDownloadURL}'
+----
+
++
+See the following output:
+
++
+----
+https://assisted-image-service-assisted-installer.apps.example-acm-hub.com/byapikey/eyJhbGciOiJFUzI1NiIsInC93XVCJ9.eyJpbmZyYV9lbnZfaWQcTA0Y38sWVjYi02MTA0LTQ4NDMtODasdkOGIxYTZkZGM5ZTUifQ.3ydTpHaXJmTasd7uDp2NvGUFRKin3Z9Qct3lvDky1N-5zj3KsRePhAM48aUccBqmucGt3g/4.16/x86_64/minimal.iso
+----
+
+*Note:* By default, the ISO that is provided is a _minimal_ ISO. The minimal ISO does not contain the root file system, `RootFS`. The `RootFS` is downloaded later. To display full ISO, replace `minimal.iso` in the URL with `full.iso`.
+
+. Use the URL to download the ISO file and boot your hosts with the ISO file.
+
+Next, you need to approve each host. See the following procedure:
+
+. Run the following command to list all of your `Agents`:
+
++
+[source,bash]
+----
+oc get agent -n <infra env namespace>
+----
+
++
+You get an output that is similar to the following output:
+
++
+----
+NAME                                   CLUSTER   APPROVED   ROLE          STAGE
+24a92a6f-ea35-4d6f-9579-8f04c0d3591e             false      auto-assign   
+----
+
+. Approve any `Agent` from the list with a `false` approval status. Run the following command:
+
++
+[source,bash]
+----
+oc patch agent -n <infra env namespace> <agent name> -p '{"spec":{"approved":true}}' --type merge
+----
+
+. Run the following command to confirm approval status:
+
++
+[source,bash]
+----
+oc get agent -n <infra env namespace>
+----
+
++
+You get an output that is similar to the following output with a `true` value:
+
++
+----
+NAME                                   CLUSTER   APPROVED   ROLE          STAGE
+173e3a84-88e2-4fe1-967f-1a9242503bec             true       auto-assign    
+----
 
 [#additional-resources-add-host]
 == Additional resources
