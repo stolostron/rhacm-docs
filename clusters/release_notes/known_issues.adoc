@@ -1,5 +1,5 @@
-[#known-issues-cluster]
-= Cluster lifecycle known issues
+[#known-issues-mce]
+= Cluster lifecycle known issues and limitations
 
 ////
 Please follow this format:
@@ -21,14 +21,16 @@ Known issue process and when to write:
 Or consider a troubleshooting topic.
 ////
 
-Review the known issues for cluster lifecycle with {mce-short}. The following list contains known issues for this release, or known issues that continued from the previous release. For your {ocp-short} cluster, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14[{ocp-short} release notes].
+Review the known issues for cluster lifecycle with {mce-short}. The following list contains known issues and limitations for this release, or known issues that continued from the previous release. For your {ocp-short} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14[{ocp-short} release notes].
 
 Cluster lifecycle known issues and limitations are part of the Cluster lifecycle with {mce-short} documentation.
+
+* <<cluster-lifecycle-issues-mce,Cluster lifecycle>>
+* <<cluster-lifecycle-issues-cim,Central infrastructure management>>
+* <<cluster-lifecycle-issues-msa,Managed Service Account add-on>>
 
 [#cluster-lifecycle-issues-mce]
-== Cluster management
-
-Cluster lifecycle known issues and limitations are part of the Cluster lifecycle with {mce-short} documentation.
+== Cluster lifecycle
 
 [#limitation-with-nmstate]
 === Limitation with _nmstate_
@@ -68,97 +70,11 @@ The `clusterimageset` is in `fast` channel, but the provisioned cluster is in `s
 
 Change to the right channel in the {ocp-short} console. Click **Administration** > **Cluster Settings** > **Details Channel**.
 
-[#ca-certificate-hub-restore]
-=== Restoring the connection of a managed cluster with custom CA certificates to its restored hub cluster might fail
-//2.4:19481
-
-After you restore the backup of a hub cluster that managed a cluster with custom CA certificates, the connection between the managed cluster and the hub cluster might fail. This is because the CA certificate was not backed up on the restored hub cluster. To restore the connection, copy the custom CA certificate information that is in the namespace of your managed cluster to the `<managed_cluster>-admin-kubeconfig` secret on the restored hub cluster. 
-
-**Tip:** If you copy this CA certificate to the hub cluster before creating the backup copy, the backup copy includes the secret information. When the backup copy is used to restore in the future, the connection between the hub and managed clusters will automatically complete. 
-
-[#local-cluster-auto]
-=== The local-cluster might not be automatically recreated
-//2.4:17790
-
-If the local-cluster is deleted while `disableHubSelfManagement` is set to `false`, the local-cluster is recreated by the `MulticlusterHub` operator. After you detach a local-cluster, the local-cluster might not be automatically recreated. 
-
-- To resolve this issue, modify a resource that is watched by the `MulticlusterHub` operator. See the following example:
-
-+
-----
-oc delete deployment multiclusterhub-repo -n <namespace>
-----
-
-- To properly detach the local-cluster, set the `disableHubSelfManagement` to true in the `MultiClusterHub`.  
-
 [#subnet-required-on-prem-clust-create]
 === Selecting a subnet is required when creating an on-premises cluster
 //2.4:18387
 
 When you create an on-premises cluster using the console, you must select an available subnet for your cluster. It is not marked as a required field. 
-
-[#iso-image-name-too-long]
-=== Cluster provisioning with Infrastructure Operator fails
-//2.4:17411
-
-When creating {ocp-short} clusters using the Infrastructure Operator, the file name of the ISO image might be too long. The long image name causes the image provisioning and the cluster provisioning to fail. To determine if this is the problem, complete the following steps: 
-
-. View the bare metal host information for the cluster that you are provisioning by running the following command: 
-+
-----
-oc get bmh -n <cluster_provisioning_namespace>
-----
-
-. Run the `describe` command to view the error information:
-+
-----
-oc describe bmh -n <cluster_provisioning_namespace> <bmh_name>
-----
-
-. An error similar to the following example indicates that the length of the filename is the problem: 
-+
-----
-Status:
-  Error Count:    1
-  Error Message:  Image provisioning failed: ... [Errno 36] File name too long ...
-----
-
-If this problem occurs, it is typically on the following versions of {ocp-short}, because the infrastructure operator was not using image service:
-
-* 4.8.17 and earlier
-* 4.9.6 and earlier
-
-To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9.7 or later.
-
-[#cluster-local-offline-reimport]
-=== Local-cluster status offline after reimporting with a different name
-//2.4:16977
-
-When you accidentally try to reimport the cluster named `local-cluster` as a cluster with a different name, the status for `local-cluster` and for the reimported cluster display `offline`.
-
-To recover from this case, complete the following steps:
-
-. Run the following command on the hub cluster to edit the setting for self-management of the hub cluster temporarily:
-+
-----
-oc edit mch -n open-cluster-management multiclusterhub
-----
-
-. Add the setting `spec.disableSelfManagement=true`.
-
-. Run the following command on the hub cluster to delete and redeploy the local-cluster:
-+
-----
-oc delete managedcluster local-cluster
-----
-
-. Enter the following command to remove the `local-cluster` management setting: 
-+
-----
-oc edit mch -n open-cluster-management multiclusterhub
-----
-
-. Remove `spec.disableSelfManagement=true` that you previously added.
 
 [#cluster-provision-fails-ansible-proxy]
 === Cluster provision with Ansible automation fails in proxy environment
@@ -175,30 +91,11 @@ An Automation template that is configured to automatically provision a managed c
 
 You cannot delete the namespace of a managed cluster manually. The managed cluster namespace is automatically deleted after the managed cluster is detached. If you delete the managed cluster namespace manually before the managed cluster is detached, the managed cluster shows a continuous terminating  status after you delete the managed cluster. To delete this terminating managed cluster, manually remove the finalizers from the managed cluster that you detached.
 
-[#hub-managed-clusters-clock]
-=== Hub cluster and managed clusters clock not synced
-// 2.1:5636
-
-Hub cluster and manage cluster time might become out-of-sync, displaying in the console `unknown` and eventually `available` within a few minutes. Ensure that the {ocp-short} hub cluster time is configured correctly. See link:https://docs.openshift.com/container-platform/4.13/installing/install_config/installing-customizing.html[Customizing nodes].
-
-[#importing-certain-versions-of-ibm-red-hat-openshift-kubernetes-service-clusters-is-not-supported]
-=== Importing certain versions of IBM {ocp-short} Kubernetes Service clusters is not supported
-// 1.0.0:2179
-
-You cannot import IBM {ocp-short} Kubernetes Service version 3.11 clusters.
-Later versions of IBM OpenShift Kubernetes Service are supported.
-
 [#automatic-secret-updates-for-provisioned-clusters-is-not-supported]
 === Automatic secret updates for provisioned clusters is not supported
 // 2.0.0:3702
 
 When you change your cloud provider access key on the cloud provider side, you also need to update the corresponding credential for this cloud provider on the console of {mce-short}. This is required when your credentials expire on the cloud provider where the managed cluster is hosted and you try to delete the managed cluster.
-
-[#node-information-from-the-managed-cluster-cannot-be-viewed-in-search]
-=== Node information from the managed cluster cannot be viewed in search
-// 2.0.2:4598
-
-Search maps RBAC for resources in the hub cluster. Depending on user RBAC settings, users might not see node data from the managed cluster. Results from search might be different from what is displayed on the _Nodes_ page for a cluster.
 
 [#cluster-might-not-be-destroyed]
 === Process to destroy a cluster does not complete
@@ -304,49 +201,6 @@ To work around the issue, run the following command to remove the `finalizers` b
 oc patch clusterdeployment <clusterdeployment-name> -p '{"metadata":{"finalizers":null}}' --type=merge 
 ----
 
-[#discon-disc-iso-cluster-no-install]
-=== A cluster deployed in a disconnected environment by using the central infrastructure management service might not install
-//2.7:ACM3209
-
-When you deploy a cluster in a disconnected environment by using the central infrastructure management service, the cluster nodes might not start installing. 
-
-This issue occurs because the cluster uses a discovery ISO image that is created from the Red Hat Enterprise Linux CoreOS live ISO image that is shipped with {ocp-short} versions 4.12.0 through 4.12.2. The image contains a restrictive `/etc/containers/policy.json` file that requires signatures for images sourcing from `registry.redhat.io` and `registry.access.redhat.com`. In a disconnected environment, the images that are mirrored might not have the signatures mirrored, which results in the image pull failing for cluster nodes at discovery. The Agent image fails to connect with the cluster nodes, which causes communication with the assisted service to fail.
-
-To work around this issue, apply an ignition override to the cluster that sets the `/etc/containers/policy.json` file to unrestrictive. The ignition override can be set in the `InfraEnv` custom resource definition. The following example shows an `InfraEnv` custom resource definition with the override:
-
-[source.yaml]
-----
-apiVersion: agent-install.openshift.io/v1beta1
-kind: InfraEnv
-metadata:
-  name: cluster
-  namespace: cluster
-spec:
-  ignitionConfigOverride: '{"ignition":{"version":"3.2.0"},"storage":{"files":[{"path":"/etc/containers/policy.json","mode":420,"overwrite":true,"contents":{"source":"data:text/plain;charset=utf-8;base64,ewogICAgImRlZmF1bHQiOiBbCiAgICAgICAgewogICAgICAgICAgICAidHlwZSI6ICJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIgogICAgICAgIH0KICAgIF0sCiAgICAidHJhbnNwb3J0cyI6CiAgICAgICAgewogICAgICAgICAgICAiZG9ja2VyLWRhZW1vbiI6CiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgIiI6IFt7InR5cGUiOiJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIn1dCiAgICAgICAgICAgICAgICB9CiAgICAgICAgfQp9"}}]}}' 
-----
-
-The following example shows the unrestrictive file that is created:
-----
-{
-    "default": [
-        {
-            "type": "insecureAcceptAnything"
-        }
-    ],
-    "transports": {
-        "docker-daemon": {
-        "": [
-        {
-            "type": "insecureAcceptAnything"
-        }
-        ]
-    }
-    }
-}
-----
- 
-After this setting is changed, the clusters install. 
-
 [#deploy-managed-stuck-pending]
 === Managed cluster stuck in _Pending_ status after deployment
 //2.11:ACM-12722
@@ -394,26 +248,110 @@ oc annotate --overwrite AgentServiceConfig agent unsupported.agent-install.opens
 
 The `selectorType: LaberSelector` setting is not supported when using the link:../../apis/clusterset.json.adoc#clustersets-api[Clustersets API]. The `selectorType: ExclusiveClusterSetLabel` setting is supported.
 
-[#hub-cluster-one-way-limits]
-=== Hub cluster communication limitations
-//2.9:ACM-6292
+[#bulk-destroy-kubevirt-hosted]
+=== Bulk destroy option on KubeVirt hosted cluster does not destroy hosted cluster
+//2.10:ACM-10174
 
-The following limitations occur if the hub cluster is not able to reach or communicate with the managed cluster:
+Using the bulk destroy option in the console on KubeVirt hosted clusters does not destroy the KubeVirt hosted clusters.
 
-- You cannot create a new managed cluster by using the console. You are still able to import a managed cluster manually by using the command line interface or by using the *Run import commands manually* option in the console.
-- If you deploy an Application or ApplicationSet by using the console, or if you import a managed cluster into ArgoCD, the hub cluster ArgoCD controller calls the managed cluster API server. You can use AppSub or the ArgoCD pull model to work around the issue.
-- The console page for pod logs does not work, and an error message that resembles the following appears:
+Use the row action drop-down menu to destroy the KubeVirt hosted cluster instead.
+
+[#ocp-ded-support-curator]
+=== The Cluster curator does not support {ocp-short} Dedicated clusters
+//2.10:ACM-10154
+
+When you upgrade an {ocp-short} Dedicated cluster by using the `ClusterCurator` resource, the upgrade fails because the Cluster curator does not support {ocp-short} Dedicated clusters.
+
+[#custom-ingress-domain-limitation]
+=== Custom ingress domain is not applied correctly
+//2.8:ACM-6279
+
+You can specify a custom ingress domain by using the `ClusterDeployment` resource while installing a managed cluster, but the change is only applied after the installation by using the `SyncSet` resource. As a result, the `spec` field in the `clusterdeployment.yaml` file displays the custom ingress domain you specified, but the `status` still displays the default domain.
+
+[#cluster-lifecycle-issues-cim]
+== Central infrastructure management
+
+[#discon-disc-iso-cluster-no-install]
+=== A cluster deployed in a disconnected environment by using the central infrastructure management service might not install
+//2.7:ACM3209
+
+When you deploy a cluster in a disconnected environment by using the central infrastructure management service, the cluster nodes might not install. 
+
+This issue occurs because the cluster uses a discovery ISO image that is created from the Red Hat Enterprise Linux CoreOS live ISO image that is shipped with {ocp-short} versions 4.12.0 to 4.12.2. The image contains a restrictive `/etc/containers/policy.json` file that requires signatures for images sourcing from `registry.redhat.io` and `registry.access.redhat.com`.
+
+In a disconnected environment, the images that are mirrored might not have the signatures mirrored, which results in the image pull failing for cluster nodes at discovery. The Agent image fails to connect to the cluster nodes, which causes communication with the assisted service to fail.
+
+To work around this issue, apply an ignition override to the cluster that sets the `/etc/containers/policy.json` file to unrestrictive. You can set the ignition override in the `InfraEnv` custom resource definition. The following example shows an `InfraEnv` custom resource definition with the override:
+
+[source.yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: cluster
+  namespace: cluster
+spec:
+  ignitionConfigOverride: '{"ignition":{"version":"3.2.0"},"storage":{"files":[{"path":"/etc/containers/policy.json","mode":420,"overwrite":true,"contents":{"source":"data:text/plain;charset=utf-8;base64,ewogICAgImRlZmF1bHQiOiBbCiAgICAgICAgewogICAgICAgICAgICAidHlwZSI6ICJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIgogICAgICAgIH0KICAgIF0sCiAgICAidHJhbnNwb3J0cyI6CiAgICAgICAgewogICAgICAgICAgICAiZG9ja2VyLWRhZW1vbiI6CiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgIiI6IFt7InR5cGUiOiJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIn1dCiAgICAgICAgICAgICAgICB9CiAgICAgICAgfQp9"}}]}}' 
+----
+
+The following example shows the unrestrictive file that is created:
+
+----
+{
+    "default": [
+        {
+            "type": "insecureAcceptAnything"
+        }
+    ],
+    "transports": {
+        "docker-daemon": {
+        "": [
+        {
+            "type": "insecureAcceptAnything"
+        }
+        ]
+    }
+    }
+}
+----
+ 
+After changing the setting, the clusters install.
+
+[#iso-image-name-too-long]
+=== Cluster provisioning with Infrastructure Operator fails
+//2.4:17411
+
+When creating {ocp-short} clusters by using the Infrastructure Operator, the file name of the ISO image might be too long. The long image name causes the image provisioning and the cluster provisioning to fail. To determine if this is the problem, complete the following steps: 
+
+. View the bare metal host information for the cluster that you are provisioning by running the following command: 
 +
 ----
-Error querying resource logs:
-Service unavailable
+oc get bmh -n <cluster_provisioning_namespace>
 ----
 
-[#manageserviceaccount-addon-limitation]
-=== Managed Service Account add-on limitations
-//2.9:ACM-8586
+. Run the `describe` command to view the error information:
++
+----
+oc describe bmh -n <cluster_provisioning_namespace> <bmh_name>
+----
 
-The following are known issues and limitations for the `managed-serviceaccount` add-on:
+. An error similar to the following example indicates that the length of the filename is the problem: 
++
+----
+Status:
+  Error Count:    1
+  Error Message:  Image provisioning failed: ... [Errno 36] File name too long ...
+----
+
+If this problem occurs, it is typically on the following versions of {ocp-short}, because the infrastructure operator was not using image service:
+
+* 4.8.17 and earlier
+* 4.9.6 and earlier
+
+To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9.7 or later.
+
+[#cluster-lifecycle-issues-msa]
+== Managed Service Account add-on
 
 [#installnamespace-field-limit]
 === _installNamespace_ field can only have one value
@@ -436,23 +374,3 @@ If the `managed-serviceaccount` add-on is required, you can work around the issu
 . Update the `managed-serviceaccount` `ManagedClusterAddon` in the local cluster namespace to use the `addonDeploymentConfig` custom resource you created.
 
 See link:../../add-ons/configure_nodeselector_tolerations_addons.adoc#configure-nodeselector-tolerations-addons[Configuring nodeSelectors and tolerations for klusterlet add-ons] to learn more about how to use the `addonDeploymentConfig` custom resource to configure `tolerations` and `nodeSelector` for add-ons.
-
-[#bulk-destroy-kubevirt-hosted]
-=== Bulk destroy option on KubeVirt hosted cluster does not destroy hosted cluster
-//2.10:ACM-10174
-
-Using the bulk destroy option in the console on KubeVirt hosted clusters does not destroy the KubeVirt hosted clusters.
-
-Use the row action drop-down menu to destroy the KubeVirt hosted cluster instead.
-
-[#ocp-ded-support-curator]
-=== The Cluster curator does not support {ocp-short} Dedicated clusters
-//2.10:ACM-10154
-
-When you upgrade an {ocp-short} Dedicated cluster by using the `ClusterCurator` resource, the upgrade fails because the Cluster curator does not support {ocp-short} Dedicated clusters.
-
-[#custom-ingress-domain-limitation]
-=== Custom ingress domain is not applied correctly
-//2.8:ACM-6279
-
-You can specify a custom ingress domain by using the `ClusterDeployment` resource while installing a managed cluster, but the change is only applied after the installation by using the `SyncSet` resource. As a result, the `spec` field in the `clusterdeployment.yaml` file displays the custom ingress domain you specified, but the `status` still displays the default domain.
