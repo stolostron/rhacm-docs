@@ -1,21 +1,29 @@
 [#restore-backup]
 = Restoring a backup
 
-In a typical restore scenario, the hub cluster where the backups run becomes unavailable, and the backed up data needs to be moved to a new hub cluster. This is done by running the cluster restore operation on the new hub cluster. In this case, the restore operation runs on a different hub cluster than where the backup is created.
+In a typical restore scenario, the hub cluster where the backups run becomes unavailable, and the backed up data needs to be moved to a new hub cluster. Do this by running the cluster restore operation on the new hub cluster. In this case, the restore operation runs on a different hub cluster than where the backup is created.
 
-There are also cases where you want to restore the data on the same hub cluster where the backup was collected so that you can recover the data from a previous snapshot. In this case, both restore and backup operations run on the same hub cluster.
+There are also cases where you want to restore the data on the same hub cluster where the backup was collected so that you can recover the data from an earlier snapshot. In this case, both restore and backup operations run on the same hub cluster.
 
-After you create a `restore.cluster.open-cluster-management.io` resource on the hub cluster, you can run the following command to get the status of the restore operation: 
+To fully restore a backup, complete the following: 
 
-----
-oc get restore -n open-cluster-management-backup
-----
+* <<restoring-backup-restore-operation,Using the restore operation for backup types>>
+* <<restoring-data-primary-hub,Restoring data back to the initial primary hub>>
+* <<prepare-new-hub,Preparing the new hub cluster>>
+* <<clean-hub-restore,Cleaning the hub cluster after restore>>
+* <<restore-passive-resources-check-backups,Restoring passive resources while checking for backups>>
+* <<restore-passive-resources,Restoring passive resources>>
+* <<restore-activation-resources,Restoring activation resources>>
+* <<managed-cluster-activation-data,Restoring managed cluster activation data>>
+* <<restore-all-resources,Restoring all resources>>
+* <<restore-imported-managed-clusters,Restoring imported managed clusters>>
+* <<more-restore-samples,Using other restore samples>>
+* <<viewing-restore-events,Viewing restore events>>
 
-You can also verify that the backed up resources that are contained by the backup file are created.
+[#restoring-backup-restore-operation]
+== Using the restore operation for backup types 
 
-*Note:* The `restore.cluster.open-cluster-management.io` resource runs once unless you use the `syncRestoreWithNewBackups` option and set it to `true`, as mentioned in the <<restore-passive-resources,Restore passive resources>> section. If you want to run the same restore operation again after the restore operation is complete, you must create a new `restore.cluster.open-cluster-management.io` resource with the same `spec` options.
-
-The restore operation is used to restore all 3 backup types that are created by the backup operation. You can choose to install only a certain type of backup, such as only managed clusters, only user credentials, or only hub cluster resources.
+Use the restore operation to restore all 3 backup types that are created by the backup operation. You can choose to install only a certain type of backup, such as only managed clusters, only user credentials, or only hub cluster resources.
 
 The restore defines the following 3 required `spec` properties, where the restore logic is defined for the types of backed up files:
 
@@ -96,7 +104,6 @@ The post restore cleanup uses the `cleanupBeforeRestore` property to identify th
 
 * Although you can create multiple `restore.cluster.open-cluster-management.io` resources, only one can be active at any moment in time.
 
-
 [#restore-passive-resources-check-backups]
 == Restoring passive resources while checking for backups
 
@@ -106,7 +113,9 @@ Set the `VeleroResourcesBackupName` and `VeleroCredentialsBackupName` parameters
 
 When the activated managed cluster becomes the primary hub cluster, the restore resource is set to `Finished` and the `syncRestoreWithNewBackups` is ignored, even if set to `true`. 
 
-By default, the controler checks for new backups every 30 minutes when the `syncRestoreWithNewBackups` is set to `true`. If new backups are found, it restores the backed up resources. You can change the duration of the check by updating the `restoreSyncInterval` parameter.
+By default, the controller checks for new backups every 30 minutes when the `syncRestoreWithNewBackups` is set to `true`. If new backups are found, it restores the backed up resources. You can change the duration of the check by updating the `restoreSyncInterval` parameter.
+
+If you want to run the same restore operation again after the restore operation is complete, you must create a new `restore.cluster.open-cluster-management.io` resource with the same `spec` options.
 
 For example, see the following resource that checks for backups every 10 minutes:
 
@@ -182,13 +191,7 @@ Managed cluster activation data or other activation data resources are stored by
 [#restore-all-resources]
 == Restoring all resources
 
-Use the `restore-acm` sample if you want to restore all data at once and make the hub cluster manage the managed clusters in one step. After you create a `restore.cluster.open-cluster-management.io` resource on the hub cluster, run the following command to get the status of the restore operation:
-
-----
-oc get restore -n open-cluster-management-backup
-----
-
-Your sample might resemble the following resource:
+To restore all the data, use the following `restore-acm` sample: 
 
 [source,yaml]
 ----
@@ -198,13 +201,18 @@ metadata:
   name: restore-acm
   namespace: open-cluster-management-backup
 spec:
-  cleanupBeforeRestore: CleanupRestored
+  cleanupBeforeRestore: None
   veleroManagedClustersBackupName: latest
   veleroCredentialsBackupName: latest
   veleroResourcesBackupName: latest
 ----
 
-From your hub cluster, verify that the backed up resources contained by the backup file are created.
+After you create the `restore.cluster.open-cluster-management.io` resource on the hub cluster, get the status of the restore operation by running the following command: 
+
+[source,bash]
+----
+oc describe -n open-cluster-management-backup restore-acm
+----
 
 [#restore-imported-managed-clusters]
 == Restoring imported managed clusters
@@ -213,16 +221,15 @@ Only managed clusters connected with the primary hub cluster using the Hive API 
 
 The Hive managed clusters can be connected with the new hub cluster because Hive stores the managed cluster `kubeconfig` in the managed cluster namespace on the hub cluster. This is backed up and restored on the new hub cluster. The import controller then updates the bootstrap `kubeconfig` on the managed cluster using the restored configuration, which is only available for managed clusters created using the Hive API. It is not available for imported clusters.
 
-To reconnect imported clusters on the new hub cluster, manually create the `auto-import-secret` resource after your start the restore operation. See _Importing the cluster with the auto import secret_ for more details.
-
-Create the `auto-import-secret` resource in the managed cluster namespace for each cluster in `Pending Import` state. Use a `kubeconfig` or token with enough permissions for the import component to start the automatic import on the new hub cluster. You must have access for each managed cluster by using a token to connect with the managed cluster. The token must have a `klusterlet` role binding or a role with the same permissions.
+To reconnect imported clusters on the new hub cluster during a restore operation, enable the automatic import feature on the `BackupSchedule`. For more information, see xref:../backup_restore/backup_msa.adoc#enabling-auto-import[Enabling automatic import].
 
 [#more-restore-samples]
 == Using other restore samples
 
-View the following Restore section to view the YAML examples to restore different types of backed up files.
+View the following YAML examples to restore different types of backed up files:
 
-** Restore all three types of backed up resources:
+* Restore all three types of backed up resources:
+
 +
 [source,yaml]
 ----
@@ -236,8 +243,10 @@ spec:
   veleroCredentialsBackupSchedule: latest
   veleroResourcesBackupSchedule: latest
 ----
-+
-** Restore only managed cluster resources:
+
+
+* Restore only managed cluster resources:
+
 +
 [source,yaml]
 ----
@@ -251,8 +260,9 @@ spec:
   veleroCredentialsBackupName: skip
   veleroResourcesBackupName: skip
 ----
-+
-** Restore the resources for managed clusters only, using the `acm-managed-clusters-schedule-20210902205438` backup:
+
+* Restore the resources for managed clusters only, using the `acm-managed-clusters-schedule-20210902205438` backup:
+
 +
 [source,yaml]
 ----
@@ -266,12 +276,11 @@ spec:
   veleroCredentialsBackupName: skip
   veleroResourcesBackupName: skip
 ----
-+
-*Notes*: 
-+
-* The `restore.cluster.open-cluster-management.io` resource is run once. After the restore operation is completed, you can optionally run another restore operation on the same hub cluster. You must create a new `restore.cluster.open-cluster-management.io` resource to run a new restore operation.
-+
-* You can create multiple `restore.cluster.open-cluster-management.io`, however only one can be run at any moment.
+
+*Notes:*
+
+* The `restore.cluster.open-cluster-management.io` resource is still active if the phase is `Enabled` or `Running`. The resource execution is completed if the phase changes to `Finished`. After the restore operation is completed, you can run another restore operation on the same hub cluster. 
+* Only one `restore.cluster.open-cluster-management.io` can run at one time. 
 
 [#viewing-restore-events]
 == Viewing restore events
@@ -340,4 +349,4 @@ Events:
 
 - See link:../../clusters/cluster_lifecycle/import_cli.adoc#importing-the-cluster-auto-import-secret[Importing the cluster with the auto import secret].
 
-- See xref:../backup_restore/backup_schedule.adoc#using-backup-restore[Scheduling and restoring backups].
+- See xref:../backup_restore/backup_schedule.adoc#using-backup-restore[Scheduling backups].
