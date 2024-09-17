@@ -1,9 +1,11 @@
 [#gitops-policy-definitions]
 = Managing policy definitions with {ocp-short} GitOps (Argo CD)
 
+With Argo CD, you can use {ocp-short} GitOps to manage policy definitions by granting {ocp-short} GitOps access to create policies on the {acm-short} hub cluster. When a {acm-short} policy definition is deployed with {ocp-short} GitOps, a copy of the policy is created in each managed cluster namespace. These copies are called replicated policies.
+
 *Deprecated:* `PlacementRule`
 
-Based on Argo CD, you can use {ocp-short} GitOps to manage policy definitions. To allow this workflow, you must grant {ocp-short} GitOps access for you to create policies on the {acm-short} hub cluster. Complete the following steps to create a `ClusterRole` resource for {ocp-short} GitOps, with access to create, read, update, and delete policies and placements:
+Complete the following steps to create a `ClusterRole` resource for {ocp-short} GitOps, with access to create, read, update, and delete policies and placements:
 
 . Create a `ClusterRole` from the console. Your `ClusterRole` might resemble the following example:
 
@@ -77,14 +79,14 @@ roleRef:
   name: openshift-gitops-policy-admin
 ----
 
-When a {acm-short} policy definition is deployed with {ocp-short} GitOps, a copy of the policy is created in each managed cluster namespace. These copies are called replicated policies. To prevent {ocp-short} GitOps from repeatedly deleting this replicated policy or show that the ArgoCD `Application` is out of sync, the `argocd.argoproj.io/compare-options: IgnoreExtraneous` annotation is automatically set on each replicated policy by the {acm-short} policy framework.
+To prevent {ocp-short} GitOps from repeatedly deleting this replicated policy or show that the ArgoCD `Application` is out of sync, the `argocd.argoproj.io/compare-options: IgnoreExtraneous` annotation is automatically set on each replicated policy by the {acm-short} policy framework.
 
 There are labels and annotations used by Argo CD to track objects. For replicated policies to not show up at all in Argo CD, you can set `spec.copyPolicyMetadata` to `false` on the {acm-short} policy definition to disable the Argo CD tracking labels and annotations from being copied to the replicated policy.
 
 [#policy-gen-install-on-openshift-gitops]
 == Integrating the Policy Generator with {ocp-short} GitOps (Argo CD)
 
-Based on Argo CD, you can use {ocp-short} GitOps to generate policies by using the Policy Generator through GitOps. Since the Policy Generator does not come preinstalled in the {ocp-short} GitOps container image, some customization must take place. In order to follow along, you must have the {ocp-short} GitOps Operator installed on the {acm-short} hub cluster and be sure to log in to the hub cluster.
+Based on Argo CD, you can use {ocp-short} GitOps to generate policies by using the Policy Generator through GitOps. Since the Policy Generator does not come preinstalled in the {ocp-short} GitOps container image, you must complete customizations. You must have the {ocp-short} GitOps Operator installed on the {acm-short} hub cluster and be sure to log in to the hub cluster.
 
 For {ocp-short} GitOps to have access to the Policy Generator when you run Kustomize, an Init Container is required to copy the Policy Generator binary from the {acm-short} Application Subscription container image to the {ocp-short} GitOps container. Additionally, {ocp-short} GitOps must be configured to provide the `--enable-alpha-plugins` flag when it runs Kustomize. Complete the following steps:
 
@@ -173,9 +175,8 @@ roleRef:
 [#config-gitops-healthcheck]
 == Configuring policy health checks in {ocp-short} GitOps (Argo CD)
 
-To define additional health checks for different resource kinds, configure your `ArgoCD` resource. You can customize status messages for your resource kinds. When you add a health check for a resource, you must add it as a `group` in the `resourceHealthChecks` field. Complete the following steps to define health checks for your resource kinds:
-
-//the example provided in the issue is long. I figure we can split it or just show partial examples of how the YAML would look. Are there any CLI commands that users can run to add the groups? This way we can keep the samples at a minimum
+//what other background information do we need to add? 
+To define additional health checks for different resource kinds, configure your `ArgoCD` resource. You can customize and view health details for your resource kinds . When you add a health check for a resource, you must add it as a `group` in the `resourceHealthChecks` field. Complete the following steps to define health checks for your resource kinds:
 
 . To add the health checks, edit the {ocp-short} GitOps `ArgoCD` resource with the following command:
 
@@ -185,28 +186,61 @@ To define additional health checks for different resource kinds, configure your 
 oc -n openshift-gitops edit argocd openshift-gitops
 ----
 
-. To add a health check for your `CertificatePolicy` resources, run the following command:
+. To add a health check to your `CertificatePolicy` resource, download the `argocd-policy-healthchecks.yaml` by running the following command:
 
 +
 [source,bash]
 ----
-need command if it exists
+wget https://raw.githubusercontent.com/open-cluster-management-io/policy-collection/main/stable/CM-Configuration-Management/argocd-policy-healthchecks.yaml
 ----
 
-. Add a health check for your `ConfigurationPolicy` resource with the following command:
-
-+
-[source,bash]
-----
-same as previous step, only if one exists
-----
-
-. To add a health check for your `Policy` resources, run the following command:
+//why does the user need to view the policy before they apply it?
+. Review the policy before you apply it to your policy with the following command:
 
 +
 [source,bash]
 ----
-if a command exists
+less ./argocd-policy-healthchecks.yaml
+----
++
+Your `ArgoCD` resource might resemble the following YAML file:
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1beta1 
+kind: ArgoCD 
+metadata: 
+	name: openshift-gitops 
+	namespace: openshift-gitops 
+spec: 
+	resourceHealthChecks: 
+	    - group: policy.open-cluster-management.io 
+	      kind: CertificatePolicy 
+	      check: | 
+	          hs = {} 
+	          if obj.status == nil or obj.status.compliant == nil then
+	            hs.status = "Progressing" 
+	            hs.message = "Waiting for the status to be reported" 
+	            return hs 
+	          end 
+	          if obj.status.compliant == "Compliant" then 
+	            hs.status = "Healthy" hs.message = "All certificates found comply with the policy" 
+	            return hs 
+	          else hs.status = "Degraded" 
+	             hs.message = "At least once certificate does not comply with the policy"
+	             return hs 
+            end
+----
+
+//^should the message say "At least one certificate does not comply..." instead of once?
+
+. To apply the `argocd-policy-healthchecks.yaml` policy, run the following command:
+
++
+[source,bash]
+----
+oc apply -f ./argocd-policy-healthchecks.yaml
 ----
 
 . Verify that the health checks work as expected by viewing the `ArgoCD` resource. Run the following command:
@@ -216,8 +250,6 @@ if a command exists
 ----
 is there another way for users to verify that it is working?
 ----
-
-//reminder, still need to add the what's new entry
 
 [#additional-resource-policy-def]
 == Additional resources
