@@ -20,7 +20,7 @@ Before running the restore operation and keeping the hub cluster active, you mus
 
 Pause the backup schedule on the primary hub cluster and disable the automatic import operation for the managed clusters by completing the following steps: 
 
-. If the backup hub cluster has a `BackupSchedule` resource in the `Enabled` state, pause the resource by setting the `paused` property to `true` on the `BackupSchedule`. See the following example:
+. Pause the `BackupSchedule` resource by setting the `paused` property to `true`. See the following example:
 
 +
 [source,yaml]
@@ -37,15 +37,15 @@ spec:
  paused: true
 ----
 +
-*Note:* If you do not pause the backup schedule on the primary hub cluster before continuing to the next step, you can also back up the managed cluster by adding the `import.open-cluster-management.io/disable-auto-import` annotation to the `ManagedCluster` resource.
+*Note:* If you do not pause the backup schedule on the primary hub cluster before continuing to the next step, you might back up the `ManagedCluster` resource with the `import.open-cluster-management.io/disable-auto-import` annotation set if a backup is running while the annotation is set on the resource.
 
 +
-If you set the annotation, the managed cluster is not automatically imported when you restore it on a new hub cluster. If you set the annotation, the hub cluster does not connect to the managed cluster when the hub cluster cannot access the managed cluster.
+Backing up the `ManagedCluster` resource with the `import.open-cluster-management.io/disable-auto-import` annotation causes the managed cluster to not automatically import when you restore the backup data on a new hub cluster.
 
-. *Optional:* Tag the primary hub cluster resources with backup annotation by applying the following `Restore` resource:
+. *Optional:* Tag the primary hub cluster resources with the backup annotation. Complete the following steps:
 
 +
-*Note:* Completing the restore operation on the primary hub cluster prepares the hub cluster for reuse as a primary or secondary hub cluster after the recovery process completes. You can skip this optional step if you do not want to use this hub cluster as a primary or secondary hub cluster after the restore operation completes.
+*Note:* Apply the following restore operation on the primary hub cluster to prepare the hub cluster for reuse as a primary or secondary hub cluster after the recovery process completes. You can skip this step if you do not want to use this hub cluster as a primary or secondary hub cluster after the restore operation completes.
 
 .. Create a file named `restore-acm.yaml`.
 
@@ -66,7 +66,7 @@ spec:
  veleroResourcesBackupName: latest
 ----
 
-.. Apply the file by running the following command:
+.. Apply the file and run the restore operation by running the following command:
 
 +
 [source,bash]
@@ -74,12 +74,10 @@ spec:
 oc -f apply restore-acm.yaml
 ----
 
-.. Run the `Restore` resource to tag all hub cluster resources that you want to back up with the `velero.io/backup-name: backupName` label, where `backupName` is the name of the latest backup created by the primary hub cluster.
-
 +
-*Note:* Hub cluster resources that you tag show that they were created by a previous restored backup. Any new restore operation runs on the primary cluster by using the `cleanupBeforeRestore: CleanupRestored` option, processes hub cluster resources, and deletes the resources if they are not part of the latest backup.
+Running the `Restore` resource tags all hub cluster resources that are backed up with the `velero.io/backup-name: backupName` label, where `backupName` is the name of the latest backup created by the primary hub cluster. As a result, any restore operation that runs on the primary cluster uby sing a `Restore` resource with the `cleanupBeforeRestore` option set to `CleanupRestored` processes these resources, and deletes all resources if they are not part of the latest backup.
 
-. Disable the automatic import for managed clusters you want to move by setting the `import.open-cluster-management.io/disable-auto-import: ''` annotation on the `ManagedCluster` global resource for all managed clusters that you want to move to the restoration hub cluster. See the following example:
+. Disable the automatic import for managed clusters. See the following example:
 
 +
 [source,yaml]
@@ -89,7 +87,7 @@ annotations:
 ----
 
 +
-*Note:* This annotation prevents the backup hub cluster from recovering any managed cluster after the managed cluster moves to the restoration hub cluster.
+*Note:* Set the annotation on the `ManagedCluster` global resource for all managed clusters that you want to move to the restoration hub cluster. This annotation prevents the backup hub cluster from recovering any managed cluster after the managed cluster moves to the restoration hub cluster.
 
 [#dr4hub-keep-hub-alive-restore-run]
 == Running the restore operation on the new hub cluster
@@ -119,9 +117,7 @@ spec:
 +
 *Note:* Setting `veleroManagedClustersBackupName` to `latest` restores managed clusters and connects them with the secondary hub cluster.
 
-. Apply the file by running the following command:
-
-+
+. Apply the file and run the restore operation by running the following command:
 
 +
 [source,bash]
