@@ -1,0 +1,68 @@
+[#troubleshooting-install-stuck-rosa-hcp-mce]
+= Troubleshooting `Unknown` managed cluster state on a {rosa} hosted cluster
+
+When installing {mce} on a {rosa} hosted cluster, the `local-cluster` remains in the `Unknown` state.
+
+[#symptom-install-stuck-rosa-hcp-mce]
+== Symptom: `Unknown` managed cluster state on a {rosa} hosted cluster
+
+The state of all managed cluster becomes `Unknown`. When you check the `klusterlet-agent` pod log in the `open-cluster-management-agen` namespace on the managed cluster, you see an error message that resembles the following:
+
+[source,bash]
+----
+E0809 18:45:29.450874       1 reflector.go:147] k8s.io/client-go@v0.29.4/tools/cache/reflector.go:229: Failed to watch *v1.CertificateSigningRequest: failed to list *v1.CertificateSigningRequest: Get "https://api.xxx.openshiftapps.com:443/apis/certificates.k8s.io/v1/certificatesigningrequests?limit=500&resourceVersion=0": tls: failed to verify certificate: x509: certificate signed by unknown authority
+----
+
+[#resolving-install-stuck-rosa-hcp-mce]
+== Resolving the problem: `Unknown` managed cluster state on a {rosa} hosted cluster
+
+To resolve the problem, add the `ISRG Root X1` certificate to the klusterlet CA bundle by completing the following steps:
+
+. Download and encode the root CA certificate by running the following command:
+
++
+[source,bash]
+----
+curl -s https://letsencrypt.org/certs/isrgrootx1.pem | base64 | tr -d "\n"
+----
+
+. Create a `KlusterletConfig` resource with the encoded CA certificate and add your CA certificate to the `spec`. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: isrg-root-x1-ca
+spec:
+  hubKubeAPIServerCABundle: "<your_ca_certificate>"
+----
+
+*Note:* If the resource already exists, update `hubKubeAPIServerCABundle` with your CA certificate that you downloaded.
+
+. Apply the resource by running the following command:
+
++
+[source,bash]
+----
+oc apply -f <filename>
+----
+
+The state of some managed clusters might recover. 
+
+. For managed clusters that are still in the `Unknown` state, export the `import.yaml` from the hub cluster by running the following command. Replace values where needed:
+
++
+[source,bash]
+----
+oc get secret <cluster_name>-import -n <cluster_name> -o jsonpath={.data.import .yaml} | base64 --decode > <cluster_name>-import.yaml
+----
+
+. Apply the file by running the following command:
+
++
+[source,bash]
+----
+oc apply -f <cluster_name>-import.yaml
+----
