@@ -1,0 +1,146 @@
+[#keep-hub-active-restore]
+= Keeping the primary hub cluster active during a restore process
+
+The restore operation typically happens after a disaster occurs and the primary hub cluster fails. As a result, you cannot access the primary hub cluster when the restore operation starts.
+
+If you want to run a disaster recovery test and do not want the primary hub cluster to stop during the test, keep the primary hub cluster active during and after a hub cluster restoration.
+
+If you keep the primary hub cluster active while restoring the hub cluster data on a different hub cluster, the initial hub cluster can access the managed clusters. As a result, both hub clusters compete for the managed clusters. Any policy or application changes you make on the restored hub cluster might be undone if the initial hub cluster takes control of the managed clusters.
+
+Continue reading to learn how to keep the primary hub cluster active during and after a restore operation.
+
+* <<dr4hub-keep-hub-alive-restore-prepare,Preparing the primary hub cluster>>
+* <<dr4hub-keep-hub-alive-restore-run,Running the restore operation on the new hub cluster>>
+* <<dr4hub-keep-hub-alive-restore-delete,Deleting resources after restoration>>
+
+[#keep-hub-active-restore-prepare]
+== Preparing the primary hub cluster
+
+Before running the restore operation and keeping the hub cluster active, you must prepare the primary hub cluster.
+
+To prepare the primary hub cluster, complete the following steps: 
+
+. Pause the `BackupSchedule` resource by setting the `paused` property to `true`. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: BackupSchedule
+metadata:
+ name: schedule-acm-msa
+ namespace: open-cluster-management-backup
+spec:
+ veleroSchedule: 0 */1 * * *
+ veleroTtl: 120h
+ useManagedServiceAccount: true
+ paused: true
+----
++
+*Notes:*
+-  If you do not pause the backup schedule on the primary hub cluster before continuing to the next step, you might back up the `ManagedCluster` resource with the `import.open-cluster-management.io/disable-auto-import` annotation set if a backup is running while the annotation is set on the resource.
+
++
+- If you back up the `ManagedCluster` resource with the `import.open-cluster-management.io/disable-auto-import` annotation, the managed cluster cannot automatically import when you restore the backup data on a new hub cluster.
+
+
+. Tag the primary hub cluster resources with the backup annotation. Complete the following steps:
+
+.. Create a file named `restore-acm.yaml`.
+
+.. *Optional:* If you do not want to use this hub cluster as a primary or secondary hub cluster after the restore operation completes, apply the following restore operation on the primary hub cluster to prepare the hub cluster for reuse as a primary or secondary hub cluster after the recovery process completes. Otherwise, skip to _Running the restore operation on the new hub cluster_.
+
+.. Add the following content to the file:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+ name: restore-acm
+ namespace: open-cluster-management-backup
+spec:
+ cleanupBeforeRestore: None
+ veleroManagedClustersBackupName: latest
+ veleroCredentialsBackupName: latest
+ veleroResourcesBackupName: latest
+----
+
+.. Apply the file and run the restore operation by running the following command:
+
++
+[source,bash]
+----
+oc -f apply restore-acm.yaml
+----
+
++
+*Note:* When you run the `Restore` resource, it tags all hub cluster resources that would be backed up if you enabled the `BackupSchedule`. The resources are tagged with the `velero.io/backup-name: backupName` label, where `backupName` is the name of the latest backup created by the primary hub cluster.
+
++
++
+As a result, any restore operation that runs on the primary cluster by using a `Restore` resource with the `cleanupBeforeRestore` option set to `CleanupRestored` processes these resources, and deletes all resources if they are not part of the latest backup.
+
+. Disable the automatic import for managed clusters.
+
++
+. Set the following annotation on the `ManagedCluster` global resource for all managed clusters that you want to move to the restore hub cluster. By setting the annotation, you prevent the backup hub cluster from recovering any managed cluster after the managed cluster moves to the restore hub cluster:
+
++
+[source,yaml]
+----
+annotations:
+   import.open-cluster-management.io/disable-auto-import: ''
+----
+
+[#keep-hub-active-restore-run]
+== Running the restore operation on the new hub cluster
+
+After you prepare the primary hub cluster, run the restore operation on the new hub cluster and move your managed clusters. The managed clusters connect to the new hub cluster and do not move back to the initial hub cluster because the automatic import feature is now disabled on the backup hub cluster.
+
+Run the restore operation on the new hub cluster by completing the following steps:
+
+. Add the following content the `restore-acm.yaml` file:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+ name: restore-acm
+ namespace: open-cluster-management-backup
+spec:
+ cleanupBeforeRestore: None
+ veleroManagedClustersBackupName: latest
+ veleroCredentialsBackupName: latest
+ veleroResourcesBackupName: latest
+----
++
+*Note:* Setting `veleroManagedClustersBackupName` to `latest` restores managed clusters and connects them with the secondary hub cluster.
+
+. Apply the file and run the restore operation by running the following command:
+
++
+[source,bash]
+----
+oc -f apply restore-acm.yaml
+----
+
+[#keep-hub-active-restore-clean]
+== Cleaning up managed cluster resources on the backup hub cluster
+
+After the restore and after the managed clusters successfully connect to the new hub cluster, clean up the managed cluster resources from the initial backup hub cluster. If you want to restore the data to the backup after your recovery test completes, skip cleaning the resources 
+
+To clean up the managed clusters from the backup hub cluster, complete the following steps:
+
+. Make sure that the managed cluster status is `Unknown` on the primary hub before deleting the `ManagedCluster` global resource. If the status is not `Unknown`, your workloads are uninstalled from the managed cluster.
+. Decide if you want to remove the `ManagedCluster` global resource. Doing so deletes the managed cluster namespace.
+. Delete the `ManagedCluster` global resource from the backup hub cluster for each of the managed clusters that you moved to the new hub cluster by using the restore operation.
+
+*Important:* 
+
+* Make sure that the managed cluster status is `Unknown` on the primary hub before deleting the `ManagedCluster` global resource. If the status is not `Unknown`, your workloads are uninstalled from the managed cluster.
+
+* Removing the `ManagedCluster` global resource also deletes the managed cluster namespace.
