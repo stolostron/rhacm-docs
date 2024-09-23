@@ -21,9 +21,9 @@ Known issue process and when to write:
 Or consider a troubleshooting topic.
 ////
 
-Review the known issues for {product-title}. The following list contains known issues for this release, or known issues that continued from the previous release. 
+Review the known issues for {acm}. The following list contains known issues for this release, or known issues that continued from the previous release. 
 
-For your {ocp} cluster, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/release_notes/ocp-4-12-release-notes#ocp-4-12-known-issues[{ocp-short} known issues]. 
+For your {ocp} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/release_notes/ocp-4-12-release-notes#ocp-4-12-known-issues[{ocp-short} known issues]. 
 
 For more about deprecations and removals, see xref:../release_notes/deprecate_remove.adoc#deprecations-removals[Deprecations and removals].
 
@@ -36,11 +36,11 @@ Backup and restore known issues and limitations are listed here, along with work
 === The _open-cluster-management-backup_ namespace is stuck in the _Terminating_ state
 //2.10:ACM-10292
 
-When the cluster-backup component is disabled on the `MultiClusterHub` resource, the `open-cluster-management-backup` namespace is stuck in the `Terminating` state if you have a Velero restore resource created by a {product-title-short} restore operation.
+When the cluster-backup component is disabled on the `MultiClusterHub` resource, the `open-cluster-management-backup` namespace is stuck in the `Terminating` state if you have a Velero restore resource created by a {acm-short} restore operation.
 
 The `Terminating` state is a result of the Velero restore resources waiting on the `restores.velero.io/external-resources-finalizer` to complete. To workaround this issue, complete the following steps:
 
-. Delete all {product-title-short} restore resources and wait for the Velero restore to be cleaned up before you disable the cluster backup option on the `MultiClusterHub` resource. 
+. Delete all {acm-short} restore resources and wait for the Velero restore to be cleaned up before you disable the cluster backup option on the `MultiClusterHub` resource. 
 . If your `open-cluster-management-backup` namespace is already stuck in the `Terminating` state, edit all the Velero restore resources and remove the finalizers. 
 . Allow the Velero resources to delete the namespaces and resources. 
 
@@ -48,7 +48,7 @@ The `Terminating` state is a result of the Velero restore resources waiting on t
 === Bare metal hub resource no longer backed up by the managed clusters backup
 //2.11:ACM-11766
 
-If the resources for the bare metal cluster are backed up and restored to a secondary hub cluster by using the {product-title-short} back up and restore feature, the managed cluster reinstalls on the nodes, which destroys the existing managed cluster. 
+If the resources for the bare metal cluster are backed up and restored to a secondary hub cluster by using the {acm-short} back up and restore feature, the managed cluster reinstalls on the nodes, which destroys the existing managed cluster. 
 
 *Note:* This only affects bare metal clusters that were deployed by using zero touch provisioning, meaning that they have `BareMetalHost` resources that manage powering on and off bare metal nodes and attaching virtual media for booting. If a `BareMetalHost` resource was not used in the deployment of the managed cluster, there is no negative impact.
 
@@ -136,9 +136,9 @@ oc delete appliedmanifestwork <the-left-appliedmanifestwork-name>
 === The _appliedmanifestwork_ not removed and _agentID_ is missing in the specification
 //2.7+:ACM-7588
 
-When you are using {product-title-short} 2.6 as your primary hub cluster, but your restore hub cluster is on version 2.7 or later, the `agentID` is missing in the specification of `appliedmanifestworks` because the field is introduced in the 2.7 release. This results in the extra `appliedmanifestworks` for the primary hub on the managed cluster.
+When you are using {acm-short} 2.6 as your primary hub cluster, but your restore hub cluster is on version 2.7 or later, the `agentID` is missing in the specification of `appliedmanifestworks` because the field is introduced in the 2.7 release. This results in the extra `appliedmanifestworks` for the primary hub on the managed cluster.
 
-To avoid the issue, upgrade the primary hub cluster to {product-title-short} 2.7, then restore the backup on a new hub cluster.
+To avoid the issue, upgrade the primary hub cluster to {acm-short} 2.7, then restore the backup on a new hub cluster.
 
 Fix the managed clusters by setting the `spec.agentID` manually for each `appliedmanifestwork`.
 
@@ -165,5 +165,23 @@ the `managed-serviceaccount` add-on status shows `Unknown`.
  
 You can recover the `managed-serviceaccount` add-on after enabling the Managed Service Account in the {mce-short} resource. See link:../business_continuity/backup_restore/backup_msa.adoc#enabling-auto-import[Enabling automatic import] to learn how to enable the Managed Service Account.
 
-//[#known-issues-volsync]
-//== Volsync known issues
+[#known-issues-volsync]
+== Volsync known issues
+
+[#volsync-remove-csv-managed]
+=== Manual removal of the VolSync CSV required on managed cluster when removing the add-on
+//2.5:21356
+
+When you remove the VolSync `ManagedClusterAddOn` from the hub cluster, it removes the VolSync operator subscription on the managed cluster but does not remove the cluster service version (CSV). To remove the CSV from the managed clusters, run the following command on each managed cluster from which you are removing VolSync:
+
+----
+oc delete csv -n openshift-operators volsync-product.v0.6.0
+----
+
+[#ca-certificate-hub-restore]
+=== Restoring the connection of a managed cluster with custom CA certificates to its restored hub cluster might fail
+//2.4:19481
+
+After you restore the backup of a hub cluster that manages a cluster with custom CA certificates, the connection between the managed cluster and the hub cluster might fail. This is because the CA certificate was not backed up on the restored hub cluster. To restore the connection, copy the custom CA certificate information that is in the namespace of your managed cluster to the `<managed_cluster>-admin-kubeconfig` secret on the restored hub cluster. 
+
+*Note:* If you copy this CA certificate to the hub cluster before creating the backup copy, the backup copy includes the secret information. When you use the backup copy to restore in the future, the connection between the hub cluster and managed cluster automatically completes.

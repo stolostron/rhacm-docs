@@ -3,9 +3,24 @@
 
 The `multiclusterhub-operator` enables the `multicluster-observability-operator` pod by default. You must configure the `multicluster-observability-operator` pod.
 
-When you enable the Observability service by defining a `MultiClusterObservability` custom resource, the `observability-endpoint-operator` is automatically deployed to each imported or created managed cluster. This controller starts a metrics collector that collects the data from {ocp} Prometheus, then sends the data to the {product-title-short} hub cluster. 
 
-When the Observability service is enabled, the hub cluster is always configured to collect and send metrics to the configured Thanos instance, regardless of whether hub self-management is enabled or not. When the hub cluster is self-managed, the `disableHubSelfManagement` parameter is set to `false`, which is the default setting. Metrics and alerts for the hub cluster appear in the `local-cluster` namespace. The `local-cluster` only appears in the cluster list drop-down menu if hub self-management is enabled. You can query the `local-cluster` metrics in the Grafana explorer.
+- <<obs-open-components,Observability open source components>>
+- <<arch-diagram,Observability architecture diagram>>
+- <<persistent-stores-observability,Persistent stores used in the observability service>>
+
+[#obs-open-components]
+== Observability open source components
+
+Observability service uses open source observability tools from community. View the following descriptions of the tools that are apart of the product observability service:
+
+- *Thanos:* A toolkit of components that you can use to perform global querying across multiple Prometheus instances. For long-term storage of Prometheus data, persist it in any S3 compatible storage. You can also compose a highly-available and scalable metrics system.
+
+- *Prometheus:* A monitoring and alerting tool that you can use to collect metrics from your application and store these metrics as time-series data. Store all scraped samples locally, run rules to aggregate and record new time series from existing data, and generate alerts.
+
+- *Alertmanager:* A tool to manage and receive alerts from Prometheus. Deduplicate, group, and route alerts to your integrations such as email, Slack, and PagerDuty. Configure Alertmanager to silence and inhibit specific alerts.
+
+[#arch-diagram]
+== Observability architecture diagram
 
 The following diagram shows the components of observability:
 
@@ -42,33 +57,33 @@ To help identify when the Thanos Compactor is experiencing issues, use the four 
 | An alert is sent when the compactor has not uploaded anything in last 24 hours.
 |===
 
-- The observability component deploys an instance of _Grafana_ to enable data visualization with dashboards (static) or data exploration. {product-title-short} supports version 8.5.20 of Grafana. You can also design your Grafana dashboard. For more information, see _Designing your Grafana dashboard_.
+- The observability component deploys an instance of _Grafana_ to enable data visualization with dashboards (static) or data exploration. {acm-short} supports version 8.5.20 of Grafana. You can also design your Grafana dashboard. For more information, see _Designing your Grafana dashboard_.
 
-- The _Prometheus Alertmanager_ enables alerts to be forwarded with third-party applications. You can customize the observability service by creating custom recording rules or alerting rules. {product-title-short} supports version 0.25 of Prometheus Alertmanager.
+- The _Prometheus Alertmanager_ enables alerts to be forwarded with third-party applications. You can customize the observability service by creating custom recording rules or alerting rules. {acm-short} supports version 0.25 of Prometheus Alertmanager.
 
 [#persistent-stores-observability]
 == Persistent stores used in the observability service
 
 *Important:* Do not use the local storage operator or a storage class that uses local volumes for persistent storage. You can lose data if the pod relaunched on a different node after a restart. When this happens, the pod can no longer access the local storage on the node. Be sure that you can access the persistent volumes of the `receive` and `rules` pods to avoid data loss.
 
-When you install {product-title-short} the following persistent volumes (PV) must be created so that Persistent Volume Claims (PVC) can attach to it automatically. As a reminder, you must define a storage class in the `MultiClusterObservability` custom resource when there is no default storage class specified or you want to use a non-default storage class to host the PVs. It is recommended to use Block Storage, similar to what Prometheus uses. Also each replica of `alertmanager`, `thanos-compactor`, `thanos-ruler`, `thanos-receive-default` and `thanos-store-shard` must have its own PV. View the following table:
+When you install {acm-short} the following persistent volumes (PV) must be created so that Persistent Volume Claims (PVC) can attach to it automatically. As a reminder, you must define a storage class in the `MultiClusterObservability` custom resource when there is no default storage class specified or you want to use a non-default storage class to host the PVs. It is recommended to use Block Storage, similar to what Prometheus uses. Also each replica of `alertmanager`, `thanos-compactor`, `thanos-ruler`, `thanos-receive-default` and `thanos-store-shard` must have its own PV. View the following table:
 
 .Table list of persistent volumes
 |===
-| Persistent volume name | Purpose
+| Component name | Purpose
 | alertmanager
 | Alertmanager stores the `nflog` data and silenced alerts in its storage. `nflog` is an append-only log of active and resolved notifications along with the notified receiver, and a hash digest of contents that the notification identified.
 
-| thanos-compact
+| observability-thanos-compactor
 | The compactor needs local disk space to store intermediate data for its processing, as well as bucket state cache. The required space depends on the size of the underlying blocks. The compactor must have enough space to download all of the source blocks, then build the compacted blocks on the disk. On-disk data is safe to delete between restarts and should be the first attempt to get crash-looping compactors unstuck. However, it is recommended to give the compactor persistent disks in order to effectively use bucket state cache in between restarts.
 
-| thanos-rule
+| observability-thanos-rule
 | The thanos ruler evaluates Prometheus recording and alerting rules against a chosen query API by issuing queries at a fixed interval. Rule results are written back to the disk in the Prometheus 2.0 storage format. The amount of hours or days of data retained in this stateful set was fixed in the API version `observability.open-cluster-management.io/v1beta1`. It has been exposed as an API parameter in `observability.open-cluster-management.io/v1beta2`: `_RetentionInLocal_`
 
-| thanos-receive-default
+|  observability-thanos-receive-default
 | Thanos receiver accepts incoming data (Prometheus remote-write requests) and writes these into a local instance of the Prometheus TSDB. Periodically (every 2 hours), TSDB blocks are uploaded to the object storage for long term storage and compaction. The amount of hours or days of data retained in this stateful set, which acts a local cache was fixed in API Version `observability.open-cluster-management.io/v1beta`. It has been exposed as an API parameter in `observability.open-cluster-management.io/v1beta2`: `_RetentionInLocal_`
 
-| thanos-store-shard
+| observability-thanos-store-shard
 | It acts primarily as an API gateway and therefore does not need a significant amount of local disk space. It joins a Thanos cluster on startup and advertises the data it can access. It keeps a small amount of information about all remote blocks on local disk and keeps it in sync with the bucket. This data is generally safe to delete across restarts at the cost of increased startup times.
 |===
 
@@ -77,8 +92,11 @@ When you install {product-title-short} the following persistent volumes (PV) mus
 [#obs-arch-additional-resources]
 == Additional resources
 
+To learn more about observability and the integrated components, see the following topics:
+
 - See xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service]
-
-- See xref:../observability/observe_environments.adoc#observing-environments-intro[Observability configuration]
-
+- See xref:../observability/obs_config.adoc#obs-config[Observability configuration]
 - See xref:../observability/observability_enable.adoc#enabling-observability-service[Enabling the observability service]
+- See the link:https://thanos.io/v0.36/thanos/getting-started.md/[Thanos documentation].
+- See the link:https://prometheus.io/docs/introduction/overview/[Prometheus Overview].
+- See the link:https://prometheus.io/docs/alerting/latest/alertmanager/[Alertmanager documentation].

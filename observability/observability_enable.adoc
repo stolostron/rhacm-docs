@@ -17,12 +17,12 @@ Monitor the status of your managed clusters with the observability component, al
 [#prerequisites-observability]
 == Prerequisites
  
-- You must install {product-title}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.
+- You must install {acm}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.
 - You must define a storage class in the `MultiClusterObservability` custom resource, if there is no default storage class specified.
 - Direct network access to the hub cluster is required. Network access to load balancers and proxies are not supported. For more information, see link:../networking/networking_intro.adoc#networking[Networking].
 - You must configure an object store to create a storage solution. 
-**  *Important:* When you configure your object store, ensure that you meet the encryption requirements that are necessary when sensitive data is persisted. The observability service uses Thanos supported, stable object stores. You might not be able to share an object store bucket by multiple {product-title-short} observability installations. Therefore, for each installation, provide a separate object store bucket. 
-**  {product-title-short} supports the following cloud providers with stable object stores:
+**  *Important:* When you configure your object store, ensure that you meet the encryption requirements that are necessary when sensitive data is persisted. The observability service uses Thanos supported, stable object stores. You might not be able to share an object store bucket by multiple {acm-short} observability installations. Therefore, for each installation, provide a separate object store bucket. 
+**  {acm-short} supports the following cloud providers with stable object stores:
 
 * Amazon Web Services S3 (AWS S3)
 * Red Hat Ceph (S3 compatible API)
@@ -39,44 +39,54 @@ Enable the observability service by creating a `MultiClusterObservability` custo
 
 *Note:* 
 
-- When observability is enabled or disabled on {ocp-short} managed clusters that are managed by {product-title-short}, the observability endpoint operator updates the `cluster-monitoring-config` config map by adding additional `alertmanager` configuration that automatically restarts the local Prometheus.
+- When observability is enabled or disabled on {ocp-short} managed clusters that are managed by {acm-short}, the observability endpoint operator updates the `cluster-monitoring-config` config map by adding additional `alertmanager` configuration that automatically restarts the local Prometheus.
 - The observability endpoint operator updates the `cluster-monitoring-config` config map by adding additional `alertmanager` configurations that automatically restart the local Prometheus. When you insert the `alertmanager` configuration in the {ocp-short} managed cluster, the configuration removes the settings that relate to the retention field of the Prometheus metrics. 
 
 Complete the following steps to enable the observability service: 
  
-. Log in to your {product-title-short} hub cluster. 
+. Log in to your {acm-short} hub cluster. 
 . Create a namespace for the observability service with the following command:
+
 +
+[source,bash]
 ----
 oc create namespace open-cluster-management-observability
 ----
 
-. Generate your pull-secret. If {product-title-short} is installed in the `open-cluster-management` namespace, run the following command:
+. Generate your pull-secret. If {acm-short} is installed in the `open-cluster-management` namespace, run the following command:
  
 +
+[source,bash]
 ----
 DOCKER_CONFIG_JSON=`oc extract secret/multiclusterhub-operator-pull-secret -n open-cluster-management --to=-`
 ----
+
+.. If the `multiclusterhub-operator-pull-secret` is not defined in the namespace, copy the `pull-secret` from the `openshift-config` namespace into the `open-cluster-management-observability` namespace by running the following command:
+
 +
-If the `multiclusterhub-operator-pull-secret` is not defined in the namespace, copy the `pull-secret` from the `openshift-config` namespace into the `open-cluster-management-observability` namespace. Run the following command:
-+
+[source,bash]
 ----
 DOCKER_CONFIG_JSON=`oc extract secret/pull-secret -n openshift-config --to=-`
 ----
+
+.. Create the pull-secret in the `open-cluster-management-observability` namespace by running the following command:
+
 +
-Then, create the pull-secret in the `open-cluster-management-observability` namespace, run the following command:
-+
+[source,bash]
 ----
 oc create secret generic multiclusterhub-operator-pull-secret \
     -n open-cluster-management-observability \
     --from-literal=.dockerconfigjson="$DOCKER_CONFIG_JSON" \
     --type=kubernetes.io/dockerconfigjson
 ----
+
 +
-*Important:* If you modify the global pull secret for your cluster by using the {ocp-short} documentation, be sure to also update the global pull secret in the observability namespace. See link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/images/managing-images#images-update-global-pull-secret_using-image-pull-secrets[Updating the global pull secret] for more details.
+*Important:* If you modify the global pull secret for your cluster by using the {ocp-short} documentation, be sure to also update the global pull secret in the observability namespace. See link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/images/managing-images#images-update-global-pull-secret_using-image-pull-secrets[Updating the global pull secret] for more details.
 
 . Create a secret for your object storage for your cloud provider. Your secret must contain the credentials to your storage solution. For example, run the following command:
+
 +
+[source,bash]
 ----
 oc create -f thanos-object-storage.yaml -n open-cluster-management-observability
 ----
@@ -84,6 +94,7 @@ oc create -f thanos-object-storage.yaml -n open-cluster-management-observability
 View the following examples of secrets for the supported object stores:
 
 - For Amazon S3 or S3 compatible, your secret might resemble the following file:
+
 +
 [source,yaml]
 ----
@@ -103,12 +114,12 @@ stringData:
       access_key: YOUR_ACCESS_KEY
       secret_key: YOUR_SECRET_KEY
 ----
-+
 <1> Enter the URL without the protocol. Enter the URL for your Amazon S3 endpoint that might resemble the following URL: `s3.us-east-1.amazonaws.com`.
 +
 For more details, see the link:https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html[Amazon Simple Storage Service user guide].
 
 - For Google Cloud Platform, your secret might resemble the following file: 
+
 +
 [source,yaml]
 ----
@@ -125,10 +136,10 @@ stringData:
       bucket: YOUR_GCS_BUCKET
       service_account: YOUR_SERVICE_ACCOUNT
 ----
-+
 For more details, see link:https://cloud.google.com/storage/docs/introduction[Google Cloud Storage].
 
 - For Azure your secret might resemble the following file:
+
 +
 [source,yaml]
 ----
@@ -148,7 +159,6 @@ stringData:
       endpoint: blob.core.windows.net <1>
       max_retries: 0
 ----
-+
 <1> If you use the `msi_resource` path, the endpoint authentication is complete by using the system-assigned managed identity. Your value must resemble the following endpoint: `https://<storage-account-name>.blob.core.windows.net`. 
 +
 If you use the `user_assigned_id` path, endpoint authentication is complete by using the user-assigned managed identity. When you use the `user_assigned_id`, the `msi_resource` endpoint default value is `https:<storage_account>.<endpoint>`.
@@ -157,6 +167,7 @@ For more details, see link:https://docs.microsoft.com/en-us/azure/storage/[Azure
 *Note:* If you use Azure as an object storage for a {ocp} cluster, the storage account associated with the cluster is not supported. You must create a new storage account.
 
 - For Red Hat OpenShift Data Foundation, your secret might resemble the following file:
+
 +
 [source,yaml]
 ----
@@ -176,12 +187,12 @@ stringData:
       access_key: YOUR_RH_DATA_FOUNDATION_ACCESS_KEY
       secret_key: YOUR_RH_DATA_FOUNDATION_SECRET_KEY
 ----
-+
 <1> Enter the URL without the protocol. Enter the URL for your Red Hat OpenShift Data Foundation endpoint that might resemble the following URL: `example.redhat.com:443`.
 +
 For more details, see link:https://www.redhat.com/en/technologies/cloud-computing/openshift-data-foundation[Red Hat OpenShift Data Foundation].
 
 - For Red Hat OpenShift on IBM (ROKS), your secret might resemble the following file:
+
 +
 [source,yaml]
 ----
@@ -201,7 +212,6 @@ stringData:
       access_key: YOUR_ROKS_ACCESS_KEY
       secret_key: YOUR_ROKS_SECRET_KEY
 ----
-+
 <1> Enter the URL without the protocol. Enter the URL for your Red Hat OpenShift Data Foundation endpoint that might resemble the following URL: `example.redhat.com:443`.
 +
 For more details, follow the IBM Cloud documentation, link:https://cloud.ibm.com/objectstorage/create[Cloud Object Storage]. Be sure to use the service credentials to connect with the object storage. For more details, follow the IBM Cloud documentation, link:https://cloud.ibm.com/objectstorage/create%5BCloud[Cloud Object Store] and link:https://cloud.ibm.com/docs/cloud-object-storage/iam?topic=cloud-object-storage-service-credentials%5BService[Service Credentials].
@@ -223,6 +233,7 @@ Generating access keys using AWS Security Service require the following addition
 Complete the following steps to generate access keys using the AWS Security Service:
 
 . Set up the AWS environment. Run the following commands:
+
 +
 [source,bash]
 ----
@@ -242,6 +253,7 @@ mkdir -p $SCRATCH_DIR
 ----
 
 . Create an S3 bucket with the following command:
+
 +
 [source,bash]
 ----
@@ -249,6 +261,7 @@ aws s3 mb s3://$S3_BUCKET
 ----
 
 . Create a `s3-policy` JSON file for access to your S3 bucket. Run the following command:
+
 +
 [source,json]
 ----
@@ -277,7 +290,9 @@ aws s3 mb s3://$S3_BUCKET
 ----
 
 . Apply the policy with the following command:
+
 +
+[source,bash]
 ----
 S3_POLICY=$(aws iam create-policy --policy-name $CLUSTER_NAME-acm-obs \
 --policy-document file://$SCRATCH_DIR/s3-policy.json \
@@ -286,6 +301,7 @@ echo $S3_POLICY
 ----
 
 . Create a `TrustPolicy` JSON file. Run the following command:
+
 +
 [source,json]
 ----
@@ -315,7 +331,9 @@ echo $S3_POLICY
 ----
 
 . Create a role for AWS Prometheus and CloudWatch with the following command:
+
 +
+[source,bash]
 ----
 S3_ROLE=$(aws iam create-role \
   --role-name "$CLUSTER_NAME-acm-obs-s3" \
@@ -325,7 +343,9 @@ echo $S3_ROLE
 ----
 
 . Attach the policies to the role. Run the following command:
+
 +
+[source,bash]
 ----
 aws iam attach-role-policy \
   --role-name "$CLUSTER_NAME-acm-obs-s3" \
@@ -333,6 +353,7 @@ aws iam attach-role-policy \
 ----
 +
 Your secret might resemble the following file. The `config` section specifies `signature_version2: false` and does not specify `access_key` and `secret_key`:
+
 +
 [source,yaml]
 ----
@@ -350,21 +371,45 @@ stringData:
    endpoint: s3.$REGION.amazonaws.com
    signature_version2: false
 ----
-. Specify service account annotations when you the `MultiClusterObservability` custom resource as described in _Creating the MultiClusterObservability custom resource_ section. 
 
-. You can retrieve the S3 access key and secret key for your cloud providers with the following commands. You must decode, edit, and encode your `base64` string in the secret:
+. Specify the service account annotations in the `MultiClusterObservability` custom resource as described in _Creating the MultiClusterObservability custom resource_ section. 
+
+. Retrieve the S3 access key and secret key for your cloud providers with the following commands. You must decode, edit, and encode your `base64` string in the secret:
+
+.. To edit and decode the S3 access key for your cloud provider, run the following command:
+
 +
+[source,bash]
 ----
 YOUR_CLOUD_PROVIDER_ACCESS_KEY=$(oc -n open-cluster-management-observability get secret <object-storage-secret> -o jsonpath="{.data.thanos\.yaml}" | base64 --decode | grep access_key | awk '{print $2}')
+----
 
-echo $ACCESS_KEY
+.. To view the access key for your cloud provider, run the following command:
 
++
+[source,bash]
+----
+echo $YOUR_CLOUD_PROVIDER_ACCESS_KEY
+----
+
+.. To edit and decode the secret key for your cloud provider, run the following command:
+
++
+[source,bash]
+----
 YOUR_CLOUD_PROVIDER_SECRET_KEY=$(oc -n open-cluster-management-observability get secret <object-storage-secret> -o jsonpath="{.data.thanos\.yaml}" | base64 --decode | grep secret_key | awk '{print $2}')
+----
 
-echo $SECRET_KEY
+.. Run the following command to view the secret key for your cloud provider:
+
++
+[source,bash]
+----
+echo $YOUR_CLOUD_PROVIDER_SECRET_KEY
 ----
 
 . Verify that observability is enabled by checking the pods for the following deployments and stateful sets. You might receive the following information:
+
 +
 ----
 observability-thanos-query (deployment)
@@ -377,13 +422,14 @@ observability-thanos-store-shard-x  (statefulsets)
 [#creating-mco-cr]
 === Creating the MultiClusterObservability custom resource
 
-Use the `MultiClusterObservability` custom resource to specify the persistent volume storage size for various components. You must set the storage size during the initial creation of the `MultiClusterObservability` custom resource. When you update the storage size values post-deployment, changes take effect only if the storage class supports dynamic volume expansion. For more information, see link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/storage/expanding-persistent-volumes[Expanding persistent volumes from the {ocp} documentation].
+Use the `MultiClusterObservability` custom resource to specify the persistent volume storage size for various components. You must set the storage size during the initial creation of the `MultiClusterObservability` custom resource. When you update the storage size values post-deployment, changes take effect only if the storage class supports dynamic volume expansion. For more information, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/storage/expanding-persistent-volumes[Expanding persistent volumes from the {ocp} documentation].
 
 Complete the following steps to create the `MultiClusterObservability` custom resource on your hub cluster:
 
 . Create the `MultiClusterObservability` custom resource YAML file named `_multiclusterobservability_cr.yaml_`. 
 +
 View the following default YAML file for observability:
+
 +
 [source,yaml]
 ----
@@ -400,6 +446,7 @@ spec:
 ----
 +
 You might want to modify the value for the `retentionConfig` parameter in the `advanced` section. For more information, see link:https://thanos.io/v0.8/components/compact/#downsampling-resolution-and-retention[Thanos Downsampling resolution and retention]. Depending on the number of managed clusters, you might want to update the amount of storage for stateful sets. If your S3 bucket is configured to use STS tokens, annotate the service accounts to use STS with S3 role. View the following configuration:
+
 +
 [source,yaml]
 ----
@@ -423,44 +470,50 @@ spec:
 ----
 +
 See link:../apis/observability.json.adoc#observability-api[Observability API] for more information.
-+
+
 . To deploy on infrastructure machine sets, you must set a label for your set by updating the `nodeSelector` in the `MultiClusterObservability` YAML. Your YAML might resemble the following content:
 
 +
+[source,yaml]
 ----
   nodeSelector:
-    node-role.kubernetes.io/infra: 
+    node-role.kubernetes.io/infra: ""
 ----
 +
-For more information, see link:https://docs.openshift.com/container-platform/4.14/machine_management/creating-infrastructure-machinesets.html[Creating infrastructure machine sets].
+For more information, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html-single/machine_management/index#creating-infrastructure-machinesets[Creating infrastructure machine sets].
 
 . Apply the observability YAML to your cluster by running the following command:
+
 +
+[source,bash]
 ----
 oc apply -f multiclusterobservability_cr.yaml
 ----
 +
-All the pods in `open-cluster-management-observability` namespace for Thanos, Grafana and Alertmanager are created. All the managed clusters connected to the {product-title-short} hub cluster are enabled to send metrics back to the {product-title-short} Observability service.
+All the pods in `open-cluster-management-observability` namespace for Thanos, Grafana and Alertmanager are created. All the managed clusters connected to the {acm-short} hub cluster are enabled to send metrics back to the {acm-short} Observability service.
 
 . Validate that the observability service is enabled and the data is populated by launching the Grafana dashboards. 
 
 . Click the *Grafana link* that is near the console header, from either the console _Overview_ page or the _Clusters_ page.
-+
-.. Alternatively, access the {ocp-short} 3.11 Grafana dashboards with the following URL: `https://$ACM_URL/grafana/dashboards`.
-+
-.. To view the {ocp-short} 3.11 dashboards, select the folder named _OCP 3.11_ .
  
 . Access the `multicluster-observability-operator` deployment to verify that the `multicluster-observability-operator` pod is being deployed by the `multiclusterhub-operator` deployment. Run the following command:
+
 +
 [source,bash]
 ----
 oc get deploy multicluster-observability-operator -n open-cluster-management --show-labels
+----
++
+You might receive the following results:
 
++
+----
 NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE   LABELS
 multicluster-observability-operator   1/1     1            1           35m   installer.name=multiclusterhub,installer.namespace=open-cluster-management
 ----
 
 . View the `labels` section of the `multicluster-observability-operator` deployment for labels that are associated with the resource. The `labels` section might contain the following details:
+
 +
 [source,yaml]
 ----
@@ -469,24 +522,27 @@ multicluster-observability-operator   1/1     1            1           35m   ins
     installer.namespace: open-cluster-management
 ----
 
-.
 . _Optional:_ If you want to exclude specific managed clusters from collecting the observability data, add the following cluster label to your clusters: `observability: disabled`.
 
 The observability service is enabled. After you enable the observability service, the following functions are initiated:
 
-- All the alert managers from the managed clusters are forwarded to the {product-title-short} hub cluster.
-- All the managed clusters that are connected to the {product-title-short} hub cluster are enabled to send alerts back to the {product-title-short} observability service. You can configure the {product-title-short} Alertmanager to take care of deduplicating, grouping, and routing the alerts to the correct receiver integration such as email, PagerDuty, or OpsGenie. You can also handle silencing and inhibition of the alerts.
+- All the alert managers from the managed clusters are forwarded to the {acm-short} hub cluster.
+- All the managed clusters that are connected to the {acm-short} hub cluster are enabled to send alerts back to the {acm-short} observability service. You can configure the {acm-short} Alertmanager to take care of deduplicating, grouping, and routing the alerts to the correct receiver integration such as email, PagerDuty, or OpsGenie. You can also handle silencing and inhibition of the alerts.
 +
-*Note:* Alert forwarding to the {product-title-short} hub cluster feature is only supported by managed clusters on a supported {ocp-short} version. After you install {product-title-short} with observability enabled, alerts are automatically forwarded to the hub cluster. See xref:../observability/customize_observability.adoc#forward-alerts[Forwarding alerts] to learn more.
+*Note:* Alert forwarding to the {acm-short} hub cluster feature is only supported by managed clusters on a supported {ocp-short} version. After you install {acm-short} with observability enabled, alerts are automatically forwarded to the hub cluster. See xref:../observability/customize_observability.adoc#forward-alerts[Forwarding alerts] to learn more.
 
 [#enabling-observability-ocp]
 == Enabling observability from the {ocp} console
 
-Optionally, you can enable observability from the {ocp} console, create a project named `open-cluster-management-observability`. Be sure to create an image pull-secret named, `multiclusterhub-operator-pull-secret` in the `open-cluster-management-observability` project.
+Optionally, you can enable observability from the {ocp} console, create a project named `open-cluster-management-observability`. Complete the following steps:
 
-Create your object storage secret named, `thanos-object-storage` in the `open-cluster-management-observability` project. Enter the object storage secret details, then click *Create*. See step four of the _Enabling observability_ section to view an example of a secret.
+. Create an image pull-secret named, `multiclusterhub-operator-pull-secret` in the `open-cluster-management-observability` project.
 
-Create the `MultiClusterObservability` custom resource instance. When you receive the following message, the observability service is enabled successfully from {ocp-short}: `Observability components are deployed and running`.
+. Create your object storage secret named, `thanos-object-storage` in the `open-cluster-management-observability` project.
+
+. Enter the object storage secret details, then click *Create*. See step four of the _Enabling observability_ section to view an example of a secret.
+
+. Create the `MultiClusterObservability` custom resource instance. When you receive the following message, the observability service is enabled successfully from {ocp-short}: `Observability components are deployed and running`.
 
 [#verifying-thanos-version]
 === Verifying the Thanos version
@@ -495,6 +551,7 @@ After Thanos is deployed on your cluster, verify the Thanos version from the com
 
 After you log in to your hub cluster, run the following command in the observability pods to receive the Thanos version:
 
+[source,bash]
 ----
 thanos --version
 ----
@@ -504,7 +561,7 @@ The Thanos version is displayed.
 [#disabling-observability]
 == Disabling observability
 
-You can disable observability, which stops data collection on the {product-title-short} hub cluster.
+You can disable observability, which stops data collection on the {acm-short} hub cluster.
 
 [#disabling-observability-on-all-clusters]
 === Disabling observability on all clusters
@@ -524,9 +581,12 @@ spec:
 [#disabling-observability-on-a-single-cluster]
 === Disabling observability on a single cluster
 
-Disable observability by removing observability components on specific managed clusters. Add the `observability: disabled` label to the `managedclusters.cluster.open-cluster-management.io` custom resource.
-From the {product-title-short} console _Clusters_ page, add the `observability=disabled` label to the specified cluster.
+Disable observability by removing observability components on specific managed clusters. Complete the following steps:
 
+. Add the `observability: disabled` label to the `managedclusters.cluster.open-cluster-management.io` custom resource.
+
+. From the {acm-short} console _Clusters_ page, add the `observability=disabled` label to the specified cluster.
++
 *Note:* When a managed cluster with the observability component is detached, the `metrics-collector` deployments are removed.
 
 [#removing-observability-resource]
