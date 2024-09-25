@@ -1,26 +1,30 @@
 [#install-clusters]
 = Installing {sno} clusters with the {sco}
 
-Install your clusters with the {sco} by using the default cluster templates.
-This example procedure uses the cluster templates for the Image-Based Install Operator.
+Install your clusters with the {sco} by using the default cluster templates. Use the cluster templates for the Image-Based Install Operator to complete the procedure.
 
 *Required access:* Cluster administrator
 
 [#install-clusters-preq]
 == Prerequisites
 
-* You logged in to the hub cluster as a user with `cluster-admin` privileges.
-* If using {ztp}, you configured your {ztp} environment.
-* You have the default cluster templates.
-* You installed and configured the underlying operator of your choice. For more information, see "Image-based installations for {sno}" or "Installing an on-premise cluster using the {ai-full}".
+* Log in to the hub cluster as a user with `cluster-admin` privileges.
+* If using {ztp}, configure your {ztp} environment.
+//I am not sure they would know how to do that without a link.
+* You need the default cluster templates.
+//Where do they get these and do they know what this is at this moment?
+* Install and configure the underlying operator of your choice. For more information, see _Image-based installations for {sno}_ or _Installing an on-premise cluster using the {ai-full}_.
+//Removed quotation marks from the citation, see IBM Style for more info but this is an accessibility issue; we will need to link to the IBIO intro that we will have by GA. The conrefs will change for ai but we are working on that.
 
 [#install-clusters-target-ns]
 == Creating the target namespace
 
 You need a target namespace when creating the pull secret, the BMC secret, extra manifest `ConfigMap` objects, and the `ClusterInstance` CR.
+
 Complete the following steps to create the target namespace:
 
-. Create a YAML file, for example named `clusterinstance-namespace.yaml`, for the target namespace:
+. Create a YAML file for the target namespace. See the following example file that is named `clusterinstance-namespace.yaml`:
+
 +
 [source,yaml]
 ----
@@ -30,20 +34,22 @@ metadata:
   name: example-sno
 ----
 
-. Create the resource by running the following command on the hub cluster:
+. Apply your file to create the resource. Run the following command on the hub cluster:
+
 +
 [source,terminal]
 ----
 $ oc apply -f clusterinstance-namespace.yaml
 ----
+//changed to "apply" to mirror what the command is doing first.
 
 [#install-clusters-pull-secret]
 == Creating the pull secret
 
-You need a pull secret to enable your clusters to pull images from container registries.
-Complete the following steps to create a pull secret:
+You need a pull secret to enable your clusters to pull images from container registries. Complete the following steps to create a pull secret:
 
-. Create a YAML file for pulling images, for example named `pull-secret.yaml`:
+. Create a YAML file to pull images. See the following example of a file that is named `pull-secret.yaml`:
+
 +
 --
 [source,yaml]
@@ -61,7 +67,9 @@ type: kubernetes.io/dockerconfigjson
 <2> Specify the base64-encoded configuration file as the value. 
 --
 
-. Create the resource by running the following command on the hub cluster:
+. Apply the file to create the resource. Run the following command on the hub cluster:
+//changed to "apply the file" to mirror what the command is doing first.
+
 +
 [source,terminal]
 ----
@@ -71,10 +79,10 @@ $ oc apply -f pull-secret.yaml
 [#install-clusters-bmc-secret]
 == Creating the BMC secret
 
-You need a secret to connect to your baseboard management controller (BMC).
-Complete the following steps to create a secret:
+You need a secret to connect to your baseboard management controller (BMC). Complete the following steps to create a secret:
 
-. Create a YAML file for the BMC secret, for example named `example-bmc-secret.yaml`:
+. Create a YAML file for the BMC secret. See the following sample file that is named `example-bmc-secret.yaml`:
+
 +
 --
 [source,yaml]
@@ -92,7 +100,8 @@ type: Opaque
 <1> The `namespace` value must match the target namespace.
 --
 
-.. Create the resource by running the following command on the hub cluster:
+. Apply the file to create the resource. Run the following command on the hub cluster:
+
 +
 [source,terminal]
 ----
@@ -152,10 +161,12 @@ $ oc apply -f enable-crun.yaml
 [#install-clusters-templates]
 == Creating the cluster and node templates
 
-You can use the default cluster and node templates to install your cluster with the Image-based Install Operator.
-Complete the following steps to create the templates:
+You can use the default cluster and node templates to install your cluster with the Image-based Install Operator. Complete the following steps to create the templates:
 
-. Create your cluster and node templates for the Image-based Install Operator by running the following commands:
+. Create your cluster and node templates for the Image-based Install Operator 
+
+.. Run the following command to apply the cluster template:
+
 +
 --
 [source,terminal]
@@ -163,6 +174,9 @@ Complete the following steps to create the templates:
 $ oc apply -f ibi-cluster-templates-v1.yaml
 ----
 
+.. Run the following command to apply the node template:
+
++
 [source,terminal]
 ----
 $ oc apply -f ibi-node-templates-v1.yaml
@@ -172,10 +186,10 @@ $ oc apply -f ibi-node-templates-v1.yaml
 [#install-clusters-reconcile-clusterinstance]
 == Render the installation manifests
 
-Populate the `ClusterInstance` CR by refercing your templates and supporting manifests.
-Complete the following steps to render the installation manifests:
+Populate the `ClusterInstance` CR by referencing your templates and supporting manifests. Complete the following steps to render the installation manifests:
 
-. In the `example-sno` namespace, create the `ClusterInstance` CR, named for example `clusterinstance-ibi.yaml`:
+. In the `example-sno` namespace, create the `ClusterInstance` CR that is named `clusterinstance-ibi.yaml` in the following example:
+
 +
 --
 [source,yaml]
@@ -215,16 +229,16 @@ spec:
 <6> Reference the `name` of the node-level templates under the `spec.nodes.templateRefs` field. The `namespace` must match the namespace where the Operator is installed.
 --
 
-. Create the resource by running the following command:
+. Apply the file and create the resource by running the following command:
+
 +
 [source,terminal]
 ----
 $ oc apply -f clusterinstance-ibi.yaml
 ----
-
-
 +
 After creating the CR, the {sco} starts reconciling the `ClusterInstance` CR, then validates and renders the installation manifests.
+
 The {sco} continues to monitor for changes in the `ClusterDeployment` CRs to update the cluster installation progress of the corresponding `ClusterInstance` CR.
 
 [#install-clusters-verification]
@@ -238,7 +252,10 @@ The {sco} continues to monitor for changes in the `ClusterDeployment` CRs to upd
 $ oc get clusterinstance <cluster_name> -n <target_namespace> -o yaml
 ----
 
-.Example output from status.conditions section for successful manifest generation
++
+See the following example output from the `status.conditions` section for successful manifest generation
+
++
 [source,terminal]
 ----
 message: Applied site config manifests
@@ -247,11 +264,12 @@ status: "True"
 type: RenderedTemplatesApplied
 ----
 
-For more information about status conditions, see "ClusterInstance CR conditions".
+For more information about status conditions, see _ClusterInstance CR conditions_.
 //TODO Add/Update link
 --
 
 . Check the manifests that {sco} rendered by running the following command:
+
 +
 [source,terminal]
 ----
