@@ -75,6 +75,25 @@ To reference secrets within your Alertmanager configuration, add the `Secret` re
 oc create secret tls tls --cert=</path/to/cert.crt> --key=</path/to/cert.key> -n open-cluster-management-observability
 ----
 
+. To create `cert.crt` and `cert.key` files, run the following command:
+
++
+[source,bash]
+----
+openssl req -new -newkey rsa:2048 -nodes -keyout cert.key -out cert.csr
+----
+
+. To set an expiration of 365 days for your `cert.crt` and `cert.key` files, run the following command:
+
++
+[source,bash]
+----
+openssl x509 -req -days 365 -in cert.csr -signkey cert.key -out cert.crt
+----
+
+//I added the steps to create the .crt and .key files because I saw that in Polarian. Should cert.csr be changed to cert.crt in the openssl req command?
+//
+
 . Mount the `tls` secret to your `MultiClusterObservability` resource by adding it to the `advancedConfig` section. Your resource might resemble the following content:
 
 +
@@ -85,6 +104,8 @@ advancedConfig:
  alertmanager: 
    secrets: ['tls']
 ----
+
+//Should "['tls']" in the previous sample be moved to a new line? Asking because the sample appears that way in Polarian
 
 . To add a reference of your `tls` secret within your Alertmanager configuration, add the path of your secret to the configuration. Your resource might resemble the following configuration:
 
@@ -101,8 +122,23 @@ tls_config:
 +
 [source,bash]
 ----
-need command for this verification
+oc -n open-cluster-management-observability get secret alertmanager-config --template='{{ index .data "alertmanager.yaml" }}' |base64 -d > alertmanager.yaml
 ----
++
+Your YAML might resemble the following contents:
+
++
+[source,yaml]
+----
+"global":
+  "resolve_timeout": "5m"
+  "http_config":
+    "tls_config":
+      "cert_file": "/etc/alertmanager/secrets/storyverify/tls.crt"
+      "key_file": "/etc/alertmanager/secrets/storyverify/tls.key"
+----
+
+//also got verification step from Polarian
 
 [#forward-alerts]
 == Forwarding alerts
