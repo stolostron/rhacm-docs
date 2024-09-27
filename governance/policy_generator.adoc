@@ -12,7 +12,7 @@ View the following sections for more information:
 [#policy-generator-capabilities]
 == Policy Generator capabilities
 
-The Policy Generator and its integration with the {acm-short} application lifecycle subscription GitOps workflow simplifies the distribution of Kubernetes resource objects to managed {ocp-short} clusters, and Kubernetes clusters through {acm-short} policies. 
+The integration of the Policy Generator with the {acm-short} application lifecycle subscription GitOps workflow simplifies the distribution of Kubernetes resource objects to managed {ocp-short} clusters, and Kubernetes clusters through {acm-short} policies. 
 
 Use the Policy Generator to complete the following actions:
 
@@ -24,18 +24,21 @@ Use the Policy Generator to complete the following actions:
 [#policy-generator-configuration]
 == Policy Generator configuration structure
 
-The Policy Generator is a Kustomize generator plug-in that is configured with a manifest of the `PolicyGenerator` kind and `policy.open-cluster-management.io/v1` API version. 
+The Policy Generator is a Kustomize generator plug-in that is configured with a manifest of the `PolicyGenerator` kind and `policy.open-cluster-management.io/v1` API version. Continue reading to learn about the configuration structure:
 
-To use the plug-in, start by adding a `generators` section in a `kustomization.yaml` file. View the following example:
+- To use the plug-in, start by adding a `generators` section in a `kustomization.yaml` file. View the following example:
 
++
 [source,yaml]
 ----
 generators:
-  - policy-generator-config.yaml
+  - policy-generator-config.yaml <1>
 ----
+<1> The `policy-generator-config.yaml` file that is referenced in the previous example is a YAML file with the instructions of the policies to generate. 
 
-The `policy-generator-config.yaml` file that is referenced in the previous example is a YAML file with the instructions of the policies to generate. A simple `PolicyGenerator` configuration file might resemble the following example:
+- A simple `PolicyGenerator` configuration file might resemble the following example:
 
++
 [source,yaml]
 ----
 apiVersion: policy.open-cluster-management.io/v1
@@ -48,11 +51,11 @@ policyDefaults:
 policies:
   - name: config-data
     manifests:
-      - path: configmap.yaml
+      - path: configmap.yaml <1>
 ----
+<1> The `configmap.yaml` represents a Kubernetes manifest YAML file to be included in the policy. Alternatively, you can set the path to a Kustomize directory, or a directory with multiple Kubernetes manifest YAML files. View the following example:
 
-The `configmap.yaml` represents a Kubernetes manifest YAML file to be included in the policy. Alternatively, you can set the path to a Kustomize directory, or a directory with multiple Kubernetes manifest YAML files. View the following example:
-
++
 [source,yaml]
 ----
 apiVersion: v1
@@ -65,8 +68,9 @@ data:
   key2: value2
 ----
 
-You can also use the `object-templates-raw` manifest to automatically generate a `ConfigurationPolicy` with the content you add. See the following example:
+- Use the `object-templates-raw` manifest to automatically generate a `ConfigurationPolicy` with the content you add. See the following example:
 
++
 [source,yaml]
 ----
 apiVersion: policy.open-cluster-management.io/v1
@@ -80,13 +84,13 @@ policies:
   - name: config-data
     manifests:
       - path: object-templates-raw: | 
-              <your_content>
+              <your_content> <1>
 ----
+<1> Your content is used in the generated `ConfigurationPolicy` and added as an entry for the `policy-templates` of a policy. The `object-templates-raw` generated `ConfigurationPolicy` has the same name as a manifest generated from a `ConfigurationPolicy` that has no specified name.
 
-Your content is used in the generated `ConfigurationPolicy` and added as an entry for the `policy-templates` of a policy. The `object-templates-raw` generated `ConfigurationPolicy` has the same name as a manifest generated from a `ConfigurationPolicy` that has no specified name.
+- The generated `Policy`, along with the generated `Placement` and `PlacementBinding` might resemble the following example:
 
-The generated `Policy`, along with the generated `Placement` and `PlacementBinding` might resemble the following example:
-
++
 [source,yaml]
 ----
 apiVersion: cluster.open-cluster-management.io/v1beta1
@@ -151,7 +155,7 @@ spec:
 [#policy-gen-yaml-table]
 == Policy Generator configuration reference table
 
-Note that all the fields in the `policyDefaults` section except for `namespace` can be overridden for each policy, and all the fields in the `policySetDefaults` section can be overridden for each policy set.
+All the fields in the `policyDefaults` section except for `namespace` can be overridden for each policy, and all the fields in the `policySetDefaults` section can be overridden for each policy set.
 
 .Parameter table
 |===
@@ -213,6 +217,10 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | Optional
 | Copies the labels and annotations for all policies and adds them to a replica policy. Set to `true` by default. If set to `false`, only the policy framework specific policy labels and annotations are copied to the replicated policy.
 
+| `policyDefaults.customMessage`
+| Optional
+| Configures the compliance messages emitted by the configuration policy to use one of the specified Go templates based on the current compliance. See the ConfigurationPolicy API documentation for more details.
+
 | `policyDefaults.severity`
 | Optional
 | The severity of the policy violation. The default value is `low`.
@@ -231,11 +239,15 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | `policyDefaults.evaluationInterval`
 | Optional
-| Use the parameters `compliant` and `noncompliant` to specify the frequency for a policy to be evaluated when in a particular compliance state. When managed clusters have low CPU resources, the evaluation interval can be increased to reduce CPU usage on the Kubernetes API. These are in the format of durations. For example, `"1h25m3s"` represents 1 hour, 25 minutes, and 3 seconds. These can also be set to "never" to avoid evaluating the policy after it has become a particular compliance state.
+| Use the parameters `compliant` and `noncompliant` to specify the frequency for a policy to be evaluated when in a particular compliance state. The default value is `"watch"` to leverage Kubernetes API watches instead of polling the Kubernetes API server. When managed clusters have low resources, the evaluation interval can be set to long polling intervals to reduce CPU and memory usage on Kubernetes API and policy controller. These are in the format of durations. For example, `"1h25m3s"` represents 1 hour, 25 minutes, and 3 seconds. These can also be set to `"never"` to avoid evaluating the policy after it has become a particular compliance state.
 
 | `policyDefaults.pruneObjectBehavior`
 | Optional
 | Determines whether objects created or monitored by the policy should be deleted when the policy is deleted. Pruning only takes place if the remediation action of the policy has been set to `enforce`. Example values are `DeleteIfCreated`, `DeleteAll`, or `None`. The default value is `None`.
+
+| `policyDefaults.recreateOption`
+| Optional
+| Describes whether to delete and recreate an object when an update is required. `IfRequired` will recreate the object when updating an immutable field. `Always` will always recreate the object if a mismatch is detected. `RecreateOption` has no effect when the `remediationAction` is `inform`. `IfRequired` has no effect on clusters without dry run update support. The default value is `None`.
 
 | `policyDefaults.recordDiff`
 | Optional
@@ -321,6 +333,10 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 | Optional
 | Labels that the policy includes in its `metadata.labels` section. The `policyLabels` parameter is applied for all policies unless specified in the policy.
 
+| `policyDefaults.gatekeeperEnforcementAction`
+| Optional
+| Overrides the spec.enforcementAction field of a Gatekeeper constraint. This only applies to Gatekeeper constraints and is ignored by other manifests. If not set, the spec.enforcementAction field is not changed.
+
 | `policyDefaults.policySets`
 | Optional
 | Array of policy sets that the policy joins. Policy set details can be defined in the `policySets` section. When a policy is part of a policy set, a placement binding is not generated for the policy since one is generated for the set. Set `policies[].generatePlacementWhenInSet` or `policyDefaults.generatePlacementWhenInSet` to override `policyDefaults.policySets`.
@@ -395,7 +411,19 @@ Note that all the fields in the `policyDefaults` section except for `namespace` 
 
 | `policies[].manifests[].path`
 | Required
-| Path to a single file, a flat directory of files, or a Kustomize directory relative to the `kustomization.yaml` file. If the directory is a Kustomize directory, the generator runs Kustomize against the directory before generating the policies. If there is a requirement to process Helm charts for the Kustomize directory, set `POLICY_GEN_ENABLE_HELM` to `"true"` in the environment where the policy generator is running to enable Helm for the policy generator.
+a| Path to a single file, a flat directory of files, or a Kustomize directory relative to the `kustomization.yaml` file. If the directory is a Kustomize directory, the generator runs Kustomize against the directory before generating the policies. If there is a requirement to process Helm charts for the Kustomize directory, set `POLICY_GEN_ENABLE_HELM` to `"true"` in the environment where the policy generator is running to enable Helm for the policy generator.
+
+The following manifests are supported:
+
+- Non-root policy type manifests such as IamPolicy, CertificatePolicy, and ConfigurationPolicy that have a "Policy" suffix. These are not modified except for patches and are directly added as a Policy's policy-templates entry.
+
+- Manifests containing only an `object-templates-raw` key. The corresponding value will be used directly in a generated ConfigurationPolicy without modification, which will then be added as a Policy's policy-templates entry.
+
+- For everything else, ConfigurationPolicy objects are generated to wrap these manifests. The resulting ConfigurationPolicy is added as a Policy's policy-templates entry.
+
+| `policies[].manifests[].name`
+| Optional
+| This name is used when ConsolidateManifests is set to false and will serve as the ConfigurationPolicy name. If multiple manifests are present in the path, an index number will be appended. If multiple manifests are present and their names are provided, with `consolidateManifests` set to true, the name of the first manifest will be used for all manifest paths.
 
 | `policies[].manifests[].patches`
 | Optional
