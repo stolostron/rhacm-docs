@@ -27,43 +27,52 @@ You must meet the following requirements before you install {acm}:
 [#disconnect-confirm-ocp-installation]
 == Confirm your {ocp-short} installation
 
-* While you are connected, run the `oc -n openshift-console get route` command to access the {ocp-short} web console. See the following example output:
+While you are connected, verify that a {product-title-short} hub cluster is not already installed on your {ocp-short} cluster.
+
+You cannot have more than one hub cluster. {acm-short} allows only one single {acm-short} hub cluster installation on each {ocp-short} cluster. 
+
+. To ensure that the {ocp-short} cluster is set up correctly, access the {ocp-short} web console with the following command:
 
 +
 [source,bash]
 ----
-openshift-console          console             console-openshift-console.apps.new-coral.purple-chesterfield.com                       console              https   reencrypt/Redirect     None
+oc -n openshift-console get route
 ----
 
-Open the URL in your browser and check the result. If the console URL displays `console-openshift-console.router.default.svc.cluster.local`, set the value for `openshift_master_default_subdomain` when you install {ocp-short}.
++
+See the following example output:
+
++
+[source,bash]
+----
+openshift-console console console-openshift-console.apps.new-coral.purple-chesterfield.com               
+console   https   reencrypt/Redirect     None
+----
+
+. Open the URL in your browser and check the result. If the console URL displays `console-openshift-console.router.default.svc.cluster.local`, set the value for `openshift_master_default_subdomain` when you install {ocp-short}.
 
 == Confirm availability of a local image registry
 
 *Best practice:* Use your existing mirror registry for the {olm} operator related content.
 
-Installing {acm} in a disconnected environment involves the use of a local mirror image registry. Because you have already completed the installation of the {ocp-short} cluster in your disconnected environment, you already set up a mirror registry for use during the {ocp} cluster installation.
+Installing {acm} in a disconnected environment requires a local mirror image registry. Because you have already completed the installation of the {ocp-short} cluster in your disconnected environment, you already set up a mirror registry for use during the {ocp} cluster installation.
 
 If you do not already have a local image registry, create one by completing the procedure that is described in link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/installing/disconnected-installation-mirroring#mirroring-images-disconnected-install[Mirroring images for a disconnected installation] of the {ocp} documentation.
 
 [#disconnect-configure-olm]
 == Configure {olm}
 
-Because {acm} is packaged as an operator, installing is completed by using {olm}.
+Because {acm} is packaged as an operator, you need {olm} to install.
 
 In disconnected environments, {olm} cannot access the standard operator sources that Red Hat provided operators can because they are hosted on image registries that are not accessible from a disconnected cluster. Instead, a cluster administrator can enable the installation and upgrade of operators in a disconnected environment by using mirrored image registries and operator catalogs.
 
-To prepare your disconnected cluster for installing {acm}, follow the procedure that is described in
+. To prepare your disconnected cluster for installing {acm}, follow the procedure that is described in
 link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14/html-single/operators/index#olm-restricted-networks[Using Operator Lifecycle Manager on restricted networks] in the {ocp-short} documentation.
-
-[#additional-requirements]
-=== Additional requirements 
  
-When you complete the previous procedures, note the following requirements that are also specific to {acm}:
+. When you complete the previous procedure, note the following requirements that are also specific to {acm}:
 
-[#disconnect-include-acm-pkgs]
-==== Include operator packages in mirror catalog 
-
-* Include the required operator packages in your mirror catalog. Red Hat provides the {acm} operator in the Red Hat operators catalog, which is delivered by the `registry.redhat.io/redhat/redhat-operator-index` index image. When you prepare your mirror of this catalog index image, you can choose to either mirror the entire catalog as provided by Red Hat, or you can mirror a subset that contains only the operator packages that you intend to use.
++ 
+Include the required operator packages in your mirror catalog. Red Hat provides the {acm} operator in the Red Hat operators catalog, which is delivered by the `registry.redhat.io/redhat/redhat-operator-index` index image. When you prepare your mirror of this catalog index image, you can choose to either mirror the entire catalog as provided by Red Hat, or you can mirror a subset that contains only the operator packages that you intend to use.
 
 +
 If you are creating a full mirror catalog, no special considerations are needed as all of the packages required to install {acm} are included. However, if you are creating a partial or filtered mirrored catalog, for which you identify particular packages to be included, you need to include the following package names in your list:
@@ -71,10 +80,9 @@ If you are creating a full mirror catalog, no special considerations are needed 
    - `advanced-cluster-management`
    - `multicluster-engine`
 
-* Use one of the two mirroring procedures. 
+. Use one of the two mirroring procedures: 
 
-+
-* If you are creating the mirrored catalog or registry by using the OPM utility, `opm index prune`, include the following package names in the value of the `-p` option as displayed in the following example, with the current version replacing `4.x`:
+.. If you are creating the mirrored catalog or registry by using the OPM utility, `opm index prune`, include the following package names in the value of the `-p` option as displayed in the following example, with the current version replacing `4.x`:
 
 +
 [source,bash]
@@ -85,8 +93,7 @@ opm index prune \
    -t myregistry.example.com:5000/mirror/my-operator-index:v4.x
 ----
 
-+
-* If you are populating the mirrored catalog or registry by using the `oc-mirror` plug-in instead, include the following package names in the packages list section of your `ImageSetConfiguration`, as displayed in the following example, with the current version replacing `4.x`:
+.. If you are populating the mirrored catalog or registry by using the `oc-mirror` plug-in instead, include the following package names in the packages list section of your `ImageSetConfiguration`, as displayed in the following example, with the current version replacing `4.x`:
 
 +
 [source,yaml]
@@ -110,22 +117,20 @@ mirror:
   helm: {}
 ----
 
-[#config-mirror]
-==== Configure to use your mirror registry
-
-When you have populated a local mirror registry with the earlier packages that are required for installing {acm}, complete the steps that are described in the topic link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14/html-single/operators/index#olm-restricted-networks[Using Operator Lifecycle Manager on restricted networks] to make your mirror registry and catalog available on your disconnected cluster, which includes the following steps:
+. Configure to use your mirror registry. When you have populated a local mirror registry with the earlier packages that are required for installing {acm}, complete the steps that are described in the topic link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14/html-single/operators/index#olm-restricted-networks[Using Operator Lifecycle Manager on restricted networks] to make your mirror registry and catalog available on your disconnected cluster, which includes the following steps:
 
 . link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14/html-single/operators/index#olm-restricted-networks-operatorhub_olm-restricted-networks[Disabling the default OperatorHub sources]
 . link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14/html-single/operators/index#olm-mirror-catalog_olm-restricted-networks[Mirroring the Operator catalog]
 . link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14/html-single/operators/index#olm-creating-catalog-from-index_olm-restricted-networks[Adding a catalog source for your mirrored catalog]
 
-[#note-source-name]
-==== Find the catalog source name
+. Find the catalog source name. 
 
-As described in the procedures in the {ocp} documentation, you need to add a `CatalogSource` resource to your disconnected cluster. *Important:* Take note of the value of the `metadata.name` field, which you will need later.
+. As described in the procedures in the {ocp} documentation, you need to add a `CatalogSource` resource to your disconnected cluster. *Important:* Take note of the value of the `metadata.name` field, which you will need later.
 
++
 Add the `CatalogSource` resource into the `openshift-marketplace` namespace by using a YAML file similar to the following example, replacing `4.x` with the current version:
 
++
 [source,yaml]
 ----
 apiVersion: operators.coreos.com/v1alpha1
@@ -137,7 +142,8 @@ spec:
   image: myregistry.example.com:5000/mirror/my-operator-index:v4.x
   sourceType: grpc
 ----
- 
+
++ 
 You need the `metadata.name` field value for the annotation in the `MulticlusterHub` resource that you will create later.
 
 [#verify-required-package]
