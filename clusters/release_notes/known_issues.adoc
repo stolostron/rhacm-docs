@@ -271,52 +271,6 @@ You can specify a custom ingress domain by using the `ClusterDeployment` resourc
 [#cluster-lifecycle-issues-cim]
 == Central infrastructure management
 
-[#discon-disc-iso-cluster-no-install]
-=== A cluster deployed in a disconnected environment by using the central infrastructure management service might not install
-//2.7:ACM3209
-
-When you deploy a cluster in a disconnected environment by using the central infrastructure management service, the cluster nodes might not install. 
-
-This issue occurs because the cluster uses a discovery ISO image that is created from the Red Hat Enterprise Linux CoreOS live ISO image that is shipped with {ocp-short} versions 4.12.0 to 4.12.2. The image contains a restrictive `/etc/containers/policy.json` file that requires signatures for images sourcing from `registry.redhat.io` and `registry.access.redhat.com`.
-
-In a disconnected environment, the images that are mirrored might not have the signatures mirrored, which results in the image pull failing for cluster nodes at discovery. The Agent image fails to connect to the cluster nodes, which causes communication with the assisted service to fail.
-
-To work around this issue, apply an ignition override to the cluster that sets the `/etc/containers/policy.json` file to unrestrictive. You can set the ignition override in the `InfraEnv` custom resource definition. The following example shows an `InfraEnv` custom resource definition with the override:
-
-[source.yaml]
-----
-apiVersion: agent-install.openshift.io/v1beta1
-kind: InfraEnv
-metadata:
-  name: cluster
-  namespace: cluster
-spec:
-  ignitionConfigOverride: '{"ignition":{"version":"3.2.0"},"storage":{"files":[{"path":"/etc/containers/policy.json","mode":420,"overwrite":true,"contents":{"source":"data:text/plain;charset=utf-8;base64,ewogICAgImRlZmF1bHQiOiBbCiAgICAgICAgewogICAgICAgICAgICAidHlwZSI6ICJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIgogICAgICAgIH0KICAgIF0sCiAgICAidHJhbnNwb3J0cyI6CiAgICAgICAgewogICAgICAgICAgICAiZG9ja2VyLWRhZW1vbiI6CiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgIiI6IFt7InR5cGUiOiJpbnNlY3VyZUFjY2VwdEFueXRoaW5nIn1dCiAgICAgICAgICAgICAgICB9CiAgICAgICAgfQp9"}}]}}' 
-----
-
-The following example shows the unrestrictive file that is created:
-
-----
-{
-    "default": [
-        {
-            "type": "insecureAcceptAnything"
-        }
-    ],
-    "transports": {
-        "docker-daemon": {
-        "": [
-        {
-            "type": "insecureAcceptAnything"
-        }
-        ]
-    }
-    }
-}
-----
- 
-After changing the setting, the clusters install.
-
 [#iso-image-name-too-long]
 === Cluster provisioning with Infrastructure Operator fails
 //2.4:17411
