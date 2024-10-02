@@ -36,22 +36,6 @@ oc get route rbac-query-proxy -n open-cluster-management-observability
 MY_TOKEN=$(oc whoami --show-token)
 ----
 
-. Run the following command to add the access permission to your script file:
-
-+
-[source,bash]
-----
-chmod +x my_script.sh
-----
-
-. To verify updates to your script, run the following command to view the contents of your script:
-
-+
-[source,bash]
-----
-./my_script.sh $MY_TOKEN
-----
-
 . Get the default CA certificate and store the content of the `tls.crt` key in a local file. Run the following command:
 
 +
@@ -104,65 +88,31 @@ metadata:
   namespace: open-cluster-management-observability
 type: Opaque
 stringData:
-  ep.yaml: |
-    url: http://victoriametrics:8428/api/v1/write
-    http_client_config:
-      basic_auth:
-        username: test
-        password: test
+  ep.yaml: | <1>
+    url: http://victoriametrics:8428/api/v1/write <2>
+    http_client_config: <3>
+      basic_auth: <4>
+        username: test <5>
+        password: test <6>
+      tls_config: <7>
+        secret_name: <8>
+        ca_file_key: <9>
+        cert_file_key: <10>
+        key_file_key: <11>
+        insecure_skip_verify: <12>
 ----
-+
-The `ep.yaml` is the key of the content and is used in the `MultiClusterObservability` custom resource in next step. Currently, observability supports exporting metrics to endpoints without any security checks, with basic authentication or with `tls` enablement. View the following tables for a full list of supported parameters:
-+
-[options="header", cols=".^2a,.^6a,.^4a"]
-|===
-|Name|Description|Schema
-|*url* +
-_required_|URL for the external endpoint.|string
-|*http_client_config* +
-_optional_|Advanced configuration for the HTTP client.|<<jsonmulticlusterobservability_httpclient,HttpClientConfig>>
-|===
-+
-[[jsonmulticlusterobservability_httpclient]]
-*HttpClientConfig*
-[options="header", cols=".^2a,.^3a,.^4a"]
-+
-|===
-|Name|Description|Schema
-|*basic_auth* +
-_optional_|HTTP client configuration for basic authentication.|<<jsonmulticlusterobservability_basicauth,BasicAuth>>
-|*tls_config* +
-_optional_|HTTP client configuration for TLS.|<<jsonmulticlusterobservability_tls,TLSConfig>>
-|===
-+
-[[jsonmulticlusterobservability_basicauth]]
-*BasicAuth*
-[options="header", cols=".^2a,.^3a,.^4a"]
-+
-|===
-|Name|Description|Schema
-|*username* +
-_optional_|User name for basic authorization.|string
-|*password* +
-_optional_|Password for basic authorization.|string
-|===
-+
-[[jsonmulticlusterobservability_tls]]
-*TLSConfig*
-+
-|===
-|Name|Description|Schema
-|*secret_name* +
-_required_|Name of the secret that contains certificates.|string
-|*ca_file_key* +
-_optional_|Key of the CA certificate in the secret (only _optional_ if *insecure_skip_verify* is set to true).|string
-|*cert_file_key* +
-_required_|Key of the client certificate in the secret.|string
-|*key_file_key* +
-_required_|Key of the client key in the secret.|string
-|*insecure_skip_verify* +
-_optional_|Parameter to skip the verification for target certificate.|bool
-|===
+<1> The `ep.yaml` parameter is the key of the content and is used in the `MultiClusterObservability` custom resource in next step. Currently, observability supports exporting metrics to endpoints without any security checks, with basic authentication or with `tls` enablement. View the following tables for a full list of supported parameters:
+<2> The `url` parameter is required and the URL for the external endpoint. Enter the value as a string.
+<3> The `http_client_config` parameter is optional and is the advanced configuration for the HTTP client.
+<4> The `basic_auth` parameter is optional and is the HTTP client configuration for basic authentication.
+<5> The `username` parameter is optional and is the user name for basic authorization. Enter the value as a string.
+<6> The `password` is optional and is the password for basic authorization. Enter the value as a string.
+<7> The `tls_config` parameter is optional and is the HTTP client configuration for TLS.
+<8> The `secret_name` parameter is required and is the name of the secret that contains certificates. Enter the value as a string.
+<9> The `ca_file_key` parameter is required and the key of the CA certificate in the secret. This parameter is only optional if the `insecure_skip_verify` parameter is set to `true`. Enter the value as a string.
+<10> The `cert_file_key` parameter is required and is the key of the client certificate in the secret. Enter the value as a string.
+<11> The `key_file_key` parameter is required and is the key of the client key in the secret. Enter the value as a string.
+<12> The `insecure_skip_verify` parameter is optional and used to skip the verification for target certificate. Enter the value as a boolean value.
 
 . Add the `writeStorage` parameter to the `MultiClusterObservability` custom resource for adding a list of external endppoints that you want to export. View the following example:
 
@@ -217,7 +167,7 @@ Your query data appears from the Grafana dashboard.
 [#acm-provided-dashboards]
 === Viewing {acm-short} dashboards
 
-When you enable the {acm-short} observability service, three dashboards become available. the following dashboard descriptions:
+When you enable the {acm-short} observability service, three dashboards become available. View the following dashboard descriptions:
 
 * _Alert Analysis_: Overview dashboard of the alerts being generated within the managed cluster fleet.
 * _Clusters by Alert_: Alert dashboard where you can filter by the alert name.
@@ -231,21 +181,17 @@ You can also view the etcd table from the hub cluster dashboard in Grafana to le
 [#viewing-k8s-dashboards]
 === Viewing the Kubernetes API server dashboard
 
-View the following options to view the Kubernetes API server dashboards:
+To see the total number of clusters that are exceeding or meeting the targeted _service-level objective_ (SLO) value for the past seven or 30-day period, offending and non-offending clusters, and API Server Request Duration, use the following options to view the Kubernetes API server dashboards:
 
 * View the cluster fleet Kubernetes API service-level overview from the hub cluster dashboard in Grafana.
 +
 . Navigate to the Grafana dashboard.
 . Access the managed dashboard menu by selecting *Kubernetes* > *Service-Level Overview* > *API Server*. The _Fleet Overview_ and _Top Cluster_ details are displayed. 
+
+* View the Kubernetes API service-level overview table from the hub cluster dashboard in Grafana to see the error budget for the past seven or 30-day period, the remaining downtime, and trend. 
 +
-The total number of clusters that are exceeding or meeting the targeted _service-level objective_ (SLO) value for the past seven or 30-day period, offending and non-offending clusters, and API Server Request Duration is displayed.
-
-* View the Kubernetes API service-level overview table from the hub cluster dashboard in Grafana. 
-
 . Navigate to the Grafana dashboard from your hub cluster.
 . Access the managed dashboard menu by selecting *Kubernetes* > *Service-Level Overview* > *API Server*. The _Fleet Overview_ and _Top Cluster_ details are displayed.
-+
-The error budget for the past seven or 30-day period, the remaining downtime, and trend are displayed.
 
 [#additional-resources-use]
 == Additional resources
