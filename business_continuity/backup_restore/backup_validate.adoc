@@ -55,13 +55,17 @@ For a definition of the `BackupCollision`, see xref:../backup_restore/backup_sch
 +
 * An `acm-backup-in-progress-report` template checks if `Backup.velero.io` resources are stuck in the `InProgress` state. This validation is added because with a large number of resources, the velero pod restarts as the backup runs, and the backup stays in progress without proceeding to completion. During a normal backup, the backup resources are in progress at some point when it is run, but are not stuck and run to completion. It is normal to see the `acm-backup-in-progress-report` template report a warning during the time the schedule is running and backups are in progress.
 
-- *Backups that actively run as a cron job*
+- *Backup schedules are generating backups on the primary hub cluster*
 +
-* A `BackupSchedule.cluster.open-cluster-management.io` actively runs and saves new backups at the storage location. This validation is done by the `backup-schedule-cron-enabled` policy template. The template checks that there is a `Backup.velero.io` with `velero.io/schedule-name: acm-validation-policy-schedule` label at the storage location.
+* The `backup-schedule-cron-enabled` policy template notifies the hub cluster administrator that the primary hub cluster is not creating new backups. The policy shows that the `BackupSchedule.cluster.open-cluster-management.io` resource is disabled on the primary hub cluster or is not able to create scheduled backups.
 +
-* The `acm-validation-policy-schedule` backups are set to expire after the time is set for the backups cron schedule. If no cron job is running to create backups, the old `acm-validation-policy-schedule` backup is deleted because it expired and a new one is not created. As a result, if no `acm-validation-policy-schedule backups` exist at any moment, it means that there are no active cron jobs generating backups.
+* The `backup-schedule-cron-enabled` policy template is in violation if the backup schedule on the primary hub cluster did not generate new backups when the `BackupSchedule` cron job definition expects new backups. This might happen if the `BackupSchedule` does not exist, is paused, or the `BackupSchedule` cron job property updated and the time to run the backups increased. The template is in violation until a new set of backups is created.
 +
-* This policy is intended to help notify the hub cluster administrator of any backup issues when the hub cluster is active and produces or restore backups.
+* The template validation works in the following ways:
++
+** A `BackupSchedule.cluster.open-cluster-management.io` actively runs and saves new backups at the storage location. The `backup-schedule-cron-enabled` policy template completes this validation. The template checks that there is a `Backup.velero.io` with a `velero.io/schedule-name: acm-validation-policy-schedule` label at the storage location.
++
+** The `acm-validation-policy-schedule` backups are set to expire after you set a time for the backups cron schedule. If no cron job is running to create backups, the old `acm-validation-policy-schedule` backup is deleted because it expired and a new one is not created. As a result, if no `acm-validation-policy-schedule` backups exists, there are no active cron jobs generating backups.
 
 The `backup-restore-auto-import` policy includes a set of templates that check for the following constraints:
 
