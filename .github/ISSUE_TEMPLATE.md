@@ -5,7 +5,7 @@ title: ''
 
 ---
 
-## Red Hat Advanced Cluster Management for Kubernetes documentation issue
+## Red Hat Advanced Cluster Management for Kubernetes documentation issue ARCHIVED from GITHUB
 
 ### **THIS IS FOR EXTERNAL CUSTOMERS ONLY!**
 
