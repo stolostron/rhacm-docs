@@ -1,0 +1,109 @@
+[#return-initial-hub]
+= Returning to the initial hub cluster after a restore 
+
+In this scenario, run a disaster recovery test by simulating a disaster that makes the primary hub cluster unusable, requiring you to restore hub data on a new hub cluster. In this simulation, the backup data is restored to a new hub cluster, and you must verify that all the data has been recovered successfully.
+
+After you complete all the required tests, return to the initial hub cluster by using the primary hub cluster as the active hub cluster. To do this, restore the data back to the initial hub cluster. This action is known as controlled recovery operation because users are able to control the timing of the recovery operation. Users can run any required steps to prepare the primary hub cluster, so that users can reuse the hub cluster after completing the disaster recovery test. 
+
+[#prerequisite]
+== Prerequisite 
+
+* To prepare the backup hub cluster for the restore operation and to run the restore, complete the following documentation: xref:../backup_restore/backup_active_restore.adoc##keep-hub-active-restore[Keeping the primary hub cluster active during a restore process]. 
+
+[#making-active-hub]
+== Making the new hub cluster the active hub cluster  
+
+To begin the simulation, you must make the new hub cluster the active hub cluster by completing the following steps:
+
+. Run the restore operation on the new hub cluster to make it the active hub cluster. 
+. Verify that the managed clusters are now connected to the new hub cluster.
+. Run your disaster recovery simulation tests on this hub cluster.
+
+[#returning-primary-hub]
+== Returning to the primary hub cluster 
+
+After your disaster recovery tests complete, you are ready to return to the primary hub  cluster and make it the active hub cluster that manages the cluster fleet. To do this, complete the following sections to return to the primary cluster:
+
+* <<creating-backup,Creating a backup on the restore hub cluster>>
+* <<preparing-restore-hub,Preparing the restore hub cluster for the move>>
+* <<making-initial-hub,Making the initial hub cluster the active hub cluster>>
+* <<enabling-backup-schedule,Enabling the backup schedule on the primary hub cluster>>
+
+[#creating-backup]
+=== Creating a backup on the restore hub cluster
+
+To restore the data back to the initial hub cluster, create a backup on the restore hub cluster by completing the following steps: 
+
+. On the restore hub cluster, apply the following resource:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: BackupSchedule
+metadata:
+ name: schedule-acm-msa
+ namespace: open-cluster-management-backup
+spec:
+ veleroSchedule: 0 */1 * * *
+ veleroTtl: 120h
+ useManagedServiceAccount: true
+ paused: false
+----
+
+. Make sure the {prod-short} backups are generated and have the `Completed` status.
+
+[#preparing-restore-hub]
+=== Preparing the restore hub cluster for the move 
+
+To prepare the restore hub cluster for the move back to the initial hub cluster, complete the following steps on the restore hub cluster: 
+
+. Pause the backup schedule by setting the `paused=true` property on the `schedule-acm-msa BackupSchedule` resource.
+. Add the `import.open-cluster-management.io/disable-auto-import: '' annotation to all  ManagedCluster` resources so they do not connect back to this hub cluster after being moved back to the primary hub cluster. 
+
+[#making-initial-hub]
+=== Making the initial hub cluster the active hub cluster
+
+When you make the initial hub cluster the active hub cluster, all the managed clusters are returned to and managed by the initial hub cluster. To do this, complete the following steps:
+
+. Go to the initial hub cluster. 
+. Restore all the resources from the secondary hub cluster backup by applying the following restore resource: 
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+ name: restore-acm
+ namespace: open-cluster-management-backup
+spec:
+ cleanupBeforeRestore: CleanupRestored
+ veleroManagedClustersBackupName: latest
+ veleroCredentialsBackupName: latest
+ veleroResourcesBackupName: latest
+----
+
+*Note:* Since the `cleanupBeforeRestore` property has the `CleanupRestored` value, a cleanup operation runs after all resources are restored. This cleanup operation removes any hub resource that is not part of the restored backup. 
+
+[#enabling-backup-schedule]
+=== Enabling the backup schedule on the primary hub cluster 
+
+Now that the initial hub cluster is the primary hub cluster again, enable the backup schedule on the primary hub cluster by completing the following step:
+
+. Go to the primary hub cluster
+. Apply the following resource: 
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: BackupSchedule
+metadata:
+ name: schedule-acm-msa
+ namespace: open-cluster-management-backup
+spec:
+ veleroSchedule: 0 */1 * * *
+ veleroTtl: 120h
+ useManagedServiceAccount: true
+ paused: false
+----
+
+*Note:* The second hub can be used again as the secondary hub custer in the `active-passive` configuration.
