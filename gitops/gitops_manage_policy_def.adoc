@@ -1,9 +1,26 @@
 [#gitops-policy-definitions]
-= Managing policy definitions with {ocp-short} GitOps (Argo CD)
+= Managing policy definitions with {gitops} 
+
+With the `ArgoCD` resource, you can use {gitops} to manage policy definitions by granting {gitops-short} access to create policies on the {acm-short} hub cluster.
+
+- <<gitops-pol-def-prereq,Prerequisite>>
+- <<create-clusterrole-gitops,Creating a _ClusterRole_ resource for {gitops-short}>>
+- <<integrate-pol-gen-ocp-gitops,Integrating the Policy Generator with {gitops-short}>>
+- <<config-gitops-healthcheck,Configuring policy health checks in {gitops-short}>>
+
+[#gitops-pol-def-prereq]
+== Prerequisite
+
+You must log in to your hub cluster.
+
+*Required access:* Cluster administrator
 
 *Deprecated:* `PlacementRule`
 
-Based on Argo CD, you can use {ocp-short} GitOps to manage policy definitions. To allow this workflow, you must grant {ocp-short} GitOps access for you to create policies on the {acm-short} hub cluster. Complete the following steps to create a `ClusterRole` resource for {ocp-short} GitOps, with access to create, read, update, and delete policies and placements:
+[#create-clusterrole-gitops]
+== Creating a _ClusterRole_ resource for {gitops-short}
+
+To create a `ClusterRole` resource for {gitops-short}, with access to create, read, update, and delete policies and placements:
 
 . Create a `ClusterRole` from the console. Your `ClusterRole` might resemble the following example:
 
@@ -27,6 +44,9 @@ rules:
       - policy.open-cluster-management.io
     resources:
       - policies
+      - configurationpolicies
+      - certificatepolicies
+      - operatorpolicies
       - policysets
       - placementbindings
   - verbs:
@@ -58,7 +78,7 @@ rules:
       - placementdecisions/status
 ----
 
-. Create a `ClusterRoleBinding` object to grant the {ocp-short} GitOps service account access to the `openshift-gitops-policy-admin` `ClusterRole` object. Your `ClusterRoleBinding` might resemble the following example:
+. Create a `ClusterRoleBinding` object to grant the {gitops-short} service account access to the `openshift-gitops-policy-admin` `ClusterRole` object. Your `ClusterRoleBinding` might resemble the following example:
 
 +
 [source,yaml]
@@ -76,19 +96,32 @@ roleRef:
   kind: ClusterRole
   name: openshift-gitops-policy-admin
 ----
++
+*Notes:* 
+- When a {acm-short} policy definition is deployed with {gitops-short}, a copy of the policy is created in each managed cluster namespace for resolving hub template differences. These copies are called replicated policies.
+- To prevent {gitops-short} from repeatedly deleting this replicated policy or show that the Argo CD `Application` is out of sync, the `argocd.argoproj.io/compare-options: IgnoreExtraneous` annotation is automatically set on each replicated policy by the {acm-short} policy framework.
 
-When a {acm-short} policy definition is deployed with {ocp-short} GitOps, a copy of the policy is created in each managed cluster namespace. These copies are called replicated policies. To prevent {ocp-short} GitOps from repeatedly deleting this replicated policy or show that the ArgoCD `Application` is out of sync, the `argocd.argoproj.io/compare-options: IgnoreExtraneous` annotation is automatically set on each replicated policy by the {acm-short} policy framework.
+. There are labels and annotations used by Argo CD to track objects. For replicated policies to not show up at all in Argo CD, disable the Argo CD tracking labels and annotations by setting `spec.copyPolicyMetadata` to `false` on the {acm-short} policy definition.
 
-There are labels and annotations used by Argo CD to track objects. For replicated policies to not show up at all in Argo CD, you can set `spec.copyPolicyMetadata` to `false` on the {acm-short} policy definition to disable the Argo CD tracking labels and annotations from being copied to the replicated policy.
+[#integrate-pol-gen-ocp-gitops]
+== Integrating the Policy Generator with {gitops-short}
 
-[#policy-gen-install-on-openshift-gitops]
-== Integrating the Policy Generator with {ocp-short} GitOps (Argo CD)
+You can use {gitops-short} to generate policies by using the Policy Generator through GitOps. Since the Policy Generator does not come preinstalled in the {gitops-short} container image, you must complete customizations. 
 
-Based on Argo CD, you can use {ocp-short} GitOps to generate policies by using the Policy Generator through GitOps. Since the Policy Generator does not come preinstalled in the {ocp-short} GitOps container image, some customization must take place. In order to follow along, you must have the {ocp-short} GitOps Operator installed on the {acm-short} hub cluster and be sure to log in to the hub cluster.
+[#integrate-pol-gen-prereq]
+=== Prerequisites
 
-For {ocp-short} GitOps to have access to the Policy Generator when you run Kustomize, an Init Container is required to copy the Policy Generator binary from the {acm-short} Application Subscription container image to the {ocp-short} GitOps container. Additionally, {ocp-short} GitOps must be configured to provide the `--enable-alpha-plugins` flag when it runs Kustomize. Complete the following steps:
+* You must install {gitops-short} on your {acm-short} hub cluster.
+* You must log in to the hub cluster.
 
-. Start editing the {ocp-short} GitOps `argocd` object with the following command:
+[#access-policy-gen-gitops]
+=== Accessing the Policy Generator from {gitops-short}
+
+To access the Policy Generator from {gitops-short}, you must configure the Init Container to copy the Policy Generator binary from the {acm-short} Application Subscription container image. You must also configure {gitops-short} by providing the `--enable-alpha-plugins` flag when it runs Kustomize.
+
+To create, read, update, and delete policies and placements with the Policy Generator, grant access to the Policy Generator from {gitops-short}. Complete the following steps:
+
+. Edit the {gitops-short} `argocd` object with the following command:
 
 +
 [source,bash]
@@ -96,7 +129,9 @@ For {ocp-short} GitOps to have access to the Policy Generator when you run Kusto
 oc -n openshift-gitops edit argocd openshift-gitops
 ----
 
-. Modify the {ocp-short} GitOps `argocd` object to contain the following additional YAML content. When a new major version of {acm-short} is released and you want to update the Policy Generator to a newer version, you need to update the `registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel9` image used by the Init Container to a newer tag. View the following example and replace `<version>` with {product-version} or your desired {acm-short} version:
+. To update the Policy Generator to a newer version, add the `registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel9` image used by the Init Container to a newer tag. Replace the `<version>` parameter with the latest {acm-short} version in your `ArgoCD` resource.
++
+Your `ArgoCD` resource might resemble the following YAML file:
 
 +
 [source,yaml]
@@ -138,8 +173,8 @@ spec:
 ----
 image: '{{ (index (lookup "apps/v1" "Deployment" "open-cluster-management" "multicluster-operators-hub-subscription").spec.template.spec.containers 0).image }}'
 ----
-+
-If you want to enable the processing of Helm charts inside of a Kustomize directory before generating policies, set the environment variable `POLICY_GEN_ENABLE_HELM` to `"true"` in the `spec.repo.env` field:
+
+. If you want to enable the processing of Helm charts within the Kustomize directory before generating policies, set the `POLICY_GEN_ENABLE_HELM` environment variable to `"true"` in the `spec.repo.env` field:
 
 +
 [source,yaml]
@@ -149,9 +184,7 @@ env:
   value: "true"
 ----
 
-. Now that {ocp-short} GitOps can use the Policy Generator, {ocp-short} GitOps must be granted access to create policies on the {acm-short} hub cluster. Create the `ClusterRole` resource called `openshift-gitops-policy-admin`, with access to create, read, update, and delete policies and placements. Refer to the ealier `ClusterRole` resource example.
-
-. Create a `ClusterRoleBinding` object to grant the {ocp-short} GitOps service account access to the `openshift-gitops-policy-admin` `ClusterRole`. Your `ClusterRoleBinding` might resemble the following resource:
+. To create, read, update, and delete policies and placements, create a `ClusterRoleBinding` object to grant the {gitops-short} service account access to {acm-short} hub cluster. Your `ClusterRoleBinding` might resemble the following resource:
 
 +
 [source,yaml]
@@ -170,9 +203,74 @@ roleRef:
   name: openshift-gitops-policy-admin
 ----
 
+[#config-gitops-healthcheck]
+== Configuring policy health checks in {gitops-short}
+
+With the `ArgoCD` resoure, use {gitops-short} for you to define custom logic that determines the current health of specific resource based on the resource state. Define custom health checks to report the policy as healthy only when your policy is compliant. When you add a health check for a resource, you must add it as a `group` in the `resourceHealthChecks` field. 
+
+*Important:* To verify that you did not download something malicious from the Internet, review every policy before you apply it.
+
+To define health checks for your resource kinds complete the following steps:
+
+. To configure the health check for your `CertificatePolicy` resources, edit the `ArgoCD` resource with the following command:
+
++
+[source,bash]
+----
+oc -n openshift-gitops edit argocd openshift-gitops
+----
++
+Your `ArgoCD` resource might resemble the following YAML file:
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1beta1 
+kind: ArgoCD 
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec: 
+  resourceHealthChecks: 
+    - group: policy.open-cluster-management.io 
+      kind: CertificatePolicy 
+      check: | 
+	hs = {} 
+	if obj.status == nil or obj.status.compliant == nil then
+	  hs.status = "Progressing" 
+	  hs.message = "Waiting for the status to be reported" 
+	  return hs 
+	end 
+	if obj.status.compliant == "Compliant" then 
+	  hs.status = "Healthy" hs.message = "All certificates found comply with the policy" 
+	  return hs 
+	else hs.status = "Degraded" 
+          hs.message = "At least one certificate does not comply with the policy"
+	  return hs 
+        end
+----
+
+. To add a health check to your `CertificatePolicy`, `ConfigurationPolicy`, `OperatorPolicy`, and `Policy` resources, download the `argocd-policy-healthchecks.yaml` by running the following command:
+
++
+[source,bash]
+----
+wget https://raw.githubusercontent.com/open-cluster-management-io/policy-collection/main/stable/CM-Configuration-Management/argocd-policy-healthchecks.yaml
+----
+
+. To apply the `argocd-policy-healthchecks.yaml` policy, run the following command:
+
++
+[source,bash]
+----
+oc apply -f ./argocd-policy-healthchecks.yaml
+----
+
+. Verify that the health checks work as expected by viewing the _Summary_ tab of the `ArgoCD` resource. View the health details from the Argo CD console.
+
 [#additional-resource-policy-def]
 == Additional resources
 
-* Refer to link:https://argoproj.github.io/argo-cd/[Argo CD] documentation.
+* See the link:https://docs.redhat.com/en/documentation/red_hat_openshift_gitops/1.12/html/understanding_openshift_gitops/index[Understanding {gitops-short}] documentation.
 
 
