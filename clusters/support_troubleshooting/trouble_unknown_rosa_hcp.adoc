@@ -1,12 +1,12 @@
 [#trouble-state-unknown-rosa-hcp]
-= Troubleshooting all managed clusters become `Unknown` on a {rosa} hosted cluster
+= Troubleshooting all managed clusters become `Unknown` on a ROSA with hosted control planes cluster
 
-On a {rosa} hosted cluster, the state of all managed clusters might switch to `Unknown`.
+On a Red Hat OpenShift Service on AWS (ROSA) with hosted control planes cluster, the state of all managed clusters might switch to `Unknown`.
 
 [#symptom-state-unknown-rosa-hcp]
-== Symptom: All managed clusters become `Unknown` on a {rosa} hosted cluster
+== Symptom: All managed clusters become `Unknown` on a ROSA with hosted control planes cluster
 
-The state of all managed cluster on a {rosa} hosted cluster suddenly becomes `Unknown`. When you check the `klusterlet-agent` pod log in the `open-cluster-management-agent` namespace on your managed cluster, you see an error that resembles the following: 
+The state of all managed cluster on a ROSA hosted cluster suddenly becomes `Unknown`. When you check the `klusterlet-agent` pod log in the `open-cluster-management-agent` namespace on your managed cluster, you see the following error message: 
 
 [source,bash]
 ----
@@ -14,7 +14,7 @@ E0809 18:45:29.450874       1 reflector.go:147] k8s.io/client-go@v0.29.4/tools/c
 ----
 
 [#resolve-state-unknown-rosa-hcp]
-== Resolving the problem: All managed clusters become `Unknown` on a {rosa} hosted cluster
+== Resolving the problem: All managed clusters become `Unknown` on a ROSA with hosted control planes cluster
 
 To resolve the problem, add the `ISRG Root X1` certificate to the klusterlet CA bundle by completing the following steps:
 
@@ -26,7 +26,7 @@ To resolve the problem, add the `ISRG Root X1` certificate to the klusterlet CA 
 curl -s https://letsencrypt.org/certs/isrgrootx1.pem | base64 | tr -d "\n"
 ----
 
-. Create a `KlusterletConfig` resource and add your encoded CA certificate to the `spec`. If the resource already exists, update it by adding your encoded CA certificate. See the following example:
+. Create a `KlusterletConfig` resource and add your encoded CA certificate to the `spec` parameter section. See the following example:
 
 +
 [source,yaml]
@@ -39,7 +39,7 @@ spec:
   hubKubeAPIServerCABundle: "<your_ca_certificate>"
 ----
 
-. Apply the resource by running the following command:
+. Apply the resource by running the following command on the hub cluster:
 
 +
 [source,bash]
@@ -49,23 +49,15 @@ oc apply -f <filename>
 +
 The state of some managed clusters might recover.
 
-. For managed clusters that remain `Unknown`, export the `import.yaml` file from the hub cluster by running the following command. Replace values where needed:
+. For managed clusters that remain `Unknown`, export and decode the `import.yaml` file from the hub cluster by running the following command on the hub cluster. Replace values where needed:
 
 +
 [source,bash]
 ----
-oc get secret <cluster_name>-import -n <cluster_name> -o jsonpath={.data.import .yaml}
+oc get secret <cluster_name>-import -n <cluster_name> -o jsonpath={.data.import/.yaml} | base64 --decode > <cluster_name>-import.yaml
 ----
 
-. Decode the file by running the following command. Replace values where needed:
-
-+
-[source,bash]
-----
-base64 --decode > <cluster_name>-import.yaml
-----
-
-. Apply the file by running the following command. Replace values where needed:
+. Apply the file by running the following command on the managed cluster. Replace values where needed:
 
 +
 [source,bash]
