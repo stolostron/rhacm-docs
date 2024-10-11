@@ -29,6 +29,35 @@ For more about deprecations and removals, see xref:../release_notes/deprecate_re
 
 See the following known issues for the Application lifecycle component.
 
+[#app-argo-ocp-clusters]
+== Argo CD pull model does not work on {ocp-short} 4.17 clusters 
+//2.10:ACM-14650
+
+If you have {ocp-short} 4.17, the search `serviceaccount` is missing some permissions it needs to function as a user. Therefore, the Argo CD pull model resource sync controller fails to access the application resource list from the search API.
+
+To work around this issue, complete the following steps: 
+
+. Patch the search `clusterRole` by running the following command: 
++
+[source,bash]
+----
+ oc patch clusterrole search --type='json' -p='[{"op":"add", "path":"/rules/-", "value": {"verbs":["impersonate"], "apiGroups":["authentication.k8s.io"], "resources":["userextras/authentication.kubernetes.io/credential-id", "userextras/authentication.kubernetes.io/node-name", userextras/authentication.kubernetes.io/node-uid]}}]'
+----
+
+.  Stop the `search-api` pod by running the following command:
++
+[source,bash]
+----
+oc scale deployment search-api -n open-cluster-management --replicas=0
+----
+
+. Start the `search-api` pod by running the following command: 
++
+[source,bash]
+----
+oc scale deployment search-api -n open-cluster-management  --replicas=1
+----
+
 [#app-topology-311]
 == Application topology error for subscription deployed {ocp-short} 3.11
 //2.10:ACM-10551
