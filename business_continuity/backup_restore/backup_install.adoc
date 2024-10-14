@@ -57,7 +57,9 @@ When the cluster is in the STS mode, the backup chart creates a config map named
 
 To learn more about installing the OADP operator with the STS option, see link:https://docs.openshift.com/rosa/rosa_backing_up_and_restoring_applications/backing-up-applications.html[Installing OADP on ROSA with STS]. 
 
-*Notes:*
+*Important:*
+
+When you install the OADP operator, see the following notes: 
 
 - Custom resource definitons are cluster-scoped, so you cannot have two different versions of OADP or Velero installed on the same cluster. If you have two different versions, one version runs with the wrong custom resource definitions.
 
@@ -65,13 +67,42 @@ To learn more about installing the OADP operator with the STS option, see link:h
 
 - The backup component works with the OADP Operator that is installed in the component namespace. 
 
-*Important:*
+- If you manually install the OADP operator, the custom resource definition version of the OADP operator and Velereo must exactly match. If these versions do not exactly match one another, you get problems. 
 
-If you manually install the OADP operator, the custom resource definition version of the OADP operator and Velereo must exactly match. If these versions do not exactly match one another, you encounter problems. 
+- Velero is installed with the OADP Operator on the {acm} hub cluster. It is used to backup and restore {acm-short} hub cluster resources. 
 
-Velero is installed with the OADP Operator on the {acm} hub cluster. It is used to backup and restore {acm-short} hub cluster resources. 
+- For a list of supported storage providers for Velero, see link:https://docs.openshift.com/container-platform/4.14/backup_and_restore/application_backup_and_restore/installing/about-installing-oadp.html[About installing OADP].
 
-For a list of supported storage providers for Velero, see link:https://docs.openshift.com/container-platform/4.14/backup_and_restore/application_backup_and_restore/installing/about-installing-oadp.html[About installing OADP].
+[#installing-custom-oadp]
+=== Installing a custom OADP version 
+
+Setting an annotation on your `MultiClusterHub` resource allows you to customize the OADP version for your specific needs. Complete the following steps:
+
+. To override the OADP version installed by the backup and restore operator, use the following annotation on the `MultiClusterHub` resource:
+
++
+[source,yaml]
+----
+installer.open-cluster-management.io/oadp-subscription-spec: '{"channel": "stable-1.4"}'
+----
+*Important:* If you use this option to get a different OADP version than the one installed by default by the backup and restore operator, make sure this version is supported on the {ocp} version used by the hub cluster. Use this override option with caution because it can result in unsupported configurations.
+
+. For example, install the OADP 1.5 version by setting your annotation. Your `MultiClusterHub` resource might resemble the following example: 
+
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  annotations:
+    installer.open-cluster-management.io/oadp-subscription-spec: '{"channel": "stable-1.5","installPlanApproval": "Automatic","name":
+      "redhat-oadp-operator","source": "redhat-operators","sourceNamespace": "openshift-marketplace"}'
+  name: multiclusterhub
+spec: {}
+---- 
+
+. Enable the `cluster-backup` option on the `MultiClusterHub` resource by setting `cluster-back` to `true`. 
 
 [#creating-a-dataprotectionapplication-resource]
 === Creating a `DataProtectionApplication` resource 
@@ -83,8 +114,10 @@ To create an instance of the `DataProtectionApplication` resource for your activ
 . Create the Velero instance by selecting configurations using the {ocp-short} console or by using a YAML file as mentioned in the `DataProtectionApplication` example.
 . Set the `DataProtectionApplication` namespace to `open-cluster-management-backup`.
 . Set the specification (`spec:`) values appropriately for the `DataProtectionApplication` resource. Then click *Create*.
+
 +
 If you intend on using the default backup storage location, set the following value, `default: true` in the `backupStorageLocations` section. View the following `DataProtectionApplication` resource sample:
+
 +
 [source,yaml]
 ----
@@ -130,6 +163,7 @@ spec:
 To enable the backup and restore component with {ocp} in a disconnected environment, complete the following steps: 
 
 . Update the `MultiClusterHub` resource with the follwing annotation to override the source from which the OADP operator is installed. Create the annotation before the `cluster-backup` component is enabled on the `MultiClusterHub` resource:
+
 +
 [source,yaml]
 ----
@@ -139,15 +173,19 @@ metadata:
   annotations:
     installer.open-cluster-management.io/oadp-subscription-spec: '{"source": "redhat-operator-index"}'
 ----
-+
+
 . The `redhat-operator-index` is a custom name and represents the name of the `CatalogSource` resource that you define and use to access Red Hat OpenShift Operators in the disconnected environment. Run the following command to retrieve the `catalogsource`:
+
 +
+[source,bash]
 ----
 oc get catalogsource -A
 ----
 +
 The output might resemble the following:
+
 +
+[source,bash]
 ----
 NAMESPACE               NAME                         DISPLAY                       TYPE   PUBLISHER   AGE
 openshift-marketplace   acm-custom-registry          Advanced Cluster Management   grpc   Red Hat     42h
