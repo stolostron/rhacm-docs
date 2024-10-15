@@ -1,0 +1,88 @@
+[#scale-in-worker-nodes]
+= Scaling in a {sno} cluster with the {sco}
+
+Scale in your managed cluster that was installed by the {sco}.
+You can scale in your cluster by removing a worker node.
+
+[#scale-in-preq]
+== Prerequisites
+
+* You have logged in to the hub cluster as a user with `cluster-admin` privileges.
+* If using {ztp}, you have configured your {ztp} environment. To configure your environment, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/edge_computing/ztp-preparing-the-hub-cluster[Preparing the hub cluster for GitOps ZTP].
+* You have the default cluster templates. To get familiar with the default templates, see xref:../../acm_mce_integration/siteconfig/cluster_templates.adoc#default-templates[Default set of templates]
+* You have installed your cluster with the {sco}. To install a cluster with the {sco}, see see xref:../../acm_mce_integration/siteconfig/install-clusters.adoc##install-clusters[Installing {sno} clusters with the {sco}]
+
+[#scale-in-remove-node]
+== Removing a worker node
+
+Remove a worker node that was deployed by {ai} using the {sco} flow.
+
+Complete the following steps to remove a worker node from the managed cluster:
+
+. Add an annotation in the `extraAnnotations` field of the worker node entry in the `ClusterInstance` CR:
++
+[source,yaml]
+----
+...
+   - hostName: "worker-node2.example.com"
+      role: "worker"
+      ironicInspect: ""
+      extraAnnotations:
+        BareMetalHost:
+          bmac.agent-install.openshift.io/remove-agent-and-node-on-delete: "true"
+...
+----
+
+. Specify the API version and kind of the `BareMetalHost` resource in the node-level `pruneManifests` field:
++
+[source,yaml]
+----
+...
+spec:
+   ...
+   nodes:
+     -hostName: "worker-node2.example.com"
+      ...
+      pruneManifests:
+        - apiVersion: metal3.io/v1alpha1
+          kind: BareMetalHost
+...
+----
+
+[#scale-in-verification]
+== Verifying worker node deletion
+
+. Wait for the worker node to be deleted. Monitor the process by running the following command:
++
+[source,terminal]
+----
+oc get bmh -n <managed_cluster_namespace> --watch
+----
+
++
+See the following example output for successful worker node deletion:
+
++
+[source,terminal]
+----
+NAME                                STATE            CONSUMER   ONLINE   ERROR   AGE
+worker-node1.example.com            provisioned                 true             81m
+worker-node2.example.com            deprovisioning              true             44m
+worker-node2.example.com            deleting                    true             50m
+----
+
+. Verify that the `BareMetalHost` and the `Agent` resources are removed on the hub cluster by running the following command:
++
+[source,terminal]
+----
+oc get managedclusterinfo/<managed_cluster_name> -n <managed_cluster_namespace>  -o jsonpath='{range .status.nodeList[*]}{.name}{"\t"}{.conditions}{"\t"}{.labels}{"\n"}{end}'
+----
+
++
+See the following example output for successful worker node deletion:
+
++
+[source,terminal]
+----
+worker-node2.example.com 	[{"status":"True","type":"Ready"}]	{"node-role.kubernetes.io/control-plane":"","node-role.kubernetes.io/master":"","node-role.kubernetes.io/worker":""}
+----
