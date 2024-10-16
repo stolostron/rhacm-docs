@@ -1,16 +1,23 @@
 [#installing-while-connected-online]
 = Installing while connected online
 
-You install {acm} through {olm}, which manages the installation, upgrade, and removal of the components that encompass the {acm-short} hub cluster. 
+Install {acm} through {olm}, which manages the installation, upgrade, and removal of the components that encompass the {acm-short} hub cluster. Because {acm-short} depends on and uses the {mce-short}, after you create the `MultiClusterHub` resource during installation, the {acm-short} operator automatically installs the {mce-short} operator and creates the `MultiClusterEngine` resource. 
 
-**Required access:** Cluster administrator. 
-**{ocp-short} Dedicated environment required access:** You must have `cluster-admin` permissions. By default `dedicated-admin` role does not have the required permissions to create namespaces in the {ocp-short} Dedicated environment. 
+You must have a supported version of {ocp-short} to install {acm-short}.
+
+*Required access:* Cluster administrator
+
+*{ocp-short} Dedicated environment required access:* You need `cluster-admin` permissions. By default the `dedicated-admin` role does not have the required permissions to create namespaces in the {ocp-short} Dedicated environment. 
+
+*Notes:*
 
 - By default, the hub cluster components are installed on worker nodes of your {ocp-short} cluster without any additional configuration. You can install the hub cluster on worker nodes by using the {ocp-short} OperatorHub web console interface, or by using the {ocp-short} CLI.
 
 - If you have configured your {ocp-short} cluster with infrastructure nodes, you can install the hub cluster on those infrastructure nodes by using the {ocp-short} CLI with additional resource parameters. See the _Installing the {acm-short} hub cluster on infrastructure node_ section for more details.
 
-- If you plan to import Kubernetes clusters that were not created by {ocp-short} or {acm-short}, you need to configure an image pull secret. 
+- If you plan to import Kubernetes clusters that are not {ocp-short} or {acm-short} clusters, you need to configure an image pull secret. 
+
+- If you previously installed {acm-short} on a cluster, then uninstalled, you need to follow the clean up procedure to remove artifacts. See xref:../install/reinstall.adoc#cleanup-reinstall[Cleaning up artifacts before reinstalling] and follow the procedure.
 
 For information on how to configure advanced configurations, see options in the xref:../install/adv_config_install.adoc#advanced-config-hub[MultiClusterHub advanced configuration] section of the documentation. 
 
@@ -33,11 +40,11 @@ Before you install {acm-short}, see the following requirements:
 
 * Your {ocp-short} command line interface (CLI) must be configured to run `oc` commands. See link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.15/html/cli_tools/openshift-cli-oc#cli-getting-started[Getting started with the CLI] for information about installing and configuring the {ocp-short} CLI.
 
-* Your {ocp-short} permissions must allow you to create a namespace. Without a namespace, installation will fail.
+* Your {ocp-short} permissions must allow you to create a namespace. Without a namespace, installation fails.
 
 * You must have an Internet connection to access the dependencies for the operator.
 
-* **Important:** To install in a {ocp-short} Dedicated environment, see the following requirements:
+* To install in a {ocp-short} Dedicated environment, see the following requirements:
 
 ** You must have the {ocp-short} Dedicated environment configured and running.
 
@@ -48,21 +55,23 @@ Before you install {acm-short}, see the following requirements:
 [#confirm-ocp-installation]
 == Confirm your {ocp-short} installation
 
-You must have a supported {ocp-short} version, including the registry and storage services, installed and working. For more information about installing {ocp-short}, see the {ocp-short} documentation.
+Verify that a {acm-short} hub cluster is not already installed on your {ocp-short} cluster. You cannot have more than one hub cluster. 
 
-. Verify that a {acm-short} hub cluster is not already installed on your {ocp-short} cluster. {acm-short} allows only one single {acm-short} hub cluster installation on each {ocp-short} cluster. Continue with the following steps if there is no {acm-short} hub cluster installed:
+You can only have one single {acm-short} hub cluster installation on each {ocp-short} cluster. Continue with the following steps if there is no {acm-short} hub cluster installed:
 
 . To ensure that the {ocp-short} cluster is set up correctly, access the {ocp-short} web console with the following command:
 
 +
+[source,bash]
 ----
-kubectl -n openshift-console get route
+oc -n openshift-console get route
 ----
 
 +
 See the following example output:
 
 +
+[source,bash]
 ----
 openshift-console console console-openshift-console.apps.new-coral.purple-chesterfield.com               
 console   https   reencrypt/Redirect     None
@@ -70,38 +79,37 @@ console   https   reencrypt/Redirect     None
 
 . Open the URL in your browser and check the result. If the console URL displays `console-openshift-console.router.default.svc.cluster.local`, set the value for `openshift_master_default_subdomain` when you install {ocp-short}. See the following example of a URL: `https://console-openshift-console.apps.new-coral.purple-chesterfield.com`.
 
-You can proceed to install {acm-short} from the console or the CLI. Both procedures are documented.
+You can proceed to install {acm-short} from the console or the CLI. 
+
+* <<installing-from-the-operatorhub,Installing from the OperatorHub web console interface>>
+* <<installing-from-the-cli,Installing from the {ocp-short} CLI>>
+
+*Note:* For installing the {acm-short} hub cluster on infrastructure nodes, see the _Installing the {acm-short} hub cluster on infrastructure nodes_ section of this procedure.
 
 [#installing-from-the-operatorhub]
 == Installing from the OperatorHub web console interface
 
-**Best practice:** From the _Administrator_ view in your {ocp-short} navigation, install the OperatorHub web console interface that is provided with {ocp-short}.
+*Best practice:* From the _Administrator_ view in your console, install the OperatorHub web console interface that is provided with {ocp-short}.
 
 . Select *Operators* > *OperatorHub* to access the list of available operators, and select _Advanced Cluster Management for Kubernetes_ operator.
 
 . On the _Operator subscription_ page, select the options for your installation:
 
-+
-* Namespace information: 
+Channel:: The channel that you select corresponds to the release that you are installing. When you select the channel, it installs the identified release, and establishes that the future Errata updates within that release are obtained.
 
-  - The {acm-short} hub cluster must be installed in its own namespace, or project. 
+Namespace information:: The {acm-short} hub cluster must be installed in its own namespace, or project. 
 
-  - By default, the OperatorHub console installation process creates a namespace titled `open-cluster-management`. *Best practice:* Continue to use the `open-cluster-management` namespace if it is available.  
+- By default, the OperatorHub console installation process creates a namespace that is titled `open-cluster-management`. *Best practice:* Continue to use the `open-cluster-management` namespace if it is available.  
   
-  - If there is already a namespace named `open-cluster-management`, choose a different namespace.
+- If there is already a namespace named `open-cluster-management`, choose a different namespace.
 
-+
-* Channel: The channel that you select corresponds to the release that you are installing. When you select the channel, it installs the identified release, and establishes that the future Errata updates within that release are obtained.
+Approval strategy for updates:: The approval strategy identifies the human interaction that is required for applying updates to the channel or release to which you subscribed. 
 
-+
-* Approval strategy for updates: The approval strategy identifies the human interaction that is required for applying updates to the channel or release to which you subscribed. 
-
-  - Select *Automatic* to ensure any updates within that release are automatically applied. 
+- Select *Automatic* to ensure any updates within that release are automatically applied. 
   
-  - Select *Manual* to receive a notification when an update is available. If you have concerns about when the updates are applied, this might be best practice for you.
-
+- Select *Manual* to receive a notification when an update is available. If you have concerns about when the updates are applied, this might be best practice for you.
 +
-*Important:* To upgrade to the next minor release, you must return to the _OperatorHub_ page and select a new channel for the more current release.
+*Important:* To upgrade to the next minor release, you must return to the _OperatorHub_ page and select a new channel for a more recent release.
 
 . Select *Install* to apply your changes and create the operator. 
 
@@ -110,8 +118,10 @@ You can proceed to install {acm-short} from the console or the CLI. Both procedu
  .. Select the *MultiClusterHub* tab.
  .. Select *Create MultiClusterHub*.
  .. Update the default values in the YAML file. See options in the _MultiClusterHub advanced configuration_ section of the documentation.
+
+. Click the _MultiClusterHub_ tab to see the list of resources where your operator is listed.
  
-* The following example shows the default template. Confirm that `namespace` is your project namespace. See the sample:
+* The following example shows the default template from the YAML view. Confirm that `namespace` is your project namespace. See the sample:
 
 +
 [source,yaml]
@@ -124,17 +134,22 @@ metadata:
 ----
 
 + 
-. Select *Create* to initialize the custom resource. It can take up to 10 minutes for the {acm-short} hub cluster to build and start.
+. Select *Create* to initialize the custom resource. It can take up to 10 minutes for the {acm-short} hub cluster to build and deploy components.
 
 +
-After the {acm-short} hub cluster is created, the `MultiClusterHub` resource status displays _Running_ from the _MultiClusterHub_ tab of the {acm-short} operator details. To gain access to the console, see the link:../console/console_access.adoc#accessing-your-console[Accessing your console] topic.
+After the {acm-short} hub cluster is created, the `MultiClusterHub` resource status displays _Running_ from the _MultiClusterHub_ tab of the {acm-short} operator details. 
+
+To gain access to the console, see the _Accessing your console_ topic in _Additional resources_.
 
 [#installing-from-the-cli]
 == Installing from the {ocp-short} CLI
 
+Install the operator and the objects. Complete the following steps:
+
 . Create a {acm-short} hub cluster namespace where the operator requirements are contained. Run the following command, where `namespace` is the name for your {acm-short} hub cluster namespace. The value for `namespace` might be referred to as _Project_ in the {ocp-short} environment:
 
 +
+[source,bash]
 ----
 oc create namespace <namespace>
 ----
@@ -142,11 +157,12 @@ oc create namespace <namespace>
 . Switch your project namespace to the one that you created. Replace `namespace` with the name of the {acm-short} hub cluster namespace that you created in step 1.
 
 +
+[source,bash]
 ----
 oc project <namespace>
 ----
 
-. Create a YAML file to configure an `OperatorGroup` resource. Each namespace can have only one operator group. Replace `default` with the name of your operator group. Replace `namespace` with the name of your project namespace. See the following sample:
+. Create a YAML file to configure an `OperatorGroup` resource. Each namespace can have only one operator group:
 
 +
 [source,yaml]
@@ -154,21 +170,25 @@ oc project <namespace>
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
-  name: <default>
-  namespace: <namespace>
+  name: <default> <1>
+  namespace: <namespace> <2>
 spec:
   targetNamespaces:
   - <namespace>
 ----
+<1> Replace `<default>` with the name of your operator group. 
+<2> Replace `<namespace>` with the name of your project namespace. 
+
 . Run the following command to create the `OperatorGroup` resource. Replace `operator-group` with the name of the operator group YAML file that you created:
 
 +
+[source,bash]
 ----
 oc apply -f <path-to-file>/<operator-group>.yaml
 ----
 +
 
-. Create a YAML file to configure an {ocp-short} subscription. Your file is similar to the following sample, replacing `release-2.x` with the current release:
+. Create a YAML file to configure an {ocp-short} subscription to choose the version that you want to install. Your file is similar to the following sample, replacing `release-<2.x>` with the selected release:
 
 +
 [source,yaml]
@@ -180,23 +200,21 @@ metadata:
 spec:
   sourceNamespace: openshift-marketplace
   source: redhat-operators
-  channel: release-2.x
+  channel: release-<2.x>
   installPlanApproval: Automatic
   name: advanced-cluster-management
 ----
 
 +
-*Note:* For installing the {acm-short} hub cluster on infrastructure nodes, the see the xref:../install/install_connected.adoc#infra-olm-sub-add-config[{olm} Subscription additional configuration] section.
+. Run the following command to apply the file and create the {ocp-short} subscription. Replace `subscription` with the name of the subscription file that you created:
 
 +
-. Run the following command to create the {ocp-short} subscription. Replace `subscription` with the name of the subscription file that you created:
-
-+
+[source,bash]
 ----
 oc apply -f <path-to-file>/<subscription>.yaml
 ----
 
-. Create a YAML file to configure the `MultiClusterHub` custom resource. Your default template should look similar to the following example. Replace `namespace` with the name of your project namespace:
+. Create a YAML file to configure the `MultiClusterHub` custom resource. Your default template should look similar to the following example. Replace `namespace` with your project namespace:
 
 +
 [source,yaml]
@@ -210,38 +228,37 @@ spec: {}
 ----
 
 +
-*Note:* For installing the {acm-short} hub cluster on infrastructure nodes, see the xref:../install/install_connected.adoc#infra-mch-add-config[MultiClusterHub custom resource additional configuration] section:
-
-+
-. Run the following command to create the `MultiClusterHub` custom resource. Replace `custom-resource` with the name of your custom resource file:
+. Run the following command to apply the file and create the `MultiClusterHub` custom resource. Replace `custom-resource` with the name of your custom resource file:
  
 +
+[source,bash]
 ----
 oc apply -f <path-to-file>/<custom-resource>.yaml
 ----
 
 +
-If this step fails with the following error, the resources are still being created and applied. Run the command again in a few minutes when the resources are created:
+If you receive the following error, the resource process is still running. Run the `oc apply` command again in a few minutes when the resources are created:
 
 +
 ----
 error: unable to recognize "./mch.yaml": no matches for kind "MultiClusterHub" in version "operator.open-cluster-management.io/v1"
 ----
 
-. Run the following command to get the custom resource. It can take up to 10 minutes for the `MultiClusterHub` custom resource status to display as `Running` in the `status.phase` field after you run the command:
+. Run the following command to get the custom resource. It can take up to 10 minutes for the `MultiClusterHub` custom resource status to display as `Running`:
 
 +
+[source,bash]
 ----
-oc get mch -o=jsonpath='{.items[0].status.phase}'
+oc get mch -o yaml
 ----
-
-If you are reinstalling {acm-short} and the pods do not start, see link:../troubleshooting/trouble_reinstall.adoc#troubleshooting-reinstallation-failure[Troubleshooting reinstallation failure] for steps to work around this problem.
 
 *Notes:*
 
 - A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to {acm-short} and to any user credentials with access to the namespace where you install {acm-short}.
 
-- The installation also creates a namespace called `local-cluster` that is reserved for the {acm-short} hub cluster when it is managed by itself. There cannot be an existing namespace called `local-cluster`. For security reasons, do not release access to the `local-cluster` namespace to any user who does not already have `cluster-administrator` access.
+- A namespace called `local-cluster` is reserved for the {acm-short} hub cluster when it is self-managed. This is the only `local-cluster` namespace that can exist in the product. 
+
+- *Important:* For security reasons, do not give access to the `local-cluster` namespace to any user that is not a `cluster-administrator`.
 
 [#installing-on-infra-node]
 == Installing the {acm-short} hub cluster on infrastructure nodes
@@ -255,8 +272,9 @@ After adding infrastructure nodes to your {ocp-short} cluster, follow the xref:.
 
 Follow the procedures that are described in link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.15/html/machine_management/creating-infrastructure-machinesets[Creating infrastructure machine sets] in the {ocp-short} documentation. Infrastructure nodes are configured with a Kubernetes `taint` and `label` to keep non-management workloads from running on them.
 
-To be compatible with the infrastructure node enablement provided by {acm-short}, ensure your infrastructure nodes have the following `taint` and `label` applied:
+. To be compatible with the infrastructure node enablement provided by {acm-short}, ensure your infrastructure nodes have the following `taint` and `label` applied:
 
++
 [source,yaml]
 ----
 metadata:
@@ -268,11 +286,9 @@ spec:
     key: node-role.kubernetes.io/infra
 ----
 
-[#infra-olm-sub-add-config]
-=== {olm} Subscription additional configuration
+. Add the following additional configuration before applying the {olm} Subscription:
 
-Add the following additional configuration before applying the {olm} Subscription:
-
++
 [source,yaml]
 ----
 spec:
@@ -285,14 +301,21 @@ spec:
       operator: Exists
 ----
 
-[#infra-mch-add-config]
-=== MultiClusterHub custom resource additional configuration
+. Add the following additional configuration before you apply the `MultiClusterHub` custom resource:
 
-Add the following additional configuration before applying the `MultiClusterHub` custom resource:
-
++
 [source,yaml]
 ----
 spec:
   nodeSelector:
     node-role.kubernetes.io/infra: ""
 ----
+
+[#additional-resources-install]
+
+Learn about sizing, scaling, and advanced configuration.
+
+* xref:../install/cluster_size.adoc#sizing-your-cluster[Sizing your cluster]
+* xref:../install/perform_scale.adoc#performance-and-scalability[Performance and scalability]
+* xref:../install/adv_config_install.adoc#advanced-config-hub[MultiClusterHub advanced configuration]
+* link:../console/console_access.adoc#accessing-your-console[Accessing your console]
