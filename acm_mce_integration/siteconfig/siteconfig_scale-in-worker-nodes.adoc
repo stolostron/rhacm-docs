@@ -1,0 +1,170 @@
+[#scale-in-worker-nodes]
+= Scaling in a {sno} cluster with the {sco}
+
+If you need to do maintenance work on your worker nodes, temporarily remove the node from your managed cluster that was installed by the {sco}.
+When you are ready, you can readd the previously removed worker node to your cluster.
+
+[#scale-in-preq]
+== Prerequisites
+
+* You have logged in to the hub cluster as a user with `cluster-admin` privileges.
+* If using {ztp}, you have configured your {ztp} environment. To configure your environment, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/edge_computing/ztp-preparing-the-hub-cluster[Preparing the hub cluster for GitOps ZTP].
+* You have the default cluster templates. To get familiar with the default templates, see xref:../../acm_mce_integration/siteconfig/cluster_templates.adoc#default-templates[Default set of templates]
+* You have installed your cluster with the {sco}. To install a cluster with the {sco}, see see xref:../../acm_mce_integration/siteconfig/install-clusters.adoc##install-clusters[Installing {sno} clusters with the {sco}]
+
+[#scale-in-remove-node]
+== Removing a worker node
+
+Remove a worker node that was deployed by {ai} using the {sco} flow.
+
+Complete the following steps to remove a worker node from the managed cluster:
+
+. Add an annotation in the `extraAnnotations` field of the worker node entry in the `ClusterInstance` CR:
++
+[source,yaml]
+----
+spec:
+   ...
+   nodes:
+   - hostName: "worker-node2.example.com"
+      role: "worker"
+      ironicInspect: ""
+      extraAnnotations:
+        BareMetalHost:
+          bmac.agent-install.openshift.io/remove-agent-and-node-on-delete: "true"
+...
+----
+
+. Specify the API version and kind of the `BareMetalHost` resource in the node-level `pruneManifests` field:
++
+[source,yaml]
+----
+...
+spec:
+   ...
+   nodes:
+     -hostName: "worker-node2.example.com"
+      ...
+      pruneManifests:
+        - apiVersion: metal3.io/v1alpha1
+          kind: BareMetalHost
+...
+----
+
+. Optional: If you are using {ztp}, push your changes to your Git repository and wait for node deletion to start.
+
+[#scale-in-delete-verification]
+=== Verifying worker node deletion
+
+. Wait for the worker node to be deleted. Monitor the process by running the following command on the hub cluster:
++
+[source,terminal]
+----
+oc get bmh -n <managed_cluster_namespace> --watch
+----
+
++
+See the following example output for successful worker node deletion:
+
++
+[source,terminal]
+----
+NAME                                STATE            CONSUMER   ONLINE   ERROR   AGE
+master-node1.example.com            provisioned                 true             81m
+worker-node2.example.com            deprovisioning              true             44m
+worker-node2.example.com            deleting                    true             50m
+----
+
+. Verify that the `BareMetalHost` and the `Agent` resources are removed on the hub cluster by running the following command on the hub cluster:
++
+[source,terminal]
+----
+oc get managedclusterinfo/<managed_cluster_name> -n <managed_cluster_namespace> -o \
+jsonpath='{range .status.nodeList[*]}{.name}{"\t"}{.conditions}{"\t"}{.labels}{"\n"}{end}'
+----
+
++
+See the following example output for successful worker node deletion:
+
++
+[source,terminal]
+----
+master-node1.example.com 	[{"status":"True","type":"Ready"}]	{"node-role.kubernetes.io/control-plane":"","node-role.kubernetes.io/master":"","node-role.kubernetes.io/worker":""}
+----
+
+[#scale-out-readd-node]
+== Readd a deleted worker node
+
+Readd a previously deleted worker node that was deployed by {ai} using the {sco} flow.
+
+Complete the following steps to readd the worker node to the managed cluster:
+
+. Remove the `extraAnnotations` and `pruneManifests` fields from the `ClusterInstance` CR that was added for node deletion.
++
+[source,yaml]
+----
+...
+spec:
+   ...
+   nodes:
+   - hostName: "worker-node2.example.com"
+      role: "worker"
+      ironicInspect: ""
+#      extraAnnotations:
+#        BareMetalHost:
+#          bmac.agent-install.openshift.io/remove-agent-and-node-on-delete: "true"
+#      pruneManifests:
+#        - apiVersion: metal3.io/v1alpha1
+#          kind: BareMetalHost
+...
+----
+
+. Optional: If you are using {ztp}, push your changes to your Git repository and wait for node deletion to start.
+
+[#scale-in-readd-verification]
+=== Verifying worker node addition
+
+. Wait for the worker node to be readded. Monitor the process by running the following command on the hub cluster:
++
+[source,terminal]
+----
+oc get agent -n <managed_cluster_namespace> --watch
+----
+
++
+See the following example output for successful worker node addition:
+
++
+[source,terminal]
+----
+NAME                                   CLUSTER                        APPROVED   ROLE     STAGE
+foobar01-a2b3-c4d5-e678-901f2g3h4j5k   <managed_cluster_namespace>    true       master   Done
+foobar02-a3b4-c5d6-e789-012f3g4h5j6k   <managed_cluster_namespace>    false                   
+foobar02-a3b4-c5d6-e789-012f3g4h5j6k   <managed_cluster_namespace>    false      worker   
+foobar02-a3b4-c5d6-e789-012f3g4h5j6k   <managed_cluster_namespace>    true       worker   
+foobar02-a3b4-c5d6-e789-012f3g4h5j6k   <managed_cluster_namespace>    true       worker   Starting installation
+foobar02-a3b4-c5d6-e789-012f3g4h5j6k   <managed_cluster_namespace>    true       worker   Installing
+foobar02-a3b4-c5d6-e789-012f3g4h5j6k   <managed_cluster_namespace>    true       worker   Writing image to disk
+foobar02-a3b4-c5d6-e789-012f3g4h5j6k   <managed_cluster_namespace>    true       worker   Waiting for control plane
+foobar02-a3b4-c5d6-e789-012f3g4h5j6k   <managed_cluster_namespace>    true       worker   Rebooting
+foobar02-a3b4-c5d6-e789-012f3g4h5j6k   <managed_cluster_namespace>    true       worker   Joined
+foobar02-a3b4-c5d6-e789-012f3g4h5j6k   <managed_cluster_namespace>    true       worker   Done
+----
+
+. Verify that the worker node is added by running the following command on the hub cluster:
++
+[source,terminal]
+----
+oc get managedclusterinfo/<managed_cluster_name> -n <managed_cluster_namespace> -o \
+jsonpath='{range .status.nodeList[*]}{.name}{"\t"}{.conditions}{"\t"}{.labels}{"\n"}{end}'
+----
+
++
+See the following example output for successful worker node addition:
+
++
+[source,terminal]
+----
+master-node1.example.com	[{"status":"True","type":"Ready"}]	{"node-role.kubernetes.io/control-plane":"","node-role.kubernetes.io/master":"","node-role.kubernetes.io/worker":""}
+worker-node2.example.com	[{"status":"True","type":"Ready"}]	{"node-role.kubernetes.io/worker":""}
+----
