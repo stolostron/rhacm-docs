@@ -1,0 +1,140 @@
+[#enable-vm-actions]
+= Enabling virtual machine actions (Technology Preview)
+
+To view `VirtualMachine` resources across all the clusters that {acm} manages, use the Search feature to list and filter the `VirtualMachine` resources created with the {ocp-virt}. You can also enable the following actions in your `VirtualMachine` resources:
+
+- Start
+- Stop
+- Restart
+- Pause
+- Unpause
+
+[#vm-actions-prereq]
+== Prerequisites
+
+- *Required access:* What's the required access level? 
+- You must enable the ManagedServiceAccount add-on. See link:../../clusters/install_upgrade/adv_config_install.adoc#serviceaccount-addon-intro[ManagedServiceAccount add-on].
+
+[#enable-actions-acm]
+== Enabling virtual machine actions for {acm-short}
+
+You can enable the virtual machine actions for {acm-short} by updating the console config map. Complete the following steps:
+
+. To update the {acm-short} console config map for enabling virtual machine actions, run the following command:
+
++
+[source,bash]
+----
+console-config -n open-cluster-management -p '{"data": {"VIRTUAL_MACHINE_ACTIONS": "enabled"}}'
+----
+
+. To run the actions, create and configure a `ManagedServiceAccount` resource for each managed cluster. Save the following YAML file:
+
++
+[source,yaml]
+----
+apiVersion: authentication.open-cluster-management.io/v1beta1
+kind: ManagedServiceAccount
+metadata:
+  name: vm-actor
+  labels:
+    app: search
+spec:
+  rotation: {}
+---
+apiVersion: rbac.open-cluster-management.io/v1alpha1
+kind: ClusterPermission
+metadata:
+  name: vm-actions
+  labels:
+    app: search
+spec:
+  clusterRole:
+    rules:
+      - apiGroups:
+          - subresources.kubevirt.io
+        resources:
+          - virtualmachines/start
+          - virtualmachines/stop
+          - virtualmachines/restart
+          - virtualmachineinstances/pause
+          - virtualmachineinstances/unpause
+        verbs:
+          - update
+  clusterRoleBinding:
+    subject:
+      kind: ServiceAccount
+      name: vm-actor
+      namespace: open-cluster-management-agent-addon
+----
++
+*Note:* You must repeat this step for each new managed cluster.
+
+. Apply the `ManagedServiceAccount` resource to your managed cluster by running the following command:
+
++
+[source,bash]
+----
+oc apply -n <MANAGED_CLUSTER> -f /path/to/file
+----
+
+The virtual machine actions are enabled for {acm-short}.
+
+[#disable-vm-actions]
+== Disabling virtual machine actions
+
+To disable virtual machine actions for {acm-short}, run the following command:
+
+[source,bash]
+----
+oc patch configmap console-config -n open-cluster-management -p '{"data": {"VIRTUAL_MACHINE_ACTIONS": "disabled"}}'
+----
+
+The actions are disabled.
+
+[#delete-vm-actions]
+== Deleting ManagedServiceAccounts and ClusterPermissions resources
+
+To delete `ManagedServiceAccounts` and `ClusterPermissions` resources that use virtual machine actions, complete the following steps:
+
+. To delete `ManagedServiceAccounts` resources, run the following command:
+
++
+[source,bash]
+----
+oc delete managedserviceaccount -A -l app=search
+----
+
+. To delete `ClusterPermissions` resources, run the following command:
+
++
+[source,bash]
+----
+oc delete clusterpermission -A -l app=search
+----
+
+. To confirm that the clean up is complete, run the following command:
+
++
+[source,bash]
+----
+echo
+----
+
++
+You might receive the following message:
+
++
+[source,bash]
+----
+"Virtual Machine tech preview cleanup complete."
+----
+
+The `ManagedServiceAccounts` and `ClusterPermissions` resources are deleted.
+
+
+
+
+
+
+
