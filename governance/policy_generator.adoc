@@ -68,7 +68,17 @@ data:
   key2: value2
 ----
 
-- Use the `object-templates-raw` manifest to automatically generate a `ConfigurationPolicy` with the content you add. See the following example:
+- Use the `object-templates-raw` manifest to automatically generate a `ConfigurationPolicy` resource with the content you add. See the following examples:
+
+** Create a manifest file called `manifest.yaml` with the following syntax:
+
++
+[source,yaml]
+----
+object-templates-raw: | {{- range (lookup "v1" "ConfigMap" "my-namespace" "").items }} - complianceType: musthave objectDefinition: kind: ConfigMap apiVersion: v1 metadata: name: {{ .metadata.name }} namespace: {{ .metadata.namespace }} labels: i-am-from: template {{- end }}
+----
+
+** Then create a `PolicyGenerator` configuration file similar to the following YAML:
 
 +
 [source,yaml]
@@ -83,12 +93,9 @@ policyDefaults:
 policies:
   - name: config-data
     manifests:
-      - path: <1>
-      object-templates-raw: | 
-        <your_content> <2>
+      - path: manifest.yaml <1>
 ----
-<1> Path to your file.
-<2> Your content is used in the generated `ConfigurationPolicy` resource and added as an entry for the `policy-templates` of a policy. The `object-templates-raw` generated `ConfigurationPolicy` has the same name as a manifest generated from a `ConfigurationPolicy` that has no specified name.
+<1> Path to your `manifest.yaml` file.
 
 - The generated `Policy` resource, along with the generated `Placement` and `PlacementBinding` might resemble the following example:
 
@@ -429,7 +436,7 @@ a| Path to a single file, a flat directory of files, or a Kustomize directory re
 
 The following manifests are supported:
 
-- Non-root policy type manifests such as `IamPolicy`, `CertificatePolicy`, and `ConfigurationPolicy` that have a `Policy` suffix. The previous manifests are not modified except for patches and are directly added as a `policy-templates` entry of the `Policy` resource. Gatekeeper constraints are also directly included if `informGatekeeperPolicies` is set to `false`.
+- Non-root policy type manifests such as `CertificatePolicy`, and `ConfigurationPolicy` that have a `Policy` suffix. The previous manifests are not modified except for patches and are directly added as a `policy-templates` entry of the `Policy` resource. Gatekeeper constraints are also directly included if `informGatekeeperPolicies` is set to `false`.
 
 - Manifests containing only an `object-templates-raw` key. The corresponding value is used directly in a generated `ConfigurationPolicy` resource without modification, which is added as a `policy-templates` entry of the `Policy` entry.
 
