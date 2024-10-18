@@ -1,0 +1,93 @@
+[#scale-out-worker-nodes]
+= Scaling out a {sno} cluster with the {sco}
+
+Scale out your managed cluster that was installed by the {sco}.
+You can scale out your cluster by adding a worker node.
+
+[#scale-out-preq]
+== Prerequisites
+
+* You have logged in to the hub cluster as a user with `cluster-admin` privileges.
+* If using {ztp}, you have configured your {ztp} environment. To configure your environment, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/edge_computing/ztp-preparing-the-hub-cluster[Preparing the hub cluster for GitOps ZTP].
+* You have the default cluster templates. To get familiar with the default templates, see xref:../../acm_mce_integration/siteconfig/cluster_templates.adoc#default-templates[Default set of templates]
+* You have installed your cluster with the {sco}. To install a cluster with the {sco}, see see xref:../../acm_mce_integration/siteconfig/install-clusters.adoc##install-clusters[Installing {sno} clusters with the {sco}]
+
+[#scale-out-annotation]
+== Adding a worker node
+
+Add a worker node by updating your `ClusterInstall` CR.
+
+Complete the following steps to add a worker node to the managed cluster:
+
+. Add a worker node and define the required fields in the `ClusterInstance` CR:
++
+[source,yaml]
+----
+spec:
+  ...
+  nodes:
+    - hostName: "<host_name>"
+      role: "worker"
+      templateRefs:
+        - name: aci-node-crs-v1
+          namespace: rhacm
+      bmcAddress: "<bmc_address>"
+      bmcCredentialsName:
+        name: "<bmc_credentials_name>"
+      bootMACAddress: "<boot_mac_address>"
+...
+----
+
+For more information about the required and optional fields, see xref:../../rhacm-docs/apis/clusterinstance.json.adoc#clusterinstance[ClusterInstance].
+
+. Apply the changes.
+
+.. If you are using {acm} only, run the following command on the hub cluster:
++
+[source,terminal]
+----
+oc apply -f <clusterinstance>.yaml
+----
+
+.. If you are using {ztp}, push to your Git repository and wait for Argo CD to synchronize the changes.
+
+[#scale-out-verification]
+=== Verifying worker node addition
+
+. Wait for the `BaremetalHost` resource of that worker node to be added. Monitor the process by running the following command on the hub cluster:
++
+[source,terminal]
+----
+oc get bmh -n <managed_cluster_namespace> --watch
+----
+
++
+See the following example output for successful worker node addition:
+
++
+[source,terminal]
+----
+NAME                                STATE            CONSUMER   ONLINE   ERROR   AGE
+master-node1.example.com            provisioned                 true             81m
+worker-node2.example.com            provisioning                true             44m
+----
+
+. Verify that the `Node`, `Agent`, and `BareMetalHost` resources are created by running the following commands on the hub cluster:
++
+[source,terminal]
+----
+oc get managedclusterinfo/<managed_cluster_name> -n <managed_cluster_namespace> \
+-o jsonpath='{range .status.nodeList[*]}{.name}{"\t"}{.conditions}{"\t"}{.labels}{"\n"}{end}'
+----
+
++
+[source,terminal]
+----
+oc get agents -n <managed_cluster_namespace> --watch
+----
+
++
+[source,terminal]
+----
+oc get bmh -n <managed_cluster_namespace> --watch
+----
