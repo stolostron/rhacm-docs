@@ -1,43 +1,58 @@
-[#troubleshooting-klusterlet-with-degraded-conditions-mce]
-= Troubleshooting Klusterlet with degraded conditions
+[#trouble-unknown-status-rosa-hcp]
+= Troubleshooting managed clusters _Unknown_ on {rosa} with hosted control planes cluster
 
-The Klusterlet degraded conditions can help to diagnose the status of Klusterlet agents on managed cluster. If a Klusterlet is in the degraded condition, the Klusterlet agents on managed cluster might have errors that need to be troubleshooted. See the following information for Klusterlet degraded conditions that are set to `True`.
+The status of all managed clusters on a {rosa} hosted clusters suddenly becomes `Unknown`.
 
-[#symptom-klusterlet-is-in-the-degraded-condition-mce]
-== Symptom: Klusterlet is in the degraded condition
+[#symptom-unknown-status-rosa-hcp]
+== Symptom: All managed clusters are in _Unknown_ status on {rosa} with hosted control planes cluster
 
-After deploying a Klusterlet on managed cluster, the `KlusterletRegistrationDegraded` or `KlusterletWorkDegraded`
-condition displays a status of _True_.
+When you check the `klusterlet-agent` pod log in the `open-cluster-management-agent` namespace on your managed cluster, you see an error that resembles the following:
 
-[#identifying-the-problem-klusterlet-is-in-the-degraded-condition-mce]
-== Identifying the problem: Klusterlet is in the degraded condition
+----
+E0809 18:45:29.450874       1 reflector.go:147] k8s.io/client-go@v0.29.4/tools/cache/reflector.go:229: Failed to watch *v1.CertificateSigningRequest: failed to list *v1.CertificateSigningRequest: Get "https://api.xxx.openshiftapps.com:443/apis/certificates.k8s.io/v1/certificatesigningrequests?limit=500&resourceVersion=0": tls: failed to verify certificate: x509: certificate signed by unknown authority
+----
 
-. Run the following command on the managed cluster to view the Klusterlet status:
+[#resolving-the-problem-unknown-status-rosa-hcp]
+== Resolving the problem: All managed clusters are in _Unknown_ status on {rosa} with hosted control planes cluster
+
+. Create a `KlusterletConfig` resource with name `global` if it does not exist.
+
+. Set the `spec.hubKubeAPIServerConfig.serverVerificationStrategy` to `UseSystemTruststore`. See the following example:
+
 +
+[source,yaml]
 ----
-kubectl get klusterlets klusterlet -oyaml
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  hubKubeAPIServerConfig:
+    serverVerificationStrategy: UseSystemTruststore
 ----
 
-. Check `KlusterletRegistrationDegraded` or `KlusterletWorkDegraded` to see if the condition is set to `True`. Proceed to _Resolving the problem_ for any degraded conditions that are listed.
+. Apply the resource by running the following command on the hub cluster. Replace `<filename>` with the name of your file:
 
-[#resolving-the-problem-klusterlet-is-in-the-degraded-condition-mce]
-== Resolving the problem: Klusterlet is in the degraded condition
++
+[source,bash]
+----
+oc apply -f <filename>
+----
 
-See the following list of degraded statuses and how you can attempt to resolve those issues:
+The state of some managed clusters might recover. Continue with the process for managed clusters that remain in the `Unknown` status.
 
- - If the `KlusterletRegistrationDegraded` condition with a status of _True_ and the condition reason is: _BootStrapSecretMissing_, you need create a bootstrap secret on `open-cluster-management-agent` namespace.
+. Export and decode the `import.yaml `file from the hub cluster by running the following command on the hub cluster. Replace `<cluster_name>` with the name of your cluster.
 
- - If the `KlusterletRegistrationDegraded` condition displays _True_ and the condition reason is a _BootstrapSecretError_,
-or _BootstrapSecretUnauthorized_, then the current bootstrap secret is invalid. Delete the current bootstrap secret and recreate a valid bootstrap secret on `open-cluster-management-agent` namespace.
++
+[source,bash]
+----
+oc get secret <cluster_name>-import -n <cluster_name> -o jsonpath={.data.import\.yaml} | base64 --decode > <cluster_name>-import.yaml
+----
 
- - If the `KlusterletRegistrationDegraded` and `KlusterletWorkDegraded` displays _True_ and the condition reason is
-_HubKubeConfigSecretMissing_, delete the Klusterlet and recreate it.
+. Apply the file by running the following command on the managed cluster. 
 
- - If the `KlusterletRegistrationDegraded` and `KlusterletWorkDegraded` displays _True_ and the condition reason is:
-_ClusterNameMissing_, _KubeConfigMissing_, _HubConfigSecretError_, or _HubConfigSecretUnauthorized_, delete the hub cluster kubeconfig secret from `open-cluster-management-agent` namespace. The registration agent will bootstrap again to get a new hub cluster kubeconfig secret.
-
- - If the `KlusterletRegistrationDegraded` displays _True_ and the condition reason is _GetRegistrationDeploymentFailed_
-or _UnavailableRegistrationPod_, you can check the condition message to get the problem details and attempt to resolve.
-
- - If the `KlusterletWorkDegraded` displays _True_ and the condition reason is _GetWorkDeploymentFailed_ or _UnavailableWorkPod_,
-you can check the condition message to get the problem details and attempt to resolve.
++
+[source,bash]
+----
+oc apply -f <cluster_name>-import.yaml
+----
