@@ -1,0 +1,60 @@
+[#trouble-unknown-status-rosa-hcp]
+= Troubleshooting managed clusters _Unknown_ on {rosa} with hosted control planes cluster
+
+The status of all managed clusters on a {rosa} hosted clusters suddenly becomes `Unknown`.
+
+[#symptom-unknown-status-rosa-hcp]
+== Symptom: All managed clusters are in _Unknown_ status on {rosa} with hosted control planes cluster
+
+When you check the `klusterlet-agent` pod log in the `open-cluster-management-agent` namespace on your managed cluster, you see an error that resembles the following:
+
+[source,terminal]
+----
+E0809 18:45:29.450874       1 reflector.go:147] k8s.io/client-go@v0.29.4/tools/cache/reflector.go:229: Failed to watch *v1.CertificateSigningRequest: failed to list *v1.CertificateSigningRequest: Get "https://api.xxx.openshiftapps.com:443/apis/certificates.k8s.io/v1/certificatesigningrequests?limit=500&resourceVersion=0": tls: failed to verify certificate: x509: certificate signed by unknown authority
+----
+
+[#resolving-the-problem-unknown-status-rosa-hcp]
+== Resolving the problem: All managed clusters are in _Unknown_ status on {rosa} with hosted control planes cluster
+
+. Create a `KlusterletConfig` resource with name `global` if it does not exist.
+
+. Set the `spec.hubKubeAPIServerConfig.serverVerificationStrategy` to `UseSystemTruststore`. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  hubKubeAPIServerConfig:
+    serverVerificationStrategy: UseSystemTruststore
+----
+
+. Apply the resource by running the following command on the hub cluster. Replace `<filename>` with the name of your file:
+
++
+[source,bash]
+----
+oc apply -f <filename>
+----
+
++
+The state of some managed clusters might recover. Continue with the process for managed clusters that remain in the `Unknown` status.
+
+. Export and decode the `import.yaml `file from the hub cluster by running the following command on the hub cluster. Replace `<cluster_name>` with the name of your cluster.
+
++
+[source,bash]
+----
+oc get secret <cluster_name>-import -n <cluster_name> -o jsonpath={.data.import\.yaml} | base64 --decode > <cluster_name>-import.yaml
+----
+
+. Apply the file by running the following command on the managed cluster. 
+
++
+[source,bash]
+----
+oc apply -f <cluster_name>-import.yaml
+----
