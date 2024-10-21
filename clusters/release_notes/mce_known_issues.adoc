@@ -25,12 +25,76 @@ Review the known issues for Cluster lifecycle with {mce-short}. The following li
 
 Cluster management known issues and limitations are part of the Cluster lifecycle with {mce-short} documentation.
 
+* <<cluster-issues-install,Installation>>
 * <<cluster-issues-mce,Cluster management>>
 * <<cluster-issues-cim,Central infrastructure management>>
 * <<cluster-issues-msa,Managed Service Account add-on>>
+//??
+
+[#cluster-issues-install]
+== Installation 
+
+Learn about known issues and limitations during {mce-short} installation.
+
+[#status-stuck-rosa-hcp]
+=== Status stuck when installing on {rosa} with hosted control plane cluster
+//2.7:14566
+
+Installation status might get stuck in the `Installing` state when you install {mce-short} on a {rosa} with hosted control planes cluster. The `local-cluster` might also remain in the `Unknown` state. 
+
+When you check the `klusterlet-agent` pod log in the `open-cluster-management-agent` namespace on your hub cluster, you see an error that resembles the following:
+
+[source,terminal]
+----
+E0809 18:45:29.450874       1 reflector.go:147] k8s.io/client-go@v0.29.4/tools/cache/reflector.go:229: Failed to watch *v1.CertificateSigningRequest: failed to list *v1.CertificateSigningRequest: Get "https://api.xxx.openshiftapps.com:443/apis/certificates.k8s.io/v1/certificatesigningrequests?limit=500&resourceVersion=0": tls: failed to verify certificate: x509: certificate signed by unknown authority
+----
+
+To resolve the problem, configure the hub cluster API server verification strategy. Complete the following steps:
+
+. Create a `KlusterletConfig` resource with name `global` if it does not exist.
+
+. Set the `spec.hubKubeAPIServerConfig.serverVerificationStrategy` to `UseSystemTruststore`. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  hubKubeAPIServerConfig:
+    serverVerificationStrategy: UseSystemTruststore
+----
+
+. Apply the resource by running the following command on the hub cluster. Replace `<filename>` with the name of your file:
+
++
+[source,bash]
+----
+oc apply -f <filename>
+----
+
+. If the `local-cluster` state does not recover in one minute, export and decode the `import.yaml` file by running the following command on the hub cluster:
+
++
+[source,bash]
+----
+oc get secret local-cluster-import -n local-cluster -o jsonpath={.data.import\.yaml} | base64 --decode > import.yaml
+----
+
+. Apply the file by running the following command on the hub cluster:
+
++
+[source,bash]
+----
+oc apply -f import.yaml
+----
 
 [#cluster-issues-mce]
 == Cluster
+
+//Need a description here. I will fix later.
 
 [#limitation-with-nmstate]
 === Limitation with _nmstate_
@@ -306,6 +370,7 @@ To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9
 
 [#cluster-issues-msa]
 == Managed Service Account add-on
+//these sections are higher level features of the product; not sure this needs to be separated as a header like install or cluster management--a good way to tell is looking at the console. We would not have a section for every add-on.
 
 [#installnamespace-field-limit]
 === _installNamespace_ field can only have one value
