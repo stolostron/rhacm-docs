@@ -144,17 +144,24 @@ spec:
 +
 [source,yaml]
 ----
-apiVersion: config.open-cluster-management.io/v1alpha1
 kind: KlusterletConfig
 metadata:
   name: https-proxy
 spec:
-  hubKubeAPIServerProxyConfig:
-    httpsProxy: "https://<username>:<password>@<ip>:<port>"
-    caBundle: <user-ca-bundle> 
+  hubKubeAPIServerConfig:
+    proxyURL: "https://<username>:<password>@<ip>:<port>"
+    trustedCABundles:
+    - name: "proxy-ca-bundle"
+      caBundle:
+        name: <configmap-name>
+        namespace: <configmap-namespace>
 ----
 + 
-*Note:* A CA certificate is required when the HTTPS proxy server is configured. The HTTPS proxy is used if both HTTP proxy and HTTPS proxy are specified.
+*Note:* A CA bundle is required for HTTPS proxy. It refers to a ConfigMap containing one or multiple CA certificates. You can create the ConfigMap by running the following command:
++
+----
+oc create -n <configmap-namespace> configmap <configmap-name> --from-file=ca.crt=/path/to/ca/file`
+----
 
 . When creating a managed cluster, choose the `KlusterletConfig` resource by adding an annotation that refers to the `KlusterletConfig` resource. See the following example:
 +
@@ -239,15 +246,23 @@ To use a custom hub API server URL and CA bundle when importing a managed cluste
 apiVersion: config.open-cluster-management.io/v1alpha1
 kind: KlusterletConfig
 metadata:
-  name: <1>
+  name: <name> <1>
 spec:
-  hubKubeAPIServerURL: "https://api.example.com:6443" <2>
-  hubKubeAPIServerCABundle: "LS0tLS1CRU...LS0tCg==" <3>
+  hubKubeAPIServerConfig:
+    url: "https://api.example.com:6443" <2>
+    serverVerificationStrategy: UseCustomCABundles
+    trustedCABundles:
+    - name: <custom-ca-bundle> <3>
+      caBundle:
+        name: <custom-ca-bundle-configmap> <4>
+        namespace: <multicluster-engine> <5>
 ----
 +
 <1> Add your klusterlet config name.
 <2> Add your custom server URL.
-<3> Add your custom CA bundle.
+<3> Add your custom CA bundle name. You can use any value except `auto-detected`, which is reserved for internal use.
+<4> Add your name of the CA bundle ConfigMap. You can create the ConfigMap by running the following command: `oc create -n <configmap-namespace> configmap <configmap-name> --from-file=ca.crt=/path/to/ca/file`
+<5> Add your namespace of the CA bundle ConfigMap.
 
 . Select the `KlusterletConfig` resource when creating a managed cluster by adding an annotation that refers to the resource. See the following example:
 +
@@ -277,26 +292,30 @@ spec:
 
 If you create a `KlusterletConfig` resource and set the name to `global`, the configurations in the global `KlusterletConfig` are automatically applied on every managed cluster.
 
-If you create another `KlusterletConfig` in an environment that has a global `KlusterletConfig` and bind it with a managed cluster, the value of your `KlusterletConfig` overrides the global `KlusterletConfig` value if you set different values for the same field.
+In an environment that has a global `KlusterletConfig`, you can also create a cluster-specific `KlusterletConfig` and bind it with a managed cluster by adding the `agent.open-cluster-management.io/klusterlet-config: <klusterletconfig-name>` annotation to the `ManagedCluster resource`. The value of the cluster-specific `KlusterletConfig` overrides the global `KlusterletConfig` value if you set different values for the same field. 
 
-See the following example where the `hubKubeAPIServerURL` field has different values set in your `KlusterletConfig` and the global `KlusterletConfig`. The `"example.test.com"` value overrides the `"example.global.com"` value:
+See the following example where the `hubKubeAPIServerURL` field has different values set in your `KlusterletConfig` and the global `KlusterletConfig`. The "https://api.example.test.com:6443" value overrides the "https://api.example.global.com:6443" value:
 
 [source,yaml]
 ----
-apiVersion: config.open-cluster-management.io/v1alpha1
+piVersion: config.open-cluster-management.io/v1alpha1
 kind: KlusterletConfig
 metadata:
   name: test
 spec:
-  hubKubeAPIServerURL: "example.test.com"
-—
+  hubKubeAPIServerConfig:
+    url: "https://api.example.test.com:6443"
+---
 apiVersion: config.open-cluster-management.io/v1alpha1
 kind: KlusterletConfig
 metadata:
   name: global
 spec:
-  hubKubeAPIServerURL: "example.global.com"
+  hubKubeAPIServerConfig:
+    url: "https://api.example.global.com:6443"
 ----
+
+The value of the global `KlusterletConfig` is used if there is no cluster-specific `KlusterletConfig` bound to a managed cluster, or the same field is missing or does not have a value in the cluster-specific `KlusterletConfig`. 
 
 If you create another `KlusterletConfig` in an environment that has a global `KlusterletConfig` and bind it with a managed cluster, the value of the global `KlusterletConfig` is used if the same field is missing or does not have a value in your `KlusterletConfig`.
 
