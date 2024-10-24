@@ -1,5 +1,5 @@
 [#known-issues-mce]
-= Known issues and limitations for Cluster management with {mce-short}
+= Known issues and limitations for Cluster lifecycle with {mce-short}
 
 ////
 Please follow this format:
@@ -21,16 +21,80 @@ Known issue process and when to write:
 Or consider a troubleshooting topic.
 ////
 
-Review the known issues for cluster management with {mce-short}. The following list contains known issues and limitations for this release, or known issues that continued from the previous release. For your {ocp-short} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14[{ocp-short} release notes].
+Review the known issues for Cluster lifecycle with {mce-short}. The following list contains known issues and limitations for this release, or known issues that continued from the previous release. For your {ocp-short} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.14[{ocp-short} release notes].
 
 Cluster management known issues and limitations are part of the Cluster lifecycle with {mce-short} documentation.
 
+* <<cluster-issues-install,Installation>>
 * <<cluster-issues-mce,Cluster management>>
 * <<cluster-issues-cim,Central infrastructure management>>
 * <<cluster-issues-msa,Managed Service Account add-on>>
+//??
+
+[#cluster-issues-install]
+== Installation 
+
+Learn about known issues and limitations during {mce-short} installation.
+
+[#status-stuck-rosa-hcp]
+=== Status stuck when installing on {rosa} with hosted control plane cluster
+//2.7:14566
+
+Installation status might get stuck in the `Installing` state when you install {mce-short} on a {rosa} with hosted control planes cluster. The `local-cluster` might also remain in the `Unknown` state. 
+
+When you check the `klusterlet-agent` pod log in the `open-cluster-management-agent` namespace on your hub cluster, you see an error that resembles the following:
+
+[source,terminal]
+----
+E0809 18:45:29.450874       1 reflector.go:147] k8s.io/client-go@v0.29.4/tools/cache/reflector.go:229: Failed to watch *v1.CertificateSigningRequest: failed to list *v1.CertificateSigningRequest: Get "https://api.xxx.openshiftapps.com:443/apis/certificates.k8s.io/v1/certificatesigningrequests?limit=500&resourceVersion=0": tls: failed to verify certificate: x509: certificate signed by unknown authority
+----
+
+To resolve the problem, configure the hub cluster API server verification strategy. Complete the following steps:
+
+. Create a `KlusterletConfig` resource with name `global` if it does not exist.
+
+. Set the `spec.hubKubeAPIServerConfig.serverVerificationStrategy` to `UseSystemTruststore`. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  hubKubeAPIServerConfig:
+    serverVerificationStrategy: UseSystemTruststore
+----
+
+. Apply the resource by running the following command on the hub cluster. Replace `<filename>` with the name of your file:
+
++
+[source,bash]
+----
+oc apply -f <filename>
+----
+
+. If the `local-cluster` state does not recover in one minute, export and decode the `import.yaml` file by running the following command on the hub cluster:
+
++
+[source,bash]
+----
+oc get secret local-cluster-import -n local-cluster -o jsonpath={.data.import\.yaml} | base64 --decode > import.yaml
+----
+
+. Apply the file by running the following command on the hub cluster:
+
++
+[source,bash]
+----
+oc apply -f import.yaml
+----
 
 [#cluster-issues-mce]
 == Cluster
+
+//Need a description here. I will fix later.
 
 [#limitation-with-nmstate]
 === Limitation with _nmstate_
@@ -208,11 +272,11 @@ oc patch clusterdeployment <clusterdeployment-name> -p '{"metadata":{"finalizers
 The converged flow is the default process of provisioning. When you use the `BareMetalHost` resource for the Bare Metal Operator (BMO) to connect your host to a live ISO, the Ironic Python Agent does the following actions:
 
 * It runs the steps in the Bare Metal installer-provisioned-infrastructure. 
-* It starts the Assisted Installer agent, and the agent handles the rest of the install and provisioning process. 
+* It starts the {ai} agent, and the agent handles the rest of the install and provisioning process. 
 
-If the Assisted Installer agent starts slowly and you deploy a managed cluster, the managed cluster might become stuck in the `Pending` status and not have any agent resources. You can work around the issue by disabling the converged flow. 
+If the {ai} agent starts slowly and you deploy a managed cluster, the managed cluster might become stuck in the `Pending` status and not have any agent resources. You can work around the issue by disabling the converged flow. 
 
-*Important:* When you disable the converged flow, only the Assisted Installer agent runs in the live ISO, reducing the number of open ports and disabling any features you enabled with the  Ironic Python Agent agent, including the following:
+*Important:* When you disable the converged flow, only the {ai} agent runs in the live ISO, reducing the number of open ports and disabling any features you enabled with the  Ironic Python Agent agent, including the following:
 
 * Pre-provisioning disk cleaning 
 * iPXE boot firmware 
@@ -306,6 +370,7 @@ To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9
 
 [#cluster-issues-msa]
 == Managed Service Account add-on
+//these sections are higher level features of the product; not sure this needs to be separated as a header like install or cluster management--a good way to tell is looking at the console. We would not have a section for every add-on.
 
 [#installnamespace-field-limit]
 === _installNamespace_ field can only have one value

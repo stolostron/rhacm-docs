@@ -1,7 +1,7 @@
 [#gitops-register]
-= Registering managed clusters to OpenShift GitOps operator
+= Registering managed clusters to {gitops} operator
 
-To configure GitOps with the Push model, you can register a set of one or more {acm} managed clusters to an instance of {ocp} GitOps operator. After registering, you can deploy applications to those clusters. Set up a continuous GitOps environment to automate application consistency across clusters in development, staging, and production environments.
+To configure {gitops-short} with the Push model, you can register a set of one or more {acm} managed clusters to an instance of {gitops-short} operator. After registering, you can deploy applications to those clusters. Set up a continuous {gitops-short} environment to automate application consistency across clusters in development, staging, and production environments.
 
 [#prerequisites-argo]
 == Prerequisites 
@@ -10,24 +10,23 @@ To configure GitOps with the Push model, you can register a set of one or more {
 
 . Import one or more managed clusters.
 
+. To register managed clusters to {gitops-short}, complete the link:../clusters/cluster_lifecycle/create_clusterset.adoc#creating-a-managedclusterset[Creating a _ManagedClusterSet_] documentation.
+
 [#register-gitops]
-== Registering managed clusters to GitOps
+== Registering managed clusters to {gitops}
 
-Complete the following steps to register managed clusters to GitOps:
+Complete the following steps to register managed clusters to {gitops-short}:
 
-+
-See the link:../clusters/cluster_lifecycle/create_clusterset.adoc#creating-a-managedclusterset[Creating a _ManagedClusterSet_] documentation for more information.
+. Create a managed cluster set binding to the namespace where {gitops-short} is deployed. For an example of binding the managed cluster to the `openshift-gitops` namespace, see the link:https://github.com/stolostron/multicloud-integrations/blob/main/examples/managedclustersetbinding.yaml[`multicloud-integrations`] managed `clusterset` binding example. In the _Additional resources_ section, see _Creating a ManagedClusterSetBinding resource_ for more general information about creating a `ManagedClusterSetBinding`. See link:../clusters/cluster_lifecycle/placement_filter.adoc[Filtering ManagedClusters from ManagedClusterSets] for placement information. 
 
-. Create a managed cluster set binding to the namespace where {gitops} is deployed. For an example of binding the managed cluster to the `openshift-gitops` namespace, see the link:https://github.com/stolostron/multicloud-integrations/blob/main/examples/managedclustersetbinding.yaml[`multicloud-integrations`] managed clusterset binding example. In the _Additional resources_ section, see _Creating a ManagedClusterSetBinding resource_ for more general information about creating a `ManagedClusterSetBinding`. See link:../clusters/cluster_lifecycle/placement_filter.adoc[Filtering ManagedClusters from ManagedClusterSets] for placement information. 
-
-. In the namespace that is used in managed cluster set binding, create a `Placement` custom resource to select a set of managed clusters to register to an {ocp-short} GitOps operator instance. Use the `multicloud-integration` placement example as a template. See _Using ManagedClusterSets with Placement_ for placement information. 
+. In the namespace that is used in managed cluster set binding, create a `Placement` custom resource to select a set of managed clusters to register to an {gitops-short} operator instance. Use the `multicloud-integration` placement example as a template. See _Using ManagedClusterSets with Placement_ for placement information. 
 +
 *Notes:* 
 +
-- Only {ocp-short} clusters are registered to an {ocp} GitOps operator instance, not other Kubernetes clusters.
-- In some unstable network scenarios, the managed clusters might be temporarily placed in `unavailable` or `unreachable` state. See _Configuring placement tolerations for {acm-short} and OpenShift GitOps_ for more details.
+- Only {ocp-short} clusters are registered to an {gitops-short} operator instance, not other Kubernetes clusters.
+- In some unstable network scenarios, the managed clusters might be temporarily placed in `unavailable` or `unreachable` state. See _Configuring placement tolerations for {acm-short} and {gitops-short}_ for more details.
 
-. Create a `GitOpsCluster` custom resource to register the set of managed clusters from the placement decision to the specified instance of OpenShift GitOps. This enables the OpenShift GitOps instance to deploy applications to any of those {acm-short} managed clusters. Use the `_multicloud-integrations_` GitOps cluster example.
+. Create a `GitOpsCluster` custom resource to register the set of managed clusters from the placement decision to the specified instance of {gitops-short}. This enables the {gitops-short} instance to deploy applications to any of those {acm-short} managed clusters. Use the `_multicloud-integrations_` {gitops-short} cluster example.
 +
 *Note:* The referenced `Placement` resource must be in the same namespace as the `GitOpsCluster` resource. See the following example:
 +
@@ -47,56 +46,108 @@ spec:
     apiVersion: cluster.open-cluster-management.io/v1beta1
     name: all-openshift-clusters <1>
 ----
-<1> The `placementRef.name` value is `all-openshift-clusters`, and is specified as target clusters for the GitOps instance that is installed in `argoNamespace: openshift-gitops`. The `argoServer.cluster` specification requires the `local-cluster` value.
+<1> The `placementRef.name` value is `all-openshift-clusters`, and is specified as target clusters for the {gitops-short} instance that is installed in `argoNamespace: openshift-gitops`. The `argoServer.cluster` specification requires the `local-cluster` value.
 
-. Save your changes. You can now follow the GitOps workflow to manage your applications.
+. Save your changes. You can now follow the {gitops-short} workflow to manage your applications.
+
+[#register-non-ocp]
+== Registering non-{ocp-short} clusters to {gitops}
+
+You can now use the {acm-short} `GitOpsCluster` resource to register a non-{ocp-short} cluster to a {gitops-short} cluster. With this capability, you can deploy application resources to the non-{ocp-short} cluster by using the {gitops-short} console. To register a non-{ocp-short} cluster to a {gitops-short} cluster, complete the following steps:
+
+. Go to the API server URL in the non-{ocp-short} `ManagedCluster` resource `spec` and validate it by running the following command:
+
++
+[source,bash]
+----
+oc get managedclusters eks-1
+----
+
+. Verify that your output resembles the following information:
+
++
+[source,bash]
+----
+NAME    HUB ACCEPTED   MANAGED CLUSTER URLS                                                      JOINED   AVAILABLE   AGE
+eks-1   true           https://5E336C922AB16684A332C10535B8D407.gr7.us-east-2.eks.amazonaws.com  True     True        37m 
+----
+
+. If the API server URL in the non-{ocp-short} `MangedCluster` resource `spec` is empty, update it manually by completing the following steps: 
+.. To complete the API server URL, edit the `MangedCluster` resource `spec` by running the following command: 
+
++
+[source,bash]
+----
+oc edit managedclusters eks-1
+----
+
+.. Verify that your YAML resembles the following file: 
+
++
+[source,bash]
+----
+spec:
+  managedClusterClientConfigs:
+  - caBundle: ZW1wdHlDQWJ1bmRsZQo=          
+    url: https://5E336C922AB16684A332C10535B8D407.gr7.us-east-2.eks.amazonaws.com
+----
+
+.. Save the changes then validate that the API server is completed by running the following command: 
+
++
+[source,bash]
+----
+oc get managedclusters eks-1
+----
+
+.. Verify that your output resembles the following information: 
+
++
+[source,bash]
+----
+NAME     HUB ACCEPTED  MANAGED CLUSTER URLS                                                      JOINED   AVAILABLE   AGE
+eks-1    true          https://5E336C922AB16684A332C10535B8D407.gr7.us-east-2.eks.amazonaws.com  True     True        37m 
+----
+
+. To verify that the cluster secret is generated, go to the `openshift-gitops` namespace and confirm that that `GitOpsCluster` resource status reports, `successful`. 
++
+*Notes:* 
+
+* With {acm-short} 2.12 or later, the API server URL for all types of non-{ocp-short} `ManagedCluster` resources renders automatically if you use the following importing modes:
+** Entering your server URL and API token for the existing cluster. 
+** Entering the `kubeconfig` file for the existing cluster. 
+* The following cases can make the API server URL empty for one of the `ManagedClusters` resources:
+** The non-{ocp-short} cluster is imported to the {acm-short} hub cluster before version 2.12. 
+** The non-{ocp-short} cluster is manually imported to the {acm-short} hub cluster in version 2.12 through the import mode, `Run import commands`. 
 
 [#secret-gitops]
-== GitOps token
+== {gitops} token
 
-When you integrate with the GitOps operator for every managed cluster that is bound to the GitOps namespace through the placement and `ManagedClusterSetBinding` custom resources, a secret with a token to access the `ManagedCluster` is created in the namespace. This is required for the GitOps controller to sync resources to the managed cluster. When a user is given administrator access to a GitOps namespace to perform application lifecycle operations, the user also gains access to this secret and `admin` level to the managed cluster. 
+When you integrate with the {gitops-short} operator, for every managed cluster that is bound to the {gitops-short} namespace through the placement and `ManagedClusterSetBinding` custom resources, a secret with a token to access the `ManagedCluster` is created in the {gitops-short} instance server namespace. 
 
-If this is not desired, instead of binding the user to the namespace-scoped `admin` role, use a more restrictive custom role with permissions required to work with application resources that can be created and used to bound the user. See the following `ClusterRole` example:
+The {gitops-short} controller needs this secret to sync resources to the managed cluster. By default, the service account application manager works with the cluster administrator permissions on the managed cluster to generate the {gitops-short} cluster secret in the {gitops-short} instance server namespace. The default namespace is `openshift-gitops`. 
 
-
-[source,yaml]
-----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: application-set-admin
-rules:
-- apiGroups:
-  - argoproj.io
-  resources:
-  - applicationsets
-  verbs:
-  - get
-  - list
-  - watch
-  - update
-  - delete
-  - deletecollection
-  - patch
-----
+If you do not want this default, create a service account with customized permissions on the managed cluster for generating the {gitops-short} cluster secret in the {gitops-short} instance server namespace. The default namespace is still, `openshift-gitops`. For more information, see xref:../gitops/gitops_service_account_argo_cd.adoc#gitops-service-account-argo-cd[Creating a customized service account for Argo CD push model].
 
 [#additional-resources-gitops]
 == Additional resources
 
-- Refer to xref:../gitops/gitops_tolerations_config.adoc#tolerations-config[Configuring application placement tolerations for GitOps] for more details.
+For more information, see the following resources and examples: 
 
-- See the link:https://github.com/open-cluster-management-io/multicloud-integrations/blob/main/examples/managedclustersetbinding.yaml[`multicloud-integrations` managed cluster set binding] example.
+- xref:../gitops/gitops_tolerations_config.adoc#tolerations-config[Configuring application placement tolerations for GitOps]
 
-- Refer to link:../clusters/cluster_lifecycle/create_clusterset.adoc#creating-a-managedclusterset[Creating a _ManagedClusterSet_] 
+- link:https://github.com/open-cluster-management-io/multicloud-integrations/blob/main/examples/managedclustersetbinding.yaml[`multicloud-integrations` managed cluster set binding] 
 
-- See the link:https://github.com/stolostron/multicloud-integrations/blob/main/examples/placement.yaml[`multicloud-integration` placement] example.
+- link:../clusters/cluster_lifecycle/create_clusterset.adoc#creating-a-managedclusterset[Creating a _ManagedClusterSet_] 
 
-- See link:../clusters/cluster_lifecycle/placement_overview.adoc[Placement overview] for placement information.
+- link:https://github.com/stolostron/multicloud-integrations/blob/main/examples/placement.yaml[`multicloud-integration` placement]
 
-- See the link:https://github.com/stolostron/multicloud-integrations/blob/main/examples/gitopscluster.yaml[`multicloud-integrations` GitOps cluster] example.
+- link:../clusters/cluster_lifecycle/placement_overview.adoc[Placement overview]
 
-- See the link:https://github.com/stolostron/multicloud-integrations/blob/main/examples/managedclustersetbinding.yaml[`multicloud-integrations` managed cluster set binding] example.
+- link:https://github.com/stolostron/multicloud-integrations/blob/main/examples/gitopscluster.yaml[`multicloud-integrations` GitOps cluster] 
 
-- See link:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-a-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource] documentation for more information.
+- link:https://github.com/stolostron/multicloud-integrations/blob/main/examples/managedclustersetbinding.yaml[`multicloud-integrations` managed cluster set binding] 
 
-- See link:https://docs.redhat.com/documentation/en-us/red_hat_openshift_gitops/1.12/html/understanding_openshift_gitops/about-redhat-openshift-gitops[About {gitops}] to learn more.
+- link:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-a-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource] 
+
+- link:https://docs.redhat.com/documentation/en-us/red_hat_openshift_gitops/1.12/html/understanding_openshift_gitops/about-redhat-openshift-gitops[About {gitops}] 

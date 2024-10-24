@@ -89,7 +89,14 @@ spec:
 
 | `spec.customMessage`
 | Optional
-| Based on the current compliance, use this section to configure the compliance messages sent by the configuration policy to use one of the specified Go templates. You can use the default message from the `.DefaultMessage` parameter and `.Policy` object variable of the current state of the policy from the configuration policy controller. The state of each related object is available at the `.Policy.status.relatedObjects[*].object` parameter section of the configuration policy controller. If you set an `evaluationInterval`, only identifiable information is available.
+a| Based on the current compliance, use this section to configure the compliance messages sent by the configuration policy to use one of the specified Go templates. You can use the default message from the `.DefaultMessage` parameter and `.Policy` object variable of the current state of the policy from the configuration policy controller. See the state of each related object in the following parameter section of the configuration policy controller:
+
+[source,yaml]
+----
+.Policy.status.relatedObjects[*].object
+----  
+
+If you set an `evaluationInterval`, only identifiable information is available.
 
 | `spec.customMessage.compliant`
 | Optional
@@ -103,15 +110,20 @@ spec:
 | Required
 | Specifies the severity when the policy is non-compliant. Use the following parameter values: `low`, `medium`, `high`, or `critical`.
 
+| `spec.evaluationInterval`
+| Optional
+| Specifies the frequency for a policy to be evaluated when it is in a particular compliance state. Use the parameters `compliant` and `noncompliant`. The default value for the `compliant` and `noncompliant` parameters is `watch` to leverage Kubernetes API watches instead of polling the Kubernetes API server. 
+
+When managed clusters have low resources, the evaluation interval can be set to long polling intervals to reduce CPU and memory usage on the Kubernetes API and policy controller. These are in the format of durations. For example, `1h25m3s` represents 1 hour, 25 minutes, and 3 seconds. These can also be set to `never` to avoid evaluating the policy after it is in a particular compliance state. 
+
 | `spec.evaluationInterval.compliant`
 | Optional
-| Used to define how often the policy is evaluated when it is in the compliant state. The values must be in the format of a duration which is a sequence of numbers with time unit suffixes. For example, `12h30m5s` represents 12 hours, 30 minutes, and 5 seconds. It can also be set to `never` so that the policy is not reevaluated on the compliant cluster, unless the policy `spec` is updated. 
+| Specifies the evaluation frequency for a compliant policy. To enable the previous polling behavior, set this parameter to `10s`.
 
-By default, the minimum time between evaluations for configuration policies is approximately 10 seconds when the `evaluationInterval.compliant` is not set or empty. This can be longer if the configuration policy controller is saturated on the managed cluster. 
 
 | `spec.evaluationInterval.noncompliant`
 | Optional
-| Used to define how often the policy is evaluated when it is in the non-compliant state. Similar to the `evaluationInterval.compliant` parameter, the values must be in the format of a duration which is a sequence of numbers with time unit suffixes. It can also be set to `never` so that the policy is not reevaluated on the non-compliant cluster, unless the policy `spec` is updated.
+| Specifies the evaluation frequency for a non-compliant policy. To enable the previous polling behavior, set this parameter to `10s`.
 
 | `spec.object-templates`
 | Optional
@@ -119,16 +131,18 @@ By default, the minimum time between evaluations for configuration policies is a
 
 | `spec.object-templates-raw`
 | Optional
-| Used to set object templates with a raw YAML string. Specify conditions for the object templates, where advanced functions like if-else statements and the `range` function are supported values. For example, add the following value to avoid duplication in your `object-templates` definition:
+a| Used to set object templates with a raw YAML string. Specify conditions for the object templates, where advanced functions like if-else statements and the `range` function are supported values. For example, add the following value to avoid duplication in your `object-templates` definition:
 
-
-`{{- if eq .metadata.name "policy-grc-your-meta-data-name" }}
+[source,yaml]
+----
+{{- if eq .metadata.name "policy-grc-your-meta-data-name" }}
                   replicas: 2
  {{- else }}
                   replicas: 1
- {{- end }}`
+ {{- end }}
+----
  
- *Note:* While `spec.object-templates` and `spec.object-templates-raw` are listed as optional, exactly one of the two parameter fields must be set. 
+*Note:* While `spec.object-templates` and `spec.object-templates-raw` are listed as optional, exactly one of the two parameter fields must be set. 
 
 | `spec.object-templates[].complianceType`
 | Required
@@ -172,8 +186,8 @@ By default, this parameter is set to `InStatus` if the controller does not detec
 
 See the following topics for more information:
 
-- See xref:../governance/create_config_pol.adoc#managing-configuration-policies[Managing configuration policies].
-- See the xref:../governance/policy_overview.adoc#policy-overview[Policy overview] for more details on the hub cluster policy.
+- See xref:../governance/create_config_pol.adoc#create-configuration-policies[Creating configuration policies]. 
+- See the xref:../governance/hub_policy_framework.adoc#hub-policy-framework[Hub cluster policy framework] for more details on the hub cluster policy.
 - See the policy samples that use link:https://nvd.nist.gov/800-53/Rev4/control/CA-1[NIST Special Publication 800-53 (Rev. 4)], and are supported by {acm-short} from the link:https://github.com/open-cluster-management/policy-collection/tree/main/stable/CM-Configuration-Management[`CM-Configuration-Management` folder].
 - For information about dry-run support, see the Kubernetes documentation, link:https://kubernetes.io/docs/reference/using-api/api-concepts/#dry-run[Dry-run].
 - Learn about how policies are applied on your hub cluster, see xref:../governance/supported_policies.adoc#supported-policies[Supported policies] for more details. 
@@ -181,5 +195,5 @@ See the following topics for more information:
 - Customize your policy controller configuration. See xref:../governance/policy_ctrl_adv_config.adoc#policy-controller-advanced-config[Policy controller advanced configuration].
 - Learn about cleaning up resources and other topics in the xref:../governance/create_policy.adoc#cleaning-up-resources-from-policies[Cleaning up resources that are created by policies] documentation.
 - Refer to xref:../governance/policy_generator.adoc#policy-generator[Policy Generator].
-- Learn about how to create and customize policies, see xref:../governance/manage_dashboard.adoc#manage-dashboard[Manage Governance dashboard].
+- Learn about how to create and customize policies, see xref:../governance/manage_dashboard.adoc#grc-dashboard[Governance dashboard].
 - See xref:../governance/template_support_intro.adoc#template-processing[Template processing].

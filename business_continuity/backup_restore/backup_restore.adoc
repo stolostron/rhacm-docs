@@ -75,6 +75,12 @@ A disaster recovery test, where you only validate the restore operation on a pas
 [#prepare-new-hub]
 == Preparing the new hub cluster 
 
+When you need to restore backup data on a hub cluster, create a new hub cluster instead of using the primary hub cluster or a hub cluster where an earlier user created resources before the restore operation.
+
+In a disaster recovery scenario, when you restore the backup to the passive hub cluster, you want a hub cluster identical to the hub cluster that failed during the disaster. You do not want any other user resources, such as: applications, policies, and extra managed clusters. 
+
+When you restore the backup on this hub cluster, if you have managed clusters managed by this hub cluster, then the restore operation might detach them and delete their cluster resources. The restore operation does this to clean up the resources that are not part of the restored backup, making the content in this hub cluster identical with the initial hub cluster. In this case, you might lose user data because the managed cluster workloads get deleted by detach action.  
+
 Before running the restore operation on a new hub cluster, you need to manually configure the hub cluster and install the same operators as on the initial hub cluster. You must install the {acm-short} operator in the same namespace as the initial hub cluster, create the _DataProtectionApplication_ resource, and then connect to the same storage location where the initial hub cluster previously backed up data.
 
 Use the same configuration as on the initial hub cluster for the `MultiClusterHub` resource created by the {acm-short} operator, including any changes to the `MultiClusterEngine` resource.
@@ -276,11 +282,57 @@ spec:
   veleroCredentialsBackupName: skip
   veleroResourcesBackupName: skip
 ----
++
 
 *Notes:*
 
-* The `restore.cluster.open-cluster-management.io` resource is still active if the phase is `Enabled` or `Running`. The resource execution is completed if the phase changes to `Finished`. After the restore operation is completed, you can run another restore operation on the same hub cluster. 
-* Only one `restore.cluster.open-cluster-management.io` can run at one time. 
+**  The `restore.cluster.open-cluster-management.io` resource is still active if the phase is `Enabled` or `Running`. The resource run is completed if the phase changes to `Finished`. After the restore operation is completed, you can run another restore operation on the same hub cluster. 
+** Only one `restore.cluster.open-cluster-management.io` can run at one time. 
+
+
+* Use the advanced options with `velero.io.restore` to filer out resources you want to restore. Use the following sample with `velero.io.restore` `spec` options to restore resources only from the `vb-managed-cls-2` managed cluster namespace and to exclude global `MultiCluster` resources: 
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-filter-sample
+  namespace: open-cluster-management-backup
+spec:
+  cleanupBeforeRestore: None
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+  veleroManagedClustersBackupName: latest
+excludedResources:
+  - ManagedCluster
+orLabelSelectors:
+  - matchExpressions:
+  - values:
+  - vb-managed-cls-2
+key: name
+operator: In
+----
+
+* Set the following `velero.io.restore` `spec` options when you create the {acm-short} restore resource: 
+
++
+[source,yaml]
+----
+spec:
+  includedResources
+  includedNamespaces
+  excludedResources
+  excludedNamespaces
+  LabelSelector
+  OrLabelSelector
+----
++
+
+*Note:*
+
+** When you set any of these Velero restore filters, set the `cleanupBeforeRestore` to `None` to avoid cleaning up hub cluster resources that are part of the restored backup but are not being restored because of the applied filter. 
 
 [#viewing-restore-events]
 == Viewing restore events
