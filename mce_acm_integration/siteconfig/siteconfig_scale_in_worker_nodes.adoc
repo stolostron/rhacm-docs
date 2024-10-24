@@ -1,16 +1,16 @@
 [#scale-in-worker-nodes]
 = Scaling in a {sno} cluster with the {sco}
 
-Scale in your managed cluster that was installed by the {sco}.
-You can scale in your cluster by removing a worker node.
+Scale in your managed cluster that was installed by the {sco}. You can scale in your cluster by removing a worker node.
+
+*Required access:* Cluster administrator
 
 [#scale-in-preq]
 == Prerequisites
 
-* You have logged in to the hub cluster as a user with `cluster-admin` privileges.
-* If using GitOps ZTP, you have configured your GitOps ZTP environment. To configure your environment, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/edge_computing/ztp-preparing-the-hub-cluster[Preparing the hub cluster for GitOps ZTP].
+* If you are using GitOps ZTP, you have configured your GitOps ZTP environment. To configure your environment, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/edge_computing/ztp-preparing-the-hub-cluster[Preparing the hub cluster for GitOps ZTP].
 * You have the default cluster templates. To get familiar with the default templates, see xref:../../acm_mce_integration/siteconfig/cluster_templates.adoc#default-templates[Default set of templates]
-* You have installed your cluster with the {sco}. To install a cluster with the {sco}, see see xref:../../acm_mce_integration/siteconfig/install-clusters.adoc##install-clusters[Installing {sno} clusters with the {sco}]
+* You have installed your cluster with the {sco}. To install a cluster with the {sco}, see xref:../../acm_mce_integration/siteconfig/install-clusters.adoc##install-clusters[Installing {sno} clusters with the {sco}]
 
 [#scale-in-annotation]
 == Adding an annotation to your worker node
@@ -19,7 +19,8 @@ Add an annotation to mark the worker node for removal.
 
 Complete the following steps to remove a worker node from the managed cluster:
 
-. Add an annotation in the `extraAnnotations` field of the worker node entry in the `ClusterInstance` CR:
+. Add an annotation in the `extraAnnotations` field of the worker node entry in the `ClusterInstance` custom resource:
+
 +
 [source,yaml]
 ----
@@ -35,9 +36,10 @@ spec:
 ...
 ----
 
-. Apply the changes.
+. Apply the changes. See the following options:
 
-.. If you are using {acm} only, run the following command on the hub cluster:
+.. If you are using {acm-short} only, run the following command on the hub cluster:
+
 +
 [source,terminal]
 ----
@@ -47,6 +49,7 @@ oc apply -f <clusterinstance>.yaml
 .. If you are using GitOps ZTP, push to your Git repository and wait for Argo CD to synchronize the changes.
 
 . Wait for the `BaremetalHost` resource of that worker node to be deleted. Monitor the process by running the following command on the hub cluster:
+
 +
 [source,terminal]
 ----
@@ -71,6 +74,7 @@ worker-node2.example.com            deleting                    true            
 Prune the `BareMetalHost` resource of the worker node that you want to delete to prevent reprovisioning of the node.
 
 . Specify the API version and kind of the `BareMetalHost` resource in the node-level `pruneManifests` field:
+
 +
 [source,yaml]
 ----
@@ -86,9 +90,10 @@ spec:
 ...
 ----
 
-. Apply the changes.
+. Apply the changes. See the following options.
 
-.. If you are using {acm} only, run the following command on the hub cluster:
+.. If you are using {acm-short} only, run the following command on the hub cluster:
+
 +
 [source,terminal]
 ----
@@ -100,7 +105,11 @@ oc apply -f <clusterinstance>.yaml
 [#scale-in-delete-verification]
 === Verifying worker node deletion
 
-. Verify that the `Node`, `Agent`, and `BareMetalHost` resources are removed by running the following commands on the hub cluster:
+Verify that the `Node`, `Agent`, and `BareMetalHost` resources are removed.
+
+
+. Verify that the `Node` resources are removed by running the following command on the hub cluster:
+
 +
 [source,terminal]
 ----
@@ -108,11 +117,16 @@ oc get managedclusterinfo/<managed_cluster_name> -n <managed_cluster_namespace> 
 -o jsonpath='{range .status.nodeList[*]}{.name}{"\t"}{.conditions}{"\t"}{.labels}{"\n"}{end}'
 ----
 
+. Verify that the `Agent` resources are removed by running the following command on the hub cluster:
+
+
 +
 [source,terminal]
 ----
 oc get agents -n <managed_cluster_namespace> --watch
 ----
+
+. Verify that the `BareMetalHost` resources are removed by running the following command on the hub cluster:
 
 +
 [source,terminal]
