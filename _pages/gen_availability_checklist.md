@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Refreshing builds
-permalink: refresh_builds
+title: General availability checklist
+permalink: gen_availability_checklist
 horizontal: false
 ---
 
-We typically refresh weekly, but can adjust the schedule as needed. These directions walk you through a refresh, as well as an internal build to check drafts and error logs in between publish dates.
+These directions walk you through preparing for the release and getting ready to publish.
 
 ## Prerequisites
 
@@ -13,14 +13,33 @@ You must have the following prerequisites to publish live:
 
 - Minimum KCS1 access to the Customer Portal and Pantheon
 - Connection to the VPN
-- Logged in to the Customer Portal
 - Logged in to the Pantheon UI 
 
-## PR for live refresh
+## Preparing for _Pencils Down_
 
-**Note:** Do not create a PR to the `prod` branch if you are only building `stage` for internal purposes. Move on to the later sections in this case.
+At some point the team agrees to a _Pencils Down_ date, which may move depending on the product release. Close to that date, start preparing.
 
-You have to get a copy of `stage` to `prod` to refresh live docs. To create the pull request (PR) to refresh live, complete the following steps:
+1. Ensure the build is regularly green. Ask writers fix any errors for their books a few days before GA and work to keep the build green closer to the agreed upon _Pencils Down_ day.
+2. Ask the team to work on reconciling changes and merging active PRs to the stage branch. Since this depends on reviews and such, the PR list may not be clear in time, but no PRs for stage is the goal for _Pencils Down_.
+3. Declare _Pencils Down_ on the date/time so that the team pauses any pushing to stage.
+4. Build stage. Check for green. Fix any errors. 
+
+## Creating the `production` from `stage` 
+
+Now that stage is finalized and green, you can create the production branch from the stage branch. See [Branch Strategy](branch_strategy.md) for imporation information about how and why we use these branchs.
+
+1. Create the new <release_number>_prod branch from the <release_number>_stage branch.
+2. Protect the branch to keep anyone from bypassing rules in the production branch. Two users are needed to push stage into to prod: The creator and the reviewer. Go to **Settings** > **Branches**. (Because GitHub changes the UI at times, if this is not the workflow, you can simply Google something like "how to protect my branch in GitHub" for the process.)
+3. Select **Add rule** in the _Branch protection_ rules section. 
+4. Add the branch name to the **Branch name pattern**. Example: `2x_prod`. 
+5. Select **Require a pull request before merging**. 
+6. Ensure that **Require approvals** is selected. 
+7. Select *Include administrators*. 
+Select *Create* to apply the rule. 
+Run a build using the new prod branch to verify that it is working ok: ./acm_sync_asciidoc.sh <release_number> _prod
+Ensure the build is clean. 
+Make sure nobody builds anymore until after GA.
+
 
 1. Create a PR from `stage` to `prod`. 
 
