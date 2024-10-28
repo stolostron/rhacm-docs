@@ -8,6 +8,8 @@ dropdown: true
 children:
     - title: Creating builds
       permalink: /create_builds
+    - title: General availability tasks
+      permalink: /gen_availability_tasks
     - title: divider
     - title: Refreshing builds
       permalink: /refresh_builds
