@@ -39,7 +39,7 @@ Now that stage is finalized and green, you can create the production branch from
 8. Select **Create** to apply the rule. 
 9. Run a build wit the prod branch in the command: `./acm_sync_asciidoc.sh 2.x 2.x_prod`
 10. Ensure the build is clean.
-11. Stop any builds until GA day and after. <!--Question to Chris? Why can we not build stage after this if prod is set and publishable?-->
+11. Stop any builds until GA day and after because `prod` and `stage` are in the same directory. You can return to building stage after you publish.
 
 ## Publishing the doc and the splash page
 
@@ -58,6 +58,6 @@ Ideally the architect or strategist is doing this but can be done by the lead, w
 ## Additional tasks
 
 1. Publish the draft(s) for the Support Matrix. There should be an issue for the release that tracked this work. See the strategist or lead.
-2. Edit [Comet](https://comet.engineering.redhat.com/containers/products/5ec54aa3535cb70ab8c02996). <!--check into this; I have not had to do this in a while.-->
+2. Edit [Comet](https://comet.engineering.redhat.com/containers/products/5ec54aa3535cb70ab8c02996). <!--check into this; I have not had to do this in a while. Ask Chris about this.-->
 3. Add the _Support matrix_ to the _Lifecycle_ page.
 4. Double check that links to the Support matrix work after you publish.
