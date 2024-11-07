@@ -59,5 +59,5 @@ Ideally the architect or strategist is doing this but can be done by the lead, w
 
 1. Publish the draft(s) for the Support Matrix. There should be an issue for the release that tracked this work. See the strategist or lead. Currently there is a matrix for ACM and MCE. 
 2. Edit [Comet](https://comet.engineering.redhat.com/containers/products/5ec54aa3535cb70ab8c02996). (?) <!--check into this; I have not had to do this in a while. Ask Chris about this.-->
-3. Add the _Support matrix_ to the _Lifecycle_ page.
+3. Add the _Support matrix_ to the [_Lifecycle_ page](https://access.redhat.com/support/policy/updates/advanced-cluster-management).
 4. Double check that links to the Support matrix work after you publish.
