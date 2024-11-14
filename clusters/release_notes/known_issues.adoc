@@ -147,6 +147,12 @@ If this problem occurs, it is typically on the following versions of {ocp-short}
 
 To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9.7 or later.
 
+[#boot-discovery-auto-add-host]
+=== Cannot use host inventory to boot with the discovery image and add hosts automatically
+//2.12:ACM-14719
+
+You cannot use a host inventory, or `InfraEnv` custom resource, to both boot with the discovery image and add hosts automatically. If you used your previous `InfraEnv` resource for the `BareMetalHost` resource, and you want to boot the image yourself, you can work around the issue by creating a new `InfraEnv` resource.
+
 [#cluster-local-offline-reimport]
 === Local-cluster status offline after reimporting with a different name
 //2.4:16977
@@ -445,20 +451,14 @@ Error querying resource logs:
 Service unavailable
 ----
 
-[#manageserviceaccount-addon-limitation]
-=== Managed Service Account add-on limitations
-//2.9:ACM-8586
-
-The following are known issues and limitations for the `managed-serviceaccount` add-on:
-
 [#installnamespace-field-limit]
-==== _installNamespace_ field can only have one value
+=== _installNamespace_ field can only have one value
 //2.9:ACM-7523
 
 When enabling the `managed-serviceaccount` add-on, the `installNamespace` field in the `ManagedClusterAddOn` resource must have `open-cluster-management-agent-addon` as the value. Other values are ignored. The `managed-serviceaccount` add-on agent is always deployed in the `open-cluster-management-agent-addon` namespace on the managed cluster.
 
 [#settings-limit-msa-agent]
-==== _tolerations_ and _nodeSelector_ settings do not affect the _managed-serviceaccount_ agent
+=== _tolerations_ and _nodeSelector_ settings do not affect the _managed-serviceaccount_ agent
 //2.9:ACM-7523
 
 The `tolerations` and `nodeSelector` settings configured on the `MultiClusterEngine` and `MultiClusterHub` resources do not affect the `managed-serviceaccount` agent deployed on the local cluster. The `managed-serviceaccount` add-on is not always required on the local cluster.
@@ -492,6 +492,23 @@ When you upgrade an {ocp-short} Dedicated cluster by using the `ClusterCurator` 
 //2.8:ACM-6279
 
 You can specify a custom ingress domain by using the `ClusterDeployment` resource while installing a managed cluster, but the change is only applied after the installation by using the `SyncSet` resource. As a result, the `spec` field in the `clusterdeployment.yaml` file displays the custom ingress domain you specified, but the `status` still displays the default domain.
+
+[#install-sno-ocp-infra]
+=== A {sno} cluster installation requires a matching {ocp-short} with infrastructure operator for Red Hat OpenShift
+
+If you want to install a {sno} cluster with an {ocp} version before 4.16, your `InfraEnv` custom resource and your booted host must use the same {ocp-short} version that you are using to install the {sno} cluster. The installation fails if the versions do not match.
+
+To work around the issue, edit your `InfraEnv` resource before you boot a host with the Discovery ISO, and include the following content:
+
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+spec:
+  osImageVersion: 4.15
+----
+
+The `osImageVersion` field must match the {ocp} cluster version that you want to install.
 
 [#hosted-control-plane-mce]
 == Hosted control planes
