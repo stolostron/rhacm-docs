@@ -34,7 +34,8 @@ Everyone helps maintain Jira issues with the following guidance:
 
   - Jira tasks and bugs have different status indicators, which are used in the pipelines. (These are not flexible, so the pipelines are fixed.)
   - Issues remain in `UNTRIAGED` until the `doc-ack` label is added and `doc-awaiting-info` is removed, if it was added.
-  - The `IN PROGRESS` column contains Bugs and Tasks that are triaged and ready to work. Keep issues in this status while you are working.
+  - The `BACKLOG` column contains Bugs and Tasks that are triaged and ready to work. Keep issues in this status if you have not started work on them yet.
+  - The `IN PROGRESS` column contains Bugs and Tasks that are triaged and that you are actively working on. Keep issues in this status while you are working.
   - Labels within the `IN PROGRESS` pipeline will relate to trains if they are part of a feature, example: `Train-XX`.
   - Issues that are ready for a PR review can move to `REVIEW` for tech review, QE review, and peer review. Use this column when the basic content standards are mostly met and you are ready for a final review.
   - Blogs are `IN PROGRESS` when the editor (us) is reviewing the blog. Move to `Review` when the editor has completed their part. Close when the Google form has been submitted. Track these stages in issue comments.
@@ -42,7 +43,7 @@ Everyone helps maintain Jira issues with the following guidance:
   - Use meetings to plan work for the train and update the team on progress. Also redistribute work as needed on the board.
   - Bring up any `unplanned` work that got in the way on progress; use the `unplanned` label.
   - Label any JIRA issues that close without work as `not-started`.
-  - The `DONE` column will contain closed items for a certain amount of time.
+  - The `DONE` column contains issues that were closed in the last four weeks.
 
 ## Board review in scrums
 
