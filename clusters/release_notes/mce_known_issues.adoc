@@ -330,6 +330,55 @@ When you upgrade an {ocp-short} Dedicated cluster by using the `ClusterCurator` 
 
 You can specify a custom ingress domain by using the `ClusterDeployment` resource while installing a managed cluster, but the change is only applied after the installation by using the `SyncSet` resource. As a result, the `spec` field in the `clusterdeployment.yaml` file displays the custom ingress domain you specified, but the `status` still displays the default domain.
 
+[#managedclusteraddon-status-stuck]
+=== `ManagedClusterAddon` status becomes stuck
+
+If you define configurations in the `ManagedClusterAddon` to override some configurations in the `ClusterManagementAddon`, the `ManagedClusterAddon` might become stuck at the following status:
+
+[source,bash]
+----
+progressing... mca and work configs mismatch
+----
+
+When you check the `ManagedClusterAddon` status, a part of the configurations has an empty `spec` hash, even if the configurations exist. See the following example:
+
+[source,yaml]
+----
+status:
+  conditions:
+  - lastTransitionTime: "2024-09-09T16:08:42Z"
+    message: progressing... mca and work configs mismatch
+    reason: Progressing
+    status: "True"
+    type: Progressing
+...
+  configReferences:
+  - desiredConfig:
+      name: deploy-config
+      namespace: open-cluster-management-hub
+      specHash: b81380f1f1a1920388d90859a5d51f5521cecd77752755ba05ece495f551ebd0
+    group: addon.open-cluster-management.io
+    lastObservedGeneration: 1
+    name: deploy-config
+    namespace: open-cluster-management-hub
+    resource: addondeploymentconfigs
+  - desiredConfig:
+      name: cluster-proxy
+      specHash: ""
+    group: proxy.open-cluster-management.io
+    lastObservedGeneration: 1
+    name: cluster-proxy
+    resource: managedproxyconfigurations 
+----
+
+To resolve the issue, delete the `ManagedClusterAddon` by running the following command to reinstall and recover the `ManagedClusterAddon`. Replace `<cluster-name>` with the `ManagedClusterAddon` namespace. Replace `<addon-name>` with the `ManagedClusterAddon` name:
+
+[source,bash]
+----
+oc -n <cluster-name> delete managedclusteraddon <addon-name>
+----
+
+
 [#cluster-issues-cim]
 == Central infrastructure management
 
