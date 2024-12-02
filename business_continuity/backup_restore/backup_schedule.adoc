@@ -152,8 +152,8 @@ For descriptions of the various `BackupSchedule` statuses, see the following tab
 | The `BackupSchedule` is not generating backups. Look at the `BackupSchedule` status section for the reason why the resource status is `BackupCollision`. To start creating backups, delete this resource and create a new one. 
 |===
 
-[#avoid-backup-collision]
-=== Avoiding backup collisions
+[#understand-backup-collision]
+== Understanding backup collisions
 
 Backup collisions might occur if the hub cluster changes status from passive to primary hub cluster, or from primary to passive, and different hub clusters back up data at the same storage location.
 
@@ -182,12 +182,17 @@ Since the `BackupSchedule.cluster.open-cluster-management.io` resource is still 
 - The initial hub cluster is still running.
 - The initial hub cluster backup data is restored on the secondary hub cluster, including managed clusters backup. Therefore, the secondary hub cluster is now the active cluster.
 - Since the `BackupSchedule.cluster.open-cluster-management.io` resource is still enabled on the initial hub cluster, it writes backups at the same storage location which corrupts the backup data. For example, any hub cluster restoring the latest backups from this location might use the initial hub cluster data instead of the secondary hub cluster data. To avoid data corruption, the initial hub cluster `BackupSchedule` resource status automatically changes to `BackupCollision`. In this scenario, to avoid getting into this backup collision state, stop the initial hub cluster first or delete the `BackupSchedule.cluster.open-cluster-management.io` resource on the initial hub cluster before restoring managed clusters data on  the secondary hub cluster.
-+
-To avoid and report backup collisions, a `BackupCollision` state exists for the `BackupSchedule.cluster.open-cluster-management.io` resource. The controller checks regularly if the latest backup in the storage location has been generated from the current hub cluster. If not, a different hub cluster has recently written backup data to the storage location, indicating that the hub cluster is colliding with a different hub cluster.
 
-In this case, the current hub cluster `BackupSchedule.cluster.open-cluster-management.io` resource status is set to `BackupCollision` and the `Schedule.velero.io` resources created by this resource are deleted to avoid data corruption. The `BackupCollision` is reported by the backup policy. The administrator verifies which hub cluster writes to the storage location, before removing the `BackupSchedule.cluster.open-cluster-management.io` resource from the invalid hub cluster and creating a new `BackupSchedule.cluster.open-cluster-management.io` resource on the valid primary hub cluster, to resume the backup.
+[#prevent-backup-collision]
+== Preventing backup collisions
 
-Run the following command to check if there is a backup collision:
+To prevent and report backup collisions, use the `BackupCollision` state in the `BackupSchedule.cluster.open-cluster-management.io` resource. The controller checks regularly if the latest backup in the storage location has been generated from the current hub cluster. If not, a different hub cluster has recently written backup data to the storage location, indicating that the hub cluster is colliding with a different hub cluster.
+
+In the backup collision scenario, the current hub cluster `BackupSchedule.cluster.open-cluster-management.io` resource status is set to `BackupCollision`. To prevent data corruption, this resource deletes the `Schedule.velero.io` resources. The backup policy reports the `BackupCollision`.
+
+In this same scenario, the administrator verifies which hub cluster writes to the storage location. The administrator does this verification before removing the `BackupSchedule.cluster.open-cluster-management.io` resource from the invalid hub cluster. Then, the administrator can create a new `BackupSchedule.cluster.open-cluster-management.io` resource on the valid primary hub cluster, resuming the backup.
+
+To check if there is a backup collision, run the following command:
 
 ----
 oc get backupschedule -A
