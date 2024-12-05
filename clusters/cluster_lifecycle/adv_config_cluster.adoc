@@ -357,6 +357,116 @@ spec:
   hubKubeAPIServerURL: "example.global.com"
 ----
 
+[#config-hub-kube-api-server]
+== Configuring the hub cluster `KubeAPIServer` verification strategy
+
+Managed clusters communicate with the hub cluster through a mutual connection with the {ocp-short} `KubeAPIServer` external load balancer. An internal {ocp-short} cluster certificate authority (CA) issues the default {ocp-short} `KubeAPIServer` certificate when you install {ocp-short}. The {mce} automatically detects and adds the certificate to managed clusters in the `bootstrap-kubeconfig-secret` namespace.
+
+If your automatically detected certificate does not work, you can manually configure a strategy configuration in the `KlusterletConfig` resource. Manually configuring the strategy allows you to control how you verify the hub cluster `KubeAPIServer` certificate.
+
+See the examples in one of the following three strategies to learn how to manually configure a strategy:
+
+[#config-hub-strategy-auto-detect-ca]
+=== Configuring the strategy with `UseAutoDetectedCABundle`
+
+The default configuration strategy is `UseAutoDetectedCABundle`. The {mce-short} automatically detects the certificate on the hub cluster and merges the certificate configured in the `trustedCABundles` list of config map references to the real CA bundles, if there are any.
+
+The following example merges the automatically detected certificates from the hub cluster and the certificates that you configured in the `new-ocp-ca` config map, and adds both to the managed cluster:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+ name: ca-strategy
+spec:
+ hubKubeAPIServerConfig:
+   serverVerificationStrategy: UseAutoDetectedCABundle
+   trustedCABundles:
+   - name: new-ca
+     caBundle:
+       name: new-ocp-ca
+       namespace: default
+----
+
+[#config-hub-strategy-system-truststore]
+=== Configuring the strategy with `UseSystemTruststore`
+
+With `UseSystemTruststore`, {mce-short} does not detect any certificate and ignores the certificates configured in the `trustedCABundles` parameter section. This configuration does not pass any certificate to the managed clusters. Instead, the managed clusters use certificates from the system trusted store of the managed clusters to verify the hub cluster API server. This applies to situations where a public CA, such as `Let's Encrypt`, issues the hub cluster certificate. See the following example that uses `UseSystemTruststore`:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+ name: ca-strategy
+spec:
+ hubKubeAPIServerConfig:
+   serverVerificationStrategy: UseSystemTruststore
+----
+
+[#config-hub-strategy-custom-ca]
+=== Configuring the strategy with `UseCustomCABundles`
+
+You can use `UseCustomCABundles` if you know the CA of the hub cluster API server and do not want {mce-short} to automatically detect it. For this strategy, {mce-short} adds your configured certificates from the `trustedCABundles` parameter to the managed clusters. See the following examples to learn how to use `UseCustomCABundles`:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+ name: ca-strategy
+spec:
+ hubKubeAPIServerConfig:
+   serverVerificationStrategy: UseCustomCABundles
+   trustedCABundles:
+   - name: ca
+     caBundle:
+       name: ocp-ca
+       namespace: default
+----
+
+Typically, this policy is the same for each managed cluster. The hub cluster administrator can configure a `KlusterletConfig` named `global` to activate the policy for each managed cluster when you install {mce-short} or the hub cluster certificate changes. See the following example:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+ name: global
+spec:
+ hubKubeAPIServerConfig:
+   serverVerificationStrategy: UseSystemTruststore
+----
+
+When a managed cluster needs to use a different strategy, you can also create a different `KlusterletConfig` and use the `agent.open-cluster-management.io/klusterlet-config` annotation in the managed clusters to point to a specific strategy. See the following example:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+ name: test-ca
+spec:
+ hubKubeAPIServerConfig:
+   serverVerificationStrategy: UseCustomCABundles
+   trustedCABundles:
+   - name: ca
+     caBundle:
+       name: ocp-ca
+       namespace: default
+--
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    agent.open-cluster-management.io/klusterlet-config: test-ca
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+----
+
 [#add-resources-adv-cluster]
 == Additional resources
 
