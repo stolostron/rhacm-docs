@@ -179,36 +179,108 @@ oc get infraenv -n managed-cluster some-other-infraenv -ojson | jq ".status.<url
 
 If your {ocp-short} managed cluster was installed by the {ai}, you can move the managed cluster and its resources from one hub cluster to another hub cluster. 
 
-You can import the following resources and continue to manage your cluster with them:
-
-- `Agent`
-- `AgentClassification`
-- `AgentClusterInstall`
-- `BareMetalHost`
-- `ClusterDeployment`
-- `InfraEnv`
-- `NMStateConfig`
-
-You can manage a cluster from a new hub cluster by creating a copy of the original resources and applying them to the new hub cluster. You can then scale down or scale up your managed cluster from the new hub cluster.
+You can manage a cluster from a new hub cluster by saving a copy of the original resources, applying them to the new hub cluster, and deleting the original resources. You can then scale down or scale up your managed cluster from the new hub cluster.
 
 *Important:* You can only scale down imported {ocp-short} managed clusters if they were installed by the {ai}.
 
-Import your cluster resources by creating a copy of your resources on your target hub cluster. See the following example to learn how to create a copy of the `Agent` resource and apply similar steps to your other resources:
+You can import the following resources and continue to manage your cluster with them:
 
-. Get the `Agent` resource from your source hub cluster by running the following command. Replace values where needed:
+.Managed cluster resource table
+|===
+| Resource | Optional or required | Description
+
+| `Agent`
+| Required
+| 
+
+| `AgentClassification`
+| Optional
+| Required if you want to classify Agents with a filter query.
+
+| `AgentClusterInstall`
+| Required
+| 
+
+| `BareMetalHost`
+| Optional
+| Required if you are using the `baremetal` platform.
+
+| `ClusterDeployment`
+| Required
+| 
+
+| `InfraEnv`
+| Required
+| 
+
+| `NMStateConfig`
+| Optional
+| Required if you want to apply your network configuration on the hosts.
+
+| `ManagedCluster`
+| Required
+| 
+
+| `Secret`
+| Required
+| The `admin-kubeconfig` secret is required. The `bmc-secret` secret is only required if you are using `BareMetalHosts`.
+|===
+
+[#save-apply-cluster-resources]
+=== Saving and applying managed cluster resources
+
+To save a copy of your managed cluster resources and apply them to a new hub cluster, complete the following steps:
+
+. Get your resources from your source hub cluster by running the following command. Replace values where needed:
 
 +
 [source,bash]
 ----
-oc –kubeconfig <source_hub_kubeconfig> -n <managed_cluster_name> get agent <cluster_provisioning_namespace> -oyaml > agent.yaml
+oc –kubeconfig <source_hub_kubeconfig> -n <managed_cluster_name> get <resource_name> <cluster_provisioning_namespace> -oyaml > <resource_name>.yaml
 ----
 
-. Apply your `Agent` resource on your target hub cluster by running the following command. Replace values where needed:
+.. Repeat the command for every resource you want to import by replacing `<resource_name>` with the name of the resource.
+
+. Remove the `ownerReferences` property from the following resources by running the following commands:
++
+.. `AgentClusterInstall`
++
+[source,bash]
+----
+yq --in-place -y 'del(.metadata.ownerReferences)' AgentClusterInstall.yaml
+----
++
+.. `Secret` (`admin-kubeconfig`)
++
+[source,bash]
+----
+yq --in-place -y 'del(.metadata.ownerReferences)' AdminKubeconfigSecret.yaml
+----
+
+. Detach the managed cluster from the source hub cluster by running the following command. Replace values where needed:
 
 +
 [source,bash]
 ----
-oc –kubeconfig <target_hub_kubeconfig> apply -f agent.yaml
+oc –kubeconfig <target_hub_kubeconfig> delete ManagedCluster <cluster_name>
 ----
 
-After importing your cluster resources, delete your original cluster resources on your source hub cluster.
+. Create a namespace on the target hub cluster for the managed cluster. Use a similar name as the source hub cluster.
+
+. Apply your stored resources on the target hub cluster individually by running the following command. Replace values where needed:
++
+*Note:* Replace `<resource_name>.yaml` with `.` if you want to apply all the resources as a group instead of individually.
++
+[source,bash]
+----
+oc –kubeconfig <target_hub_kubeconfig> apply -f <resource_name>.yaml
+----
+
+[#remove-cluster-source-hub]
+=== Removing the managed cluster from the source hub cluster
+
+After importing your cluster resources, remove your managed cluster from the source hub cluster by completing the following steps:
+
+. Set the `spec.preserveOnDelete` parameter to `true` in the `ClusterDeployment` custom resource to prevent destroying the managed cluster.
+
+. Complete the steps in xref:../cluster_lifecycle/remove_managed_cluster.adoc#remove-managed-cluster[Removing a cluster from management].
