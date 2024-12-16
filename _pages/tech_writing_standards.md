@@ -128,7 +128,6 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * When commenting in the source, avoid miscommunications by being specific about the context of the comment. Provide the following information when leaving comments: `//comment | initials or account name | date`
 
 ## Requirements for creating and merging PRs
-(#requirements-before-merging-prs)
 
 * Use a few words in your commit message so that internal users understand the commit without having to search. **Note:** Since we cover many components, putting the component name in the message can increase UX. **Example:** `git commit cm -m "<ACM JIRA URL> - siteconfig template resource updated for customer bug."`
 * Request peer reviews for all new topics and other changes that are more than a typo or small content correction. **Note:** Small changes for build errors can be merged without peer, but use your judgement about whether you need extra eyes or help troubleshooting.
