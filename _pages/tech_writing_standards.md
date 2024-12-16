@@ -12,7 +12,7 @@ Most of the following content is addressed in the following manuals or guidance:
 * [_IBM Style Manual_](https://www.ibm.com/docs/en/ibm-style)
 * [_Red Hat Supplemental_ guide](https://redhat-documentation.github.io/supplementary-style-guide/#_about_this_guide)
 * [_Naming_](https://source.redhat.com/departments/marketing/brand/naming)
-* [Writing and reviewing checklist](pages/checklist.md)
+* [Writing and reviewing checklist](checklist.md)
 
 Many of the guidelines we adopt are industry standards for high quality writing, proper grammar, SEO, translation, accessibility, and readability. All technical writers should be very familiar with these standards for writing. Each contributor should refer to these manuals when creating content for the RHACM docs repository. Read more about the standards in the following sections, but see the manuals for more information:
 
@@ -142,7 +142,7 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * If you cannot reach the original reviewer via DM or notifications because they are absent, another reviewer can vouch for those changes. **Note:** not best practice for GH hygiene, so use a comment to indicate all changes were accounted for.
 * If you get a Slack approval, but the engineer has not approved in the PR, try to get them to give the official review, but you can tag the engineer in PR comments that they approved on Slack and they are too busy or absent. **Note:** This is not best practice for GH hygiene, but working across timezones (PTO and holidays), at times we need to merge if engineer is unavailable after Slack approval. 
 * Ensure your peer reviews and contributions are in your goals since we spend a lot of time helping each other with PRs.
-* Use the [Writing and reviewing checklist](pages/checklist.md) to review content.
+* Use the [Writing and reviewing checklist](checklist.md) to review content.
 
 
 ## Additional resources
