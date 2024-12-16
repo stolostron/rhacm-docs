@@ -12,6 +12,7 @@ Most of the following content is addressed in the following manuals or guidance:
 * [_IBM Style Manual_](https://www.ibm.com/docs/en/ibm-style)
 * [_Red Hat Supplemental_ guide](https://redhat-documentation.github.io/supplementary-style-guide/#_about_this_guide)
 * [_Naming_](https://source.redhat.com/departments/marketing/brand/naming)
+* [Writing and reviewing checklist](pages/checklist.md)
 
 Many of the guidelines we adopt are industry standards for high quality writing, proper grammar, SEO, translation, accessibility, and readability. All technical writers should be very familiar with these standards for writing. Each contributor should refer to these manuals when creating content for the RHACM docs repository. Read more about the standards in the following sections, but see the manuals for more information:
 
@@ -126,16 +127,22 @@ From the Developing Quality Technical Information handbook (IBM Press), do not o
 * We only have permanent comments about format or issue numbers in Troubleshooting and Known issues. We do not need them in What's new or Errata.
 * When commenting in the source, avoid miscommunications by being specific about the context of the comment. Provide the following information when leaving comments: `//comment | initials or account name | date`
 
-## Requirements before merging PRs
+## Requirements for creating and merging PRs
 
-* Request peer reviews for all new topics and other changes that result in more than a typo or small correction.
-* Request peer reviews when developers make changes with PRs, meaning you and another writer review a PR sent from Engineering or QE.
-* Request technical review for any changes other than typos or broken links. 
-* Check broken links as you build content. Use the easy _Check my links_ plug-in on each PR in preview mode.
+* Use a few words in your commit message so that internal users understand the commit without having to search. **Note:** Since we cover many components, putting the component name in the message can increase UX. **Example:** `git commit cm -m "<ACM JIRA URL> - siteconfig template resource updated for customer bug."`
+* Request peer reviews for all new topics and other changes that are more than a typo or small content correction. **Note:** Small changes for build errors can be merged without peer, but use your judgement about whether you need extra eyes or help troubleshooting.
+* Request peer reviews when developers make changes with PRs; you and another writer must review a PR sent from Engineering or QE.
+* Request a technical review for any changes that you make other than typos, build errors, or broken links.
+* You can merge a `cherry-pick` or copy of a change from a previous branch that was peer reviewed if it is the exact same. 
+* Check broken links as you build content. Use the easy _Check my links_ plug-in on each PR in preview mode. Also check the linter.
 * Check your PR _requests_ from team members regularly. From the repo, click on **Pull requests** in the header and check for any reviews assigned to you.
-* Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`.
-* Ensure your peer reviews and contributions are in your goals.
-* Use [The peer review checklist](pages/checklist_peer_review.md).
+* Keep track of peer reviews you request or complete by using the Slack user group `@pr-docs-acm-team`. **Note:** We are a small team and we get busy, so it's a good idea to follow through obtaining reviews before creating more PRs for others to review if you can.
+* Consider pulling in multiple peers if there is debate or discussion, or if the content is high-impact and time allows.
+* If possible, do not merge a blocked PR if you can reach the original reviewer who previously requested changes.
+* If you cannot reach the original reviewer via DM or notifications because they are absent, another reviewer can vouch for those changes. **Note:** not best practice for GH hygiene, so use a comment to indicate all changes were accounted for.
+* If you get a Slack approval, but the engineer has not approved in the PR, try to get them to give the official review, but you can tag the engineer in PR comments that they approved on Slack and they are too busy or absent. **Note:** This is not best practice for GH hygiene, but working across timezones (PTO and holidays), at times we need to merge if engineer is unavailable after Slack approval. 
+* Ensure your peer reviews and contributions are in your goals since we spend a lot of time helping each other with PRs.
+* Use the [Writing and reviewing checklist](pages/checklist.md) to review content.
 
 
 ## Additional resources
