@@ -22,7 +22,7 @@ Many of the guidelines we adopt are industry standards for high quality writing,
 * [Concise, clear content](#concise-clear-content)
 * [Lists and tables](#lists-and-tables)
 * [Adding links](#adding-links)
-* [Requirements before merging PRs](#requirements-before-merging-prs)
+* [equirements for creating and merging PRs](#requirements-before-merging-prs)
 
 ## General reminders 
 
