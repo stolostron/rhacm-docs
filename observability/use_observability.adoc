@@ -1,61 +1,68 @@
 [#using-observability]
-= Using observability
+= Using Observability
 
-Use the observability service to view the utilization of clusters across your fleet.
+Use the Observability service to view the utilization of clusters across your fleet.
 
-- <<external-metric-query,Querying metrics using the observability API>>
+*Required access:* Cluster administrator
+
+- <<external-metric-query,Querying metrics using the Observability API>>
 - <<exporting-metrics-to-external-endpoints,Exporting metrics to external endpoints>>
 - <<viewing-and-exploring-data,Viewing and exploring data>>
 
 [#external-metric-query]
-== Querying metrics using the observability API
+== Querying metrics using the Observability API
 
-Observability provides an external API for metrics to be queried through the OpenShift route, `rbac-query-proxy`. See the following options to get your queries for the `rbac-query-proxy` route:
+To access your endpoint by using the mutual TLS, which verifies the identities of both parties in a network connection, query metrics through the {ocp} `rbac-query-proxy` route with the Observability external API. Complete the following steps to get your queries for the `rbac-query-proxy` route:
 
-* You can get the details of the route with the following command:
+. Get the details of the route with the following command:
+
 +
+[source,bash]
 ----
 oc get route rbac-query-proxy -n open-cluster-management-observability
 ----
 
-* You can also access the `rbac-query-proxy` route with your OpenShift OAuth access token. The token should be associated with a user or service account, which has permission to get namespaces. For more information, see link:https://docs.openshift.com/container-platform/4.14/authentication/managing-oauth-access-tokens.html[Managing user-owned OAuth access tokens].
+. To access the `rbac-query-proxy` route with your {ocp-short} OAuth access token, run the following command to get the token. The token must be associated with a user or service account, which has permission to get namespaces:
 
-Complete the following steps to create `proxy-byo-cert` secrets for observability:
-
-. Get the default CA certificate and store the content of the key `tls.crt` in a local file. Run the following command:
 +
+[source,bash]
+----
+MY_TOKEN=$(oc whoami --show-token)
+----
+
+. To access the `openshift-ingress` route, get the default CA certificate and store the content of the `tls.crt` key in a local file. Run the following command:
+
++
+[source,bash]
 ----
 oc -n openshift-ingress get secret router-certs-default -o jsonpath="{.data.tls\.crt}" | base64 -d > ca.crt
 ----
 
-. Run the following command to query metrics:
-+
-----
-curl --cacert ./ca.crt -H "Authorization: Bearer {TOKEN}" https://{PROXY_ROUTE_URL}/api/v1/query?query={QUERY_EXPRESSION}
-----
-+
-*Note:* The `QUERY_EXPRESSION` is the standard Prometheus query expression. For example, query the metrics `cluster_infrastructure_provider` by replacing the URL in the previously mentioned command with the following URL: `https://{PROXY_ROUTE_URL}/api/v1/query?query=cluster_infrastructure_provider`. For more details, see link:https://prometheus.io/docs/prometheus/latest/querying/basics/[Querying Prometheus].
+. To access an endpoint of the default CA certificate from your hub cluster through mutual TLS, which verifies the identities of both parties in a network connection, create the `proxy-byo-ca` TLS secret with the following command:
 
-. Run the following command to create `proxy-byo-ca` secrets using the generated certificates:
 +
 [source,bash]
 ----
 oc -n open-cluster-management-observability create secret tls proxy-byo-ca --cert ./ca.crt --key ./ca.key
 ----
 
-. Create `proxy-byo-cert` secrets using the generated certificates by using the following command:
+. To query metrics from the API, run the following command: 
+
 +
 [source,bash]
 ----
-oc -n open-cluster-management-observability create secret tls proxy-byo-cert --cert ./ingress.crt --key ./ingress.key
+curl --cacert ./ca.crt -H "Authorization: Bearer {TOKEN}" https://{PROXY_ROUTE_URL}/api/v1/query?query={QUERY_EXPRESSION}
 ----
++
+*Note:* The `QUERY_EXPRESSION` is the standard Prometheus query expression. For example, query the metrics `cluster_infrastructure_provider` by replacing the URL in the previously mentioned command with the following URL: `https://{PROXY_ROUTE_URL}/api/v1/query?query=cluster_infrastructure_provider`. For more details, see link:https://prometheus.io/docs/prometheus/latest/querying/basics/[Querying Prometheus].
 
 [#exporting-metrics-to-external-endpoints]
-== Exporting metrics to external endpoints
+=== Exporting metrics to external endpoints
 
-Export metrics to external endpoints, which support the Prometheus Remote-Write specification in real time. Complete the following steps to export metrics to external endpoints: 
+To support the Prometheus Remote-Write specification in real time, export metrics to external endpoints. Complete the following steps to export metrics to external endpoints: 
 
 . Create the Kubernetes secret for an external endpoint with the access information of the external endpoint in the `open-cluster-management-observability` namespace. View the following example secret:
+
 +
 [source,yaml]
 ----
