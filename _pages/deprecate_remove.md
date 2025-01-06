@@ -18,7 +18,7 @@ A deprecated component, feature, or service is supported, but no longer recommen
 
 A removed item is typically function that was deprecated in previous releases and is no longer available in the product. usually these are removed after two releases, but the support manager, tech leads, and product managers will decide to remove. Users use alternatives in the _Recommended action_.
 
-## Process
+## Component and feature doc process
 
 A developer story or epic would indicated if something is deprecated or removed. They will create a doc issue to deprecate or remove an item.
 
@@ -39,8 +39,10 @@ A developer story or epic would indicated if something is deprecated or removed.
   - All `V1` APIs are generally available and supported for 12 months or three releases, whichever is greater. V1 APIs are not removed, but can be deprecated outside of that time limit.
   - All `beta` APIs are generally available for nine months or three releases, whichever is greater. Beta APIs are not removed outside of that time limit.
   - All `alpha` APIs are not required to be supported, but might be listed as deprecated or removed if it benefits users.
-  
-* When a version of the product is no longer supported (EOL), the program manager will have a document to communicate to the teams. Someone on the leadership team shoud open an Epic, which also will lead to a doc issue for EOL.
+
+ ## Entire version EOL doc process
+ 
+ When a version of the product code is no longer supported (EOL), the program manager will have a document to communicate this to the teams. Someone on the ACM leadership team shoud open an Epic, which also will lead to a doc issue for EOL.
 
   - We cannot remove a version of the doc, per support. But it is always worth asking for really old versions to see if the policy has changed.
   - How we indicated a version of the product is removed, but the doc is deprecated is with a note similar to the following note:
@@ -49,7 +51,7 @@ A developer story or epic would indicated if something is deprecated or removed.
   - The accompanying MCE doc will need this, as well:
     `**Deprecated:** {mce-short} 2.2 and earlier versions are no longer supported. The documentation might remain available, but without any Errata or other updates.`
     `**Best practice:** Upgrade to the most recent version.`
-  - It's a good idea to place these exact notes at the top of the deprectation topic, intro to release notes, and intro to install topics.
-  - Since this has been done, you can simply replace the version number in each note. If you change this strategy based on field feedback and such, be sure to change all spots using find and replace.
+  - It's a good idea to place these exact notes at the top of the **Deprectation topic**, **Intro to release notes**, and **Intro to install topics**.
+  - Since this has been done, you can simply replace the version number in each note. If you change this strategy based on field feedback and such, be sure to change all spots using find and replace, and the directions in this document.
 
 
