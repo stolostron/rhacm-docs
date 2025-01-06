@@ -34,6 +34,7 @@ In addition to the release work, the lead or the strategists must follow up on g
 5. Update any other versions, such as channel, RHEL, etc.... Get guidance from a tech lead on this.
 6. Change support matrix links.
 7. If something went EOL, ensure the latest doc reflects those changes. See _Deprecating and removing_ for that guidance.
+8. Work with console focal and engineers to ensure links in the console have not changed.
 
 ## Preparing for _Pencils Down_
 
