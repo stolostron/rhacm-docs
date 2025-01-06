@@ -16,11 +16,11 @@ You must have the following prerequisites to publish live:
 - Logged in to the Pantheon UI 
 - Feature doc and release work is completed for GA
 
-[Tasks to complete early staging](tasks-to-complete-early-staging)
-[Preparing for _Pencils Down_](preparing-for-pencils-down)
-[Creating `production` branch from `stage`](creating-production-branch-from-stage)
-[Publishing doc and splash page](publishing-doc-and-splash-page)
-[Additional required tasks](additional-required-tasks)
+- [Tasks to complete early staging](tasks-to-complete-early-staging)
+- [Preparing for _Pencils Down_](preparing-for-pencils-down)
+- [Creating `production` branch from `stage`](creating-production-branch-from-stage)
+- [Publishing doc and splash page](publishing-doc-and-splash-page)
+- [Additional required tasks](additional-required-tasks)
 
 ## Tasks to complete early staging
 
