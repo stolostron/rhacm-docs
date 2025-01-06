@@ -9,9 +9,9 @@ We document when parts of the product are deprecated or removed. We also need to
 
 (We brought this deprecation and removal strategy with us from IBM Doc Strategy because it works well, RH did not have a consistent strategy, and STSMs and DEs approved this process.)
 
-[Definitions](#definitions)
-[Component and feature deprecation and removal](#component-and-feature-deprecation-and-removal)
-[Entire version EOL doc process](#entire-version-eol-doc-process)
+- [Definitions](#definitions)
+- [Component and feature deprecation and removal](#component-and-feature-deprecation-and-removal)
+- [Entire version EOL doc process](#entire-version-eol-doc-process)
 
 ## Definitions
 
