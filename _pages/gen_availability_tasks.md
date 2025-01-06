@@ -16,16 +16,13 @@ You must have the following prerequisites to publish live:
 - Logged in to the Pantheon UI 
 - Feature doc and release work is completed for GA
 
-## Preparing for _Pencils Down_
+[Tasks to complete early staging](tasks-to-complete-early-staging)
+[Preparing for _Pencils Down_](preparing-for-pencils-down)
+[Creating `production` branch from `stage`](creating-production-branch-from-stage)
+[Publishing doc and splash page](publishing-doc-and-splash-page)
+[Additional required tasks](additional-required-tasks)
 
-At some point the team agrees to a _Pencils Down_ date, which may move depending on the product release. Close to that date, start preparing.
-
-1. Ensure the build is regularly green. Ask writers fix any errors for their books a few days before GA and work to keep the build green closer to the agreed upon _Pencils Down_ day.
-2. Ask the team to work on reconciling the changes and merging active PRs to the stage branch. Since this depends on reviews and such, the PR list may not be clear in time, but no PRs for stage is the goal for _Pencils Down_.
-3. Declare _Pencils Down_ on the date/time so that the team pauses any pushing to stage.
-4. Build stage. Check for green. Fix any errors.
-
-## Tasks to complete early in the release cycle before GA
+## Tasks to complete early staging
 
 In addition to the release work, the lead or the strategists must follow up on general tasks each release before GA. **Best practice:** Open a story on the Documentation component to track along side the dev stories. Attach issues that can be shared if needed for the following tasks (you can combine similar tasks in one issue):
 
@@ -37,9 +34,18 @@ In addition to the release work, the lead or the strategists must follow up on g
 6. Change support matrix links.
 7. If something went EOL, ensure the latest doc reflects those changes. See _Deprecating and removing_ for that guidance.
 
-## Creating the `production` from `stage` 
+## Preparing for _Pencils Down_
 
-Now that stage is finalized and green, you can create the production branch from the stage branch. See [Branch Strategy](branch_strategy.md) for important information about how and why we use these branches.
+At some point the team agrees to a _Pencils Down_ date, which may move depending on the product release. Close to that date, start preparing.
+
+1. Ensure the build is regularly green. Ask writers fix any errors for their books a few days before GA and work to keep the build green closer to the agreed upon _Pencils Down_ day.
+2. Ask the team to work on reconciling the changes and merging active PRs to the stage branch. Since this depends on reviews and such, the PR list may not be clear in time, but no PRs for stage is the goal for _Pencils Down_.
+3. Declare _Pencils Down_ on the date/time so that the team pauses any pushing to stage.
+4. Build stage. Check for green. Fix any errors.
+
+## Creating `production` branch from `stage` 
+
+Now that stage branch is finalized and green, you can create the production branch from the stage branch. See [Branch Strategy](branch_strategy.md) for important information about how and why we use these branches.
 
 1. Create the new <release_number>_prod branch from the <release_number>_stage branch.
 2. Protect the branch to keep anyone from bypassing rules in the production branch. Two users are needed to push stage into to prod: The creator and the reviewer. Go to **Settings** > **Branches**. (Because GitHub changes the UI at times, if this is not the workflow, you can simply Google something like "how to protect my branch in GitHub" for the process.)
@@ -53,7 +59,7 @@ Now that stage is finalized and green, you can create the production branch from
 10. Ensure the build is clean.
 11. Stop any builds until GA day and after because `prod` and `stage` are in the same directory. You can return to building stage after you publish.
 
-## Publishing the doc and the splash page
+## Publishing doc and splash page
 
 Ideally the architect or strategist is doing this but can be done by the lead, with overall big-picture in mind. See support from the DE/PM about arranging this when needed.
 
@@ -67,7 +73,7 @@ Ideally the architect or strategist is doing this but can be done by the lead, w
 7. Change the _Product status_ from **Unpublished** to **Published**.
 8. Click **Save** to save the changes.
 
-## Additional tasks
+## Additional required tasks
 
 1. Publish the draft(s) for the Support Matrix. There should be an issue for the release that tracked this work. See the strategist or lead. Currently there is a matrix for ACM and MCE. 
 2. Edit [Comet](https://comet.engineering.redhat.com/containers/products/5ec54aa3535cb70ab8c02996). (?) <!--check into this; I have not had to do this in a while. Ask Chris about this.-->
