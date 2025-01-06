@@ -9,6 +9,10 @@ We document when parts of the product are deprecated or removed. We also need to
 
 (We brought this deprecation and removal strategy with us from IBM Doc Strategy because it works well, RH did not have a consistent strategy, and STSMs and DEs approved this process.)
 
+[Definitions](#definitions)
+[Component and feature deprecation and removal](#component-and-feature-deprecation-and-removal)
+[Entire version EOL doc process](#entire-version-eol-doc-process)
+
 ## Definitions
 
 **Deprecation:** A piece of the product will no longer be developed or updated. These components or features are highlighted in the doc.
@@ -18,7 +22,9 @@ A deprecated component, feature, or service is supported, but no longer recommen
 
 A removed item is typically function that was deprecated in previous releases and is no longer available in the product. usually these are removed after two releases, but the support manager, tech leads, and product managers will decide to remove. Users use alternatives in the _Recommended action_.
 
-## Component and feature doc process
+**Important** Usually before something is removed, it was already deprecated for at least two releases. There are rare occasions where this is missed by the product team, but it is not ideal for the customer.
+
+## Component and feature deprecation and removal
 
 A developer story or epic would indicated if something is deprecated or removed. They will create a doc issue to deprecate or remove an item.
 
@@ -28,11 +34,9 @@ A developer story or epic would indicated if something is deprecated or removed.
  4. Ensure the table is reviewed each release for existing and outdated content. A cross-squad issue with the release manager is an efficient way to get dev teams to review existing content. For new entries, developers need to open new issues for doc.
  5. Remove content that is not within the n-2 support structure.
 
-### Notes:
+### API deprecations
 
-* Usually before something is removed, it was already deprecated for at least two releases. There are rare occasions where this is missed by the product team, but it is not ideal for the customer.
-
-* API deprecations and removals: follows the Kubernetes deprecation guidelines for APIs. See the [Kubernetes Deprecation Policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/) for more details about that policy. 
+ API deprecations and removals: follows the Kubernetes deprecation guidelines for APIs. See the [Kubernetes Deprecation Policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/) for more details about that policy. 
 
 * APIs are only deprecated or removed outside of the following timelines:
   
