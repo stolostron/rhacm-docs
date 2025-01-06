@@ -23,7 +23,19 @@ At some point the team agrees to a _Pencils Down_ date, which may move depending
 1. Ensure the build is regularly green. Ask writers fix any errors for their books a few days before GA and work to keep the build green closer to the agreed upon _Pencils Down_ day.
 2. Ask the team to work on reconciling the changes and merging active PRs to the stage branch. Since this depends on reviews and such, the PR list may not be clear in time, but no PRs for stage is the goal for _Pencils Down_.
 3. Declare _Pencils Down_ on the date/time so that the team pauses any pushing to stage.
-4. Build stage. Check for green. Fix any errors. 
+4. Build stage. Check for green. Fix any errors.
+
+## Tasks to complete early in the release cycle before GA
+
+In addition to the release work, the lead or the strategists must follow up on general tasks each release before GA. **Best practice:** Open a story on the Documentation component to track along side the dev stories. Attach issues that can be shared if needed for the following tasks (you can combine similar tasks in one issue):
+
+1. Remove old _What's new_ entries so that the team can start over for the new release.
+2. Remove deprecation and removal items that are older than staged-N minus two (the squads help with this via the cross-squad issue).
+3. Clean the Errata release notes to only have the intro (both MCE and ACM).
+4. Update link versions for OCP. (Currently we use the earliest of N-2, unless the feature is built on a later OCP. See PM for guidance. If this changes, we need to change the note we added about this.)
+5. Update any other versions, such as channel, RHEL, etc.... Get guidance from a tech lead on this.
+6. Change support matrix links.
+7. If something went EOL, ensure the latest doc reflects those changes. See _Deprecating and removing_ for that guidance.
 
 ## Creating the `production` from `stage` 
 
