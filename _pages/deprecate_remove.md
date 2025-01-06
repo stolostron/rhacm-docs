@@ -40,7 +40,7 @@ A developer story or epic would indicated if something is deprecated or removed.
   - All `beta` APIs are generally available for nine months or three releases, whichever is greater. Beta APIs are not removed outside of that time limit.
   - All `alpha` APIs are not required to be supported, but might be listed as deprecated or removed if it benefits users.
 
- ## Entire version EOL doc process
+## Entire version EOL doc process
  
  When a version of the product code is no longer supported (EOL), the program manager will have a document to communicate this to the teams. Someone on the ACM leadership team shoud open an Epic, which also will lead to a doc issue for EOL.
 
