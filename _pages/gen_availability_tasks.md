@@ -7,12 +7,12 @@ horizontal: false
 
 These directions walk you through preparing for the release and tasks for GA day. Ideally this is done by a strategist/architect or a lead with a big-picture view of the doc, but as long as a teammate has rights, they can go through these procedures.
 
-- [Prerequisites](prerequisites)
-- [Tasks to complete early staging](tasks-to-complete-early-staging)
-- [Preparing for _Pencils Down_](preparing-for-pencils-down)
-- [Creating `production` branch from `stage`](creating-production-branch-from-stage)
-- [Publishing doc and splash page](publishing-doc-and-splash-page)
-- [Additional required tasks](additional-required-tasks)
+- [Prerequisites](#prerequisites)
+- [Tasks to complete early staging](#tasks-to-complete-early-staging)
+- [Preparing for _Pencils Down_](#preparing-for-pencils-down)
+- [Creating `production` branch from `stage`](#creating-production-branch-from-stage)
+- [Publishing doc and splash page](#publishing-doc-and-splash-page)
+- [Additional required tasks](#additional-required-tasks)
 
 ## Prerequisites
 
