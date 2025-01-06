@@ -16,7 +16,7 @@ Most of the following content is addressed in the following manuals or guidance:
 
 Many of the guidelines we adopt are industry standards for high quality writing, proper grammar, SEO, translation, accessibility, and readability. All technical writers should be very familiar with these standards for writing. Each contributor should refer to these manuals when creating content for the RHACM docs repository. Read more about the standards in the following sections, but see the manuals for more information:
 
-* [General reminders](#reminders)
+* [General reminders](#general-reminders)
 * [File names, titles, headers](#file-names-titles-headers)
 * [Short descriptions](#short-descriptions)
 * [Concise, clear content](#concise-clear-content)
