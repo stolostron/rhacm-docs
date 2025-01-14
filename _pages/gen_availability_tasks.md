@@ -35,6 +35,7 @@ In addition to the release work, the lead or the strategists must follow up on g
 6. Change support matrix links.
 7. If something went EOL, ensure the latest doc reflects those changes. See _Deprecating and removing_ for that guidance.
 8. Work with console focal and engineers to ensure links in the console have not changed.
+9. Email 
 
 ## Preparing for _Pencils Down_
 
@@ -81,3 +82,8 @@ Ideally the architect or strategist is doing this but can be done by the lead, w
 2. Edit [Comet](https://comet.engineering.redhat.com/containers/products/5ec54aa3535cb70ab8c02996). (?) <!--check into this; I have not had to do this in a while. Ask Chris about this.-->
 3. Add the _Support matrix_ to the [_Lifecycle_ page](https://access.redhat.com/support/policy/updates/advanced-cluster-management).
 4. Double check that links to the Support matrix work after you publish.
+5. Reach out at the earliest convenience to get the Jira template changed with the following note (or something similar) to **rh-issues@redhat.com:**
+   
+```
+When you create the Jira for the ACM Doc team, you choose the **Documentation** component to see the **Doc template** for requested Customer Portal changes. All issue types would display this template because it is controlled by the component, `Documentation`. Please update the current link with the latest published doc that just went live: `<insert link to landing page for most recent doc>`
+```
