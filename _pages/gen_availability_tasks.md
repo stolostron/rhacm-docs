@@ -79,10 +79,10 @@ Ideally the architect or strategist is doing this but can be done by the lead, w
 
 ## Request support matrix link update on product page
 
-This used to be something that we had to update. It is now handled through an issue. 
+This was something that we had to update but is now handled through an issue with more process attached. 
 
 1. Clone [CPPX-948](https://issues.redhat.com/browse/CPPX-948) and update the version numbers. This example was used for version 2.12. 
-2. Request an update to the support matrix link on the product page to the new support matrix.
+2. Request an update to the Support Matrix link on the product page to the new support matrix.
 3. Submit the issue. It is usually a very fast turnaround. 
 
 ## Additional required tasks
