@@ -1,0 +1,41 @@
+[#]
+= Troubleshooting missing desired OpenShift version when upgrading managed cluster
+
+The desired OpenShift versions is missing on the ACM Web console when upgrading the managed cluster.
+
+= Symptom: missing desired OpenShift version when upgrading managed cluster
+= Resolving the problem: missing desired OpenShift version when upgrading managed cluster
+
+. Make sure the desired version is included in the status of the ClusterVersion on the managed cluster.
+
++
+----
+oc get clusterversion version -o jsonpath='{.status.availableUpdates[*].version}'
+----
+
+If not present, the version is not applicable for this OpenShift managed cluster.
+
+. Check if the ManagedClusterInfo includes the desired version on the hub cluster
+
+----
+oc -n <cluster_name> get managedclusterinfo <cluster_name> -o jsonpath='{.status.distributionInfo.ocp.availableUpdates[*]}'
+----
+
+. If included, check if there is a ClusterCurator with failure on the hub cluster
+
+----
+oc -n <cluster_name> get ClusterCurator local-cluster -o yaml
+----
+
+. If the ClusterCurator exists and the status of its `clustercurator-job` condition is `False`, delete the ClusterCurator from the hub cluster
+
+----
+oc -n <cluster_name> delete ClusterCurator local-cluster
+----
+
+. Otherwise if the ManagedClusterInfo does not included the desired version, check the log of the `work-manager` add-on on the managed cluster and take care of the errors accordingly if some errors are reported.
+
+----
+kubectl -n open-cluster-management-agent-addon logs klusterlet-addon-workmgr-xxx-xx
+----
+Replace the pod name with the real name in your environment.
