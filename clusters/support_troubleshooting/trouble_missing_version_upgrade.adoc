@@ -1,41 +1,59 @@
-[#]
-= Troubleshooting missing desired OpenShift version when upgrading managed cluster
+[#upgrade-managed-missing-ocp]
+= Troubleshooting upgraded managed cluster with missing {ocp-short} version 
 
-The desired OpenShift versions is missing on the ACM Web console when upgrading the managed cluster.
+After you upgrade your managed cluster, the expected {ocp-short} version is missing.
 
-= Symptom: missing desired OpenShift version when upgrading managed cluster
-= Resolving the problem: missing desired OpenShift version when upgrading managed cluster
+[#symptom-missing-ocp]
+== Symptom: After managed cluster upgrade the {ocp-short} version is missing 
 
-. Make sure the desired version is included in the status of the ClusterVersion on the managed cluster.
+After you upgraded your managed cluster, you did not see the {ocp-short} version that you want in the console.
+
+[#resolve-missing-ocp]
+== Resolving the problem: After managed cluster upgrade the {ocp-short} version is missing 
+
+See the following procedure:
+
+. Ensure the desired version is included in the status of the `ClusterVersion` on the managed cluster. Run the following command:
 
 +
+[source,bash]
 ----
 oc get clusterversion version -o jsonpath='{.status.availableUpdates[*].version}'
 ----
 
-If not present, the version is not applicable for this OpenShift managed cluster.
++
+If your expected version is not displayed, then the version is not applicable for this managed cluster.
 
-. Check if the ManagedClusterInfo includes the desired version on the hub cluster
+. Check if the `ManagedClusterInfo` includes the desired version on the hub cluster. Run the following command:
 
++
+[source,bash]
 ----
 oc -n <cluster_name> get managedclusterinfo <cluster_name> -o jsonpath='{.status.distributionInfo.ocp.availableUpdates[*]}'
 ----
 
-. If included, check if there is a ClusterCurator with failure on the hub cluster
+. If the version is included, check to see if there is a `ClusterCurator` with failure on the hub cluster. Run the following command:
 
++
+[source,bash]
 ----
 oc -n <cluster_name> get ClusterCurator local-cluster -o yaml
 ----
 
-. If the ClusterCurator exists and the status of its `clustercurator-job` condition is `False`, delete the ClusterCurator from the hub cluster
+. If the `ClusterCurator` exists and the status of its `clustercurator-job` condition is `False`, delete the `ClusterCurator` from the hub cluster. Run the following command:
 
++
+[source,bash]
 ----
 oc -n <cluster_name> delete ClusterCurator local-cluster
 ----
 
-. Otherwise if the ManagedClusterInfo does not included the desired version, check the log of the `work-manager` add-on on the managed cluster and take care of the errors accordingly if some errors are reported.
+. If the `ManagedClusterInfo` does not include the desired version, check the `work-manager` add-on log on the managed cluster and fix errors that are reported.
 
++
+[source,bash]
 ----
-kubectl -n open-cluster-management-agent-addon logs klusterlet-addon-workmgr-xxx-xx
+oc -n open-cluster-management-agent-addon logs klusterlet-addon-workmgr-xxx-xx
 ----
-Replace the pod name with the real name in your environment.
+
+. Replace the pod name with the real name in your environment.
