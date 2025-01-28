@@ -27,6 +27,7 @@ Your header 2 ID and titles go here if there are more than two:
 == Prerequisites
 
 You must have the following prerequisites: (or a line similar between the list and header)
+Only use bullets if you have more than one prereq to list.
 
 * A deployed hub cluster that is running on a supported {ocp-short} version with...
 * An {ocp-short} cluster that is managed by the hub cluster
