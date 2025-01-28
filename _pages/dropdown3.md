@@ -5,7 +5,9 @@ permalink:
 nav: true
 nav_order: 3
 dropdown: true
-children: 
+children:
+    - title: ASCII Doc template ACM
+      permalink: /ascii_acm_template
     - title: Building links
       permalink: /build_links
     - title: divider
