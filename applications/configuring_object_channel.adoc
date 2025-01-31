@@ -1,0 +1,77 @@
+[#configuring-object-channel]
+= Configuring application channel and subscription for a secure object storage connection
+
+To get transport layer security (TLS) support for your S3 buckets, you must configure your applications and subscriptions to use a secure object storage connection. To configure a secure object storage connection, complete the following sections: 
+
+* <<creating-insecure-http-object-server, Creating an insecure HTTPS connection to an object storage server>>
+* <<using-certificates-secure-https-connection, Using custom CA certificates for a secure HTTPS connection>>
+
+[#creating-insecure-http-object-server]
+== Creating an insecure HTTPS connection to an object storage server
+
+In your _development_ environment, use a connection method to connect a privately hosted object storage server with the TLS certificates that are signed by the custom certificate authority (CA) certificates. By doing this, you create an insecure HTTPS connection to an object storage server. 
+
+To create an insecure HTTPS connection to an object storage server, complete the following steps:
+
+. In the channel specification, specify `insecureSkipVerify: true`. 
+. Use the following YAML as your connection method:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+labels:
+  name: sample-channel
+  namespace: sample
+spec:
+  type: ObjectBucket
+  pathname: <ObjectBucket HTTPS URL>
+  insecureSkipVerify: true
+----
+
+[#using-certificates-secure-https-connection]
+== Using custom CA certificates for a secure HTTPS connection
+
+You can use this connection method to securely connect to a privately hosted Git server with TLS certificates that are signed by the custom CA certificates. By doing so, you create a secure HTTPS connection. 
+
+To use custom CA certificates for a secure HTTPS connection, complete the following steps:
+
+. Create a `ConfigMap` to contain the object storage server root and intermediate CA certificates in the privacy enhanced mail (PEM) format. 
+. Use the following YAML as your connection method: 
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: obj-ca
+  namespace: ch-object-dev <1> 
+data:
+  caCerts: |
+    # minio root CA
+  -----BEGIN CERTIFICATE-----
+  MIIBbDCCARKgAwIBAgIQGr0mPSgSVkL+LGyc4t6sizAKBggqhkjOPQQDAjAWMRQw
+  EgYDVQQDEwt0ZW5hbnQtMS1jYTAeFw0yNTAxMDcyMjQ3MzFaFw0zMzAxMDcyMjQ3 
+  -----END CERTIFICATE-----   
+----
+<1> Create the `ConfigMap` in the same namespace as the channel resource. 
+. Configure the channel resource with the `ConfigMap` by using the following YAML as your connection method:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: object-dev
+  namespace: ch-object-dev
+spec:
+  type: ObjectBucket
+  pathname: <ObjectBucket HTTPS URL>
+  configMapRef:
+    name: obj-ca <1> 
+----
+<1> Get this object name by creating the `ConfigMap` like you did in the earlier step. 
