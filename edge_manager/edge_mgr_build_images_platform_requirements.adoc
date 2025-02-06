@@ -1,0 +1,158 @@
+[#edge-mgr-platform-requirements]
+= Requirements for specific target platforms
+
+See the following platform considerations:
+
+* <<rhem-virt,{ocp-virt}>>
+* <<rhem-vmware,VMware vSphere>>
+
+[#rhem-virt]
+== Image building for {ocp-virt}
+
+When building operating system images and disk images for VMware vSphere, you can follow the generic image building process with the following changes:
+
+* Using late binding by injecting the enrollment certificate or the agent configuration through `cloud-init` when provisioning the virtual device.
+* Adding the `open-vm-tools` guest tools to the image.
+* Building a disk image of type `qcow2` instead of `iso`.
+
+Complete the generic steps with changes to the following steps:
+
+. Build an operating system image based on RHEL 9 that includes the {rhem} agent and VM guest tools but excludes the agent configuration.
+
+. Create a file named `Containerfile` with the following content:
+
++
+[source,bash]
+----
+FROM registry.redhat.io/rhel9/bootc-image-builder:latest
+
+RUN subscription-manager repos --enable rhacm-2.13-for-rhel-9-$(uname -m)-rpms && \
+    dnf -y install flightctl-agent && \
+    dnf -y clean all && \
+    systemctl enable flightctl-agent.service
+
+RUN dnf -y install cloud-init open-vm-tools && \
+    dnf -y clean all && \
+    ln -s ../cloud-init.target /usr/lib/systemd/system/default.target.wants && \
+    systemctl enable vmtoolsd.service
+----
+
+. *Optional:* To enable `podman-compose` application support, add the following section to the `Containerfile` file:
+
++
+[source,bash]
+----
+RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+    dnf -y install podman-compose && \
+    dnf -y clean all && \
+    systemctl enable podman.service
+----
+
+Build, sign, and publish the `bootc operating system image by following the generic image building process.
+
+. Create a directory called `output` by running the following command:
+
++
+[source,bash]
+----
+mkdir -p output
+----
+
+. Generate an operating system disk image of type `vmdk` from your operating system image by running the following command:
+
++
+[source,bash]
+----
+sudo podman run --rm -it --privileged --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v "${PWD}/output":/output \
+    -v /var/lib/containers/storage:/var/lib/containers/storage \
+    registry.redhat.io/rhel9/bootc-image-builder:latest \
+    --type qcow2 \
+    ${OCI_IMAGE_REPO}:${OCI_IMAGE_TAG}
+----
+
+When `bootc-image-builder` completes, you can find the disk image under `${PWD}/output/vmdk/disk.vmdk`.
+
+{ocp-virt} can download disk images from an OCI registry but it expects a container disk image instead of an OCI artifact. Complete the following steps to build, sign, and upload the QCoW2 disk image:
+
+. Create a file called `Containerfile.qcow2` with the following content:
+
++
+[source,bash]
+----
+FROM registry.access.redhat.com/ubi9/ubi:latest AS builder
+ADD --chown=107:107 output/qcow2/disk.qcow2 /disk/ <1>
+RUN chmod 0440 /disk/* <2>
+FROM scratch
+COPY --from=builder /disk/* /disk/ <3>
+----
+<1> Adds the QCoW2 disk image to a builder container to set the required `107` file ownership, which is the QEMU user.
+<2> Sets the required `0440` file permissions. 
+<3> Copies the file to a scratch image.
+
+. Build, sign, and publish your disk image. Run the following command:
+
++
+[source,bash]
+----
+sudo chown -R $(whoami):$(whoami) "${PWD}/output"
+OCI_DISK_IMAGE_REPO=${OCI_IMAGE_REPO}/diskimage-qcow2
+sudo podman build -t ${OCI_DISK_IMAGE_REPO}:${OCI_IMAGE_TAG} -f Containerfile.qcow2 .
+sudo podman push --sign-by-sigstore-private-key ./signingkey.private ${OCI_DISK_IMAGE_REPO}:${OCI_IMAGE_TAG}
+----
+
+[#rhem-vmware]
+== Image building for VMware vSphere
+
+When building operating system images and disk images for VMware vSphere, you can follow the generic image building process with the following changes:
+
+* Using late binding by injecting the enrollment certificate or the agent configuration through `cloud-init` when provisioning the virtual device.
+* Adding the `open-vm-tools` guest tools to the image.
+* Building a disk image of type `vmdk` instead of `iso`.
+
+Complete the generic steps with changes to the following steps:
+
+. Build an operating system image based on RHEL 9 that includes the {rhem} agent and VM guest tools but excludes the agent configuration.
+
+. Create a file named `Containerfile` with the following content:
+
++
+[source,bash]
+----
+FROM registry.redhat.io/rhel9/bootc-image-builder:latest
+
+RUN subscription-manager repos --enable rhacm-2.13-for-rhel-9-$(uname -m)-rpms && \
+    dnf -y install flightctl-agent && \
+    dnf -y clean all && \
+    systemctl enable flightctl-agent.service && \
+
+RUN dnf -y install cloud-init open-vm-tools && \
+    dnf -y clean all && \
+    ln -s ../cloud-init.target /usr/lib/systemd/system/default.target.wants && \
+    systemctl enable vmtoolsd.service
+----
+
+. Create a directory called `output` by running the following command:
+
++
+[source,bash]
+----
+mkdir -p output
+----
+
+. Generate an operating system disk image of type `vmdk` from your operating system image by running the following command:
+
++
+[source,bash]
+----
+sudo podman run --rm -it --privileged --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v "${PWD}/output":/output \
+    -v /var/lib/containers/storage:/var/lib/containers/storage \
+    registry.redhat.io/rhel9/bootc-image-builder:latest \
+    --type vmdk \
+    ${OCI_IMAGE_REPO}:${OCI_IMAGE_TAG}
+----
+
+When `bootc-image-builder` completes, you can find the disk image under `${PWD}/output/vmdk/disk.vmdk`.
