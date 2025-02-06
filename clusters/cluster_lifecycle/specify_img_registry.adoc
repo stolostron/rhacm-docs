@@ -1,11 +1,22 @@
 [#specify-registry-img-on-managed-clusters-for-import]
 = Specifying image registry on managed clusters for import
 
-You might need to override the image registry on the managed clusters that you are importing. You can do this by creating a `ManagedClusterImageRegistry` custom resource definition. The `ManagedClusterImageRegistry` custom resource definition is a namespace-scoped resource.
+You might need to override the image registry on the managed clusters that you are importing by creating a `ManagedClusterImageRegistry` custom resource definition. The `ManagedClusterImageRegistry` custom resource definition specifies a set of managed clusters for a `placement` to select, but needs different images from the custom image registry. 
 
-The `ManagedClusterImageRegistry` custom resource definition specifies a set of managed clusters for a `placement` to select, but needs different images from the custom image registry. 
+{acm-short} retrieves {ocp-short} `ClusterImageSets` from a GitHub repository that is managed by Red Hat. These `ClusterImageSets` define {ocp-short} versions that can be deployed. 
 
-After the managed clusters are updated with the new images, the following label is added to each managed cluster for identification: `open-cluster-management.io/image-registry=<namespace>.<managedClusterImageRegistryName>`.
+*Important:* You might need to obtain _ClusterImageSets_ without access to GitHub.
+
++
+If you cannot access the repository that you need to specify an image registry because you are not connected to the Internet, or because of policy settings, you might need to take additional steps to access a _mirrored_ or _internal_ repository​. See xref:../cluster_lifecycle/release_image_disconn.adoc#release-images-disconnected[Maintaining a custom list of release images while disconnected] for that procedure.
+
+* <<config-managedclusterimageregistry,Configure the _ManagedClusterImageRegistry_>>
+* <<import-cluster-managedclusterimageregistry,Importing a cluster that has a _ManagedClusterImageRegistry_>>
+
+[#config-managedclusterimageregistry]
+== Configure the _ManagedClusterImageRegistry_
+
+The `ManagedClusterImageRegistry` custom resource definition is a namespace-scoped resource. After the managed clusters are updated with the new images, the following label is added to each managed cluster for identification: `open-cluster-management.io/image-registry=<namespace>.<managedClusterImageRegistryName>`.
 
 The following example shows a `ManagedClusterImageRegistry` custom resource definition with `placementRef` specifications:
 
@@ -89,7 +100,7 @@ $ kubectl create secret docker-registry myPullSecret \
   --docker-password=<my-password>
 ----
 
-. Create a Placement in the namespace that you created.
+. Create a `placement` in the namespace that you created.
 +
 [source,yaml]
 ----
@@ -106,7 +117,7 @@ spec:
     operator: Exists
 ----
 +
-*Note:* The `unreachable` toleration is required for the Placement to be able to select the cluster. 
+*Note:* The `unreachable` toleration is required for the `placement` to be able to select the cluster. 
 
 . Create a `ManagedClusterSet` resource and bind it to your namespace.
 +
@@ -149,14 +160,3 @@ spec:
 . Import a managed cluster from the console and add it to a managed cluster set.
 
 . Copy and run the import commands on the managed cluster after the `open-cluster-management.io/image-registry=myNamespace.myImageRegistry` label is added to the managed cluster.
-
-[registry-disconnected]
-== Accessing _ClusterImageSets_ in a disconnected environment
-
-If you cannot access the repository, you might need to take additional steps. {acm-short} retrieves {ocp-short} `ClusterImageSets` from a GitHub repository that is managed by Red Hat. 
-
-These `ClusterImageSets` define {ocp-short} versions that can be deployed. 
-
-Access to this repository requires an internet connection to GitHub unless you configure your setup to use a mirrored or internal repository​. 
-
-See xref:../cluster_lifecycle/release_image_disconn.adoc#release-images-disconnected[Maintaining a custom list of release images while disconnected].
