@@ -10,18 +10,21 @@ Before installing VolSync on your clusters, you must have the following requirem
 
 * A configured {ocp} environment on a supported {acm-short} hub cluster
 
+* The storage driver that you use for your source persistent volume must be CSI-compatible and able to support snapshots. 
+
+If you want to use the `rsync-tls` mover to replicate data between clusters, you must have the following requirements: 
+
 * At least two managed clusters for the same {acm-short} hub cluster
 
 * Network connectivity between the clusters that you are configuring with VolSync. If the clusters are not on the same network, you can configure the link:../../networking/submariner/subm_intro.adoc#submariner[Submariner multicluster networking and service discovery] and use the `ClusterIP` value for `ServiceType` to network the clusters, or use a load balancer with the `LoadBalancer` value for `ServiceType`.
 
-* The storage driver that you use for your source persistent volume must be CSI-compatible and able to support snapshots. 
 
 [#volsync-install-clusters]
 == Installing VolSync on the managed clusters
 
 To enable VolSync to replicate the persistent volume claim on one cluster to the persistent volume claim of another cluster, you must install VolSync on both the source and the target managed clusters.
 
-VolSync does not create its own namespace, so it is in the same namespace as other {ocp-short} all-namespace operators. Any changes that you make to the operator settings for VolSync also affects the other operators in the same namespace, such as if you change to manual approval for channel updates. 
+You can install VolSync as a deployment on the `volsync-system` namespace on the managed cluster. Doing this provides support for non-OpenShift managed clusters. 
 
 You can use either of two methods to install VolSync on two clusters in your environment. You can either add a label to each of the managed clusters in the hub cluster, or you can manually create and apply a `ManagedClusterAddOn`, as they are described in the following sections:
 
@@ -45,13 +48,21 @@ The VolSync service pod is installed on the managed cluster.
 
 . Add the same label the other managed cluster. 
 
-. Run the following command on each managed cluster to confirm that the VolSync operator is installed:
+. Run the following command on the hub to confirm that the VolSync operator is installed:
 +
 ----
-oc get csv -n openshift-operators
+oc -n <managed-cluster-name> get ManagedClusterAddOn volsync
 ----
 +
-There is an operator listed for VolSync when it is installed.
+
+. Verify that the command output shows that the `managedclusteraddon` has a `Ready` status. 
+
+. Run the following command on the managed cluster to confirm that the VolSync operator is installed:
++
+----
+kubectl -n volsync-system get deployment volsync
+----
++
 
 * Complete the following steps from the command-line interface:
 
@@ -105,23 +116,7 @@ oc apply -f volsync-mcao.yaml
 
 . Repeat the procedure for the other managed cluster.
 +
-A `ManagedClusterAddOn` resource should be created automatically on your hub cluster in the namespace of each corresponding managed cluster.
-
-[#volsync-update-mcaddon]
-=== Updating the VolSync _ManagedClusterAddOn_
-
-Depending on what version of {acm-short} you use, you might need to update your VolSync version. To update VolSync `ManagedClusterAddOn` resource, complete the following steps: 
-
-. Add the following annotation to your `ManagedClusterAddOn` resource:
-+
-[source,yaml]
-----
-  annotations:
-       operator-subscription-channel: stable-0.9
-----
-+
-. Define the `operator-subscription-channel` where you want VolySync deployed from. 
-. Verify that you updated your Volsync version by going to your `ManagedClusterAddOn` resource and confirming that your chosen `operator-subscription-channel` is included. 
+A `ManagedClusterAddOn` resource should be created automatically on your hub cluster in the namespace of each corresponding managed cluster. 
 
 [#rsync-tls-replication-volsync]
 == Configuring an Rsync-TLS replication
