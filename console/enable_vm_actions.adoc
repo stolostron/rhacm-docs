@@ -19,116 +19,34 @@ Confirm that the _ManagedServiceAccount_ add-on is enabled. See link:../clusters
 [#enable-actions-acm]
 == Enabling virtual machine actions for {acm-short}
 
-You can enable the virtual machine actions for {acm-short} by updating the console config map. Complete the following steps:
+You can enable the virtual machine actions for {acm-short} by adding the `virtual-machine-preview=true` annotation to the search operator. Run the following command to add the annotation:
 
-. To update the {acm-short} console config map for enabling virtual machine actions, run the following command:
-
-+
 [source,bash]
 ----
-oc patch configmap console-mce-config -n multicluster-engine -p '{"data": {"VIRTUAL_MACHINE_ACTIONS": "enabled"}}'
+oc annotate search search-v2-operator -n open-cluster-management virtual-machine-preview='true'
 ----
 
-. To configure {acm-short} to process the actions, create and configure a `ManagedServiceAccount` resource for each managed cluster. Save the following YAML file:
+You can verify that virtual machines actions for {acm-short} are enabled by checking the search operator status:
 
-+
 [source,yaml]
 ----
-apiVersion: authentication.open-cluster-management.io/v1beta1
-kind: ManagedServiceAccount
-metadata:
-  name: vm-actor
-  labels:
-    app: search
-spec:
-  rotation: {}
----
-apiVersion: rbac.open-cluster-management.io/v1alpha1
-kind: ClusterPermission
-metadata:
-  name: vm-actions
-  labels:
-    app: search
-spec:
-  clusterRole:
-    rules:
-      - apiGroups:
-          - subresources.kubevirt.io
-        resources:
-          - virtualmachines/start
-          - virtualmachines/stop
-          - virtualmachines/restart
-          - virtualmachineinstances/pause
-          - virtualmachineinstances/unpause
-        verbs:
-          - update
-  clusterRoleBinding:
-    subject:
-      kind: ServiceAccount
-      name: vm-actor
-      namespace: open-cluster-management-agent-addon
+status:
+  conditions:
+    - lastTransitionTime: '2024-12-09T20:14:18Z'
+      message: Virtual machine actions are enabled.
+      reason: None
+      status: 'True' 
+      type: VirtualMachineActionsReady
 ----
-+
-*Note:* You must repeat this step for each new managed cluster.
-
-. Apply the `ManagedServiceAccount` resource to your hub cluster by running the following command:
-
-+
-[source,bash]
-----
-oc apply -n <MANAGED_CLUSTER> -f /path/to/file
-----
-
-The virtual machine actions are enabled for {acm-short}.
 
 [#disable-vm-actions]
 == Disabling virtual machine actions
 
-To disable virtual machine actions for {acm-short}, run the following command:
+To disable virtual machine actions for {acm-short}, remove the `virtual-machine-preview` annotation by running the following command:
 
 [source,bash]
 ----
-oc patch configmap console-mce-config -n multicluster-engine -p '{"data": {"VIRTUAL_MACHINE_ACTIONS": "disabled"}}'
+oc annotate search search-v2-operator -n open-cluster-management virtual-machine-preview-
 ----
 
 The virtual machine actions are disabled for {acm-short}.
-
-[#delete-vm-actions]
-== Deleting ManagedServiceAccounts and ClusterPermissions resources
-
-To delete `ManagedServiceAccounts` and `ClusterPermissions` resources that use virtual machine actions, complete the following steps:
-
-. To delete the resources, run the following command:
-
-+
-[source,bash]
-----
-oc delete managedserviceaccount,clusterpermission -A -l app=search
-----
-+
-You might receive the following output:
-
-+
-[source,bash]
-----
-managedserviceaccount.authentication.open-cluster-management.io "vm-actor" deleted managedserviceaccount.authentication.open-cluster-management.io "vm-actor" deleted clusterpermission.rbac.open-cluster-management.io "vm-actions" deleted clusterpermission.rbac.open-cluster-management.io "vm-actions" deleted
-----
-
-. To confirm that the clean up is complete, run the following command:
-
-+
-[source,bash]
-----
-oc get managedserviceaccount,clusterpermission -A -l app=search
-----
-
-+
-When the resources are deleted successfully, you receive the following message:
-
-+
-[source,bash]
-----
-"No resources found"
-----
-
-The `ManagedServiceAccounts` and `ClusterPermissions` resources are deleted.
