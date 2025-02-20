@@ -1,5 +1,5 @@
 [#adv-template-processing]
-= Advanced template processing in configuration policies
+= Using advanced template processing in policies
 
 Use both managed cluster and hub cluster templates to reduce the need to create separate policies for each target cluster or hardcode configuration values in the policy definitions. For security, both resource-specific and the generic lookup functions in hub cluster templates are restricted to the namespace of the policy on the hub cluster.
 
@@ -8,8 +8,8 @@ Use both managed cluster and hub cluster templates to reduce the need to create 
 Continue reading for advanced template use-cases:
 
 * <<special-annotation-processing,Special annotation for reprocessing>>
-* <<raw-object-template-processing,Object template processing>>
 * <<bypass-template-processing,Bypass template processing>>
+* <<raw-object-template-processing,Raw object template processing>>
 
 [#special-annotation-processing]
 == Special annotation for reprocessing
@@ -18,10 +18,19 @@ Hub cluster templates are resolved to the data in the referenced resources durin
 
 If you need to manually initiate an update, use the special annotation, `policy.open-cluster-management.io/trigger-update`, to indicate changes for the data referenced by the templates. Any change to the special annotation value automatically initiates template processing. Additionally, the latest contents of the referenced resource are read and updated in the policy definition that is propagated for processing on managed clusters. A way to use this annotation is to increment the value by one each time.
 
-[#raw-object-template-processing]
-== Object template processing
+[#bypass-template-processing]
+== Bypassing template processing
 
-Set object templates with a YAML string representation. The `object-template-raw` parameter is an optional parameter that supports advanced templating use-cases, such as if-else and the `range` function. The following example is defined to add the `species-category: mammal` label  to any ConfigMap in the `default` namespace that has a `name` key equal to `Sea Otter`:
+By default, {acm-short} processes all Go templates. You might create a policy that contains a policy in `policy-templates` that is not intended to be processed by {acm-short}. To bypass template processing for a particular template, change `{{ template content }}` to `+{{ `{{ template content }}` }}+` to have the template return a raw string to be processed by a subsequent templating engine.
+
+If you want to completely bypass the template resolution for a configuration policy, add the following annotation in the relevant `ConfigurationPolicy` contained in your `Policy`: `policy.open-cluster-management.io/disable-templates: "true"`.
+
+[#raw-object-template-processing]
+== Processing raw templates in configuration policies
+
+The `object-template-raw` parameter is an optional parameter that supports advanced templating use-cases, such as the `if` conditional function and the `range` loop function. The `object-templates-raw` parameter accepts a string containing Go templates, and when you use these templates, they must result in an `object-templates` array.
+
+For example, see the following YAML sample that adds the `species-category: mammal` label to any ConfigMap in the `default` namespace that has a `name` key equal to `Sea Otter`:
 
 [source,yaml]
 ----
@@ -42,7 +51,7 @@ object-templates-raw: |
 ----
 
 *Note:* While `spec.object-templates` and `spec.object-templates-raw` are optional, exactly one of the two parameter fields must be set.
- 
+
 View the following policy example that uses advanced templates to create and configure infrastructure `MachineSet` objects for your managed clusters.
 
 [source,yaml]
@@ -133,19 +142,11 @@ spec:
     {{- end }}
 ----
 
-[#bypass-template-processing]
-== Bypass template processing
-
-You might create a policy that contains a template that is not intended to be processed by {acm-short}. By default, {acm-short} processes all templates. 
-
-To bypass template processing for your hub cluster, you must change `{{ template content }}` to `{{ `{{ template content }}`` `}}`.
-
-Alternatively, you can add the following annotation in the `ConfigurationPolicy` section of your `Policy`: `policy.open-cluster-management.io/disable-templates: "true"`. When this annotation is included, the previous workaround is not necessary. Template processing is bypassed for the `ConfigurationPolicy`.
-
 [#additional-resources-hub-temp]
 == Additional resources
 
 * See xref:../governance/template_functions.adoc#template-functions[Template functions] for more details.
 * Return to xref:../governance/template_support_intro.adoc#template-processing[Template processing].
+* See xref:../governance/manage_policies.adoc#policy-cli-commands[Policy CLI] for tools to resolve Go templates locally.
 * See xref:../governance/config_policy_ctrl.adoc#kubernetes-config-policy-controller[Kubernetes configuration policy controller] for more details.
 * Also refer to the link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/backup_and_restore/control-plane-backup-and-restore#backing-up-etcd-data_backup-etcd[Backing up etcd data].
