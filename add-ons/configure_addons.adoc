@@ -1,7 +1,7 @@
-[#configure-nodeselector-tolerations-addons]
-= Configuring nodeSelectors and tolerations for klusterlet add-ons
+[#configure-addons]
+= Configuring klusterlet add-ons
 
-In {acm-short}, you can configure nodeSelector and tolerations for the following klusterlet add-ons:
+In {acm-short}, you can configure the following klusterlet add-ons:
 
 * application-manager
 * cert-policy-controller
@@ -9,7 +9,6 @@ In {acm-short}, you can configure nodeSelector and tolerations for the following
 * config-policy-controller
 * governance-policy-framework
 * hypershift-addon
-* iam-policy-controller
 * managed-serviceaccount 
 * observability-controller
 * search-collector
@@ -17,9 +16,16 @@ In {acm-short}, you can configure nodeSelector and tolerations for the following
 * volsync
 * work-manager
 
+// This note only applies to ACM 2.13 and should be removed in ACM 2.14.
+*NOTE:* Configuring `resourceRequirements` is only available for the following add-ons:
+
+* cert-policy-controller
+* config-policy-controller
+* governance-policy-framework
+
 Complete the following steps:
 
-.  Use the `AddonDeploymentConfig` API to create a configuration to specify the `nodeSelector` and `tolerations` on a certain namespace on the hub cluster.
+.  Use the `AddonDeploymentConfig` API to create an add-on configuration in any namespace on the hub cluster.
 
 . Create a file named `addondeploymentconfig.yaml` that is based on the following template:
 +
@@ -34,12 +40,22 @@ spec:
   nodePlacement:
     nodeSelector: node-selector <3>
     tolerations: tolerations <4>
+  resourceRequirements: <5>
+  - containerID: "<workload-kind>:<workload-name>:<container-name>" <6>
+    resources:
+      requests:
+        memory: 75Mi
+      limits:
+        memory: 150Mi
 ----
 +
 <1> Replace `config-name` with the name of the `AddonDeploymentConfig` that you just created.
 <2> Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you just created.
 <3> Replace `node-selector` with your node selector.
 <4> Replace `tolerations` with your tolerations.
+// The note here only applies to ACM 2.13 and should be removed in ACM 2.14.
+<5> (*NOTE:* Configuring `resourceRequirements` is only available for policy add-ons.) List resource requirements here to override the `resources` of the add-on workload containers. If an add-on container matches more than one of the items in the list, the last matching configuration is applied.
+<6> Replace `<workload-kind>` with the kind of workload, like "deployment". Replace `<workload-name>` with the name of the workload. Replace `<container-name>` with the name of the container. For any of these values, a `*` wildcard can be used to apply the configuration to all objects managed by the add-on. For example, `*:*:*` would apply to every container of every workload kind in any add-on to which this configuration is attached.
 +
 A completed `AddOnDeployment` file might resemble the following example: 
 +
