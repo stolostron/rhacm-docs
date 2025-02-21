@@ -1,0 +1,122 @@
+[#device-lifecycle-hooks"]
+= Device lifecycle hooks
+
+The {rhem} agent can run user-defined commands at specific points in the device lifecycle by using device lifecycle hooks.
+For example, you can add a shell script to your operating system images that backs up your application data.
+You can then specify that this script must run and complete successfully before the agent can start updating the operating system.
+
+The following device lifecycle hooks are supported:
+
+[%header,cols="1,3"]
+|===
+|Lifecycle Hook |Description
+|`beforeUpdating` |The hook is called after the agent completed preparing for the update but before changing the operating system. 
+If an action in this hook returns with a failure, the agent cancels the update.
+
+|`afterUpdating` |The hook is called after the agent wrote the update to disk. 
+If an action in this hook returns with a failure, the agent cancels and rolls back the update.
+
+|`beforeRebooting` |The hook is called before the system reboots. The agent blocks the reboot until the action completes or times out. 
+If any action in this hook returns with a failure, the agent cancels and rolls back the update.
+
+|`afterRebooting` |The hook is called when the agent first starts after a reboot. 
+If any action in this hook returns with a failure, the agent reports the failure but continues starting up.
+|===
+
+//For a state diagram defining when each device lifecycle hook is called by the agent, see the ADD LINK[Device API statuses] section.
+//API docs are deprecated in ACM so I can't include this. Do we need to add more info this doc?
+
+[#rule-files"]
+== Rule files
+
+You can define device lifecycle hooks by adding rule files to one of the following locations in the device filesystem:
+
+* Rules in the `/usr/lib/flightctl/hooks.d/<lifecycle_hook_name>/` drop-in directory are read-only.
+To add rules to the `/usr` directory, you must add them to the operating system image during image building.
+* Rules in the `/etc/flightctl/hooks.d/<lifecycle_hook_name>/` drop-in directory are read-writable. 
+You can update the rules at runtime by using several methods. 
+
+//For more information, see Image building and The operating system configuration
+//TODO add link and verify title of the section
+
+When creating and placing the files, you must consider the following practices:
+
+* The name of the rule must be all lower case.
+* If you define rules in both locations, the rules are merged.
+* If you add more than one rule files to a lifecycle hook directory, the files are processed in lexical order of the file names.
+* If you define files with identical file names in both locations, files in the `/etc` folder takes precedence over files of the same name in the `/usr` folder.
+
+A rule file is written in YAML format and contains a list of one or more actions.
+An action can be an instruction to run an external command.
+
+When you specify many actions for a hook, the actions are performed in sequence, finishing one action before starting the next. 
+If an action returns with a failure, the following actions are skipped.
+
+A `run` action takes the following parameters:
+
+[%header,cols="1,3"]
+|===
+|Parameter |Description
+|`Run` |The absolute path to the command to run, followed by any flags or arguments, for example `/usr/bin/nmcli connection reload`. 
+The command is not executed in a shell, so you cannot use shell variables, such as `$PATH` or `$HOME`, or chain commands, such as `\|` or `;`.
+However,  if necessary, you can start a shell by specifying the shell as command to run, for example `/usr/bin/bash -c 'echo $SHELL $HOME $USER'`.
+
+|`EnvVars` |Optional. A list of key-value pairs to set as environment variables for the command.
+
+|`WorkDir` |Optional. The directory the command is run from.
+
+|`Timeout` |Optional. The maximum duration allowed for the action to complete.
+Specify the duration as a single positive integer followed by a time unit. 
+The `s`, `m`, and `h` units are supported for seconds, minutes, and hours, respectively.
+
+|`If` |Optional. A list of conditions that must be true for the action to be run. 
+If not provided, actions run unconditionally.
+|===
+
+By default, actions are performed every time the hook is triggered.
+However, for the `afterUpdating` hook, you can use the `If` parameter to add conditions that must be true for an action to be performed.
+Otherwise the action is skipped.
+
+For example, to run an action only if a given file or directory changes during the update, you can define a path condition that takes the following parameters:
+
+[%header,cols="1,3"]
+|===
+|Parameter |Description
+|`Path` |An absolute path to a file or directory that must change during the update as condition for the action to be performed.
+Specify paths by using forward slashes (`/`).
+If the path is to a directory, it must end with a forward slash (`/`). 
+If you specify a path to a file, the file must have changed to satisfy the condition. 
+If you specify a path to a directory, a file in that directory or any of its subdirectories must have changed to satisfy the condition.
+|`Op` |A list of file operations, such as `created`, `updated`, and `removed`, to limit the type of changes to the specified path as condition for the action to be performed.
+|===
+
+If you specify a path condition for an action in the `afterUpdating` hook, you have the following variables that you can include in arguments to your command and are replaced with the absolute paths to the changed files:
+
+[%header,cols="1,3"]
+|===
+|Variable |Description
+|`{{ Path }}` |The absolute path to the file or directory specified in the path condition.
+
+|`{{ Files }}` |A space-separated list of absolute paths of the files that changed during the update and are covered by the path condition.
+
+|`{{ CreatedFiles }}` |A space-separated list of absolute paths of the files that were created during the update and are covered by the path condition.
+
+|`{{ UpdatedFiles }}` |A space-separated list of absolute paths of the files that were updated during the update and are covered by the path condition.
+
+|`{{ RemovedFiles }}` |A space-separated list of absolute paths of the files that were removed during the update and are covered by the path condition.
+|===
+
+The {rhem} agent includes a built-in set of rules defined in `/usr/lib/flightctl/hooks.d/afterupdating/00-default.yaml`.
+The following commands are executed if the certain files are changed:
+
+[%header,cols="2,2,4"]
+|===
+|File |Command|Description
+|`/etc/systemd/system/` |`systemctl daemon-reload` |Changes to `systemd` units are activated by signaling the `systemd` daemon to reload the `systemd` manager configuration. 
+This reruns all generators, reloads all unit files, and re-creates the entire dependency tree.
+
+|`/etc/NetworkManager/system-connections/` |`nmcli conn reload` |Changes to Network Manager system connections are activated by signaling Network Manager to reload all connections
+//TODO check if Network Manager has a different brand-approved name
+
+|`/etc/firewalld/` |`firewall-cmd --reload` |Changes to the permanent configuration of `firewalld` are activated by signaling `firewalld` to reload firewall rules as new runtime configuration.
+|===

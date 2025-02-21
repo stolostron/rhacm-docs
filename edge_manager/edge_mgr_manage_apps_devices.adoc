@@ -1,0 +1,136 @@
+[#manage-apps"]
+= Managing applications
+
+You can deploy, update, or remove applications on a device by updating the list of applications in the device specification. 
+When the {rhem} agent checks in and detects the change in the specification, the agent downloads any new or updated application packages and images from an OCI-compatible registry. 
+Then, the agent deploys the packages to the appropriate application runtime or removes them from that runtime.
+
+The {rhem} supports `podman-compose` as the application runtime and format.
+
+[#prereqs"]
+== Prerequisites
+
+* You must install the {rhem} CLI.
+* You must log in to the {rhem} service.
+* You must install Podman Compose. See link:https://podman-desktop.io/docs/compose/setting-up-compose[Setting up Compose].
+
+[#create-apps"]
+== Creating applications
+
+You can create an Open Container Initiative (OCI) registry application package.
+Complete the following steps:
+
+. Define the functionality of the application with the Podman Compose specification.
+
++
+[source,bash]
+----
+FROM scratch <1>
+COPY podman-compose.yaml /podman-compose.yaml
+LABEL appType="compose" <2>
+----
+<1> Embed the compose file in a `scratch` container.
+<2> Add the `appType=compose` label.
+
+. Build and push the container to your OCI registry.
+
+. Specify the application package in `spec.applications` field of the `Device` resource:
+
++
+[source,yaml]
+----
+apiVersion: flightctl.io/v1alpha1
+kind: Device
+metadata:
+  name: <device_name>
+spec:
+[...]
+  applications:
+  - name: podman-compose.yaml
+[...]
+----
+
+[#deploy-apps"]
+== Deploying applications on a device using the CLI
+
+Deploy an application package to a device from an OCI registry by using the CLI.
+Complete the following steps:
+
+* Specify the application package that you want to deploy in the `spec.applications` field in the `Device` resource:
+
++
+[source,yaml]
+----
+apiVersion: flightctl.io/v1alpha1
+kind: Device
+metadata:
+  name: <device_name> <1>
+spec:
+[...]
+  applications:
+  - name: wordpress
+    image: quay.io/rhem-demos/wordpress-app:latest <2>
+    envVars: <3>
+      WORDPRESS_DB_HOST: <database_host>
+      WORDPRESS_DB_USER: <user_name>
+      WORDPRESS_DB_PASSWORD: <password>
+[...]
+----
+<1> A user-defined name for the application that is used when the web console and the CLI list applications.
+<2> A reference to an application package in an OCI registry.
+<3> Optional. A list of key-value pairs that are passed to the deployment tool as environment variables or command line flags.
+
+*Note:* For each application in the `applications` section of the device specification, you can find the corresponding device status information.
+//Add verification?
+
+////
+Check if this is this relevant
+* To deploy an unpackaged application from a Git repository, specify it in the device's `spec.applications[]` as follows:
++
+[source,yaml]
+----
+apiVersion: flightctl.io/v1alpha1
+kind: Device
+metadata:
+  name: some_device_name
+spec:
+[...]
+  applications:
+  - name: wordpress
+    git:
+      url: https://github.com/flightctl/flightctl-demos.git
+      revision: v1.0
+      path: /wordpress
+    envVars:
+      WORDPRESS_DB_HOST: "mysql"
+      WORDPRESS_DB_USER: "user"
+      WORDPRESS_DB_PASSWORD: "password"
+[...]
+----
+
+* To deploy an unpackaged application inline with the device specification, specify it in the device's `spec.applications[]` as follows:
++
+[source,yaml]
+----
+apiVersion: flightctl.io/v1alpha1
+kind: Device
+metadata:
+  name: some_device_name
+spec:
+[...]
+  applications:
+  - name: wordpress
+    inline:
+      podman-compose.yaml: |
+        version: “3.7"
+        services:
+          wordpress:
+            image: “wordpress:latest”
+        [...]
+    envVars:
+      WORDPRESS_DB_HOST: "mysql"
+      WORDPRESS_DB_USER: "user"
+      WORDPRESS_DB_PASSWORD: "password"
+[...]
+----
+////
