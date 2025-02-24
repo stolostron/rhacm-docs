@@ -1,0 +1,81 @@
+[#edge-mgmt-arch]
+= {rhem} architecture
+
+You can manage individual devices or an entire fleet by using the {rhem}.
+The {rhem} uses an agent-based architecture that allows for a scalable and robust device management, even with limited network conditions.
+By deploying a {rhem} agent to a device, the agent autonomously manages and monitors the device while periodically communicating with the {rhem} service to check for new configurations and to report device status.
+
+The {rhem} supports image-based operating systems.
+You can include the {rhem} agent and the agent configuration in the image that is distributed to the devices.
+Image-based operating systems allow the agent to initiate a transactional update of the image and to roll back to the previous version in case of an update error.
+
+The {rhem} architecture has the following main features:
+
+* Agent
+* Service
+* Image-based operating system
+* API server 
+* Database
+* Device
+* Device fleet
+
+Learn more from the following sections:
+
+* <<agent-service,{rhem} agent and service>>
+* <<api-server,{rhem} API server>>
+////
+TODO include links when docs are ready
+- Build images
+- Provisioning
+- Managing devices
+- Managing device fleets
+////
+
+[#agent-service]
+== {rhem} agent and service
+
+The {rhem} agent is a process running on each managed device that periodically communicates the {rhem} service on the {acm-short} hub cluster.
+The agent is responsible for the following tasks:
+
+* Enrolling devices into the service
+* Periodically checking with the service for changes in the device specification, such as changes to the operating system, configuration, and applications
+* Applying any updates independently from the service
+* Reporting status of the device and the applications
+
+The {rhem} service is responsible for the following tasks:
+
+* Authenticating and authorizing users and agents
+* Enrolling devices
+* Managing device inventory
+* Reporting status from individual devices or fleets
+
+The service also communicates with a database that stores the device inventory and the target device configuration.
+When communicating with the service, the agent polls the service for changes in the configuration.
+If the the agent detects that the current configuration deviates from the target configuration, the agent attempts to apply the changes to the device.
+
+When the agent receives a new target configuration from the service, the agent does the following tasks:
+
+. To avoid depending on network connectivity during the update, the agent downloads all required resources, such as the operating system image and application container images, over the network to disk.
+. The agent updates the operating system image by delegating to `bootc`.
+. The agent updates configuration files on the file system of the device by overlaying a set of files that the service sends to the device.
+. If necessary, the agent reboots into the new operating system. Otherwise, the agent signals system services and applications to reload the updated configuration.
+. The agent updates applications running on Podman or MicroShift.
+
+If the update fails or the system does not return online after rebooting, the agent automatically rolls back to the previous operating system image and configuration.
+
+*Note:* You can maintain fleet definitions in Git. The {rhem} periodically syncs with the fleet definitions in the database.
+
+[#api-server]
+== {rhem} API server
+
+The API server is a core component of the {rhem} service that allows users and agents to communicate with the service.
+
+The API server exposes the following endpoints:
+
+User-facing API endpoint:: Users can connect to the user-facing API endpoint from the CLI or the web console.
+Users must authenticate with the configured external authentication service to obtain a JSON Web Token (JWT) to make HTTPS requests.
+
+Agent-facing API endpoint:: Agents connect to the agent-facing endpoint, which is mTLS-protected.
+The service authenticates devices using the X.509 client certificates.
+
+The {rhem} service also communicates with various external systems to authenticate and authorize users, get mTLS certificates signed, or query configuration for managed devices.
