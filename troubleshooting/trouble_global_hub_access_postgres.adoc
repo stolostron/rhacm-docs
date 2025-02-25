@@ -14,7 +14,7 @@ You might experience various errors with {global-hub}. You can access the provis
 * Using the `ClusterIP` service
 +
 ----
-oc exec -it multicluster-global-hub-postgres-0 -c multicluster-global-hub-postgres -n multicluster-global-hub -- psql -U postgres -d hoh
+oc exec -it multicluster-global-hub-postgresql-0 -c multicluster-global-hub-postgresql -n multicluster-global-hub -- psql -U postgres -d hoh
 
 # Or access the database installed by crunchy operator
 oc exec -it $(kubectl get pods -n multicluster-global-hub -l postgres-operator.crunchydata.com/role=master -o jsonpath='{.items..metadata.name}') -c database -n multicluster-global-hub -- psql -U postgres -d hoh -c "SELECT 1"
@@ -29,7 +29,7 @@ cat <<EOF | oc apply -f -
 apiVersion: v1
 kind: Service
 metadata:
-  name: multicluster-global-hub-postgres-lb
+  name: multicluster-global-hub-postgresql-lb
   namespace: multicluster-global-hub
 spec:
   ports:
@@ -38,7 +38,7 @@ spec:
     protocol: TCP
     targetPort: 5432
   selector:
-    name: multicluster-global-hub-postgres
+    name: multicluster-global-hub-postgresql
   type: LoadBalancer
 EOF
 ----
@@ -47,10 +47,13 @@ Run the following command to get your the credentials:
 +
 ----
 # Host
-oc get svc postgres-ha -ojsonpath='{.status.loadBalancer.ingress[0].hostname}'
+oc get svc multicluster-global-hub-postgresql-lb -n multicluster-global-hub -ojsonpath='{.status.loadBalancer.ingress[0].hostname}'
 
-# Password
-oc get secrets -n multicluster-global-hub postgres-pguser-postgres -o go-template='{{index (.data) "password" | base64decode}}'
+# Database URI
+oc get secret storage-config -n multicluster-global-hub -ojsonpath='{.data.database-url}' | base64 -d
+
+# Database CA 
+oc get secret storage-config -ojsonpath='{.data.ca\.crt}' | base64 -d
 ----
 + 
 - Expose the service type to `LoadBalancer` provisioned by crunchy operator:
