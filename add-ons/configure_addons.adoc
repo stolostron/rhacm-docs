@@ -1,7 +1,7 @@
 [#configure-addons]
 = Configuring klusterlet add-ons
 
-In {acm-short}, you can configure the following klusterlet add-ons:
+In {acm-short}, you can configure the following klusterlet add-ons to improve the performance and functionality of your managed clusters:
 
 * application-manager
 * cert-policy-controller
@@ -17,17 +17,21 @@ In {acm-short}, you can configure the following klusterlet add-ons:
 * work-manager
 
 // This note only applies to ACM 2.13 and should be removed in ACM 2.14.
-*NOTE:* Configuring `resourceRequirements` is only available for the following add-ons:
+*Note:* Configuring `resourceRequirements` is only available for the following add-ons:
 
 * cert-policy-controller
 * config-policy-controller
 * governance-policy-framework
 
-Complete the following steps:
+[#applying-specifications-addons]
+== Applying specifications to klusterlet add-ons
+
+When you configure the klusterlet add-ons, you can apply specifications to all the add-ons on each of your managed clusters, such as the `nodeSelector` and `tolerations`. To configure the klusterlet add-on, complete the following steps:
 
 .  Use the `AddonDeploymentConfig` API to create an add-on configuration in any namespace on the hub cluster.
 
-. Create a file named `addondeploymentconfig.yaml` that is based on the following template:
+. Create a file named `addondeploymentconfig.yaml` with the following template:
+
 +
 [source,yaml]
 ----
@@ -49,15 +53,16 @@ spec:
         memory: 150Mi
 ----
 +
-<1> Replace `config-name` with the name of the `AddonDeploymentConfig` that you just created.
-<2> Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you just created.
+<1> Replace `config-name` with the name of the `AddonDeploymentConfig` that you created.
+<2> Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you created.
 <3> Replace `node-selector` with your node selector.
 <4> Replace `tolerations` with your tolerations.
 // The note here only applies to ACM 2.13 and should be removed in ACM 2.14.
-<5> (*NOTE:* Configuring `resourceRequirements` is only available for policy add-ons.) List resource requirements here to override the `resources` of the add-on workload containers. If an add-on container matches more than one of the items in the list, the last matching configuration is applied.
-<6> Replace `<workload-kind>` with the kind of workload, like "deployment". Replace `<workload-name>` with the name of the workload. Replace `<container-name>` with the name of the container. For any of these values, a `*` wildcard can be used to apply the configuration to all objects managed by the add-on. For example, `*:*:*` would apply to every container of every workload kind in any add-on to which this configuration is attached.
+<5> *Note:* Configuring `resourceRequirements` is only available for policy add-ons. List resource requirements here to override the `resources` of the add-on workload containers. If an add-on container matches more than one of the items in the list, the last matching configuration is applied.
+<6> Replace `<workload-kind>` with the kind of workload, for example: `deployment`. Replace `<workload-name>` with the name of the workload. Replace `<container-name>` with the name of the container. 
+.. For any of these values, you can use `\*` attribute to apply the configuration to all objects managed by the add-on. For example, if you used the  `\*:*:*` attribute , it would apply the configuration  to every container of every workload kind in any add-on the configuration is attached to.
 +
-A completed `AddOnDeployment` file might resemble the following example: 
+A completed `AddOnDeployment` resembles the following example: 
 +
 [source,yaml]
 ----
@@ -77,30 +82,34 @@ spec:
         operator: Equal
 ----
 
-. Run the following command to apply the file that you created:
+. Apply the file you created by running the following command:
 +
+[source,bash]
 ----
 oc apply -f addondeploymentconfig
 ----
 
 . Use the configuration that you created as the global default configuration for your add-on by running the following command:
 +
+[source,bash]
 ----
 oc patch clustermanagementaddons <addon-name> --type='json' -p='[{"op":"add", "path":"/spec/supportedConfigs", "value":[{"group":"addon.open-cluster-management.io","resource":"addondeploymentconfigs", "defaultConfig":{"name":"<config-name>","namespace":"<config-namespace>"}}]}]'
 ----
 +
 * Replace `<addon-name>` with your add-on name.
-* Replace `<config-name>` with the name of the `AddonDeploymentConfig` that you just created.
-* Replace `<config-namespace>` with the namespace of the `AddonDeploymentConfig` that you just created.
+* Replace `<config-name>` with the name of the `AddonDeploymentConfig` that you created.
+* Replace `<config-namespace>` with the namespace of the `AddonDeploymentConfig` that you created.
 
-The `nodeSelector` and `tolerations` that you specified are applied to all of your add-on on each of the managed clusters.
+[#overriding-configurations-addons]
+== Overriding configurations on klusterlet add-ons
 
-You can also override the global default `AddonDeploymentConfig` configuration for your add-on on a certain managed cluster by using following steps:
+You can also override the global default `AddonDeploymentConfig` configuration for your add-on on a certain managed cluster. To override configurations, complete the following steps:
 
 . Use the `AddonDeploymentConfig` API to create another configuration to specify the `nodeSelector` and `tolerations` on the hub cluster. 
 
-. Link the new configuration that you created to your add-on `ManagedClusterAddon` on a managed cluster.
+. Connect the new configuration that you created to your `ManagedClusterAddon` add-on on the managed cluster by running the following command:
 +
+[source,bash]
 ----
 oc -n <managed-cluster> patch managedclusteraddons <addon-name> --type='json' -p='[{"op":"add", "path":"/spec/configs", "value":[ 
 
@@ -110,9 +119,10 @@ oc -n <managed-cluster> patch managedclusteraddons <addon-name> --type='json' -p
 +
 * Replace `managed-cluster` with your managed cluster name
 * Replace `addon-name` with your add-on name
-* Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you just created
-* Replace `config-name` with the name of the `AddonDeploymentConfig` that you just created
+* Replace `config-namespace` with the namespace of the `AddonDeploymentConfig` that you created
+* Replace `config-name` with the name of the `AddonDeploymentConfig` that you created
 +
-The new configuration that you referenced in the add-on `ManagedClusterAddon` overrides the global default configuration that you previously defined in the `ClusterManagementAddon` add-on.
 
-. To make sure your content is deployed to the correct nodes, complete the steps in link:../clusters/cluster_lifecycle/adv_config_cluster.adoc#config-klusterlet-nodes[Optional: Configuring the klusterlet to run on specific nodes].
+The new configuration that you referenced in the `ManagedClusterAddon` add-on  overrides the global default configuration that you defined earlier in the `ClusterManagementAddon` add-on.
+
+To make sure that you can deploy your content to the correct nodes, see link:../clusters/cluster_lifecycle/adv_config_cluster.adoc#config-klusterlet-nodes[Optional: Configuring the klusterlet to run on specific nodes].
