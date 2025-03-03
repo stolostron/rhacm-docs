@@ -48,31 +48,22 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
   name: demo-fromsecret
-  namespace: test
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
+  - objectDefinition:
       apiVersion: v1
-      data: <1>
-        USER_NAME: YWRtaW4=
-        PASSWORD: '{{ fromSecret "default" "localsecret" "PASSWORD" }}' <2>
-      kind: Secret <3>
+      kind: Secret <1>
       metadata:
         name: demosecret
         namespace: test
       type: Opaque
-  remediationAction: enforce
-  severity: low
+      data: <2>
+        USER_NAME: YWRtaW4=
+        PASSWORD: '{{ fromSecret "default" "localsecret" "PASSWORD" }}' <3>
 ----
-<1> When you use this function with hub cluster templates, the output is automatically encrypted using the <<protect-function,protect>> function.
-<2> The value for the `PASSWORD` data key is a template that references the secret on the target cluster.
-<3> You receive a policy violation if the Kubernetes `Secret` resource does not exist on the target cluster. If the data key does not exist on the target cluster, the value becomes an empty string.
+<1> You receive a policy violation if the Kubernetes `Secret` resource does not exist on the target cluster. If the data key does not exist on the target cluster, the value becomes an empty string.
+<2> When you use the `fromSecret` function with hub cluster templates, the output is automatically encrypted using the <<protect-function,protect>> function to protect the value in flight to the managed cluster.
+<3> The value for the `PASSWORD` data key is a template that references the secret on the target cluster.
 
 *Important:* When you add multiline string values such as, certificates, always add `| toRawJson | toLiteral` syntax at the end of the template pipeline to handle line breaks. For example, if you are copying a certificate from a `Secret` resource and including it in a `ConfigMap` resource, your template pipeline might be similar to the following syntax:
 
@@ -102,33 +93,19 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
   name: demo-fromcm-lookup
-  namespace: test-templates
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
-      kind: ConfigMap <1>
-      apiVersion: v1
-      metadata:
-        name: demo-app-config
-        namespace: test
-      data: <2>
+  - objectDefinition:
+      ...
+      data: <1>
         app-name: sampleApp
         app-description: "this is a sample app"
-        log-file: '{{ fromConfigMap "default" "logs-config" "log-file" }}' <3>
-        log-level: '{{ fromConfigMap "default" "logs-config" "log-level" }}' <4>
-  remediationAction: enforce
-  severity: low
+        log-file: '{{ fromConfigMap "default" "logs-config" "log-file" }}' <2>
+        log-level: '{{ fromConfigMap "default" "logs-config" "log-level" }}' <3>
 ----
-<1> You receive a policy violation if the Kubernetes `ConfigMap` resource does not exist on the target cluster.
-<2> If the `data` key does not exist on the target cluster, the value becomes an empty string.
-<3> The value for the `log-file` data key is a template that retrieves the value of the `log-file` from the `logs-config` config map in the `default` namespace.
-<4> The `log-level` is a tempalte that retrieves the value of the `log-level` data key in the `default` namespace.
+<1> If the `data` key does not exist on the target cluster, the value becomes an empty string.
+<2> The `log-file` template value retrieves the value of the `log-file` data key from the `logs-config` `ConfigMap` in the `default` namespace.
+<3> The `log-level` template value retrieves the value of the `log-level` data key from the `logs-config` `ConfigMap` in the `default` namespace.
 
 [#fromclusterclaim-func]
 === _fromClusterClaim_
@@ -147,27 +124,14 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
   name: demo-clusterclaims <1>
-  namespace: default
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
-      kind: ConfigMap
-      apiVersion: v1
-      metadata:
-        name: sample-app-config
-        namespace: default
+  - objectDefinition:
+      ...
       data: <2>
         platform: '{{ fromClusterClaim "platform.open-cluster-management.io" }}' <3>
         product: '{{ fromClusterClaim "product.open-cluster-management.io" }}'
         version: '{{ fromClusterClaim "version.openshift.io" }}'
-  remediationAction: enforce
-  severity: low
 ----
 <1> When you use this function, enter the name of a Kubernetes `ClusterClaim` resource. You receive a policy violation if the `ClusterClaim` resource does not exist.
 <2> Configuration values can be set as key-value properties.
@@ -196,31 +160,18 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
   name: demo-lookup
-  namespace: test-templates
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
-      kind: ConfigMap
-      apiVersion: v1
-      metadata:
-        name: demo-app-config
-        namespace: test
+  - objectDefinition:
+      ...
       data: <1>
         app-name: sampleApp
         app-description: "this is a sample app"
-        metrics-url: | <2>
+        metrics-url: >- <2>
           http://{{ (lookup "v1" "Service" "default" "metrics").spec.clusterIP }}:8080
-  remediationAction: enforce
-  severity: low
 ----
 <1> Configuration values can be set as key-value properties.
-<2> The value for the `metrics-url` data key is a template that retrieves the `v1/Service` Kubernetes resource `metrics` from the `default` namespace, and is set to the value of the `Spec.ClusterIP` in the queried resource.
+<2> The value for the `metrics-url` data key is a template that retrieves the `v1/Service` Kubernetes resource `metrics` from the `default` namespace, and is set to the value of the `spec.clusterIP` in the queried resource.
 
 [#base64enc-func]
 === _base64enc_
@@ -239,19 +190,13 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
   name: demo-fromsecret
-  namespace: test
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
-    ...
-    data:
-      USER_NAME: '{{ fromConfigMap "default" "myconfigmap" "admin-user" | base64enc }}'
+  - objectDefinition:
+      ...
+      data:
+        USER_NAME: >-
+          {{ fromConfigMap "default" "myconfigmap" "admin-user" | base64enc }}
 ----
 
 [#base64dec-func]
@@ -271,20 +216,13 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
   name: demo-fromsecret
-  namespace: test
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
-    ...
-    data:
-      app-name: |
-         "{{ ( lookup "v1"  "Secret" "testns" "mytestsecret") .data.appname ) | base64dec }}"
+  - objectDefinition:
+      ...
+      data:
+        app-name: >-
+          {{ ( lookup "v1"  "Secret" "testns" "mytestsecret") .data.appname ) | base64dec }}
 ----
 
 [#indent-function]
@@ -302,22 +240,13 @@ View the following example of the configuration policy that uses the `indent` fu
 ----
 apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
-metadata:
-  name: demo-fromsecret
-  namespace: test
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
-    ...
-    data:
-      Ca-cert:  |
-        {{ ( index ( lookup "v1" "Secret" "default" "mycert-tls"  ).data  "ca.pem"  ) |  base64dec | indent 4  }}
+  - objectDefinition:
+      ...
+      data:
+        Ca-cert: >-
+          {{ ( index ( lookup "v1" "Secret" "default" "mycert-tls"  ).data  "ca.pem"  ) |  base64dec | indent 4  }}
 ----
 
 [#autoindent-function]
@@ -333,20 +262,13 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
   name: demo-fromsecret
-  namespace: test
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
-    ...
-    data:
-      Ca-cert:  |
-        {{ ( index ( lookup "v1" "Secret" "default" "mycert-tls"  ).data  "ca.pem"  ) |  base64dec | autoindent }}
+  - objectDefinition:
+      ...
+      data:
+        Ca-cert: >-
+          {{ ( index ( lookup "v1" "Secret" "default" "mycert-tls"  ).data  "ca.pem"  ) |  base64dec | autoindent }}
 ----
 
 [#toInt-function]
@@ -366,20 +288,13 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
   name: demo-template-function
-  namespace: test
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
-    ...
-    spec:
-      vlanid:  |
-        {{ (fromConfigMap "site-config" "site1" "vlan")  | toInt }}
+  - objectDefinition:
+      ...
+      spec:
+        vlanid: >-
+          {{ (fromConfigMap "site-config" "site1" "vlan")  | toInt }}
 ----
 
 [#toBool-function]
@@ -399,20 +314,13 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
   name: demo-template-function
-  namespace: test
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
-    ...
-    spec:
-      enabled:  |
-        {{ (fromConfigMap "site-config" "site1" "enabled")  | toBool }}
+  - objectDefinition:
+      ...
+      spec:
+        enabled: >-
+          {{ (fromConfigMap "site-config" "site1" "enabled")  | toBool }}
 ----
 
 [#protect-function]
@@ -426,19 +334,12 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: ConfigurationPolicy
 metadata:
   name: demo-template-function
-  namespace: test
 spec:
-  namespaceSelector:
-    exclude:
-    - kube-*
-    include:
-    - default
   object-templates:
-  - complianceType: musthave
-    objectDefinition:
+  - objectDefinition:
     ...
     spec:
-      enabled:  |
+      enabled: >-
         {{hub (lookup "v1" "Secret" "default" "my-hub-secret").data.message | protect hub}}
 ----
 
@@ -472,13 +373,13 @@ The `copySecretData` function copies all of the `data` contents of the specified
 
 [source,yaml]
 ----
-complianceType: musthave
-      objectDefinition:
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: my-secret-copy
-        data: '{{ copySecretData "default" "my-secret" }}' <1>
+...
+objectDefinition:
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: my-secret-copy
+  data: '{{ copySecretData "default" "my-secret" }}' <1>
 ----
 <1> When you use this function with hub cluster templates, the output is automatically encrypted using the <<protect-function,protect>> function.
 
@@ -489,13 +390,13 @@ The `copyConfigMapData` function copies all of the `data` content of the specifi
 
 [source,yaml]
 ----
-complianceType: musthave
-      objectDefinition:
-        apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: my-secret-copy
-        data: '{{ copyConfigMapData "default" "my-configmap" }}'
+...
+objectDefinition:
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: my-secret-copy
+  data: '{{ copyConfigMapData "default" "my-configmap" }}'
 ----
 
 [#getNodes]
@@ -505,18 +406,18 @@ The `getNodesWithExactRoles` function returns a list of nodes with only the role
 
 [source,yaml]
 ----
-      complianceType: musthave
-      objectDefinition:
-        apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: my-configmap
-          data:
-            infraNode: |
-              {{- range $i,$nd := (getNodesWithExactRoles "infra").items }}
-              node{{ $i }}: {{ $nd.metadata.name }}
-              {{- end }}
-            replicas: {{ len ((getNodesWithExactRoles "infra").items) | toInt }}
+...
+objectDefinition:
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: my-configmap
+    data:
+      infraNode: |
+        {{- range $i,$nd := (getNodesWithExactRoles "infra").items }}
+        node{{ $i }}: {{ $nd.metadata.name }}
+        {{- end }}
+      replicas: {{ len ((getNodesWithExactRoles "infra").items) | toInt }}
 ----
 
 [#hasNodes]
@@ -526,14 +427,14 @@ The `hasNodesWithExactRoles` function returns the `true` value if the cluster co
 
 [source,yaml]
 ----
-      complianceType: musthave
-      objectDefinition:
-        apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: my-configmap
-        data:
-          key: '{{ hasNodesWithExactRoles "infra" }}'
+...
+objectDefinition:
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: my-configmap
+  data:
+    key: '{{ hasNodesWithExactRoles "infra" }}'
 ----
 
 [#open-source-community-functions]
@@ -577,7 +478,8 @@ The `hasNodesWithExactRoles` function returns the `true` value if the cluster co
 == Additional resources
 
 * See xref:../governance/template_support_intro.adoc#template-processing[Template processing] for more details.
-* See xref:../governance/adv_template_process.adoc#adv-template-processing[Advanced template processing in configuration policies] for use-cases.
+* See xref:../governance/adv_template_process.adoc#adv-template-processing[Advanced template processing in policies] for use-cases.
+* See xref:../governance/manage_policies.adoc#policy-cli-commands[Policy CLI] for tools to resolve Go templates locally.
 * For label selector examples, see the link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/[Kubernetes labels and selectors] documentation.
 * Refer to the link:https://golang.org/pkg/text/template[Golang documentation - Package templates].
 * See the link:https://masterminds.github.io/sprig/[Sprig Function Documentation] for more details.
