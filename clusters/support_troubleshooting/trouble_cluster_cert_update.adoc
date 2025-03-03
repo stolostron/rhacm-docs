@@ -1,0 +1,56 @@
+[#ca-update-error-hive-ai]
+= Troubleshooting certificate authority update error on Hive and Assisted Installer clusters
+
+Troubleshoot a connection error message that appears after you update the cluster certificate authority (CA) on a Hive-provisioned or Assisted Installer cluster.
+
+[#symptom-ca-update-error-hive-ai]
+== Symptom: Certificate authority update error on Hive and Assisted Installer clusters
+
+When you update the cluster CA with your enterprise CA on the Hive-provisioned or Assisted Installer cluster, the corresponding cluster deployment on the hub cluster displays the following connection error message:
+
+[source,terminal]
+----
+x509: certificate signed by unknown authority
+----
+
+If you back up and restore the cluster in this state, you cannot automatically import the managed cluster to the restored hub cluster.
+
+[#resolving-ca-update-error-hive-ai]
+== Resolving the problem: Certificate authority update error on Hive and Assisted Installer clusters
+
+Use the following procedure to resolve the error:
+
+. Define your custom CA with the global variable in your system. Run the following command:
+
++
+[source,bash]
+----
+export CA=<your_customized_CA>
+----
+
+. Run the following command to generate a new secret with your customized CA:
+
++
+[source,bash]
+----
+oc create secret generic additional-ca \
+  --from-literal=ca.crt="$CA" \
+  --namespace hive
+----
+
+. Update your cluster with the new secret. Run the following command with the additional CA patch:
+
++
+[source,bash]
+----
+oc patch hiveconfig hive --type=merge -p '
+{
+  "spec": {
+    "additionalCertificateAuthoritiesSecretRef": [
+      {
+        "name": "additional-ca"
+      }
+    ]
+  }
+}'
+----
