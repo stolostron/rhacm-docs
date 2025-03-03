@@ -9,6 +9,7 @@ Continue reading for advanced template use-cases:
 
 * <<special-annotation-processing,Special annotation for reprocessing>>
 * <<bypass-template-processing,Bypassing template processing>>
+* <<object-selector,Configuration policy object selector>>
 * <<raw-object-template-processing,Processing raw templates in configuration policies>>
 
 [#special-annotation-processing]
@@ -24,6 +25,29 @@ If you need to manually initiate an update, use the special annotation, `policy.
 By default, {acm-short} processes all Go templates. You might create a policy that contains a policy in `policy-templates` that is not intended to be processed by {acm-short}. To bypass template processing for a particular template, change `{{ template content }}` to `+{{ `{{ template content }}` }}+`. Then, the template returns a raw string to be processed by a subsequent templating engine.
 
 If you want to completely bypass the template resolution for a configuration policy, add the `policy.open-cluster-management.io/disable-templates: "true"` annotation in the relevant `ConfigurationPolicy` that is contained in your `Policy` resource.
+
+[#object-selector]
+== Configuration policy `objectSelector`
+
+To iterate over many objects that are filtered by a label with `ConfigurationPolicy`, use the `objectSelector` and specify the `kind` in the `objectDefinition`. The `objectSelector` is similar to the `namespaceSelector`, except that it does not have name filtering capabilities. To filter by name, use the `skipObject` Go template function. If you reference `{{ skipObject }}` at any time, it signals to skip that particular object from those that are selected by the `objectSelector` for the policy.
+
+See the following YAML sample that selects objects that have the label `foo: bar`, but skips objects that have a name with the suffix `-prod`:
+
+[source,yaml]
+----
+...
+objectSelector:
+  matchExpressions:
+  - key: foo
+    operator: In
+    values:
+    - bar
+objectDefinition:
+  apiVersion: v1
+  kind: ConfigMap
+  data:
+    key: '{{ if (hasSuffix "-prod" .ObjectName) }}{{ skipObject }}{{ end }}{{ hasNodesWithExactRoles "infra" }}'
+----
 
 [#raw-object-template-processing]
 == Processing raw templates in configuration policies
