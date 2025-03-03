@@ -12,16 +12,19 @@ The {rhem} supports `podman-compose` as the application runtime and format.
 
 * You must install the {rhem} CLI.
 * You must log in to the {rhem} service.
-* You must install Podman Compose. See link:https://podman-desktop.io/docs/compose/setting-up-compose[Setting up Compose].
+* Your device must run an operating system image with the `podman-compose` tool installed.
+//TODO See [link to Image Building page here].
 
-[#create-apps"]
-== Creating applications
+[#build-app-packages"]
+== Building an application package image
 
-You can create an Open Container Initiative (OCI) registry application package.
+The {rhem} can download application packages from an Open Container Initiative (OCI) compatible registry. 
+You can build an OCI container image that includes your application package in the `podman-compose` format and push the image to your OCI registry.
 Complete the following steps:
 
-. Define the functionality of the application with the Podman Compose specification.
+. Define the functionality of the application in a file called `podman-compose.yaml` that follows the Podman Compose specification.
 
+.. Create a file called `Containerfile` with the following content:
 +
 [source,bash]
 ----
@@ -32,26 +35,42 @@ LABEL appType="compose" <2>
 <1> Embed the compose file in a `scratch` container.
 <2> Add the `appType=compose` label.
 
-. Build and push the container to your OCI registry.
+. Build and push he container image to your OCI registry.
 
-. Specify the application package in `spec.applications` field of the `Device` resource:
+.. Define the image repository that you have permissions to write to by running the following command:
 
 +
-[source,yaml]
+[source,bash]
 ----
-apiVersion: flightctl.io/v1alpha1
-kind: Device
-metadata:
-  name: <device_name>
-spec:
-[...]
-  applications:
-  - name: podman-compose.yaml
-[...]
+OCI_IMAGE_REPO=quai.io/<your_org>/<your_image>
+----
+
+.. Define the image tag by running the following command:
+
++
+[source,bash]
+----
+OCI_IMAGE_TAG=v1
+----
+
+.. Build the application container image. Run the following command:
+
++
+[source,bash]
+----
+podman build -t ${OCI_IMAGE_REPO}:${OCI_IMAGE_TAG} .
+----
+
+.. Push the container image .
+
++
+[source,bash]
+----
+podman push ${OCI_IMAGE_REPO}:${OCI_IMAGE_TAG} .
 ----
 
 [#deploy-apps"]
-== Deploying applications on a device using the CLI
+== Deploying applications to a device using the CLI
 
 Deploy an application package to a device from an OCI registry by using the CLI.
 Complete the following steps:
@@ -64,11 +83,11 @@ Complete the following steps:
 apiVersion: flightctl.io/v1alpha1
 kind: Device
 metadata:
-  name: <device_name> <1>
+  name: <device_name>
 spec:
 [...]
   applications:
-  - name: wordpress
+  - name: wordpress <1>
     image: quay.io/rhem-demos/wordpress-app:latest <2>
     envVars: <3>
       WORDPRESS_DB_HOST: <database_host>
@@ -81,56 +100,32 @@ spec:
 <3> Optional. A list of key-value pairs that are passed to the deployment tool as environment variables or command line flags.
 
 *Note:* For each application in the `applications` section of the device specification, you can find the corresponding device status information.
-//Add verification?
 
-////
-Check if this is this relevant
-* To deploy an unpackaged application from a Git repository, specify it in the device's `spec.applications[]` as follows:
+. Verify the status of an application deployment on a device by inspecting the device status information. Run the following command:
+
++
+[source,bash]
+----
+flightctl get device/<your_device_id> -o yaml
+----
++
+See the following example output:
 +
 [source,yaml]
 ----
-apiVersion: flightctl.io/v1alpha1
-kind: Device
-metadata:
-  name: some_device_name
+[...]
 spec:
-[...]
   applications:
-  - name: wordpress
-    git:
-      url: https://github.com/flightctl/flightctl-demos.git
-      revision: v1.0
-      path: /wordpress
-    envVars:
-      WORDPRESS_DB_HOST: "mysql"
-      WORDPRESS_DB_USER: "user"
-      WORDPRESS_DB_PASSWORD: "password"
-[...]
-----
-
-* To deploy an unpackaged application inline with the device specification, specify it in the device's `spec.applications[]` as follows:
-+
-[source,yaml]
-----
-apiVersion: flightctl.io/v1alpha1
-kind: Device
-metadata:
-  name: some_device_name
-spec:
-[...]
+  - name: example-app
+    image: quay.io/flightctl-demos/example-app:v1
+status:
   applications:
-  - name: wordpress
-    inline:
-      podman-compose.yaml: |
-        version: “3.7"
-        services:
-          wordpress:
-            image: “wordpress:latest”
-        [...]
-    envVars:
-      WORDPRESS_DB_HOST: "mysql"
-      WORDPRESS_DB_USER: "user"
-      WORDPRESS_DB_PASSWORD: "password"
+  - name: example-app
+    ready: 3/3
+    restarts: 0
+    status: Running
+  applicationsSummary:
+    info: All application workloads are healthy.
+    status: Healthy
 [...]
 ----
-////
