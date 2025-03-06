@@ -3,7 +3,7 @@
 
 The {rhem} simplifies the management of a large number of devices and workloads through device fleets.
 
-A fleet is a group of devices that is governed by a common device template and management policies.
+A fleet is a resource that defines a group of devices governed by a common device template and management policies.
 When you make a change to the device template, all devices in the fleet receive the changes when the {rhem} agent detects the new target specification.
 Device monitoring in a fleet is also simplified because you can check the status summary of the whole fleet.
 
@@ -16,18 +16,19 @@ Fleet-level management offers the following advantages:
 The fleet specification consists of the following features:
 
 Label selector:: Determines which devices are part of the fleet.
-Device template:: Defines the configuration the devices in the fleet.
+Device template:: Defines the configuration that the {rhem} enforces on devices in the fleet.
 Policies:: Govern how devices are managed, for example how changes to the device template are rolled out to the devices.
 
 You can have both individually managed and fleet-managed devices at the same time.
+When a device is selected into a fleet, the {rhem} creates the device specification for the new device based on the device template.
+If you update the device template for a fleet or a new device joins the fleet, the {rhem} enforces the new specification in the fleet.
+
+If a device is not selected into any fleets, the device is considered user-managed or unmanaged.
+For user-managed devices, you must update the device specification either manually or through an external automation.
 
 *Important:* A device cannot be member of more than one fleet at the same time.
 
-When you update the device template for the fleet, the {rhem} service rolls out the new configuration to all of the devices in the fleet.
-The {rhem} agent updates the device as soon as the agent detects the new target configuration.
-The update process is the same when you add an individual device to the fleet or when a device changes fleets.
-
-//TODO Add link: For more information, see xref:../edge_manager/edge_mgr_manage_organize.adoc#labels[Labels and label selectors].
+For more information, see xref:../edge_manager/edge_mgr_label_devices.adoc#labels[Labels and label selectors].
 
 [#device-selection]
 == Device selection into a fleet
@@ -39,7 +40,6 @@ To understand how to use labels in a fleet, see the following example:
 
 The following list shows point-of-sales terminal devices and their labels:
 
-[%header,cols="1,4"]
 |===
 |Device |Labels
 |A |`type: pos-terminal`, `region: east`, `stage: production`
@@ -83,14 +83,12 @@ You can also use the following functions in your placeholders:
 
 * The `upper` function changes the value to upper case. For example, `{{ upper .metadata.name }}`.
 * The `lower` function changes the value to lower case. For example, `{{ lower .metadata.labels.key }}`.
-* The `replace` function replaces all occurrences of a substring with another string. For example, `{{ replace \"old\" \"new\" .metadata.labels.key }}`.
-* The `getOrDefault` function returns a default value if accessing a missing label. For example, `{{ getOrDefault .metadata.labels \"key\" \"default\" }}`.
+* The `replace` function replaces all occurrences of a substring with another string. For example, `{{ replace "old" "new" .metadata.labels.key }}`.
+* The `getOrDefault` function returns a default value if accessing a missing label. For example, `{{ getOrDefault .metadata.labels "key" "default" }}`.
 
-You can combine the functions in pipelines, for example `{{ getOrDefault .metadata.labels \"key\" \"default\" | upper | replace \" \" \"-\" }}`.
+You can combine the functions in pipelines, for example `{{ getOrDefault .metadata.labels "key" "default" | upper | replace " " "-" }}`.
 
-*Note:* Ensure using proper Go template syntax. For example, `{{ .metadata.labels.target-revision }}` is not valid because of the hyphen. Instead, you must refer to the field as `{{ index .metadata.labels \"target-revision\" }}`.
-
-Here are some examples of what you can do with placeholders in device templates:
+*Note:* Ensure using proper Go template syntax. For example, `{{ .metadata.labels.target-revision }}` is not valid because of the hyphen. Instead, you must refer to the field as `{{ index .metadata.labels "target-revision" }}`.
 
 You can use the placeholders in device templates in the following ways:
 
@@ -101,7 +99,6 @@ Then, you can use the label with the `site` key as parameter when referencing th
 
 The following fields in device templates support placeholders:
 
-[%header,cols="1,3"]
 |===
 |Field |Placeholders supported in
 |Operating System Image |repository name, image name, image tag
