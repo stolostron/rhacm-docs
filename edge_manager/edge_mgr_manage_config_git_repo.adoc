@@ -1,0 +1,67 @@
+[#device-config-git-cli]
+= Managing the device configuration from a Git repository on the CLI
+
+Create and apply a device configuration in a Git repository.
+Complete the following steps:
+
+. Create a file, for example `site-settings-repo.yaml`, that contains the following definition for a `Repository` resource, named `site-settings`:
+
++
+[source,yaml]
+----
+apiVersion: flightctl.io/v1alpha1
+kind: Repository
+metadata:
+  name: site-settings
+spec:
+  type: git
+  url: https://github.com/<your_org>/<your_repo>.git
+----
+
+. Create the `Repository` resource by running the following command:
+
++
+[source,bash]
+----
+flightctl apply -f site-settings-repo.yaml
+----
+
+. Verify that the resource has been correctly created and is accessible by {rhem} by running the following command:
+
++
+[source,bash]
+----
+flightctl get repository/site-settings
+----
++
+See the following example output:
+
++
+[source,bash]
+----
+NAME           TYPE  REPOSITORY URL                                 ACCESSIBLE
+site-settings  git   https://github.com/<your_org>/<your_repo>.git  True
+----
+
+. Apply the `example-site` configuration to a device by update the device specification:
+
++
+[source,yaml]
+----
+apiVersion: flightctl.io/v1alpha1
+kind: Device
+metadata:
+  name: <device_name>
+spec:
+[...]
+  config: <1>
+  - name: example-site
+    configType: GitConfigProviderSpec
+    gitRef:
+      repository: site-settings
+      targetRevision: production
+      path: /etc/example-site <2>
+[...]
+----
+<1> The example configuration takes all the files from the `example-site` directory from the `production` branch of the `site-settings` repository and places the files in the root directory (`/`).
+<2> Ensure that the target path is writeable by creating your directory structure. The root directory (`/`) is not writeable in `bootc` systems.

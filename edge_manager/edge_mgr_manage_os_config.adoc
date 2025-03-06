@@ -1,0 +1,132 @@
+[#manage-os-config]
+= Operating system configuration
+
+You can include an operating system-level host configuration in the image to provide maximum consistency and repeatability.
+To update the configuration, you create a new operating system image and update devices with the new image.
+
+However, updating devices with a new image can be impractical in the following cases:
+
+* The configuration is missing in the image.
+* The configuration needs to be specific to a device.
+* The configuration needs to be updateable at runtime without updating the operating system image and rebooting.
+
+For these cases, you can declare a set of configuration files that is present on the file system of the device.
+The {rhem} agent applies updates to the configuration files while ensuring that either all files are successfully updated in the file system, or rolled back to their pre-update state.
+If the user updates both an operating system and configuration set of a device at the same time, the {rhem} agent updates the operating system first, then applies the specified set of configuration files.
+
+You can also specify a list of configuration sets that the {rhem} agent applies in sequence.
+In case of a conflict, the last applied configuration set is valid.
+
+*Important:* After the {rhem} agent updates the configuration on the disk, the running applications need to reload the new configuration into memory for the configuration to become effective.
+If the update involves a reboot, `systemd` automatically restarts the applications with the new configuration and in the correct order.
+If the update does not involve a reboot, many application can detect changes to their configuration files and automatically reload the files.
+When an application does not support change detection, you can use device lifecycle hooks to run scripts or commands if certain conditions are met.
+//TODO Add link: For more information on device lifecycle hooks and the default rules used by the {rhem} agent, see xref:../[Device lifecycle hooks].
+
+[#config-providers]
+== Configuration providers
+
+You can provide configuration from multiple sources, called configuration providers, in {rhem}.
+The {rhem} currently supports the following configuration providers:
+
+Git Config Provider:: Fetches device configuration files from a Git repository.
+Kubernetes Secret Provider:: Fetches a secret from a Kubernetes cluster and writes the content to the file system of the device.
+HTTP Config Provider:: Fetches device configuration files from an HTTP(S) endpoint.
+Inline Config Provider:: Allows specifying device configuration files inline in the device manifest without querying external systems.
+
+Read more about the configuration providers in the following sections:
+
+* <<config-git,Configuration from a Git repository>>
+* <<config-k8s-secret,Secrets from a Kubernetes cluster>>
+* <<config-http,Configuration from an HTTP server>>
+* <<config-inline,Configuration inline in the device specification>>
+
+[#config-git]
+=== Configuration from a Git repository
+
+You can store device configuration in a Git repository such as GitHub or GitLab.
+You can then add a Git Config Provider so that the {rhem} synchronizes the configuration from the repository to the file system of the device.
+
+The Git Config Provider takes the following parameters:
+
+|===
+|Parameter|Description
+|`Repository`|The name of a `Repository` resource defined in the {rhem}.
+
+|`TargetRevision`|The branch, tag, or commit of the repository to checkout.
+
+|`Path`|The absolute path to the directory in the repository from which files and subdirectories are synchronized to the file system of the device.
+The `Path` directory corresponds to the root directory (`/`) on the device, unless the `MountPath` parameter is specified.
+
+|`MountPath`|Optional. The absolute path to the directory in the file system of the device to write the content of the repository to. By default, the value is the file system root (`/`).
+|===
+
+The `Repository` resource defines the Git repository, the protocol and access credentials that the {rhem} must use.
+The repository needs to be set up only once.
+After setting up, the repository can be used to configure individual devices or device fleets.
+
+[#config-k8s-secret]
+=== Secrets from a Kubernetes cluster
+
+The {rhem} can query only the Kubernetes cluster that the {rhem} is running on for a Kubernetes secret.
+The content of that secret can be written to a path on the device file system.
+
+The Kubernetes Secret Provider takes the following parameters:
+
+|===
+|Parameter|Description
+|`Name`|The name of the secret.
+
+|`NameSpace`|The namespace of the secret.
+
+|`MountPath`|The directory in the file system of the device to write the secret contents to.
+|===
+
+*Note:* The {rhem} needs permission to access secrets in the defined namespace.
+For example, creating a `ClusterRole` and `ClusterRoleBinding` allows the `flightctl-worker` service account to get and list secrets in that namespace.
+
+//TODO add link: For more information about granting {rhem} permissions, see xref:..[RBAC].
+
+[#config-http]
+=== Configuration from an HTTP server
+
+The {rhem} can query an HTTP server for configuration.
+The HTTP server can serve static or dynamically generated configuration for a device.
+
+The HTTP Config Provider takes the following parameters:
+
+|===
+|Parameter|Description
+|`Repository`|The name of a `Repository` resource defined in the {rhem}.
+
+|`Suffix`|The suffix to append to the base URL defined in the `Repository` resource. The suffix can include path and query parameters, for example `/path/to/endpoint?query=param`.
+
+|`FilePath`|The absolute path to the file in the file system of the device to write the response of the HTTP server to.
+|===
+
+The `Repository` resource specifies the HTTP server for the {rhem} to connect to, and the protocol and access credentials to use.
+The repository needs to be set up once and then, the repository can be used to configure multiple devices or device fleets.
+
+[#config-inline]
+=== Configuration inline in the device specification
+
+You can specify configuration inline in a device specification.
+When using the inline device specification, the {rhem} does not need to connect to external systems to fetch the configuration.
+
+The Inline Config Provider takes a list of file specifications, where each file specification takes the following parameters:
+
+|===
+|Parameter|Description
+|`Path`|The absolute path to the file in the file system of the device to write the content to.
+If a file already exists in the specified path, the file is overwritten.
+
+|`Content`|The UTF-8 or base64-encoded content of the file.
+
+|`ContentEncoding`|Defines how the contents are encoded. Must be either `plain` or `base64`. Default value is set to `plain`.
+
+|`Mode`|Optional. The permission mode of the file. You can specify the octal with a leading zero, for example `0644`, or as a decimal without a leading zero, for example `420`. The `setuid`, `setgid`, and `sticky` bits are supported. If not specified, the permission mode for files defaults to `0644`.
+
+|`User`|Optional. The owner of the file. Specified either as a name or numeric ID. Default value is set to `root`.
+
+|`Group`|Optional. The group of the file. Specified either as a name or numeric ID.
+|===
