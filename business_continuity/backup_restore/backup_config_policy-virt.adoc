@@ -1,0 +1,260 @@
+[#backup-config-policy-virt]
+= Configuring backup and restore for {ocp-virt} using {acm-short} policies
+
+Use the {acm-short} backup and restore component to install {acm-short} policies that can be used to backup and restore the {ocp-virt-short} resources. With these policies, you can backup and restore virtual machines by using OpenShift APIS for Data Protection (OADP). After you back up the virtual machines, you can run and restore it on the hub cluster or managed clusters. 
+
+These {acm-short} policies for {ocp-virt-short} support the following backup and restore storage options:
+
+* Container Storage Interface (CSI) backups
+* Container Storage Interface (CSI) backups with DataMover
+
+They do not support the following options: 
+
+* File system backup and restore
+* Volume snapshot backups and restores
+
+To configure the policies, and either enable a backup schedule or run a restore operation for a virtual machine, complete the following sections: 
+
+* <<backing-up-restoring-vm, Backing up and restoring a virtual machine>>
+* <<using-virt-policies, Using virtualization policies installed on the hub cluster>>
+* <<defining-policies, Defining policies with _ConfigMap_>>
+* <<creating-operations-restore-policy, Creating restore operations with restore policies>> 
+
+[#backing-up-restoring-vm]
+== Backing up and restoring a virtual machine
+
+You can back up virtual machines that run on a cluster or restore a virtual machine on a cluster by completing the following steps: 
+
+. Enable the backup component on the hub cluster by setting the `cluster-backup` parameter in `MultiClusterHub` to `true`.
+. To place the policies on the `cluster-name` cluster, add the `acm-virt-config` label to  the `ManagedCluster` resource by using the following YAML sample: 
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+ name: cluster-name
+ labels:
+   acm-virt-config: acm-dr-virt-config <1>
+----
+<1> The `acm-dr-virt-config` that passes through the label annotation, is a `acm-virt-config` ConfigMap. Read the `acm-dr-virt-config` `ConfigMap` section to understand how to configure OADP and backup storage location.
+
+. Complete the following steps, depending on whether you want to backup or restore your virtual machine: 
+.. Back up your virtual machine by adding the `cluster.open-cluster-management.io/backup-vm` to the `kubevirt.io.VirtualMachine` resource. Your `kubevirt.io.VirtualMachine` resource might resemble the following YAML sample:  
+
++
+[source,yaml]
+----
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-name
+  labels:
+    cluster.open-cluster-management.io/backup-vm: daily_8am
+----
+
+.. Restore your virtual machine by updating the `acm-dr-restore-config` `ConfigMap` as described in the `acm-dr-virt-restore-config` section. 
+
+[#using-virt-policies]
+== Using virtualization policies installed on the hub cluster
+
+When you enable the backup operator, a set of {acm} policies and `ConfigMaps`, get installed on the hub cluster. When you disable the policy or remove it from the cluster, all the resources the policy created gets removed. To learn more about the different types of policies available to you, complete the following sections:
+
+[#intallation-policy]
+=== Installation policy
+
+The installation policy installs OADP and configures the `oadp.openshift.io.DataProtectionApplication` resource on the cluster where this policy is placed. If the cluster is a hub cluster, it verifies that OADP is installed in the `open-cluster-management-backup` namespace and that the `DataProtectionApplication` resource exists and has the required configuration. The policy does not attempt to install OADP or create the `DataProtectionApplication` resource on the hub cluster. 
+
+When you enable the `cluster-backup` option on the `MultiClusterHub` resource, the backup chart installs the OADP. When you enable the `cluster-backup-option`, you create the `DataProtectionApplication` on the hub cluster.
+
+See the following installation policy templates and descriptions:
+
+. Installation policy templates
+|===
+| Template | Description 
+| `check-config-file`| 
+Verifies that  the `ConfigMap` defined by the `acm-virt-config` label set on the `ManagedCluster` resource exists on the hub, in the `open-cluster-management-backup` namespace. 
+| `check-oadp-channel` | 
+Verifies if there is an OADP version installed on the cluster, and that it matches the version installed by the policy.
+| `check-dpa-config` | 
+Verifies that the `DataProtectionApplication` resource exists, has the expected configuration, and has a status of `Reconciled`. 
+Verifies that the `BackupStorageLocation`  exists and has a status phase `Available`.
+| `install-oadp-copy-config`| 
+Creates the namespace where OADP gets installed, if this namespace is not found. 
+Copies the OADP secret and installs OADP, but only for managed clusters. 
+Creates the `DataProtectionApplication` resource as defined by the `acm-virt-config` label, but only for the managed clusters. The user must manually create the OADP and `DataPotectionApplication` on the hub cluster.
+|===
+
+[#backup-policy]
+=== Backup policy
+
+The backup upolicy backs up the `kubevirt.io.VirtualMachine`  resources that has the label, `cluster.open-cluster-management.io/backup-vm: schedule_cron_name`. 
+
+See the following backup policy templates and descriptions:
+
+. Backup policy templates 
+|===
+| Template | Description 
+| `check-cron-schedule-valid`| 
+Shows a violation error if there is any cron schedule name used by a virtual machine `cluster.open-cluster-management.io/backup-vm` label which is not found in the `ConfigMap` for the cron schedules. 
+The name of the `ConfigMap` for the cron schedules is defined by the `schedule_hub_config_name` property and should be available under the `open-cluster-management-backup namespace`.  
+| `check-backup-status-completed`| 
+If the schedule is not paused, it verifies that the status is `Enabled`. Finds the latest backup generated by this schedule and verifies that the status is `Completed`. If any `DataUpload` has been created for this backup, the status is `Completed`. Shows a violation if any of these conditions are not `True`.
+| `create-virt-backup`| 
+Creates velero schedules for all virtual machine resources with a `cluster.open-cluster-management.io/backup-vm` label. 
+Creates one schedule for each cron job schedule found with the virtual machines label.
+Backs up the virtual machine sharing the same cron job schedule under the same backup. 
+Creates the velero schedule resource only if the `acm-dr-virt-install` policy is compliant.
+|===
+
+[#restore-policy]
+=== Restore policy
+
+The restore policy restores the `kubevirt.io.VirtualMachine` resources by UID. The policy creates velero restore resources on clusters using the information from the `ConfigMap` identified by the  `restore_hub_config_name` property from the `acm-dr-virt-config` `ConfigMap`.
+
+See the following restore policy templates and descriptions:
+
+. Restore policy templates 
+|===
+| Template | Description 
+| `check-velero-restore-status`| 
+Verifies that the restore resource with the name defined by the `clusterID_restoreName` property exists and has a status of `Completed`. 
+| `create-velero-restore`| 
+If the `clusterID_restoreName` property value is not empty, and the `clusterID` matches this cluster UID, it creates a velero restore resources using the properties defined with the `ConfigMap` identified by the `restore_hub_config_name` .
+Creates the velero restore resource only if the `acm-dr-virt-install`  policy is compliant.
+|===
+
+[#defining-policies]
+== Defining policies with _ConfigMaps_ 
+
+When you install the policies on the hub cluster, the following `ConfigMaps` are created on the hub cluster, in the `open-cluster-management-backup` namespace. When you place the virtualization policies on the hub or managed cluster, these `ConfigMaps` define the backup and restore configuration for the virtualization policies. 
+
+[#defining-virt-config-configmap]
+=== Defining the _acm-dr-virt-config_ _ConfigMap_
+
+The `acm-dr-virt-config` `ConfigMap` defines the OADP configuration and other settings related to the backup or restore operation. You can use the name of this resource as the value for the `acm-virt-config` label which is set on the `ManagedCluter` where the policies are placed. You can also create a new `ConfigMap` that uses the `acm-dr-virt-config` as a sample, then use this new `ConfigMap` to place the virtualization policies on the cluster.
+
+To place the virtualization policies on a managed cluster or hub cluster, complete the following steps: 
+
+. Use the `acm-dr-virt-config` or create a new `ConfigMap` on the hub cluster in the `open-cluster-management-backup` namespace, by using the `acm-dr-virt-config` `ConfigMap` as an example. For this example, the name is  `ConfigMap` `acm-dr-virt-config-new`.
+.. Update the `dpa_spec` section to match the storage location where you want to store the backups created by OADP. This is a required update.
+.. *Optional:* Update other properties available with the `acm-dr-virt-config-new` `ConfigMap`, such as OADP version or channel.
+. Add the `acm-virt-config=acm-dr-virt-config-new` label to the ManagedCluster resource. The value of the `acm-virt-config` label is the name of the `ConfigMap` that you created. 
+
+For an example of a `ManagedCluster` resource with a virtualization backup label set to use the `acm-dr-virt-config-new` `ConfigMap`, see the following YAML sample:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+ name: managed-cluster-name
+ labels:
+   acm-virt-config: acm-dr-virt-config-new
+----
+
+To learn more, see the following tables: 
+
+. `ConfigMap` properties for the `acm-dr-virt-install` policy
+|===
+| Name | Description | Type | Default value | Optional 
+| `channel`| OADP channel version | String | None| No
+| `channelName`| OADP channel name. Set this property for custom installation, for example: `offline install`.| String | `redhat-oadp-operator`| Yes
+| `subscriptionSource`| OADP subscription. Set this property for custom installation, for example: `offline install`.| String | `redhat-operators`| Yes
+| `subscriptionSourceNamespace`| OADP subscription source. Set this property for custom installation, for example: `offline install`.| String | `openshift-marketplace`| Yes
+| `subscriptionStartingCSV`| OADP subscription startingCSV.| String | None| Yes
+| `subscriptionInstallPlanApproval`|OADP install plan. | String | Automatic| Yes
+| `backupNS`| Namespace where OADP gets installed on the managed cluster.| String | None| No
+| `credentials_hub_secret_name`| Name of the OADP secret to be used on the managed cluster.
+A Secret with this name must exist on the hub cluster in the `open-cluster-management-backup` namespace. The install policy moves this secret to the hub cluster, under the specified `backupNS` namespace.| String | None| No
+| `credentials_name`| Name of the secret used by the OADP `DataProtectionApplication` resource on the managed cluster, when setting the velero credential name.| JSON| None| No
+| `dpa_name`| Name of the `DataProtectionApplication` resource that gets created on the managed cluster.| String | None| No
+| `dpa_spec`| Valid JSON defining the `DataProtectionApplication` spec when created on the managed cluster.| JSON | None| No
+|===
+
+. `ConfigMap` properties for the `acm-dr-virt-backup` policy
+|===
+| Name | Description | Type | Default value | Optional 
+| `scheduleTTL`|Backup expiration time.| String |`24h0m0s`| Yes
+| `schedule_paused`| Set to `True` to pause the virtualization backup schedule. | String | False | Yes
+| `schedule_hub_config_name`| Name of the `ConfigMap` used to define the valid cron jobs schedules. A `ConfigMap` with this name must exist on the hub cluster in the `open-cluster-management-backup` namespace.| String | None| Yes
+|===
+
+. `ConfigMap` properties for the `acm-dr-virt-restore` policy
+|===
+| Name | Description | Type | Default value | Optional 
+| `restore_hub_config_name`| Name of the `ConfigMap` used to define the restore operation. A `ConfigMap` with this name must exist on the hub cluster in the `open-cluster-management-backup` namespace| String | None | No
+|===
+
+[#defining-virt-schedule-configmap]
+=== Defining the _acm-dr-virt-schedule-cron_ _ConfigMap_
+
+Use the `acm-dr-virt-schedule-cron` `ConfigMap` to define the valid cron job schedules to be used when scheduling a virtual machine backup. The `acm-dr-virt-schedule-cron` `ConfigMap` is created by the hub cluster backup component in the `open-cluster-management-backup` namespace and includes the following YAML: 
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+    metadata:
+        name: acm-dr-virt-schedule-cron
+        namespace: open-cluster-management-backup
+    data:
+        hourly: "0 */1 * * *"
+        every_2_hours: "0 */2 * * *"
+        every_3_hours: "0 */3 * * *"
+        every_4_hours: "0 */4 * * *"
+        every_5_hours: "0 */5 * * *"
+        every_6_hours: "0 */6 * * *"
+        twice_a_day: "0 */12 * * *"
+        daily_8am: "0 8 * * *"
+        every_sunday: "0 0 * * 0"
+----
+
+You can use any of the schedules by the `acm-dr-virt-schedule-cron` `ConfigMap` to set the backup schedule for a `kubevirt.io.VirtualMachine`. For example, if you want to backup a virtual machine every day at 8am, add the following label to the virtual machine resource:
+
+[source,yaml]
+----
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-name
+  labels:
+    cluster.open-cluster-management.io/backup-vm: daily_8am
+----
+
+Since this `acm-dr-virt-schedule-cron` `ConfigMap` was created and is managed by the hub cluster  backup component, you cannot change any of the existing cron properties or delete them. The properties are recreated when the content is reconciled. You can only add new properties to the existing ones. For example, if you want to create a cron job to run every Saturday, add the following label  to the existing `acm-dr-virt-schedule-cron` properties: `every_sunday: "0 0 * * SAT"`. 
+
+[#defining-virt-restore-configmap]
+=== Defining the _acm-dr-virt-restore-config_ _ConfigMap_
+
+Use the `acm-dr-virt-restore-config` `ConfigMap` to define the restore operations to be implmented by the `acm-dr-virt-restore` policy. The `ConfigMap` is created by the hub backup component in the `open-cluster-management-backup` namespace. 
+
+For an example of a complete restore operation, see the following YAML sample:
+
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+ name: acm-dr-virt-restore-config
+ namespace: open-cluster-management-backup
+data:
+ 2a054d24-3235-4249-9c81-f58ebc6110c7_backupName: acm-rho-virt-schedule-every-10-hours-20250120230438 <1>
+ 2a054d24-3235-4249-9c81-f58ebc6110c7_restoreName: restore-20250120230438 <2> 
+ 2a054d24-3235-4249-9c81-f58ebc6110c7_vmsUID: 2a054d24-3235-4249-9c81-f58ebc6110c7 <3> 
+----
+<1> `2a054d24-3235-4249-9c81-f58ebc6110c7` is the clusterId where the restore must be completed. `acm-rho-virt-schedule-every-10-hours-20250120230438` is the name of the backup to be used for the restore operation. 
+<2> `restore-20250120230438` is the name of the restore resource created as a result of this restore operation.
+<3>  `2a054d24-3235-4249-9c81-f58ebc6110c7` is the UID of the VM backed up with the acm-rho-virt-schedule-every-10-hours-20250120230438 backup to be restored. 
+
+[#creating-operations-restore-policy]
+== Creating restore operations with restore policies
+
+When you install virtualization policies for your restore operations, consider the following scenarios:
+
+* If you set the  `clusterID_restoreName` property from the `acm-dr-virt-restore-config` `ConfigMap` to an empty value, then the restore resource created by the `acm-dr-virt-restore` policy on the cluster with `clusterID` gets deleted.
+* If  you set the `clusterID_restoreName` property from the `acm-dr-virt-restore-config`  `ConfigMap` to a non-empty value, then the `acm-dr-virt-restore` policy creates a velero Restore resource . This velero restore resource has a name that matches the `clusterID_restoreName` value. If the restore resource with this name is deleted from the restore cluster, the `acm-dr-virt-restore` policy recreates the resource which results in the restore operation running again.
+* Consider the following actions:
+** Do not delete the restore resource if you do not want to run the restore again. 
+** Set the `clusterID_restoreName` to empty on the `acm-dr-virt-restore-config` ConfigMap as soon as the restore operation gets verified to be completed successfully. Doing this prevents you from having to rerun the restore operation if the `acm-dr-virt-restore` policy is disabled and enabled again. When the `acm-dr-virt-restore` policy is disabled, all resources created by it on the restore cluster get cleaned up and recreated when the policy is enabled again.
