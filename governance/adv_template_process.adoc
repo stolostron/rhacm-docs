@@ -11,6 +11,7 @@ Continue reading for advanced template use-cases:
 * <<bypass-template-processing,Bypassing template processing>>
 * <<object-selector,Configuration policy object selector>>
 * <<raw-object-template-processing,Processing raw templates in configuration policies>>
+* <<hub-template-config-policies,Using hub templates to define configuration policies>>
 
 [#special-annotation-processing]
 == Special annotation for reprocessing
@@ -166,9 +167,57 @@ spec:
     {{- end }}
 ----
 
+[#hub-template-config-policies]
+== Using hub templates to define configuration policies
+
+Use the `governance-standalone-hub-templating` addon in the `ManagedClusterAddOn` to define `ConfigurationPolicies` on your managed clusters. 
+
+To enable the `governance-standalone-hub-templating` addon, complete the following steps: 
+
+. On your hub cluster, go to the managed cluster namespace. 
+. Create a `ManagedClusterAddOn` resource with the name, `governance-standalone-hub-templating`, by using the following YAML sample: 
+
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: governance-standalone-hub-templating
+  namespace: <cluster name>
+  labels:
+    cluster.open-cluster-management.io/backup: ''
+spec: {}
+----
+
+By default, the agent on the managed cluster only has access to the `ManagedCluster` resources on the hub cluster. You can use the `.ManagedClusterLabels` template variable in the hub cluster templates inside the `ConfigurationPolicies` that are deployed directly to the managed cluster. If you want the hub template to access other resources, such as: the `lookup` or `fromConfigMap` function calls, you must add those specific permissions to the addon group. You can add these permissions through resources, such as: `Roles`, `ClusterRoles`, `RoleBindings`, and `ClusterRoleBindings`. The name of the addon group depends on the name of your managed cluster, but it has the following standard form: `system:open-cluster-management:cluster:<cluster name>:addon:governance-standalone-hub-templating`.
+
+To allow access to `Configmaps` in your managed cluster namespace on your hub cluster, complete the following steps: 
+
+. Add the `Role` resource by running the following command: 
+
++
+[source,bash]
+----
+oc create role -n <cluster name> cm-reader --verb=get,list,watch --resource=configmaps
+----
+
+. Add the `Rolebinding` by running the following command: 
+
++
+[source,bash]
+----
+oc create rolebinding -n <cluster name> cm-reader-binding --role=cm-reader --group=system:open-cluster-management:cluster:<cluster name>:addon:governance-standalone-hub-templating
+----
+
+. To ensure these resources on the hub cluster get backed up and restored, add the following label to each resource that you create: `cluster.open-cluster-management.io/backup`. 
+
+After you add these resources, they resolve the hub templates, and the state of the policy gets saved on a secret on the managed clusters. This secret prevents interruptions if the hub cluster becomes temporarily unavailable to the managed cluster.
+
 [#additional-resources-hub-temp]
 == Additional resources
 
+*  See xref:../business_continuity/backup_restore/backup_arch.adoc#resources-that-are-backed-up[Resources that are backed up] for more details on backing up and restoring resources. 
 * See xref:../governance/template_functions.adoc#template-functions[Template functions] for more details.
 * Return to xref:../governance/template_support_intro.adoc#template-processing[Template processing].
 * See xref:../governance/manage_policies.adoc#policy-cli-commands[Policy CLI] for tools to resolve Go templates locally.
