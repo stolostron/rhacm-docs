@@ -1,0 +1,135 @@
+[#manage-apps]
+= Managing applications on an edge device
+
+You can deploy, update, or remove applications on a device by updating the list of applications in the device specification. When the {rhem} agent checks in and detects the change in the specification, the agent downloads any new or updated application packages and images from an Open Container Initiative (OCI)-compatible registry. Then, the agent deploys the packages to the appropriate application runtime or removes them from that runtime.
+
+The {rhem} supports the `podman-compose` tool as the application runtime and format.
+
+[#prereqs]
+== Prerequisites
+
+* You must install the {rhem} CLI.
+* You must log in to the {rhem} service.
+* Your device must run an operating system image with the `podman-compose` tool installed.
+//TODO See [link to Image Building page here].
+
+[#build-app-packages]
+== Building an application package image
+
+The {rhem} can download application packages from an Open Container Initiative (OCI) compatible registry. 
+You can build an OCI container image that includes your application package in the `podman-compose` format and push the image to your OCI registry.
+
+Complete the following steps:
+
+. Define the functionality of the application in a file called `podman-compose.yaml` that follows the Podman Compose specification.
+
+.. Create a file called `Containerfile` with the following content:
+
++
+[source,bash]
+----
+FROM scratch <1>
+COPY podman-compose.yaml /podman-compose.yaml
+LABEL appType="compose" <2>
+----
+<1> Embed the compose file in a `scratch` container.
+<2> Add the `appType=compose` label.
+
+. Build and push he container image to your OCI registry.
+
+.. Define the image repository that you have permissions to write to by running the following command:
+
++
+[source,bash]
+----
+OCI_IMAGE_REPO=quai.io/<your_org>/<your_image>
+----
+
+.. Define the image tag by running the following command:
+
++
+[source,bash]
+----
+OCI_IMAGE_TAG=v1
+----
+
+.. Build the application container image. Run the following command:
+
++
+[source,bash]
+----
+podman build -t ${OCI_IMAGE_REPO}:${OCI_IMAGE_TAG} .
+----
+
+.. Push the container image.
+
++
+[source,bash]
+----
+podman push ${OCI_IMAGE_REPO}:${OCI_IMAGE_TAG} .
+----
+
+[#deploy-apps]
+== Deploying applications to a device using the CLI
+
+Deploy an application package to a device from an OCI registry by using the CLI.
+
+Complete the following steps:
+
+. Specify the application package that you want to deploy in the `spec.applications` field in the `Device` resource:
+
++
+[source,yaml]
+----
+apiVersion: flightctl.io/v1alpha1
+kind: Device
+metadata:
+  name: <device_name>
+spec:
+[...]
+  applications:
+  - name: wordpress <1>
+    image: quay.io/rhem-demos/wordpress-app:latest <2>
+    envVars: <3>
+      WORDPRESS_DB_HOST: <database_host>
+      WORDPRESS_DB_USER: <user_name>
+      WORDPRESS_DB_PASSWORD: <password>
+[...]
+----
+<1> A user-defined name for the application that is used when the web console and the CLI list applications.
+<2> A reference to an application package in an OCI registry.
+<3> Optional. A list of key-value pairs that are passed to the deployment tool as environment variables or command line flags.
+
++
+*Note:* For each application in the `applications` section of the device specification, you can find the corresponding device status information.
+
+. Verify the status of an application deployment on a device by inspecting the device status information. Run the following command:
+
++
+[source,bash]
+----
+flightctl get device/<your_device_id> -o yaml
+----
+
++
+See the following example output:
+
++
+[source,yaml]
+----
+[...]
+spec:
+  applications:
+  - name: example-app
+    image: quay.io/flightctl-demos/example-app:v1
+status:
+  applications:
+  - name: example-app
+    ready: 3/3
+    restarts: 0
+    status: Running
+  applicationsSummary:
+    info: All application workloads are healthy.
+    status: Healthy
+[...]
+----
