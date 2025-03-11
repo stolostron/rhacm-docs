@@ -1,0 +1,107 @@
+[#edge-mgr-provisioning-openshift-virt]
+= Provisioning devices on {ocp-virt-short}
+
+You can provision a virtual machine on {ocp-virt-short} by using a QCoW2 container disk image that is hosted on an OCI container registry.
+
+If your operating system image does not already contain the {rhem} agent enrollment configuration, you can inject the configuration through the `cloud-init` user data at provisioning.
+
+For more information, see the _Additional resources_ section.
+
+[#provisioning-virt-prereq]
+== Prerequisites
+
+* You installed the `flightctl` CLI and logged in to your {rhem} service instance.
+* You installed the `oc` CLI, used it to log in to your OpenShift cluster instance, and changed to the project in which you want to create your virtual machine.
+
+[#provisioning-virt-cloudinit-config]
+== Creating the _cloud-init_ configuration
+
+To create the `cloud-init` configuration, complete the following steps:
+
+. Request a new {rhem} agent enrollment configuration and store it in a file called `config.yaml`. Run the following command:
+
++
+[source,bash]
+----
+flightctl certificate request --signer=enrollment --expiration=365d --output=embedded > config.yaml
+----
+
+. Create a cloud configuration user data file called `cloud-config.yaml` that places the agent configuration in the correct location on the first boot. Run the following command:
+
++
+[source,bash]
+----
+cat <<EOF > cloud-config.yaml
+#cloud-config
+write_files:
+- path: /etc/flightctl/config.yaml
+  content: $(cat config.yaml | base64 -w0)
+  encoding: b64
+EOF
+----
+
+. Create a Kubernetes `Secret` that contains the cloud configuration user data file:
+
++
+[source,bash]
+----
+oc create secret generic enrollment-secret --from-file=userdata=cloud-config.yaml
+----
+
+[#provisioning-virt-create-vm]
+== Creating the virtual machine
+
+Create a virtual machine that has its primary disk populated from your QCoW2 container disk image and a `cloud-init` configuration drive that is populated from your enrollment secret.
+Complete the following steps:
+
+. Create a file that contains a the `VirtualMachine` resource manifest by running the following command:
+
++
+[source,bash]
+----
+cat <<EOF > my-bootc-vm.yaml
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: my-bootc-vm
+spec:
+  runStrategy: RerunOnFailure
+  template:
+    spec:
+      domain:
+        cpu:
+          cores: 1
+        memory:
+          guest: 1024M
+        devices:
+          disks:
+            - name: containerdisk
+              disk:
+                bus: virtio
+            - name: cloudinitdisk
+              disk:
+                bus: virtio
+      volumes:
+        - name: containerdisk
+          containerDisk:
+            image: ${OCI_DISK_IMAGE_REPO}:${OCI_IMAGE_TAG}
+        - name: cloudinitdisk
+          cloudInitConfigDrive:
+            secretRef:
+              name: enrollment-secret
+EOF
+----
+
+. Apply the resource manifest to your cluster by running the following command:
+
++
+[source,bash]
+----
+oc apply -f my-bootc-vm.yaml
+----
+
+[#additional-resources-provisioning-virt]
+== Additional resources
+
+* For more information about how to inject the configuration through the `cloud-init` user data, see link:https://cloudinit.readthedocs.io/en/latest/[Cloud-init documentation].
+* See xref:../edge_manager/edge_mgr_build_images_platform_requirements.adoc#rhem-virt[Image building for {ocp-virt}].
