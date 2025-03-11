@@ -79,8 +79,6 @@ oc delete namespace --ignore-not-found open-cluster-management-agent open-cluste
 
 Develop quicker by configuring copy and paste features. To configure the `copy-from-mac` feature in the `assisted-installer`, you must add the `mac-address` to the `nmstate` definition interface and the `mac-mapping` interface. The `mac-mapping` interface is provided outside the `nmstate` definition interface. As a result, you must provide the same `mac-address` twice. 
 
-If you have a different version of VolSync installed, replace `v0.6.0` with your installed version. 
-
 [#clusterset-label-not-removed]
 === Deleting a managed cluster set does not automatically remove its label
 //2.5:20727
@@ -110,12 +108,6 @@ If the malformed claim is deleted, claims begin successfully reconciling again w
 The `clusterimageset` is in `fast` channel, but the provisioned cluster is in `stable` channel. Currently the product does not sync the `channel` to the provisioned {ocp-short} cluster. 
 
 Change to the right channel in the {ocp-short} console. Click **Administration** > **Cluster Settings** > **Details Channel**.
-
-[#subnet-required-on-prem-clust-create]
-=== Selecting a subnet is required when creating an on-premises cluster
-//2.4:18387
-
-When you create an on-premises cluster using the console, you must select an available subnet for your cluster. It is not marked as a required field. 
 
 [#cluster-provision-fails-ansible-proxy]
 === Cluster provision with Ansible automation fails in proxy environment
@@ -259,29 +251,7 @@ If the {ai} agent starts slowly and you deploy a managed cluster, the managed cl
 * iPXE boot firmware 
 * BIOS configuration 
 
-To decide what port numbers you want to enable or disable without disabling the converged flow, see link:../../clusters/about/mce_networking.adoc#mce-network-configuration[Network configuration]. 
-
-To disable the converged flow, complete the following steps:
-
-. Create the following ConfigMap on the hub cluster:
-+
-[source,yaml]
-----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: my-assisted-service-config
-  namespace: multicluster-engine
-data:
-  ALLOW_CONVERGED_FLOW: "false" <1> 
-----
-<1> When you set the parameter value to "false", you also disable any features enabled by the Ironic Python Agent. 
-
-. Apply the ConfigMap by running the following command:
-+
-----
-oc annotate --overwrite AgentServiceConfig agent unsupported.agent-install.openshift.io/assisted-service-configmap=my-assisted-service-config
-----
+To decide what port numbers you want to enable or disable without disabling the converged flow, see link:../../clusters/about/mce_networking.adoc#mce-network-configuration[Network configuration].
 
 [#managedclusterset-api-limitation]
 === ManagedClusterSet API specification limitation
@@ -349,66 +319,6 @@ To resolve the issue, delete the `ManagedClusterAddon` by running the following 
 oc -n <cluster-name> delete managedclusteraddon <addon-name>
 ----
 
-
-[#cluster-issues-cim]
-== Central infrastructure management
-
-[#iso-image-name-too-long]
-=== Cluster provisioning with {infra} fails
-//2.4:17411
-
-When creating {ocp-short} clusters by using the {infra}, the file name of the ISO image might be too long. The long image name causes the image provisioning and the cluster provisioning to fail. To determine if this is the problem, complete the following steps: 
-
-. View the bare metal host information for the cluster that you are provisioning by running the following command: 
-+
-----
-oc get bmh -n <cluster_provisioning_namespace>
-----
-
-. Run the `describe` command to view the error information:
-+
-----
-oc describe bmh -n <cluster_provisioning_namespace> <bmh_name>
-----
-
-. An error similar to the following example indicates that the length of the filename is the problem: 
-+
-----
-Status:
-  Error Count:    1
-  Error Message:  Image provisioning failed: ... [Errno 36] File name too long ...
-----
-
-If this problem occurs, it is typically on the following versions of {ocp-short}, because the {infra} was not using image service:
-
-* 4.8.17 and earlier
-* 4.9.6 and earlier
-
-To avoid this error, upgrade your {ocp-short} to version 4.8.18 or later, or 4.9.7 or later.
-
-[#boot-discovery-auto-add-host]
-=== Cannot use host inventory to boot with the discovery image and add hosts automatically
-//2.12:ACM-14719
-
-You cannot use a host inventory, or `InfraEnv` custom resource, to both boot with the discovery image and add hosts automatically. If you used your previous `InfraEnv` resource for the `BareMetalHost` resource, and you want to boot the image yourself, you can work around the issue by creating a new `InfraEnv` resource.
-
-[#install-sno-ocp-infra]
-=== A {sno} cluster installation requires a matching {ocp-short} with {infra}
-
-If you want to install a {sno} cluster with an {ocp} version before 4.16, your `InfraEnv` custom resource and your booted host must use the same {ocp-short} version that you are using to install the {sno} cluster. The installation fails if the versions do not match.
-
-To work around the issue, edit your `InfraEnv` resource before you boot a host with the Discovery ISO, and include the following content:
-
-[source,yaml]
-----
-apiVersion: agent-install.openshift.io/v1beta1
-kind: InfraEnv
-spec:
-  osImageVersion: 4.15
-----
-
-The `osImageVersion` field must match the {ocp} cluster version that you want to install.
-
 [#settings-limit-msa-agent]
 === _tolerations_ and _nodeSelector_ settings do not affect the _managed-serviceaccount_ agent
 //2.9:ACM-7523
@@ -424,6 +334,15 @@ If the `managed-serviceaccount` add-on is required, you can work around the issu
 . Update the `managed-serviceaccount` `ManagedClusterAddon` in the local cluster namespace to use the `addonDeploymentConfig` custom resource you created.
 
 To learn more about how to use the `addonDeploymentConfig` custom resource to configure `tolerations` and `nodeSelector` for add-on, see link:../../add-ons/configure_klusterlet_addons.adoc#configure-klusterlet-addons[Configuring klusterlet add-ons].
+
+[#cluster-issues-cim]
+== Central infrastructure management
+
+[#boot-discovery-auto-add-host]
+=== Cannot use host inventory to boot with the discovery image and add hosts automatically
+//2.12:ACM-14719
+
+You cannot use a host inventory, or `InfraEnv` custom resource, to both boot with the discovery image and add hosts automatically. If you used your previous `InfraEnv` resource for the `BareMetalHost` resource, and you want to boot the image yourself, you can work around the issue by creating a new `InfraEnv` resource.
 
 [#nodes-shut-down-bmh]
 === Nodes shut down after removing `BareMetalHost` resource
