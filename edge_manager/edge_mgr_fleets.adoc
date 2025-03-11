@@ -1,0 +1,110 @@
+[#fleets]
+= Device fleets
+
+The {rhem} simplifies the management of a large number of devices and workloads through _device fleets_. A fleet is a resource that defines a group of devices governed by a common device template and management policies.
+
+When you make a change to the device template, all devices in the fleet receive the changes when the {rhem} agent detects the new target specification.
+
+Device monitoring in a fleet is also simplified because you can check the status summary of the whole fleet.
+
+Fleet-level management offers the following advantages:
+
+* Scales your operations because you perform operations only once for each fleet instead of once for each device.
+* Minimizes the risk of configuration mistakes and configuration drift.
+* Automatically applies the target configuration when you add devices to the fleet or replace devices in the fleet.
+
+The fleet specification consists of the following features:
+
+Label selector:: Determines which devices are part of the fleet.
+Device template:: Defines the configuration that the {rhem} enforces on devices in the fleet.
+Policies:: Govern how devices are managed, for example, how changes to the device template are rolled out to the devices.
+
+You can have both individually managed and fleet-managed devices at the same time.
+When a device is selected into a fleet, the {rhem} creates the device specification for the new device based on the device template.
+If you update the device template for a fleet or a new device joins the fleet, the {rhem} enforces the new specification in the fleet.
+
+If a device is not selected into any fleets, the device is considered user-managed or unmanaged.
+For user-managed devices, you must update the device specification either manually or through an external automation.
+
+*Important:* A device cannot be member of more than one fleet at the same time.
+
+For more information, see xref:../edge_manager/edge_mgr_label_devices.adoc#labels[Labels and label selectors].
+
+[#device-selection]
+== Device selection into a fleet
+
+By default, devices are not assigned to a fleet.
+Instead, each fleet uses a selector that defines which labels a device must have to be added to the fleet.
+
+To understand how to use labels in a fleet, see the following example:
+
+The following list shows point-of-sales terminal devices and their labels:
+
+|===
+|Device |Labels
+|A |`type: pos-terminal`, `region: east`, `stage: production`
+|B |`type: pos-terminal`, `region: east`, `stage: development`
+|C |`type: pos-terminal`, `region: west`, `stage: production`
+|D |`type: pos-terminal`, `region: west`, `stage: development`
+|===
+
+If all point-of-sales terminals uses the same configuration and are managed by the same operations team, you can define a single fleet called `pos-terminals` with the  `type=pos-terminal` label selector.
+Then, the fleet contains devices A, B, C, and D.
+
+However, you might want to create separate fleets for the different organizations for development or production.
+You can define a fleet for development with the `type=pos-terminal, stage=development` label selector, which selects devices C and D.
+Then, you can define another fleet for production with the `type=pos-terminal, stage=production` label selector.
+By using the correct label selectors, you can manage both fleets independently.
+
+*Important:* You must define selectors in a way that two fleets do not select the same device.
+For example, if one fleet selects `region=east`, and another fleet selects `stage=production`, both fleets try to select device A.
+If two fleets try to select the same device, the {rhem} keeps the device in the currently assigned fleet, if any, and sets the `OverlappingSelectors` condition on the affected fleets to `true`.
+
+[#device-templates]
+== Device templates
+
+A device template of a fleet contains a device specification that is applied to all devices in the fleet when the template is updated.
+
+For example, you can specify in the device template of a fleet that all devices in the fleet must run the `quay.io/flightctl/rhel:9.5` operating system image.
+
+The {rhem} service then rolls out the target specification to all devices in the fleet and the {rhem} agents update each devices accordingly.
+
+You can change other specification items in the device template and the {rhem} apply the changes in the same way.
+
+//The same would apply to the other specification items described in link:managing-devices.md[Managing Devices].
+
+However, sometimes not all of the devices in the fleet need to have the exact same specification. The {rhem} allows templates to contain placeholders that are populated based on the device name or label values.
+
+The syntax of the placeholders matches that of https://pkg.go.dev/text/template[Go templates]. However, you can only use simple text and actions.
+
+The use of conditionals or loops in the placeholders is not supported.
+
+You can reference anything from the metadata of a device, such as `{{ .metadata.labels.key }}` or `{{ .metadata.name }}`.
+
+You can also use the following functions in your placeholders:
+
+* The `upper` function changes the value to uppercase. For example, the function is `{{ upper .metadata.name }}`.
+* The `lower` function changes the value to lowercase. For example, the function is `{{ lower .metadata.labels.key }}`.
+* The `replace` function replaces all occurrences of a substring with another string. For example, the function is `{{ replace "old" "new" .metadata.labels.key }}`.
+* The `getOrDefault` function returns a default value if accessing a missing label. For example, he function is `{{ getOrDefault .metadata.labels "key" "default" }}`.
+
+You can combine the functions in pipelines, for example, a combined function is `{{ getOrDefault .metadata.labels "key" "default" | upper | replace " " "-" }}`.
+
+*Note:* Ensure using proper Go template syntax. For example, `{{ .metadata.labels.target-revision }}` is not valid because of the hyphen. Instead, you must refer to the field as `{{ index .metadata.labels "target-revision" }}`.
+
+You can use the placeholders in device templates in the following ways:
+
+* You can label devices by deployment stage, for example, stage labels are `stage: testing` and `stage: production`.
+Then, you can use the label with the `stage` key as placeholder when referencing the operating system image to use, for example, use `quay.io/myorg/myimage:latest-{{ .metadata.labels.stage }}` or when referencing a configuration folder in a Git repository.
+* You can label devices by deployment site, for example, deployment sites are `site: factory-berlin` and `site: factory-madrid`. 
+* Then, you can use the label with the `site` key as parameter when referencing the secret with network access credentials in Kubernetes.
+
+The following fields in device templates support placeholders:
+
+|===
+|Field |Placeholders supported in
+|Operating System Image |repository name, image name, image tag
+|Git Config Provider |target revision, path
+|HTTP Config Provider |URL suffix, path
+|Inline Config Provider |content, path
+|===
