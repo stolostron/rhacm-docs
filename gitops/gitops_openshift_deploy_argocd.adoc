@@ -1,0 +1,262 @@
+[#gitops-openshift-deploy-argocd]
+= Deploying the {gitops} instances on OpenShift and Non-OpenShift managed clusters for Argo CD pull model (Technology Preview)  
+
+With the GitOps addon, you can manage the lifecycle of the {gitops-short} instances on all kinds of OpenShift and Non-OpenShift managed clusters for the Argo CD pull model. 
+
+When you create the `gitops-addon ManagedClusterAddon` addon in the cluster namespace on your hub cluster, the GitOps addon deploys on the managed cluster that manages the installation, upgrade, and deletion of the {gitops-short} instance.
+
+Use the Argo CD pull model to deploy the {gitops-short} instance with the GitOps addon. Only the following three components are installed on the hub clusters: 
+
+* {gitops-short} application controller
+* {gitops-short} repo server
+* {gitops-short} Redis server
+
+To deploy the {gitops-short} instances for the Argo CD pull model, complete the following sections: 
+
+* <<install-openshift-gitops-cluster, Installing an {gitops-short} instance on a managed cluster>>
+* <<upgrade-openshift-gitops-instance, Upgrading an {gitops-short} instance and operator>>
+* <<delete-openshift-gitops-instance, Deleting an {gitops-short} instance and operator>>
+* <<reconcile-argocd-applications, Reconciling Argo CD applications in any namespace>>
+* <<install-openshift-gitops-instance, Installing an {gitops-short} instance in another namespace>>
+
+
+[#install-openshift-gitops-cluster]
+== Installing an {gitops-short} instance on a managed cluster
+
+When you upgrade {acm-short} to its latest version, the {gitops-short} instance on all the managed clusters automatically upgrades, and it gets bundled with the GitOps addon. 
+
+To install an {gitops-short} instance on a managed cluster, complete the following steps: 
+
+. On your hub cluster, in your selected cluster namespace, create a `managedClusterAddon` resource by running the following YAML sample: 
+
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: gitops-addon
+  namespace: <Cluster-Name>
+ labels:
+   cluster.open-cluster-management.io/backup: ''
+spec:
+  installNamespace: open-cluster-management-agent-addon
+----
+
+. Verify that the `gitops-addon controller` is running on the managed cluster by running the following command: 
+
++
+[source,bash]
+----
+% oc get pods -n open-cluster-management-agent-addon |grep gitops-addon
+gitops-addon-7dc9b895f9-cqknj                         1/1     Running   0          7h45m
+----
+
+. Verify that the {gitops-short} operator is running in the `openshit-gitops-operator` namespace by running the following command: 
+
++
+[source,bash]
+----
+oc openshift-gitops-operator argocd-operator-controller-manager-6ddcf4db5c-qjpjt  1/1 Running
+----
+
+. Verify that {gitops-short} instance is running in the `openshit-gitops` namespace by running the following command:
+
++
+[source,bash]
+----
+oc openshift-gitops  openshift-gitops-application-controller-0  1/1 Running
+oc openshift-gitops  openshift-gitops-redis-7f4bd766fc-4xg6h  1/1 Running
+oc openshift-gitops  openshift-gitops-repo-5898d9976d-b9rj6  1/1 Running
+----
+
+[#upgrade-openshift-gitops-instance]
+== Upgrading an {gitops-short} instance and operator
+
+You must manually upgrade the {gitops-short} operator and its instance to a specific version other than the most recent version.
+
+If you attach the `AddOnDeploymentConfig` to the `gitops-addon ClusterManagementAddon`, the specified image tags are always applied to the {gitops-short} operator and its instance. The latest version of the operator and its instance do not automatically update. To apply the latest version, remove the custom image settings, `GITOPS_OPERATOR_IMAGE, GITOPS_IMAGE, REDIS_IMAGE` in the default `AddOnDeploymentConfig`. 
+
+To upgrade an {gitops-short} instance and operator, complete the following steps: 
+
+. Create an `AddOnDeploymentConfig` custom image by running the following YAML sample: 
+
+ +
+[source,yaml]
+----
+kind: AddOnDeploymentConfig
+metadata:
+  name: gitops-addon-config
+  namespace: <any namespace, e.g. ocm>
+spec:
+  customizedVariables:
+  - name: GITOPS_OPERATOR_IMAGE <1>
+    value: registry.redhat.io/openshift-gitops-1/gitops-rhel8-operator@sha256:73f13a5587bbfbea5a64bd3507120eb83b6be85088139c6d65a9aa9cd56e186a
+  - name: GITOPS_IMAGE <2>
+    value: registry.redhat.io/openshift-gitops-1/argocd-rhel8@sha256:706d5c99715eece77616135da2fbf90863b7aef17fd64ab03bf7dd20877490ec
+  - name: REDIS_IMAGE <3> 
+    value: registry.redhat.io/rhel8/redis-6@sha256:a848cc4edb4405846c673187dd68ce66c328dd1ad42f193f5737288c7971399d
+----
+<1> Specify the new image and tag of the {gitops-short} operator. 
+<2> Specify the new image and tag of the {gitops-short} instance. 
+<3> Specify the new image and tag of the {gitops-short} Redis. 
+
+. Connect the `AddOnDeploymentConfig` to the `gitops-addon ClusterManagementAddon` by specifying the `defaultConfig` name and namespace of the `addondeploymentconfigs` resource by running the following YAML sample: 
+
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ClusterManagementAddOn
+metadata:
+  name: gitops-addon
+  annotations:
+    addon.open-cluster-management.io/lifecycle: "gitops-addon"
+spec:
+  addOnMeta:
+    description: gitops-addon
+    displayName: gitops-addon
+  supportedConfigs:
+  - group: addon.open-cluster-management.io
+    resource: addondeploymentconfigs
+    defaultConfig:
+      name: gitops-addon-config
+      namespace: ocm
+  - group: addon.open-cluster-management.io
+    resource: addontemplates
+    defaultConfig:
+      name: gitops-addon
+----
+
+. On the managed clusters, verify that the {gitops-short} operator pods and instance pods are restarted with the following new image tags: 
+
++
+[source,bash]
+----
+openshift-gitops-operator  argocd-operator-controller-manager-6ddcf4db5c-qjpjt  1/1 Running
+openshift-gitops  openshift-gitops-application-controller-0   1/1 Running
+openshift-gitops  openshift-gitops-redis-7f4bd766fc-4xg6h  1/1 Running
+openshift-gitops  openshift-gitops-repo-server-5898d9976d-b9rj6  1/1 Running
+----
+
+[#delete-openshift-gitops-instance]
+== Deleting an {gitops-short} instance and operator
+
+All the dependent Argo CD custom resource definitions (CRDs) remain even after the {gitops-short} operator gets removed, ensuring that all existing Argo CD applications do not get removed with the operator deletion. 
+
+You can reinstall the {gitops-short} operator into the same default namespace. Always install the {gitops-short} operator into the default namespace, `openshift-gitops-operator`. The {gitops-short} operator watches the Argo CD resources in any namespace regardless of the operator installation namespace.  
+
+To delete an {gitops-short} instance and operator, complete the following steps: 
+
+. Delete the {gitops-short} instance by running the following YAML sample:
+
+ +
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: gitops-addon-config
+  namespace: <any namespace, e.g. ocm>
+spec:
+  customizedVariables:
+  - name: ACTION <1>
+    value: Delete-Instance
+----
+<1> Specify the `Action` to delete the {gitops-short} instance linked in the default `AddOnDeploymentConfig`.  
+
+. Delete the {gitops-short} operator by running the following YAML sample:
+
+ +
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: gitops-addon-config
+  namespace: <any namespace, e.g. ocm>
+spec:
+  customizedVariables:
+  - name: ACTION <1>
+    value: Delete-Operator
+----
+<1> Specify the `Action` to delete the {gitops-short} operator linked in the default `AddOnDeploymentConfig`. 
+
+[#reconcile-argocd-applications]
+== Reconciling Argo CD applications in any namespace
+
+You can configure the {gitops-short} instance to reconcile the Argo CD application in any namespace. 
+
+To reconcile Argo CD applications in any namespace, complete the following step: 
+
+. In the linked default, `AddOnDeploymentConfig`, specify the customized variable, `RECONCILE_SCOPE` to `All-Namespaces` by running the following YAML sample: 
+
+ +
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: gitops-addon-config
+  namespace: <any namespace, e.g. ocm>
+spec:
+  customizedVariables:
+  - name: RECONCILE_SCOPE <1>
+    value: All-Namespaces <2> 
+----
+<1> The GitOps Argo CD instance can only reconcile applications in the namespace where the GitOps Argo CD instance is running. 
+<2> The GitOps Argo CD instance can reconcile applications in all namespaces. 
+
+[#install-openshift-gitops-instance]
+== Installing an {gitops-short} instance in another namespace
+
+By default, the {gitops-short} instance is installed in the `openshift-gitops` namespace. If you want to install the {gitops-short} instance in another namespace, complete the following steps: 
+
+. Delete the {gitops-short} instance by running the following YAML sample:
+
+ +
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: gitops-addon-config
+  namespace: <any namespace, e.g. ocm>
+spec:
+  customizedVariables:
+  - name: ACTION <1> 
+    value: Delete-Instance
+----
+<1> Specify the `Action` to delete the {gitops-short} instance linked in the default `AddOnDeploymentConfig`.  
+
+. Verify that the {gitops-short} instance is removed by running the following command: 
+
++
+[source,bash]
+----
+% oc get pods -n openshift-gitops 
+----
+
+. Install the {gitops-short} instance to another namespace by running the following YAML sample: 
+
+ +
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: gitops-addon-config
+  namespace: <any namespace, e.g. ocm>
+spec:
+  customizedVariables:
+  - name: GITOPS_NAMESPACE
+    value: openshift-gitops-2
+----
+
+. Verify that the {gitops-short} instance is running on the new namespace by running the following command: 
+
++
+[source,bash]
+----
+% oc get pods -n openshift-gitops-2
+----
