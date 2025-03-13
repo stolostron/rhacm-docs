@@ -1,7 +1,7 @@
 [#gitops-openshift-deploy-argocd]
 = Deploying the {gitops} instances (Technology Preview)  
 
-With the GitOps add-on, you can manage the lifecycle of the {gitops-short} instances on all kinds of {ocp} managed clusters for the `ArgoCD` pull model. 
+With the GitOps add-on, you can manage the lifecycle of the {gitops-short} instances on all kinds of {ocp} and non-{ocp-short} managed clusters for the `ArgoCD` pull model. 
 
 When you create the `gitops-addon ManagedClusterAddon` add-on in the cluster namespace on your hub cluster, the GitOps add-on deploys on the managed cluster that manages the installation, upgrade, and deletion of the {gitops-short} instance.
 
@@ -86,17 +86,17 @@ metadata:
   namespace: <namespace> <1>
 spec:
   customizedVariables:
-  - name: <string> <2>
-    value: registry.redhat.io/openshift-gitops-1/gitops-rhel8-operator@sha256:73f13a5587bbfbea5a64bd3507120eb83b6be85088139c6d65a9aa9cd56e186a
-  - name: <string> <3>
-    value: registry.redhat.io/openshift-gitops-1/argocd-rhel8@sha256:706d5c99715eece77616135da2fbf90863b7aef17fd64ab03bf7dd20877490ec
-  - name: <string> <4> 
-    value: registry.redhat.io/rhel8/redis-6@sha256:a848cc4edb4405846c673187dd68ce66c328dd1ad42f193f5737288c7971399d
+  - name: GITOPS_OPERATOR_IMAGE
+    value: <string> <2>
+  - name: GITOPS_IMAGE
+    value: <string> <3>
+  - name: REDIS_IMAGE
+    value: <string> <4> 
 ----
-<1> Any namespace that you want. 
-<2> Specify the new image and tag of the {gitops-short} operator. 
-<3> Specify the new image and tag of the {gitops-short} instance. 
-<4> Specify the new image and tag of the {gitops-short} Redis. 
+<1> Add any namespace that you want. 
+<2> Specify the new image and tag of the {gitops-short} operator. For example, `registry.redhat.io/openshift-gitops-1/gitops-rhel8-operator@sha256:73f13a5587bbfbea5a64bd3507120eb83b6be85088139c6d65a9aa9cd56e186a`.  
+<3> Specify the new image and tag of the {gitops-short} instance. For example, `registry.redhat.io/openshift-gitops-1/argocd-rhel8@sha256:706d5c99715eece77616135da2fbf90863b7aef17fd64ab03bf7dd20877490ec`. 
+<4> Specify the new image and tag of the {gitops-short} Redis. For example, `registry.redhat.io/rhel8/redis-6@sha256:a848cc4edb4405846c673187dd68ce66c328dd1ad42f193f5737288c7971399d`.
 
 . Connect the `AddOnDeploymentConfig` to the `gitops-addon ClusterManagementAddon` by specifying the `defaultConfig` name and namespace of the `addondeploymentconfigs` resource by applying the following YAML sample: 
 
@@ -118,12 +118,13 @@ spec:
     resource: addondeploymentconfigs
     defaultConfig:
       name: gitops-addon-config
-      namespace: ocm
+      namespace: ocm <1>
   - group: addon.open-cluster-management.io
     resource: addontemplates
     defaultConfig:
       name: gitops-addon
 ----
+<1> The namespace specified in the `AddOnDeploymentConfig`. 
 
 . On the managed clusters, verify that the {gitops-short} operator pods and instance pods are restarted with the new image tags. 
 
@@ -148,11 +149,10 @@ metadata:
   namespace:<namespace> <1>
 spec:
   customizedVariables:
-  - name: <string> <2>
+  - name: ACTION 
     value: Delete-Instance
 ----
-<1> Any namespace that you want. 
-<2> Specify the `Action` to delete the {gitops-short} instance linked in the default `AddOnDeploymentConfig`.  
+<1> This is the namespace that you specified when you created the default `AddOnDeploymentConfig` connected to the `gitop-addon` `ClusterManagementAddOn`.
 
 . Delete the {gitops-short} operator by applying the following YAML sample:
 
@@ -166,11 +166,10 @@ metadata:
   namespace: <namespace> <1>
 spec:
   customizedVariables:
-  - name: <string> <2> 
+  - name: ACTION 
     value: Delete-Operator
 ----
-<1> Any namespace that you want. 
-<2> Specify the `Action` to delete the {gitops-short} operator linked in the default `AddOnDeploymentConfig`. 
+<1> This is the namespace that you specified when you created the default `AddOnDeploymentConfig` connected to the `gitop-addon` `ClusterManagementAddOn`.
 
 [#reconcile-argocd-applications]
 == Reconciling _ArgoCD_ applications in any namespace
@@ -179,7 +178,7 @@ You can configure the {gitops-short} instance to reconcile the `ArgoCD` applicat
 
 To reconcile `ArgoCD` applications in any namespace, complete the following step: 
 
-. In the linked default, `AddOnDeploymentConfig`, specify the customized variable, `RECONCILE_SCOPE` to `All-Namespaces` by applying the following YAML sample: 
+. In the linked default `AddOnDeploymentConfig`, specify the customized variable, `RECONCILE_SCOPE` to `All-Namespaces` by applying the following YAML sample: 
 
 +
 [source,yaml]
@@ -191,12 +190,11 @@ metadata:
   namespace: <namespace> <1> 
 spec:
   customizedVariables:
-  - name: RECONCILE_SCOPE <2>
-    value: All-Namespaces <3> 
+  - name: RECONCILE_SCOPE
+    value: <2> 
 ----
-<1> Any namespace that you want.  
-<2> The GitOps `ArgoCD` instance can only reconcile applications in the namespace where the GitOps `ArgoCD` instance is running. 
-<3> The GitOps `ArgoCD` instance can reconcile applications in all namespaces. 
+<1> This is the namespace that you specified when you created the default `AddOnDeploymentConfig` connected to the `gitop-addon` `ClusterManagementAddOn`.
+<2> You have two available options for this value. `All-Namespaces` where the GitOps `ArgoCD` instance can reconcile applications in all namespaces `Single-Namespace` the GitOps `ArgoCD` instance can only reconcile applications in the namespace where the GitOps `ArgoCD` instance is running. 
 
 [#install-openshift-gitops-instance]
 == Installing an {gitops-short} instance in another namespace
@@ -215,11 +213,10 @@ metadata:
   namespace: <namespace> <1> 
 spec:
   customizedVariables:
-  - name: <string> <2> 
+  - name: ACTION
     value: Delete-Instance
 ----
-<1> Any namespace that you want. 
-<1> Specify the `Action` to delete the {gitops-short} instance linked in the default `AddOnDeploymentConfig`.  
+<1> This is the namespace that you specified when you created the default `AddOnDeploymentConfig` connected to the `gitop-addon` `ClusterManagementAddOn`.  
 
 . Verify that the {gitops-short} instance is removed by running the following command: 
 
@@ -244,7 +241,7 @@ spec:
   - name: GITOPS_NAMESPACE
     value: openshift-gitops-2
 ----
-<1> Any namespace that you want. 
+<1> This is the namespace that you specified when you created the default `AddOnDeploymentConfig` connected to the `gitop-addon` `ClusterManagementAddOn`.
 
 . Verify that the {gitops-short} instance is applying on the new namespace by running the following command: 
 
