@@ -1,0 +1,245 @@
+[#field-selectors]
+= Field selectors
+
+Field selectors filter a list of {rhem} resources, including individual devices, fleets and any other resources, based on specific resource field values.
+Field selectors follow the same syntax, principles, and operators as Kubernetes field and label selectors with additional operators available for more advanced search use cases.
+
+[#supported-fields]
+== Supported fields
+
+The {rhem} resources give a set of metadata fields that you can select.
+
+Each resource supports the following metadata fields:
+
+* `metadata.name`
+* `metadata.owner`
+* `metadata.creationTimestamp`
+
+*Note:* To query labels, use label selectors for advanced and flexible label filtering.
+
+For more information, see xref:../edge_manager/edge_mgr_label_devices.adoc#labels[Labels and label selectors].
+
+[#additional-supported-fields]
+== List of additional supported fields
+
+In addition to the metadata fields, each resource has its own unique set of fields that you can select, offering further flexibility in filtering and selection based on resource-specific attributes.
+
+The following table lists the fields supported for filtering for each resource kind:
+
+|===
+|Kind |Fields
+|Certificate Signing Request |`status.certificate`
+
+|Device
+|`status.summary.status`
+
+`status.applicationsSummary.status`
+
+`status.updated.status`
+
+`status.lastSeen`
+
+`status.lifecycle.status`
+
+|Enrollment Request |`status.approval.approved`
+
+`status.certificate`
+
+|Fleet |`spec.template.spec.os.image`
+
+|Repository |`spec.type`
+
+`spec.url`
+
+|Resource Sync |`spec.repository`
+|===
+
+[#field-discovery]
+== Field discovery
+
+Some {rhem} resources might expose additional supported fields.
+You can discover the supported fields by using the `flightctl` command with the `--field-selector` option. 
+If you try to use an unsupported field, the error message lists the available supported fields.
+See the following examples:
+
+[source,bash]
+----
+flightctl get device --field-selector='text'
+----
+
+[source,bash]
+----
+Error: listing devices: 400, message: unknown or unsupported selector: unable to resolve selector name "text". Supported selectors are: [metadata.alias metadata.creationTimestamp metadata.name metadata.nameoralias metadata.owner status.applicationsSummary.status status.lastSeen status.summary.status status.updated.status]
+----
+
+The field `text` is not a valid field for filtering.
+The error message provides a list of supported fields that you can use with `--field-selector` for the `Device` resource.
+
+You can then use one of the supported fields:
+
+[source,bash]
+----
+flightctl get devices --field-selector 'metadata.alias contains cluster'
+----
+
+The `metadata.alias` field is checked with the containment operator `contains` to see if it has the value `cluster`.
+
+[#supported-fields-examples]
+=== Examples
+
+.Excluding a specific device by name
+
+The following command filters out a specific device by its name:
+
+[source,bash]
+----
+flightctl get devices --field-selector 'metadata.name!=<device_name>'
+----
+
+.Filter by owner, labels, and creation timestamp
+
+This command retrieves devices owned by `Fleet/pos-fleet`, located in the `us` region, and created in 2024:
+
+[source,bash]
+----
+flightctl get devices --field-selector 'metadata.owner=Fleet/pos-fleet, metadata.creationTimestamp >= 2024-01-01T00:00:00Z, metadata.creationTimestamp < 2025-01-01T00:00:00Z' -l 'region=us'
+----
+
+.Filter by owner, labels, and device status
+
+The following command retrieves devices owned by `Fleet/pos-fleet`, located in the `us` region, and with a `status.updated.status` of either `Unknown`
+or `OutOfDate`:
+
+[source,bash]
+----
+flightctl get devices --field-selector 'metadata.owner=Fleet/pos-fleet, status.updated.status in (Unknown, OutOfDate)' -l 'region=us'
+----
+
+[#supported-operators]
+== Supported operators
+
+|===
+|Operator |Symbol |Description
+|Exists |`--field-selector <field>` |Checks if a field exists. For example, the `--field-selector 'metadata.owner'` field selector returns resources that have the `metadata.owner` field.
+
+|DoesNotExist |`!` |Checks if a field does not exist.
+
+|Equals |`=` |Checks if a field is equal to a value.
+
+|DoubleEquals |`==` |Another form of equality check.
+
+|NotEquals |`!=` |Checks if a field is not equal to a value.
+
+|GreaterThan |`>` |Checks if a field is greater than a value.
+
+|GreaterThanOrEquals |`>=` |Checks if a field is greater than or equal to a value.
+
+|LessThan |`<` |Checks if a field is less than a value.
+
+|LessThanOrEquals |`<=` |Checks if a field is less than or equal to a value.
+
+|In |`in` |Checks if a field is within a list of values.
+
+|NotIn |`notin` |Checks if a field is not in a list of values.
+
+|Contains |`contains` |Checks if a field has a value.
+
+|NotContains |`notcontains` |Checks if a field does not contain a value.
+|===
+
+[#operator-usage]
+== Operators usage by field type
+
+Each field type supports a specific subset of operators:
+
+|===
+|Field Type |Supported Operators |Value
+|String |`Equals`: Matches if the field value is an exact match to the specified string. 
+
+`DoubleEquals`: Matches if the field value is an exact match to the specified string. Alternative to `Equals`. 
+
+`NotEquals`: Matches if the field value is not an exact match to the specified string. 
+
+`In`: Matches if the field value matches at least one string in the list. 
+
+`NotIn`: Matches if the field value does not match any of the strings in the list. 
+
+`Contains`: Matches if the field value has the specified substring.
+
+`NotContains`: Matches if the field value does not contain the specified substring. 
+
+`Exists`: Matches if the field is present. 
+
+`DoesNotExist`: Matches if the field is not present. |Text
+string
+
+|Timestamp |`Equals`: Matches if the field value is an exact match to the specified timestamp. 
+
+`DoubleEquals`: Matches if the field value is an exact match to the specified timestamp. Alternative to `Equals`.
+
+`NotEquals`: Matches if the field value is not an exact match to the specified timestamp. 
+
+`GreaterThan`: Matches if the field value is after the specified timestamp. 
+
+`GreaterThanOrEquals`: Matches if the field value is after or equal to the specified timestamp. 
+
+`LessThan`: Matches if the field value is before the specified timestamp.
+
+`LessThanOrEquals`: Matches if the field value is before or equal to the specified timestamp. 
+
+`In`: Matches if the field value matches at least one timestamp in the list. 
+
+`NotIn`: Matches if the field value does not match any of the timestamps in the list. 
+
+`Exists`: Matches if the field is present. 
+
+`DoesNotExist`: Matches if the field is not present. |RFC 3339 format
+
+|Number |`Equals`: Matches if the field value equals the specified number. 
+
+`DoubleEquals`: Matches if the field value equals the specified number. Alternative to `Equals`. 
+
+`NotEquals`: Matches if the field value does not equal to the specified number. 
+
+`GreaterThan`: Matches if the field value is greater than the specified number.
+
+`GreaterThanOrEquals`: Matches if the field value is greater than or equal to the specified number. 
+
+`LessThan`: Matches if the field value is less than the specified number. 
+
+`LessThanOrEquals`: Matches if the field value is less than or equal to the specified number. 
+
+`In`: Matches if the field value equals at least one number in the list. 
+
+`NotIn`: Matches if the field value does not equal any numbers in the list.
+
+`Exists`: Matches if the field is present. 
+
+`DoesNotExist`: Matches if the field is not present. |Number format
+
+|Boolean |`Equals`: Matches if the value is `true` or `false`.
+
+`DoubleEquals`: Matches if the value is `true` or `false`. Alternative to `Equals`. 
+
+`NotEquals`: Matches if the value is the opposite of the specified value. 
+
+`In`: Matches if the value, `true` or `false`, is in the list. The list can only contain `true` or `false`, so this operator is limited in use.
+
+`NotIn`: Matches if the value is not in the list. 
+
+`Exists`: Matches if the field is present. 
+
+`DoesNotExist`: Matches if the field is not present. |Boolean format (`true`, `false`)
+
+|Array |`Contains`: Matches if the array has the specified value.
+
+`NotContains`: Matches if the array does not contain the specified value.
+
+`In`: Matches if the array overlaps with the specified values.
+
+`NotIn`: Matches if the array does not overlap with the specified values. `Exists`: Matches if the field is present. 
+
+`DoesNotExist`: Matches if the field is not present.
+
+|Array element
+|===
