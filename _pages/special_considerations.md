@@ -19,6 +19,10 @@ To avoid formatting issues, place them within the backtics `*`, just as we do fo
 
 Ensure you only use a single `*` for each line, in backtics and not codeblock. If necessary, separate paragraphs with multiple single asterisks into several lines to avoid formatting or build issues.
 
+## Spacing between step and source code block
+
+To prevent rendering errors in GitHub, you might need to add an empty line between a step and the source code block (syntax highlighting).
+
 ## IP addresses
 
 To avoid security issues, do not include public IP addresses from test clusters in the documentation. You can use private IP addresses where necessary. This is just good security practice for the tech industry in general.
