@@ -1,0 +1,349 @@
+[#edge-mgr-build]
+= Building a _bootc_ operating system image for the {rhem}
+
+To prepare your device to be managed by the {rhem}, build a `bootc` operating system image that contains the {rhem} agent. Then build an operating system disk image for your devices.
+
+For more information, read the following sections:
+
+* <<install-rhem-cli,Installing the {rhem} CLI>>
+* <<request-cert,Optional: Requesting an enrollment certificate for early binding>>
+* <<image-pullsecrets,Optional: Using image pull secrets>>
+* <<build-bootc-image,Building the operating system image with _bootc_>>
+* <<build-sign-image,Signing and publishing the _bootc_ operating system image by using Sigstore>>
+* <<build-disk-image,Building the operating system disk image>>
+* <<sign-disk-image,Signing and publishing the operating system disk image to an Open Container Initiative registry>>
+
+[#build-prerequisites]
+== Prerequisites
+
+See the following prerequisites for building a `bootc` operating system image:
+
+* Install `podman` version 5.0 or later and `skopeo` version 1.14 or later. See xref:https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/building_running_and_managing_containers/index#proc_getting-container-tools_assembly_starting-with-containers[Getting container tools].
+* Install `bootc-image-builder`. See link:https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_image_mode_for_rhel_to_build_deploy_and_manage_operating_systems/index#installing-bootc-image-builder_creating-bootc-compatible-base-disk-images-with-bootc-image-builder[Installing bootc-image-builder].
+
+[#install-rhem-cli]
+== Installing the {rhem} CLI
+
+To install the {rhem} CLI, complete the following steps:
+
+. Enable the subscription manager for the repository appropriate for your system by running the following command:
+
++
+[source,bash]
+----
+subscription-manager repos --enable rhacm-2.13-for-rhel-<version>-<arch>-rpms
+----
+
++
+For a full list of available repositories for the {rhem}, see the _Additional resources_ section.
+
+. Install the `flightctl` CLI with your package manager. Run the following command:
+
++
+[source,bash]
+----
+sudo dnf install flightctl-cli
+----
+
+[#request-cert]
+== Optional: Requesting an enrollment certificate for early binding
+
+If you want to include an agent configuration in the image, complete the following steps:
+
+. Authenticate with the {rhem} service by using the `flightctl` CLI. Run the following command:
+
++
+[source,bash]
+----
+flightctl login --username=<your_user> --password=<your_password> https://<rhem_api_server_url>
+----
+
++
+*Note:* The CLI uses the certificate authority pool of the host to verify the identity of the {rhem} service. The verification can lead to a TLS verification error when using self-signed certificates, if you do not add your certificate authority certificate to the pool. You can bypass the server verification by adding the `--insecure-skip-tls-verify` flag to your command.
+
+. Obtain the enrollment credentials in the format of an agent configuration file by running the following command:
+
++
+[source,bash]
+----
+flightctl certificate request --signer=enrollment --expiration=365d --output=embedded > config.yaml
+----
+
++
+*Notes:* 
+
+* The `--expiration=365d` option specifies that the credentials are valid for a year.
+* The `--output=embedded` option specifies that the output is an agent configuration file with the enrollment credentials embedded.
+
++
+The returned `config.yaml` contains the URLs of the {rhem} service, the certificate authority bundle, and the enrollment client certificate and key for the agent.
+See the following example:
+
++
+[source,yaml]
+----
+enrollment-service:
+  authentication:
+    client-certificate-data: LS0tLS1CRUdJTiBD...
+    client-key-data: LS0tLS1CRUdJTiBF...
+  service:
+    certificate-authority-data: LS0tLS1CRUdJTiBD...
+    server: https://agent-api.flightctl.127.0.0.1.nip.io:7443
+  enrollment-ui-endpoint: https://ui.flightctl.127.0.0.1.nip.io:8081
+----
+
+[#image-pullsecrets]
+== Optional: Using image pull secrets
+
+If your device relies on containers from a private repository, you must configure a pull secret for the registry. Complete the following steps:
+
+. Depending on the kind of container image you use, place the pull secret in one or both of the following system paths on the device:
+
++
+* Operating system images use the `/etc/ostree/auth.json` path.
+* Application container images use the `/root/.config/containers/auth.json` path.
+
++
+*Important:* The pull secret must exist on the device before the secret can be consumed.
+
+. Ensure that the pull secrets have the following format:
+
++
+[source,json]
+----
+{
+  "auths": {
+    "registry.example.com": {
+      "auth": "base64-encoded-credentials"
+    }
+  }
+}
+----
+
+For more information, see the _Additional resources_ section.
+
+[#build-bootc-image]
+== Building the operating system image with _bootc_
+
+Build the operating system image with `bootc` that contains the {rhem} agent. You can optionally include the following items in your operating system image:
+
+* The agent configuration for early binding
+* Any drivers
+* Host configuration
+* Application workloads that you need
+
+Complete the following steps:
+
+. Create a `Containerfile` file with the following content to build a RHEL 9-based operating system image that includes the {rhem} agent and configuration:
+
++
+[source,bash]
+----
+FROM registry.redhat.io/rhel9/rhel-bootc:<required_os_version> <1>
+
+RUN subscription-manager repos --enable rhacm-2.13-for-rhel-9-$(uname -m)-rpms && \
+    dnf -y install flightctl-agent && \
+    dnf -y clean all && \
+    systemctl enable flightctl-agent.service && \
+    systemctl mask bootc-fetch-apply-updates.timer <2>
+----
+<1> The base image that is referenced in `FROM` is a bootable container (`bootc`) image that already contains a Linux kernel, which allows you to reuse existing standard container build tools and workflows.
+<2> Disables the default automatic updates. The updates are managed by the {rhem}.
+
++
+*Important:* If your device relies on containers from a private repository, the device pull secret must be placed in the `/etc/ostree/auth.json` path. The pull secret must exist on the device before the secret can be consumed.
+
+.. *Optional:* To enable `podman-compose` application support, add the following section to the `Containerfile` file:
+
++
+[source,bash]
+----
+RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+    dnf -y install podman-compose && \
+    dnf -y clean all && \
+    systemctl enable podman.service
+----
+
+.. *Optional:* If you created the `config.yaml` for early binding, add the following section to the `Containerfile`:
+
++
+[source,bash]
+----
+ADD config.yaml /etc/flightctl/
+----
+
++
+For more information, see <<request-cert,Optional: Requesting an enrollment certificate for early binding>>.
+
+. Define the Open Container Initiative (OCI) registry by running the following command:
+
++
+[source,bash]
+----
+OCI_REGISTRY=registry.redhat.io
+----
+
+. Define the image repository that you have permissions to write to by running the following command:
+
++
+[source,bash]
+----
+OCI_IMAGE_REPO=${OCI_REGISTRY}/<your_org>/<your_image>
+----
+
+. Define the image tag by running the following command:
+
++
+[source,bash]
+----
+OCI_IMAGE_TAG=v1
+----
+
+. Build the operating system image for your target platform:
+
++
+[source,bash]
+----
+sudo podman build -t ${OCI_IMAGE_REPO}:${OCI_IMAGE_TAG} .
+----
+
+[#build-sign-image]
+== Signing and publishing the _bootc_ operating system image by using Sigstore
+
+To sign the `bootc` operating system image by using Sigstore, complete the following steps:
+
+. Generate a Sigstore key pair named `signingkey.pub` and `signingkey.private`:
+
++
+[source,bash]
+----
+skopeo generate-sigstore-key --output-prefix signingkey
+----
+
+. Configure container tools such as Podman and Skopeo to upload Sigstore signatures together with your signed image to your OCI registry:
+
++
+[source,bash]
+----
+sudo tee "/etc/containers/registries.d/${OCI_REGISTRY}.yaml" > /dev/null <<EOF
+docker:
+    ${OCI_REGISTRY}:
+        use-sigstore-attachments: true
+EOF
+----
+
+. Log in to your OCI registry by running the following command:
+
++
+[source,bash]
+----
+sudo podman login ${OCI_REGISTRY}
+----
+
+. Sign and publish the operating system image by running the following command:
+
++
+[source,bash]
+----
+sudo podman push \
+    --sign-by-sigstore-private-key ./signingkey.private \
+    ${OCI_IMAGE_REPO}:${OCI_IMAGE_TAG}
+----
+
+[#build-disk-image]
+== Building the operating system disk image
+
+Build the operating system disk image that contains the file system for your devices. Complete the following steps:
+
+. Create a directory called `output` by running the following command:
+
++
+[source,bash]
+----
+mkdir -p output
+----
+
+. Use `bootc-image-builder` to generate an operating system disk image of type `iso` from your operating system image. Run the following command:
+
++
+[source,bash]
+----
+sudo podman run --rm -it --privileged --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v "${PWD}/output":/output \
+    -v /var/lib/containers/storage:/var/lib/containers/storage \
+    registry.redhat.io/rhel9/bootc-image-builder:latest \
+    --type iso \
+    ${OCI_IMAGE_REPO}:${OCI_IMAGE_TAG}
+----
+
+When the `bootc-image-builder` completes, you can find the ISO disk image at the `${PWD}/output/bootiso/install.iso` path.
+
+[#sign-disk-image]
+== Optional: Signing and publishing the operating system disk image to an Open Container Initiative registry
+
+Sign and publish your disk image to your Open Container Initiative (OCI) registry. Optionally, you can compress and publish the disk image as an OCI artifact to the same OCI registry as your `bootc` images, which facilitates a unified hosting and distribution of `bootc` and disk images. To publish your ISO disk image to a repository named after your `bootc` image with `/diskimage-iso` appended, complete the following steps:
+
+[#sign-disk-image-prereq]
+=== Prerequisites
+
+* You created a private key by using Sigstore. See <<build-sign-image,Signing and publishing the _bootc_ operating system image by using Sigstore>>.
+
+[#sign-disk-image-proc]
+=== Optional: Signing and publishing the operating system disk image to an OCI registry
+
+Sign and publish your disk image to your OCI registry. Complete the following steps:
+
+. Change the owner of the directory where the ISO disk image is located from `root` to your current user. Run the following command:
+
++
+[source,bash]
+----
+sudo chown -R $(whoami):$(whoami) "${PWD}/output"
+----
+
+. Define the `OCI_DISK_IMAGE_REPO` environmental variable to be the same repository as your `bootc` image with `/diskimage-iso` appended. Run the following command:
+
++
+[source,bash]
+----
+OCI_DISK_IMAGE_REPO=${OCI_IMAGE_REPO}/diskimage-iso
+----
+
+.. Create a manifest list by running the following command:
+
++
+[source,bash]
+----
+sudo podman manifest create \
+    ${OCI_DISK_IMAGE_REPO}:${OCI_IMAGE_TAG}
+----
+
+.. Add the ISO disk image to the manifest list as an OCI artifact by running the following command:
+
++
+[source,bash]
+----
+sudo podman manifest add \
+    --artifact --artifact-type application/vnd.diskimage.iso \
+    --arch=amd64 --os=linux \
+    ${OCI_DISK_IMAGE_REPO}:${OCI_IMAGE_TAG} \
+    "${PWD}/output/bootiso/install.iso"
+----
+
+.. Sign the manifest list with your private Sigstore key and push the image to the registry. Run the following command:
+
++
+[source,bash]
+----
+sudo podman manifest push --all \
+     --sign-by-sigstore-private-key ./signingkey.private \
+    ${OCI_DISK_IMAGE_REPO}:${OCI_IMAGE_TAG} \
+    docker://${OCI_DISK_IMAGE_REPO}:${OCI_IMAGE_TAG}
+----
+
+[#additional-resources-rhem-build-images]
+== Additional resources
+
+* For a full list of available repositories for the {rhem}, see link:https://access.redhat.com/downloads/content/609/[Download {acm}].
+* For more information about building the operating system image on different target platforms, see link:https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_image_mode_for_rhel_to_build_deploy_and_manage_operating_systems/index#configuring-container-pull-secrets_managing-users-groups-ssh-key-and-secrets-in-image-mode-for-rhel[Configuring container pull secrets].
