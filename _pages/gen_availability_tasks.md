@@ -12,6 +12,7 @@ These directions walk you through preparing for the release and tasks for GA day
 - [Preparing for _Pencils Down_](#preparing-for-pencils-down)
 - [Creating `production` branch from `stage`](#creating-production-branch-from-stage)
 - [Publishing doc and splash page](#publishing-doc-and-splash-page)
+- [Publishing support matrices](#publishing-support-matrices)
 - [Request support matrix link update on product page](#request-support-matrix-link-update-on-product-page)
 - [Additional required tasks](#additional-required-tasks)
 
@@ -76,6 +77,12 @@ Ideally the architect or strategist is doing this but can be done by the lead, w
 7. Change the _Product status_ from **Unpublished** to **Published**.
 8. Click **Save** to save the changes.
 
+## Publishing support matrices
+
+1. Publish MCE matrix at MCE GA, then update the previous matrix references with the newest version.
+2. Publish ACM matrix at ACM GA, then update the previous matrix references with the newest version.
+3. Double check that all links work in the documentation.
+4. 
 ## Request support matrix link update on product page
 
 This was something that we had to update but is now handled through an issue with more process attached. 
