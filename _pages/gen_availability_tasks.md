@@ -56,7 +56,7 @@ Now that stage branch is finalized and green, you can create the production bran
 4. Add the branch name to the **Branch name pattern**. Example: `2x_prod`. 
 5. Select **Require a pull request before merging**. 
 6. Ensure that **Require approvals** is selected. 
-7. Select **Include administrators** to prevent admins from bypassing this rule. Admins can bypass in `stage` IF needed, but not `prod`.
+7. Select **Do not allow bypassing the above settings** to prevent admins from bypassing this rule. Admins can bypass in `stage` IF needed, but not `prod`.
 8. Select **Create** to apply the rule. 
 9. Run a build wit the prod branch in the command: `./acm_sync_asciidoc.sh 2.x 2.x_prod`
 10. Ensure the build is clean.
