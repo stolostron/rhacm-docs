@@ -10,7 +10,7 @@ See the following list for guidance when creating or updating content. Use this 
 ## Writing and reviewing checklist 
 
 - [ ] Are file names, headers, and titles consistent with the feature and the rest of the component doc? Meaning you can intuitively find the file named in the repo based on the title of the file.
-- [ ] Are file names, headers, and titles concise for easier URL building?
+- [ ] Are file names, headers, and titles concise and unique for easier URL building?
 - [ ] For bugs, is the diff clearly addressing the customer concern or code change, and is it signed of by QE/Dev?
 - [ ] Does the file have a meaningful short description that tells you why the user wants to use the feature and what the feature is about?
 - [ ] Are prerequisites separate, clear, and imperative?
