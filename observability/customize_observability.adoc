@@ -22,7 +22,7 @@ Create custom rules for the observability installation by adding Prometheus link
 
 To precalculate expensive expressions, use the recording rules abilities with Prometheus to create alert conditions and send notifications based on how you want to send an alert to an external service. The results are saved as a new set of time series. View the following examples to create a custom alert rule within the `observability-thanos-rule-custom-rules` config map:
 
-- To get a notification for when your CPU usage paases your defined value, create the following custom alert rule:
+- To get a notification for when your CPU usage passes your defined value, create the following custom alert rule:
 
 +
 [source,yaml]
@@ -75,87 +75,93 @@ To verify that the alert rules are functioning correctly, go to the Grafana dash
 [#adding-custom-metrics]
 == Adding custom metrics
 
-Add metrics to the `metrics_list.yaml` file to collect from managed clusters. Complete the following steps:
+To monitor metrics from a remote cluster by using {acm}, check if the metric is exported as a Platform or a User workload metric. Use one of the following three methods to find the metric type:
 
-. Before you add a custom metric, verify that `mco observability` is enabled with the following command: 
+* Find the metric type in the documentation of the solution you want to monitor.
 
-+
-[source,bash]
-----
-oc get mco observability -o yaml
-----
+* Find the metric type by contacting the support for your product.
 
-. Check for the following message in the `status.conditions.message` section reads:
+* Find the metric type by checking the annotation that the `ServiceMonitor` for the observed resource uses.
+** Platform metrics use `operator.prometheus.io/controller-id: openshift-platform-monitoring/prometheus-operator`.
+** User workload metrics use `operator.prometheus.io/controller-id: openshift-user-workload-monitoring/prometheus-operator`.
 
-+
-[source,bash]
-----
-Observability components are deployed and running
-----
+You can also find `ServiceMonitors` in the console by going to *Observe* > *Targets* and choosing Platform or User from the *Source* filter in the top right. 
 
-. Create the `observability-metrics-custom-allowlist` config map in the `open-cluster-management-observability` namespace with the following command:
+*Note:* The *Source* filter provides service monitor or target information, not a list of metrics.
 
-+
-[source,bash]
-----
-oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml
-----
+If the metric is a Platform, continue at <<adding-platform-metrics,Adding Platform metrics>>. If the metric is a User workload, continue at <<adding-user-workload-metrics,Adding user workload metrics>>.
 
-. Add the name of the custom metric to the `metrics_list.yaml` parameter. Your YAML for the config map might resemble the following content:
+[#adding-platform-metrics]
+=== Adding Platform metrics
 
-+
+You can monitor Platform metrics by creating a `ConfigMap` on the hub cluster in the `open-cluster-management-observability` namespace. Use `observability-metrics-custom-allowlist` as the name. See the following `ConfigMap` example that you can use to monitor Platform metrics:
+
 [source,yaml]
 ----
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: observability-metrics-custom-allowlist
-data:
+  namespace: open-cluster-management-observability
+  data:
   metrics_list.yaml: |
     names: <1>
       - node_memory_MemTotal_bytes
-    rules: <2>
-    - record: apiserver_request_duration_seconds:histogram_quantile_90
-      expr: histogram_quantile(0.90,sum(rate(apiserver_request_duration_seconds_bucket{job=\"apiserver\",
-        verb!=\"WATCH\"}[5m])) by (verb,le))
+        recording_rules: <2>
+      - record: apiserver_request_duration_seconds:histogram_quantile_90
+        expr: histogram_quantile(0.90,sum(rate(apiserver_request_duration_seconds_bucket {job=\"apiserver\", verb!=\"WATCH\"}[5m])) by (verb,le))
 ----
-+
-<1> *Optional:* Add the name of the custom metrics that are to be collected from the managed cluster.
-<2> *Optional:* Enter only one value for the `expr` and `record` parameter pair to define the query expression. The metrics are collected as the name that is defined in the `record` parameter from your managed cluster. The metric value returned are the results after you run the query expression.
-+
-You can use either one or both of the sections. For user workload metrics, see the _Adding user workload metrics_ section.
-+
-*Note:* You can also individually customize each managed cluster in the custom metrics allowlist instead of applying it across your entire fleet. You can create the same YAML directly on your managed cluster to customize it.
 
-. Verify the data collection from your custom metric by querying the metric from the Grafana dashboard *Explore* page. You can also use the custom metrics in your own dashboard.
+<1> *Optional:* Add the names of the custom metrics you want to collect from your managed cluster.
+<2> *Optional:* Add one value for the `expr` and `record` parameter pair to define the query expression.
 
-[#adding-user-workload-metrics]
-=== Adding user workload metrics
+The name for the metrics you collect is the same name that you define in your managed cluster `record` parameter. After you run the query expression, you get the metric value results. You can use one section or both sections, which applies to every cluster with monitoring enabled.
 
-Collect {ocp-short} user-defined metrics from workloads in {ocp-short} to display the metrics from your Grafana dashboard. Complete the following steps:
+If you only want to collect custom metrics from a single managed cluster, use the following example and apply the config map on your managed cluster in the `open-cluster-management-addon-observability` namespace:
 
-. Enable monitoring on your {ocp-short} cluster. See _Enabling monitoring for user-defined projects_ in the _Additional resources_ section.
-+
-If you have a managed cluster with monitoring for user-defined workloads enabled, the user workloads are located in the `test` namespace and generate metrics. These metrics are collected by Prometheus from the {ocp-short} user workload.
-
-. Add user workload metrics to the `observability-metrics-custom-allowlist` config map to collect the metrics in the `test` namespace. View the following example:
-
-+
 [source,yaml]
 ----
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: observability-metrics-custom-allowlist
-  namespace: test
-data:
-  uwl_metrics_list.yaml: <1>
-    names: <2>
-      - sample_metrics
+  namespace: open-cluster-management-addon-observability
+  data:
+  metrics_list.yaml: |
+    names: <1>
+      - node_memory_MemTotal_bytes
+        recording_rules: <2>
+      - record: apiserver_request_duration_seconds:histogram_quantile_90
+        expr: histogram_quantile(0.90,sum(rate(apiserver_request_duration_seconds_bucket{job="apiserver", verb!="WATCH"}[5m])) by (verb,le))
 ----
-+
-<1> Enter the key for the config map data.
-<2> Enter the value of the config map data in YAML format. The `names` section includes the list of metric names, which you want to collect from the `test` namespace. After you create the config map, the observability collector collects and pushes the metrics from the target namespace to the hub cluster.
+
+<1> *Optional:* Add the names of the custom metrics you want to collect from your managed cluster.
+<2> *Optional:* Enter only one value for the `expr` and `record` parameter pair to define the query expression.
+
+The name for the metrics you collect is the same name that you define in your managed cluster `record` parameter. After you run the query expression, you get the metric value results. You can use one section or both sections.
+
+[#adding-user-workload-metrics]
+=== Adding User workload metrics
+
+You can monitor User workload metrics by setting the configuration on the managed cluster in namespace where you want to capture the metric. The name must be `observability-metrics-custom-allowlist` and the format must be the same as the following example:
+
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: observability-metrics-custom-allowlist
+  namespace: <monitored_namespace> <1>
+data:
+  uwl_metrics_list.yaml:
+    names:
+      - <sample_metrics> <2>
+----
+
+<1> Add the namespace where you want to capture the metric.
+<2> Add the value of the config map data in YAML format. Add list of metric names that you want to collect from the `test` namespace to the `names` section. After you create the config map, the observability collector collects and pushes the metrics from the target namespace to the hub cluster.
+
+The previous example monitors the User workload metric `sample_metrics` from the namespace `monitored_namespace`. If you create the configuration in the `open-cluster-management-addon-observability` namespace instead, the metrics are collected from all the namespaces of the managed cluster.
 
 [#removing-default-metrics]
 === Removing default metrics
