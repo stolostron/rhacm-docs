@@ -5,7 +5,9 @@ permalink: /special_tag_guidance
 horizontal: false
 ---
 
-Special tags can be used to draw attention to content where necessary. Limit special tagging and make sure to use bold text for all special tags, including the colon. Red Hat calls these tags "Abominiations." We currently do not capitalize these in the RHACM docs.
+Special tags can be used to draw attention to content where necessary. Limit special tagging and make sure to use bold text for all special tags, including the colon. Red Hat calls these tags "Abominiations." We currently do not capitalize these in the RHACM docs. We agreed it was not necessary. See [All-Caps Headings: Are They Bad for Accessibility?](https://www.boia.org/blog/all-caps-headings-are-they-bad-for-accessibility) for consideration on the matter.
+
+We stick to only a handful of [Standard notes](https://www.ibm.com/docs/en/ibm-style?topic=format-notes#standard-notes) from the manual. This is to keep one writer from overusing or another from not using at all or people using various ones when others are use different ones for the same reason.
 
 ## Table of special tags
 
