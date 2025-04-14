@@ -37,13 +37,21 @@ MY_TOKEN=$(oc whoami --show-token)
 ----
 oc -n openshift-ingress get secret router-certs-default -o jsonpath="{.data.tls\.crt}" | base64 -d > ca.crt
 ----
-
-. To access an endpoint of the default CA certificate from your hub cluster through mutual TLS, which verifies the identities of both parties in a network connection, create the `proxy-byo-ca` TLS secret with the following command:
-
++
+*Note:* The `router-certs-default` secret does not exist if your hub cluster is running on OpenShift Service on AWS. Instead, use the CA certificate that `spec.defaultCertificate.name` points to in the default ingress controller object. Store the content of the `tls.crt` key in a local file. Complete the following steps:
++
+.. Get the name of the `spec.defaultCertificate.name` by running the following command:
 +
 [source,bash]
 ----
-oc -n open-cluster-management-observability create secret tls proxy-byo-ca --cert ./ca.crt --key ./ca.key
+SECRET_NAME=$(oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath=" {.spec.defaultCertificate.name}")
+----
++
+.. Extract the certificate from the secret by running the following command:
++
+[source,bash]
+----
+oc get secret $SECRET_NAME -n openshift-ingress -o jsonpath=" {.data.tls\.crt}" | base64 -d > ca.crt
 ----
 
 . To query metrics from the API, run the following command: 
@@ -55,6 +63,8 @@ curl --cacert ./ca.crt -H "Authorization: Bearer {TOKEN}" https://{PROXY_ROUTE_U
 ----
 +
 *Note:* The `QUERY_EXPRESSION` is the standard Prometheus query expression. For example, query the metrics `cluster_infrastructure_provider` by replacing the URL in the previous command with the following URL: `https://{PROXY_ROUTE_URL}/api/v1/query?query=cluster_infrastructure_provider`. For more details, see link:https://prometheus.io/docs/prometheus/latest/querying/basics/[Querying Prometheus].
+
+. If you want to configure custom certificates for the `rbac-query-proxy` route, see link:../governance/cert_manage.adoc#replacing-certificates-for-rbac-query-proxy-route[Replacing certificates for _rbac-query-proxy_ route].
 
 [#exporting-metrics-to-external-endpoints]
 === Exporting metrics to external endpoints

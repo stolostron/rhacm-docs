@@ -27,6 +27,79 @@ For your {ocp} cluster, see link:https://docs.redhat.com/documentation/en-us/ope
 
 For more about deprecations and removals, see xref:../release_notes/acm_deprecate_remove.adoc#deprecations-removals-acm[Deprecations and removals for {acm-short}].
 
+[#observability-upgrade-issue]
+== Upgrading an existing {acm-short} cluster with {ocp-short} 4.18 creates an error installing CRD
+//2.12:19151
+
+If you upgrade an existing {acm-short} 2.12 cluster with {ocp-short} 4.18, your upgrade fails with an error from installing the Observability component on your `MultiClusterHub` custom resource instance.
+
+*Note:* If you upgrade directly to 2.12.2, you don't receive this error. If you install {acm-short} 2.12 with {ocp-short} 4.18 for the first time, you do not receive this error. 
+
+. To get the details of the error, run the following command:
+
++
+[source,bash]
+----
+oc get multiclusterhubs -n open-cluster-management -o yaml
+----
+
++
+The hub cluster reports the following error message that shows installing `multiclusterobservabilities.observability.open-cluster-management.io` failed:
+
++
+[source,bash]
+----
+message: 'Error installing CRDs: CustomResourceDefinition.apiextensions.k8s.io
+"multiclusterobservabilities.observability.open-cluster-management.io" is 
+invalid: spec.conversion.webhookClientConfig.caBundle: Invalid value: []byte{0x5c,0x6e}: unable to load root certificates: unable to parse bytes as PEM block'
+ reason: FailedDeployingComponent
+ status: "False"
+ type: Progressing
+desiredVersion: 2.12.0
+phase: Installing
+----
+
+. With the Observability component `disabled` on your `MultiClusterHub` custom resource instance, run the following command to delete the Observabiliity `crd`:
+
++
+[source,bash]
+----
+oc delete crd multiclusterobservabilities.observability.open-cluster-management.io
+----
++
+*Important:* 
++
+- If the Observability component is `enabled` on the cluster, the previous command deletes the entire Observability stack. 
++
+- No known workaround exists for an upgrade with Observability enabled. You can unistall {acm-short} completely and reinstall without any CRDs without this failure.
++
+- If you do not want to lose the Observability stack, do not updrade {acm-short} with {ocp-short} 4.18.
+
+. After you delete the Observability CRD, run the following command to check the progress of the {acm-short} upgrade:
+
++
+[source,bash]
+----
+oc get multiclusterhubs -n open-cluster-management -o yaml
+----
+
++
+The output states that hub cluster components are ready, as in the following example:
+
++
+[source,bash]
+----
+message: 'created new resource: CustomResourceDefinition multiclusterobservabilities.observability.open-cluster-management.io'
+ reason: NewResourceCreated
+ status: "True"
+ type: Progressing
+ message: All hub components ready.
+ ...
+ reason: ComponentsAvailable
+ status: "True"
+ type: Complete
+----
+
 [#uninstall-manual-remove-cr]
 == Uninstalling and reinstalling earlier versions with an upgrade can fail
 //2.10:10953 and 2:12:14343, to name a few issues for this
