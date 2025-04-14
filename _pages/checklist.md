@@ -46,7 +46,7 @@ See the following list for guidance when creating or updating content. Use this 
    - "In other words...", this can be removed, just write the words
    -  "...from being automatically imported", can be something like "...from automatic import"
    - Before: "Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list."
-   - After: "Add the managed cluster label to the `ignore_labels` list to exclude it from the _Label_ drop-down filter
+   - After: "Add the managed cluster label to the `ignore_labels` list to exclude it from the _Label_ drop-down filter.
 
 ## Common resources
 
