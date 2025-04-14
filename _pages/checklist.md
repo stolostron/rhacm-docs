@@ -13,7 +13,7 @@ See the following list for guidance when creating or updating content. Use this 
    - You can intuitively find the file named in the repo based on the title of the file.
    - Headers are parallel with each other and named to fit the content.
 - [ ] Are file names, headers, anchors, and titles shortened, concise, and unique for easier URL building? 
-- [ ] For bugs and Errata release notes, is the diff clearly addressing the customer concern, bug fix, or code change, and is it signed of by QE/Dev?
+- [ ] For bugs and Errata release notes, is the diff clearly addressing the customer concern, bug fix, or code change, and is it signed off by QE/Dev?
 - [ ] Does the file have a meaningful short description that tells you why the user wants to use the feature and what the feature is about?
 - [ ] Are prerequisites separate, clear, and imperative?
 - [ ] Are there any obvious prerequisites that can be removed, such as "You must install the RHACM" in an area where that is already understood?
@@ -37,7 +37,7 @@ See the following list for guidance when creating or updating content. Use this 
 - [ ] Does the content cross features and if so, have tech leads discussed best placement for it?
 - [ ] Are there any long paragraphs that should be broken up into lists or concise paragraphs?
 - [ ] Do you understand what the change is about from the introduction?
-- [ ] Is content grammatically correct and concise?
+- [ ] Is content grammatically correct and concise? See some examples to think about:
   - Are modals used properly?
   - Is the content in active voice and present tense?
   - Do you find wordy content that can be removed or merged together?
