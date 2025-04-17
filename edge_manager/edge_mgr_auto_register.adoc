@@ -1,0 +1,59 @@
+[#edge-config-auto-register]
+= Configuring fleets to auto-register MicroShift clusters
+
+If you have fleets of devices that are running an operating sysem image that includes MicroShift, you can configure your fleets to auto-register MicroShift clusters with {acm-short}.
+
+[#edge-config-device-template]
+== Configuring your device template
+
+To enable auto-registration in a fleet, add configuration items to the device template. 
+
+. Begin with your `Fleet` template and add the `acm-crd`, `filePath`, `repository`, and `suffix` import configuration to your
+
++
+[source,yaml]
+----
+apiVersion: flightctl.io/v1alpha1
+kind: Fleet
+metadata:
+  name: fleet-acm
+spec:
+  selector:
+    matchLabels:
+      fleet: acm
+  template:
+    spec:
+      os:
+        image: <your os image>
+config:
+      - name: acm-crd
+        httpRef:
+          filePath: /var/local/acm-import/crd.yaml
+          repository: acm-registration
+          suffix: /agent-registration/crds/v1
+----
+
+. Add the `acm-import` configuration with the `filePath`, `repository`, and `suffix`, as you see in the following addition to the template:
+
++
+[source,yaml]
+----
+- name: acm-import
+        httpRef:
+          filePath: /var/local/acm-import/import.yaml
+          repository: acm-registration
+          suffix: /agent-registration/manifests/{{.metadata.name}}
+----
+
+. Add the `acm-import` name and the `filePath`, `repository`, and `suffix`, as you see in the following addition to the template:
+
++
+[source,yaml]
+----
+- name: pull-secret
+        inline:
+        - path: "/etc/crio/openshift-pull-secret"
+          content: "{\"auths\":{...}}"
+----
+
+. And when approve the device, you should label the device with "fleet:acm".
