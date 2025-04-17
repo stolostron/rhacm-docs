@@ -1,0 +1,220 @@
+[#adding-custom-metrics]
+= Adding custom metrics
+
+To monitor metrics from a remote cluster by using {acm}, check if the metric is exported as a Platform or a User workload metric. Use one of the following three methods to find the metric type:
+
+* Find the metric type in the documentation of the solution you want to monitor.
+
+* Find the metric type by contacting the support for your product.
+
+* Find the metric type by checking the annotation that the `ServiceMonitor` for the observed resource uses.
+** Platform metrics use `operator.prometheus.io/controller-id: openshift-platform-monitoring/prometheus-operator`.
+** User workload metrics use `operator.prometheus.io/controller-id: openshift-user-workload-monitoring/prometheus-operator`.
+
+You can also find `ServiceMonitors` in the console by going to *Observe* > *Targets* and choosing Platform or User from the *Source* filter in the top right. 
+
+*Note:* The *Source* filter provides service monitor or target information, not a list of metrics.
+
+If the metric is a Platform, continue at <<adding-platform-metrics,Adding Platform metrics>>. If the metric is a User workload, continue at <<adding-user-workload-metrics,Adding user workload metrics>>.
+
+*Required access:* Cluster administrator
+
+- <<adding-platform-metrics,Adding Platform metrics>>
+- <<adding-user-workload-metrics,Adding User workload metrics>>
+- <<removing-default-metrics,Removing default metrics>>
+- <<dynamic-metrics-for-sno,Dynamic metrics for {sno} clusters>>
+- <<add-res-obs-metrics,Additional resources>>
+
+[#adding-platform-metrics]
+== Adding Platform metrics
+
+You can monitor Platform metrics by creating a `ConfigMap` on the hub cluster in the `open-cluster-management-observability` namespace. Use `observability-metrics-custom-allowlist` as the name. See the following `ConfigMap` example that you can use to monitor Platform metrics:
+
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: observability-metrics-custom-allowlist
+  namespace: open-cluster-management-observability
+  data:
+  metrics_list.yaml: |
+    names: <1>
+      - node_memory_MemTotal_bytes
+        recording_rules: <2>
+      - record: apiserver_request_duration_seconds:histogram_quantile_90
+        expr: histogram_quantile(0.90,sum(rate(apiserver_request_duration_seconds_bucket {job=\"apiserver\", verb!=\"WATCH\"}[5m])) by (verb,le))
+----
+
+<1> *Optional:* Add the names of the custom metrics you want to collect from your managed cluster.
+<2> *Optional:* Add one value for the `expr` and `record` parameter pair to define the query expression.
+
+The name for the metrics you collect is the same name that you define in your managed cluster `record` parameter. After you run the query expression, you get the metric value results. You can use one section or both sections, which applies to every cluster with monitoring enabled.
+
+If you only want to collect custom metrics from a single managed cluster, use the following example and apply the config map on your managed cluster in the `open-cluster-management-addon-observability` namespace:
+
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: observability-metrics-custom-allowlist
+  namespace: open-cluster-management-addon-observability
+  data:
+  metrics_list.yaml: |
+    names: <1>
+      - node_memory_MemTotal_bytes
+        recording_rules: <2>
+      - record: apiserver_request_duration_seconds:histogram_quantile_90
+        expr: histogram_quantile(0.90,sum(rate(apiserver_request_duration_seconds_bucket{job="apiserver", verb!="WATCH"}[5m])) by (verb,le))
+----
+
+<1> *Optional:* Add the names of the custom metrics you want to collect from your managed cluster.
+<2> *Optional:* Enter only one value for the `expr` and `record` parameter pair to define the query expression.
+
+The name for the metrics you collect is the same name that you define in your managed cluster `record` parameter. After you run the query expression, you get the metric value results. You can use one section or both sections.
+
+[#adding-user-workload-metrics]
+== Adding User workload metrics
+
+You can monitor User workload metrics by setting the configuration on the managed cluster in namespace where you want to capture the metric. The name must be `observability-metrics-custom-allowlist` and the format must be the same as the following example:
+
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: observability-metrics-custom-allowlist
+  namespace: <monitored_namespace> <1>
+data:
+  uwl_metrics_list.yaml:
+    names:
+      - <sample_metrics> <2>
+----
+
+<1> Add the namespace where you want to capture the metric.
+<2> Add the value of the config map data in YAML format. Add list of metric names that you want to collect from the `test` namespace to the `names` section. After you create the config map, the observability collector collects and pushes the metrics from the target namespace to the hub cluster.
+
+The previous example monitors the User workload metric `sample_metrics` from the namespace `monitored_namespace`. If you create the configuration in the `open-cluster-management-addon-observability` namespace instead, the metrics are collected from all the namespaces of the managed cluster.
+
+[#removing-default-metrics]
+== Removing default metrics
+
+If you do not want to collect data for a specific metric from your managed cluster, remove the metric from the `observability-metrics-custom-allowlist.yaml` file. When you remove a metric, the metric data is not collected from your managed clusters. Complete the following steps to remove a default metric:
+
+. Verify that `mco observability` is enabled by using the following command: 
+
++
+[source,bash]
+----
+oc get mco observability -o yaml
+----
+
+. Add the name of the default metric to the `metrics_list.yaml` parameter with a hyphen `-` at the start of the metric name. View the following metric example:
+
++
+[source,bash]
+----
+-cluster_infrastructure_provider
+----
+
+. Create the `observability-metrics-custom-allowlist` config map in the 
+`open-cluster-management-observability` namespace with the following command: 
+
++
+[source,bash]
+----
+oc apply -n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml
+----
+
+. Verify that the observability service is not collecting the specific metric from your managed clusters. When you query the metric from the Grafana dashboard, the metric is not displayed.
+
+[#dynamic-metrics-for-sno]
+== Dynamic metrics for {sno} clusters
+
+Dynamic metrics collection supports automatic metric collection based on certain conditions. By default, a {sno} cluster does not collect pod and container resource metrics. Once a {sno} cluster reaches a specific level of resource consumption, the defined granular metrics are collected dynamically. When the cluster resource consumption is consistently less than the threshold for a period of time, granular metric collection stops.
+
+The metrics are collected dynamically based on the conditions on the managed cluster specified by a collection rule. Because these metrics are collected dynamically, the following {acm-short} Grafana dashboards do not display any data. When a collection rule is activated and the corresponding metrics are collected, the following panels display data for the duration of the time that the collection rule is initiated:
+
+* Kubernetes/Compute Resources/Namespace (Pods)
+* Kubernetes/Compute Resources/Namespace (Workloads)
+* Kubernetes/Compute Resources/Nodes (Pods)
+* Kubernetes/Compute Resources/Pod
+* Kubernetes/Compute Resources/Workload
+
+A collection rule includes the following conditions:
+
+* A set of metrics to collect dynamically.
+* Conditions written as a PromQL expression.
+* A time interval for the collection, which must be set to `true`.
+* A match expression to select clusters where the collect rule must be evaluated.
+
+By default, collection rules are evaluated continuously on managed clusters every 30 seconds, or at a specific time interval. The lowest value between the collection interval and time interval takes precedence. Once the collection rule condition persists for the duration specified by the `for` attribute, the collection rule starts and the metrics specified by the rule are automatically collected on the managed cluster. Metrics collection stops automatically after the collection rule condition no longer exists on the managed cluster, at least 15 minutes after it starts.
+
+The collection rules are grouped together as a parameter section named `collect_rules`, where it can be enabled or disabled as a group. {acm-short} installation includes the collection rule group, `SNOResourceUsage` with two default collection rules: `HighCPUUsage` and `HighMemoryUsage`. The `HighCPUUsage` collection rule begins when the node CPU usage exceeds 70%. The `HighMemoryUsage` collection rule begins if the overall memory utilization of the {sno} cluster exceeds 70% of the available node memory. Currently, the previously mentioned thresholds are fixed and cannot be changed. When a collection rule begins for more than the interval specified by the `for` attribute, the system automatically starts collecting the metrics that are specified in the `dynamic_metrics` section.
+
+View the list of dynamic metrics that from the `collect_rules` section, in the following YAML file:
+
+[source,yaml]
+----
+collect_rules:
+  - group: SNOResourceUsage
+    annotations:
+      description: >
+        By default, a {sno} cluster does not collect pod and container resource metrics. Once a {sno} cluster 
+        reaches a level of resource consumption, these granular metrics are collected dynamically. 
+        When the cluster resource consumption is consistently less than the threshold for a period of time, 
+        collection of the granular metrics stops.
+    selector:
+      matchExpressions:
+        - key: clusterType
+          operator: In
+          values: ["{sno}"]
+    rules:
+    - collect: SNOHighCPUUsage
+      annotations:
+        description: >
+          Collects the dynamic metrics specified if the cluster cpu usage is constantly more than 70% for 2 minutes
+      expr: (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))) * 100 > 70
+      for: 2m
+      dynamic_metrics:
+        names:
+          - container_cpu_cfs_periods_total
+          - container_cpu_cfs_throttled_periods_total
+          - kube_pod_container_resource_limits 
+          - kube_pod_container_resource_requests   
+          - namespace_workload_pod:kube_pod_owner:relabel 
+          - node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate 
+          - node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate 
+    - collect: SNOHighMemoryUsage
+      annotations:
+        description: >
+          Collects the dynamic metrics specified if the cluster memory usage is constantly more than 70% for 2 minutes
+      expr: (1 - sum(:node_memory_MemAvailable_bytes:sum) / sum(kube_node_status_allocatable{resource=\"memory\"})) * 100 > 70
+      for: 2m
+      dynamic_metrics:
+        names:
+          - kube_pod_container_resource_limits 
+          - kube_pod_container_resource_requests 
+          - namespace_workload_pod:kube_pod_owner:relabel
+        matches:
+          - __name__="container_memory_cache",container!=""
+          - __name__="container_memory_rss",container!=""
+          - __name__="container_memory_swap",container!=""
+          - __name__="container_memory_working_set_bytes",container!=""
+----
+
+A `collect_rules.group` can be disabled in the `custom-allowlist` as shown in the following example. When a `collect_rules.group` is disabled, metrics collection reverts to the previous behavior. These metrics are collected at regularly, specified intervals:
+
+[source,yaml]
+----
+collect_rules:
+  - group: -SNOResourceUsage
+----
+
+The data is only displayed in Grafana when the rule is initiated.
+
+[#add-res-obs-metrics]
+== Additional resources
+
+- See xref:../observability/use_observability.adoc#exporting-metrics-to-external-endpoints[Exporting metrics to external endpoints]. 

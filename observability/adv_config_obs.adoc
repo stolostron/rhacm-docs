@@ -1,0 +1,263 @@
+[#adv-config-obs]
+= Observability advanced configuration
+
+You can further customize the observability configuration to the specific needs of your environment. Manage and view cluster fleet data that the observability service collects.
+
+*Required access:* Cluster administrator
+
+- <<creating-custom-rules,Creating custom rules>>
+- <<updating-replicas,Updating the _MultiClusterObservability_ custom resource replicas from the console>>
+- <<increase-decrease-pv-pvc,Increasing and decreasing persistent volumes and persistent volume claims>>
+- <<custom-obervatorium-alert-url,Customizing the managed cluster Observatorium API and Alertmanager URLs (Technology Preview)>>
+- <<configure-fine-grain-rbac,Configuring fine-grain RBAC (Technology Preview)>>
+- <<add-res-adv-config-obs,Additional resources>>
+
+[#creating-custom-rules]
+== Creating custom rules
+
+Create custom rules for the observability installation by adding Prometheus link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[recording rules] and link:https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[alerting rules] to the observability resource.
+
+To precalculate expensive expressions, use the recording rules abilities with Prometheus to create alert conditions and send notifications based on how you want to send an alert to an external service. The results are saved as a new set of time series.
+
+Complete the following steps to create a custom alert rule within the `observability-thanos-rule-custom-rules` config map:
+
+. Create the following custom alert rule to get a notification for when your CPU usage passes your defined value:
+
++
+[source,yaml]
+----
+data:
+  custom_rules.yaml: |
+    groups:
+      - name: cluster-health
+        rules:
+        - alert: ClusterCPUHealth-jb
+          annotations:
+            summary: Notify when CPU utilization on a cluster is greater than the defined utilization limit
+            description: "The cluster has a high CPU usage: {{ $value }} core for {{ $labels.cluster }} {{ $labels.clusterID }}."
+          expr: |
+            max(cluster:cpu_usage_cores:sum) by (clusterID, cluster, prometheus) > 0
+          for: 5s
+          labels:
+            cluster: "{{ $labels.cluster }}"
+            prometheus: "{{ $labels.prometheus }}"
+            severity: critical
+----
+
++
+*Notes:*
+
+* When you update your custom rules, `observability-thanos-rule` pods restart automatically.
+* You can create multiple rules in the configuration. 
+* The default alert rules are in the `observability-thanos-rule-default-rules` config map of the `open-cluster-management-observability` namespace.
+
+. Create a custom recording rule to get the sum of the container memory cache of a pod. See the following example:
+
++
+[source,yaml]
+----
+data:
+  custom_rules.yaml: |
+    groups:
+      - name: container-memory
+        rules:
+        - record: pod:container_memory_cache:sum
+          expr: sum(container_memory_cache{pod!=""}) BY (pod, container)
+----
+
++
+*Note:* After you make changes to the config map, the configuration automatically reloads. The configuration reloads because of the `config-reload` within the `observability-thanos-rule` sidecar.
+
+To verify that the alert rules are functioning correctly, go to the Grafana dashboard, select the *Explore* page, and query `ALERTS`. The alert is only available in Grafana if you created the alert. 
+
+[#updating-replicas]
+== Updating the _MultiClusterObservability_ custom resource replicas from the console
+
+If your workload increases, increase the number of replicas of your observability pods. Navigate to the console from your hub cluster. Locate the `MultiClusterObservability` custom resource, and update the `replicas` parameter value for the component where you want to change the replicas. Your updated YAML might resemble the following content:
+
+[source,yaml]
+----
+spec:
+   advanced:
+      receive:
+         replicas: 6
+----
+
+For more information about the parameters within the `mco observability` custom resource, see the _Observability API_ documentation.
+
+[#increase-decrease-pv-pvc]
+== Increasing and decreasing persistent volumes and persistent volume claims
+
+Increase and decrease the persistent volume and persistent volume claims to change the amount of storage in your storage class. Complete the following steps:
+
+. To increase the size of the persistent volume, update the `MultiClusterObservability` custom resource if the storage class support expanding volumes.        
+
+. To decrease the size of the persistent volumes remove the pods using the persistent volumes, delete the persistent volume and recreate them. You might experience data loss in the persistent volume. Complete the following steps:
++
+.. Pause the `MultiClusterObservability` operator by adding the annotation `mco-pause: "true"` to the `MultiClusterObservability` custom resource.
+
+.. Look for the stateful sets or deployments of the desired component. Change their replica count to `0`. This initiates a shutdown, which involves uploading local data when applicable to avoid data loss. For example, the Thanos `Receive` stateful set is named `observability-thanos-receive-default` and has three replicas by default. Therefore, you are looking for the following persistent volume claims:
++
+- `data-observability-thanos-receive-default-0`
+- `data-observability-thanos-receive-default-1`
+- `data-observability-thanos-receive-default-2`
+
+.. Delete the persistent volumes and persistent volume claims used by the desired component. 
+.. In the `MultiClusterObservability` custom resource, edit the storage size in the configuration of the component to the desired amount in the storage size field. Prefix with the name of the component.
+
+.. Unpause the `MultiClusterObservability` operator by removing the previously added annotation.
+
+.. To initiate a reconcilation after having the operator paused, delete the `multicluster-observability-operator` and `observatorium-operator` pods. The pods are recreated and reconciled immediately.
+
+. Verify that persistent volume and volume claims are updated by checking the `MultiClusterObservability` custom resource.
+
+[#custom-obervatorium-alert-url]
+== Customizing the managed cluster Observatorium API and Alertmanager URLs (Technology Preview)
+
+You can customize the Observatorium API and Alertmanager URLs that the managed cluster uses to communicate with the hub cluster to maintain all {acm-short} functions when you use a load balancer or reserve proxy. To customize the URLs, complete the following steps:
+
+. Add your URLs to the `advanced` section of the `MultiClusterObservability` `spec`. See the following example:
+
+[source,yaml]
+----
+spec:
+  advanced:
+    customObservabilityHubURL: <yourURL>
+    customAlertmanagerHubURL: <yourURL>
+----
+
+*Notes:*
+
+* Only HTTPS URLs are supported. If you do not add `https://` to your URL, the scheme is added automatically.
+* You can include the standard path for the Remote Write API, `/api/metrics/v1/default/api/v1/receive` in the `customObservabilityHubURL` `spec`. If you do not include the path, the Observability service automatically adds the path at runtime.
+* Any intermediate component you use for the custom Observability hub cluster URL cannot use TLS termination because the component relies on MTLS authentication. The custom Alertmanager hub cluster URL supports intermediate component TLS termination by using your own existing certificate instructions.
+
+. If you are using a `customObservabilityHubURL`, create a route object by using the following template. Replace `<intermediate_component_url>` with the intermediate component URL:
+
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: proxy-observatorium-api
+  namespace: open-cluster-management-observability
+spec:
+  host: <intermediate_component_url>
+  port:
+    targetPort: public
+  tls:
+    insecureEdgeTerminationPolicy: None
+    termination: passthrough
+  to:
+    kind: Service
+    name: observability-observatorium-api
+    weight: 100
+  wildcardPolicy: None
+----
+
+. If you are using a `customAlertmanagerHubURL`, create a route object by using the following template. Replace `<intermediate_component_url>` with the intermediate component URL:
+
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: alertmanager-proxy
+  namespace: open-cluster-management-observability
+spec:
+  host: <intermediate_component_url>
+  path: /api/v2
+  port:
+    targetPort: oauth-proxy
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: reencrypt
+  to:
+    kind: Service
+    name: alertmanager
+    weight: 100
+  wildcardPolicy: None
+----
+
+[#configure-fine-grain-rbac]
+== Configuring fine-grain RBAC (Technology Preview)
+
+To restrict metric access to specific namespaces within the cluster, use fine-grain role-based access control (RBAC). Using fine-grain RBAC, you can allow application teams to only view the metrics for the namespaces that you give them permission to access. 
+
+You must configure metric access control on the hub cluster for the users of that hub cluster. On this hub cluster, a `ManagedCluster` custom resource represents every managed cluster. To configure RBAC and to select the allowed namespaces, use the rules and action verbs specified in the `ManagedCluster` custom resources. 
+
+For example, you have an application named, `my-awesome-app`, and this application is on two different managed clusters, `devcluster1` and `devcluster2`. Both clusters are in the `AwesomeAppNS` namespace. You have an `admin` user group named, `my-awesome-app-admins`, and you want to restrict this user group to only have access to metrics from only these two namespaces on the hub cluster. 
+
+To use fine-grain RBAC to restrict the user group access, complete the following steps: 
+
+. Define a `ClusterRole` resource with permissions to access metrics. Your resource might resemble the following YAML: 
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+ name: awesome-app-metrics-role
+rules:
+ - apiGroups:
+     - "cluster.open-cluster-management.io"
+   resources:
+     - managedclusters: <1>
+   resourceNames: <2>
+     - devcluster1
+     - devcluster2
+   verbs: <3> 
+     - metrics/AwesomeAppNS
+----
+<1> Represents the parameter values for the managed clusters. 
+<2> Represents the list of managed clusters.
+<3> Represents the namespace of the managed clusters.
+
+. Define a `ClusterRoleBinding` resource that binds the group, `my-awesome-app-admins`, with the `ClusterRole` resource for the `awesome-app-metrics-role`. Your resource might resemble the following YAML: 
+
++
+[source,yaml]
+----
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+ name: awesome-app-metrics-role-binding
+subjects:
+ - kind: Group
+   apiGroup: rbac.authorization.k8s.io
+   name: my-awesome-app-admins
+roleRef:
+ apiGroup: rbac.authorization.k8s.io
+ kind: ClusterRole
+ name: awesome-app-metrics-role
+----
+
+After completing these steps, when the users in the `my-awesome-app-admins` log into the Grafana console, they have the following restrictions: 
+
+* Users see no data for dashboards that summarize fleet level data. 
+* Users can only select managed clusters and namespaces specified in the `ClusterRole` resource.   
+
+To set up different types of user access, define separate `ClusterRoles` and `ClusterRoleBindings` resources to represent the different managed clusters in the namespaces. 
+
+[#add-res-adv-config-obs]
+== Additional resources
+
+- Refer to link:https://prometheus.io/docs/prometheus/latest/configuration/configuration/[Prometheus configuration] for more information. For more information about recording rules and alerting rules, refer to the recording rules and alerting rules from the link:https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/[Prometheus documentation]. 
+
+- For more information about viewing the dashboard, see xref:../observability/design_grafana.adoc#using-grafana-dashboards[Using Grafana dashboards].
+
+- See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/monitoring/configuring-user-workload-monitoring#enabling-monitoring-for-user-defined-projects_preparing-to-configure-the-monitoring-stack-uwm[Enabling monitoring for user-defined projects].
+
+- See the link:../apis/observability.json.adoc#observability-api[Observability API].
+
+- For more details about observability alerts, see xref:../observability/observability_alerts.adoc#observability-alerts[Observability alerts]
+
+- To learn more about alert forwarding, see the link:https://prometheus.io/docs/alerting/latest/alertmanager/[Prometheus Alertmanager documentation].
+
+- See xref:../observability/observe_environments_intro.adoc#observability-alerts[Observability alerts] for more information.
+
+- For more topics about the observability service, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service].
+
+- See link:https://github.com/openshift/enhancements/blob/master/enhancements/workload-partitioning/management-workload-partitioning.md#management-workload-partitioning[Management Workload Partitioning] for more information.
+
