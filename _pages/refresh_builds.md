@@ -65,7 +65,7 @@ Use this process to refresh a public version or build internally.
 
 2. Verify that the commits on the Pantheon UI all match for stage and prod. That means that you pushed all of the latest files that resulted from your last build.
 
-## Set up local build
+## Set up local build on MacOS
 
 Make sure you are connected to the VPN and have [Homebrew](https://brew.sh/) installed before completing the following steps to build locally:
 
@@ -111,6 +111,61 @@ Make sure you are connected to the VPN and have [Homebrew](https://brew.sh/) ins
    **Note:** The first number is the GitLab branch number (corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
 
 7. When running the script for the first time after adding your SSH key to GitLab, you might receive an error resembling the following message:
+
+   ```
+   The authenticity of host can't be established.
+   Are you sure you want to continue connecting (yes/no/[fingerprint])?
+   ```
+
+   - Enter `yes` and continue.
+   - You might receive an access rights error message. Ignore the message and run the script again. If you have the correct access rights, the script runs successfully. If not, contact your manager to gain access rights.
+  
+Pantheon updates automatically and matches the commit number. If Pantheon does not update automatically, you can manually refresh individual books.
+
+## Set up local build on Linux
+
+Make sure you are connected to the VPN before completing the following steps to build locally:
+
+1. Download the build script to a folder of your choice from the master branch at: 
+
+   ```
+   https://gitlab.cee.redhat.com/red-hat-enterprise-openshift-documentation/advanced-cluster-management/-/blob/master/acm_sync_asciidoc.sh
+   ```
+
+2. Change to your chosen directory. For example, the following command switches to the _Documents_ folder:
+
+   ```
+   cd Documents
+   ```
+
+3. Open the script with the text editor of your choice.
+
+4. Change every instance of `gsed` to `sed` and save the file.
+
+5. Make the script executable by running the following command:
+
+   ```
+   chmod +x acm_sync_asciidoc.sh
+   ```
+
+6. Add your SSH key to your GitLab account. You can find the link to GitLab on Rover Apps. If you have already set up your GitHub account, you have a SSH key. To find it, see [Checking for existing SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys). If you need to create a new key, see [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
+
+   Then, complete the following steps to use your SSH key for your GitLab account:
+   - Copy the key.
+   - Open GitLab.
+   - Open your profile.
+   - Select **SSH Keys** in the left nav.
+   - Paste the key and select **Add key**.   
+      
+7. Run the file with the following command to build 2.9:
+
+   ```
+   ./acm_sync_asciidoc.sh 2.9 2.9_stage
+   ```
+
+   **Note:** The first number is the GitLab branch number (corresponds to our release number). The second number is our GitHub branch. Both prod and stage go to the same GitLab branch.
+
+8. When running the script for the first time after adding your SSH key to GitLab, you might receive an error resembling the following message:
 
    ```
    The authenticity of host can't be established.
