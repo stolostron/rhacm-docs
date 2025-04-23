@@ -1,0 +1,82 @@
+[#edge-config-auto-register]
+= Configuring fleets to auto-register MicroShift clusters
+
+*Technology Preview:* If you have fleets of devices that are running an operating system image that includes MicroShift, you can configure your fleets to auto-register MicroShift clusters with {acm-short}.
+
+[#edge-config-device-template]
+== Configuring your device template
+
+To enable auto-registration in a fleet, add configuration to the device template. Complete the following steps:
+
+. Add the `acm-crd` resource configuration, which includes the `filePath` for your `crd.yaml` file, your `repository`, and `suffix` to your `Fleet` resource. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: flightctl.io/v1alpha1
+kind: Fleet
+metadata:
+ name: fleet-acm
+spec:
+ selector:
+  matchLabels:
+   fleet: acm
+ template:
+  spec:
+   os:
+    image: <your os image>
+config:
+   - name: acm-crd
+    httpRef:
+     filePath: /var/local/acm-import/crd.yaml
+     repository: acm-registration
+     suffix: /agent-registration/crds/v1
+----
+
+. Add the `acm-import` resource configuration with the `filePath`, `repository`, and `suffix`, as you see in the following example:
+
++
+[source,yaml]
+----
+- name: acm-import
+    httpRef:
+     filePath: /var/local/acm-import/import.yaml
+     repository: acm-registration
+     suffix: /agent-registration/manifests/{{.metadata.name}}
+----
+
+. *Optional:* If your MicroShift cluster did not pull the {acm-short} images, add the `pull-secret` resource, as you see in the following addition to the template:
+
++
+[source,yaml]
+----
+- name: pull-secret
+    inline:
+    - path: "/etc/crio/openshift-pull-secret"
+     content: "{\"auths\":{...}}"
+----
+
+. Add the `apply-acm-manifests` resource with the following conditional `if` requirements to run `kubectl apply -f` on your `crd.yaml` file, and your `import.yaml` file:
+
++
+[source,yaml]
+----
+- name: apply-acm-manifests
+    inline:
+    - path: "/etc/flightctl/hooks.d/afterupdating/50-acm-registration.yaml"
+     content: |
+      - if:
+       - path: /var/local/acm-import/crd.yaml
+        op: [created]
+       run: kubectl apply -f /var/local/acm-import/crd.yaml
+       envVars:
+        KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
+      - if:
+       - path: /var/local/acm-import/import.yaml
+        op: [created]
+       run: kubectl apply -f /var/local/acm-import/import.yaml
+       envVars:
+        KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
+----
+
+. In the console, label the device `fleet:acm` and click *Approve*, which automatically selects the `fleet-acm` fleet. See xref:../edge_manager/edge_mgr_fleets.adoc#device-fleets[Managing device fleets] for information about managing devices with labels.
