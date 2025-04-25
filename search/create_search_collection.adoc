@@ -1,0 +1,58 @@
+[#create-search-collection]
+= Creating search configurable collection
+
+Define which Kubernetes resources are collected from the cluster by creating a `search-collector-config` config map for each managed cluster where you want to customize the resources that search collects.
+
+*Required access:* Cluster administrator
+
+Place the config map in the same namespace where the search add-on is deployed. The default namespace is `open-cluster-management-agent-addon`.
+
+Complete the following steps:
+
+. Run the following command to create the `search-collector-config` config map: 
+
++
+[source,bash]
+----
+oc apply -f <your-search-collector-config>.yaml
+----
+
+. List the resources in the allow (`data.AllowedResources`) and deny list (`data.DeniedResources`) sections within the config map. Your config map might resemble the following YAML file: 
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: search-collector-config
+ namespace: <namespace where search-collector add-on is deployed>
+data:
+ AllowedResources: |- <1>
+   - apiGroups:
+       - "*"
+     resources: 
+       - services
+       - pods
+   - apiGroups:
+       - admission.k8s.io
+       - authentication.k8s.io
+     resources:
+       - "*"
+ DeniedResources: |- <2>
+   - apiGroups:
+       - "*"
+     resources:
+       - secrets
+   - apiGroups:
+       - admission.k8s.io
+     resources:
+       - policies
+       - iampolicies
+       - certificatepolicies
+----
++
+<1> The previous config map example displays `services` and `pods` to be collected from all `apiGroups`, while allowing all resources to be collected from the `admission.k8s.io` and `authentication.k8s.io` `apiGroups`. 
+<2> The config map example also prevents the central collection of `secrets` from all `apiGroups` while preventing the collection of `policies`, `iampolicies`, and `certificatepolicies` from the `apiGroup` `admission.k8s.io`.
++
+*Note:* If you do not provide a config map, all resources are collected by default. If you only provide `AllowedResources`, all resources not listed in `AllowedResources` are automatically excluded. Resources listed in `AllowedResources` and `DeniedResources` at the same time are also  excluded. 
