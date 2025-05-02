@@ -13,7 +13,7 @@ Use the ACM Documentation dashboard to see an overview of issues and story point
 
 **Note:** Story points are only visible at a glance on the dashboard.
 
-- [Documentation story points dashboard](https://issues.redhat.com/secure/Dashboard.jspa?selectPageId=12380992)
+- [ACM Documentation Dashboard](https://issues.redhat.com/secure/Dashboard.jspa?selectPageId=12380992)
 
 ## General rules
 
