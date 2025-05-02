@@ -24,6 +24,9 @@ children:
     - title: Maintaining scrum board
       permalink: /board_maintenance
     - title: divider
+    - title: Story pointing
+      permalink: /story_pointing
+    - title: divider
     - title: Technical resources
       permalink: /technical_resources
     - title: divider
