@@ -9,7 +9,7 @@ Not all issues are created equal. To help plan our anticipated workloads for eac
 
 ## Dashboard
 
-Use the ACM Documentation dashboard to see an overview of issues and story points. You can use the dashboard to quickly assign story points to multiple issues. You can also assign story points to issues by selecting individual issues on the Kanban board.
+Use the ACM Documentation Dashboard to see an overview of issues and story points. You can use the dashboard to quickly assign story points to multiple issues. You can also assign story points to issues by selecting individual issues on the Kanban board.
 
 **Note:** Story points are only visible at a glance on the dashboard.
 
