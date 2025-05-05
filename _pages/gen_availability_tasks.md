@@ -27,14 +27,14 @@ You must have the following prerequisites to publish live:
 
 ## Tasks to complete early staging
 
-In addition to the release work, the lead or the strategists must follow up on general tasks each release before GA. **Best practice:** Open a story on the Documentation component to track along side the dev stories. Attach issues that can be shared if needed for the following tasks (you can combine similar tasks in one issue):
+In addition to the release work, the lead or the strategist must follow up on general tasks each release before GA. **Best practice:** Open a story on the Documentation component to track along side the dev stories, . Attach issues that can be shared if needed for the following tasks (you can combine similar tasks in one issue):
 
 1. Remove old _What's new_ entries so that the team can start over for the new release.
 2. Remove deprecation and removal items that are older than staged-N minus two (the squads help with this via the cross-squad issue).
 3. Clean the Errata release notes to only have the intro (both MCE and ACM).
 4. Update link versions for OCP. (Currently we use the earliest of N-2, unless the feature is built on a later OCP. See PM for guidance. If this changes, we need to change the note we added about this.)
 5. Update any other versions, such as channel, RHEL, etc.... Get guidance from a tech lead on this.
-6. Change support matrix links.
+6. Change support matrix links in the doc and on the Splash Page.
 7. If something went EOL, ensure the latest doc reflects those changes. See _Deprecating and removing_ for that guidance.
 8. Work with console focal and engineers to ensure links in the console have not changed. You will need to know the deadline for code changes from the UI team.
 
