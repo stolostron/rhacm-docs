@@ -27,7 +27,7 @@ You must have the following prerequisites to publish live:
 
 ## Tasks to complete early staging
 
-In addition to the release work, the lead or the strategist must follow up on general tasks each release before GA. **Best practice:** Open a story on the Documentation component to track along side the dev stories, . Attach issues that can be shared if needed for the following tasks (you can combine similar tasks in one issue):
+In addition to the release work, the lead or the strategist must follow up on general tasks each release before GA. **Best practice:** Open a story on the Documentation component to track along side the dev stories. Add your story as "Related to" the Release Manager's Release Epic. Attach issues to your story that can be shared if needed for the following tasks (you can combine similar tasks in one issue):
 
 1. Remove old _What's new_ entries so that the team can start over for the new release.
 2. Remove deprecation and removal items that are older than staged-N minus two (the squads help with this via the cross-squad issue).
