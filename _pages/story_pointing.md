@@ -27,11 +27,12 @@ Consider the following rubrics when assigning story points to Jira issues:
 
 | **Rubric** | **Description** |
 | ----------- | ----------- |
-| Writing time | How long it takes to solve an issue. |
 | Difficulty | How complex an issue is and how many additional factors you have to consider. | 
 | Research | How much new information you need to seek out and learn to understand or solve the issue. | 
 | Length | How many new files, topics, or individual lines it takes to solve the issue. | 
 | Review | Who and how many people need to review your solution before merging. |
+| Product knowledge | How much product knowledge and planning knowledge is required.|
+| Writing time | How long it takes to write the content. |
 
 &nbsp;
 
@@ -52,8 +53,7 @@ The most basic type of issue usually consisting of fixing typos, links, or inden
 | Research | None. | 
 | Length | A single or a few characters added/changed in one file. A phrase at most. | 
 | Review | None if only fixing typos or links (peer review still recommended). Dev and peer review required for all other cases. |
-
- Little product knowledge is needed. |
+| Product knowledge | Little product knowledge is needed. |
 | Writing time | A few minutes. |
 
 &nbsp;
