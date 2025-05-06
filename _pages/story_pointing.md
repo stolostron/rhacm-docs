@@ -44,7 +44,7 @@ Consider the following rubrics when assigning story points to Jira issues:
 
 ## `1` point
 
-The most basic type of issue usually consisting of fixing typos, links, or indentations. The information provided in the issue is always sufficient to solve the issue quickly, with no additional research or communication. Little product knowledge is needed. A review not typically needed when fixing typos or links, but usually is required when editing code samples, even for simple indentation fixes.
+The most basic type of issue usually consisting of fixing typos, links, or indentations. The information provided in the issue is always sufficient to solve the issue quickly, with no additional research or communication. A review not typically needed when fixing typos or links, but usually is required when editing code samples, even for simple indentation fixes.
 
 | **Rubric** | **`1` point description** |
 | ----------- | ----------- |
@@ -52,6 +52,8 @@ The most basic type of issue usually consisting of fixing typos, links, or inden
 | Research | None. | 
 | Length | A single or a few characters added/changed in one file. A phrase at most. | 
 | Review | None if only fixing typos or links (peer review still recommended). Dev and peer review required for all other cases. |
+
+ Little product knowledge is needed. |
 | Writing time | A few minutes. |
 
 &nbsp;
@@ -66,6 +68,7 @@ A simple issue that requires little additional work to understand the diff. Thes
 | Research | Minimal (in the form of verification) to none. | 
 | Length | One or two paragraphs in one file. | 
 | Review | Dev and peer review. |
+| Product knowledge | Little product knowledge is needed. |
 | Writing time | About an hour. |
 
 &nbsp;
@@ -80,6 +83,7 @@ A relatively simple issue that requires minimal additional research and editing.
 | Research | You might need to reach out for verification or have short discussions about the implementation. | 
 | Length | One or a few paragraphs in one or more files. | 
 | Review | Dev and peer review. |
+| Product knowledge | More product awareness is needed than previous points. |
 | Writing time | Up to a day when additional communication is needed. |
 
 &nbsp;
@@ -94,6 +98,7 @@ A relatively simple issue that requires minimal additional research and editing.
 | Research | You might need to research a topic and learn basic new concepts.  | 
 | Length | Varies, but often requires several lines across multiple files. | 
 | Review | Dev and peer review. |
+| Product knowledge | More product and ACM team awareness is expected for this issue. |
 | Writing time | A day or more, depending on how much communication and research is needed. |
 
 &nbsp;
@@ -108,6 +113,7 @@ A somewhat difficult issue that requires you to research topics, reach out to SM
 | Research | Reaching out to SMEs, learning new technical and product concepts, and becoming familiar with the architecture of the doc section affected. | 
 | Length | Varies, but often requires several topics across multiple files. | 
 | Review | Dev, QE, and peer review. |
+| Product knowledge | Product awareness and knowledge is required. |
 | Writing time | A day or more, depending on how much communication and research is needed. |
 
 &nbsp;
@@ -122,13 +128,14 @@ A difficult issue similar to 5 point issues, but with even more investment requi
 | Research | Reaching out to SMEs, learning new technical and product concepts, and becoming familiar with the architecture of the doc section affected. Meetings might be helpful. | 
 | Length | Varies, but often requires several topics across multiple files. | 
 | Review | Dev, QE, and peer review. |
+| Product knowledge | Product awareness and knowledge is required. |
 | Writing time | Multiple days, depending on how much communication and research is needed. |
 
 &nbsp;
 
 ## `7` points
 
-The first level of issue difficulty that requires strong awareness of doc architecture and planning. The issue might provide a general request with some details or limited drafts, but doesn't provide clear directions about how to accomplish the goal. It is up to you to research, plan, and write a solution to solve the issue, all while considering architecture, the user story, style, and formatting. You need to meet or consult with multiple SMEs and, potentially, team leaders.
+The first level of issue difficulty that requires more product/component knowledge, strong awareness of doc architecture, and release planning. The issue might provide a general request with some details or limited drafts, but doesn't provide clear directions about how to accomplish the goal. It is up to you to research, plan, and write a solution to solve the issue, all while considering architecture, the user story, style, and formatting. You need to meet or consult with multiple SMEs and, potentially, team leaders.
 
 | **Rubric** | **`7` points description** |
 | ----------- | ----------- |
@@ -136,6 +143,7 @@ The first level of issue difficulty that requires strong awareness of doc archit
 | Research | Intensive research required to understand the issue and topic. You also need to gather complex information through various channels and verify it. Meetings with SMEs are likely necessary. | 
 | Length | Varies, but can require some input in up to a dozen files. | 
 | Review | Dev, QE, and peer review. PM review is encouraged. |
+| Product knowledge | Product awareness, knowledge, and release planning is required. |
 | Writing time | Can be done within a train. |
 
 &nbsp;
@@ -150,6 +158,7 @@ A complex issue similar to 7 point issues, but with even more investment require
 | Research | Intensive research required to understand the issue and topic. You also need to gather complex information through various channels and verify it. Meetings with SMEs and team leaders are necessary. | 
 | Length | Varies, but can require some input in up to a dozen files. | 
 | Review | Dev, QE, and peer review. PM review is encouraged. |
+| Product knowledge | Product awareness, knowledge, and release planning is required. |
 | Writing time | Might require more than one train. |
 
 &nbsp;
@@ -164,6 +173,7 @@ A highly complex but rare issue characterized by the lack of a clear, stable dir
 | Research | Requires lengthy research to understand the content and explain it. Often requires putting together information from multiple sources. | 
 | Length | Varies, but can require major input in over a dozen files. | 
 | Review | Dev, QE, PM, and peer review. |
+| Product knowledge | Product awareness, knowledge, and release planning is required. |
 | Writing time | One release or less. |
 
 &nbsp;
@@ -178,6 +188,7 @@ An extremely complex issue that requires massive work on all fronts and input fr
 | Research | Extensive research on all fronts, including style, technical concepts, and customer needs. Information comes from a multitude of sources. Recurring meetings with product managers, SMEs, developers, and team leaders are required. | 
 | Length | New book or multiple books, with in put in dozens or even hundreds of files. | 
 | Review | Multiple dev, QE, PM, and peer reviews. |
+| Product knowledge | Product awareness, knowledge, and release planning is required. |
 | Writing time | Might require one or multiple releases. |
 
 &nbsp;
