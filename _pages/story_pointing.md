@@ -18,7 +18,7 @@ Use the ACM Documentation Dashboard to see an overview of issues and story point
 ## General rules
 
 - The range of points consists of integers from `1` to `10`, with `1` being "I can knock this out in 5 minutes" and `10` being "I'm sending UNSUBSQUIRREL as reply all to memo-list". Do not use fractions or integers above 10.
-- Estimate points when triaging issues, but feel free to change them any time during your work process, including after you have already closed the issue.
+- Estimate points when triaging issues, but feel free to change them any time during your work process, including after you have already closed the issue. Add a comment when to explain why the points changed.
 - With all issues, including `1` point issues, it's important to take a step back and consider the purpose and necessity of the change.
 
 ## Rubrics
@@ -27,7 +27,7 @@ Consider the following rubrics when assigning story points to Jira issues:
 
 | **Rubric** | **Description** |
 | ----------- | ----------- |
-| Time | How long it takes to solve an issue. |
+| Writing time | How long it takes to solve an issue. |
 | Difficulty | How complex an issue is and how many additional factors you have to consider. | 
 | Research | How much new information you need to seek out and learn to understand or solve the issue. | 
 | Length | How many new files, topics, or individual lines it takes to solve the issue. | 
@@ -37,7 +37,7 @@ Consider the following rubrics when assigning story points to Jira issues:
 
 **Important:**
 
-- The rubrics are only guidelines. As you read the following section explaining each point selection in detail, remember that individual rubrics can vary drastically. For example, you may find some rubrics matching that of a 2 point issue while others match a 5 point issue. It's up to your subjective judgement and prior experience to select an appropriate score in such cases.
+- Rubrics are guidelines and can vary based on your experience, delays in builds, communication, unknown complexities, and other things out of our control. It's important to use your judgement, but to be as objective and honest as possible when choosing or changing your story.
 - New features always require dev, QE, and a peer review, regardless of their story points. If QE review is not possible, you can substitute it with a second dev review.
 
 &nbsp;
@@ -48,11 +48,11 @@ The most basic type of issue usually consisting of fixing typos, links, or inden
 
 | **Rubric** | **`1` point description** |
 | ----------- | ----------- |
-| Time | A few minutes. |
 | Difficulty | Very easy. Diff is clear without additional work. | 
 | Research | None. | 
 | Length | A single or a few characters added/changed in one file. A phrase at most. | 
 | Review | None if only fixing typos or links (peer review still recommended). Dev and peer review required for all other cases. |
+| Writing time | A few minutes. |
 
 &nbsp;
 
@@ -62,11 +62,11 @@ A simple issue that requires little additional work to understand the diff. Thes
 
 | **Rubric** | **`2` points description** |
 | ----------- | ----------- |
-| Time | About an hour. |
 | Difficulty | Easy. Might require minimal style and formatting considerations. | 
 | Research | Minimal (in the form of verification) to none. | 
 | Length | One or two paragraphs in one file. | 
 | Review | Dev and peer review. |
+| Writing time | About an hour. |
 
 &nbsp;
 
@@ -76,11 +76,11 @@ A relatively simple issue that requires minimal additional research and editing.
 
 | **Rubric** | **`3` points description** |
 | ----------- | ----------- |
-| Time | Up to a day when additional communication is needed. |
 | Difficulty | Some rewriting and editing is required. | 
 | Research | You might need to reach out for verification or have short discussions about the implementation. | 
 | Length | One or a few paragraphs in one or more files. | 
 | Review | Dev and peer review. |
+| Writing time | Up to a day when additional communication is needed. |
 
 &nbsp;
 
@@ -90,11 +90,11 @@ A relatively simple issue that requires minimal additional research and editing.
 
 | **Rubric** | **`4` points description** |
 | ----------- | ----------- |
-| Time | A day or more, depending on how much communication and research is needed. |
 | Difficulty | Includes drafting new content or adapting drafts that require verification, discussion, and review from SMEs. | 
 | Research | You might need to research a topic and learn basic new concepts.  | 
 | Length | Varies, but often requires several lines across multiple files. | 
 | Review | Dev and peer review. |
+| Writing time | A day or more, depending on how much communication and research is needed. |
 
 &nbsp;
 
@@ -104,11 +104,11 @@ A somewhat difficult issue that requires you to research topics, reach out to SM
 
 | **Rubric** | **`5` points description** |
 | ----------- | ----------- |
-| Time | A day or more, depending on how much communication and research is needed. |
 | Difficulty | You need to author new topics and content based on multiple sources. Includes research and communication with multiple SMEs. Consider style, formatting, user needs, and, to some extent, the architecture of the doc. | 
 | Research | Reaching out to SMEs, learning new technical and product concepts, and becoming familiar with the architecture of the doc section affected. | 
 | Length | Varies, but often requires several topics across multiple files. | 
 | Review | Dev, QE, and peer review. |
+| Writing time | A day or more, depending on how much communication and research is needed. |
 
 &nbsp;
 
@@ -118,11 +118,11 @@ A difficult issue similar to 5 point issues, but with even more investment requi
 
 | **Rubric** | **`6` points description** |
 | ----------- | ----------- |
-| Time | Multiple days, depending on how much communication and research is needed. |
 | Difficulty | You need to author new topics and content based on multiple sources. Includes research, communication with multiple SMEs, and, sometimes, meetings for discussion. You need to consider the doc architecture, style, formatting, and user needs. | 
 | Research | Reaching out to SMEs, learning new technical and product concepts, and becoming familiar with the architecture of the doc section affected. Meetings might be helpful. | 
 | Length | Varies, but often requires several topics across multiple files. | 
 | Review | Dev, QE, and peer review. |
+| Writing time | Multiple days, depending on how much communication and research is needed. |
 
 &nbsp;
 
@@ -132,11 +132,11 @@ The first level of issue difficulty that requires strong awareness of doc archit
 
 | **Rubric** | **`7` points description** |
 | ----------- | ----------- |
-| Time | Can be done within a train. |
 | Difficulty | Complex authoring of new content based on limited available information. You need to have strong awareness of the doc architecture to make the right decisions. | 
 | Research | Intensive research required to understand the issue and topic. You also need to gather complex information through various channels and verify it. Meetings with SMEs are likely necessary. | 
 | Length | Varies, but can require some input in up to a dozen files. | 
 | Review | Dev, QE, and peer review. PM review is encouraged. |
+| Writing time | Can be done within a train. |
 
 &nbsp;
 
@@ -146,11 +146,11 @@ A complex issue similar to 7 point issues, but with even more investment require
 
 | **Rubric** | **`8` points description** |
 | ----------- | ----------- |
-| Time | Might require more than one train. |
 | Difficulty | Complex authoring of new content based on limited available information. You need to have strong awareness of the doc architecture to make the right decisions. | 
 | Research | Intensive research required to understand the issue and topic. You also need to gather complex information through various channels and verify it. Meetings with SMEs and team leaders are necessary. | 
 | Length | Varies, but can require some input in up to a dozen files. | 
 | Review | Dev, QE, and peer review. PM review is encouraged. |
+| Writing time | Might require more than one train. |
 
 &nbsp;
 
@@ -160,11 +160,11 @@ A highly complex but rare issue characterized by the lack of a clear, stable dir
 
 | **Rubric** | **`9` points description** |
 | ----------- | ----------- |
-| Time | One release or less. |
 | Difficulty | Complex authoring of new content that is still being decided. Expect additional effort when dealing with frequent changes. You need to have strong awareness of the doc architecture to make the right decisions. | 
 | Research | Requires lengthy research to understand the content and explain it. Often requires putting together information from multiple sources. | 
 | Length | Varies, but can require major input in over a dozen files. | 
 | Review | Dev, QE, PM, and peer review. |
+| Writing time | One release or less. |
 
 &nbsp;
 
@@ -174,11 +174,11 @@ An extremely complex issue that requires massive work on all fronts and input fr
 
 | **Rubric** | **`10` points description** |
 | ----------- | ----------- |
-| Time | Might require one or multiple releases. |
 | Difficulty | Complex authoring, editing, and decision-making on content that might not exist yet. You need mastery of the doc architecture to make the right decisions. | 
 | Research | Extensive research on all fronts, including style, technical concepts, and customer needs. Information comes from a multitude of sources. Recurring meetings with product managers, SMEs, developers, and team leaders are required. | 
 | Length | New book or multiple books, with in put in dozens or even hundreds of files. | 
 | Review | Multiple dev, QE, PM, and peer reviews. |
+| Writing time | Might require one or multiple releases. |
 
 &nbsp;
 
