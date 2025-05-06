@@ -44,7 +44,7 @@ Consider the following rubrics when assigning story points to Jira issues:
 
 ## `1` point
 
-The most basic type of issue usually consisting of fixing typos, links, or indentations. The information provided in the issue is always sufficient to solve the issue quickly, with no additional research or communication. A review not typically needed when fixing typos or links, but usually is required when editing code samples, even for simple indentation fixes.
+The most basic type of issue usually consisting of fixing typos, links, or indentations. The information provided in the issue is always sufficient to solve the issue quickly, with no additional research or communication. Little product knowledge is needed. A review not typically needed when fixing typos or links, but usually is required when editing code samples, even for simple indentation fixes.
 
 | **Rubric** | **`1` point description** |
 | ----------- | ----------- |
