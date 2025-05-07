@@ -1,0 +1,58 @@
+[#mirror-images-disconnected]
+= Mirroring images for disconnected environments
+
+You can deploy a cluster with the {sco} operator by using the {ibio} as your underlying operator. If you deploy your clusters with the Image Based Install Operator in a disconnected environment, you must supply your mirror images as extra manifests in the `ClusterInstance` custom resource.
+
+*Required access:* Cluster administrator
+
+Complete the following steps to mirror images for disconnected environments:
+
+. Create a YAML file named `idms-configmap.yaml` for your `ImageDigestMirrorSet` object that contains your mirror registry locations:
+
++
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: "idms-configmap"
+  namespace: "example-sno"
+data:
+  99-example-idms.yaml: |
+    apiVersion: config.openshift.io/v1
+    kind: ImageDigestMirrorSet
+    metadata:
+      name: example-idms
+    spec:
+      imageDigestMirrors:
+      - mirrors:
+        - mirror.registry.example.com/image-repo/image
+        source: registry.example.com/image-repo/image
+----
+
+**Important:** Define the `ConfigMap` resource that contains the extra manifest in the same namespace as the `ClusterInstance` resource.
+
+. Create the resource by running the following command on the hub cluster:
+
++
+[source,terminal]
+----
+oc apply -f idms-configmap.yaml
+----
+
+. Reference your `ImageDigestMirrorSet` object in the `ClusterInstance` custom resource:
+
++
+[source,yaml]
+----
+apiVersion: siteconfig.open-cluster-management.io/v1alpha1
+kind: ClusterInstance
+metadata:
+  name: "example-sno"
+  namespace: "example-sno"
+spec:
+  ...
+  extraManifestsRefs:
+    - name: idms-configmap
+...
+----
