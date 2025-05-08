@@ -1,0 +1,279 @@
+[#config-mirror-reg-cluster]
+= Configuring mirror registries for each cluster
+
+Use the mirror registry feature to configure and manage custom registries for each cluster by referencing a dedicated mirror registry configuration object from each `AgentClusterInstall` and `InfraEnv`.
+
+You might configure mirror registries for each cluster in multicluster environments where you need isolated registry configurations.
+
+- <<cim-mirror-reg-prereqs,Prerequisites>>
+- <<init-mirror-reg,Initializing the Mirror Registry>>
+- <<mirror-required-image,Mirroring required images>>
+- <<apply-crd-update-config,Applying CRDs with updated configurations>>
+- <<add-res-mirror-reg,Additional resources>>
+
+[#cim-mirror-reg-prereqs]
+== Prerequisites
+
+- You must enable the {cim} service. See xref:../assisted_installer/ai_enable_cim.adoc#enable-cim[Enabling the {cim} service] for more information.
+- The `assisted-service` must run in `KubeAPI` mode.
+
+[#init-mirror-reg]
+== Initializing the Mirror Registry
+
+Complete the following stepos to set up your mirror registry. Ensure that the image versions in the mirror registry match the versions you specified in the cluster configuration:
+
+. Define key environment variables by running the following commands. Replace value where needed:
+
++
+[source,bash]
+----
+export REGISTRY_IP="<your-registry-ip>"
+export REGISTRY_PORT=5000
+export REGISTRY_PATH="/root/.docker/registry"
+export TLS_PATH="${REGISTRY_PATH}/tls"
+export OCP_TAG="4.18.0-rc.4-x86_64"
+export INSECURE=false
+export REGISTRY_NAME="registry_<cluster-name>"
+----
+
+Defining the variables allows you to change the configurations without modifying the script.
+
+. Set up your Transport Layer Security (TLS). If `INSECURE` is set to `false`, generate TLS certificates by running the following commands:
+
+.. Create a directort for your TLS path by running the following command:
+
++
+[source,bash]
+----
+mkdir -p "$TLS_PATH"
+----
+
+.. Generate new keys by running the following command:
+
++
+[source,bash]
+----
+openssl req -x509 -nodes -days 365 -newkey rsa:4096 \
+  -keyout "$TLS_PATH/key.pem" \
+  -out "$TLS_PATH/cert.pem" \
+  -subj "/CN=$REGISTRY_IP" \
+  -addext "subjectAltName=IP:$REGISTRY_IP"
+----
+
+.. Copy the certificates by running the following command:
+
++
+[source,bash]
+----
+cp "$TLS_PATH/cert.pem" /etc/pki/ca-trust/source/anchors/registry.crt
+----
+
+.. Update your CA trust list by running the following command:
+
++
+[source,bash]
+----
+update-ca-trust
+----
+
+. If you are using secure mode for TLS, create the following registry configuration `yaml` file:
+
++
+[source,yaml]
+----
+version: 0.1
+log:
+  accesslog:
+    disabled: true
+  level: debug
+  formatter: text
+
+storage:
+  filesystem:
+    rootdirectory: /var/lib/registry
+
+http:
+  addr: :${REGISTRY_PORT}
+  net: tcp
+  relativeurls: false
+  draintimeout: 60s
+  tls:
+    certificate: /certs/cert.pem
+    key: /certs/key.pem
+----
+
+. If you are using insecure mode for TLS, create the following registry configuration `yaml` file:
+
++
+[source,yaml]
+----
+version: 0.1
+log:
+  accesslog:
+    disabled: true
+  level: debug
+  formatter: text
+
+storage:
+  filesystem:
+    rootdirectory: /var/lib/registry
+
+http:
+  addr: :${REGISTRY_PORT}
+  net: tcp
+  relativeurls: false
+  draintimeout: 60s
+----
+
+. Stop any existing registry containers by running the following commands:
+
++
+[source,bash]
+----
+podman kill $REGISTRY_NAME || true
+podman rm $REGISTRY_NAME || true
+----
+
+. Start a new registry container by running the following command:
+
++
+[source,bash]
+----
+podman run -d --privileged \
+  --network host \
+  -v "$REGISTRY_PATH/config.yml:/etc/docker/registry/config.yml" \
+  $( [[ "$INSECURE" != "true" ]] && echo "-v $TLS_PATH:/certs" ) \
+  --restart=unless-stopped \
+  --name $REGISTRY_NAME \
+  registry:2
+----
+
+. If you are using secure mode, verify that the registry is running by running the following command:
+
++
+[source,bash]
+----
+curl -k https://$REGISTRY_IP:$REGISTRY_PORT/v2/
+----
+
+. If you are using insecure mode, verify that the registry is running by running the following command:
+
++
+[source,bash]
+----
+curl http://$REGISTRY_IP:$REGISTRY_PORT/v2/
+----
+
+If the registry is working correctly, an empty JSON response appears.
+
+[#mirror-required-image]
+== Mirroring required images
+
+Ensure that the required images are mirrored to the registry. Complete the following steps:
+
+. Mirror the {ocp} release images by running the following command.
+
++
+[source,bash]
+----
+oc adm release mirror \
+  -a pull_secret.json \
+  --from=quay.io/openshift-release-dev/ocp-release:$OCP_TAG \
+  --to=$REGISTRY_IP:$REGISTRY_PORT/openshift-release-dev/ocp-release \
+  --to-release-image=$REGISTRY_IP:$REGISTRY_PORT/openshift-release-dev/ocp-release:$OCP_TAG \
+  --insecure=$INSECURE
+----
++
+*Note:* Ensure that the {ocp-short} version in the mirror registry matches the version in the image set configuration.
+
+. Miror the {ai} images by running the following commands:
+
++
+[source,bash]
+----
+oc image mirror \
+  -a pull_secret.json \
+  quay.io/edge-infrastructure/assisted-installer:latest \
+  $REGISTRY_IP:$REGISTRY_PORT/edge-infrastructure/assisted-installer:latest \
+  --insecure=$INSECURE
+
+oc image mirror \
+  -a pull_secret.json \
+  quay.io/edge-infrastructure/assisted-installer-controller:latest \
+  $REGISTRY_IP:$REGISTRY_PORT/edge-infrastructure/assisted-installer-controller:latest \
+  --insecure=$INSECURE
+
+oc image mirror \
+  -a pull_secret.json \
+  quay.io/edge-infrastructure/assisted-installer-agent:latest \
+  $REGISTRY_IP:$REGISTRY_PORT/edge-infrastructure/assisted-installer-agent:latest \
+  --insecure=$INSECURE
+----
+
+[#apply-crd-update-config]
+== Applying custom resource definitions with updated configurations
+
+After setting up the mirror registry, apply the required custom resource definitions to configure your cluster to use the mirrored images. Complete the following steps:
+
+. Apply the mirror registry `ConfigMap`. Create a file named `mirror_registry.yaml` with the following content. Replace values where needed:
+
+[source,bash]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mirror-registry-config
+  namespace: <your-namespace>
+data:
+  registries.conf: |
+    [[registry]]
+      prefix = ""
+      location = "quay.io/openshift-release-dev/ocp-release"
+      [[registry.mirror]]
+        location = "$REGISTRY_IP:$REGISTRY_PORT/openshift-release-dev/ocp-release"
+        pull-from-mirror = "digest-only"
+
+    [[registry]]
+      prefix = ""
+      location = "quay.io/edge-infrastructure"
+      [[registry.mirror]]
+        location = "$REGISTRY_IP:$REGISTRY_PORT/edge-infrastructure"
+  ca-bundle.crt: |
+    -----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----
+----
+
+. Apply the `ConfigMap` by running the following command:
+
+[source,bash]
+----
+oc apply -f mirror_registry.yaml
+----
+
+. Ensure that your `AgentClusterInstall` and `InfraEnv` custom resource definitions reference the mirror registry configuration. See the following example for both `aci.yaml` and `infraenv.yaml`:
+
++
+[source,bash]
+----
+...
+spec:
+  mirrorRegistryRef:
+    name: mirror-registry-config
+    namespace: <your-namespace>
+    ...
+----
+
+. Update and apply the custom resource definitions by running the following commands:
+
++
+[source,bash]
+----
+oc apply -f aci.yaml
+oc apply -f infraenv.yaml
+----
+
+[#add-res-mirror-reg]
+== Additional resources
+
+- See link:https://docs.openshift.com/container-platform/4.16/installing/disconnected_install/installing-mirroring-installation-images.html[Mirroring images for a disconnected installation] in the {ocp-short} documentation to learn more about mirroring images.
