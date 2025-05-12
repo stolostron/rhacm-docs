@@ -1,8 +1,7 @@
 [#enable-cim]
 = Enabling the {cim} service
 
-The {cim} service is provided with the {mce-short} and deploys {ocp-short} clusters. The {cim} service is deployed automatically when you enable the `MultiClusterHub` Operator on the hub cluster, but you have to enable the service manually.
-//This doc is in the MCE doc, which is supposed to be stand-alone for an OCP user. We can discuss MCH here, but we need to say: The {cim} service is deployed automatically if you installed {acm-short} and enabled the `MultiClusterHub` Operator on the hub cluster, but you have to enable the service manually in this case. (Do we tell them how?)
+The {cim} service is provided with the {mce-short} and deploys {ocp-short} clusters. The {cim} service is deployed automatically when you enable the MultiClusterHub Operator on the hub cluster, but you have to enable the service manually.
 
 See the following sections:
 
@@ -18,8 +17,7 @@ See the following sections:
 See the following prerequisites before enabling the {cim} service:
 
 - You must have a deployed hub cluster on a supported {ocp-short} version and a supported {acm} version.
-- You need internet access for your hub cluster.
-- If you are working in a disconnected environment, you need a connection to an internal or mirror registry that has a connection to the internet to retrieve the required images for creating the environment.
+- You need internet access for your hub cluster (connected), or a connection to an internal or mirror registry that has a connection to the internet (disconnected) to retrieve the required images for creating the environment.
 - You must open the required ports for bare metal provisioning. See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/deploying_installer-provisioned_clusters_on_bare_metal/ipi-install-prerequisites#network-requirements-ensuring-required-ports-are-open_ipi-install-prerequisites[Ensuring required ports are open] in the {ocp-short} documentation.
 - You need a bare metal host custom resource definition.
 - You need an {ocp-short} link:https://console.redhat.com/openshift/install/pull-secret[pull secret]. See _Using image pull secrets_ for more information. 
@@ -69,25 +67,22 @@ You need a `Provisioning` resource before enabling the {cim} service.
 oc get provisioning
 ----
 +
-- If you already have a `Provisioning` resource, modify the `Provisioning` resource.
-- If you do not have a `Provisioning` resource, you receive a `No resources found` error. Continue to create the `Provisioning` resource.
+- If you already have a `Provisioning` resource, continue by _Modifying the `Provisioning` resource_.
+- If you do not have a `Provisioning` resource, you receive a `No resources found` error. Continue by  _Creating the `Provisioning` resource_.
 
-. Modify the `Provisioning` resource.
+[#enable-cim-mod-provision]
+=== Modifying the _Provisioning_ resource
 
-+
 If you already have a `Provisioning` resource, you must modify the resource if your hub cluster is installed on one of the following platforms:
 
-+
 - Bare metal
 - Red Hat OpenStack Platform
 - VMware vSphere
 - User-provisioned infrastructure (UPI) method and the platform is `None`
 
-+
 If your hub cluster is installed on a different platform, continue at _Enabling {cim} in disconnected environments_ or _Enabling {cim} in connected environments_.
 
-+
-Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces by running the following command:
+. Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces by running the following command:
 
 +
 [source,bash]
@@ -95,9 +90,12 @@ Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all
 oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
 ----
 
-. Create the _Provisioning_ resource if you do not have a `Provisioning` resource. 
+[#enable-cim-create-provision]
+=== Creating the _Provisioning_ resource
 
-.. Create the following `Provisioning` resource YAML file:
+If you do not have a `Provisioning` resource, complete the following steps:
+
+. Create the `Provisioning` resource by adding the following YAML content:
 
 +
 [source,yaml]
@@ -111,7 +109,7 @@ spec:
   watchAllNamespaces: true
 ----
 
-.. Apply the content by running the following command:
+. Apply the content by running the following command:
 
 +
 [source,bash]
@@ -241,7 +239,7 @@ spec:
 +
 <2> Include the optional `unauthenticated_registry` parameter if you are using a mirror registry that does not require authentication. Entries on this list are not validated or required to have an entry in the pull secret. 
 +
-<3> Replace `img_volume_size` with the size of the volume for the `imageStorage` field, for example `10Gi` for each operating system image. The minimum value is `10Gi`, but the value for best practice is at least `50Gi`, especially if you are opting for the default set of images instead of defining a limited set using `osImages`. This value specifies how much storage is allocated for the images of the clusters. You need to allow at least 1 GB of image storage for each instance of Red Hat Enterprise Linux CoreOS that is running. You might need to use a higher value if there are many clusters and instances of Red Hat Enterprise Linux CoreOS.
+<3> Replace `img_volume_size` with the size of the volume for the `imageStorage` field, for example `10Gi` per operating system image. The minimum value is `10Gi`, but the recommended value is at least `50Gi`. This value specifies how much storage is allocated for the images of the clusters. You need to allow 1 GB of image storage for each instance of Red Hat Enterprise Linux CoreOS that is running. You might need to use a higher value if there are many clusters and instances of Red Hat Enterprise Linux CoreOS.
 +
 <4> Replace `ocp_version` with the {ocp-short} version to install, for example, `4.16`.
 +
@@ -288,16 +286,13 @@ spec:
         storage: <img_volume_size> <3>
 ----
 <1> Replace `db_volume_size` with the volume size for the `databaseStorage` field, for example `10Gi`. This value specifies how much storage is allocated for storing files such as database tables and database views for the clusters. The minimum value that is required is `1Gi`. You might need to use a higher value if there are many clusters.
-<2> Replace `fs_volume_size` with the size of the volume for the `filesystemStorage` field, for example `200M` for each cluster and `2-3Gi` for each supported {ocp-short} version. The minimum value that is required is `1Gi`, but the recommended value is at least `100Gi`. This value specifies how much storage is allocated for storing logs, manifests, and `kubeconfig` files for the clusters. You might need to use a higher value if there are many clusters. 
-<3> Replace `img_volume_size` with the size of the volume for the `imageStorage` field, for example `10Gi` for each operating system image. The minimum value is `10Gi`, but the recommended value is at least `50Gi`, especially in case you are opting for the default set of images instead of defining a limited set using `osImages`. This value specifies how much storage is allocated for the images of the clusters. You need to allow at least 1 GB of image storage for each instance of Red Hat Enterprise Linux CoreOS that is running. You might need to use a higher value if there are many clusters and instances of Red Hat Enterprise Linux CoreOS.
-
-See _Enabling {cim} in disconnected environments_ for details about how to define custom image set in `osImages`.
+<2> Replace `fs_volume_size` with the size of the volume for the `filesystemStorage` field, for example `200M` per cluster and `2-3Gi` per supported {ocp-short} version. The minimum value that is required is `1Gi`, but the recommended value is at least `100Gi`. This value specifies how much storage is allocated for storing logs, manifests, and `kubeconfig` files for the clusters. You might need to use a higher value if there are many clusters. 
+<3> Replace `img_volume_size` with the size of the volume for the `imageStorage` field, for example `10Gi` per operating system image. The minimum value is `10Gi`, but the recommended value is at least `50Gi`. This value specifies how much storage is allocated for the images of the clusters. You need to allow 1 GB of image storage for each instance of Red Hat Enterprise Linux CoreOS that is running. You might need to use a higher value if there are many clusters and instances of Red Hat Enterprise Linux CoreOS.
 
 Your {cim} service is configured. You can verify that it is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. 
 
 [#fips-install-cim]
 == Installing a FIPS-enabled cluster by using the {ai}
-//THis should be a standalone topic and we need to remove previous OCP versions from this
 
 When you install a {ocp-short} cluster that is version 4.15 and earlier and is in FIPS mode, you must specify that the installers run Red Hat Enterprise Linux (RHEL) version 8 in the `AgentServiceConfig` resource. When you install a {ocp-short} clusterthat is version 4.16 and later and is in FIPS mode, do not specify any RHEL version for the installers.
 
