@@ -1,0 +1,138 @@
+[#prep-for-install]
+= Preparing for image-based installation for {sno} clusters
+
+To prepare for an image-based installation for {sno} clusters, you must complete the following tasks:
+
+*Required access:* Cluster administrator
+* Create a seed image by using the {lcao}.
+* Verify that all software components meet the required versions. For further information, see "Software prerequisites for an image-based installation and deployment".
+
+== Installing the {lcao}
+
+Use the {lcao} to generate a seed image from a seed cluster. You can install the {lcao} using the {oc-first} or the web console. 
+
+== Installing by using the {ocp-short} command-line interface to install the {lcao}:
+
+. Create a `Namespace` object YAML file for the {lcao}:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-lifecycle-agent
+  annotations:
+    workload.openshift.io/allowed: management
+----
+
+. Create the `Namespace` CR by running the following command:
++
+[source,terminal]
+----
+$ oc create -f <namespace_filename>.yaml
+----
+
+. Create an `OperatorGroup` object YAML file for the {lcao}:
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: openshift-lifecycle-agent
+  namespace: openshift-lifecycle-agent
+spec:
+  targetNamespaces:
+  - openshift-lifecycle-agent
+----
+
+. Create the `OperatorGroup` CR by running the following command:
++
+[source,terminal]
+----
+$ oc create -f <operatorgroup_filename>.yaml
+----
+
+. Create a `Subscription` CR for the {lcao}:
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-lifecycle-agent-subscription
+  namespace: openshift-lifecycle-agent
+spec:
+  channel: "stable"
+  name: lifecycle-agent
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+----
+
+. Create the `Subscription` CR by running the following command:
++
+[source,terminal]
+----
+$ oc create -f <subscription_filename>.yaml
+----
+
+. To verify that the installation succeeded, inspect the CSV resource by running the following command:
++
+[source,terminal]
+----
+$ oc get csv -n openshift-lifecycle-agent
+----
++
+.Example output
+----
+NAME                              DISPLAY                     VERSION               REPLACES                           PHASE
+lifecycle-agent.v{product-version}.0           Openshift Lifecycle Agent   {product-version}.0                Succeeded
+----
+
+. Verify that the {lcao} is up and running by running the following command:
++
+[source,terminal]
+----
+$ oc get deploy -n openshift-lifecycle-agent
+----
+
++
+.Example output
+[source,terminal]
+----
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+lifecycle-agent-controller-manager   1/1     1            1           14s
+----
+
+== Installing the {lcao} by using the web console
+
+You can use the {product-title} web console to install the {lcao}.
+
+.Prerequisites
+
+* You have logged in as a user with `cluster-admin` privileges.
+
+.Procedure
+
+. In the {product-title} web console, navigate to *Operators* -> *OperatorHub*.
+. Search for the *{lcao}* from the list of available Operators, and then click *Install*.
+. On the *Install Operator* page, under *A specific namespace on the cluster* select *openshift-lifecycle-agent*.
+. Click *Install*.
+
+.Verification
+
+. To confirm that the installation is successful:
+
+.. Click *Operators* -> *Installed Operators*.
+.. Ensure that the {lcao} is listed in the *openshift-lifecycle-agent* project with a *Status* of *InstallSucceeded*.
++
+[NOTE]
+====
+During installation an Operator might display a *Failed* status. If the installation later succeeds with an *InstallSucceeded* message, you can ignore the *Failed* message.
+====
+
+If the Operator is not installed successfully:
+
+. Click *Operators* -> *Installed Operators*, and inspect the *Operator Subscriptions* and *Install Plans* tabs for any failure or errors under *Status*.
+. Click *Workloads* -> *Pods*, and check the logs for pods in the *openshift-lifecycle-agent* project.
+
