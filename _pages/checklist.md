@@ -17,7 +17,7 @@ Before you submit for peer review, go through at least one tech review. You can 
    - You can intuitively find the file named in the repo based on the title of the file.
    - For example, the file is named `upgrade_cluster_disconnected` and the title of the file is `Upgrading your cluster in a disconnected environment`.
    - Headers are parallel with each other and named to fit the content.
-- [ ] Are file names, headers, anchors, and titles concise, and unique for easier URL building? (You can eliminate article like "the" from the file name, for example)
+- [ ] Are file names, headers, anchors, and titles concise, and unique for easier URL building? (You can eliminate articles like "the" from the file name, for example.)
 - [ ] For bugs, Errata release notes, etc... is the diff clearly addressing the customer concern, bug fix, or code change?
 - [ ] Does the file have a meaningful short description that tells you why the user wants to use the feature and what the feature is about?
 - [ ] Are prerequisites separate, clear, and imperative?
