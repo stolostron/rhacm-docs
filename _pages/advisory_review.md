@@ -87,7 +87,7 @@ Before you review, verify that there is a doc issue that has a link to the advis
    kinit <your_usename>@IPA.REDHAT.COM
    ```
 
-   **Note:** If you are using a custom browser install, you need to enable kerberos manually before you can run `kinit`. See: [Browser settings for GSSAPI](https://source.redhat.com/departments/it/identityaccessmanagement/it_iam_kerberos/browser_settings_for_gssapi_how_to_enable_kerberoskrb5_in_your_browser)
+   **Note:** If you are using a custom browser install, you need to enable kerberos manually before you can run `kinit`. See: [Browser settings for GSSAPI](https://url.corp.redhat.com/33c669f)
 
 3. Open the advisory in Google chrome browser or Firefox browser.
 
