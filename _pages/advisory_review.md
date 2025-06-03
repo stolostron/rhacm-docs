@@ -87,6 +87,8 @@ Before you review, verify that there is a doc issue that has a link to the advis
    kinit <your_usename>@IPA.REDHAT.COM
    ```
 
+   **Note:** If you are using a custom browser install, you need to enable kerberos manually before you can run `kinit`. See: [Browser settings for GSSAPI](https://url.corp.redhat.com/33c669f)
+
 3. Open the advisory in Google chrome browser or Firefox browser.
 
 4. View the list of issues from the _Summary_ tab. If you do not see any issues, reach out to the release manager to verify if other issues should be added.
