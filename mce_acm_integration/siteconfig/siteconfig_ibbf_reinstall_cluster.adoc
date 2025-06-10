@@ -1,0 +1,65 @@
+[#ibbf-sno-hardware-replacement]
+= Replacing hardware with Image-Based Break/Fix for {sno} (Technology Preview)
+
+The Image-Based Break/Fix feature utilizes the cluster reinstallation mechanism of the {sco} to simplify {sno} hardware replacement. The feature minimizes downtime by preserving the original identity of the cluster. The Image-Based Break/Fix feature retains critical cluster details, including identifiers, cryptographic keys, such as `kubeconfig`, and authentication credentials, which enables the replacement node to seamlessly assume the identity of the failed hardware.
+
+Designed for identical hardware replacements in {sno} clusters installed using the Image Based Install method, Image-Based Break/Fix introduces a GitOps-compatible, declarative API. Users can initiate hardware replacement with a single Git commit. Powered by the {sco} and {ibio}, Image-Based Break/Fix enables cluster redeployment using the existing `ClusterInstance` custom resource.
+
+With Image-Based Break/Fix, {ocp-short} users gain a resilient, automated, and GitOps-native solution for quickly restoring {sno} clusters after hardware failures.
+
+[#ibbf-workflow]
+== Image-Based Break/Fix cluster reinstallation workflow
+
+The Image-Based Break/Fix workflow is similar to the cluster reinstallation workflow with certain differences.
+To familiarize yourself with the differences in the workflows, see the high-level overview of the Image-Based Break/Fix cluster reinstallation workflow:
+
+- Enable the {sco} reinstallation service.
+- Initiate a cluster reinstallation.
+* Set `spec.reinstall.preservationMode: "ClusterIdentity"`.
+* Update the `spec.nodes` object with the changed hardware information.
+* *Note*: The {ibio} automatically labels cluster identity resources.
+- Monitor the reinstallation progress.
+* During cluster provisioning, the operators consuming the installation manifests provision the cluster using the newly generated manifests.
+* *Note*: The {ibio} detects the preserved cluster identity data and incorporates it into the configuration ISO image.
+- Verify that the cluster is provisioned and available.
+* Use the `kubeconfig` that is associated with the failed hardware to access the reinstalled spoke cluster.
+
+For more information about the steps of the Image-Based Break/Fix cluster reinstallation, see Cluster reinstallation.
+//TODO Add link here
+
+[#ibbf-prereqs]
+== Prerequisites
+
+* The cluster is a {sno} cluster installed using the Image Based Install provisioning method.
+* The faulty hardware is replaced with a new node with identical specifications.
+
+[#ibbf-initiating-reinstallation]
+== Initiating the Image-Based Break/Fix cluster reinstallation
+
+To initiate the Image-Based Break/Fix cluster reinstallation, update the `ClusterInstance` resource by setting the `spec.reinstall.generation` field and updating the `spec.nodes` object with the changed hardware information.
+
+. Modify the `spec.reinstall.generation` field and update the `spec.nodes` object in the `ClusterInstance` resource with the new node details:
+
++
+[source,yaml]
+----
+apiVersion: siteconfig.open-cluster-management.io/v1alpha1
+kind: `ClusterInstance`
+metadata:
+  name: clusterinstance-example
+  namespace: some-namespace
+spec:
+  ...
+  reinstall:
+    generation: "unique-generation-string"
+    preservationMode: "ClusterIdentity"
+  nodes:
+    - bmcAddress: <new-node-bmcAddress>
+      bootMACAddress: <new-node-bootMACAddress>
+      rootDeviceHints: <new-node-rootDeviceHints>
+      nodeNetwork:
+        interfaces:
+          macAddress: <new-node-macAddress>
+          ...
+      ...
+----
