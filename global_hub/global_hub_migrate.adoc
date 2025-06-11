@@ -1,0 +1,131 @@
+[#global-hub-migrating-managed-clusters]
+= Migrating managed clusters (Technology Preview)
+
+With {global-hub}, you can migrate managed clusters from one {acm} hub cluster to another and migrate associated Kubernetes resources, such as, `ConfigMaps` and `Secrets`. 
+
+By using {global-hub} to migrate your managed cluster, you have a unified process that helps you perform the following actions: 
+
+* Reorganize workloads among {acm-short} hub clusters. 
+* Move clusters and their resources together. 
+* Automate cluster registration and cleanup. 
+* Tracks individual steps with detailed status updates. 
+
+[#understanding-migration]
+== Understanding the managed cluster migration process 
+
+With {global-hub}, you can manage large fleets of clusters by implementing the event-driven architecture of {global-hub}. Because of this architecture, {global-hub} connects to your managed hub clusters. With the managed cluster migration, you can also implement {global-hub} to communicate, organize, synchronize, and transfer resources among all you hub clusters. 
+
+The manage cluster migration process requires coordination between a `source` hub and `target` hub. The `multicluster-global-hub-agent` performs the migrations tasks on the `source` and `target` hubs. The `multicluster-global-hub-manager` controls the flow of the migration between the `source` and `target` hub and manages the `ManagedClusterMigration` resources. 
+
+During the managed cluster migration, the `source` and `target` hub goes through different phases. See the following table to understand the these different phases and their conditions: 
+
+.Table list of _Phase_ and _Condition_
+|===
+| Phase | Condition 
+
+| `Pending`
+| Performs one migration at a time. Other migrations remain `Pending`. 
+
+| `Validating`
+| Verifies that the clusters and hub clusters are valid. 
+
+| `Initializing`
+| Prepares the `target` hub and `source` hub. 
+
+| `Deploying`
+| Migrates selected clusters and their resources. 
+
+| `Registering`
+| Restarts the registration of the cluster to the `target` hub. 
+
+| `Cleaning`
+| Cleans the resources from both `target` and `source` hub and manages the `rollback` if needed. 
+
+| `Completed`
+| Confirms the migrations has successfully completed. 
+
+| `Failed`
+| Confirms that the migration has failed and includes this failure message in the `status`.  
+|===
+
+*Note:* The `Validating` phase does not check resources such as `ConfigMap` and `Secret`. If you specify resources that do not exist in the `source` hub, the migration fails in the `Deploying` phase. 
+
+[#migrating-managed-clusters]
+== Migrating managed clusters 
+
+To migrate your migrate managed clusters from different {acm-short} hub clusters, install a `Brownfield` environment and import your managed clusters in the `Hosted` mode. 
+
+Complete the following steps: 
+
+. Install {global-hub} on `hub1`. 
+. For the `featureGate`, enable the `ImportClusterInHosted`. 
+. Deploy the {global-hub} agent locally by applying the following YAML: 
+
++
+[source,yaml]
+----
+  apiVersion: operator.open-cluster-management.io/v1alpha4
+  kind: MulticlusterGlobalHub
+  metadata:
+    name: multiclusterglobalhub
+    namespace: multicluster-global-hub
+  spec:
+    availabilityConfig: High
+    installAgentOnLocal: true
+    featureGates:
+    - feature: ImportClusterInHosted
+      mode: Enable
+----
++ 
+
+. In the deployment mode, label `hub2` as `Hosted` by giving it the following label: `global-hub.open-cluster-management.io/deploy-mode=hosted`. 
+. To move the cluster and its related resources, define the `ManagedClusterMigration` by applying the following YAML: 
+
++
+[source,yaml]
+----
+apiVersion: global-hub.open-cluster-management.io/v1alpha1
+kind: ManagedClusterMigration
+metadata:
+  name: migration-sample
+spec:
+  from: local-cluster <1>
+  includedManagedClusters: <2> 
+    - cluster1
+  includedResources: <3> 
+    - configmap/default/foo
+    - secret/cluster1/bar
+  to: hub2 <4> 
+----
+<1> The `source` hub which is in this case the `hub1`. 
+<2> The `target` hub which is in this case the `hub2`. 
+<3> Lists the clusters to be migrated and includes unique cluster names for both `hub1` and `hub2`. 
+<4> Specifies the Kubernetes resources to migrate by using the format, `kind/namespace/name`. 
+
+. Verify that your migration status resembles the following status: 
+
++
+[source,bash]
+----
+status:
+  conditions:
+    - type: ResourceValidated
+      status: "True"
+      message: Migration resources have been validated
+    - type: ResourceInitialized
+      status: "True"
+      message: All source and target hubs have been initialized
+    - type: ResourceDeployed
+      status: "True"
+      message: Resources have been successfully deployed to the target hub cluster
+    - type: ClusterRegistered
+      status: "True"
+      message: All migrated clusters have been successfully registered
+    - type: ResourceCleaned
+      status: "True"
+      message: Resources have been successfully cleaned up from the hub clusters
+  phase: Completed
+----
+
+
+
