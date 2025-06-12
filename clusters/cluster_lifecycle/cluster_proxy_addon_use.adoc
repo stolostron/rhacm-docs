@@ -1,0 +1,104 @@
+[#use-cluster-proxy-addon]
+= Using cluster proxy add-ons
+
+Use cluster proxy add-ons to access the managed cluster kube API server or managed cluster services by using different methods. See the following topics to learn more about the different ways you can use cluster proxy add-ons.
+
+*Required access:* Editor
+
+[#use-cluster-proxy-addon-prereq]
+== Prerequisites
+
+* You must configure cluster proxy add-ons.
+
+[#access-kube-apiserver-managed-token]
+== Accessing the managed cluster `kube-apiserver` by using a managed cluster user token
+
+Use the cluster proxy add-on to list pods in the default namespace of a managed cluster by completing the following steps:
+
+. Export your cluster proxy URL by running the following command. Replace values where needed:
+
++
+[source,bash]
+----
+export CLUSTER_PROXY_URL=https://$(oc get route -n multicluster-engine cluster-proxy-addon-user -o=jsonpath='{.spec.host}')/<managed-cluster-name>
+----
+
+. Get the `ConfigMap` by running the following command:
+
++
+[source,bash]
+----
+oc get configmap kube-root-ca.crt -o=jsonpath='{.data.ca\.crt}' > hub-ca.crt
+----
+
+. Transfer your CA certificate by running the following command:
+
++
+[source,bash]
+----
+curl --cacert hub-ca.crt -H "Authorization: Bearer $TOKEN" https://$CLUSTER_PROXY_URL/api/v1/namespaces/default/pods 
+----
++
+*Note:* You need a user token that has permission to list pods in the default namespace of the managed cluster.
+
+[#access-kube-apiserver-hub-token]
+== Accessing the managed cluster `kube-apiserver` by using a hub cluster user token
+
+The target hub cluster and target managed cluster both need to use the same external identity provider so that both clusters can recognize the same user.
+
+To list pods in the default namespace by using the the hub cluster `developer ` user token, you must first create the appropriate `Role` and `RoleBinding` for the `developer` on the managed cluster.
+
+If you are using {rhacm}, you can use the `ClusterPermission` API to create `Roles` and RoleBindings from the hub cluster.
+
+See the following example that binds the `get` and `list` permissions for pods to the user `developer`:
+
+[source,yaml]
+----
+apiVersion: rbac.open-cluster-management.io/v1alpha1
+kind: ClusterPermission
+metadata:
+  name: <name>
+  namespace: <cluster-namespace>
+spec:
+  roles:
+  - namespace: default
+    rules:
+    - apiGroups: [""]
+      resources: ["pods"]
+      verbs: ["get","list"]
+  roleBindings:
+  - namespace: default
+    roleRef:
+      kind: Role
+    subject:
+      apiGroup: rbac.authorization.k8s.io
+      kind: User
+      name: developer 
+----
+
+[#access-managed-cluster-services]
+== Accessing managed cluster services
+
+To access managed cluster services, the managed cluster must be an {ocp} cluster and the service must use the `services-serving-certificate` service to generate server certificates.
+
+Complete the following steps:
+
+. Get the Prometheus service token from the managed cluster. Run the following command:
+
++
+[source,bash]
+----
+export PROMETHEUS_TOKEN=$(kubectl get secret -n openshift-monitoring $(kubectl get serviceaccount -n openshift-monitoring prometheus-k8s -o=jsonpath='{.secrets[0].name}') -o=jsonpath='{.data.token}' | base64 -d)
+----
+
+. Get the Prometheus managed cluster metrics from the hub cluster. Run the following commands:
+
++
+[source,bash]
+----
+export SERVICE_NAMESPACE=openshift-monitoring
+export SERVICE_NAME=prometheus-k8s
+export SERVICE_PORT=9091
+export SERVICE_PATH="api/v1/query?query=machine_cpu_sockets"
+curl --cacert hub-ca.crt $CLUSTER_PROXY_URL/api/v1/namespaces/$SERVICE_NAMESPACE/services/$SERVICE_NAME:$SERVICE_PORT/proxy-service/$SERVICE_PATH -H "Authorization: Bearer $PROMETHEUS_TOKEN" 
+----
