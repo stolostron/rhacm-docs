@@ -8,7 +8,6 @@
 *Note:* Action buttons are disabled from the console if the user-role access is impermissible.
 
 If you installed operators that create cluster roles, you do not need to create them. You can create `clusterroles` manually if you need to create them. 
-//how and what operators?
 
 To learn about {ocp-short} default and virtualization roles and permissions, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/virtualization/about#authorization_virt-security-policies[Authorization] in the {ocp-short} documentation.
 
@@ -20,10 +19,73 @@ You can grant access to the following roles for {ocp-virt-short}, which are exte
 - `kubevirt.io:edit`: modify resources
 - `kubevirt.io:admin`: view, modify, delete resources; grant permissions
 
-To use fine-grained role-based access control, see the following procedure:
+.Prerequisites
+
+See the following requirement to manage fine-grained role-based access control:
 
 . In your `MultiClusterHub` custom resource `spec.overrides.components` field, set `fine-grained-rbac-preview` to `true` to enable the feature.
 . In your `MultiClusterHub` custom resource `spec.overrides.components` field, set `search` to `enabled` to retrieve a list of managed clusters namespaces that can represent virtual machines that are used for access control.
-. On the hub cluster, label `clusterroles` with the `rbac.open-cluster-management.io/filter=vm-clusterroles` filter so you see cluster roles in the console when you create or edit cluster permissions.
+. On the hub cluster, label `clusterroles` with the `rbac.open-cluster-management.io/filter=vm-clusterroles` filter so that you see cluster roles in the console when you create or edit cluster permissions.
 . Ensure you have virtual machines by creating or migrating them on the hub cluster, which gives the managed cluster namespaces.
 . Verify that the `ClusterPermission` resource is created and is in ready status.
+
+[#assign-fine-grain-rbac]
+== Assigning fine-grained role-based access control
+
+You can assign users to manage virtual machines with fine-grained role-based access control. 
+
+. As a cluster administrator, click *AccessControlManagement* > *Add Access Control* in the console.
+. *Optional:* Click the *YAML* option on to see the metadata that you enter populate in the *Access Control YAML* window.
+. Add the `Basic information`, such as the cluster name and the user.
+. Add the `Role Binding` information.
+. Add the `Cluster Role Binding` information.
+. Review and click *Add*.
+
+See the following example of the `ClusterRole` resource, with roles for {ocp-virt-short} and the `ClusterRoleBinding`resource:
+
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: acm-vm-rbac-required
+rules:
+- apiGroups: ["clusterview.open-cluster-management.io"]
+  resources: ["kubevirtprojects"]
+  verbs: ["list"]
+- apiGroups: ["clusterview.open-cluster-management.io"]
+  resources: ["managedclusters"]
+  verbs: ["list","get","watch"]
+- apiGroups: ["cluster.open-cluster-management.io"]
+  resources: ["managedclusters"]
+  verbs: ["get"]
+  resourceNames: ["cluster01", "cluster02", "cluster03"]
+- apiGroups: ["view.open-cluster-management.io"]
+  resources: ["managedclusterviews"]
+  verbs: ["create", "get", "delete"]
+- apiGroups: ["kubevirt.io"]
+  resources: ["virtualmachines"]
+  verbs: ["delete"]
+- apiGroups: ["action.open-cluster-management.io"]
+  resources: ["managedclusteractions"]
+  verbs: ["create", "get", "delete"]
+- apiGroups: ["snapshot.kubevirt.io"]
+  resources: ["virtualmachinesnapshots"]
+  verbs: ["delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: acm-vm-rbac-required
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: acm-vm-rbac-required
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: user1
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: group1
+----
