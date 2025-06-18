@@ -18,7 +18,7 @@ Monitor the status of your managed clusters with the Observability component, al
 == Prerequisites
  
 - You must install {acm}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.
-- You must define a storage class in the `MultiClusterObservability` custom resource, if there is no default storage class specified.
+- You must specify the `storageConfig.storageClass` field in the `MultiClusterObservability` custom resource if you do not want to use the platform's default `StorageClass`.
 - Direct network access to the hub cluster is required. Network access to load balancers and proxies are not supported. For more information, see link:../networking/networking_intro.adoc#networking[Networking].
 - You must configure an object store to create a storage solution. 
 ** *Important:* When you configure your object store, ensure that you meet the encryption requirements that are necessary when sensitive data is persisted. The Observability service uses Thanos supported, stable object stores. You might not be able to share an object store bucket by multiple {acm-short} Observability installations. Therefore, for each installation, provide a separate object store bucket. 
@@ -50,7 +50,7 @@ Complete the following steps to enable the Observability service:
 +
 [source,bash]
 ----
-oc create namespace open-cluster-management-observability
+$ oc create namespace open-cluster-management-observability
 ----
 
 . Generate your pull-secret. If {acm-short} is installed in the `open-cluster-management` namespace, run the following command:
@@ -74,7 +74,7 @@ DOCKER_CONFIG_JSON=`oc extract secret/pull-secret -n openshift-config --to=-`
 +
 [source,bash]
 ----
-oc create secret generic multiclusterhub-operator-pull-secret \
+$ oc create secret generic multiclusterhub-operator-pull-secret \
     -n open-cluster-management-observability \
     --from-literal=.dockerconfigjson="$DOCKER_CONFIG_JSON" \
     --type=kubernetes.io/dockerconfigjson
@@ -88,7 +88,7 @@ oc create secret generic multiclusterhub-operator-pull-secret \
 +
 [source,bash]
 ----
-oc create -f thanos-object-storage.yaml -n open-cluster-management-observability
+$ oc create -f thanos-object-storage.yaml -n open-cluster-management-observability
 ----
 +
 View the following examples of secrets for the supported object stores:
@@ -487,10 +487,22 @@ For more information, see link:https://docs.redhat.com/en/documentation/openshif
 +
 [source,bash]
 ----
-oc apply -f multiclusterobservability_cr.yaml
+$ oc apply -f multiclusterobservability_cr.yaml
 ----
+
 +
-All the pods in `open-cluster-management-observability` namespace for Thanos, Grafana and Alertmanager are created. All the managed clusters connected to the {acm-short} hub cluster are enabled to send metrics back to the {acm-short} Observability service.
+*Note:* By default if you do not define the `storageConfig.storageClass` field in the `MultiClusterObservability` custom resource,  platforms default `StorageClass` will be populated in the   storageConfig  section of `MultiClusterObservability`. For example for AWS default storageClass will be gp2. You can verify default storageClass using below command:
+ 
++ 
+----
+$ oc get storageClass
+NAME                PROVISIONER       RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+gp2-csi             ebs.csi.aws.com   Delete          WaitForFirstConsumer   true                   151m
+gp3-csi (default)   ebs.csi.aws.com   Delete          WaitForFirstConsumer   true                   151m
+----
+
++
+All the pods in `open-cluster-management-observability` namespace for Thanos, Grafana and Alertmanager are created. All the managed clusters connected to the {acm-short} hub cluster are   enabled to send metrics back to the {acm-short} Observability service.
 
 . Validate that the Observability service is enabled and the data is populated by launching the Grafana dashboards. 
 
@@ -501,7 +513,7 @@ All the pods in `open-cluster-management-observability` namespace for Thanos, Gr
 +
 [source,bash]
 ----
-oc get deploy multicluster-observability-operator -n open-cluster-management --show-labels
+$ oc get deploy multicluster-observability-operator -n open-cluster-management --show-labels
 ----
 +
 You might receive the following results:
