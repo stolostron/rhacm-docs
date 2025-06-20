@@ -12,15 +12,24 @@ By using {global-hub} to migrate your managed cluster, you have a unified proces
 
 To fully migrate your managed clusters and to understand the process, complete the following sections: 
 
+. <<prerequisites, Prerequisites>> 
 . <<understanding-migration, Understanding the managed cluster migration process>> 
-. <<understanding-imported-hub-clusters, Understanding the imported hub clusters>> 
-. <<installing-brownfield-environment, Installing {global-hub} in a Brownfield environment>> 
+. <<preparing-migration-environment, Preparing the migration environment>> 
 . <<migrating-managed-clusters, Migrating managed clusters>> 
+
+[#prerequisites]
+== Prerequisites 
+
+To migrate your managed clusters, you need the following components: 
+
+* The {global-hub} operator to organize the migration workflow.
+* The `source` {acm-short} hub to manage the clusters and their associated resources. 
+* The `target`{acm-short} hub to receive the migrated clusters and their associated resources. 
 
 [#understanding-migration]
 == Understanding the managed cluster migration process 
 
-With {global-hub}, you can manage large fleets of clusters by implementing the event-driven architecture of {global-hub}. Because of this architecture, {global-hub} connects to your managed hub clusters. With the managed cluster migration, you can also implement {global-hub} to communicate, organize, synchronize, and transfer resources among all you hub clusters. 
+With {global-hub}, you can manage large fleets of clusters by implementing the event-driven architecture of {global-hub}. {global-hub} connects itself to your managed hub clusters. With the {global-hub} event-based design, you can enable {global-hub} to communicate, organize, synchronize, and transfer resources and cluster states among all you hub clusters.  
 
 The manage cluster migration process requires coordination between a `source` hub and `target` {acm-short} hub. The `multicluster-global-hub-agent` performs the migrations tasks on the `source` and `target` hubs. The `multicluster-global-hub-manager` controls the flow of the migration between the `source` and `target` hub and manages the `ManagedClusterMigration` resources. 
 
@@ -49,7 +58,7 @@ During the managed cluster migration, the `source` and `target` hubs go through 
 | Cleans the resources from both `target` and `source` hub and manages the `rollback` if needed. 
 
 | `Completed`
-| Confirms the migrations has successfully completed. 
+| Confirms the migrations are successfully completed. 
 
 | `Failed`
 | Confirms that the migration has failed and includes this failure message in the `status`.  
@@ -57,24 +66,16 @@ During the managed cluster migration, the `source` and `target` hubs go through 
 
 *Note:* The `Validating` phase does not check resources such as `ConfigMap` and `Secret`. If you specify resources that do not exist in the `source` hub, the migration fails in the `Deploying` phase. 
 
-[#understanding-imported-hub-clusters]
-== Understanding the imported hub clusters 
+[#preparing-migration-environment]
+== Preparing the migration environment 
 
-When you install the {global-hub} operand, it enables the {global-hub} agent on your local cluster.  When you enable the {global-hub} agent, you must add the label, `global-hub.open-cluster-management.io/deploy-mode`. With this label, you indicate that the hub is a managed cluster hub. Without this label, you cannot install the {global-hub} agent in the imported cluster. 
+To prepare your {global-hub} migration environment, create a Brownfield environment. You create a Brownfield environment by deploying the {global-hub} control plane directly into the `source` and `target` {acm-short} hub. Then, you configure the {global-hub} migration environment into the Brownfield environment that you created and import the `source` hub in the `Hosted` mode. 
 
-The label, `global-hub.open-cluster-management.io/deploy-mode` supports the following values: 
+Complete the following steps: 
 
-* `default`: Use this value when the {acm-short} hub cluster that is imported does not have self-management enabled. With this value, the `Klusterlet` and {global-hub} agent install directly in the imported {acm-short} hub cluster.    
-* `hosted`: Use this value when the {acm-short} hub cluster that is imported does have self-management enabled. Only use this value if the {global-hub} cluster also has self-management enabled and if the `kubeconfig` of the imported {acm-short} hub cluster does not expire. 
-
-[#installing-brownfield-environment]
-== Installing {global-hub} in a Brownfield environment 
-
-Install your {global-hub} operator and agent into a {global-hub} custom resource within a Brownfield environment to more easily migrate managed clusters. Complete the following steps: 
-
-. Install the {global-hub} operator and local agent in a {global-hub} custom resource. 
-. Enable the {global-hub} custom resource on the `source` hub.  
-. Configure the {global-hub} custom resource to work within a Brownfield environment by applying the following YAML in the `source` hub: 
+. Install the {global-hub} operator in the `source` {acm-short} hub. 
+. Enable the `local-cluster` in the {global-hub} custom operator that is running in the `source` {acm-short} hub. 
+. Create the {global-hub} operand and enable the {global-hub} agent to run locally by applying the following YAML:
 
 +
 [source,yaml]
@@ -88,18 +89,24 @@ Install your {global-hub} operator and agent into a {global-hub} custom resource
     availabilityConfig: High
     installAgentOnLocal: true
 ----
++
+. Import the `target` {acm-short} hub into the {global-hub} migration environment. 
+. Import the {global-hub} migration environment into the `Hosted` mode adding the following label to the managed hub cluster:
+
++
+[oc,bash]
+----
+global-hub.open-cluster-management.io/deploy-mode=hosted
+----
+
 
 [#migrating-managed-clusters]
 == Migrating managed clusters 
 
-After you configured your {global-hub} custom resource to work within a Brownfield environment, migrate your managed clusters by importing them in the `Hosted` mode. 
+After configuring your {global-hub} migration environment, you migrate your managed clusters. For an example of migrating the sample, `cluster1`
+and its associated resources from `hub1` to `hub2`, complete the following steps: 
 
-Complete the following steps: 
-
-. Take the {global-hub} custom resource in the Brownfield environment and install it in the `hub1` cluster. 
-. Ensure that the `enableLocalAgent` is in the `True` mode. 
-. Import the managed hub in a `Hosted` mode by giving `hub2` the following label:  `global-hub.open-cluster-management.io/deploy-mode=hosted`. 
-. Initiate the managed cluster migration by defining the `ManagedClusterMigration` resource with the the following YAML: 
+. Start the migration by create a `ManagedClusterMigration` resource in the {global-hub} migration environment by applying the following YAML: 
 
 +
 [source,yaml]
@@ -110,18 +117,20 @@ metadata:
   name: migration-sample
 spec:
   from: local-cluster <1>
-  includedManagedClusters: <2> 
-    - cluster1
+  includedManagedClusters: 
+    - cluster1 <2> 
   includedResources: <3> 
     - configmap/default/foo
     - secret/cluster1/bar
   to: hub2 <4> 
 ----
-<1> The `source` hub which is the `hub1`. 
-<2> The `target` hub which is the `hub2`. 
-<3> Lists the clusters to be migrated and includes unique cluster names for both `hub1` and `hub2`. 
-<4> Specifies the Kubernetes resources to migrate by using the format, `kind/namespace/name`. 
-
+<1> The `source` hub is a `local-cluster` that {global-hub} installed in `hub1`. 
+<2> The managed cluster that is named `cluster1` and is being migrated to `hub2`. The managed cluster in `hub1` and `hub2` must be different from one another. 
+<3> Specifies the Kubernetes resources for you to migrate by using the format, `kind/namespace/name`. For example: 
+* `configmap/default/foo` is a `Configmap` in the `default` namespace that is named `foo`.
+* `secret/cluster1/bar` is a `Secret` in the `cluster1` namespace that is named `bar`. 
+<4> The `target` hub is `hub2`. 
++ 
 . In the `status` resource section, verify that your migration status resembles the following status: 
 
 +
