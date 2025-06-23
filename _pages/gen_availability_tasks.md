@@ -39,7 +39,7 @@ In addition to the release work, the lead or the strategist must follow up on ge
 6. Change support matrix links in the doc and on the Splash Page. (You can use the tasks you already opened for creating the new matrices)
 7. If something went EOL, ensure the latest doc reflects those changes. See _Deprecating and removing_ for that guidance. Open a task for this.
 8. Work with console focal and engineers to ensure links in the console have not changed. You will need to know the deadline for code changes from the UI team. (Open a task for this.)
-9. Create teh Splash page with the links you need. Open a task for this.
+9. Create the Splash page with the links you need. Open a task for this.
 
 ## Preparing for _Pencils Down_
 
