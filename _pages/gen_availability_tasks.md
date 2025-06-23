@@ -7,6 +7,8 @@ horizontal: false
 
 These directions walk you through preparing for the release and tasks for GA day. Ideally this is done by a strategist/architect or a lead with a big-picture view of the doc, but as long as a teammate has rights, they can go through these procedures.
 
+Note: It is best to have a story for release prep and the linked issues. It is also best to have a story for the matrix, with cross-squad issues linked.
+
 - [Prerequisites](#prerequisites)
 - [Tasks to complete early staging](#tasks-to-complete-early-staging)
 - [Preparing for _Pencils Down_](#preparing-for-pencils-down)
@@ -37,6 +39,7 @@ In addition to the release work, the lead or the strategist must follow up on ge
 6. Change support matrix links in the doc and on the Splash Page. (You can use the tasks you already opened for creating the new matrices)
 7. If something went EOL, ensure the latest doc reflects those changes. See _Deprecating and removing_ for that guidance. Open a task for this.
 8. Work with console focal and engineers to ensure links in the console have not changed. You will need to know the deadline for code changes from the UI team. (Open a task for this.)
+9. Create teh Splash page with the links you need. Open a task for this.
 
 ## Preparing for _Pencils Down_
 
