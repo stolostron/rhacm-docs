@@ -1,0 +1,308 @@
+[#reinstalling-cluster]
+= Reinstalling a cluster with the {sco} (Technology Preview)
+
+Reinstall your clusters by using the {sco}. After enabling the reinstallation, you can define your desired preservation mode and if applicable, label your resources.
+
+*Required access:* Cluster administrator
+
+Complete the following steps to reinstall a cluster:
+
+. <<enabling-cluster-reinstallation,Enabling cluster reinstallation>>
+. <<labeling-resources-for-preservation,Labeling resources for preservation>>
+. <<initiating-cluster-reinstallation,Initiating a cluster reinstallation>>
+. <<monitoring-cluster-reinstallation,Monitoring the cluster reinstallation>>
+
+[#enabling-cluster-reinstallation]
+== Enabling cluster reinstallation
+
+You must explicitly enable cluster reinstallation in the `siteconfig-operator-configuration` `ConfigMap` resource, which you can complete well before initiating the process. By default, reinstallation is disabled.
+
+Complete the following steps:
+
+. Set the `NAMESPACE` environment variable to match the namespace where the {sco} is installed. Run the following command:
+
++
+[source,bash]
+----
+NAMESPACE=<namespace>
+----
+
+. Verify the current configuration by running the following command:
+
++
+[source,bash]
+----
+oc get configmap siteconfig-operator-configuration -n $NAMESPACE -o yaml
+----
+
++
+*Example output:*
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: siteconfig-operator-configuration
+    namespace: <namespace> <1>
+data:
+    allowReinstalls: false <2>
+    ...  
+----
+<1> The namespace where the {sco} is installed.
+<2> Set to `true` to enable reinstallation.
+
++
+*Note:* The operator continuously monitors the `siteconfig-operator-configuration` `ConfigMap` resource for changes.
+
+. To enable cluster reinstallation, update the `ConfigMap` resource by setting the `data.allowReinstalls` field to `true`. Run the following command:
+
++
+[source,bash]
+----
+oc patch configmap siteconfig-operator-configuration \  
+    -n $NAMESPACE \  
+    --type=json \  
+    -p '[{"op": "replace", "path": "/data/allowReinstalls", "value": "true"}]'  
+----
+
+. Verify the update by running the following command:
+
++
+[source,bash]
+----
+oc get configmap siteconfig-operator-configuration -n $NAMESPACE -o yaml  
+----
+
+[#labeling-resources-for-preservation]
+== Labeling resources for preservation
+
+You can set the desired preservation mode in your `ClusterInstance` custom resource and if applicable, label your resources accordingly. By default, the `preservationMode` field is set to `None`.
+For more information, see xref:../../mce_acm_integration/siteconfig/siteconfig_cluster_reinstallation.adoc#resources-labeling-for-preservation[Resource labeling for preservation].
+
+Complete the following example step:
+
+* Label a resource for the `All` preservation mode by running the following command:
+
++
+[source,bash]
+----
+oc label configmap <your_configmap> "siteconfig.open-cluster-management.io/preserve=all"
+----
+
+The `ClusterInstance` custom resource is updated with the correct `preservationMode` corresponding to the applied labels.
+
+[#initiating-cluster-reinstallation]
+== Initiating a cluster reinstallation
+
+To start the reinstallation, update the `ClusterInstance` resource with a new `spec.reinstall.generation` value.
+
+. Modify the `spec.reinstall.generation` value in the `ClusterInstance` resource:
+
++
+[source,yaml]
+----
+apiVersion: siteconfig.open-cluster-management.io/v1alpha1
+kind: `ClusterInstance`
+metadata:
+  name: clusterinstance-example
+  namespace: some-namespace
+spec:
+  reinstall:
+    generation: "unique-generation-string"
+    preservationMode: "<your-preservation-mode>"
+----
+
+*Note:* Ensure you set the appropriate preservation mode when you modify the `ClusterInstance` resource. `"None"`, `"All"`, or `"ClusterIdentity"` are valid values.
+
+. Optional. When defining the `spec.reinstall` object, you can modify the following additional fields in the `ClusterInstance` resource:
+
+* `spec.extraAnnotations`
+* `spec.extraLabels`
+* `spec.suppressedManifests`
+* `spec.pruneManifests`
+* `spec.nodes.<node-id>.extraAnnotations`
+* `spec.nodes.<node-id>.extraLabels`
+* `spec.nodes.<node-id>.suppressedManifests`
+* `spec.nodes.<node-id>.pruneManifests`
+* `spec.nodes.<node-id>.bmcAddress`
+* `spec.nodes.<node-id>.bootMACAddress`
+* `spec.nodes.<node-id>.nodeNetwork.interfaces.macAddress`
+* `spec.nodes.<node-id>.rootDeviceHints`
+
++
+*Note:* `<node-id>` represents the updated `NodeSpec` object.
+
+. Apply the changes. See the following options:
+
+.. If you are using {gitops-short} ZTP, push to your Git repository and wait for Argo CD to synchronize the changes.
+
+.. To manually apply your changes, run the following command on the hub cluster:
+
++
+[source,bash]
+----
+oc apply -f clusterinstance-example.yaml
+----
+
+[#monitoring-cluster-reinstallation]
+== Monitoring the cluster reinstallation
+
+You can monitor the cluster reinstallation progress. Complete the following steps:
+
+. Verify that the reinstallation request is being processed:
+
++
+[source,bash]
+----
+oc get clusterinstance clusterinstance-example -n some-namespace -o json | jq -r '.status.reinstall.conditions[] | select(.type=="ReinstallRequestProcessed")'
+----
+
++
+See the following example output:
+
++
+[source,json]
+----
+{
+"type": "ReinstallRequestProcessed"
+"reason": "InProgress",
+"status": "False",
+...
+}
+----
+
+. Verify that the cluster reinstallation request is validated successfully:
+
++
+[source,bash]
+----
+oc get clusterinstance clusterinstance-example -n some-namespace -o json | jq -r '.status.reinstall.conditions[] | select(.type=="ReinstallRequestValidated")'
+----
+
++
+See the following example output:
+
++
+[source,json]
+----
+{
+"type": "ReinstallRequestValidated"
+"reason": "Completed",
+"status": "True",
+...
+}
+----
+
+. Optional. If you set the `spec.reinstall.preservationMode` field to `All` or `ClusterIdentity`, verify that the cluster identity data is preserved:
+
++
+[source,bash]
+----
+oc get clusterinstance clusterinstance-example -n some-namespace -o json | jq -r '.status.reinstall.conditions[] | select(.type=="ReinstallPreservationDataBackedup")'
+----
+
++
+See the following example output:
+
++
+[source,json]
+----
+{
+"type": "ReinstallPreservationDataBackedup"
+"reason": "Completed",
+"status": "True",
+...
+}
+----
+
+. Optional. If you set the `spec.reinstall.preservationMode` field to `All` or `ClusterIdentity`, verify that the cluster identity data is detected:
+
++
+[source,bash]
+----
+oc get clusterinstance clusterinstance-example -n some-namespace -o json | jq -r '.status.reinstall.conditions[] | select(.type=="ReinstallClusterIdentityDataDetected")'
+----
+
++
+See the following example output:
+
++
+[source,json]
+----
+{
+"type": "ReinstallClusterIdentityDataDetected"
+"reason": "DataAvailable",
+"status": "True",
+...
+}
+----
+
+. Verify that the installation manifests are deleted. The deletion can take several minutes to complete.
+
++
+[source,bash]
+----
+oc get clusterinstance clusterinstance-example -n some-namespace -o json | jq -r '.status.reinstall.conditions[] | select(.type=="ReinstallRenderedManifestsDeleted")'
+----
+
++
+See the following example output:
+
++
+[source,json]
+----
+{
+"type": "ReinstallRenderedManifestsDeleted"
+"reason": "Completed",
+"status": "True",
+...
+}
+----
+
+. Optional. If you set the `preseservationMode` field to `All` or `ClusterIdentity`, verify that the data preserved earlier are restored:
+
++
+[source,bash]
+----
+oc get clusterinstance clusterinstance-example -n some-namespace -o json | jq -r '.status.reinstall.conditions[] | select(.type=="ReinstallPreservationDataRestored")'
+----
+
++
+See the following example output:
+
++
+[source,json]
+----
+{
+"type": "ReinstallPreservationDataRestored"
+"reason": "Completed",
+"status": "True",
+...
+}
+----
+
+. After you verified the previous steps, ensure that the reinstallation request completed successfully:
+
++
+[source,bash]
+----
+oc get clusterinstance clusterinstance-example -n some-namespace -o json | jq -r '.status.reinstall.conditions[] | select(.type=="ReinstallRequestProcessed")'
+----
+
++
+See the following example output:
+
++
+[source,json]
+----
+{
+"type": "ReinstallRequestProcessed"
+"reason": "Completed",
+"status": "True",
+...
+}
+----
+
+. Confirm that the cluster is successfully reinstalled and is operational by running an `oc` command with the `kubeconfig` file that is associated with the reinstalled cluster.
