@@ -7,7 +7,7 @@ horizontal: false
 
 These directions walk you through preparing for the release and tasks for GA day. Ideally this is done by a strategist/architect or a lead with a big-picture view of the doc, but as long as a teammate has rights, they can go through these procedures.
 
-Note: It is best to have a story for release prep and the linked issues. It is also best to have a story for the matrix, with cross-squad issues linked.
+Note: It is best to have a story for release prep and the linked issues. It is also best to have a story for the matrix, with cross-squad issues for the team linked. [Example](https://issues.redhat.com/browse/ACM-20503)
 
 - [Prerequisites](#prerequisites)
 - [Tasks to complete early staging](#tasks-to-complete-early-staging)
