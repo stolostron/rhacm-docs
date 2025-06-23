@@ -467,6 +467,38 @@ spec:
   leaseDurationSeconds: 60
 ----
 
+[#custom-auto-import-strat]
+=== Customizing the automatic import strategy
+
+Set the automatic import behavior of a managed cluster to be either a one-time process or a continuous process. The following two automatic import strategies exist:
+
+`ImportOnly`::
+If a managed cluster is missing the `ManagedClusterImportSucceeded` condition, or the condition is not set to `True`, the hub cluster controller initiates the import by applying the klusterlet manifests to the managed cluster. After the cluster joins the hub cluster, the hub controller stops applying klusterlet manifests. Now, only the klusterlet agent on the managed cluster keeps the hub configuration synchronized. If the klusterlet agent stops working, the manifests might become outdated, and might cause the managed cluster to appear in an `Unknown` state on the hub cluster. You must then xref:../cluster_lifecycle/import_cli.adoc#importing-cluster-manual[import the cluster manually].
+
+`ImportAndSync`::
+The hub cluster controller applies the klusterlet manifests until the managed cluster joins. After joining, both the hub cluster controller and the klusterlet agent continuously synchronize the klusterlet manifests with the hub cluster configuration, ensuring consistency even if one component stops working.
+
+The default automatic import strategy is `ImportOnly`. To change the import strategy, use a `ConfigMap` named `import-controller-config` in the {mce-short} install namespace. Complete the following steps:
+
+. To set a custom strategy, run the following command. Replace <mce_install_namespace> with your {mce-short} install namespace:
+
+[source,bash]
+----
+oc -n <mce_install_namespace> create configmap import-controller-config \
+  --from-literal=autoImportStrategy=<ImportOnly|ImportAndSync>
+----
++
+*Note:* The default {mce-short} install namespace is `multicluster-engine`.
+
+. If you want to include the updated strategy in the cluster backup, add the `backup=true` label to the `ConfigMap` by running the following command. Replace <mce_install_namespace> with your {mce-short} install namespace:
+
+[source,bash]
+----
+oc -n <mce_install_namespace> label configmap import-controller-config \
+
+  cluster.open-cluster-management.io/backup=true
+----
+
 [#add-resources-adv-cluster]
 == Additional resources
 
