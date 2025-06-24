@@ -25,7 +25,7 @@ Review the known issues and limitations for _Cluster lifecycle with {mce-short}_
 
 Cluster management known issues and limitations are part of the _Cluster lifecycle with {mce-short}_ documentation. Known issues for {mce-short} integrated _with_ {acm-short} are documented in the link:../../release_notes/acm_release_notes.adoc#acm-release-notes[Release notes for {acm-short}]. 
 
-*Important:* {ocp-short} release notes are not documented in this product documentation. For your {ocp-short} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.16[{ocp-short} release notes].
+*Important:* {ocp-short} release notes are not documented in this product documentation. For your {ocp-short} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.17[{ocp-short} release notes].
 
 * <<cluster-issues-install,Installation>>
 * <<cluster-issues-mce,Cluster management>>
@@ -160,12 +160,6 @@ The `ManagedServiceAccount` and cluster proxy add-ons are enabled by default in 
 - To learn how to enable `ManagedServiceAccount` add-on, see  link:../../clusters/install_upgrade/adv_config_install.adoc#serviceaccount-addon-intro[ManagedServiceAccount add-on]. 
 - To learn how to enable a cluster proxy add-on, see link:../../clusters/cluster_lifecycle/cluster_proxy_addon.adoc#cluster-proxy-addon[Using cluster proxy add-ons].
 
-[#hypershift-proxy-install-not-supported-ocp-410z]
-=== {ocp-short} 4.10.z does not support hosted control plane clusters with proxy configuration
-// 2.6:25156
-
-When you create a hosting service cluster with a cluster-wide proxy configuration on {ocp-short} 4.10.z, the `nodeip-configuration.service` service does not start on the worker nodes.
-
 [#client-cannot-reach-ipxe-script]
 === Client cannot reach iPXE script
 //2.6:25157
@@ -232,6 +226,54 @@ When you upgrade an {ocp-short} Dedicated cluster by using the `ClusterCurator` 
 
 You can specify a custom ingress domain by using the `ClusterDeployment` resource while installing a managed cluster, but the change is only applied after the installation by using the `SyncSet` resource. As a result, the `spec` field in the `clusterdeployment.yaml` file displays the custom ingress domain you specified, but the `status` still displays the default domain.
 
+[#managedclusteraddon-status-stuck]
+=== `ManagedClusterAddon` status becomes stuck
+
+If you define configurations in the `ManagedClusterAddon` to override some configurations in the `ClusterManagementAddon`, the `ManagedClusterAddon` might become stuck at the following status:
+
+[source,bash]
+----
+progressing... mca and work configs mismatch
+----
+
+When you check the `ManagedClusterAddon` status, a part of the configurations has an empty `spec` hash, even if the configurations exist. See the following example:
+
+[source,yaml]
+----
+status:
+  conditions:
+  - lastTransitionTime: "20xx-09-09T16:08:42Z"
+    message: progressing... mca and work configs mismatch
+    reason: Progressing
+    status: "True"
+    type: Progressing
+...
+  configReferences:
+  - desiredConfig:
+      name: deploy-config
+      namespace: open-cluster-management-hub
+      specHash: b81380f1f1a1920388d90859a5d51f5521cecd77752755ba05ece495f551ebd0
+    group: addon.open-cluster-management.io
+    lastObservedGeneration: 1
+    name: deploy-config
+    namespace: open-cluster-management-hub
+    resource: addondeploymentconfigs
+  - desiredConfig:
+      name: cluster-proxy
+      specHash: ""
+    group: proxy.open-cluster-management.io
+    lastObservedGeneration: 1
+    name: cluster-proxy
+    resource: managedproxyconfigurations 
+----
+
+To resolve the issue, delete the `ManagedClusterAddon` by running the following command to reinstall and recover the `ManagedClusterAddon`. Replace `<cluster-name>` with the `ManagedClusterAddon` namespace. Replace `<addon-name>` with the `ManagedClusterAddon` name:
+
+[source,bash]
+----
+oc -n <cluster-name> delete managedclusteraddon <addon-name>
+----
+
 [#settings-limit-msa-agent]
 === _tolerations_ and _nodeSelector_ settings do not affect the _managed-serviceaccount_ agent
 //2.9:ACM-7523
@@ -256,17 +298,15 @@ To learn more about how to use the `addonDeploymentConfig` custom resource to co
 
 If you want to install a {sno} cluster with an {ocp} version before 4.19, your `InfraEnv` custom resource and your booted host must use the same {ocp-short} version that you are using to install the {sno} cluster. The installation fails if the versions do not match.
 
-To work around the issue, edit your `InfraEnv` resource before you boot a host with the Discovery ISO, and include the following content:
+To work around the issue, edit your `InfraEnv` resource before you boot a host with the Discovery ISO, and include the following content. Replace `<4.x>` with the `osImageVersion` that you want to install:
 
 [source,yaml]
 ----
 apiVersion: agent-install.openshift.io/v1beta1
 kind: InfraEnv
 spec:
-  osImageVersion: "4.16"
+  osImageVersion: "<4.x>"
 ----
-
-The `osImageVersion` field must match the {ocp} cluster version that you want to install.
 
 [#boot-discovery-auto-add-host]
 === Cannot use host inventory to boot with the discovery image and add hosts automatically
