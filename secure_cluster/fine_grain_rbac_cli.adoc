@@ -1,5 +1,5 @@
 [#fine-grain-rbac-cli]
-= Implementing fine-grained role-based access control with the console (Technology Preview*)
+= Implementing fine-grained role-based access control in the terminal (Technology Preview*)
 
 {acm} supports fine-grained role-based access control (RBAC). As a cluster administrator, you can manage and control permissions at the namespace level on managed clusters, rather than at the cluster level. Grant permissions to a namespace without granting permission to the entire managed cluster, or virtual machine, to further secure your clusters.
 
@@ -36,7 +36,7 @@ You can grant access to the following roles for {ocp-virt-short}, which are exte
 oc edit mch -n open-cluster-management multiclusterhub
 ----
 
-. Change the `configOverrides` specification to `enabled: true`. See the following example:
+. Edit to change the `configOverrides` specification from `enabled: false` to `enabled: true`. See the following example:
 
 +
 [source,yaml]
@@ -49,85 +49,32 @@ oc edit mch -n open-cluster-management multiclusterhub
 +
 *Note:* Run `oc get mch -A` to get name and namespace of the `MultiClusterHub` resource if you do not use the `open-cluster-management` namespace.
 
-. You need to install policies on hub cluster to access the `kubevirt` roles.
-//we need to tell them how to do that--link them to the doc.
-
-. Confirm that the `policy-virt-clusterroles` is available in the `open-cluster-management-global-set namespace`. Run the following command:
-
-+
-[source,bash]
-----
-oc get policy -n open-cluster-management-global-set
-----
-
-. Label the `local-cluster` with `environment=virtualization`. Run the following command.
-
+. Label your `local-cluster` with `environment=virtualization`. Run the following command:
+//why
 +
 [source,bash]
 ----
 oc label managedclusters local-cluster environment=virtualization
 ----
 
-. Change the `policy-virt-clusterroles` value for the `remediationAction` to `enforce`, which adds the `kubevirt` `clusterroles` to the hub cluster. Run the following command to edit the policy.
+. Change the `policy-virt-clusterroles` to `enforce`, which adds the `kubevirt` `clusterroles` onto the hub cluster. Run the following command, then edit the `remediationAction` value to `enforce`:
 
 +
 [source,bash]
 ----
-oc edit policy -n open-cluster-management-global-set policy-virt-clusterroles
+oc get policy -n open-cluster-management-global-set policy-virt-clusterroles
 ----
-
 +
-Edit the `remediationAction` to enforce the policy:
-
+See the following `remediationAction` change:
 +
 [source,yaml]
 ----
   remediationAction: enforce
 ----
 
-. Confirm that the `policy-virt-clusterroles` is available in the `open-cluster-management-global-set namespace`. Run the following command:
+//*Note:* (change the remediationAction farthest to the bottom that has the least indentation, there are 2 and only the bottom one needs to be changed)
 
-+
-[source,bash]
-----
-oc get policy -n open-cluster-management-global-set
-----
-
-. Label the `local-cluster` with `environment=virtualization`. Run the following command.
-
-+
-[source,bash]
-----
-oc label managedclusters local-cluster environment=virtualization
-----
-
-. Change the `policy-virt-clusterroles` value for the `remediationAction` to `enforce`, which adds the `kubevirt` `clusterroles` to the hub cluster. Run the following command to edit the policy.
-
-+
-[source,bash]
-----
-oc edit policy -n open-cluster-management-global-set policy-virt-clusterroles
-----
-
-+
-Edit the `remediationAction` to `enforce` the policy:
-
-+
-[source,yaml]
-----
-  remediationAction: enforce
-----
-
-. Label the roles so that the console can detect them. Run the following command:
-//we need to change that lingo, "list them?" "find them" "display them during search?"
-
-+
-[source,bash]
-----
-oc label clusterroles kubevirt.io:{admin,edit,view} rbac.open-cluster-management.io/filter=vm-clusterroles
-----
-
-. Create a YAML file for the `ClusterRole` resource. See the following sample YAML file. 
+. Create the following YAML file and name the file `acm-vm-rbac-required.yml` for later steps in the procedure:
 
 +
 [source,yaml]
@@ -135,32 +82,33 @@ oc label clusterroles kubevirt.io:{admin,edit,view} rbac.open-cluster-management
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: acm-vm-rbac-required #this is probably a variable that we need to tell them to replace with theirs?
+  name: acm-vm-rbac-required # customer can use any name
 rules:
-- apiGroups: ["clusterview.open-cluster-management.io"]
-  resources: ["kubevirtprojects"]
-  verbs: ["list"]
-- apiGroups: ["clusterview.open-cluster-management.io"]
-  resources: ["managedclusters"]
-  verbs: ["list","get","watch"]
-- apiGroups: ["cluster.open-cluster-management.io"]
-  resources: ["managedclusters"]
-  verbs: ["get"]
-  resourceNames: ["cluster01", "cluster02", "cluster03"]
-- apiGroups: ["view.open-cluster-management.io"]
-  resources: ["managedclusterviews"]
-  verbs: ["create", "get", "delete"]
-- apiGroups: ["kubevirt.io"]
-  resources: ["virtualmachines"]
-  verbs: ["delete"]
-- apiGroups: ["action.open-cluster-management.io"]
-  resources: ["managedclusteractions"]
-  verbs: ["create", "get", "delete"]
-- apiGroups: ["snapshot.kubevirt.io"]
-  resources: ["virtualmachinesnapshots"]
-  verbs: ["delete"]
+  - apiGroups: ["clusterview.open-cluster-management.io"]
+    resources: ["kubevirtprojects"]
+    verbs: ["list"]
+  - apiGroups: ["clusterview.open-cluster-management.io"]
+    resources: ["managedclusters"]
+    verbs: ["list","get","watch"]
+  - apiGroups: ["cluster.open-cluster-management.io"]
+    resources: ["managedclusters"]
+    verbs: ["get"]
+    resourceNames: ["cluster01", "cluster02", "cluster03"] # customer needs to add the managed clusters they want their users and groups to access
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: acm-vm-rbac-required # customer can use any name
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: acm-vm-rbac-required # this name has to match the above ClusterRole name
+subjects:
+  - kind: User # customer can choose User or Group
+    apiGroup: rbac.authorization.k8s.io
+    name: user1 # customer needs to specify user or group name
 ----
-//This is where we need to discuss the notes and such for this YAML example.
+//not sure about having these both together, below it is separated out.
 
 . Apply the `ClusterRole` resource with the following command:
 
@@ -191,7 +139,7 @@ subjects:
   kind: Group
   name: group1
 ----
-//This is where we need to discuss the notes and such for this YAML example.
+//in the previous step
 
 . Apply the `ClusterRoleBinding` resource with the following command:
 
@@ -200,23 +148,43 @@ subjects:
 ----
 oc apply -f acm-vm-rbac-required.yml #variable? usually <rbac-namespace> or something
 ----
+//
 
-. Manually ddd users and groups to the hub cluster before you create the `ClusterPermission` in the console. For example, if you want to create an Access Control that allows three groups to access virtual machines, run the following commands.
-//now I am confused bc I thought this was the terminal process in lieu of the console so need to talk about this. If this is a bug, this needs to go in to the known issues or limitations, likely.
+. . Create a YAML file for the `ClusterPermission` resource and name the file, `cluster01-prod-admin.yml`. Assign fine-grain role-based access from the `ClusterPermission` resource, as displayed in the following YAML sample:
 
 +
 [source,bash]
 ----
-oc adm groups new group1
-oc adm groups new group2
-oc adm groups new group3
+apiVersion: rbac.open-cluster-management.io/v1alpha1
+kind: ClusterPermission
+metadata:
+  name: cluster01-prod-admin # customer can use any name
+  namespace: cluster01 # customer must specify a specific managed cluster name
+spec:
+  roleBindings:
+    - name: cluster01-prod-admin # customer can use any name
+      namespace: prod # customer must specify the namespace in the managed cluster that they are granting access too
+      roleRef:
+        name: kubevirt.io:admin
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+      subjects:
+        - kind: User # customer can choose User or Group
+          apiGroup: rbac.authorization.k8s.io
+          name: user1 # customer needs to specify user or group name
+
 ----
-//After the desired groups and/or users have been created on the hub, then you can proceed with creating Access Controls from the ACM UI which utilizes those users/groups. The user and group configurations should get configured by IDP once user logs in, we just need these dummy users/groups added here to workaround the ACM console UI bug.--from the google doc.
+. Run the following command to apply the file:
 
-If `observability` is enabled, create an additional `RoleBinding` on the hub cluster so that users can view virtual machine details in Grafana.
-//This is going in at the end as an optional step.
++
+[source,bash]
+----
+oc apply -f cluster01-prod-admin.yml
+----
 
-. Create the `RoleBinding` resource for Grafana access. See the following sample YAML file with `name: user-observability-grafana-access`.
+. *Optional:* If `observability` is enabled, create an additional `RoleBinding` on the hub cluster so that users can view virtual machine details in Grafana.
+
+.. Create the `RoleBinding` resource for Grafana access. See the following sample YAML file with `name: user-observability-grafana-access`.
 
 +
 [source,yaml]
@@ -236,16 +204,12 @@ roleRef:
  name: view
 ----
 
-. Apply the `ClusterRoleBinding` resource with the following command:
+.. Apply the `ClusterRoleBinding` resource with the following command:
 
 +
 [source,bash]
 ----
 oc apply -f user-observability-grafana-access.yml
 ----
-
-//NOTES:
-//Adjust Subjects accordingly. Add the usernames here that need access to Grafana
-//Adjust the namespace (cluster name) accordingly. One of these RoleBindings needs to be created for each cluster that the user or group needs ////access to. If you want to give a user/group access to all clusters, you can create a ClusterRoleBinding instead.
 
 
