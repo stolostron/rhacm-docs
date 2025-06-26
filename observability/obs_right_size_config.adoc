@@ -1,0 +1,89 @@
+[#config-right-size]
+= Configuring right-sizing guides (Technology Preview)
+
+You can customize right-sizing by editing the `rs-namespace-config` `ConfigMap` resource.
+
+[#config-right-size-prereq]
+== Prerequisites
+
+- You have enabled right-sizing guides.
+
+[#config-right-size-placement]
+== Configuring placement
+
+You can customize the placement configuration by making changes to the `placementConfiguration` property in the `rs-namespace-config` `ConfigMap` resource.
+
+See the following example where the policy only applies to clusters with the `environment=prod` label:
+
+[source,yaml]
+----
+placementConfiguration: |
+ spec:
+   . . .
+   predicates:
+   - requiredClusterSelector:
+       labelSelector:
+         matchLabels:
+           environment: prod
+   . . .
+----
+
+[#config-right-size-prometheus]
+== Configuring `PrometheusRule`
+
+You can customize the `PrometheusRule` resource by making changes to one of the following properties:
+
+`namespaceFilterCriteria`:: Limit guides to specific namespaces. You can include or exclude this property.
+`labelFilterCriteria`:: Filter namespaces with custom labels.
+`recommendationPercentage`:: Adjust CPU and memory guide percentages.
+
+See the following example:
+
+[source,yaml]
+----
+. . .
+  prometheusRuleConfig: |
+   namespaceFilterCriteria:
+    inclusionCriteria: <1>
+    - prod.*
+    exclusionCriteria: <1>
+    - openshift.*
+  labelFilterCriteria:
+  - labelName: label_kubernetes_io_metadata_name
+    inclusionCriteria:
+    - prod
+    - staging
+    exclusionCriteria:
+    - kube.*
+  recommendationPercentage: 120 <2>
+  . . .
+----
+
+<1> Use either `inclusionCriteria` or `exclusionCriteria`. You cannot use both at the same time.
+<2> Set the percentage of actual usage.
+
+[#config-right-size-namespace]
+== Configuring namespace binding
+
+By default, the right-sizing feature uses the `open-cluster-management-global-set` namespace for binding policies to clusters.
+
+To bind generated policies to a different namespace and cluster set, use the `namespaceBinding` property. See the following example:
+
+[source,yaml]
+----
+apiVersion: observability.open-cluster-management.io/v1beta2
+kind: MultiClusterObservability
+metadata:
+  name: observability
+spec:
+  . . .
+  capabilities:
+    platform:
+      analytics:
+        namespaceRightSizingRecommendation:
+          enabled: true
+          namespaceBinding: <your-namespace-binding>
+  . . .
+----
+
+*Important:* Ensure that the target namespace is part of a valid `ClusterSet` before you apply the change. The policies that you generate might not apply to any clusters if there is no valid binding.
