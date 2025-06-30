@@ -1,0 +1,146 @@
+[#gitops_app_rollout_strategy]
+= Implementing progressive rollout strategy by using _ApplicationSet_ resource (Technology Preview) 
+
+By implementing the progressive rollout strategy to your application in your cluster fleet for both the push and pull model, you have a {gitops}-based process that makes changes safely across your entire cluster fleet. With the rollout strategy, you can orchestrate staged updates across different clusters. Additionally, you can promote changes throughout your label defined groups, such as development and product clusters. 
+
+When you use the `ApplicationSet` resource for the progressive rollout strategy to your application, the `ApplicationSet` controller organizes the clusters for your application into groups. The controller processes one group at a time through the Argo CD health cycle, then only makes the group available if there is a `Healthy` status.
+
+To learn more about implementing the progressive rollout strategy by using the `ApplicationSet` resource, complete the following sections: 
+
+* <<enabling-rollout-strategy, Enabling the progressive rollout strategy by using the _ApplicationSet_ resource>>
+* <<understanding-applicationset, Understanding a sample _ApplicationSet_ resource for the progressive rollout strategy>>
+* <<understanding-labels-applications, Understanding labels for applications that use the progressive rollout strategy>>
+* <<understanding-changes-git-repository, Understanding changes to the Git repository that uses the progressive rollout strategy>>  
+
+[#enabling-rollout-strategy]
+== Enabling the progressive rollout strategy by using the _ApplicationSet_ resource
+
+To enable the progressive rollout strategy with your `ApplicationSet` resource, complete the following steps:
+
+. On your hub cluster, update the {gitops-short} operator instance configuration in the `openshift-gitops` namespace. 
+. Enable the progressive syncs for the `ApplicationSet` resource by running the following command:
+
++
+[source,bash]
+----
+oc -n openshift-gitops patch argocd openshift-gitops --type='merge' -p '{"spec":{"applicationSet":{"extraCommandArgs":["--enable-progressive-syncs"]}}}'
+----
+
+. Restart the `openshift-gitops-applicationset-controller` deployment in the `openshift-gitops` namespace. 
+. Apply the updated {gitops-short} operator instance configuration to create a new rollout by running the following command: 
+
++
+[source,bash]
+----
+oc -n openshift-gitops rollout restart deployment openshift-gitops-applicationset-controller
+----
+
+[#understanding-applicationset]
+== Understanding a sample _ApplicationSet_ resource for the progressive rollout strategy
+
+Understand a sample `ApplicationSet` with the Argo CD pull model that implements the progressive rollout strategy by viewing a strategy specification. This YAML activates the progressive rollout strategy. By adding the `strategy` parameter section on your hub cluster, your clusters can update fully and simultaneously instead of individually. 
+
+For example, see how a strategy is defined in the following `ApplicationSet` resource:
+
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook-allclusters-app-set
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: ocm-placement-generator
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: aws-app-placement
+      requeueAfterSeconds: 30
+  strategy:
+    type: RollingSync
+    rollingSync:
+      steps:
+      - name: dev-stage
+        matchExpressions:
+        - key: envLabel
+          operator: In
+          values: [env-dev]
+        maxUpdate: 100%
+      - name: qa-stage
+        matchExpressions:
+        - key: envLabel
+          operator: In
+          values: [env-qa]
+        maxUpdate: 100%
+      - name: prod-stage
+        matchExpressions:
+        - key: envLabel
+          operator: In
+          values: [env-prod]
+        maxUpdate: 100%
+  template:
+    preserveFields: <1> 
+    - metadata.labels.envLabel
+    metadata:
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+      name: '{{name}}-guestbook-app'
+    spec:
+      destination:
+        namespace: guestbook
+        server: https://kubernetes.default.svc
+      project: default
+      sources:
+      - repoURL: https://github.com/argoproj/argocd-example-apps.git
+        targetRevision: main
+        path: guestbook
+      syncPolicy:
+        syncOptions:
+        - CreateNamespace=true
+----
+<1> Use the `preserveFields` parameter to list the labels that need to be ignored by the `ApplicationSet` controller. You can manually apply a label that you want, for example, `envLabel=env-qa`. Without this field, the `ApplicationSet` controller overwrites or deletes labels that are not defined in the template. 
+
+
+[#understanding-labels-applications]
+== Understanding labels for applications that use the progressive rollout strategy
+
+The rollout strategy is used to process one group of applications at a time through the Argo CD health cycle. The controller organizes these groups of applications by matching labels that you set on the application objects. 
+
+Ensure that there is a unique label that specifies the promotion order that you need for every application, which is using the rollout strategy. See the following examples:
+
+* For example, you can give your applications a unique label by running the following command on your hub cluster: 
+
++
+[source,bash]
+----
+oc -n openshift-gitops label application/cluster1-guestbook-app envLabel=env-dev 
+----
+
+* If you want to  specify an application for quality assurance, run the following command: 
+
++
+[source,bash]
+----
+oc -n openshift-gitops label application/cluster2-guestbook-app envLabel=env-qa 
+----
+
+* If you want to specify an application group for product, run the following command:
+
+[source,bash]
+----
+oc -n openshift-gitops label application/cluster3-guestbook-app envLabel=env-prod
+----
+
+[#understanding-changes-git-repository]
+== Understanding changes to the Git repository that uses the progressive rollout strategy 
+
+To start the progressive rollout strategy for your `ApplicationSet` resource on your cluster fleet, the Argo CD application checks your Git repository for committed changes. When there are committed changes, the progressive rollout strategy begins. 
+
+When Argo CD starts the rollout strategy, the `ApplicationSet` controller detects the applications that have the `OutOfSync` status and schedules applications for a staged rollout. Based on the labels you use for your application groups, the `ApplicationSet` controller starts the first `RollingSync` step with the `env-dev` application group. 
+
+From the Argo CD health cycle, you can watch each application group move from `OutOfSync` to a `Healthy` status. After all your application groups have a `Healthy` status, the `ApplicationSet` controller syncs the application group with the `env-qa` label,  then the application group with the `env-prod` label. After your last `env-prod` application group has a `Healthy` status, the progressive rollout strategy completes automatically and fully runs its strategy on your cluster fleet. 
