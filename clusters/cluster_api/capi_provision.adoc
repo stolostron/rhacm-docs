@@ -1,0 +1,264 @@
+[#capi-provision]
+=  Provisioning a workload with Cluster API
+
+//need a short description--why does the user need to do this, for example
+
+Use supported RHCOS OCP images: Red Hat CoreOS (RHCOS) The exact RHCOS image version used should match the target OpenShift version.
+//Needs to be rewritten: We need supported OCP images that match the target OCP version later in the process, I assume.
+
+.Prerequisites
+
+* You need a management cluster.
+//do we mean managed? Need to understand this--we have hub, managed, local cluster...what do we meen by management -- if this is OCP, can you point to where we need to send the user for this.
+* You need the `MultiClusterEngine` resource either from the {acm-short} installation, or the {mce-short} standalone installation.
+* You need to configure DNS entries for the expected endpoints. DNS entries must be resolvable from the bootstrap cluster and the hosts that form the workload cluster. See the following endpoints:
+  - `api.<baseDomain>`: The API endpoint for the cluster.
+  - `api-int.<baseDomain>`: The internal API endpoint for the cluster.
+  - `*.apps.<baseDomain>`: The wildcard DNS entry for the cluster's applications.
+  - '<assisted-service-dns>': The DNS entry for the Assisted Installer service (see configuration).
+  - '<assisted-image-service-dns>': The DNS entry for the Assisted Installer image service (see configuration).
+//"see configuration" will be removed from this draft, let's point to what we want them to see.
+
+[steps-capi-workload]
+==  Provisioning a workload with Cluster API
+
+. You need to configure a `Cluster` resource with `clusterNetwork` specifications, `controlPlaneRef` specifications, and `infrastructureRef` specifications. See the following example `Cluster` resource that is named `test-multinode` in the `test-capi` namespace. `OpenshiftAssistedControlPlane` is the control place and `Metal3Cluster` is the infrastructure:
+
+[source,yaml]
+----
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: test-multinode
+  namespace: test-capi
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 172.18.0.0/20
+    services:
+      cidrBlocks:
+        - 10.96.0.0/12
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
+    kind: OpenshiftAssistedControlPlane
+    name: test-multinode
+    namespace: test-capi
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: Metal3Cluster
+    name: test-multinode
+    namespace: test-capi
+----
+//why do we have OpenshiftAssistedControlPlane and Metal3Cluster--I think we need to talk about this more in the intro, and are these only for those specific references?
+
+//do they save this or just add to it?
+
+
+. Configure the control plane node that includes the distribution version, API VIPs, and SSH keys. The following YAML defines the control plane configuration, including the distribution version, API VIPs, and SSH keys.
+//what yaml?
+
+- `.spec.config.sshAuthorizedKey` can be used to access the provisioned OpenShift Nodes
+- `.spec.openshiftAssistedConfigSpec.sshAuthorizedKey` can be used to access nodes in the boot (also known as discovery) phase.
+- For more configuration options, refer to the exposed APIs:
+- For controlplane specific config [OpenshiftAssistedControlPlane](./controlplane/api/v1alpha2/openshiftassistedcontrolplane_types.go) - `.spec.config`
+- For bootstrap config [OpenshiftAssistedConfig](./bootstrap/api/v1alpha1/openshiftassistedconfig_types.go) - `.spec.openshiftAssistedConfig`
+//this needs to be rewritten, we don't normally reference and api like this. What are we saying here? If I understand the goal, I can write it better.
+
+. If you do not have a pull secret, you need to create a pull secret. Set the `pullSecretRef` field to the name of the secret that contains the pull secret. This is required in multiple locations:
+- `.spec.config.pullSecretRef` and `.spec.openshiftAssistedConfigSpec.pullSecretRef` in the `OpenshiftAssistedControlPlane` resource.
+- `.spec.template.spec.pullSecretRef` in any `OpenshiftAssistedConfigTemplate` attached to MachineSets.
+//how do they create a pull secret, we need more info here. Imagine this is being read by a screen reader. That is how we need to orient the user.
+
+. Specify your {ocp-short} version in the `distributionVersion` field of the `OpenshiftAssistedControlPlane` resource. The value for the `distributionVersion` must match one of the tags that can be found in the OCP release page:https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/ 
+RHCOS image must match the version * [OCP Releases](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/)
+//rewrite (but I think we already say this early) but this is a bit confusing.
+
+[source,yaml]
+----
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
+kind: OpenshiftAssistedControlPlane
+metadata:
+  name: test-multinode
+  namespace: test-capi
+  annotations: {}
+spec:
+  openshiftAssistedConfigSpec:
+    sshAuthorizedKey: "{{ ssh_authorized_key }}"
+    nodeRegistration:
+      kubeletExtraLabels:
+      - 'metal3.io/uuid="${METADATA_UUID}"'
+  distributionVersion: 4.19.0 #we should be able to make this a variable
+  config:
+    apiVIPs:
+    - 192.168.222.40
+    ingressVIPs:
+    - 192.168.222.41
+    baseDomain: lab.home
+    pullSecretRef:
+      name: "pull-secret"
+    sshAuthorizedKey: "{{ ssh_authorized_key }}"
+  machineTemplate:
+    infrastructureRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+      kind: Metal3MachineTemplate
+      name: test-multinode-controlplane
+      namespace: test-capi
+  replicas: 3
+----
+
+. Configure the cluster infrastructure. The control plane endpoint is composed by the `<clusterName>.<baseDomain>*` value. The `clusterName` is defined in the `Cluster` resource, while `baseDomain` is defined in the `OpenshiftAssistedControlPlane` resource in the following section:
+//I don't see any of that following, this is in the previous YAMl. It's best to have the YAML chronological.
+
+[source,yaml]
+----
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3Cluster
+metadata:
+  name: test-multinode
+  namespace: test-capi
+spec:
+  controlPlaneEndpoint:
+    host: test-multinode.lab.home
+    port: 6443
+  noCloudProvider: true
+----
+
+. Configure control plane infrastructure. The following YAML defines the infrastructure provider configuration for control plane nodes. For more info check the [CAPM3 official documentation](https://book.metal3.io/capm3/introduction.html)
+//It's very odd to give some yaml and tell them to go to another doc to understand the YAML. We explain what we want them to know from the example.
+Note: make sure clusterName is set to the same value as in the `Cluster` resource*
+
+[source,yaml]
+----
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3MachineTemplate
+metadata:
+  name: test-multinode-controlplane
+  namespace: test-capi
+spec:
+  nodeReuse: false
+  template:
+    spec:
+      automatedCleaningMode: disabled
+      dataTemplate:
+        name: test-multinode-controlplane-template
+      image:
+        checksum: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/pre-release/dev-4.19/sha256sum.txt
+
+        checksumType: sha256
+        url: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/pre-release/dev-4.19/rhcos-dev-4.19-x86_64-nutanix.x86_64.qcow2
+        format: qcow2
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3DataTemplate
+metadata:
+   name: test-multinode-controlplane-template
+   namespace: test-capi
+spec:
+   clusterName: test-multinode
+----
+
+. Configure worker nodes with the `MachineDeployment` resource. The following YAML defines a `MachineDeployment` for worker nodes, including the bootstrap configuration and infrastructure reference.
+
+[source,yaml]
+----
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: test-multinode-worker
+  namespace: test-capi
+  labels:
+    cluster.x-k8s.io/cluster-name: test-multinode
+spec:
+  clusterName: test-multinode
+  replicas: 2
+  selector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: test-multinode
+  template:
+    metadata:
+      labels:
+        cluster.x-k8s.io/cluster-name: test-multinode
+    spec:
+      clusterName: test-multinode
+      bootstrap:
+        configRef:
+          name: test-multinode-worker
+          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
+          kind: OpenshiftAssistedConfigTemplate
+      infrastructureRef:
+        name: test-multinode-workers-2
+        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
+        kind: Metal3MachineTemplate
+----
+
+The following YAML defines the bootstrap configuration for worker nodes. This is used to register the nodes with the OpenShift Assisted Installer.
+Notice how we are labeling the nodes through kubelet labels: this is required by CAPM3. The METADATA_UUID env var is being loaded on the node, and can be leveraged by this templating.
+//I don't understand this so I cannot easily explain it, and the following YAML doesn't have bootstrap spec, the previous one does.
+
+[source,yaml]
+----
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
+kind: OpenshiftAssistedConfigTemplate
+metadata:
+  name: test-multinode-worker
+  namespace: test-capi
+  labels:
+    cluster.x-k8s.io/cluster-name: test-multinode
+spec:
+  template:
+    spec:
+      nodeRegistration:
+        kubeletExtraLabels:
+          - 'metal3.io/uuid="${METADATA_UUID}"'
+      sshAuthorizedKey: "{{ ssh_authorized_key }}"
+----
+
+The following YAML defines the infrastructure provider configuration for worker nodes. For more info check the CAPM3 official documentation
+//we need to tell them what to do/look for, not just point them to another document:
+
+[source,yaml]
+----
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3MachineTemplate
+metadata:
+   name: test-multinode-workers-2
+   namespace: test-capi
+spec:
+   nodeReuse: false
+   template:
+      spec:
+         automatedCleaningMode: metadata
+         dataTemplate:
+            name: test-multinode-workers-template
+         image:
+            checksum: https://cloud.centos.org/centos/scos/9/prod/streams/latest/x86_64/sha256sum.txt
+            checksumType: sha256
+            url: https://cloud.centos.org/centos/scos/9/prod/streams/latest/x86_64/scos-9.0.20250411-0-nutanix.x86_64.qcow2
+            format: qcow2
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3DataTemplate
+metadata:
+   name: test-multinode-workers-template
+   namespace: test-capi
+spec:
+   clusterName: test-multinode
+----
+
+. Run the following command to save the YAML file and provision a cluster.
+
+[source,bash]
+----
+oc apply -f cluster.yaml
+----
+//did we tell them to name it that and if not, then we need to tell them it is a variable.
+
+. Monitor the cluster.
+
+//It looks like this is two procedures that are placed together in one draft. I think we need to reconsider the architecture here. 
+//Procedure one: (Metal3Cluster)
+//Procedure two: (OpenshiftAssistedControlPlane)
+//I still don't have a good sense of what the goal is for the user, and that is needed to be able to write it. The draft needs some work in defining the procedure and explaining. I looked for a demo in the ACM playbacks but didn't see one. 
+
+
