@@ -50,8 +50,8 @@ oc edit multiclusterengines.multicluster.openshift.io -n multicluster-engine
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
-  name: test-multinode #should this be <cluster-name>
-  namespace: test-capi
+  name: <cluster-name>
+  namespace: <cluster-namespace>
 spec:
   clusterNetwork:
     pods:
@@ -63,13 +63,13 @@ spec:
   controlPlaneRef: <1>
     apiVersion: controlplane.cluster.x-k8s.io/v1alpha2 <1>
     kind: OpenshiftAssistedControlPlane
-    name: <your-name> # <cluster-name>?
-    namespace: <your-namespace>
+    name:  <cluster-name> 
+    namespace:  <cluster-namespace>
   infrastructureRef: <2>
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1 <2>
     kind: Metal3Cluster
-    name: <your-name>
-    namespace: <your-namespace>
+    name: <cluster-name>
+    namespace: <cluster-namespace>
 ----
 1. `OpenshiftAssistedControlPlane` is the control plane.
 2. `Metal3Cluster` is the infrastructure.
@@ -90,8 +90,8 @@ oc apply -f <filename>.yaml
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
 kind: OpenshiftAssistedControlPlane
 metadata:
-  name: test-multinode
-  namespace: test-capi
+  name: <cluster-name>
+  namespace: <cluster-namespace>
   annotations: {}
 spec:
   openshiftAssistedConfigSpec:
@@ -113,8 +113,8 @@ spec:
     infrastructureRef:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: Metal3MachineTemplate
-      name: test-multinode-controlplane
-      namespace: test-capi
+      name: <cluster-name-control-plane>
+      namespace: <cluster-namespace>
   replicas: 3
 ----
 1.`.spec.openshiftAssistedConfigSpec.sshAuthorizedKey` is used to access nodes in the boot (also known as discovery) phase.
@@ -140,7 +140,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: pull-secret
-  namespace: <your-namespace> <1>
+  namespace: <cluster-namespace> <1>
 data:
   .dockerconfigjson: <encoded_docker_configuration> <2>
 type: kubernetes.io/dockerconfigjson
@@ -164,11 +164,11 @@ oc apply -f pull-secret.yaml
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3Cluster
 metadata:
-  name: test-multinode
-  namespace: test-capi
+  name: <cluster-name>
+  namespace: <cluster-namespace>
 spec:
   controlPlaneEndpoint:
-    host: test-multinode.lab.home <1>
+    host: <cluster-name>.lab.home <1>
     port: 6443
   noCloudProvider: true
 ----
@@ -190,15 +190,15 @@ oc apply -f <filename>.yaml
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3MachineTemplate
 metadata:
-  name: test-multinode-controlplane
-  namespace: test-capi
+  name: <cluster-name>
+  namespace: <cluster-namespace>
 spec:
   nodeReuse: false
   template:
     spec:
       automatedCleaningMode: disabled
       dataTemplate:
-        name: test-multinode-controlplane-template
+        name: <cluster-name-template>
       image: <1>
         checksum: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/sha256sum.txt
         checksumType: sha256
@@ -208,12 +208,12 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3DataTemplate
 metadata:
-   name: test-multinode-controlplane-template
-   namespace: test-capi
+   name: <cluster-name-template>
+   namespace: <cluster-namespace>
 spec:
-   clusterName: test-multinode <2>
+   clusterName: <cluster-name> <2>
 ----
-1. The `distributionVersion` the version from link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
+1. The image is `distributionVersion` value from link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
 2. Set the `clusterName` to the same value that it is in the `Cluster` resource
 
 
@@ -233,29 +233,29 @@ oc apply -f <filename>.yaml
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
-  name: test-multinode-worker
-  namespace: test-capi
+  name: <cluster-name-worker>
+  namespace: <cluster-namespace>
   labels:
-    cluster.x-k8s.io/cluster-name: test-multinode
+    cluster.x-k8s.io/cluster-name: <cluster-name>
 spec:
-  clusterName: test-multinode
+  clusterName: <cluster-name>
   replicas: 2
   selector:
     matchLabels:
-      cluster.x-k8s.io/cluster-name: test-multinode
+      cluster.x-k8s.io/cluster-name: <cluster-name>
   template:
     metadata:
       labels:
-        cluster.x-k8s.io/cluster-name: test-multinode
+        cluster.x-k8s.io/cluster-name: <cluster-name>
     spec:
-      clusterName: test-multinode
+      clusterName: <cluster-name>
       bootstrap: <1>
         configRef:
-          name: test-multinode-worker
+          name: <cluster-name-worker>
           apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1 
           kind: OpenshiftAssistedConfigTemplate
       infrastructureRef: <2>
-        name: test-multinode-workers-2
+        name: <cluster-name-workers-2>
         apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
         kind: Metal3MachineTemplate
 ----
@@ -270,7 +270,7 @@ spec:
 oc apply -f <filename>.yaml
 ----
 
-. Create the `OpenshiftAssistedConfigTemplate` resource that is referenced in the `MachineDeployment`. The following YAML defines the bootstrap configuration for worker nodes. This is used to register the nodes with the {ai}.
+. Create the `OpenshiftAssistedConfigTemplate` resource that is referenced in the `MachineDeployment`. The following YAML defines the bootstrap configuration for worker nodes and is used to register the nodes with the {ai}.
 
 +
 [source,yaml]
@@ -278,10 +278,10 @@ oc apply -f <filename>.yaml
 apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
 kind: OpenshiftAssistedConfigTemplate
 metadata:
-  name: test-multinode-worker
-  namespace: test-capi
+  name: <cluster-name-worker>
+  namespace: <cluster-namespace>
   labels:
-    cluster.x-k8s.io/cluster-name: test-multinode
+    cluster.x-k8s.io/cluster-name: cluster-name
 spec:
   template:
     spec:
@@ -301,15 +301,15 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3MachineTemplate
 metadata:
-   name: test-multinode-workers-2
-   namespace: test-capi
+   name: <cluster-name-workers-2>
+   namespace: <cluster-namespace>
 spec:
    nodeReuse: false
    template:
       spec:
          automatedCleaningMode: metadata
          dataTemplate:
-            name: test-multinode-workers-template
+            name: <cluster-name-workers-template>
       image:
         checksum: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/sha256sum.txt
         checksumType: sha256
@@ -319,10 +319,10 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3DataTemplate
 metadata:
-   name: test-multinode-workers-template
-   namespace: test-capi
+   name: <cluster-name-workers-template>
+   namespace: <cluster-namespace>
 spec:
-   clusterName: test-multinode
+   clusterName: <cluster-name>
 ----
 
 . Run the following command to save the YAML file and provision a cluster.
@@ -330,15 +330,15 @@ spec:
 +
 [source,bash]
 ----
-oc apply -f cluster.yaml
+oc apply -f <filename>.yaml
 ----
 
 . Verify that the resources are available. 
 
-.. Run `oc get cluster` to check your `Cluster` resource.
+.. Run `oc get cluster --namespace <cluster-namespace> <cluster-name> -o yaml` to check your `Cluster` resource status.
 
 +
-See the following output and check for the status:
+See the following output and status:
 
 +
 [source,yaml]
@@ -356,10 +356,10 @@ status:
     type: InfrastructureReady
 ----
 
-.. Run the `oc get metal3cluster --namespace test-capi test-multinode -o yaml` command to check your cluster infrastructure.
+.. Run the `oc get metal3cluster --namespace <cluster-namespace> <cluster-name> -o yaml` command to check your cluster infrastructure status.
 
 +
-See the following output and check for the status:
+See the following output and status:
 
 +
 [source,yaml]
@@ -374,10 +374,10 @@ status:
     type: BaremetalInfrastructureReady
 ----
 
-.. Run the `oc get openshiftassistedcontrolplane --namespace test-capi test-multinode -o yaml` command to check your control plane.
+.. Run the `oc get openshiftassistedcontrolplane --namespace <cluster-namespace> <cluster-name> -o yaml` command to check your control plane status.
 
-+ 
-See the following output and check for the status:
++
+See the following output and status:
 
 +
 [source,yaml]
@@ -404,10 +404,10 @@ status:
     type: UpgradeCompleted
 ----
 
-.. Run the `oc get machinedeployment --namespace test-capi test-multinode-worker -o yaml` command to check your machine deployments.
+.. Run the `oc get machinedeployment --namespace <cluster-namespace> <cluster-name> -o yaml` command to check your machine deployments status.
 
 + 
-See the following output and check for the status:
+See the following output and status:
 
 +
 [source,yaml]
@@ -425,10 +425,10 @@ status:
     type: MachineSetReady
 ----
 
-.. Run the `kubectl get machine -l cluster.x-k8s.io/cluster-name=test-multinode -n test-capi -o yaml` command to check your machines.
+.. Run the `kubectl get machine -l cluster.x-k8s.io/cluster-name=cluster-name -n test-capi -o yaml` command to check your machines.
 
 + 
-See the following output and check for the status:
+See the following output and status:
 
 +
 [source,yaml]
@@ -456,7 +456,7 @@ See the following output and check for the status:
 +
 [source,bash]
 ----
-oc get secret -n test-capi  test-multinode-admin-kubeconfig -o json | jq -r .data.kubeconfig | base64 --decode > kubeconfig
+oc get secret -n test-capi  cluster-name-admin-kubeconfig -o json | jq -r .data.kubeconfig | base64 --decode > kubeconfig
 ----
 
 .. Run the following command to use the `kubeconfig` file to access the cluster:
