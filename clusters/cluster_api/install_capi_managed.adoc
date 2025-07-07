@@ -3,9 +3,6 @@
 
 You can install an {ocp-short} managed cluster with the Cluster API by using the `metal3` infrastructure provider and the {ocp-short} assisted bootstrap and control plane providers.
 
-//Use supported RHCOS OCP images: Red Hat CoreOS (RHCOS) The exact RHCOS image version used should match the target OpenShift version.
-//We say this below, so can we remove it?
-
 .Prerequisites
 
 * You need the `MultiClusterEngine` resource either from the {acm-short} installation, or the {mce-short} standalone installation.
@@ -17,12 +14,13 @@ You can install an {ocp-short} managed cluster with the Cluster API by using the
 
 . Enable the services that you need to provision a workload. By default, `assisted-service`, cluster-api-provider-metal3-preview, and `cluster-api-provider-openshift-assisted-preview` are disabled. Run the following command to edit the resource: 
 
++
 [source,bash]
 ----
 oc edit multiclusterengines.multicluster.openshift.io -n multicluster-engine
 ----
 
-. Set `enabled: true` in `.spec.overrides` for `assisted-service`, `cluster-api-provider-metal3-preview`, and `cluster-api-provider-openshift-assisted-preview`. See the following `configOverrides`:
+. Set `enabled: true` in `.spec.overrides` for the `assisted-service` component, the `cluster-api-provider-metal3-preview` component, and the `cluster-api-provider-openshift-assisted-preview` component. See the following `configOverrides` values:
 
 +
 [source,yaml]
@@ -44,7 +42,7 @@ oc edit multiclusterengines.multicluster.openshift.io -n multicluster-engine
 
 . Enable the {cim} service. See link:../assisted_installer/ai_enable_cim.adoc#enable-cim[Enabling the {cim} service] for the procedure.
 
-. Configure a `Cluster` resource with `clusterNetwork` specifications, `controlPlaneRef` specifications, and `infrastructureRef` specifications. See the following example `Cluster` resource:
+. Configure a `Cluster` resource with `clusterNetwork` specifications, `controlPlaneRef` specifications, and `infrastructureRef` specifications. See the following `Cluster` resource:
 
 +
 [source,yaml]
@@ -79,6 +77,7 @@ spec:
 . Apply the YAML content by running the following command:
 
 +
+[source,bash]
 ----
 oc apply -f <filename>.yaml
 ----
@@ -119,15 +118,13 @@ spec:
   replicas: 3
 ----
 1.`.spec.openshiftAssistedConfigSpec.sshAuthorizedKey` is used to access nodes in the boot (also known as discovery) phase.
-2, Specify your {ocp-short} version in the `distributionVersion` field. The value for the `distributionVersion` must match one of the tags from the {ocp-short} release page:https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/.
-//this points to staged version -- is there a better link
-See link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
-//is this the link we should be using?
+2. Specify your {ocp-short} version in the `distributionVersion` field. The value for the `distributionVersion` must match one of the tags from the {ocp-short} release. See link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
 3.`.spec.config.sshAuthorizedKey` is used to access the provisioned {ocp-short} nodes.
 
 . Apply the YAML content by running the following command:
 
 +
+[source,bash]
 ----
 oc apply -f <filename>.yaml
 ----
@@ -143,7 +140,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: pull-secret
-  namespace: example-sno <1>
+  namespace: <your-namespace> <1>
 data:
   .dockerconfigjson: <encoded_docker_configuration> <2>
 type: kubernetes.io/dockerconfigjson
@@ -154,7 +151,7 @@ type: kubernetes.io/dockerconfigjson
 . Run the following command to apply the file:
 
 +
-[source,terminal]
+[source,bash]
 ----
 oc apply -f pull-secret.yaml
 ----
@@ -175,12 +172,12 @@ spec:
     port: 6443
   noCloudProvider: true
 ----
-1. The `host` is composed by the `<clusterName>.<baseDomain>*` value. The `clusterName` is defined in the `Cluster` resource, while `baseDomain` is defined in the `OpenshiftAssistedControlPlane` resource.
-//because it is called test-multinode.lab.home should we enter cluster name here?
+1. The `host` is the `<clusterName>.<baseDomain>*` value with the `clusterName` from the `Cluster` resource, and the `baseDomain` is defined in the `OpenshiftAssistedControlPlane` resource.
 
 . Apply the file. Run the following command:
 
 +
+[source,bash]
 ----
 oc apply -f <filename>.yaml
 ----
@@ -202,7 +199,7 @@ spec:
       automatedCleaningMode: disabled
       dataTemplate:
         name: test-multinode-controlplane-template
-      image:
+      image: <1>
         checksum: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/sha256sum.txt
         checksumType: sha256
         url: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/rhcos-4.19.0-x86_64-nutanix.x86_64.qcow2
@@ -214,14 +211,16 @@ metadata:
    name: test-multinode-controlplane-template
    namespace: test-capi
 spec:
-   clusterName: test-multinode
+   clusterName: test-multinode <2>
 ----
-1. Set the `clusterName` to the same value that it is in the `Cluster` resource
-//what else should we call out here?
+1. The `distributionVersion` the version from link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
+2. Set the `clusterName` to the same value that it is in the `Cluster` resource
+
 
 . Apply the file. Run the following command:
 
 +
+[source,bash]
 ----
 oc apply -f <filename>.yaml
 ----
@@ -266,6 +265,7 @@ spec:
 . Apply the file. Run the following command:
 
 +
+[source,bash]
 ----
 oc apply -f <filename>.yaml
 ----
@@ -293,7 +293,7 @@ spec:
 1. The `kubeletExtraLabels` must be this exact value.
 2. Enter your `sshAuthorizedKey`.
 
-. Create the `Metal3MachineTemplate` that is referenced in the `MachineDeployment`.
+. Create the `Metal3MachineTemplate` that is referenced in the `MachineDeployment` resource.
 
 +
 [source,yaml]
@@ -333,10 +333,12 @@ spec:
 oc apply -f cluster.yaml
 ----
 
-. You can verify that the resources are available. For example, you can run  `oc get cluster` to check your `Cluster` resource
+. Verify that the resources are available. 
+
+.. Run `oc get cluster` to check your `Cluster` resource.
 
 +
-See the following output and check for the status of your cluster:
+See the following output and check for the status:
 
 +
 [source,yaml]
@@ -352,4 +354,97 @@ status:
   - lastTransitionTime: "2025-06-25T10:37:03Z"
     status: "True"
     type: InfrastructureReady
+----
+
+.. Run the `oc get metal3cluster --namespace test-capi test-multinode -o yaml` command to check your cluster infrastructure.
+
++
+See the following output and check for the status:
+
++
+[source,yaml]
+----
+status:
+  conditions:
+  - lastTransitionTime: "2025-06-25T10:37:03Z"
+    status: "True"
+    type: Ready
+  - lastTransitionTime: "2025-06-25T10:37:03Z"
+    status: "True"
+    type: BaremetalInfrastructureReady
+----
+
+.. Run the `oc get openshiftassistedcontrolplane --namespace test-capi test-multinode -o yaml` command to check your control plane.
+
++ 
+See the following output and check for the status:
+
++
+[source,yaml]
+----
+status:
+  conditions:
+  - lastTransitionTime: "2025-06-25T11:23:38Z"
+    status: "True"
+    type: Ready
+  - lastTransitionTime: "2025-06-25T11:23:38Z"
+    status: "True"
+    type: ControlPlaneReady
+  - lastTransitionTime: "2025-06-25T10:45:48Z"
+    status: "True"
+    type: KubeconfigAvailable
+  - lastTransitionTime: "2025-06-25T10:38:25Z"
+    status: "True"
+    type: MachinesCreated
+  - lastTransitionTime: "2025-06-25T11:10:54Z"
+    status: "True"
+    type: MachinesReady
+  - lastTransitionTime: "2025-06-25T11:23:38Z"
+    status: "True"
+    type: UpgradeCompleted
+----
+
+.. Run the `oc get machinedeployment --namespace test-capi test-multinode-worker -o yaml` command to check your machine deployments.
+
++ 
+See the following output and check for the status:
+
++
+[source,yaml]
+----
+status:
+  conditions:
+  - lastTransitionTime: "2025-06-25T11:10:29Z"
+    status: "True"
+    type: Ready
+  - lastTransitionTime: "2025-06-25T11:10:29Z"
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2025-06-25T11:10:29Z"
+    status: "True"
+    type: MachineSetReady
+----
+
+.. Run the `kubectl get machine -l cluster.x-k8s.io/cluster-name=test-multinode -n test-capi -o yaml` command to check your machines.
+
++ 
+See the following output and check for the status:
+
++
+[source,yaml]
+----
+ status:
+    conditions:
+    - lastTransitionTime: "2025-06-25T11:09:57Z"
+  	status: "True"
+  	type: Ready
+    - lastTransitionTime: "2025-06-25T10:38:20Z"
+  	status: "True"
+  	type: BootstrapReady
+    - lastTransitionTime: "2025-06-25T11:09:57Z"
+  	status: "True"
+  	type: InfrastructureReady
+    - lastTransitionTime: "2025-06-25T11:10:29Z"
+  	status: "True"
+  	type: NodeHealthy
 ----
