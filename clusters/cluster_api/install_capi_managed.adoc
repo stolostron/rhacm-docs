@@ -1,27 +1,31 @@
 [#capi-provision]
 = Installing a managed cluster with Cluster API
 
-You can install an OCP managed cluster with the cluster API using the `metal3` infrastructure provider and the openshift assisted bootstrap and control plane providers.
+You can install an {ocp-short} managed cluster with the Cluster API by using the `metal3` infrastructure provider and the {ocp-short} assisted bootstrap and control plane providers.
 
 //Use supported RHCOS OCP images: Red Hat CoreOS (RHCOS) The exact RHCOS image version used should match the target OpenShift version.
-//Needs to be rewritten: We need supported OCP images that match the target OCP version later in the process, I assume.
+//We say this below, so can we remove it?
 
 .Prerequisites
 
 * You need the `MultiClusterEngine` resource either from the {acm-short} installation, or the {mce-short} standalone installation.
-* Assisted service needs to be enabled, which is the default setting.
-You need to configure DNS entries for the expected endpoints. DNS entries must be resolvable from the bootstrap cluster and the hosts that form the workload cluster. See the following endpoints:
-  - `api.<baseDomain>`: The API endpoint for the cluster.
-  - `api-int.<baseDomain>`: The internal API endpoint for the cluster.
-  - `*.apps.<baseDomain>`: The wildcard DNS entry for the cluster's applications.
+* The following API base domain must point to the static API VIP: `api.<cluster_name>.<base_domain>`
+* The following application base domain must point to the static IP address for Ingress VIP: `*.apps.<cluster_name>.<base_domain>`
 
 [steps-capi-workload]
 ==  Provisioning a workload with Cluster API
 
-. Change the default behavior
-oc edit multiclusterengines.multicluster.openshift.io -n multicluster-engine
+. Enable the services that you need to provision a workload. By default, `assisted-service`, cluster-api-provider-metal3-preview, and `cluster-api-provider-openshift-assisted-preview` are disabled. Run the following command to edit the resource: 
 
-# set enabled to true for the following values in .spec.overrides:
+[source,bash]
+----
+oc edit multiclusterengines.multicluster.openshift.io -n multicluster-engine
+----
+
+. Set `enabled: true` in `.spec.overrides` for `assisted-service`, `cluster-api-provider-metal3-preview`, and `cluster-api-provider-openshift-assisted-preview`. See the following `configOverrides`:
+
++
+[source,yaml]
 ----
     - configOverrides: {}
       enabled: true
@@ -29,24 +33,26 @@ oc edit multiclusterengines.multicluster.openshift.io -n multicluster-engine
     - configOverrides: {}
       enabled: true
       name: cluster-api
-..
+...
     - configOverrides: {}
       enabled: true
       name: cluster-api-provider-metal3-preview
     - configOverrides: {}
       enabled: true
       name: cluster-api-provider-openshift-assisted-preview
-----    
-. You need to enable cim https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.13/html/clusters/cluster_mce_overview#enable-cim 
+----
 
-. You need to configure a `Cluster` resource with `clusterNetwork` specifications, `controlPlaneRef` specifications, and `infrastructureRef` specifications. See the following example `Cluster` resource `OpenshiftAssistedControlPlane` is the control place and `Metal3Cluster` is the infrastructure:
+. Enable the {cim} service. See link:../assisted_installer/ai_enable_cim.adoc#enable-cim[Enabling the {cim} service] for the procedure.
 
+. Configure a `Cluster` resource with `clusterNetwork` specifications, `controlPlaneRef` specifications, and `infrastructureRef` specifications. See the following example `Cluster` resource:
+
++
 [source,yaml]
 ----
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
-  name: test-multinode
+  name: test-multinode #should this be <cluster-name>
   namespace: test-capi
 spec:
   clusterNetwork:
@@ -57,23 +63,29 @@ spec:
       cidrBlocks:
         - 10.96.0.0/12
   controlPlaneRef: <1>
-    apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
+    apiVersion: controlplane.cluster.x-k8s.io/v1alpha2 <1>
     kind: OpenshiftAssistedControlPlane
-    name: <your-name>
+    name: <your-name> # <cluster-name>?
     namespace: <your-namespace>
   infrastructureRef: <2>
-    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1 <2>
     kind: Metal3Cluster
     name: <your-name>
     namespace: <your-namespace>
 ----
-1. 
-2. 
+1. `OpenshiftAssistedControlPlane` is the control plane.
+2. `Metal3Cluster` is the infrastructure.
 
-. Run the command to apply.
+. Apply the YAML content by running the following command:
 
-. Configure the `OpenshiftAssistedControlPlane` resource that includes the distribution version, API VIPs, and SSH keys. The following YAML defines the control plane configuration, including the distribution version, API VIPs, and SSH keys.
++
+----
+oc apply -f <filename>.yaml
+----
 
+. Configure the `OpenshiftAssistedControlPlane` resource that includes the distribution version, API VIPs, and SSH keys. The following YAML defines the control plane configuration, including the distribution version, API VIPs, and SSH keys. See the following YAML sample:
+
++
 [source,yaml]
 ----
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
@@ -84,11 +96,11 @@ metadata:
   annotations: {}
 spec:
   openshiftAssistedConfigSpec:
-    sshAuthorizedKey: "{{ ssh_authorized_key }}"
+    sshAuthorizedKey: "{{ ssh_authorized_key }}" <1>
     nodeRegistration:
       kubeletExtraLabels:
       - 'metal3.io/uuid="${METADATA_UUID}"'
-  distributionVersion: 4.19.0 #we should be able to make this a variable
+  distributionVersion: 4.x.0 <2>
   config:
     apiVIPs:
     - 192.168.222.40
@@ -97,7 +109,7 @@ spec:
     baseDomain: lab.home
     pullSecretRef:
       name: "pull-secret"
-    sshAuthorizedKey: "{{ ssh_authorized_key }}"
+    sshAuthorizedKey: "{{ ssh_authorized_key }}" <3>
   machineTemplate:
     infrastructureRef:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -106,24 +118,50 @@ spec:
       namespace: test-capi
   replicas: 3
 ----
-1.`.spec.config.sshAuthorizedKey` can be used to access the provisioned OpenShift Nodes
-2.`.spec.openshiftAssistedConfigSpec.sshAuthorizedKey` can be used to access nodes in the boot (also known as discovery) phase.
-3. Specify your {ocp-short} version in the `distributionVersion` field of the `OpenshiftAssistedControlPlane` resource. The value for the `distributionVersion` must match one of the tags that can be found in the OCP release page:https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/ 
-RHCOS image must match the version * [OCP Releases](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/)
-//will rewrite (but I think we already say this early)
+1.`.spec.openshiftAssistedConfigSpec.sshAuthorizedKey` is used to access nodes in the boot (also known as discovery) phase.
+2, Specify your {ocp-short} version in the `distributionVersion` field. The value for the `distributionVersion` must match one of the tags from the {ocp-short} release page:https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/.
+//this points to staged version -- is there a better link
+See link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
+//is this the link we should be using?
+3.`.spec.config.sshAuthorizedKey` is used to access the provisioned {ocp-short} nodes.
 
-. Apply
+. Apply the YAML content by running the following command:
 
-. If you do not have a pull secret, you need to create a pull secret. Set the `pullSecretRef` field to the name of the secret that contains the pull secret. 
++
+----
+oc apply -f <filename>.yaml
+----
 
-.. `.spec.config.pullSecretRef` and `.spec.openshiftAssistedConfigSpec.pullSecretRef` in the `OpenshiftAssistedControlPlane` resource.
-.. `.spec.template.spec.pullSecretRef` in any `OpenshiftAssistedConfigTemplate` attached to MachineSets.
-.. See {ocp-short} link:https://console.redhat.com/openshift/install/pull-secret[pull secret]. See _Using image pull secrets_ for more information.
-//use siteconfig as example.
+. If you do not have a pull secret, you need to create a pull secret to enable your clusters to pull images from container registries. Complete the following steps to create a pull secret:
 
+. Create a YAML file to pull images. See the following example of a file that is named `pull-secret.yaml`:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pull-secret
+  namespace: example-sno <1>
+data:
+  .dockerconfigjson: <encoded_docker_configuration> <2>
+type: kubernetes.io/dockerconfigjson
+----
+<1> Ensure that the `namespace` value matches the target namespace.
+<2> Specify the base64-encoded configuration file as the value. 
+
+. Run the following command to apply the file:
+
++
+[source,terminal]
+----
+oc apply -f pull-secret.yaml
+----
 
 . Configure the `Metal3Cluster` infrastructure resource. 
 
++
 [source,yaml]
 ----
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -133,16 +171,23 @@ metadata:
   namespace: test-capi
 spec:
   controlPlaneEndpoint:
-    host: test-multinode.lab.home
+    host: test-multinode.lab.home <1>
     port: 6443
   noCloudProvider: true
 ----
 1. The `host` is composed by the `<clusterName>.<baseDomain>*` value. The `clusterName` is defined in the `Cluster` resource, while `baseDomain` is defined in the `OpenshiftAssistedControlPlane` resource.
+//because it is called test-multinode.lab.home should we enter cluster name here?
 
-. oc apply
+. Apply the file. Run the following command:
 
-. Configure the `Metal3MachineTemplate` resource for the control plane nodes that is referenced from the `OpenshiftAssistedControlPlane`
++
+----
+oc apply -f <filename>.yaml
+----
 
+. Configure the `Metal3MachineTemplate` resource for the control plane nodes that is referenced from the `OpenshiftAssistedControlPlane` resource. See the following YAML sample:
+
++
 [source,yaml]
 ----
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -158,9 +203,9 @@ spec:
       dataTemplate:
         name: test-multinode-controlplane-template
       image:
-        checksum: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/pre-release/dev-4.19/sha256sum.txt
+        checksum: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/sha256sum.txt
         checksumType: sha256
-        url: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/pre-release/dev-4.19/rhcos-dev-4.19-x86_64-nutanix.x86_64.qcow2
+        url: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/rhcos-4.19.0-x86_64-nutanix.x86_64.qcow2
         format: qcow2
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -171,14 +216,19 @@ metadata:
 spec:
    clusterName: test-multinode
 ----
-1. Make sure clusterName is set to the same value as in the `Cluster` resource
-2. names need to match
-3.
+1. Set the `clusterName` to the same value that it is in the `Cluster` resource
+//what else should we call out here?
 
-. Apply command
+. Apply the file. Run the following command:
 
-. Configure worker nodes with the `MachineDeployment` resource. 
++
+----
+oc apply -f <filename>.yaml
+----
 
+. Configure worker nodes with the `MachineDeployment` resource. See the following example:
+
++
 [source,yaml]
 ----
 apiVersion: cluster.x-k8s.io/v1beta1
@@ -200,22 +250,27 @@ spec:
         cluster.x-k8s.io/cluster-name: test-multinode
     spec:
       clusterName: test-multinode
-      bootstrap:
+      bootstrap: <1>
         configRef:
           name: test-multinode-worker
-          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
+          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1 
           kind: OpenshiftAssistedConfigTemplate
-      infrastructureRef:
+      infrastructureRef: <2>
         name: test-multinode-workers-2
         apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
         kind: Metal3MachineTemplate
 ----
-1. including the bootstrap configuration is referenced below (how to install)
-2. infrastructure reference points to the resource below (how to provision)
+1. The bootstrap configuration is also referenced in the next resource for installation.
+2. The infrastructure reference points to the resource to provision.
 
-. Run apply
+. Apply the file. Run the following command:
 
-. Create the `OpenshiftAssistedConfigTemplate` resource that is referenced in the `MachineDeployment`. The following YAML defines the bootstrap configuration for worker nodes. This is used to register the nodes with the OpenShift Assisted Installer.
++
+----
+oc apply -f <filename>.yaml
+----
+
+. Create the `OpenshiftAssistedConfigTemplate` resource that is referenced in the `MachineDeployment`. The following YAML defines the bootstrap configuration for worker nodes. This is used to register the nodes with the {ai}.
 
 +
 [source,yaml]
@@ -235,8 +290,8 @@ spec:
           - 'metal3.io/uuid="${METADATA_UUID}"'<1>
       sshAuthorizedKey: "{{ ssh_authorized_key }}" <2>
 ----
-1. The METADATA_UUID env var is being loaded on the node, and can be leveraged by this templating. (must be this)
-2. Enter your ssh
+1. The `kubeletExtraLabels` must be this exact value.
+2. Enter your `sshAuthorizedKey`.
 
 . Create the `Metal3MachineTemplate` that is referenced in the `MachineDeployment`.
 
@@ -256,11 +311,11 @@ spec:
          dataTemplate:
             name: test-multinode-workers-template
       image:
-        checksum: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/pre-release/dev-4.19/sha256sum.txt
+        checksum: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/sha256sum.txt
         checksumType: sha256
-        url: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/pre-release/dev-4.19/rhcos-dev-4.19-x86_64-nutanix.x86_64.qcow2
+        url: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/rhcos-4.19.0-x86_64-nutanix.x86_64.qcow2
         format: qcow2
-----
+---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3DataTemplate
 metadata:
@@ -278,11 +333,13 @@ spec:
 oc apply -f cluster.yaml
 ----
 
-. You can verify that the resources are available.
+. You can verify that the resources are available. For example, you can run  `oc get cluster` to check your `Cluster` resource
 
-.. For example, run  `oc get cluster` to check your `Cluster` resource
-.. See the following output:
++
+See the following output and check for the status of your cluster:
 
++
+[source,yaml]
 ----
 status:
   conditions:
@@ -295,7 +352,4 @@ status:
   - lastTransitionTime: "2025-06-25T10:37:03Z"
     status: "True"
     type: InfrastructureReady
----
-
-//https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/rhcos-4.19.0-x86_64-nutanix.x86_64.qcow2
-//https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/sha256sum.txt
+----
