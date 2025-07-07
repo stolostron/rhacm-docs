@@ -3,6 +3,9 @@
 
 You can install an {ocp-short} managed cluster with the Cluster API by using the `metal3` infrastructure provider and the {ocp-short} assisted bootstrap and control plane providers.
 
+* A `ControlPlane`defines the control plane properties.
+* The `ClusterInfrastructure` defines the cluster-level infrastructure details.
+
 .Prerequisites
 
 * You need the `MultiClusterEngine` resource either from the {acm-short} installation, or the {mce-short} standalone installation.
@@ -82,7 +85,7 @@ spec:
 oc apply -f <filename>.yaml
 ----
 
-. Configure the `OpenshiftAssistedControlPlane` resource that includes the distribution version, API VIPs, and SSH keys. The following YAML defines the control plane configuration, including the distribution version, API VIPs, and SSH keys. See the following YAML sample:
+. Configure the `OpenshiftAssistedControlPlane` resource that includes the `distributionVersion`, `apiVIPs`, and SSH keys. See the following YAML resource:
 
 +
 [source,yaml]
@@ -118,10 +121,10 @@ spec:
   replicas: 3
 ----
 1.`.spec.openshiftAssistedConfigSpec.sshAuthorizedKey` is used to access nodes in the boot (also known as discovery) phase.
-2. Specify your {ocp-short} version in the `distributionVersion` field. The value for the `distributionVersion` must match one of the tags from the {ocp-short} release. See link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
+2. Specify your {ocp-short} version in the `distributionVersion` field. The value for the `distributionVersion` matches the image from the link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
 3.`.spec.config.sshAuthorizedKey` is used to access the provisioned {ocp-short} nodes.
 
-. Apply the YAML content by running the following command:
+. Apply the YAML file. Run the following command:
 
 +
 [source,bash]
@@ -156,7 +159,7 @@ type: kubernetes.io/dockerconfigjson
 oc apply -f pull-secret.yaml
 ----
 
-. Configure the `Metal3Cluster` infrastructure resource. 
+. Configure the `Metal3Cluster` infrastructure resource, which contains information that is related to the deployment of the cluster on baremetal.
 
 +
 [source,yaml]
@@ -182,7 +185,7 @@ spec:
 oc apply -f <filename>.yaml
 ----
 
-. Configure the `Metal3MachineTemplate` resource for the control plane nodes that is referenced from the `OpenshiftAssistedControlPlane` resource. See the following YAML sample:
+. Configure the `Metal3MachineTemplate` resource for the control plane nodes that are referenced from the `OpenshiftAssistedControlPlane` resource. See the following YAML sample:
 
 +
 [source,yaml]
@@ -213,9 +216,8 @@ metadata:
 spec:
    clusterName: <cluster-name> <2>
 ----
-1. The image is `distributionVersion` value from link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
+1. The image matches the `distributionVersion` value and the version from link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
 2. Set the `clusterName` to the same value that it is in the `Cluster` resource
-
 
 . Apply the file. Run the following command:
 
@@ -225,7 +227,7 @@ spec:
 oc apply -f <filename>.yaml
 ----
 
-. Configure worker nodes with the `MachineDeployment` resource. See the following example:
+. Configure worker nodes with the `MachineDeployment` resource, which refers to a `Metal3MachineTemplate`. See the following YAML example:
 
 +
 [source,yaml]
@@ -270,7 +272,7 @@ spec:
 oc apply -f <filename>.yaml
 ----
 
-. Create the `OpenshiftAssistedConfigTemplate` resource that is referenced in the `MachineDeployment`. The following YAML defines the bootstrap configuration for worker nodes and is used to register the nodes with the {ai}.
+. Create the `OpenshiftAssistedConfigTemplate` resource that is referenced in the `MachineDeployment`. The following YAML defines the bootstrap configuration for worker nodes and is used to register the nodes with the {ai}:
 
 +
 [source,yaml]
@@ -290,7 +292,7 @@ spec:
           - 'metal3.io/uuid="${METADATA_UUID}"'<1>
       sshAuthorizedKey: "{{ ssh_authorized_key }}" <2>
 ----
-1. The `kubeletExtraLabels` must be this exact value.
+1. The `kubeletExtraLabels` cannot change from this value.
 2. Enter your `sshAuthorizedKey`.
 
 . Create the `Metal3MachineTemplate` that is referenced in the `MachineDeployment` resource.
