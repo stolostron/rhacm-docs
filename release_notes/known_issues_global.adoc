@@ -21,7 +21,7 @@ Known issue process and when to write:
 Or consider a troubleshooting topic.
 ////
 
-Review the known issues for the {global-hub} Operator. The following list contains known issues for this release, or known issues that continued from the previous release. For your {ocp-short} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.16/html/release_notes/#ocp-4-15-known-issues[{ocp-short} known issues].
+Review the known issues for the {global-hub} Operator. The following list contains known issues for this release, or known issues that continued from the previous release. For your {ocp-short} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.17/html/release_notes/#ocp-4-15-known-issues[{ocp-short} known issues].
 
 [#detached-managed-hub-cluster]
 == The detached managed hub cluster deletes and recreates the namespace and resources 
@@ -45,6 +45,41 @@ If your original {global-hub} cluster crashes, the {global-hub} loses its genera
 == Managed cluster displays but is not counted
 
 A managed cluster that is not created successfully, meaning `clusterclaim id.k8s.io` does not exist in the managed cluster, is not counted in the policy compliance dashboards, but shows in the policy console. 
+
+[#incomplete-data-dashboard]
+== Incomplete data display in Grafana dashboards 
+
+The Kafka message size limit might cause the Grafana dashboards to not display complete data. The default limit is `1 megabyte (MB)`. Verify if the total size of your policy or managed cluster data exceeds `1 MB`. If it does, increase the Kafka message size limit to meet your needs. 
+
+Modify the Kafka configuration by completing the following steps: 
+
+. To go to the Kafka container resource, run the following command: 
+
++
+[oc,bash]
+----
+oc edit kafka kafka -n multicluster-global-hub
+----
+. Add the following YAML to set the Kafka message size to `10 MB`: 
+
++
+[source,yaml]
+----
+  spec:
+    kafka:
+      config:
+        message.max.bytes: 10485760
+        replica.fetch.max.bytes: 10485760
+----
+. Restart the {global-hub} agent pod in each managed hub cluster. Run the following commands: 
+
++
+[oc,bash]
+----
+oc delete pod multicluster-global-hub-agent-xxx -n agent_installed_namespace <1>
+----
+<1> By default, the `agent_installed_namespace` is the `multicluster-global-hub-agent`.
+
 
 [#no-new-page-group-filter]
 == The standard group filter cannot pass to the new page

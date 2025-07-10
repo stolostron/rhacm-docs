@@ -23,90 +23,9 @@ Or consider a troubleshooting topic.
 
 Review the known issues for installing and upgrading. The following list contains known issues for this release, or known issues that continued from the previous release. 
 
-For your {ocp} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.16/html/release_notes/#ocp-4-15-known-issues[{ocp-short} known issues]. 
+For your {ocp} cluster, see link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.17/html/release_notes/#ocp-4-15-known-issues[{ocp-short} known issues]. 
 
 For more about deprecations and removals, see xref:../release_notes/acm_deprecate_remove.adoc#deprecations-removals-acm[Deprecations and removals for {acm-short}].
-
-[#upgrade-stuck]
-== Upgrading an existing {acm-short} cluster with {ocp-short} 4.18 causes the upgrade to get stuck in `upgrading` status while installing the CRD 
-//2.13:19151
-
-When you upgrade to {acm-short} 2.13 with an {ocp-short} version 4.18 cluster, you receive an error installing the CRD and remain in a `stuck` status. 
-
-To resolve this issue, upgrade directly to {acm-short} 2.13.2, even if you upgraded to 2.13.1 and receive this error. Complete the following steps:
-
-. To get more information about the error, run the following command:
-
-+
-[source,bash]
-----
-oc get multiclusterhubs -n open-cluster-management -o yaml
-----
-
-+
-The hub cluster reports the following error message that shows installing `multiclusterobservabilities.observability.open-cluster-management.io` failed:
-
-+
-[source,bash]
-----
-message: 'Error installing CRDs: CustomResourceDefinition.apiextensions.k8s.io
-"multiclusterobservabilities.observability.open-cluster-management.io" is 
-invalid: spec.conversion.webhookClientConfig.caBundle: Invalid value: []byte{0x5c,0x6e}: unable to load root certificates: unable to parse bytes as PEM block'
- reason: FailedDeployingComponent
- status: "False"
- type: Progressing
-desiredVersion: 2.13.0
-phase: Installing
-----
-
-. Run the following command to check the progress of the {acm-short} upgrade:
-
-+
-[source,bash]
-----
-oc get multiclusterhubs -n open-cluster-management -o yaml
-----
-
-+
-The output states that hub cluster components are ready, as in the following example:
-
-+
-[source,bash]
-----
-message: 'created new resource: CustomResourceDefinition multiclusterobservabilities.observability.open-cluster-management.io'
- reason: NewResourceCreated
- status: "True"
- type: Progressing
- message: All hub components ready.
- ...
- reason: ComponentsAvailable
- status: "True"
- type: Complete
-----
-
-[#upgrade-fail-unknown]
-== Local-cluster status unknown after upgrade to version 2.13
-//2.13:19368
-
-After you upgrade to {acm-short} 2.13, your `local-cluster` status might change to `Unknown`. The `ManagedCluster` resource has a `ClusterCertificateRotated` condition with a `False` status, and the following message: `Stop creating CSR since there are too many CSRs created already on the hub.`
-
-. Check the number of `CertificateSigningRequests` (CSRs). Run the following command on the hub cluster:
-
-+
-[source,bash]
-----
-oc get csr -l 'open-cluster-management.io/cluster-name=local-cluster,!open-cluster-management.io/addon-name'
-----
-+
-If the total number in the output is `10`, it reached the maximum CSR limit. The `local-cluster` status will recover automatically within 1-2 hours as CSRs are periodically purged. 
-
-. Run the following command to manually delete the CRSs if you want to recover immediately:
-
-+
-[source,bash]
-----
-oc delete csr -l 'open-cluster-management.io/cluster-name=local-cluster,!open-cluster-management.io/addon-name'
-----
 
 [#uninstall-manual-remove-cr]
 == Uninstalling and reinstalling earlier versions with an upgrade can fail
@@ -151,3 +70,17 @@ oc annotate --overwrite AgentServiceConfig agent unsupported.agent-install.opens
 ----
 
 The agent appears in the inventory when the issue is resolved.
+
+[#install-siteconfig-ibbf]
+== Cannot remove data image resources after a cluster reinstallation with Image-Based Break/Fix
+
+If you change the `spec.nodes.<node-id>.bmcAddress` field while reinstalling a cluster with the Image-Based Break/Fix, the {sco} is unable to contact the original machine nd cannot delete the data image resources from the original cluster. To work around this issue, remove the finalizer from the data image resources before reinstalling a cluster with Image-Based Break/Fix.
+
+* To remove the finalizer from the data image resources, run the following command:
+
++
+[source,bash]
+----
+$ oc patch dataimages.metal3.io -n target-0 target-0-0 --patch '{"metadata":{"finalizers":[]}}' --type merge 
+dataimage.metal3.io/target-0-0 patched
+----

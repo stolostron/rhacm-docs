@@ -1,0 +1,124 @@
+[#cluster-reinstallation]
+= Cluster reinstallation with the {sco} (Technology Preview)
+
+The {sco} simplifies OpenShift cluster reinstallation through the `ClusterInstance` API while preserving critical configuration data.
+
+With a GitOps-compatible, declarative approach, users can trigger reinstallations by updating the `ClusterInstance` resource. The operator also includes a backup and restore mechanism for hub-side `Secret` and `ConfigMap` resources, ensuring essential cluster data, such as authentication credentials and configuration resources, remains intact.
+
+[#cluster-identity-preservation]
+== Cluster identity preservation
+
+Cluster reinstallation supports both {sno} and multi-node OpenShift clusters. However, cluster identity preservation is only supported for {sno} clusters installed using the Image Based Install provisioning method.
+
+For more information about the Image Based Install, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/edge_computing/image-based-installation-for-single-node-openshift#deploying-single-node-openshift-clusters[Image-based installation for {sno}].
+
+[#cluster-reinstallation-workflow]
+== Cluster reinstallation workflow
+
+See the following steps of the cluster reinstallation workflow:
+
+* Label resources for preservation. This is optional if you do not want to preserve resources. You can label your resources well before initiating the cluster reinstallation.
+* Initiate a cluster reinstallation.
+* Monitor the reinstallation progress and verify that the reinstalled cluster is available. This is optional.
+
+[#resources-labeling-for-preservation]
+== Resource labeling for preservation
+
+If you want to retain essential cluster configuration data after reinstallation, the {sco} provides a backup and restore mechanism for hub-side `Secret` and `ConfigMap` resources within the `ClusterInstance` namespace.
+
+You can control data preservation by setting the `preservationMode` in the `ClusterInstance` resource and adding the appropriate preservation label to your resources. The following preservation modes are available:
+
+.Preservation modes
+|===
+|Preservation mode|Behavior|Usage|Label requirement
+
+|`None`
+|`ConfigMap` or `Secret` resources are not preserved.
+|Select the `None` mode if data preservation is unnecessary for the cluster during reinstallation.
+|None
+
+|`All`
+|All labeled `ConfigMap` and `Secret` resources in the same namespace as the `ClusterInstance` resource are backed up. If the {sco} does not find any labeled resources, the operator proceeds with the reinstallation without data preservation. The original resources are stored as immutable Kubernetes secrets. 
+|Select the `All` mode if you want to preserve labeled resources, if any.
+|Add the `siteconfig.open-cluster-management.io/preserve: "<arbitrary-value>"` label with any value, for example, `siteconfig.open-cluster-management.io/preserve: ""`. The label indicates to the operator to back up resources with the specified label only when the preservation mode is set to `All`.
+
+|`ClusterIdentity`
+|Only `ConfigMap` and `Secret` resources that are labeled with the `siteconfig.open-cluster-management.io/preserve: "cluster-identity"` label in the same namespace as the `ClusterInstance` CR are backed up. If the {sco} does not find any labeled resources, the operator stops the reinstallation process and displays an error message. The original CRs of these resources are stored as immutable Kubernetes secrets.
+|Select the `ClusterIdentity` mode if you want the operator to verify that you labeled at least one resource.
+|Add the `siteconfig.open-cluster-management.io/preserve: "cluster-identity"` label to indicate to the operator to back up resources with the label when the preservation mode is set to `All` or `ClusterIdentity`. If the preservation mode is set to `ClusterIdentity` and the operator does not find at least one resource with the `siteconfig.open-cluster-management.io/preserve: "cluster-identity"` label, the reinstallation stops.
+
+|===
+
+You can label your resources well before initiating the reinstallation.
+
+[#cluster-reinstallation-monitoring]
+== Cluster reinstallation monitoring
+
+The reinstallation has two phases:
+
+Phase 1 - Reinstallation request handling::
+* Request validation: The {sco} validates the request.
+* Data preservation: The {sco} backs up labeled resources.
+* Cleanup: The {sco} removes existing installation manifests. If this step times out, the reinstallation stops and the `ClusterInstance` resource is paused.
+* Data restoration: The {sco} restores preserved data.
+
+Phase 2 - Cluster provisioning::
+* Manifest regeneration: The {sco} generates new manifests from templates.
+* Cluster installation: The cluster is provisioned using the new manifests.
+
+You can track progress in the `status.reinstall.conditions` and `status.conditions` fields for phase 1 and 2, respectively. To track the cluster reinstallation progress, the {sco} provides the following status conditions:
+
+.Reinstallation status conditions
+|===
+
+|Condition|Description|Reasons
+
+|`ReinstallRequestProcessed`
+|Indicates the overall status of the reinstallation request.
+a|`InProgress`: The reinstallation process is ongoing. +
+`Completed`: The reinstallation process successfully completed, and the cluster is ready for reprovisioning. +
+`Failed`: The reinstallation process encountered an error and failed. +
+`TimedOut`: The reinstallation process exceeded the expected time limit and did not complete successfully.
+
+|`ReinstallRequestValidated`
+|Confirms the validity of the reinstallation request.
+a|`Completed`: The reinstallation request is valid. +
+`Failed`: The reinstallation request is invalid.
+
+|`ReinstallPreservationDataBackedUp`
+|Tracks the backup status of preserved data.
+a|`PreservationNotRequired`: No backup required as `spec.reinstall.preservationMode: None` is set. +
+`DataUnavailable`: No `Secret` or `ConfigMap` objects with the preservation label are found in the `ClusterInstance` namespace. +
+`Completed`: `Secret` and `ConfigMap` objects are successfully backed up. +
+`Failed`: One or more `Secret` and `ConfigMap` objects are not backed up.
+
+|`ReinstallClusterIdentityDataDetected`
+|Determines whether cluster identity data is available for preservation.
+a|`PreservationNotRequired`: Data preservation is not required. The `preservationMode` field is set to `None`. +
+`DataAvailable`: Cluster identity `Secret` and `ConfigMap` objects are successfully located. +
+`DataUnavailable`: No cluster identity `Secret` or `ConfigMap` objects are detected. +
+`Failed`: The preservation mode is set to `ClusterIdentity` but no cluster identity data is found.
+
+|`ReinstallRenderedManifestsDeleted`
+|Monitors the deletion of rendered manifests associated with the `ClusterInstance` resource.
+a|`InProgress`: Deleting rendered manifests is in progress. +
+`Completed`: Successfully deleted all rendered manifests. +
+`Failed`: Failed to delete one or more rendered manifests. +
+`TimedOut`: Timed out while waiting for rendered manifests to be deleted.
+
+|`ReinstallPreservationDataRestored`
+|Tracks the restoration status of preserved data.
+a|`PreservationNotRequired`: Preservation is not required because the `preservationMode` field is set to `None`. +
+`DataUnavailable`: No preserved `Secret` or `ConfigMap` objects detected for restoration. +
+`Completed`: `Secret` and `ConfigMap` objects are successfully restored. +
+`Failed`: Failed to restore one or more `Secret` and `ConfigMap` objects.
+
+|===
+
+The `status.reinstall` field provides further information about the reinstallation process with the following fields:
+
+* `InProgressGeneration`: Identifies the active generation being processed for reinstallation.
+* `ObservedGeneration`: Indicates the last successfully processed reinstallation request.
+* `RequestStartTime`: Indicates the time when the reinstallation request was initiated.
+* `RequestEndTime`: Indicates the time when the reinstallation process was completed.
+* `History`: Displays past reinstallation attempts, including generation details, timestamps, and specification changes to the `ClusterInstance` resource.
