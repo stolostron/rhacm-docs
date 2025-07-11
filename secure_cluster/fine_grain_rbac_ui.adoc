@@ -1,0 +1,154 @@
+[#fine-grain-rbac-ui]
+= Implementing fine-grained role-based access control with the console (Technology Preview)
+
+*Technology Preview:* {acm} supports fine-grained role-based access control (RBAC). As a cluster administrator, you can manage and control permissions with the `ClusterPermission` resource, which controls permissions at the namespace level on managed clusters, as well as at the cluster level. Grant permissions to a virtual machine namespace within a cluster without granting permission to the entire managed cluster.
+
+Learn how to set up for fine-grained role-based access control (RBAC) and the `ClusterPermission` resource from the console.
+
+*Required access:* Cluster administrator
+
+To learn about {ocp-short} default and virtualization roles and permissions, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/virtualization/about#authorization_virt-security-policies[Authorization] in the {ocp-short} documentation.
+
+See xref:../secure_cluster/rbac_implement_rhacm.adoc#rhacm-rbac-implement[Implementing role-based access control] for more details about {acm-short} role-based access.
+
+.Prerequisites
+
+See the following requirements to begin using fine-grained role-based access control:
+
+* Your `MultiClusterHub` custom resource `spec.overrides.components` field for `search` must `enabled` to retrieve a list of managed clusters namespaces that can represent virtual machines that are used for access control.
+* You need virtual machines.
+
+[#assign-fine-grain-rbac-ui]
+== Assigning fine-grained role-based access control in the console
+
+You can assign users to manage virtual machines with fine-grained role-based access control. Actions are disabled in the console if the user-role access is not permitted. Slide the *YAML* option on to see the data that you enter populate in the YAML editor.
+
+You can grant access to the following roles for {ocp-virt-short}, which are extensions of the default roles:
+
+- `kubevirt.io:view`: only view resources
+- `kubevirt.io:edit`: modify resources
+- `kubevirt.io:admin`: view, modify, delete resources; grant permissions
+
+*Important:* As an administrator, you need to add either `Role bindings` or `Cluster role binding` for a valid `ClusterPermission` resource. You can also choose to add both.
+
+. Navigate to your `MultiClusterHub` custom resource to edit the resource and enable the feature.
+.. From the *local-cluster* view, click *Operators* > *Installed Operators* > *Advanced Cluster Management for Kubernetes*. 
+.. Click the *MultiClusterHub* tab to edit the resource. 
+.. Slide the *YAML* option on to see the data in the YAML editor.
+.. In your `MultiClusterHub` custom resource `spec.overrides.components` field, set `fine-grained-rbac-preview` to `true` to enable the feature. Change the `configOverrides` specification to `enabled: true` in the YAML editor and save your changes. See the following example with `fine-grained-rbac-preview` enabled:
+
++
+[source,yaml]
+----
+ - configOverrides: {}
+      enabled: true
+      name: fine-grained-rbac-preview
+----
+. Label your `local-cluster` with `environment=virtualization`. 
+.. From the `All Clusters` view, click **Infrastructure** > *Clusters* >
+.. Find your `local-cluster` and click *Actions* to edit. 
+.. Add the `environment=virtualization` label and save your changes. See the following example:
+
++
+[source,bash]
+----
+environment=virtualization
+----
+
+. Change the `policy-virt-clusterroles` value for the `remediationAction` to `enforce`, which adds the `kubevirt` `clusterroles` to the hub cluster.
+.. Click *Governance* > *Policies*.
+.. Find the `policy-virt-clusterroles` policy and click *Actions* to change the `remediationAction` value to `enforce`. *Important:* Two `remediationAction` specifications are in the policy, but you only need to change the later `remediationAction`. This does not apply to the first template in the YAML file. See the following sample:
+
++
+[source,yaml]
+----
+  remediationAction: enforce
+----
+
+.. Slide the *YAML* option on to see the data in the YAML editor and save your changes. See the following YAML sample:
+
++
+[source,yaml]
+
+. Create a `ClusterRole` resource.
+.. From the `local-cluster` view, click *User Management* > *Roles* > *Create Role*.
+.. Add the following `ClusterRole` resource information to the YAML editor:
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: acm-vm-rbac-required <1>
+rules:
+  - apiGroups: ["clusterview.open-cluster-management.io"]
+    resources: ["kubevirtprojects"]
+    verbs: ["list"]
+  - apiGroups: ["clusterview.open-cluster-management.io"]
+    resources: ["managedclusters"]
+    verbs: ["list","get","watch"]
+  - apiGroups: ["cluster.open-cluster-management.io"]
+    resources: ["managedclusters"]
+    verbs: ["get"]
+    resourceNames: ["cluster01", "cluster02", "cluster03"] <2>
+----
+<1> You can use a different name, but must continue to use that name during the process.
+<2> Add the names of the managed clusters that you want your User or Group to access.
+
+. Create a `ClusterRoleBinding` resource. 
+.. From the `local-cluster` view, click *User Management* > *RoleBindings* > *Create bindings*.
+.. Choose `Cluster-wide role binding` for the _Binding type_.
+.. Add the `RoleBinding` name that matches the name of the `ClusterRole`, which for this example is `acm-vm-rbac-required`.
+.. Add the matching role name, which for this example is also `acm-vm-rbac-required`.
+.. For the _Subject_, select User or Group, enter the User or Group name, and save your changes.
+. Create a `ClusterPermission` resource to grant permissions at the namespace level.
+.. Click *Access control* > *Create permission*. 
+.. In the _Basic information_ window, add the cluster name and the User or Group that is granted permission.
+.. Choose the cluster for that permission.
+. Add the `Role bindings` information, which sets permissions at the namespace level. 
+.. Add virtual machine namespaces in the cluster.
+.. Add Users or Groups.
+.. Add roles, such as `kubevirt.io:view`, for fine-grained role-based access control. You can choose a combination of `RoleBindings`.
+. Add the `ClusterRoleBinding` resource with the same information to set permissions at the cluster level. 
+. Review and click *Create permission* to create `ClusterPermission` resource as you see in the following example:
+
++
+[source,yaml]
+----
+apiVersion: rbac.open-cluster-management.io/v1alpha1
+kind: ClusterPermission
+metadata:
+  name: <cluster01-prod-admin> <1>
+  namespace: <cluster01> <2>
+spec:
+  roleBindings:
+    - name: cluster01-prod-admin <3>
+      namespace: prod <4>
+      roleRef:
+        name: kubevirt.io:admin
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+      subjects:
+        - kind: User <5>
+          apiGroup: rbac.authorization.k8s.io
+          name: user1 <6>
+----
+<1> Specify a name for the permissions.
+<2> Specify a namespace for permissions.
+<3> Specify a name for `RoleBindings`, which assigns roles to Users or Groups.
+<4> Specify the namespace in the managed cluster to which the User or Group is granted access.
+<5> Choose `User` or choose `Group`.
+<6> Specify the User or Group `name`.
+
+. Check for a `Ready` status in the console.
+. You can click *Edit permission* to edit the `Role bindings` and `Cluster role binding`.
+. *Optional:* Click *Export YAML* to use the resources for GitOps or in the terminal.
+. You can delete the `ClusterPermissions` resource when you are ready.
+
+. *Optional:* If `observability` is enabled, create an additional `RoleBinding` resource on the hub cluster so that users can view virtual machine details in Grafana.
+.. From the `local-cluster` view, click *User Management* > *RoleBindings* > *RoleBindings*.
+.. Choose `Namespace role binding` for the _Binding type_.
+.. Add the `observability-grafana-access``RoleBinding` name.
+.. Choose `view` for the _Role name_.
+.. For the _Subject_, select *User* or *Group*, enter the User or Group name, and save your changes.
