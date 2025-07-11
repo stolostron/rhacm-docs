@@ -17,10 +17,10 @@ Complete the following steps to add control plane nodes to healthy managed clust
 +
 [source,bash]
 ----
-oc patch agent <AGENT-NAME> -p '{"spec":{"role": "master"}}' --type=merge
+oc patch agent <agent-name> -p '{"spec":{"role": "master"}}' --type=merge
 ----
 +
-*Note:* CSRs are not automatically approved.
+*Note:* Certificate Signing Requests (CSRs) are not automatically approved.
 
 . If you are using a `BareMetalHost` to add a node, add the following line to your `BareMetalHost` annotations when creating the `BareMetalHost` resource:
 
@@ -30,7 +30,149 @@ oc patch agent <AGENT-NAME> -p '{"spec":{"role": "master"}}' --type=merge
     bmac.agent-install.openshift.io/role: master
 ----
 
-. Follow the steps in link:https://docs.redhat.com/documentation/en-us/assisted_installer_for_openshift_container_platform/2024/html/installing_openshift_container_platform_with_the_assisted_installer/expanding-the-cluster#installing-primary-control-plane-node-healthy-cluster_expanding-the-cluster[Installing a primary control plane node on a healthy cluster] in the {ai} for {ocp-short} documentation
+. Follow the steps in link:https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2025/html-single/installing_openshift_container_platform_with_the_assisted_installer/index#installing-control-plane-node-healthy-cluster_expanding-the-cluster[Replacing a control plane node in a healthy cluster] in the {ai} for {ocp-short} documentation.
+
+[#adding-ctrl-nodes-managed-healthy-api]
+== Adding control plane nodes to healthy managed clusters by using the API
+
+Complete the following steps to add control plane nodes to healthy managed clusters by using the API:
+
+. Log in to the hub cluster by running the following command. Add the name of your cluster:
+
++
+[source,bash]
+----
+oc login --token=sha256~value--server=https://api.<cluster-name>.basedomain:6443
+----
+
+. Boot the machine that you want to use as a control plane node from your Discovery ISO.
++
+*Note:* Alternatively, apply the new host to your `InfraEnv` by applying the `BareMetalHost` YAML.
+
+. Check the agent state to ensure that the agent is ready to bind to the cluster again. Run the following commands and replace variables where needed:
+
+.. Run the following command to switch your inventory. Replace `<host-inventory-namespace>` with your namespace:
+
++
+[source,bash]
+----
+oc project <host-inventory-namespace>
+----
+
+.. Run the following command to get the state of your agent. Replace `<agent-name>` with the name of your agent:
+
++
+[source,bash]
+----
+oc get agent <agent-name> -oyaml | grep state
+----
+
++
+.. In the output, check the `stateInfo` line to make sure that the host is ready to bind to a cluster.
+
+. Set the role of your host to `master`:
+
+.. If you are using the Discovery ISO to add a node, approve the agent and set the role to `master`. Run the following command:
+
++
+[source,bash]
+----
+oc patch agent <agent-name> -p '{"spec":{"approved":true,"role":"master"}}' --type=merge
+----
+
++
+.. If you are using a `BareMetalHost` to add a node, add the following line to your `BareMetalHost` annotations when creating the `BareMetalHost` resource:
+
++
+[source,yaml]
+----
+    bmac.agent-install.openshift.io/role: master
+----
+
+. Verify the patch by running the following command:
+
++
+[source,bash]
+----
+oc get agent
+----
++
+In the output, ensure that each line in the `APPROVED` column says `true` and that the `ROLE` is `master`. See the following examples:
+
++
+[source,bash]
+----
+NAME                                   CLUSTER    APPROVED    ROLE    STAGE
+c6e00642-0e11-1689-a79d-0e131d2c6ecf              true        master
+----
+
+. Add the agent to the cluster by running the following command:
+
++
+[source,bash]
+----
+oc patch agent <agent name> -p '{"spec":{"clusterDeploymentName":{"name":"<managed-cluster-name>","namespace":"<managed-cluster-namespace>"}}}' --type=merge
+----
++
+
+. Confirm that the agent is bound to the cluster by running the following command:
+
++
+[source,bash]
+----
+oc get agent
+----
++
+See the following example output:
+
++
+[source,bash]
+----
+NAME                                   CLUSTER    APPROVED    ROLE    STAGE
+c6e00642-0e11-1689-a79d-0e131d2c6ecf   hcpagent   true        master
+----
+
+. Verify the agent status by the running the following command. While the agent is installing and joining the cluster, you might need to wait a few minutes:
+
++
+[source,bash]
+----
+oc get agent -w
+----
++
+*Note:* Certificate Signing Requests (CSRs) are not automatically approved.
+
+. After the agent reaches the `Rebooting` stage, you must manually approve the CSRs. Complete the following steps:
+
+.. Get the managed cluster `kubeconfig` file by running the following command:
++
+[source,bash]
+----
+kubeconfig_secret_name=$(oc -n ${cluster_name} get clusterdeployments ${cluster_name} -ojsonpath='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}')
+oc -n ${cluster_name} get secret ${kubeconfig_secret_name} -ojsonpath={.data.kubeconfig} | base64 -d > managed-cluster.kubeconfig
+----
++
+.. Find any pending CSRs on the managed cluster by running the following command:
++
+[source,bash]
+----
+oc --kubeconfig managed-cluster.kubeconfig get csr | grep Pending
+----
++
+.. Approve any pending CSRs for the agent in the managed cluster. Run the following command and replace `<csr-name>` with your CSR name:
++
+[source,bash]
+----
+oc  --kubeconfig managed-cluster.kubeconfig  adm certificate approve <csr-name>
+----
+
+The host is installed when the `STAGE` shows `Done`. See the following output example:
+
+[source,bash]
+----
+NAME                                   CLUSTER    APPROVED   ROLE     STAGE
+c6e00642-0e11-1689-a79d-0e131d2c6ecf   hcpagent   true       master   Done
+----
 
 [#adding-ctrl-nodes-managed-unhealthy]
 == Adding control plane nodes to unhealthy managed clusters
