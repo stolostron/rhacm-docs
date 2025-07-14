@@ -43,9 +43,36 @@ Learn about known issues and limitations during {mce-short} installation.
 When enabling the `managed-serviceaccount` add-on, the `installNamespace` field in the `ManagedClusterAddOn` resource must have `open-cluster-management-agent-addon` as the value. Other values are ignored. The `managed-serviceaccount` add-on agent is always deployed in the `open-cluster-management-agent-addon` namespace on the managed cluster.
 
 [#cluster-issues-mce]
-== Cluster
+== Cluster management
 
 Learn about known issues and limitations for Cluster lifecycle with {mce-short}, such as issues with creating, discovering, importing, and removing clusters, and more cluster management issues for {mce-short}. 
+
+[#hcp-capi-known-issue]
+=== _cluster-api_ webhooks block hosted control planes deployments
+//2.14:ACM-21708
+
+The hosted control planes operator cannot manage infrastructure resources in AWS because of API conflicts between the `cluster-api-provider-aws` resource and the `hypershift` resource that is installed by the `hypershift-local-hosting` component. 
+
+To use the `hypershift` component for the AWS platform hosted clusters, _do not_ enable the `cluster-api` and `cluster-api-provider-aws` components, which are `enabled: false` by default. See the following default setting:
+
+[source,yaml]
+----
+      - configOverrides: {}
+        enabled: false
+        name: cluster-api
+      - configOverrides: {}
+        enabled: false
+        name: cluster-api-provider-aws 
+----
+
+Ensure that if `hypershift-local-hosting` is enabled, as it is in the following YAML sample, that the previous components are not enabled. 
+
+[source,yaml]
+----
+      - configOverrides: {}
+        enabled: true
+        name: hypershift-local-hosting 
+----
 
 [#klusterlet-noexecute-taint]
 === Klusterlet add-on does not tolerate `node-role.kubernetes.io/infra` taint with `NoExecute` effect
@@ -135,6 +162,7 @@ Replace `_namespace_` with the namespace of the managed cluster.
 . Save your changes and verify that `ClusterDeployment` is gone.
 
 . Manually remove the namespace of the managed cluster by running the following command:
+
 +
 ----
 oc delete ns <namespace>
@@ -172,7 +200,8 @@ When booting a node, the URL length limitation in some DHCP servers cuts off the
 To work around the issue, complete the following steps:
 
 . Apply the `InfraEnv` custom resource definition when using an assisted installation to expose the `bootArtifacts`, which might resemble the following file:
-+
+
+[source,yaml]
 ----
 status:
   agentLabelSelector:
@@ -188,6 +217,7 @@ status:
 . Create a proxy server to expose the `bootArtifacts` with short URLs.
 
 . Copy the `bootArtifacts` and add them them to the proxy by running the following commands:
+
 +
 ----
 for artifact in oc get infraenv qe2 -ojsonpath="{.status.bootArtifacts}" | jq ". | keys[]" | sed "s/\"//g"
