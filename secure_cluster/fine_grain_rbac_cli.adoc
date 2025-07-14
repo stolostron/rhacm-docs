@@ -21,6 +21,8 @@ See the following requirements to begin using fine-grained role-based access con
 [#assign-fine-grain-rbac]
 == Assigning fine-grained role-based access control in the terminal
 
+You can assign users to manage virtual machines with fine-grained role-based access control.
+
 You can grant access to the following roles for {ocp-virt-short}, which are extensions of the default roles:
 
 - `kubevirt.io:view`: only view resources
@@ -41,9 +43,10 @@ oc edit mch -n open-cluster-management multiclusterhub
 
 .. Edit to change the `configOverrides` specification from `enabled: false` to `enabled: true`. See the following example with the feature enabled:
 
++
 [source,yaml]
 ----
-    - configOverrides: {}
+ - configOverrides: {}
       enabled: true
       name: fine-grained-rbac-preview
 ----
@@ -78,7 +81,7 @@ oc edit policy -n open-cluster-management-global-set policy-virt-clusterroles
   remediationAction: enforce
 ----
 
-. Create the following YAML file and name the file `acm-vm-rbac-required.yml` for later steps in the procedure. You can use a different name. If you choose a different name, you need this name later in the procedure:
+. Create the following YAML file and name the file `acm-vm-rbac-required.yml` for later steps in the procedure. You can use a different name. If you choose a different name, you need to use it throughout the procedure:
 
 +
 [source,yaml]
@@ -86,7 +89,7 @@ oc edit policy -n open-cluster-management-global-set policy-virt-clusterroles
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: <cluster-role-name> <1> #match the UI instructions #use this for binding
+  name: acm-vm-rbac-required <1>
 rules:
   - apiGroups: ["clusterview.open-cluster-management.io"]
     resources: ["kubevirtprojects"]
@@ -97,7 +100,7 @@ rules:
   - apiGroups: ["cluster.open-cluster-management.io"]
     resources: ["managedclusters"]
     verbs: ["get"]
-    resourceNames: ["<cluster-name-01>", "<cluster-name-02>", "<cluster-name-03>"] <2>
+    resourceNames: ["cluster01", "cluster02", "cluster03"] <2>
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -106,14 +109,14 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: acm-vm-rbac-required <4> #has to be what we say above
+  name: acm-vm-rbac-required <4> 
 subjects:
   - kind: User <5>
     apiGroup: rbac.authorization.k8s.io
     name: user1 <6>
 ----
 <1> You can use a different name, but must continue to use that name.
-<2> Add the names of the managed clusters that you want your User or Group to access. Each name must be unique.
+<2> Add the names of the managed clusters that you want your User or Group to access.
 <3> You can use any name.
 <4> Ensure the name matches the `ClusterRole` name.
 <5> Choose User or Group.
@@ -124,7 +127,7 @@ subjects:
 +
 [source,bash]
 ----
-oc apply -f acm-vm-rbac-required.yml #anything
+oc apply -f acm-vm-rbac-required.yml
 ----
 
 . Create a YAML file for the `ClusterPermission` resource and name the file `cluster01-prod-admin.yml`. 
@@ -169,7 +172,7 @@ oc apply -f cluster01-prod-admin.yml
 
 . *Optional:* If `observability` is enabled, create an additional `RoleBinding` on the hub cluster so that users can view virtual machine details in Grafana.
 
-.. Create the `RoleBinding` resource for Grafana access. See the following sample YAML file:
+.. Create the `RoleBinding` resource for Grafana access. See the following sample YAML file with `name: user-observability-grafana-access`:
 
 +
 [source,yaml]
@@ -177,12 +180,12 @@ oc apply -f cluster01-prod-admin.yml
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
- name: <role-binding-name> <1>
- namespace: cluster01 <2> #match the other instruction to use cluster
+ name: user-observability-grafana-access <1>
+ namespace: cluster01 <2>
 subjects:
  - kind: User <3>
    apiGroup: rbac.authorization.k8s.io
-   name: <user-name> <4>
+   name: user1 <4>
 roleRef:
  apiGroup: rbac.authorization.k8s.io
  kind: ClusterRole
@@ -198,7 +201,7 @@ roleRef:
 +
 [source,bash]
 ----
-oc apply -f <filename>.yml
+oc apply -f user-observability-grafana-access.yml
 ----
 
 
