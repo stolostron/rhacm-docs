@@ -1,20 +1,27 @@
 [#observability-alerts]
 = Managing alerts
 
-Receive and define alerts for the observability service to be notified of hub cluster and managed cluster changes.
+Receive and define alerts as notifications for any Observability service changes in your hub cluster and managed cluster.
 
 - <<alert-prereqs,Prerequisites>>
 - <<configuring-alertmanager,Configuring Alertmanager>>
+- <<mount-secrets-alertmanager,Mounting secrets within the Alertmanager pods>>
 - <<forward-alerts,Forwarding alerts>>
+- <<disabling-forward-alerts,Disabling alert forwarding for managed clusters>>
+- <<disabe-uwl-forwarding,Disabling user workload alert forwarding for managed clusters>>
 - <<silence-alerts,Silencing alerts>>
+- <<migrating-observability-storage,Migrating observability storage>>
 - <<supress-alerts,Suppressing alerts>>
 
 [#alert-prereqs]
 == Prerequisites
 
-* You must enable observability on your hub cluster.
-* You must have the create permission for secret resources in the `open-cluster-management-observability` namespace.
-* You must have edit permission on the `MultiClusterObservability` resource.
+- You must enable Observability on your hub cluster.
+- You must have the create permission for secret resources in the `open-cluster-management-observability` namespace.
+- You must have edit permission on the `MultiClusterObservability` resource.
+- You must configure the Prometheus instances on your managed cluster to help prevent metric loss during restart. For more information, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/monitoring/configuring-core-platform-monitoring#configuring-persistent-storage_storing-and-recording-data[Configuring persistent storage] in the {ocp-short} documentation.
+- You must enable user workload monitoring and alerts on your managed clusters. For more information, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/monitoring/configuring-user-workload-monitoring[Configuring user workload monitoring] and link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/monitoring/managing-alerts[Managing alerts] in the {ocp-short} documentation.
+- The user workload Prometheus requires adding a label to alerting rules in order to force only user workload Prometheus that are deployed in the `openshift-user-workload-monitoring` namespace to evaluate the alerting rule and prevents the Thanos Ruler instance from processing them. For more details, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/monitoring/about-openshift-container-platform-monitoring#about-creating-alerting-rules-for-user-defined-projects_key-concepts[Creating alerting rules for user-defined projects] in the {ocp-short} documentation.
 
 [#configuring-alertmanager]
 == Configuring Alertmanager
@@ -61,12 +68,12 @@ route:
     receiver: team-X-mails
 ----
 
-Your changes are applied immediately after it is modified. For an example of Alertmanager, see link:https://github.com/prometheus/alertmanager/blob/main/doc/examples/simple.yml[prometheus/alertmanager].
+After you modify the secret, your changes are applied immediately. For an example of Alertmanager, see link:https://github.com/prometheus/alertmanager/blob/main/doc/examples/simple.yml[prometheus/alertmanager].
 
 [#mount-secrets-alertmanager]
-=== Mounting secrets within the Alertmanager pods
+== Mounting secrets within the Alertmanager pods
 
-You can create `Secret` resources with arbitrary content, which can be mounted within your `alertmanager` pods for access to authorization credentials.
+You can create `Secret` resources with arbitrary content that you can mount within your `alertmanager` pods for access to authorization credentials.
 
 To reference secrets within your Alertmanager configuration, add the `Secret` resource content within the `open-cluster-management-observability` namespace and mount the content within the `alertmanager` pods. For example, to create and mount a `tls` secret, complete the following steps:
 
@@ -140,7 +147,7 @@ oc -n open-cluster-management-observability replace secret --filename=-
 [#forward-alerts]
 == Forwarding alerts
 
-After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to the hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system. 
+After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to Alertmanager on your hub cluster. By default, all platform alerts are sent to Alertmanager on your hub cluster. When you enable user workload alerts on your {ocp-short} managed clusters, user workload alerts are also sent to your hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system.
 
 View the following example of the `alertmanager-config` YAML file:
 
@@ -170,10 +177,25 @@ global:
     proxy_url: http://****
 ----
 
-[#disabling-forward-alerts]
-=== Disabling alert forwarding for managed clusters
+To forward user workload alerts, the alerts must be processed by user workload Prometheus instance and not by Thanos ruler. See the following example of the Prometheus instance:
 
-To disable alert forwarding for managed clusters, add the following annotation to the `MultiClusterObservability` custom resource:
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    openshift.io/prometheus-rule-evaluation-scope: leaf-prometheus
+----
+
+[#disabling-forward-alerts]
+== Disabling alert forwarding for managed clusters
+
+To disable alert forwarding for managed clusters, add the `mco-disable-alerting: "true"` annotation to the `MultiClusterObservability` custom resource. When you set the `mco-disable-alerting: "true"` annotation, both the platform and user workload alerts are not forwarded to the Alertmanager on your hub cluster. The forwarding configuration on your managed clusters is reverted.
+
+Configuration updates to the `ocp-monitoring-config` config map in the `openshift-monitoring` namespace are reverted. Setting the annotation ensures that the `ocp-monitoring-config` config map is not managed or updated by the Observability operator endpoint. After you update the configuration, both platform and user workload Prometheus instances on your managed cluster restarts.
+
+See the following example where the `mco-disable-alerting` annotation is set to `"true"`:
 
 [source,yaml]
 ----
@@ -182,13 +204,27 @@ metadata:
         mco-disable-alerting: "true"
 ----
 
-When you set the annotation, the alert forwarding configuration on the managed clusters is reverted. Any changes made to the `ocp-monitoring-config` config map in the `openshift-monitoring` namespace are also reverted. Setting the annotation ensures that the `ocp-monitoring-config` config map is no longer managed or updated by the observability operator endpoint. After you update the configuration, the Prometheus instance on your managed cluster restarts.
+*Important:* You lose metrics on your managed cluster if you have a Prometheus instance with a persistent volume for metrics, and the Prometheus instance restarts. Metrics from the hub cluster are not affected.
 
-*Important:* Metrics on your managed cluster are lost if you have a Prometheus instance with a persistent volume for metrics, and the Prometheus instance restarts. Metrics from the hub cluster are not affected.
-
-When the changes are reverted, a ConfigMap named `cluster-monitoring-reverted` is created in the `open-cluster-management-addon-observability` namespace. Any new, manually added alert forward configurations are not reverted from the ConfigMap. 
+When the changes are reverted, a config map named `cluster-monitoring-reverted` is created in the `open-cluster-management-addon-observability` namespace. Any new, manually added alert forward configurations are not reverted from the ConfigMap. 
 
 Verify that the hub cluster alert manager is no longer propagating managed cluster alerts to third-party messaging tools. See the previous section, _Configuring Alertmanager_.
+
+[#disabe-uwl-forwarding]
+== Disabling user workload alert forwarding for managed clusters
+
+To disable user workload alert forwarding for managed clusters, add the `mco-disable-uwl-alerting: "true"` annotation to the `MultiClusterObservability` custom resource. When you set the annotation, forwarding user workload alerts to Alertmanager on your hub cluster stops and platform alerts continue to forward to Alertmanager.
+
+Setting the annotation ensures that the `user-workload-monitoring-config` config map is not managed or updated by the Observability operator endpoint. After you update the configuraion, the user workload Prometheus instance on your managed cluster restarts.
+
+See the following example where the `mco-disable-uwl-alerting` annotation is set to `"true"`:
+
+[source,yaml]
+----
+metadata:
+  annotations:
+    mco-disable-uwl-alerting: "true"
+----
 
 [#silence-alerts]
 == Silencing alerts
@@ -254,7 +290,7 @@ amtool silence expire --alertmanager.url="http://localhost:9093" $(amtool silenc
 ----
 
 [#migrating-observability-storage]
-=== Migrating observability storage
+== Migrating observability storage
 
 If you use alert silencers, you can migrate observability storage while retaining the silencers from its earlier state. To do this, migrate your {acm-short} observability storage by creating new `StatefulSets` and `PersistentVolumes` (PV) resources that use your chosen `StorageClass` resource. 
 
