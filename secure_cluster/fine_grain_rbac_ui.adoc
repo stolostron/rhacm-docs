@@ -29,7 +29,7 @@ You can grant access to the following roles for {ocp-virt-short}, which are exte
 - `kubevirt.io:edit`: modify resources
 - `kubevirt.io:admin`: view, modify, delete resources; grant permissions
 
-*Important:* As an administrator, you need to add either `Role bindings` or `Cluster role binding` for a valid `ClusterPermission` resource. You can also choose to add both.
+*Important:* As an administrator, you need to add either `roleBinding` or `ClusterRoleBinding` resources for a valid `ClusterPermission` resource. You can also choose to add both.
 
 . Navigate to your `MultiClusterHub` custom resource to edit the resource and enable the feature.
 .. From the *local-cluster* view, click *Operators* > *Installed Operators* > *Advanced Cluster Management for Kubernetes*. 
@@ -44,7 +44,7 @@ You can grant access to the following roles for {ocp-virt-short}, which are exte
       name: fine-grained-rbac-preview
 ----
 . Label your `local-cluster` with `environment=virtualization`. 
-.. From the `All Clusters` view, click **Infrastructure** > *Clusters* >
+.. From the *All Clusters* view, click **Infrastructure** > *Clusters* >
 .. Find your `local-cluster` and click *Actions* to edit. 
 .. Add the `environment=virtualization` label and save your changes. See the following example:
 
@@ -70,7 +70,7 @@ environment=virtualization
 [source,yaml]
 
 . Create a `ClusterRole` resource.
-.. From the `local-cluster` view, click *User Management* > *Roles* > *Create Role*.
+.. From the *local-cluster* view, click *User Management* > *Roles* > *Create Role*.
 .. Add the following `ClusterRole` resource information to the YAML editor:
 
 +
@@ -79,7 +79,7 @@ environment=virtualization
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: acm-vm-rbac-required <1>
+  name: <cluster-role-name> <1>
 rules:
   - apiGroups: ["clusterview.open-cluster-management.io"]
     resources: ["kubevirtprojects"]
@@ -90,16 +90,16 @@ rules:
   - apiGroups: ["cluster.open-cluster-management.io"]
     resources: ["managedclusters"]
     verbs: ["get"]
-    resourceNames: ["cluster01", "cluster02", "cluster03"] <2>
+    resourceNames: ["<cluster-name-01>", "<cluster-name-02>", "<cluster-name-03>"] <2>
 ----
-<1> You can use a different name, but must continue to use that name during the process.
-<2> Add the names of the managed clusters that you want your User or Group to access.
+<1> You can use a different name, but you must continue to use that name when you create the `ClusterRoleBinding` resource. 
+<2> Add the names of the managed clusters that you want your User or Group to access. Each name must be unique.
 
 . Create a `ClusterRoleBinding` resource. 
-.. From the `local-cluster` view, click *User Management* > *RoleBindings* > *Create bindings*.
+.. From the *local-cluster* view, click *User Management* > *RoleBindings* > *Create bindings*.
 .. Choose `Cluster-wide role binding` for the _Binding type_.
-.. Add the `RoleBinding` name that matches the name of the `ClusterRole`, which for this example is `acm-vm-rbac-required`.
-.. Add the matching role name, which for this example is also `acm-vm-rbac-required`.
+.. Add a `RoleBinding` name that matches the name of the `ClusterRole`, which is the `<cluster-role-name>` that you chose previously.
+.. Add the matching role name.
 .. For the _Subject_, select User or Group, enter the User or Group name, and save your changes.
 . Create a `ClusterPermission` resource to grant permissions at the namespace level.
 .. Click *Access control* > *Create permission*. 
@@ -118,12 +118,12 @@ rules:
 apiVersion: rbac.open-cluster-management.io/v1alpha1
 kind: ClusterPermission
 metadata:
-  name: <cluster01-prod-admin> <1>
-  namespace: <cluster01> <2>
+  name: <cluster-premission-name> <1>
+  namespace: <cluster-name-01> <2>
 spec:
   roleBindings:
-    - name: cluster01-prod-admin <3>
-      namespace: prod <4>
+    - name: <role-binding-name> <3>
+      namespace: <your-namespace> <4>
       roleRef:
         name: kubevirt.io:admin
         apiGroup: rbac.authorization.k8s.io
@@ -131,10 +131,10 @@ spec:
       subjects:
         - kind: User <5>
           apiGroup: rbac.authorization.k8s.io
-          name: user1 <6>
+          name: <user-name> <6>
 ----
 <1> Specify a name for the permissions.
-<2> Specify a namespace for permissions.
+<2> Add the _cluster_ name that is also a namespace for permissions.
 <3> Specify a name for `RoleBindings`, which assigns roles to Users or Groups.
 <4> Specify the namespace in the managed cluster to which the User or Group is granted access.
 <5> Choose `User` or choose `Group`.
@@ -146,7 +146,7 @@ spec:
 . You can delete the `ClusterPermissions` resource when you are ready.
 
 . *Optional:* If `observability` is enabled, create an additional `RoleBinding` resource on the hub cluster so that users can view virtual machine details in Grafana.
-.. From the `local-cluster` view, click *User Management* > *RoleBindings* > *RoleBindings*.
+.. From the *local-cluster* view, click *User Management* > *RoleBindings* > *RoleBindings*.
 .. Choose `Namespace role binding` for the _Binding type_.
 .. Add the `observability-grafana-access``RoleBinding` name.
 .. Choose `view` for the _Role name_.
