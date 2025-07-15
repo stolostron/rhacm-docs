@@ -78,7 +78,7 @@ oc edit policy -n open-cluster-management-global-set policy-virt-clusterroles
   remediationAction: enforce
 ----
 
-. Create the following YAML file and name the file `acm-vm-rbac-required.yml` for later steps in the procedure. You can use a different name. If you choose a different name, you need to use it throughout the procedure:
+. Create the following YAML file and name the file:
 
 +
 [source,yaml]
@@ -86,7 +86,7 @@ oc edit policy -n open-cluster-management-global-set policy-virt-clusterroles
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: acm-vm-rbac-required <1>
+  name: <cluster-role-name> <1>
 rules:
   - apiGroups: ["clusterview.open-cluster-management.io"]
     resources: ["kubevirtprojects"]
@@ -97,37 +97,37 @@ rules:
   - apiGroups: ["cluster.open-cluster-management.io"]
     resources: ["managedclusters"]
     verbs: ["get"]
-    resourceNames: ["cluster01", "cluster02", "cluster03"] <2>
+    resourceNames: ["<cluster-name-01>", "<cluster-name-02>", "<cluster-name-03>"] <2>
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: acm-vm-rbac-required <3>
+  name: <role-binding-name> <3>
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: acm-vm-rbac-required <4> 
+  name: <cluster-role-name> <4> 
 subjects:
   - kind: User <5>
     apiGroup: rbac.authorization.k8s.io
-    name: user1 <6>
+    name: <user-name> <6>
 ----
 <1> You can use a different name, but must continue to use that name.
-<2> Add the names of the managed clusters that you want your User or Group to access.
+<2> Add the names of the managed clusters that you want your User or Group to access. Each name must be unique.
 <3> You can use any name.
 <4> Ensure the name matches the `ClusterRole` name.
 <5> Choose User or Group.
 <6> Specify a User or Group name.
 
-. Apply the `ClusterRole` resource. Run the following command. Change the file name only if you changed it earlier in the process:
+. Apply the `ClusterRole` resource. Run the following command and change the file name only if you changed it earlier in the process:
 
 +
 [source,bash]
 ----
-oc apply -f acm-vm-rbac-required.yml
+oc apply -f <filename>.yml
 ----
 
-. Create a YAML file for the `ClusterPermission` resource and name the file `cluster01-prod-admin.yml`. 
+. Create a YAML file for the `ClusterPermission` resource and name the file. 
 
 . Assign fine-grain role-based access from the `ClusterPermission` resource by specifying the cluster name, managed cluster namespace, and Users or Group name:
 
@@ -137,12 +137,12 @@ oc apply -f acm-vm-rbac-required.yml
 apiVersion: rbac.open-cluster-management.io/v1alpha1
 kind: ClusterPermission
 metadata:
-  name: <cluster01-prod-admin> <1>
-  namespace: <cluster01> <2>
+  name: <cluster-premission-name> <1>
+  namespace: <cluster-name-01> <2>
 spec:
   roleBindings:
-    - name: cluster01-prod-admin <3>
-      namespace: prod <4>
+    - name: <role-binding-name> <3>
+      namespace: <your-namespace> <4>
       roleRef:
         name: kubevirt.io:admin
         apiGroup: rbac.authorization.k8s.io
@@ -150,26 +150,26 @@ spec:
       subjects:
         - kind: User <5>
           apiGroup: rbac.authorization.k8s.io
-          name: user1 <6>
+          name: <user-name> <6>
 ----
 <1> Specify a name for the permissions.
-<2> Specify a namespace for permissions.
+<2> Add the _cluster_ name that is also a namespace for permissions.
 <3> Specify a name for `RoleBindings`, which assigns roles to Users or Groups.
 <4> Specify the namespace in the managed cluster to which the User or Group is granted access.
 <5> Choose `User` or choose `Group`.
 <6> Specify the User or Group `name`.
 
-. Run the following command to apply the file. Change the name of the file if you changed the name previously:
+. Run the following command to apply the file and change the name of the file if you changed the name previously:
 
 +
 [source,bash]
 ----
-oc apply -f cluster01-prod-admin.yml
+oc apply -f <filename>.yml
 ----
 
 . *Optional:* If `observability` is enabled, create an additional `RoleBinding` on the hub cluster so that users can view virtual machine details in Grafana.
 
-.. Create the `RoleBinding` resource for Grafana access. See the following sample YAML file with `name: user-observability-grafana-access`:
+.. Create the `RoleBinding` resource for Grafana access. See the following sample YAML file:
 
 +
 [source,yaml]
@@ -177,19 +177,19 @@ oc apply -f cluster01-prod-admin.yml
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
- name: user-observability-grafana-access <1>
- namespace: cluster01 <2>
+ name: <role-binding-name> <1>
+ namespace: <cluster-name-01> <2>
 subjects:
  - kind: User <3>
    apiGroup: rbac.authorization.k8s.io
-   name: user1 <4>
+   name: <user-name> <4>
 roleRef:
  apiGroup: rbac.authorization.k8s.io
  kind: ClusterRole
  name: view
 ----
-<1> Specify a name for Grafana access.
-<2> Choose the namespace from the cluster name for which you are granting the user permissions.
+<1> Specify a name for `<role-binding-name>`, which assigns roles to Users or Groups.
+<2> Add the _cluster_ name, which is also the namespace on the hub cluster.
 <3> Choose `User` or choose `Group`.
 <4> Choose the User or Group `name`.
 
@@ -198,7 +198,6 @@ roleRef:
 +
 [source,bash]
 ----
-oc apply -f user-observability-grafana-access.yml
+oc apply -f <filename>.yml
 ----
-
 

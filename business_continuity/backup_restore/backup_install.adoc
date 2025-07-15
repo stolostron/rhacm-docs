@@ -1,39 +1,31 @@
 [#dr4hub-install-backup-and-restore]
 = Installing the backup and restore operator
 
-The cluster backup and restore operator is not installed automatically. Continue reading to learn how to install and enable the operator. 
+The cluster backup and restore operator is not installed automatically. Install and enable the operator, by completing the following sections:
+
+* <<setting-up-hub-clusters-for-backup-and-restore-operators,Setting up hub clusters for backup and restore operators >>
+* <<enabling-backup-restore,Enabling the backup and restore operator>>
 
 [#setting-up-hub-clusters-for-backup-and-restore-operators]
 == Setting up hub clusters for backup and restore operators 
 
 To use the backup and restore operator, you must set up hub clusters. To set up hub clusters, complete the following sections in order: 
 
+* <<prerequisites,Prerequisites>>
+* <<enabling-backup-operator-clusters,Enabling the backup operator for your hub clusters>>
 * <<creating-the-storage-location-secret,Creating the storage location secret>>
-* <<enabling-the-backup-operator,Enabling the backup operator>>
 * <<installing-the-oadp-operator,Installing the OADP operator>>
-* <<creating-a-dataprotectionapplication-resource,Creating a `DataProtectionApplication` resource>>
+* <<installing-custom-oadp,Installing a custom OADP version>>
+* <<creating-a-dataprotectionapplication-resource,Creating a _DataProtectionApplication_ resource>>
 * <<enabling-the-backup-and-restore-component-in-a-disconnected-environment,Enabling the backup and restore component in a disconnected environment>>
 
-[#creating-the-storage-location-secret]
-=== Creating the storage location secret 
-
-To create a storage location secret, complete the following steps: 
-
-. Complete the steps for link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.17/html/backup_and_restore/oadp-application-backup-and-restore#oadp-creating-default-secret_installing-oadp-aws[Creating a default Secret] for the cloud storage where the backups are saved. 
-. Create the secret resource in the OADP Operator namespace, which is located in the backup component namespace.
-
-[#enabling-the-backup-operator]
-=== Enabling the backup operator 
-
-Enable the backup operator to use the disaster recovery solutions for {acm}. 
-
-[#enabling-backup-operator-prerequisite]
-==== Prerequisites
+[#prerequisites]
+== Prerequisites
 
 * From your {ocp} cluster, install the {acm-short} operator version {product-version}. The `MultiClusterHub` resource is automatically created when you install {acm-short}, and displays the following status: `Running`. 
 
 [#enabling-backup-operator-clusters]
-==== Enabling backup operators for your hub clusters 
+== Enabling the backup operator for your hub clusters 
 
 To enable the backup operator for your active and passive hub clusters, complete the following steps:
 
@@ -49,8 +41,16 @@ To enable the backup operator for your active and passive hub clusters, complete
 .. Create the `DataProtectionApplication` resource on both the active and passive hub cluster. 
 .. For the restore hub cluster, when you create the `DataProtectionApplication` resource, use the same storage location as the backup hub. 
 
+[#creating-the-storage-location-secret]
+== Creating the storage location secret 
+
+To create a storage location secret, complete the following steps: 
+
+. Complete the steps for link:https://docs.redhat.com/documentation/en-us/openshift_container_platform/4.17/html/backup_and_restore/oadp-application-backup-and-restore#oadp-creating-default-secret_installing-oadp-aws[Creating a default Secret] for the cloud storage where the backups are saved. 
+. Create the secret resource in the OADP Operator namespace, which is located in the backup component namespace.
+
 [#installing-the-oadp-operator]
-=== Installing the OADP operator 
+== Installing the OADP operator 
 
 For hub clusters where you enabled the AWS Security Token Service (STS) option, the OADP operator is not installed when you installed the cluster backup and restore operator on the hub cluster. To pass the STS `role_arn` to the OADP operator, you must manually install the OADP operator. 
 
@@ -79,7 +79,7 @@ When you install the OADP operator, see the following notes:
 - For a list of supported storage providers for Velero, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/backup_and_restore/oadp-application-backup-and-restore#about-installing-oadp[About installing OADP].
 
 [#installing-custom-oadp]
-=== Installing a custom OADP version 
+== Installing a custom OADP version 
 
 Setting an annotation on your `MultiClusterHub` resource allows you to customize the OADP version for your specific needs. Complete the following steps:
 
@@ -92,7 +92,7 @@ installer.open-cluster-management.io/oadp-subscription-spec: '{"channel": "stabl
 ----
 *Important:* If you use this option to get a different OADP version than the one installed by default by the backup and restore operator, make sure this version is supported on the {ocp} version used by the hub cluster. Use this override option with caution because it can result in unsupported configurations.
 
-. For example, install the OADP 1.5 version by setting your annotation. Your `MultiClusterHub` resource might resemble the following example: 
+. *Optional:* To install a specific OADP version of the operator, set your annotation. For example, if you want to install OADP from the `stable-1.5` channel and select a specific version of the operator, set the `startingCSV` property on the `installer.open-cluster-management.io/oadp-subscription-spec` annotation. Your `MultiClusterHub` resource might resemble the following example: 
 
 +
 [source,yaml]
@@ -102,33 +102,16 @@ kind: MultiClusterHub
 metadata:
   annotations:
     installer.open-cluster-management.io/oadp-subscription-spec: '{"channel": "stable-1.5","installPlanApproval": "Automatic","name":
-      "redhat-oadp-operator","source": "redhat-operators","sourceNamespace": "openshift-marketplace"}'
+      "redhat-oadp-operator","source": "redhat-operators","sourceNamespace": "openshift-marketplace" "startingCSV": “oadp-operator.v5.0.2”}'
   name: multiclusterhub
 spec: {}
 ---- 
 
 . Enable the `cluster-backup` option on the `MultiClusterHub` resource by setting `cluster-back` to `true`. 
-
-[#installing-startingcsv]
-=== Installing a _startingCSV_ on the OADP operator 
-
-Install a specific version of the OADP operator by setting the `startingCSV` property on the `installer.open-cluster-management.io/oadp-subscription-spec` annotation. After you enable the `cluster-backup` option on the `MultiClusterHub` resource, the OADP operator is installed with the version that is specified by the `startingCSV` property.
-
-Complete the following steps: 
-
-. On your `MultiClusterHub` resource, set the following annotation:
- 
-+
-[source,yaml]
-----
-installer.open-cluster-management.io/oadp-subscription-spec: ' {"source": <my-mirror-catalog-source>,"startingCSV": "<1>"}
-----
-<1> The OADP operator version that you specified to be installed from the source.
-+ 
-. To verify that the OADP operator uses the `startingCSV` property, confirm that the `subscription` YAML for the OADP operator includes the `startingCSV` property. 
+. To verify that the OADP operator uses the `oadp-subscription-spec` annotation properties, confirm that the subscription YAML for the OADP operator includes the properties that are specified by the annotation. 
 
 [#creating-a-dataprotectionapplication-resource]
-=== Creating a `DataProtectionApplication` resource 
+== Creating a _DataProtectionApplication_ resource 
 
 To create an instance of the `DataProtectionApplication` resource for your active and passive hub clusters, complete the following steps: 
 
@@ -180,11 +163,11 @@ spec:
 ----
 
 [#enabling-the-backup-and-restore-component-in-a-disconnected-environment]
-=== Enabling the backup and restore component in a disconnected environment 
+== Enabling the backup and restore component in a disconnected environment 
 
 To enable the backup and restore component with {ocp} in a disconnected environment, complete the following steps: 
 
-. Update the `MultiClusterHub` resource with the follwing annotation to override the source from which the OADP operator is installed. Create the annotation before the `cluster-backup` component is enabled on the `MultiClusterHub` resource:
+. Update the `MultiClusterHub` resource with the following annotation to override the source from which the OADP operator is installed. Create the annotation before the `cluster-backup` component is enabled on the `MultiClusterHub` resource:
 
 +
 [source,yaml]
