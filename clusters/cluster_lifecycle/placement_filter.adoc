@@ -1,7 +1,7 @@
 [#placement-labelselector-claimSelector]
 = Selecting `ManagedClusters` from `ManagedClusterSets`
 
-You can select which `ManagedClusters` to filter by using `labelSelector` or `claimSelector`. See the following examples to learn how to use both filters:
+You can select which `ManagedClusters` to filter by using `labelSelector`, `claimSelector`, or `celSelector`. See the following examples to learn how to the filters:
 
 - In the following example, the `labelSelector` only matches clusters with the label `vendor: OpenShift`:
 +
@@ -62,6 +62,38 @@ spec:
               values:
                 - us-west-1
 ----
+
+- In the following example, `celSelector` only matches clusters that are Kubernetes version 1.31.0:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement1
+  namespace: ns1
+spec:
+  numberOfClusters: 3
+  clusterSets:
+    - clusterset1
+  predicates:
+  - requiredClusterSelector:
+      celSelector:
+        celExpressions: 
+          - managedCluster.status.version.kubernetes == "v1.31.0" <1>
+          - managedCluster.status.clusterClaims.exists(c, c.name == "kubeversion.open-cluster-management.io" && c.value == "v1.31.0") <2>
+          - managedCluster.metadata.labels["version"].matches('^1\\.(30|31).d+$') <3>
+          - semver(managedCluster.metadata.labels["version"]).isGreaterThan(semver("1.30.0")) <4>
+          - managedCluster.scores("resource-usage-score").filter(s, s.name == 'memNodeAvailable').all(e, e.value > 0) <5>
+----
+
+<1> Select clusters by Kubernetes version listed in `managedCluster.Status.version.kubernetes`.
+<2> Select clusters by informtion stored in `clusterClaims`.
+<3> Use Common Expression Language standard macros and standard functions on the `managedCluster` fields.
+<4> Use Kubernetes `semver` library functions `isLessThan` and `isGreaterThan` to select clusters by version comparison.
+<5> Use Open Cluster Management customized function scores to select clusters by `AddonPlacementScore`.
+
+See _Common Expression Language in Kubernetes_ in the additional resources section to learn more.
 
 You can also choose how many `ManagedClusters` you want to filter by using the `numberOfClusters` paremeter. See the following example:
 
@@ -331,3 +363,4 @@ spec:
 
 - See link:https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#node-allocatable[Node Allocatable] for more details.
 - Return to xref:../clusters/cluster_lifecycle/placement_intro.adoc#placement-intro[Selecting ManagedClusters with placement] for other topics.
+- To learn more about Common Expression Language in Kubernetes, see link:https://kubernetes.io/docs/reference/using-api/cel/[Common Expression Language in Kubernetes].
