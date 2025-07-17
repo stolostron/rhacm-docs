@@ -1,11 +1,11 @@
 [#observability-alerts]
 = Managing alerts
 
-Receive and define alerts as notifications for any Observability service changes in your hub cluster and managed cluster.
+Configure Observability alerts to monitor both your hub cluster and managed cluster activity, forward platform and user workload alerts to the Alertmanager on your hub cluster, and route notifications to external systems such as Slack, email, or PagerDuty.
 
 - <<alert-prereqs,Prerequisites>>
 - <<configuring-alertmanager,Configuring Alertmanager>>
-- <<mount-secrets-alertmanager,Mounting secrets within the Alertmanager pods>>
+- <<secure-comm-alertmanager,Securing communication from Alertmanager to third-party endpoints>>
 - <<forward-alerts,Forwarding alerts>>
 - <<disabling-forward-alerts,Disabling alert forwarding for managed clusters>>
 - <<disabe-uwl-forwarding,Disabling user workload alert forwarding for managed clusters>>
@@ -70,10 +70,10 @@ route:
 
 After you modify the secret, your changes are applied immediately. For an example of Alertmanager, see link:https://github.com/prometheus/alertmanager/blob/main/doc/examples/simple.yml[prometheus/alertmanager].
 
-[#mount-secrets-alertmanager]
-== Mounting secrets within the Alertmanager pods
+[#secure-comm-alertmanager]
+== Securing communication from Alertmanager to third-party endpoints
 
-You can create `Secret` resources with arbitrary content that you can mount within your `alertmanager` pods for access to authorization credentials.
+Enable secure external communication from Alertmanager to third-party endpoints such as Slack, email, and PagerDuty by keeping your credentials secure and manageable through Kubernetes `Secret` resources. You can create `Secret` resources with arbitrary content that you can mount within your `alertmanager` pods for access to authorization credentials.
 
 To reference secrets within your Alertmanager configuration, add the `Secret` resource content within the `open-cluster-management-observability` namespace and mount the content within the `alertmanager` pods. For example, to create and mount a `tls` secret, complete the following steps:
 
@@ -177,7 +177,7 @@ global:
     proxy_url: http://****
 ----
 
-To forward user workload alerts, the alerts must be processed by user workload Prometheus instance and not by Thanos ruler. See the following example of the Prometheus instance:
+To forward user workload alerts, the alerts must be processed by the user workload Prometheus instance and not by Thanos ruler. See the following example of the `PrometheusRule` resource:
 
 [source,yaml]
 ----
@@ -204,7 +204,7 @@ metadata:
         mco-disable-alerting: "true"
 ----
 
-*Important:* You lose metrics on your managed cluster if you have a Prometheus instance with a persistent volume for metrics, and the Prometheus instance restarts. Metrics from the hub cluster are not affected.
+*Important:* You lose metrics when Prometheus on your managed cluster is not configured with a persistent volume.
 
 When the changes are reverted, a config map named `cluster-monitoring-reverted` is created in the `open-cluster-management-addon-observability` namespace. Any new, manually added alert forward configurations are not reverted from the ConfigMap. 
 
@@ -217,13 +217,11 @@ To disable user workload alert forwarding for managed clusters, add the `mco-dis
 
 Setting the annotation ensures that the `user-workload-monitoring-config` config map is not managed or updated by the Observability operator endpoint. After you update the configuraion, the user workload Prometheus instance on your managed cluster restarts.
 
-See the following example where the `mco-disable-uwl-alerting` annotation is set to `"true"`:
+Run the following command to set the `mco-disable-uwl-alerting` annotation to `"true"`:
 
-[source,yaml]
+[source,bash]
 ----
-metadata:
-  annotations:
-    mco-disable-uwl-alerting: "true"
+oc annotate MultiClusterObservability observability mco-disable-uwl-alerting=true
 ----
 
 [#silence-alerts]
