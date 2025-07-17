@@ -5,16 +5,18 @@ permalink: /tech_writing_standards
 horizontal: false
 ---
 
-Use this file regularly to write high quality content. Please read and study this information as a technical writer on the team, or a contributor. 
+"If you follow IBM Style, you already write content that large language models can use. Large language models perform best when the following general rules are applied: Write content that is grammatically correct, clear, concise, appropriate for global audiences, accessible, and easy to translate." -- [_LLM consumability_](https://www.ibm.com/docs/en/ibm-style?topic=medium-llms#adapting-content-for-large-language-model-consumption)
 
-Most of the following content is addressed in the following manuals or guidance:
+Please read and study this information as a technical writer on the team, or as a contributor. Writing to theses standards is required for merge.
+
+Most of the following content is addressed in the following resources. Red Hat uses both the IBM Style Guide and has for a long time. There is a newer Red Hat supplementary guide for anything not addressed in the IBM Style manual:
 
 * [_IBM Style Manual_](https://www.ibm.com/docs/en/ibm-style)
 * [_Red Hat Supplemental_ guide](https://redhat-documentation.github.io/supplementary-style-guide/#_about_this_guide)
 * [_Naming_](https://source.redhat.com/departments/marketing/brand/naming)
 * [Writing and reviewing checklist](checklist.md)
 
-Many of the guidelines we adopt are industry standards for high quality writing, proper grammar, SEO, translation, accessibility, and readability. All technical writers should be very familiar with these standards for writing. Each contributor should refer to these manuals when creating content for the RHACM docs repository. Read more about the standards in the following sections, but see the manuals for more information:
+The guidelines we adopt are industry standard for high quality writing, proper grammar, SEO, translation, accessibility, and readability. See more details within those standards and be familiar with them as you create new documentation.
 
 * [General reminders](#general-reminders)
 * [File names, titles, headers](#file-names-titles-headers)
@@ -26,17 +28,20 @@ Many of the guidelines we adopt are industry standards for high quality writing,
 
 ## General reminders 
 
-* Use proper Global English. Please read about [Global audiences](https://www.ibm.com/docs/en/ibm_style/global-audiences.html) in the _IBM Style Manual_.
-* Write using minimalistic writing. Get to the point early and use bulleted lists and steps in place of cumbersome paragraphs. Reduce wordy sentences. Read more about [Minimalism](https://redhat-documentation.github.io/supplementary-style-guide/#minimalism) and read about using [clear, succinct verbs](https://www.ibm.com/docs/en/ibm-style?topic=grammar-verbs).
+* Use proper Global English. See [Global audiences](https://www.ibm.com/docs/en/ibm_style/global-audiences.html) in the _IBM Style Manual_.
+* Create minimalistic content. Get to the point early and use bulleted lists and steps in place of cumbersome paragraphs. Reduce wordy sentences. Read more about [Minimalism](https://redhat-documentation.github.io/supplementary-style-guide/#minimalism) and using [clear, succinct verbs](https://www.ibm.com/docs/en/ibm-style?topic=grammar-verbs).
 * Avoid dangling modifiers. Be sure subject and predicate agree. Read about [subject-verb agreement](https://www.ibm.com/docs/en/ibm-style?topic=grammar-verbs#subject-verb-agreement).
 * Know something about the technology: What is the purpose of the new function? Why should a customer use it? This will help you write your _short description_.
+* Use only Red Hat supported links. Do not link to open communities, for instance. You can link to Kubernetes products that are integrated with Red Hat products and tested/validated by the Dev team and QE.
 * Use only approved abbreviations.
   - Check third-party official doc for abbreviations, for example AWS is used by Amazon. IBM uses few abbreviations.
   - Check manuals and the rest of the doc to see where we use abbreviations and where we don't.
   - Approved abbreviations are only used after initial full spelling and parenthesis: Custom Resource (CR)
-* Ask where the user will interact with the feature: Day 1? Day 2? During the Application lifecycle? This will help with placement.
-* Seek guidance from the architect before creating a new guide or section if you are not sure about placement.
-* Reduce lengthy output examples that the user will see in the terminal. We usually do not need to repeat outputs in the doc.
+* Ask where the user will interact with the feature: Day 1? Day 2? During the Application lifecycle? This will help with placement within the doc.
+* Seek guidance from the doc architect before creating a new guide or section if you are not sure about placement.
+* Reduce lengthy output examples where you can.
+* Do not merge commands with output.
+* Ensure YAML and other file samples are in the proper format.
 * Consider using variable in versions within commands and samples so we don't get bugs or have to change them. Simply indicate that the user needs to insert the supported version. **Example:** `image: myregistry.example.com:5000/mirror/my-operator-index:v4.x,` replacing `4.x` with the current version.
  
 ## File names, titles, headers
@@ -48,8 +53,7 @@ Many of the guidelines we adopt are industry standards for high quality writing,
   - We ask for validation steps at the end, but you may not get them in your drafts. Those steps are concrete and produce a result, or just skip adding them. **Example:** Run `oc get status` to verify pod status.
   - _Concepts_ are informative about what the product does and how. A topic about architecture is a concept. An intro file is also conceptual. 
   - _References_ are also informative. A breakdown of an API or a glossary could be defined as a reference.
-
-     
+  
 * Avoid internal terms. Name the file and section after what the user reads about the product in announcements and in the console. For instance, name a file `console_intro.adoc` and not `ui.intro.adoc` because the product refers to the _console_. Another example is `spoke` cluster, which is an internal term for what we call and managed cluster.
 * Use headers for two or more subsections. If you have more than three, create links for them at the beginning of the file for easy retrievabililty and UX.
 * Use parallel language for headers. Example: Creating your cluster, Importing your cluster, Destroying your cluster.
