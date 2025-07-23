@@ -62,7 +62,7 @@ Now that stage branch is finalized and green, you can create the production bran
 6. Ensure that **Require approvals** is selected. 
 7. Select **Do not allow bypassing the above settings** to prevent admins from bypassing this rule. Admins can bypass in `stage` IF needed, but not `prod`.
 8. Select **Create** to apply the rule. 
-9. Run a build wit the prod branch in the command: `./acm_sync_asciidoc.sh 2.x 2.x_prod`
+9. Run a build with the prod branch in the command: `./acm_sync_asciidoc.sh 2.x 2.x_prod`
 10. Ensure the build is clean.
 11. Stop any builds until GA day and after because `prod` and `stage` are in the same directory. You can return to building stage after you publish.
 
