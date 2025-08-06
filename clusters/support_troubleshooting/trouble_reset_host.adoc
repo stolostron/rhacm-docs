@@ -1,0 +1,127 @@
+[#trouble-day2-host-stuck]
+= Production environment host becomes stuck during installation
+
+In some cases, a production environment host might become stuck during installation, or you might want to stop the host installation so that you can quickly scale down the number of installed hosts on your hosted cluster.
+
+[#symptom-trouble-day2-host-stuck]
+== Symptom: Production environment host becomes stuck during installation
+
+The host status is stuck at `installing-pending-user-action`, or the host is installing on a cluster that is already installed.
+
+[#identifying-trouble-day2-host-stuck]
+== Identifying the problem: Production environment host becomes stuck during installation
+
+You can only cancel the installation if you are using {cim} and have a cluster that you already installed. Complete the following steps to check if you can cancel the host installation:
+
+. Check if your installed cluster is using {cim}. Run the following command:
+
++
+[source,bash]
+----
+oc get agentclusterinstall -n <namespace>
+----
++
+If your cluster is using {cim}, the following output with the `adding-hosts` `STATE` appears:
++
+[source,bash]
+----
+NAME                    CLUSTER                 STATE
+assisted-cluster        assisted-cluster        adding-hosts 
+----
+
+. Check if the host in installing. Run the following command:
+
++
+[source,bash]
+----
+oc get agent -n <namespace>
+----
++
+If the host is installing, the output resembles the following example:
++
+[source,bash]
+----
+NAME                                   CLUSTER                 APPROVED   ROLE          STAGE
+127877e3-2098-4bf8-9b44-588a78ffcccd   assisted-cluster        true       worker        Rebooting 
+----
+
+[#resolving-trouble-day2-host-stuck]
+== Resolving the problem: Production environment host becomes stuck during installation
+
+Complete the following steps to cancel the host installation. You can only cancel the installation if you are using {cim} and have a cluster that you already installed:
+
+
+
+. Unbin the host from the cluster by removing the `clusterDeploymentName` field in the `Agent` resource of the host that you want to stop installing. Run the following command:
+
++
+[source,bash]
+----
+oc patch agent -n <namespace> <name of agent> --patch='[{"op":"remove","path":"/spec/clusterDeploymentName"}]' --type=json
+----
++
+You can confirm that the host is unbound by running the following command:
++
+[source,bash]
+----
+oc get agent -n <namespace>
+----
++
+If the host is unbound, the output resembles the following example, where `CLUSTER` and `STAGE` are empty.
++
+[source,bash]
+----
+NAME                                   CLUSTER   APPROVED   ROLE          STAGE
+127877e3-2098-4bf8-9b44-588a78ffcccd             true       auto-assign    
+----
+
+
+. Return the host to the discovery phase.
+
+.. If you are using the Discovery ISO to add a node, download the Discovery ISO again and reboot your host with the Discovery ISO. Run the following command:
++
+[source,bash]
+----
+oc get infraenv -n <namespace> <infraenv-name> -ojsonpath='{.status.isoDownloadURL}'
+----
+
+.. If you are using the `BareMetalHost` resource to add a node, the host automatically returns to the discovery phase. Run the following command to confirm that the host is in the discovery phase:
++
+[source,bash]
+----
+oc get bmh -n <namespace>
+----
++
+If the host is in the discovery phase, the `BareMetalHost` resource status changes from deprovisioning to provisioning. It might take a few minutes for deprovisioning to complete. After the  `BareMetalHost` reaches the provisioning status, the host is in discovery mode.
+
+. Check to see if the `Agent` resource is discovered and validated. Run the following command:
+
++
+[source,bash]
+----
+oc get agent -n <namespace> <agent-name> -ojsonpath='{"NAME: "}{.metadata.name}{"\n"}{"VALIDATIONS PASSING: "}{.status.conditions[?(@.type == "Validated")].status}{"\n"}'
+----
+
+. Bind the `Agent` resource to the cluster and reinstall the host. Complete the following steps:
+
++
+[source,bash]
+----
+oc patch agent -n <namespace> <agent-name> --patch='[{"op":"add","path":"/spec/clusterDeploymentName","value":{"name":"<cluster name>","namespace":"<cluster namespace>"}}]' --type=json 
+----
+
+. Confirm that the `Agent` resource is bound to the cluster. Run the following command:
+
++
+[source,bash]
+----
+oc get agent -n <namespace>
+----
++
+If the `Agent` resource is bound to the cluster, the output resembles the following example:
++
+[source,bash]
+----
+NAME                                   CLUSTER               APPROVED   ROLE          STAGE
+127877e3-2098-4bf8-9b44-588a78ffcccd   cluster name          true       auto-assign    
+----
