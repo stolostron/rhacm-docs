@@ -32,65 +32,51 @@ The following table shows the defined `ClusterClaim` list for a cluster that {mc
 
 If any of the previous claims are deleted or updated on managed cluster, they are restored or rolled back to a previous version automatically.
 
-After the managed cluster joins the hub, any `ClusterClaim` that is created on a managed cluster is synchronized with the status of the `ManagedCluster` resource on the hub cluster. See the following example of `clusterClaims` for a `ManagedCluster`, replacing `4.x` with a supported version of {ocp-short}:
+After the managed cluster joins the hub cluster, the following two types of `ClusterClaim` created on the managedcluster are synchronized with the status of the `ManagedCluster` resource on the hub cluster. `ClusterClaims` with label `open-cluster-management.io/spoke-only` label are not synchronized:
 
+`ClusterClaims` that {mce} manages:: Includes `id.k8s.io`, or labels with the `open-cluster-management.io` or `openshift.io` suffix. These `ClusterClaims are synchronized to the `ManagedCluster` status on the hub cluster.
+
+`ClusterClaims` that you manage:: Without the `open-cluster-management.io` or `openshift.io` suffix. By default, up to 20 `ClusterClaims` are synchronized to the `ManagedCluster` status on the hub cluster.
+
+To change the number of `ClusterClaims` that are synchronized, configure the `KlusterletConfig` API. Complete the following steps:
+
+. Create a `KlusterletConfig` and set `clusterClaimConfiguration.maxCustomClusterClaims` to your desired value. The maxmimum value is `100`. See the following example:
+
++
+[source,yaml]
+----
+kind: KlusterletConfig
+apiVersion: config.open-cluster-management.io/v1alpha1
+metadata:
+  name: klusterlet-cluster-claim-config
+spec:
+  clusterClaimConfiguration:
+    maxCustomClusterClaims: 30
+----
+
+. Add an annotation to refer to the `KlusterletConfig` in the `ManagedCluster` resource. Run the following command:
+
++
+[source,bash]
+----
+oc annotate managedcluster <cluster-name> agent.open-cluster-management.io/klusterlet-config="klusterlet-cluster-claim-config"
+----
++
+After adding the annotation, yor `ManagedCluster` resource resembles the following example:
++
 [source,yaml]
 ----
 apiVersion: cluster.open-cluster-management.io/v1
 kind: ManagedCluster
 metadata:
-  labels:
-    cloud: Amazon
-    clusterID: 95f91f25-d7a2-4fc3-9237-2ef633d8451c
-    installer.name: multiclusterhub
-    installer.namespace: open-cluster-management
-    name: cluster1
-    vendor: OpenShift
+  annotations:
+   agent.open-cluster-management.io/klusterlet-config: klusterlet-cluster-claim-config
   name: cluster1
 spec:
   hubAcceptsClient: true
   leaseDurationSeconds: 60
-status:
-  allocatable:
-    cpu: '15'
-    memory: 65257Mi
-  capacity:
-    cpu: '18'
-    memory: 72001Mi
-  clusterClaims:
-    - name: id.k8s.io
-      value: cluster1
-    - name: kubeversion.open-cluster-management.io
-      value: v1.18.3+6c42de8
-    - name: platform.open-cluster-management.io
-      value: AWS
-    - name: product.open-cluster-management.io
-      value: OpenShift
-    - name: id.openshift.io
-      value: 95f91f25-d7a2-4fc3-9237-2ef633d8451c
-    - name: consoleurl.openshift.io
-      value: 'https://console-openshift-console.apps.xxxx.dev04.red-chesterfield.com'
-    - name: version.openshift.io
-      value: '4.x'
-  conditions:
-    - lastTransitionTime: '2020-10-26T07:08:49Z'
-      message: Accepted by hub cluster admin
-      reason: HubClusterAdminAccepted
-      status: 'True'
-      type: HubAcceptedManagedCluster
-    - lastTransitionTime: '2020-10-26T07:09:18Z'
-      message: Managed cluster joined
-      reason: ManagedClusterJoined
-      status: 'True'
-      type: ManagedClusterJoined
-    - lastTransitionTime: '2020-10-30T07:20:20Z'
-      message: Managed cluster is available
-      reason: ManagedClusterAvailable
-      status: 'True'
-      type: ManagedClusterConditionAvailable
-  version:
-    kubernetes: v1.18.3+6c42de8
 ----
+
 
 [#create-custom-clusterclaims]
 == Create custom ClusterClaims
