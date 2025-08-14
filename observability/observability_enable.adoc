@@ -18,7 +18,7 @@ Monitor the status of your managed clusters with the Observability component, al
 == Prerequisites
  
 - You must install {acm}. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online] for more information.
-- You must define a storage class in the `MultiClusterObservability` custom resource, if there is no default storage class specified.
+- You must specify the `storageConfig.storageClass` field in the `MultiClusterObservability` custom resource, if you do not want to use the platform default `storageClass`.
 - Direct network access to the hub cluster is required. Network access to load balancers and proxies are not supported. For more information, see link:../networking/networking_intro.adoc#networking[Networking].
 - You must configure an object store to create a storage solution. 
 ** *Important:* When you configure your object store, ensure that you meet the encryption requirements that are necessary when sensitive data is persisted. The Observability service uses Thanos supported, stable object stores. You might not be able to share an object store bucket by multiple {acm-short} Observability installations. Therefore, for each installation, provide a separate object store bucket. 
@@ -29,7 +29,7 @@ Monitor the status of your managed clusters with the Observability component, al
 * Google Cloud Storage
 * Azure storage
 * Red Hat OpenShift Data Foundation, formerly known as Red Hat OpenShift Container Storage
-* Red Hat OpenShift on IBM (ROKS)
+* Red Hat OpenShift on IBM Cloud
 
 
 [#enabling-observability]
@@ -319,9 +319,9 @@ echo $S3_POLICY
          "${OIDC_PROVIDER}:sub": [
            "system:serviceaccount:${NAMESPACE}:observability-thanos-query",
            "system:serviceaccount:${NAMESPACE}:observability-thanos-store-shard",
-           "system:serviceaccount:${NAMESPACE}:observability-thanos-compact"
+           "system:serviceaccount:${NAMESPACE}:observability-thanos-compact",
            "system:serviceaccount:${NAMESPACE}:observability-thanos-rule",
-           "system:serviceaccount:${NAMESPACE}:observability-thanos-receive",
+           "system:serviceaccount:${NAMESPACE}:observability-thanos-receive"
          ]
        }
      }
@@ -365,11 +365,11 @@ metadata:
 type: Opaque
 stringData:
   thanos.yaml: |
- type: s3
- config:
-   bucket: $S3_BUCKET
-   endpoint: s3.$REGION.amazonaws.com
-   signature_version2: false
+    type: s3
+    config:
+      bucket: $S3_BUCKET
+      endpoint: s3.$REGION.amazonaws.com
+      signature_version2: false
 ----
 
 . Specify the service account annotations in the `MultiClusterObservability` custom resource as described in _Creating the MultiClusterObservability custom resource_ section. 
@@ -489,9 +489,30 @@ For more information, see link:https://docs.redhat.com/en/documentation/openshif
 ----
 oc apply -f multiclusterobservability_cr.yaml
 ----
-+
-All the pods in `open-cluster-management-observability` namespace for Thanos, Grafana and Alertmanager are created. All the managed clusters connected to the {acm-short} hub cluster are enabled to send metrics back to the {acm-short} Observability service.
 
++
+*Note:* By default, if you do not define the `storageConfig.storageClass` field in the `MultiClusterObservability` custom resource, platform default `StorageClass` fields are populated in the `storageConfig` section of the `MultiClusterObservability` resource. For example, AWS default `storageClass` is set to `gp2`.
+
+. Verify default `storageClass` by running the following command:
+
++
+[source,bash] 
+----
+oc get storageClass
+----
+
++
+See the following example output:
+
++
+[source,bash] 
+----
+NAME                PROVISIONER       RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+gp2-csi             ebs.csi.aws.com   Delete          WaitForFirstConsumer   true                   151m
+gp3-csi (default)   ebs.csi.aws.com   Delete          WaitForFirstConsumer   true                   151m
+----
+
++
 . Validate that the Observability service is enabled and the data is populated by launching the Grafana dashboards. 
 
 . Click the *Grafana link* that is near the console header, from either the console _Overview_ page or the _Clusters_ page.
