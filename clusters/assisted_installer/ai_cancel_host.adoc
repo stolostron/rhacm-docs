@@ -1,0 +1,126 @@
+[#cancel-host-install]
+= Cancelling host installations
+
+You can cancel host installations to prevent incorrect cluster binding, change host configurations, or fix installation problems.
+
+For example, you can cancel the installation if a production environment host becomes stuck during installation with the `installing-pending-user-action` status.
+
+.Prerequisites
+
+You are using the late binding feature on your managed cluster.
+
+.Procedure
+
+Complete the following steps to check if you can cancel the host installation:
+
+. Check if your managed cluster is using {cim}. Run the following command:
+
++
+[source,bash]
+----
+oc get agentclusterinstall -n <namespace>
+----
++
+If your managed cluster is using {cim}, the following output with the `adding-hosts` `STATE` appears:
+
++
+[source,bash]
+----
+NAME                    CLUSTER                 STATE
+assisted-cluster        assisted-cluster        adding-hosts 
+----
+
+. Check if the host is installing. Run the following command:
+
++
+[source,bash]
+----
+oc get agent -n <namespace>
+----
++
+If the host is installing, the output resembles the following example:
+
++
+[source,bash]
+----
+NAME                                   CLUSTER                 APPROVED   ROLE          STAGE
+127877e3-2098-4bf8-9b44-588a78ffcccd   assisted-cluster        true       worker        Rebooting 
+----
+
+If your output resembles the previous example, you can continue cancelling the host installation. Complete the following steps to cancel the host installation:
+
+. Unbind the host from the managed cluster by removing the `clusterDeploymentName` field in the `Agent` resource of the host that you want to stop installing. Run the following command:
+
++
+[source,bash]
+----
+oc patch agent -n <namespace> <agent-name> --patch='[{"op":"remove","path":"/spec/clusterDeploymentName"}]' --type=json
+----
++
+Confirm that the host is unbound by running the following command:
+
++
+[source,bash]
+----
+oc get agent -n <namespace>
+----
++
+If the host is unbound, the output resembles the following example, where `CLUSTER` is empty and `STAGE` is either empty, or `unbinding-pending-user-action` or similar.
+
++
+[source,bash]
+----
+NAME                                   CLUSTER   APPROVED   ROLE          STAGE
+127877e3-2098-4bf8-9b44-588a78ffcccd             true       auto-assign    
+----
+
+. Return the host to the discovery phase.
+
+.. If you are using the Discovery ISO to add a node, download the Discovery ISO again and reboot your host with the Discovery ISO. Run the following command:
++
+[source,bash]
+----
+oc get infraenv -n <namespace> <infraenv-name> -ojsonpath='{.status.isoDownloadURL}'
+----
+
+.. If you are using the `BareMetalHost` resource to add a node, the host automatically returns to the discovery phase. Run the following command to confirm that the host is in the discovery phase:
++
+[source,bash]
+----
+oc get bmh -n <namespace>
+----
++
+If the host is in the discovery phase, the `BareMetalHost` resource status changes from `deprovisioning` to `provisioning`. It might take a few minutes for deprovisioning to complete. After the  `BareMetalHost` reaches the `provisioning status`, the host is in discovery mode.
+
+. Check to see if the `Agent` resource is discovered and validated. Run the following command:
+
++
+[source,bash]
+----
+oc get agent -n <namespace> <agent-name> -ojsonpath='{"NAME: "}{.metadata.name}{"\n"}{"VALIDATIONS PASSING: "}{.status.conditions[?(@.type == "Validated")].status}{"\n"}'
+----
+
+. Bind the `Agent` resource to the managed cluster to reinstall the host. Run the following command:
+
++
+[source,bash]
+----
+oc patch agent -n <namespace> <agent-name> --patch='[{"op":"add","path":"/spec/clusterDeploymentName","value":{"name":"<cluster name>","namespace":"<cluster namespace>"}}]' --type=json 
+----
+
+. Confirm that the `Agent` resource is bound to the managed cluster. Run the following command:
+
++
+[source,bash]
+----
+oc get agent -n <namespace>
+----
++
+If the `Agent` resource is bound to the managed cluster, the output resembles the following example:
+
++
+[source,bash]
+----
+NAME                                   CLUSTER               APPROVED   ROLE          STAGE
+127877e3-2098-4bf8-9b44-588a78ffcccd   cluster name          true       auto-assign    
+----
