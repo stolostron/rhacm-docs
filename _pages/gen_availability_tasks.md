@@ -85,7 +85,7 @@ Ideally the architect or strategist is doing this but can be done by the lead, w
 1. Publish MCE matrix at MCE GA, then update the previous matrix references with the newest version.
 2. Publish ACM matrix at ACM GA, then update the previous matrix references with the newest version.
 3. Double check that all links work in the documentation.
-4. 
+
 ## Request support matrix link update on product page
 
 This was something that we had to update but is now handled through an issue with more process attached. 
