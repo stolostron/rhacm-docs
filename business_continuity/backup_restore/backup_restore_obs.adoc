@@ -1,11 +1,12 @@
-[#backup-restore-obs]
-= Backup and restore for Observability
+[#backup-restore-obs-config]
+= Backup and restore configuration for Observability
 
-The Observability service uses an S3-compatible object store to persist all time-series data collected from managed clusters. Because Observability is a stateful service, it is sensitive to active and passive failover patterns. You must configure Oservability to ensure data continuity and integrity during hub cluster migration or failover.
+//suggested title from developer was Configuring backup and restore for Observability 
+The Observability service uses an S3-compatible object store to persist all time-series data collected from managed clusters. Because Observability is a stateful service, it is sensitive to active and passive backup patterns. You must configure Oservability to ensure data continuity and integrity during hub cluster migration or backup.
 
 The Observability service automatically adds the `cluster.open-cluster-management.io/backup` label to Observability-related resources to be included in the standard product backup and restore processes.
 
-.Resources that are automatically backuped up and restored
+.Resources that are automatically backuped up and restored for Observability
 |====
 | Resource type | Resource name  
 
@@ -50,5 +51,40 @@ oc get observatorium -n open-cluster-management-observability -o yaml > observat
 [source,bash]
 ----
 oc get mco observability -o yaml > mco-cr-backup.yaml
+----
+
+== Backing up and restoring Observability service
+
+As you follow this procedure it is assumed that the same S3-compatible object store is used across both the primary and backup hub clusters to minimize disruption in metric data collection.
+
+Complete the following steps to backup and restore the Observability service resources:
+
+. Shut down the Thanos compactor on your primary hub cluster.
+.. To prevent write conflicts and deduplication issues while working on the same object storage, stop the Thanos compactor before starting the restore operation on the backup hub cluster. Run the following command:
+
++
+[source,bash]
+----
+oc scale statefulset observability-thanos-compact -n open-cluster-management-observability --replicas=0
+----
+
+.. Verify the compactor is stopped by running the following command:
+
++
+[source,bash]
+----
+oc get pods observability-thanos-compact-0 -n open-cluster-management-observability
+----
+
+. Restore the `backup` resources
+Restore resources from backup using the process described in the Restore Backup section (
+https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.13/html-single/business_continuity/index#restore-backup) section to restore resources from backup and activate it. This restores the automatically backed-up ConfigMaps and Secrets listed in the backup and restore configuration for Observability.
+
+. To preserve the tenant ID for maintaing continuity in the metrics ingestion and querying, restore the `observatorium` resource to the backup hub cluster. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f observatorium-backup.yaml
 ----
 
