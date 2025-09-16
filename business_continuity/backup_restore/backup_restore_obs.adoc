@@ -1,41 +1,11 @@
-[#backup-restore-obs-config]
-= Backup and restore configuration for Observability
+[#backup-restore-obs]
+= Backing up and restoring Observability service
 
-//suggested title from developer was Configuring backup and restore for Observability 
-The Observability service uses an S3-compatible object store to persist all time-series data collected from managed clusters. Because Observability is a stateful service, it is sensitive to active and passive backup patterns. You must configure Oservability to ensure data continuity and integrity during hub cluster migration or backup.
+As you follow this procedure it is assumed that the same S3-compatible object store is used across both the primary and backup hub clusters to minimize disruption in metric data collection.
 
-The Observability service automatically adds the `cluster.open-cluster-management.io/backup` label to Observability-related resources to be included in the standard product backup and restore processes.
+.Prerequsites
 
-.Resources that are automatically backuped up and restored for Observability
-|====
-| Resource type | Resource name  
-
-.5+| ConfigMaps 
-| `observability-metrics-custom-allowlist`
-| `thanos-ruler-custom-rules`
-| `alertmanager-config`
-| `policy-acs-central-status`
-| Any ConfigMap labeled with `grafana-custom-dashboard`
-
-.9+| Secrets
-| `thanos-object-storage`
-| `observability-server-ca-certs`
-| `observability-client-ca-certs`
-| `observability-server-certs`
-| `observability-grafana-certs`
-| `alertmanager-byo-ca`
-| `alertmanager-byo-cert`
-| `proxy-byo-ca`
-| `proxy-byo-cert`
-|====
-
-//== Additional resources
-//still figuring out how to separate concept vs procedure
-== Manually backup required Observability resources
-
-Some Observability resources must be manually backed up and restored to ensure continuity across hub clusters.
-
-Complete the following steps to manually back the `observatorium` resource and the `MultiClusterObservability` custom resource:
+- Some Observability resources must be manually backed up and restored to ensure continuity across hub clusters. Complete the following steps to manually backup required Observability resources:
 
 . To preserve the tenant ID of the `observatorium` resource during the restore, run the following command:
 
@@ -53,11 +23,10 @@ oc get observatorium -n open-cluster-management-observability -o yaml > observat
 oc get mco observability -o yaml > mco-cr-backup.yaml
 ----
 
-== Backing up and restoring Observability service
+[#backup-restore-procedure]
+== Backup and restore for Observability
 
-As you follow this procedure it is assumed that the same S3-compatible object store is used across both the primary and backup hub clusters to minimize disruption in metric data collection.
-
-Complete the following steps to backup and restore the Observability service resources:
+Complete the following steps to backup and restore Observability service resources:
 
 . Shut down the Thanos compactor on your primary hub cluster.
 .. To prevent write conflicts and deduplication issues while working on the same object storage, stop the Thanos compactor before starting the restore operation on the backup hub cluster. Run the following command:
@@ -75,7 +44,7 @@ oc scale statefulset observability-thanos-compact -n open-cluster-management-obs
 ----
 oc get pods observability-thanos-compact-0 -n open-cluster-management-observability
 ----
-
+//not sure which topic to point to. can we include this simply as a step?
 . Restore the `backup` resources
 Restore resources from backup using the process described in the Restore Backup section (
 https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.13/html-single/business_continuity/index#restore-backup) section to restore resources from backup and activate it. This restores the automatically backed-up ConfigMaps and Secrets listed in the backup and restore configuration for Observability.
@@ -88,3 +57,25 @@ https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for
 oc apply -f observatorium-backup.yaml
 ----
 
+. Apply the backed up `MultiClusterObservability` custom resource to start the Observability service on the new restored hub cluster. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f mco-cr-backup.yaml
+----
++
+The operator starts the Observability service and detects the existing `observatorium` resource, reusing the preserved tenant ID instead of creating a new one.
+
+. Migrate managed clusters to the new hub cluster.
+.. Detach managed clusters from the primary hub cluster and reattach the managed clusters to the new restored hub cluster. After attaching the managed clusters, the clusters resume sending metrics to the Observability service.
+
+. Shut down Observability on your primary hub cluster after migrating all managed clusters. Run the following command:
+
++
+[source,bash]
+----
+oc delete mco observability
+----
++
+This shuts down Observability on the primary hub cluster and clears in-memory metrics to S3 object store before termination.
