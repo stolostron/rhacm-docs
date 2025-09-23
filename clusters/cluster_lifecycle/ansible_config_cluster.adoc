@@ -11,6 +11,8 @@
 * <<ansible-status-job-cluster,Viewing the status of an Ansible job>>
 * <<push-cl-cr-job-pod,Pushing custom labels from the _ClusterCurator_ resource to the automation job pod>>
 * <<eus-upgrades, Using the _ClusterCurator_ for Extended Update Support (EUS) upgrades>>
+* <<upgrade-ocp-cluster-curator,Upgrading {ocp-short} clusters by using the _ClusterCurator_>>
+
 
 [#prerequisites-for-ansible-integration-cluster]
 == Prerequisites
@@ -241,3 +243,46 @@ spec:
         name: Pause machinepool
         type: Job
 ----
+
+[#upgrade-ocp-cluster-curator]
+== Upgrading {ocp-short} clusters by using the _ClusterCurator_
+
+You might want to upgrade your {ocp-short} cluster to a version with known issues to test new features quickly.
+
+*Important:* Upgrading to {ocp-short} cluster version with known issues can reduce performance and compatibility.
+
+To upgrade to an {ocp-short} cluster version with known issues, complete the following steps:
+
+. Create a file named `clustercurator.yaml`.
+
+. Add the following annotation to the file:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: ClusterCurator
+metadata:
+  annotations:
+    cluster.open-cluster-management.io/upgrade-allow-not-recommended-versions: 'true'
+  name: <name> <1>
+  namespace: <namespace> <2>
+spec:
+  desiredCuration: upgrade
+  upgrade:
+    desiredUpdate: <4.x.x> <3>
+    monitorTimeout: 120
+----
+<1> Add your cluster name.
+<2> Add your cluster namespace.
+<3> Add the {ocp-short} cluster version with known issues that you want to upgrade to.
+
+. Apply the file. Run the following command:
+
++
+[source,bash]
+----
+oc -f apply clustercurator.yaml
+----
+
+The `ClusterCurator` checks the `desiredUpdate` image digest version at startup in the conditional updates list. If the image digest is not found, the `ClusterCurator` uses the image tag instead.
