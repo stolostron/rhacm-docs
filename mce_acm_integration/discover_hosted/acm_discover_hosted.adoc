@@ -9,13 +9,11 @@ Those hosted clusters can be automatically discovered and imported as managed cl
 
 *Required access:* Cluster administrator
 
-* <<hosted-acm-prereqs,Prerequisites>>
 * <<hosted-import-config,Configuring {acm-short} to import {mce-short} clusters>>
 * <<hosted-import-mce,Importing {mce-short} manually>>
 * <<hosted-discover,Discovering hosted clusters from {mce-short}>>
 
-[#hosted-acm-prereqs]
-== Prerequisites
+.Prerequisites
 
 * You need one or more {mce-short} clusters.
 
@@ -38,10 +36,7 @@ curl -L https://raw.githubusercontent.com/open-cluster-management-io/clusteradm/
 - `managed-serviceaccount`
 - `work-manager`
 
-[#config-addons-hosted]
-=== Configuring add-ons 
-
-When your {mce-short} is imported into {acm-short}, {acm-short} enables the same set of add-ons to manage the {mce-short}. 
+Next you can configure add-ons. When your {mce-short} is imported into {acm-short}, {acm-short} enables the same set of add-ons to manage the {mce-short}. 
 
 Install those add-ons in a different {mce-short} namespace so that the {mce-short} can self-manage with the `local-cluster` add-ons while {acm-short} manages {mce-short} at the same time. Complete the following procedure:
 
@@ -177,15 +172,12 @@ See the following output example:
 [source,bash]
 ----
 NAME                                 READY   UP-TO-DATE   AVAILABLE    AGE
-cluster-proxy-proxy-agent             1/1     1            1           24h
+cluster-proxy-proxy-agent            1/1     1            1           24h
 klusterlet-addon-workmgr             1/1     1            1           24h
 managed-serviceaccount-addon-agent   1/1     1            1           24h
 ----
 
-[#create-klusterletconfig-mce]
-=== Creating a _KlusterletConfig_ resource
-
-{mce-short} has a local-cluster, which is a hub cluster that is managed. A resource named `klusterlet` is created for this local-cluster.
+Create a _KlusterletConfig_ resource. {mce-short} has a local-cluster, which is a hub cluster that is managed. A resource named `klusterlet` is created for this local-cluster.
 
 When your {mce-short} is imported into {acm-short}, {acm-short} installs the klusterlet with the same name, `klusterlet`, to manage the {mce-short}. This conflicts with the {mce-short} local-cluster klusterlet.
 
@@ -209,8 +201,7 @@ spec:
 
 . Run `oc apply -f <filename>.yaml` to apply the file.
 
-[#backup-hosted-acm]
-=== Configure for backup and restore
+Configure for backup and restore.
 
 Since you installed {acm-short}, you can also use the _Backup and restore_ feature.
 
@@ -347,12 +338,39 @@ oc patch addondeploymentconfig hypershift-addon-deploy-config -n multicluster-en
 oc patch addondeploymentconfig hypershift-addon-deploy-config -n multicluster-engine --type=merge -p '{"spec":{"customizedVariables":[{"name":"disableMetrics","value": "true"},{"name":"disableHOManagement","value": "true"}]}}'
 ----
 
-. *Optional:* You can set a naming convention by appending the previous command with `{"name":"discoveryPrefix","value": ""}]}}'`. When a discovered hosted cluster is automatically imported into the {acm-short} hub cluster, it becomes a _managed cluster_ with the following naming convention:`<mce-cluster-name>`-`<hosted-cluster-name>`. You can also set the `discoveryPrefix` to some other string to use it as a prefix that replaces `<mce-cluster-name>`. Run the following command with the prefix:
+. *Optional:* Configure your naming convention. By default, imported hosted clusters use the `<mce-cluster-name>-<hosted-cluster-name>` naming pattern, but you can customize your naming pattern.
+
+.. Remove the default prefix by running the following command:
 
 +
 [source,bash]
 ----
-oc patch addondeploymentconfig hypershift-addon-deploy-config -n multicluster-engine --type=merge -p '{"spec":{"customizedVariables":[{"name":"disableMetrics","value": "true"},{"name":"disableHOManagement","value": "true"},{"name":"discoveryPrefix","value": ""}]}}'
+oc patch addondeploymentconfig hypershift-addon-deploy-config \
+  -n multicluster-engine \
+  --type=merge \
+  -p '{"spec":{"customizedVariables":[{"name":"disableMetrics","value":"true"},{"name":"disableHOManagement","value":"true"},{"name":"discoveryPrefix","value":"custom-prefix"}]}}'
+----
+
+.. Change `custom-prefix` to your new prefix. The hosted cluster names are created with the `<custom-prefix>-<hosted-cluster-name>` pattern. Run the following command:
+
++
+[source,bash]
+----
+oc patch addondeploymentconfig hypershift-addon-deploy-config \
+  -n multicluster-engine \
+  --type=merge \
+  -p '{"spec":{"customizedVariables":[{"name":"disableMetrics","value":"true"},{"name":"disableHOManagement","value":"true"},{"name":"discoveryPrefix","value":"custom-prefix"}]}}'
+----
+
+.. If you need to remove the discovery prefix entirely, first ensure all hosted clusters are detached from the respective clusters. *Important:* Using an empty string as the custom prefix can cause klusterlet naming collisions within the {mce-short} cluster. Run the following command:
+
++
+[source,bash]
+----
+oc patch addondeploymentconfig hypershift-addon-deploy-config \
+   -n multicluster-engine \
+   --type=json \
+   -p='[{"op":"add","path":"/spec/customizedVariables/-","value":{"name":"autoImportDisabled","value":"true"}}]'
 ----
 
 . Run the following command to enable the `hypershift-addon` for {mce-short}:
@@ -384,8 +402,8 @@ See the following example output that lists the add-ons:
 +
 [source,bash]
 ----
-NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-cluster-proxy-proxy-agent            1/1     1            1           24h
+NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
+cluster-proxy-proxy-agent           1/1     1            1           24h
 klusterlet-addon-workmgr            1/1     1            1           24h
 hypershift-addon-agent              1/1     1            1           24h
 managed-serviceaccount-addon-agent  1/1     1            1           24h
