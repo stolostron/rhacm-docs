@@ -28,15 +28,8 @@ If the metric is a Platform, continue at <<adding-platform-metrics,Adding Platfo
 [#adding-platform-metrics]
 == Adding Platform metrics
 
-You can monitor Platform metrics by creating a `ConfigMap` on the hub cluster in the `open-cluster-management-observability` namespace. Use `observability-metrics-custom-allowlist` as the name. Complete the following steps:
+You can monitor Platform metrics by creating a `ConfigMap` on the hub cluster in the `open-cluster-management-observability` namespace. Use `observability-metrics-custom-allowlist` as the name. See the following `ConfigMap` example that you can use to monitor Platform metrics:
 
-. *Optional:* Update the `names` parameter of the `metrics_list.yaml` section to add the names of the custom metrics you want to collect from your managed cluster.
-
-. *Optional:* Update the `recording_rules` section by adding one value for the `expr` and `record` parameter pair to define the query expression.
-+
-See the following `ConfigMap` example that you can use to monitor Platform metrics:
-
-+
 [source,yaml]
 ----
 kind: ConfigMap
@@ -46,45 +39,19 @@ metadata:
   namespace: open-cluster-management-observability
   data:
   metrics_list.yaml: |
-    names:
+    names: <1>
       - node_memory_MemTotal_bytes
-    recording_rules:
+    recording_rules: <2>
       - record: apiserver_request_duration_seconds:histogram_quantile_90
         expr: histogram_quantile(0.90,sum(rate(apiserver_request_duration_seconds_bucket {job=\"apiserver\", verb!=\"WATCH\"}[5m])) by (verb,le))
 ----
-*Note:* The name for the metrics you collect is the same name that you define in your managed cluster `record` parameter. 
-
-. Run the query expression to get the metric value results. You can use one section or both sections, which applies to every cluster with monitoring enabled:
-
+<1> *Optional:* Add the names of the custom metrics you want to collect from your managed cluster.
+<2> *Optional:* Add one value for the `expr` and `record` parameter pair to define the query expression.
 +
-[source,bash]
-----
-need query example
-----
+*Note:* The name for the metrics you collect is the same name that you define in your managed cluster `record` parameter. After you run the query expression, you get the metric value results. You can use one section or both sections, which applies to every cluster with monitoring enabled. 
 
-. If you only want to collect custom metrics from a single managed cluster, run the following command to create the `observability-metrics-custom-allowlist` config map:
+If you only want to collect custom metrics from a single managed cluster, use the following example and apply the config map on your managed cluster in the `open-cluster-management-addon-observability` namespace:
 
-+
-[source,bash]
-----
-oc create -n observability-metrics-custom-allowlist
-----
-//command needs to be verified^
-
-
-. Apply the ConfigMap on your managed cluster in the `open-cluster-management-addon-observability` namespace with the following command:
-
-+
-[source,bash]
-----
--n open-cluster-management-observability -f observability-metrics-custom-allowlist.yaml
-----
-+
-*Note:* Similar to the previous sample, the `names` parameter of the `metrics_list.yaml` section and the `recording_rules` section are optional fields. 
-+
-See the following `ConfigMap` example that you can use to monitor Platform metrics:
-
-+
 [source,yaml]
 ----
 kind: ConfigMap
@@ -94,23 +61,21 @@ metadata:
   namespace: open-cluster-management-addon-observability
   data:
   metrics_list.yaml: |
-    names:
+    names:  <1>
       - node_memory_MemTotal_bytes
-        recording_rules:
+        recording_rules: <2>
       - record: apiserver_request_duration_seconds:histogram_quantile_90
         expr: histogram_quantile(0.90,sum(rate(apiserver_request_duration_seconds_bucket{job="apiserver", verb!="WATCH"}[5m])) by (verb,le))
 ----
+<1> *Optional:* Add the names of the custom metrics you want to collect from your managed cluster.
+<2> *Optional:* Enter only one value for the `expr` and `record` parameter pair to define the query expression.
+
+The name for the metrics you collect is the same name that you define in your managed cluster `record` parameter. After you run the query expression, you get the metric value results. You can use one section or both sections.
 
 [#adding-user-workload-metrics]
 == Adding User workload metrics
 
-You can monitor User workload metrics by setting the configuration on the managed cluster in namespace where you want to capture the metric. The name must be `observability-metrics-custom-allowlist`. Complete the following steps:
-
-. Add the namespace where you want to capture the metric in the `namespace` section of the `metadata` section.
-. Add the value of the config map data in YAML format. Add list of metric names that you want to collect from the `test` namespace to the `names` section.
-
-+
-After you create the config map, the observability collector collects and pushes the metrics from the target namespace to the hub cluster.
+You can monitor User workload metrics by setting the configuration on the managed cluster in namespace where you want to capture the metric. The name must be `observability-metrics-custom-allowlist`.
 
 The following example monitors the User workload metric `sample_metrics` from the namespace `monitored_namespace`. If you create the configuration in the `open-cluster-management-addon-observability` namespace instead, the metrics are collected from all the namespaces of the managed cluster. See the following example:
 
@@ -120,12 +85,14 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: observability-metrics-custom-allowlist
-  namespace: <monitored_namespace>
+  namespace: <monitored_namespace> <1>
 data:
   uwl_metrics_list.yaml:
     names:
-      - <sample_metrics>
+      - <sample_metrics> <2>
 ----
+<1> Add the namespace where you want to capture the metric.
+<2> Add the value of the config map data in YAML format. Add list of metric names that you want to collect from the `test` namespace to the `names` section. After you create the config map, the observability collector collects and pushes the metrics from the target namespace to the hub cluster.
 
 [#removing-default-metrics]
 == Removing default metrics
