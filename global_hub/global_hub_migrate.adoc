@@ -16,6 +16,7 @@ To fully migrate your managed clusters, complete the following sections:
 . <<migration-process, Managed cluster migration process>> 
 . <<preparing-migration-environment, Preparing the migration environment>> 
 . <<migrating-managed-clusters, Migrating managed clusters>> 
+. <<migrating-status-tracking, Migrating status tracking>> 
 
 [#prerequisites]
 == Prerequisites 
@@ -117,7 +118,9 @@ global-hub.open-cluster-management.io/deploy-mode=hosted
 
 After you configure your {global-hub} migration environment, migrate your managed clusters. Complete the following steps to migrate the `cluster1` sample and the associated resources from `hub1` to `hub2` hub clusters:
 
-. Create a `ManagedClusterMigration` resource in the {global-hub} migration environment. Apply the following YAML file: 
+You can create a `ManagedClusterMigration` resource in the {global-hub} migration environment by directly selecting your managed clusters by name or by using a `Placement` resource. 
+
+To migrate your specific managed clusters by name, apply the following YAML file: 
 
 +
 [source,yaml]
@@ -130,23 +133,68 @@ spec:
   from: local-cluster <1>
   includedManagedClusters:
     - cluster1 <2>
+    - cluster2
   to: hub2 <3>
 ----
 <1> The `source` hub cluster is a `local-cluster` that {global-hub} installed in `hub1` hub cluster.
-<2> The managed cluster that is named `cluster1` and is being migrated to `hub2` hub cluster. The managed cluster in `hub1` and `hub2` hub clusters must be different from one another.
+<2> The managed clusters that are being migrated to `hub2` hub cluster. The managed cluster in `hub1` and `hub2` hub clusters must be different from one another.
 <3> The `target` hub cluster is `hub2`.
 
-. Apply the resource. Run the following command: 
+If you use this `Placement` resource selection process, you can select clusters based on labels, cluster properties, or other criteria defined in your `Placement` resource. To migrate your managed clusters by using a `Placement` value, apply the following YAML file: 
+
++
+[source,yaml]
+----
+apiVersion: global-hub.open-cluster-management.io/v1alpha1
+kind: ManagedClusterMigration
+metadata:
+  name: migration-placement-sample
+spec:
+  from: local-cluster <1>
+  includedManagedClustersPlacementRef: production-clusters <2>
+  to: hub2 <3>
+----
+<1> The `source` hub cluster is a `local-cluster` that {global-hub} installed in `hub1` hub cluster.
+<2> The `Placement` resource that has the name `production-clusters` and that defines which clusters get migrated. You must define the `Placement` resource in the {global-hub} agent namespace of the source hub cluster. For example, you can name the `Placement` resource `multicluster-global-hub` or `multicluster-global-hub-agent`.
+<3> The `target` hub cluster is `hub2`.
+
+*Note:* After you migrate your managed clusters with the `Placement` resource, you must select the `includedManagedClusters` or `includedManagedClustersPlacementRef` cluster in your migration specification. Select only one of these clusters because they cannot exist together. 
+
+[#migrating-status-tracking]
+== Migrating status tracking 
+
+During the migration process, you can track the statuses of your managed clusters by using the {global-hub} `ConfigMap` or the migration customer resource. 
+
+{global-hub} automatically creates a `ConfigMap` to track the migration status of individual clusters. This `ConfigMap` provides detailed information about which clusters have successfully migrated or failed. 
+
+To view the migration status `ConfigMap`, run the following command:
 
 +
 [source,bash]
 ----
-apply -f user_yaml -n global_installed_namespace
+kubectl get configmap <migration-name> -n <global-hub-namespace> -o yaml
 ----
-. In the `status` resource section, verify that your migration status is `True` and resembles the following status: 
+
+Ensure that the  `ConfigMap` that you see resembles the following sample: 
 
 +
-[source,bash]
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: migration-sample
+  namespace: multicluster-global-hub
+data:
+  success: '["cluster1","cluster3"]'
+  failure: '["cluster2"]'
+----
+
+
+To view the tracking status from the migration customer resource, verify that its migration status is `True` and that it resembles the following sample: 
+
++
+[source,yaml]
 ----
 status:
   conditions:
