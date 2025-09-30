@@ -5,14 +5,12 @@ Backup and restore the Observability service to maintain data continuity and int
 
 .Prerequsites
 
-- Enable self-management on your hub cluster to ensures its metrics are collected and visible in Grafana. The Observability service recognizes the hub cluster as a managed cluster.
-
-//need to look at the local cluster feature in adv config.^| B. Swope| during peer review
-//are there prereqs? might also need help with the section title --- MJ
+- are there prereqs? 
 
 [#backup-restore-obs-procedure]
 == Backing up and restoring Observability procedure
 
+. To ensure the Observability service recognizes the hub cluster as the `local-cluster`, change the `spec.disableHubSelfManagement` parameter in the `MultiClusterHub` custom resource to `false`. 
 . Manually back up and restore the `observatium` resource and `observability` deployment to ensure continuity across hub clusters.
 .. To preserve the tenant ID of the `observatorium` resource during the restore, run the following command:
 
@@ -47,10 +45,7 @@ oc scale statefulset observability-thanos-compact -n open-cluster-management-obs
 oc get pods observability-thanos-compact-0 -n open-cluster-management-observability
 ----
 
-//not sure which topic to point to. can we include this simply as a step?
-. Restore the `backup` resources
-.. Restore resources from backup using the process described in the Restore Backup section (
-https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.13/html-single/business_continuity/index#restore-backup) section to restore resources from backup and activate it. This restores the automatically backed-up ConfigMaps and Secrets listed in the backup and restore configuration for Observability.
+. To restore the `backup` resources, see xref:../business_continuity/backup_restore/backup_restore.adoc#restoring-backup-restore-operation[Using the restore operation for backup types]. You can restore the automatically backed-up ConfigMaps and Secrets listed in the backup and restore configuration for Observability.
 
 . To preserve the tenant ID for maintaing continuity in the metrics ingestion and querying, restore the `observatorium` resource to the backup hub cluster. Run the following command:
 
@@ -73,12 +68,10 @@ The operator starts the Observability service and detects the existing `observat
 . Migrate managed clusters to the new hub cluster.
 .. Detach managed clusters from the primary hub cluster and reattach the managed clusters to the new restored hub cluster. After attaching the managed clusters, the clusters resume sending metrics to the Observability service.
 
-. Shut down Observability on your primary hub cluster after migrating all managed clusters. Run the following command:
+. Shut down Observability on your primary hub cluster and clear in-memory metrics to S3 object after migrating all managed clusters. Run the following command:
 
 +
 [source,bash]
 ----
 oc delete mco observability
 ----
-+
-This shuts down Observability on the primary hub cluster and clears in-memory metrics to S3 object store before termination.
