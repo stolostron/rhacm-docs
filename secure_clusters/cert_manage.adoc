@@ -1,12 +1,12 @@
 [#cert-manage]
 = Managing certificates
 
-Continue reading for information about how to refresh, replace, rotate, and list certificates.
+Maintain the security and reliability of your cluster management environment by managing your certificates. Continue reading to learn how to refresh, replace, rotate, and list certificates.
 
 - <<refresh-an-acm-webhook,Refreshing a {acm-short} webhook certificate>>
 - <<replacing-cert-alertmanager,Replacing certificates for Alertmanager route>>
 - <<rotating-the-gatekeeper-webhook-certificate,Rotating the Gatekeeper webhook certificate>>
-- <<verifying-cert-rotation, Verifying certificate rotation>>
+- <<verifying-cert-rotation,Verifying certificate rotation>>
 - <<list-hub-cluster-managed-certificates,Listing hub cluster managed certificates>> 
 
 [#refresh-an-acm-webhook]
@@ -16,21 +16,21 @@ You can refresh {acm-short} managed certificates, which are certificates that ar
 
 Complete the following steps to refresh certificates managed by {acm-short}:
 
-. Delete the secret that is associated with the {acm-short} managed certificate by running the following command:
-+
-----
-oc delete secret -n <namespace> <secret> <1>
-----
-+
-<1> Replace `<namespace>` and `<secret>` with the values that you want to use.
+. Delete the secret that is associated with the {acm-short} managed certificate, and replace `<namespace>` and `<secret>` with the values that you want to use. Run the following command:
 
-. Restart the services that are associated with the {acm-short} managed certificate(s) by running the following command:
 +
+[source,bash]
 ----
-oc delete pod -n <namespace> -l <pod-label> <1>
+oc delete secret -n <namespace> <secret>
 ----
+
+. Restart the services that are associated with the {acm-short} managed certificates, and replace `<namespace>` and `<pod-label>` with the values for the {acm-short} managed cluster certificates. Run the following command:
+
 +
-<1> Replace `<namespace>` and `<pod-label>` with the values from the _{acm-short} managed cluster certificates_ table.
+[source,bash]
+----
+oc delete pod -n <namespace> -l <pod-label>
+----
 +
 *Note:* If a `pod-label` is not specified, there is no service that must be restarted. The secret is recreated and used automatically.
 
@@ -51,23 +51,28 @@ openssl x509  -noout -text -in ./observability.crt
 
 . Change the SAN in the `csr.cnf` configuration file with the hostname for your `alertmanager` route.
 
-. Create the two following secrets in the `open-cluster-management-observability` namespace. Run the following commands:
+. Create the `alertmanager-byo-ca` Secret resource in the `open-cluster-management-observability` namespace by running the following command:
 
 +
 [source,bash]
 ----
 oc -n open-cluster-management-observability create secret tls alertmanager-byo-ca --cert ./ca.crt --key ./ca.key
+----
 
+. Create the `alertmanager-byo-cert` `Secret` resource in the `open-cluster-management-observability` namespace by running the following command:
+
++
+[source,bash]
+----
 oc -n open-cluster-management-observability create secret tls alertmanager-byo-cert --cert ./ingress.crt --key ./ingress.key
 ----
 
 [#rotating-the-gatekeeper-webhook-certificate]
-== Rotating the gatekeeper webhook certificate
-//do we lowercase Gatekeeper
+== Rotating the Gatekeeper webhook certificate
 
-Complete the following steps to rotate the gatekeeper webhook certificate:
+Complete the following steps to rotate the Gatekeeper webhook certificate:
 
-. Edit the secret that contains the certificate with the following command:
+. Edit the `Secret` resource that contains the Gatekeeper webhook certificate with the following command:
 
 +
 [source,bash]
@@ -77,7 +82,7 @@ oc edit secret -n openshift-gatekeeper-system gatekeeper-webhook-server-cert
 
 . Delete the following content in the `data` section: `ca.crt`, `ca.key`, `tls.crt`, and `tls.key`.
 
-. Restart the gatekeeper webhook service by deleting the `gatekeeper-controller-manager` pods with the following command:
+. Restart the Gatekeeper webhook service by deleting the `gatekeeper-controller-manager` pods with the following command:
 
 +
 [source,bash]
@@ -85,25 +90,25 @@ oc edit secret -n openshift-gatekeeper-system gatekeeper-webhook-server-cert
 oc delete pod -n openshift-gatekeeper-system -l control-plane=controller-manager
 ----
 
-The gatekeeper webhook certificate is rotated. 
+The Gatekeeper webhook certificate is rotated. 
 
 [#verifying-cert-rotation]
 == Verifying certificate rotation
 
-Verify that your certificates are rotated using the following steps:
+Verify that your certificates are rotated to prevent system outages that can effect service communication. Complete the following steps:
 
-. Identify the secret that you want to check.
+. Identify the `Secret` resource that you want to check.
 . Check the `tls.crt` key to verify that a certificate is available.
-. Display the certificate information by using the following command:
+. Display the certificate information. Replace `<your-secret-name>` with the name of secret that you are verifying. If it is necessary, also update the namespace and JSON path. Run the following command:
+
 +
 [source,bash]
 ----
 oc get secret <your-secret-name> -n open-cluster-management -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -text -noout
 ----
-+
-Replace `<your-secret-name>` with the name of secret that you are verifying. If it is necessary, also update the namespace and JSON path.
 
 . Check the `Validity` details in the output. View the following `Validity` example:
+
 +
 [source,bash]
 ----
@@ -132,5 +137,5 @@ For more information, see _OpenShift Service Serving Certificates_ in the _Addit
 [#additional-resource-cert-manage]
 == Additional resources
 
-- See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/security_and_compliance/configuring-certificates#add-service-serving[Securing service traffic using service serving certificate secrets].
+- To understand service serving certificates, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/security_and_compliance/configuring-certificates#add-service-serving[Securing service traffic using service serving certificate secrets].
 
