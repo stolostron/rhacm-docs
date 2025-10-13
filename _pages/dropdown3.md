@@ -30,8 +30,8 @@ children:
     - title: Using writing tools
       permalink: /tools
     - title: divider
-    - title: Troubleshooting guidance
-      permalink: /troubleshooting
+    - title: Support doc guidance
+      permalink: /support_docs
     - title: divider
     - title: Special tag guidance
       permalink: /special_tag_guidance
