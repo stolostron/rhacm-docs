@@ -20,7 +20,7 @@ Learn the basic format and elements of a troubleshooting topic and a known issue
   - **Identifying the problem:** Write how the user further completes a procedure to find the specific problem.
   - **Resolving the problem:** Write the user action to work around or resolve the issue.
   - Title the files in a similar format as all the other files.
-- Known issue are in the release notes.
+- Known issues are located in the release notes.
 - For MCE, which is the _Cluster lifeycle_ release note section.
 - See the process and when to write:
   - It's known by engineering that something doesn't work the way it should or that there is a limitation to a customer use-case
