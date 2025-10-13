@@ -1,15 +1,15 @@
 ---
 layout: page
-title: Troubleshooting guidance
-permalink: /troubleshooting
+title: Support doc guidance
+permalink: /support_docs
 horizontal: false
 ---
 
-Learn the basic format and elements of a troubleshooting topic, as well as other considerations.
+Learn the basic format and elements of a troubleshooting topic and a known issue, when to use which, as well as other considerations.
 
 **Note:** The format for RHAMC troubelshooting doc comes from feedback from developers and support focals.
 
-## Location and basic format
+## Location and basic requirements
 
 - Troubleshooting files are located in the _Troubleshooting_ folder.
 - For MCE, which is the _Cluster lifeycle_ feature for RHACM, there is a separate Troubleshooting guide.
@@ -20,8 +20,18 @@ Learn the basic format and elements of a troubleshooting topic, as well as other
   - **Identifying the problem:** Write how the user further completes a procedure to find the specific problem.
   - **Resolving the problem:** Write the user action to work around or resolve the issue.
   - Title the files in a similar format as all the other files.
+- Known issue are in the release notes.
+- For MCE, which is the _Cluster lifeycle_ release note section.
+- See the process and when to write:
+  - It's known by engineering that something doesn't work the way it should or that there is a limitation to a customer use-case
+  - The issue or limitation is straightforward to describe, without troubleshooting steps to find an issue
+  - Info is good to know before getting started with the product
+  - There is a fairly quick workaround, of any
+  - The issue applies to manu users or could apply to many users
+  - Something that is likely to be fixed next release (never preannounce); limitations are not always addressed, depending on customer interest
+  - Always a the link to the bug or the internal task on the developement team at the end if the known issue.
 
-## Considerations
+## Considerations for troubleshooting
 
 - _Identifying the problem_ is not needed if the symptom gives enough detail. It is needed if the user completes an action to find more about the problem. 
 
