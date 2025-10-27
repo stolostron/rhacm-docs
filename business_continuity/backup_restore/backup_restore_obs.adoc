@@ -1,18 +1,21 @@
 [#backup-restore-obs]
 = Backing up and restoring Observability service
 
-Backup and restore the Observability service to keep data safe and to maintain its continuity during the hub cluster migration or backup. To help with disruption in metric data collection, use the same S3-compatible object store for both the primary and backup hub clusters.
+Backup and restore the Observability service to keep data safe and to support continuity during the hub cluster migration or backup. To help with disruption in metric data collection, use the same S3-compatible object store for both the primary and backup hub clusters.
 
 .Prerequsites
 
-- Ensure that you can run a restore operation for backup types by completing xref:../business_continuity/backup_restore/backup_restore.adoc#restoring-backup-restore-operation[Using the restore operation for backup types].
+- Ensure that you can run a restore operation for backup types by completing the xref:../business_continuity/backup_restore/backup_restore.adoc#restoring-backup-restore-operation[Using the restore operation for backup types] process.
 
 [#backup-restore-obs-procedure]
 == Backing up and restoring Observability procedure
 
-. To ensure the Observability service recognizes the hub cluster as the `local-cluster`, change the `spec.disableHubSelfManagement` parameter in the `MultiClusterHub` custom resource to `false`. 
-. Manually back up and restore the `observatium` resource and `observability` deployment to ensure continuity across hub clusters.
-.. To preserve the tenant ID of the `observatorium` resource during the restore, run the following command:
+. To ensure the Observability service recognizes the hub cluster as the `local-cluster`, a managed hub cluster, change the `spec.disableHubSelfManagement` parameter in the `MultiClusterHub` custom resource to `false`.
+
++
+*Note:* If you change the default name of your `local-cluster` to another value, the results ppear within the changed local cluster name.
+
+. To preserve the tenant ID of the `observatorium` resource as you manually back up and restore the `observatorium` resource, run the following command:
 
 +
 [source,bash]
@@ -28,8 +31,7 @@ oc get observatorium -n open-cluster-management-observability -o yaml > observat
 oc get mco observability -o yaml > mco-cr-backup.yaml
 ----
 
-. Shut down the Thanos compactor on your primary hub cluster.
-.. To prevent write conflicts and deduplication issues while working on the same object storage, stop the Thanos compactor before starting the restore operation on the backup hub cluster. Run the following command:
+. Shut down the Thanos compactor on your primary hub cluster by running the following command:
 
 +
 [source,bash]
@@ -37,7 +39,7 @@ oc get mco observability -o yaml > mco-cr-backup.yaml
 oc scale statefulset observability-thanos-compact -n open-cluster-management-observability --replicas=0
 ----
 
-.. Verify the compactor is stopped by running the following command:
+.. Verify the compactor is not active by running the following command:
 
 +
 [source,bash]
@@ -65,10 +67,9 @@ oc apply -f mco-cr-backup.yaml
 +
 The operator starts the Observability service and detects the existing `observatorium` resource, reusing the preserved tenant ID instead of creating a new one.
 
-. Migrate managed clusters to the new hub cluster.
-.. Detach managed clusters from the primary hub cluster and reattach the managed clusters to the new restored hub cluster. After attaching the managed clusters, the clusters resume sending metrics to the Observability service.
+. Migrate managed clusters to the new hub cluster by detaching managed clusters from the primary hub cluster,  and reattach the managed clusters to the new restored hub cluster. After attaching the managed clusters, the clusters resume sending metrics to the Observability service.
 
-. Shut down Observability on your primary hub cluster and clear in-memory metrics to S3 object after migrating all managed clusters. Run the following command:
+. Shut down the Observability service on your primary hub cluster and clear in-memory metrics to S3 object after migrating all managed clusters. Run the following command:
 
 +
 [source,bash]
