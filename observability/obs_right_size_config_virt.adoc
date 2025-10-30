@@ -1,19 +1,17 @@
 [#config-right-size-virt]
-= Configuring right-sizing for Virtualization (Technology Preview)
+= Configuring _RightSizingRecommendation_ for Virtualization (Technology Preview)
 
-You can customize right-sizing for virtual machines by editing the `MultiClusterObservability` resource.
+You can customize `RightSizingRecommendation` to optimize CPU and memory resources for your virtual machines. Edit the `MultiClusterObservability` resource.
 
 .Prerequisites
 
-- You have enabled right-sizing guides for Virtualization.
+- You have enabled the `RightSizingRecommendation` feature.
 
-[#config-right-size-placement-virt]
-== Configuring placement for Virtualization
+Complete the following steps:
 
-You can customize the placement configuration by making changes to the `placementConfiguration` property in the `rs-virt-config` `ConfigMap` resource.
+. Configure placement for your virtual machines by editing the `rs-virt-config` `ConfigMap` resource and defining the `placementConfiguration` parameter. For example, customize your placement to where the policy only applies to clusters with the `environment=prod` label:
 
-See the following example where the policy only applies to clusters with the `environment=prod` label:
-
++
 [source,yaml]
 ----
 placementConfiguration: |
@@ -27,25 +25,31 @@ placementConfiguration: |
    . . .
 ----
 
-[#config-right-size-prometheus-virt]
-== Configuring `PrometheusRule` for Virtualization
+. Configure `PrometheusRule` for your virtual machines by completing one of the following steps:
 
-You can customize the `PrometheusRule` resource by making changes to one of the following properties:
+... Define the namespaces that you want to include or exclude in the `namespaceFilterCriteria` specification.
 
-`namespaceFilterCriteria`:: Limit guides to specific namespaces. You can include or exclude this property.
-`labelFilterCriteria`:: Filter namespaces with custom labels.
-`recommendationPercentage`:: Adjust CPU and memory guide percentages.
+.. Add a list of namespaces that you want to include in the `inclusionCriteria` specification.
 
+.. Add a list of namespaces that you want to exclude in the `exclusionCriteria` specification.
+
++
+*Note:* You cannot use both `inclusionCriteria` and `exclusionCriteria` at the same time.
+
+.. To adjust the CPU and memory percentages, define the percentage usage.
+
++
 See the following example:
 
++
 [source,yaml]
 ----
 . . .
   prometheusRuleConfig: |
    namespaceFilterCriteria:
-    inclusionCriteria: <1>
+    inclusionCriteria:
     - prod.*
-    exclusionCriteria: <2>
+    exclusionCriteria:
     - openshift.*
   labelFilterCriteria:
   - labelName: label_kubernetes_io_metadata_name
@@ -54,22 +58,18 @@ See the following example:
     - staging
     exclusionCriteria:
     - kube.*
-  recommendationPercentage: 120 <3>
+  recommendationPercentage: 120
   . . .
 ----
-<1> Use `inclusionCriteria` to filter namespaces that you want to include.
-<2> Use `exclusionCriteria` to filer namespaces that you want to exclude.
+
+. Configure your namespace binding. By default, the `RightSizingRecommendation` feature uses the `open-cluster-management-global-set` namespace for binding policies to clusters.
+
+.. To bind generated policies to a different namespace and cluster set, use the `namespaceBinding` property. *Important:* Ensure that the target namespace is part of a valid `ClusterSet` before you apply the change. The policies that you generate might not apply to any clusters if there is no valid binding.
+
 +
-*Note:* You cannot use both `inclusionCriteria` and `exclusionCriteria` at the same time.
-<3> Set the percentage of actual usage.
+See the following example:
 
-[#config-right-size-namespace-virt]
-== Configuring namespace binding for Virtualization
-
-By default, the right-sizing feature uses the `open-cluster-management-global-set` namespace for binding policies to clusters.
-
-To bind generated policies to a different namespace and cluster set, use the `namespaceBinding` property. See the following example:
-
++
 [source,yaml]
 ----
 apiVersion: observability.open-cluster-management.io/v1beta2
