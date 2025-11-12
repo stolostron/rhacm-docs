@@ -1,0 +1,478 @@
+[#advanced-config-cluster]
+= Cluster lifecycle advanced configuration 
+
+You can configure some cluster settings during or after installation.
+
+[#custom-api-certificates]
+== Customizing API server certificates
+
+The managed clusters communicate with the hub cluster through a mutual connection with the OpenShift Kube API server external load balancer. The default OpenShift Kube API server certificate is issued by an internal {ocp} cluster certificate authority (CA) when {ocp-short} is installed. If necessary, you can add or change certificates.
+
+Changing the API server certificate might impact the communication between the managed cluster and the hub cluster. When you add the named certificate before installing the product, you can avoid an issue that might leave your managed clusters in an offline state. 
+
+The following list contains some examples of when you might need to update your certificates: 
+
+* You want to replace the default API server certificate for the external load balancer with your own certificate. By following the guidance in _Adding API server certificates_ in the {ocp-short} documentation, you can add a named certificate with host name `api.<cluster_name>.<base_domain>` to replace the default API server certificate for the external load balancer. Replacing the certificate might cause some of your managed clusters to move to an offline state. If your clusters are in an offline state after upgrading the certificates, follow the troubleshooting instructions for _Troubleshooting imported clusters offline after certificate change_ to resolve it.
++
+*Note:* Adding the named certificate before installing the product helps to avoid your clusters moving to an offline state.
+
+* The named certificate for the external load balancer is expiring and you need to replace it. If both the old and the new certificate share the same root CA certificate, despite the number of intermediate certificates, you can follow the guidance in _Adding API server certificates_ in the {ocp-short} documentation to create a new secret for the new certificate. Then update the serving certificate reference for host name `api.<cluster_name>.<base_domain>` to the new secret in the `APIServer` custom resource. Otherwise, when the old and new certificates have different root CA certificates, complete the following steps to replace the certificate: 
++
+. Locate your `APIServer` custom resource, which resembles the following example: 
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+        name: old-cert-secret
+----
+
+. Create a new secret in the `openshift-config` namespace that contains the content of the existing and new certificates by running the following commands:
++
+.. Copy the old certificate into a new certificate:
++
+[source,bash]
+----
+cp old.crt combined.crt
+----
+
+.. Add the contents of the new certificate to the copy of the old certificate:
++
+[source,bash]
+----
+cat new.crt >> combined.crt
+----
+
+.. Apply the combined certificates to create a secret:
++
+[source,bash]
+----
+oc create secret tls combined-certs-secret --cert=combined.crt --key=old.key -n openshift-config
+----
+
+. Update your `APIServer` resource to reference the combined certificate as the `servingCertificate`.
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+        name: combined-cert-secret
+----
+
+. After about 15 minutes, the CA bundle containing both new and old certificates is propagated to the managed clusters.
+
+. Create another secret named `new-cert-secret` in the `openshift-config` namespace that contains only the new certificate information by entering the following command:
++
+[source,bash]
+----
+oc create secret tls new-cert-secret --cert=new.crt --key=new.key -n openshift-config {code}
+----
+
+. Update the `APIServer` resource by changing the name of `servingCertificate` to reference the `new-cert-secret`. Your resource might resemble the following example: 
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+        name: new-cert-secret
+----
++
+After about 15 minutes, the old certificate is removed from the CA bundle, and the change is automatically propagated to the managed clusters.
+
+*Note:* Managed clusters must use the host name `api.<cluster_name>.<base_domain>` to access the hub cluster. You cannot use named certificates that are configured with other host names.
+
+[#config-proxy-hub-cluster]
+== Configuring the proxy between hub cluster and managed cluster
+
+To register a managed cluster to your {mce} hub cluster, you need to transport the  managed cluster to your {mce-short} hub cluster. Sometimes your managed cluster cannot directly reach your {mce-short} hub cluster. In this instance, configure the proxy settings to allow the communications from the managed cluster to access the {mce-short} hub cluster through a HTTP or HTTPS proxy server.
+
+For example, the {mce-short} hub cluster is in a public cloud, and the managed cluster is in a private cloud environment behind firewalls. The communications out of the private cloud can only go through a HTTP or HTTPS proxy server. 
+
+[#config-proxy-hub-cluster-prereq]
+=== Prerequisites
+
+- You have a HTTP or HTTPS proxy server running that supports HTTP tunnels. For example, HTTP connect method. 
+- You have a manged cluster that can reach the HTTP or HTTPS proxy server, and the proxy server can access the {mce-short} hub cluster. 
+
+Complete the following steps to configure the proxy settings between hub cluster and managed cluster:
+
+. Create a `KlusterConfig` resource with proxy settings. 
+.. See the following configuration with HTTP proxy:
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: http-proxy
+spec:
+  hubKubeAPIServerConfig:
+    proxyURL: "http://<username>:<password>@<ip>:<port>" 
+----
++ 
+.. See the following configuration with HTTPS proxy:  
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: https-proxy
+spec:
+  hubKubeAPIServerConfig:
+    proxyURL: "https://<username>:<password>@<ip>:<port>"
+    trustedCABundles:
+    - name: "proxy-ca-bundle"
+      caBundle:
+        name: <configmap-name>
+        namespace: <configmap-namespace>
+----
++ 
+*Note:* A CA bundle is required for HTTPS proxy. It refers to a ConfigMap containing one or multiple CA certificates. You can create the ConfigMap by running the following command:
++
+[source,bash]
+----
+oc create -n <configmap-namespace> configmap <configmap-name> --from-file=ca.crt=/path/to/ca/file
+----
+
+. When creating a managed cluster, choose the `KlusterletConfig` resource by adding an annotation that refers to the `KlusterletConfig` resource. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    agent.open-cluster-management.io/klusterlet-config: <klusterlet-config-name>
+  name:<managed-cluster-name>
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60 
+----
++ 
+*Notes:*
++
+* You might need to toggle the YAML view to add the annotation to the `ManagedCluster` resource when you operate on the {mce-short} console.
+* You can use a global `KlusterletConfig` to enable the configuration on every managed cluster without using an annotation for binding.
+
+[#disable-proxy-hub-managed]
+=== Disabling the proxy between hub cluster and managed cluster
+
+If your development changes, you might need to disable the HTTP or HTTPS proxy. 
+
+. Go to the `ManagedCluster` resource.
+. Remove the `agent.open-cluster-management.io/klusterlet-config` annotation.
+
+[#config-klusterlet-nodes]
+=== Optional: Configuring the klusterlet to run on specific nodes
+
+When you create a cluster using {acm}, you can specify which nodes you want to run the managed cluster klusterlet to run on by configuring the `nodeSelector` and `tolerations` annotation for the managed cluster. Complete the following steps to configure these settings: 
+
+. Select the managed cluster that you want to update from the clusters page in the console. 
+
+. Set the YAML switch to `On` to view the YAML content.
++
+*Note:* The YAML editor is only available when importing or creating a cluster. To edit the managed cluster YAML definition after importing or creating, you must use the {ocp-short} command-line interface or the {acm-short} search feature.
+
+. Add the `nodeSelector` annotation to the managed cluster YAML definition. The key for this annotation is: `open-cluster-management/nodeSelector`. The value of this annotation is a string map with JSON formatting.
+
+. Add the `tolerations` entry to the managed cluster YAML definition. The key of this annotation is: `open-cluster-management/tolerations`. The value of this annotation represents a link:https://github.com/kubernetes/api/blob/release-1.24/core/v1/types.go#L3007[toleration] list with JSON formatting.
+The resulting YAML might resemble the following example: 
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    open-cluster-management/nodeSelector: '{"dedicated":"acm"}'
+    open-cluster-management/tolerations: '[{"key":"dedicated","operator":"Equal","value":"acm","effect":"NoSchedule"}]' 
+----
+
+. To make sure that you can deploy your content to the correct nodes, see link:../../add-ons/configure_klusterlet_addons.adoc#configure-klusterlet-addons[Configuring klusterlet add-ons].
+
+[#custom-server-url-ca]
+== Customizing the server URL and CA bundle of the hub cluster API server when importing a managed cluster (Technology Preview)
+
+You might not be able to register a managed cluster on your {mce-short} hub cluster if intermediate components exist between the managed cluster and the hub cluster. Example intermediate components include a Virtual IP, load balancer, reverse proxy, or API gateway. If you have an intermediate component, you must use a custom server URL and CA bundle for the hub cluster API server when importing a managed cluster.
+
+[#custom-server-url-ca-prereq]
+=== Prerequisites
+
+* You must configure the intermediate component so that the hub cluster API server is accessible for the managed cluster.
+* If the intermediate component terminates the SSL connections between the managed cluster and hub cluster API server, you must bridge the SSL connections and pass the authentication information from the original requests to the back end of the hub cluster API server. You can use the User Impersonation feature of the Kubernetes API server to bridge the SSL connections.
++
+The intermediate component extracts the client certificate from the original requests, adds Common Name (CN) and Organization (O) of the certificate subject as impersonation headers, and then forwards the modified impersonation requests to the back end of the hub cluster API server.
++
+*Note:* If you bridge the SSL connections, the cluster proxy add-on does not work.
+
+[#custom-server-url-ca-steps]
+=== Customizing the server URL and hub cluster CA bundle
+
+To use a custom hub API server URL and CA bundle when importing a managed cluster, complete the following steps:
+
+. Create a `KlusterConfig` resource with the custom hub cluster API server URL and CA bundle. See the following example:
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: <name> <1>
+spec:
+  hubKubeAPIServerConfig:
+    url: "https://api.example.com:6443" <2>
+    serverVerificationStrategy: UseCustomCABundles
+    trustedCABundles:
+    - name: <custom-ca-bundle> <3>
+      caBundle:
+        name: <custom-ca-bundle-configmap> <4>
+        namespace: <multicluster-engine> <5>
+----
++
+<1> Add your klusterlet config name.
+<2> Add your custom server URL.
+<3> Add your custom CA bundle name. You can use any value except `auto-detected`, which is reserved for internal use.
+<4> Add your name of the CA bundle ConfigMap. You can create the ConfigMap by running the following command: `oc create -n <configmap-namespace> configmap <configmap-name> --from-file=ca.crt=/path/to/ca/file`
+<5> Add your namespace of the CA bundle ConfigMap.
+
+. Select the `KlusterletConfig` resource when creating a managed cluster by adding an annotation that refers to the resource. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    agent.open-cluster-management.io/klusterlet-config: <1>
+  name: <2>
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+----
++
+<1> Add your klusterlet config name.
+<2> Add your cluster name.
++
+*Notes:*
++
+* If you use the console, you might need to enable the YAML view to add the annotation to the `ManagedCluster` resource.
+* You can use a global `KlusterletConfig` to enable the configuration on every managed cluster without using an annotation for binding.
+
+[#config-gloabl-klusterletconfig]
+=== Configuring the global _KlusterletConfig_
+
+If you create a `KlusterletConfig` resource and set the name to `global`, the configurations in the global `KlusterletConfig` are automatically applied on every managed cluster.
+
+In an environment that has a global `KlusterletConfig`, you can also create a cluster-specific `KlusterletConfig` and bind it with a managed cluster by adding the `agent.open-cluster-management.io/klusterlet-config: <klusterletconfig-name>` annotation to the `ManagedCluster resource`. The value of the cluster-specific `KlusterletConfig` overrides the global `KlusterletConfig` value if you set different values for the same field. 
+
+See the following example where the `hubKubeAPIServerURL` field has different values set in your `KlusterletConfig` and the global `KlusterletConfig`. The "https://api.example.test.com:6443" value overrides the "https://api.example.global.com:6443" value:
+
+*Deprecation:* The `hubKubeAPIServerURL` field is deprecated. 
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: test
+spec:
+  hubKubeAPIServerConfig:
+    url: "https://api.example.test.com:6443"
+---
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  hubKubeAPIServerConfig:
+    url: "https://api.example.global.com:6443"
+----
+
+The value of the global `KlusterletConfig` is used if there is no cluster-specific `KlusterletConfig` bound to a managed cluster, or the same field is missing or does not have a value in the cluster-specific `KlusterletConfig`. 
+
+See the following example, where the `"example.global.com"` value in the `hubKubeAPIServerURL` field of the global `KlusterletConfig` overrides your `KlusterletConfig`:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: test
+spec:
+  hubKubeAPIServerURL: ""
+—
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  hubKubeAPIServerURL: "example.global.com"
+----
+
+See the following example, where the `"example.global.com"` value in the `hubKubeAPIServerURL` field of the global `KlusterletConfig` also overrides your `KlusterletConfig`:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: test
+—
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  hubKubeAPIServerURL: "example.global.com"
+----
+
+[#config-hub-kube-api-server]
+== Configuring the hub cluster `KubeAPIServer` verification strategy
+
+Managed clusters communicate with the hub cluster through a mutual connection with the {ocp-short} `KubeAPIServer` external load balancer. An internal {ocp-short} cluster certificate authority (CA) issues the default {ocp-short} `KubeAPIServer` certificate when you install {ocp-short}. The {mce} automatically detects and adds the certificate to managed clusters in the `bootstrap-kubeconfig-secret` namespace.
+
+If your automatically detected certificate does not work, you can manually configure a strategy configuration in the `KlusterletConfig` resource. Manually configuring the strategy allows you to control how you verify the hub cluster `KubeAPIServer` certificate.
+
+See the examples in one of the following three strategies to learn how to manually configure a strategy:
+
+[#config-hub-strategy-auto-detect-ca]
+=== Configuring the strategy with `UseAutoDetectedCABundle`
+
+The default configuration strategy is `UseAutoDetectedCABundle`. The {mce-short} automatically detects the certificate on the hub cluster and merges the certificate configured in the `trustedCABundles` list of config map references to the real CA bundles, if there are any.
+
+The following example merges the automatically detected certificates from the hub cluster and the certificates that you configured in the `new-ocp-ca` config map, and adds both to the managed cluster:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+ name: ca-strategy
+spec:
+ hubKubeAPIServerConfig:
+   serverVerificationStrategy: UseAutoDetectedCABundle
+   trustedCABundles:
+   - name: new-ca
+     caBundle:
+       name: new-ocp-ca
+       namespace: default
+----
+
+[#config-hub-strategy-system-truststore]
+=== Configuring the strategy with `UseSystemTruststore`
+
+With `UseSystemTruststore`, {mce-short} does not detect any certificate and ignores the certificates configured in the `trustedCABundles` parameter section. This configuration does not pass any certificate to the managed clusters. Instead, the managed clusters use certificates from the system trusted store of the managed clusters to verify the hub cluster API server. This applies to situations where a public CA, such as `Let's Encrypt`, issues the hub cluster certificate. See the following example that uses `UseSystemTruststore`:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+ name: ca-strategy
+spec:
+ hubKubeAPIServerConfig:
+   serverVerificationStrategy: UseSystemTruststore
+----
+
+[#config-hub-strategy-custom-ca]
+=== Configuring the strategy with `UseCustomCABundles`
+
+You can use `UseCustomCABundles` if you know the CA of the hub cluster API server and do not want {mce-short} to automatically detect it. For this strategy, {mce-short} adds your configured certificates from the `trustedCABundles` parameter to the managed clusters. See the following examples to learn how to use `UseCustomCABundles`:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+ name: ca-strategy
+spec:
+ hubKubeAPIServerConfig:
+   serverVerificationStrategy: UseCustomCABundles
+   trustedCABundles:
+   - name: ca
+     caBundle:
+       name: ocp-ca
+       namespace: default
+----
+
+Typically, this policy is the same for each managed cluster. The hub cluster administrator can configure a `KlusterletConfig` named `global` to activate the policy for each managed cluster when you install {mce-short} or the hub cluster certificate changes. See the following example:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+ name: global
+spec:
+ hubKubeAPIServerConfig:
+   serverVerificationStrategy: UseSystemTruststore
+----
+
+When a managed cluster needs to use a different strategy, you can also create a different `KlusterletConfig` and use the `agent.open-cluster-management.io/klusterlet-config` annotation in the managed clusters to point to a specific strategy. See the following example:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+ name: test-ca
+spec:
+ hubKubeAPIServerConfig:
+   serverVerificationStrategy: UseCustomCABundles
+   trustedCABundles:
+   - name: ca
+     caBundle:
+       name: ocp-ca
+       namespace: default
+--
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    agent.open-cluster-management.io/klusterlet-config: test-ca
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+----
+
+[#add-resources-adv-cluster]
+== Additional resources
+
+* link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/security_and_compliance/configuring-certificates#api-server-certificates[Adding API server certificates]
+
+* link:../support_troubleshooting/trouble_cluster_offline_cert_mce.adoc#troubleshooting-imported-clusters-offline-after-certificate-change-mce[Troubleshooting imported clusters offline after certificate change]
+
+* xref:../cluster_lifecycle/cluster_proxy_addon_config.adoc#cluster-proxy-addon-settings[Enabling proxy settings for cluster proxy add-ons]
+
