@@ -28,4 +28,8 @@ Complete the following steps to run the spellcheck tool:
    **Note**: The results are populated in your terminal automatically.
 
 3. Create a new branch before committing the changes.
-4. Create a pull request and verify the updates.  
+4. Create a pull request and verify the updates.
+
+## YAML Lint
+
+You can use the following YAML linter to check YAML samples: [YAML Lint](https://www.yamllint.com/)
