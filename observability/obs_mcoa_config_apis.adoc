@@ -1,0 +1,102 @@
+[#config-apis-mcoa]
+= Configuring APIs for the multicluster obsservability add-on
+
+Configure the default metrics specific APIs of the multicluster observability add-on. When you enable the multicluster observability add-on, placements are automatically created for your managed clusters.
+
+When you reference a new placement in your `ClusterManagementAddon` resource, the `multicluster-observability-addon-manager` creates a specific default `PrometheusAgent` resource and adds it to the referenced placement. 
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+- You have installed and enabled the multicluster observability add-on. For more information, see xref:../observability/obs_enable_mcoa.adoc#enable-mcoa[Enabling the multicluster observability add-on].
+
+Complete the following to configure the APIs for the multicluster observability add-on:
+
+. Configure the `PrometheusAgent` resource by defining the prometheus server for federating metrics from the default scrape interval. Complete the following steps:
+
+.. Add the labels for the `multicluster-observability-addon-manager` to identify `PrometheusAgent` resources. Your `PrometheusAgent` resource might resemble the following file:
+
++
+[source,yaml]
+----
+apiVersion: monitoring.rhobs/v1alpha1
+kind: PrometheusAgent
+metadata:
+  name: mcoa-default-platform-metrics-collector-global
+  labels:
+    app.kubernetes.io/component: platform-metrics-collector
+    app.kubernetes.io/managed-by: multicluster-observability-addon
+    placement-ref-name: global
+    placement-ref-namespace: open-cluster-management-global-set
+spec:
+  ...
+----
+
+.. Set the sampling rate for each `ScrapeConfig` resource by defining the `scrapeInterval` parameter value by seconds. Set the parameter value to at least `90s`. The default value is `300s`.
+.. Edit the `managedFields` specification to apply the `multicluster-observability-addon`. Your `PrometheusAgent` resource might resemble the following YAML file:
+
++
+[source,yaml]
+----
+apiVersion: monitoring.rhobs/v1alpha1
+kind: PrometheusAgent
+metadata:
+  name: mcoa-default-user-workload-metrics-collector-global
+  namespace: open-cluster-management-observability
+  managedFields:
+    - manager: multicluster-observability-addon
+      operation: Apply
+----
+
+. Configure the `ScrapeConfig` resource to define a set of metrics for independent federation from Prometheus of the hub cluster. Complete the following steps:
+
+.. Add the name of the job that you want to reference for the `jobName` parameter.
+.. To ensure that Prometheus federates metrics, add the `/federate` URL path for the `metricsPath` parameter.
+.. Add the metric name and labels that you want to collect. See the following YAML file example where the `ScrapeConfig` resource collects the `up` metric:
+
++
+[source,yaml]
+----
+apiVersion: monitoring.rhobs/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: some-metrics-to-collect
+  namespace: open-cluster-management-observability
+  labels:
+    - app.kubernetes.io/component: <platform-metrics-collector> or <user-workload-metrics-collector>
+spec:
+  jobName: some-job-name
+  metricsPath: /federate
+  params:
+    match[]:
+    - '{__name__="up"}'
+----
+
+.. Define the target prometheus source server for platform monitring and user workloads. Your `ScrapeConfig` resource might resemble the following YAML file example:
+
++
+[source,yaml]
+----
+apiVersion: monitoring.rhobs/v1alpha1
+kind: ScrapeConfig
+spec:
+  ...
+  scrapeClass: ocp-monitoring
+  scheme: HTTPS
+  staticConfigs:
+  - targets:
+    - prometheus-k8s.openshift-monitoring.svc:9091
+    - prometheus-user-workload.openshift-user-workload-monitoring.svc:9092
+----
+
+. Configure the `PrometheusRule` resource to define alerting and recording rules for custom workloads on managed clusters.
+
++
+*Note:* Be sure to use the `monitoring.coreos.com` group for the `PrometheusRule` resource.
+
+. Configure the `AddonDeploymentConfig` resource to customize the deployment of the multicluster observability add-on on managed clusters. *Note:* The values in the `AddonDeploymentConfig` resource are override direct modifications of other resources. Complete the following steps:
+
+.. Define the namespace where you install the `PrometheusAgent` resource for the `agentInstallNamespace` parameter.
+.. Add the `nodePlacement` specification with the associated `nodeSelector` and `tolerations` parameters.
+.. Edit the `proxyConfig` specification by updating the `httpProxy` and `noProxy` configurations.
