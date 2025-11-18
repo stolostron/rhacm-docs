@@ -11,12 +11,14 @@ Enable the {gitops-short} add-on for `Advanced` pull model with the `ArgoCD` age
 [#prerequisites]
 == Prerequisites 
 
+Ensure that you have the following resources installed: 
+
 * {acm-short} hub cluster installed
 * Managed clusters registered with {acm-short}
-* OpenShift GitOps operator installed on the hub cluster
+* {gitops-short} operator installed on the hub cluster
 * A `Placement` resource to select target managed clusters
 * `ManagedClusterSet` bound to the target namespace
-* OpenShift GitOps operator subscription configured with the `ArgoCD` agent environment 
+* {gitops-short} operator subscription configured with the `ArgoCD` agent environment 
 * The `ArgoCD` custom resource configured for the `Agent` mode
 
 [#configure-subscriptions-resources]
@@ -25,7 +27,7 @@ Enable the {gitops-short} add-on for `Advanced` pull model with the `ArgoCD` age
 To enable the `ArgoCD` agent, you must configure the {gitops-short} operator subscription and the `ArgoCD` custom resource. To configure the necessary subscriptions and resources, complete the following steps:
 
 
-. On the hub cluster only, modify the OpenShift GitOps operator subscription to include the required environment variables:
+. On the hub cluster only, modify the {gitops-short} operator subscription to include the required environment variables by running the following command:
 
 +
 [source,bash]
@@ -33,7 +35,7 @@ To enable the `ArgoCD` agent, you must configure the {gitops-short} operator sub
 oc edit subscription gitops-operator -n openshift-gitops-operator
 ----
 
-. Add the following environment variables under `spec.config.env`:
+. Add the following environment variables under `spec.config.env` by applying the following YAML sample:
 
 +
 [source,yaml]
@@ -49,7 +51,7 @@ spec:
       value: openshift-gitops-redis:6379
 ----
 
-. Replace the existing `ArgoCD` custom resource with the compatible `Agent` mode configuration:
+. Replace the existing `ArgoCD` custom resource with the compatible `Agent` mode configuration by applying the following YAML sample:
 
 +
 [source,yaml]
@@ -75,17 +77,17 @@ spec:
 [#enable-argocd-agent]
 == Enabling _ArgoCD_ agent 
 
-Create a `GitOpsCluster` resource to manage the `ArgoCD` agent add-on deployment. its controller automatically creates the following resources for each managed cluster selected by the `Placement`
+Create a `GitOpsCluster` resource to manage the `ArgoCD` agent add-on deployment. The controller controller automatically creates the following resources for each managed cluster selected by the `Placement`
 
 The `GitOpsCluster` controller performs the following operations:
 
-* Create and automated PKI management 
+* Creates and automated PKI management 
 * Creates `ArgoCD` cluster secrets configured for agent mode
 * Deploys the Argo CD Agent on each selected managed cluster
 
 To enable the advanced pull model Argo CD Agent architecture, complete the following steps:
 
-. Create a `GitOpsCluster resource with the `ArgoCD` agent enabled by inputting the following YAML sample: 
+. Create a `GitOpsCluster resource with the `ArgoCD` agent enabled by applying the following YAML sample: 
 
 +
 [source,yaml]
@@ -127,9 +129,15 @@ oc get gitopscluster gitops-agent-clusters -n openshift-gitops -o jsonpath='{.st
 . Confirm that you see the following condition types in the status:
 
 +
-* `ArgoCDAgentPrereqsReady` - Agent prerequisites are set up
-* `CertificatesReady` - TLS certificates are signed
-* `ManifestWorksApplied` - CA certificates propagated to managed clusters
+* `Ready`: The `GitOpsCluster` is ready and all the components are functioning. 
+* `PlacementResolved`: The `Placement` reference is resolved and the managed clusters are retrieved. 
+* `ClustersRegistered`: The managed clusters are successfully registered with  the `ArgoCD` server.
+* `AddOnDeploymentConfigsReady`: The `AddOnDeploymentConfigs` are created for all the managed clusters.
+* `ManagedClusterAddOnsReady`: The `ManagedClusterAddons` creates and updates the managed clusters. 
+* `AddOnTemplateReady`: The dynamic `AddOnTemplate` created for the `ArgoCD` agent mode. 
+* `ArgoCDAgentPrereqsReady`: The agent prerequisites are set up.
+* `CertificatesReady`: The TLS certificates are signed.
+* `ManifestWorksApplied`: The CA certificates propagated to managed clusters.
 
 . On the hub cluster, create an `ArgoCD` application resource in the managed cluster namespace by inputting the following YAML file: 
 
@@ -177,4 +185,4 @@ oc get application guestbook -n <managed cluster name>
 [#additional-resources]
 == Additional resources 
 
-Continue learning about the {gitops-short} add-on by completing xref:../gitops/gitops_manage_addon.adoc#manage-gitops-addon[Managing the {gitops} add-on].
+Continue setting up the {gitops-short} add-on by completing xref:../gitops/gitops_manage_addon.adoc#manage-gitops-addon[Managing the {gitops} add-on].
