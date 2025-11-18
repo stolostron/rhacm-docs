@@ -1,0 +1,44 @@
+[#export-metrics-external]
+= Exportng metrics to external endpoints for the multicluster observability add-on
+
+Configure your custom `remoteWrite` configurations to your `PrometheusAgents` resources. Metrics are directly sent by the managed cluster to the external endpoint when you configure your `remoteWrite` configuration. Filter metrics by using relabeling rules. Enhance resiliency during network partitions between your managed and hub clusters for up to 2 hours.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+- You have installed and enabled the multicluster observability add-on. For more information, see xref:../observability/obs_enable_mcoa.adoc#enable-mcoa[Enabling the multicluster observability add-on].
+
+Complete the following steps to export metrics to external endpoints for the `PrometheusAgent` resource:
+
+. Create the TLS `Secret` config maps within the `open-cluster-management-observability` namespace.
+. Add the secret names to the `secrets` specification of the `PrometheusAgent` resource.
+. Add the `remoteWrite` configuration to the `PrometheusAgent` resource. Your `PrometheusAgent` resource might resemble the following YAML file, where the `up` metric is exported to a custom endpoint:
+
++
+[source,yaml]
+----
+apiVersion: monitoring.rhobs/v1alpha1
+kind: PrometheusAgent
+metadata:
+  name: mcoa-default-platform-metrics-collector-global
+  namespace: open-cluster-management-observability
+spec:
+  secrets:
+    - custom-endpoint-ca
+    - custom-endpoint-cert
+  remoteWrite:
+    - name: custom-endpoint
+      tlsConfig:
+        caFile: /etc/prometheus/secrets/custom-endpoint-ca/ca.crt
+        certFile: /etc/prometheus/secrets/custom-endpoint-cert/tls.crt
+        keyFile: /etc/prometheus/secrets/custom-endpoint-cert/tls.key
+      url: 'https://my-custom-remote-write-endpoint.io/api/v1/receive'
+      writeRelabelConfigs:
+        - action: keep
+          regex: ^up$
+          sourceLabels:
+            - __name__
+    - name: acm-observability
+      ...
+----
