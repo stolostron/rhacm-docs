@@ -1,34 +1,33 @@
 [#fine-grain-rbac-ui]
 = Implementing fine-grained role-based access control with the console (Technology Preview)
 
-*Technology Preview:* {acm} supports fine-grained role-based access control (RBAC). You can manage and control permissions at the namespace level and cluster level on your managed clusters. Grant permissions to a virtual machine namespace within a cluster without granting permission to the entire managed cluster.
+*Technology Preview:* {acm} supports fine-grained role-based access control (RBAC) for virtual machines only. Manage and control permissions at the namespace level and cluster level on your managed clusters. Grant permissions to a virtual machine namespace within a cluster without granting permission to the entire managed cluster.
 
 Learn how to set up fine-grained RBAC from the console.
 
 *Required access:* Cluster administrator
 
-To learn about {ocp-short} default and virtualization roles and permissions, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/virtualization/about#authorization_virt-security-policies[Authorization] in the {ocp-short} documentation.
-
-See xref:../secure_clusters/rbac_implement_rhacm.adoc#rhacm-rbac-implement[Implementing role-based access control] for more details about {acm-short} role-based access.
-
 .Prerequisites
 
 See the following requirements to begin using fine-grained role-based access control:
 
-- You need to install the latest verrsion of {ocp-virt} on your hub cluster. For more information, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/virtualization/installing[Virtualization - Installing].
+- You need to install the latest version of {ocp-virt} on your hub cluster. For more information, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/virtualization/installing[Virtualization - Installing].
 - To learn about {ocp-short} default and virtualization roles and permissions, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/virtualization/about#authorization_virt-security-policies[Authorization] in the {ocp-short} documentation.
 - For details on how to enable role-based access control, see xref:../secure_clusters/rbac_implement_rhacm.adoc#rhacm-rbac-implement[Implementing role-based access control].
 
-[#assign-fine-grain-rbac-ui]
 == Assigning fine-grained role-based access control in the console
 
 You can assign users to manage virtual machines with fine-grained role-based access control. Actions are disabled in the console if the user-role access is not permitted. Slide the *YAML* option on to see the data that you enter populate in the YAML editor.
 
 You can grant access to the following roles for {ocp-virt-short}:
 
-- `kubevirt.io:view`: only view resources
-- `kubevirt.io:edit`: modify resources
-- `kubevirt.io:admin`: view, modify, delete resources; grant permissions
+- `kubevirt.io:view`: Only view resources for your kubevirt resources.
+- `kubevirt.io:edit`: Change resources for your kubevirt resources.
+- `kubevirt.io:admin`: view, edit, delete resources, and grant permissions for your kubevirt resources.
+- `kubevirt.io-acm-managed:admin`: View, edit, and delete virtual machine resources from the {ocp-virt} console. With this role, you can also troubleshoot issues and complete advanced configuration tasks on your managed cluster. 
+- `kubevirt.io-acm-managed:view`: only view virtual machine resources on your managed cluster.
+- `kubevirt.io-acm-hub:admin`: View, edit, and delete resources, and grant permissions on your hub cluster and hubevirt environment
+- `kubevirt.io-acm-hub:view`: Only view virtual machine resources and related resources across your managed clusters.
 
 To assign permissions to a user, complete the following steps:
 
@@ -47,11 +46,30 @@ To assign permissions to a user, complete the following steps:
 ----
 
 . Label your `local-cluster` with `environment=virtualization`. Run the following command:
-
+//we probably should not have this here since this is a UI topic. Need to confirm how the user does this in the UI. Unless this can be run in a terminal from the console
 +
 [source,bash]
 ----
 oc label managedclusters local-cluster environment=virtualization
+----
+
+. To create a `ClusterRoleBinding` resource to add the `kubevirt.io-acm-hub:view` role, click *User Management* > *Roles*. Your `ClusterRoleBinding` resource might resemble the following YAML file:
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubevirt.io-acm-hub:view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: <cluster-role-name>
+subjects:
+- kind: User
+  apiGroup: rbac.authorization.k8s.io
+  name: <user-name>
 ----
 
 . *Optional:* If the `observability` service is enabled, create an additional `RoleBinding` resource on the hub cluster so that users can view virtual machine details in Grafana.

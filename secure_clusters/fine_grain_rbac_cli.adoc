@@ -1,7 +1,7 @@
 [#fine-grain-rbac-cli]
 = Implementing fine-grained role-based access control in the terminal (Technology Preview)
 
-*Technology Preview:* {acm} supports fine-grained role-based access control (RBAC). As a cluster administrator, you can manage and control permissions at the namespace level and cluster level on your managed clusters. Grant permissions to a virtual machine namespace within a cluster without granting permission to the entire managed cluster.
+*Technology Preview:* {acm} supports fine-grained role-based access control (RBAC) for virtual machines only. As a cluster administrator, you can manage and control permissions at the namespace level and cluster level on your managed clusters. Grant permissions to a virtual machine namespace within a cluster without granting permission to the entire managed cluster.
 
 Learn how to set up for fine-grained role-based access control (RBAC) from the terminal.
 
@@ -19,14 +19,19 @@ See the following requirements to begin using fine-grained role-based access con
 - You need virtual machines. To learn about {ocp-short} default and virtualization roles and permissions, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/virtualization/about#authorization_virt-security-policies[Authorization] in the {ocp-short} documentation.
 - For details on how to enable role-based access control, see xref:../secure_clusters/rbac_implement_rhacm.adoc#rhacm-rbac-implement[Implementing role-based access control].
 
-[#enable-fine-grain-rbac]
 == Enabling fine-grained role-based access control in the terminal
 
-You can enable role access to the following roles for {ocp-virt-short}:
+When you enable fine-grained RBAC the following roles for {ocp-virt-short} get applied automatically:
 
-- `kubevirt.io:view`: only view resources
-- `kubevirt.io:edit`: modify resources
-- `kubevirt.io:admin`: view, modify, delete resources; grant permissions
+- `kubevirt.io:view`: Only view resources for your kubevirt resources.
+- `kubevirt.io:edit`: Change resources for your kubevirt resources.
+- `kubevirt.io:admin`: view, edit, delete resources, and grant permissions for your kubevirt resources.
+- `kubevirt.io-acm-managed:admin`: View, edit, and delete virtual machine resources from the {ocp-virt} console. With this role, you can also troubleshoot issues and complete advanced configuration tasks on your managed cluster. 
+- `kubevirt.io-acm-managed:view`: only view virtual machine resources on your managed cluster.
+- `kubevirt.io-acm-hub:admin`: View, edit, and delete resources, and grant permissions on your hub cluster and hubevirt environment
+- `kubevirt.io-acm-hub:view`: Only view virtual machine resources and related resources across your managed clusters.
+
+*Note:* You must have access to the following roles to complete live migration of your virtual machines: `kubevirt.io:admin`, `kubevirt.io-acm-hub:admin`, and `kubevirt.io-acm-managed:view`.
 
 Complete the following steps:
 
@@ -61,5 +66,31 @@ oc edit mch -n open-cluster-management multiclusterhub
 oc label managedclusters local-cluster environment=virtualization
 ----
 
+. To create a `ClusterRoleBinding` resource to add the `kubevirt.io-acm-hub:view` role, run the following command:
 
++
+[source,bash]
+----
+oc create clusterrolebinding <cluster-role-binding-name> --clusterrole=kubevirt.io-acm-hub:view --user=<user-name>
+----
+
++
+Your `ClusterRolebinding` resource might resemble the following YAML file:
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubevirt.io-acm-hub:view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: <cluster-role-name>
+subjects:
+- kind: User
+  apiGroup: rbac.authorization.k8s.io
+  name: <user-name>
+----
 
