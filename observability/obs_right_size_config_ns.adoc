@@ -1,0 +1,90 @@
+[#config-right-size-ns]
+= Configuring _RightSizingRecommendation_ for namespaces (Technology Preview)
+
+Customize `RightSizingRecommendation` to optimize CPU and memory resources for your namespaces. Edit the `rs-namespace-config` `ConfigMap` resource.
+
+*Required access:* Editor
+
+.Prerequisites
+
+- You have enabled the `RightSizingRecommendation` specification. For more details, see xref:../obs_right_size_ns.adoc#optimize-work-right-size[Optimizing workloads by using _RightSizingRecommendation_ guides for namespaces (Technology Preview)].
+
+Complete the following steps:
+
+. Configure your placement for the `rs-namespace-config` `ConfigMap` resource placement. See the following example where the policy only applies to clusters with the `environment=prod` label:
+
++
+[source,yaml]
+----
+placementConfiguration: |
+ spec:
+   . . .
+   predicates:
+   - requiredClusterSelector:
+       labelSelector:
+         matchLabels:
+           environment: prod
+   . . .
+----
+
+. Configure your `PrometheusRule` resource by completing changes to one of the following steps: 
+
+.. Define the namespaces that you want to include or exclude in the `namespaceFilterCriteria` specification.
+
+.. Add a list of namespaces that you want to include in the `inclusionCriteria` specification.
+
+.. Add a list of namespaces that you want to exclude in the `exclusionCriteria` specification.
+
++
+*Note:* You cannot use both `inclusionCriteria` and `exclusionCriteria` at the same time.
+
+.. To adjust the CPU and memory percentages, define the percentage usage. 
+
++
+See the following example where the `inclusionCriteria` specification includes `prod` and the `exclusionCriteria` excludes `openshift`:
+
++
+[source,yaml]
+----
+. . .
+  prometheusRuleConfig: |
+   namespaceFilterCriteria:
+    inclusionCriteria:
+    - prod.*
+    exclusionCriteria:
+    - openshift.*
+  labelFilterCriteria:
+  - labelName: label_kubernetes_io_metadata_name
+    inclusionCriteria:
+    - prod
+    - staging
+    exclusionCriteria:
+    - kube.*
+  recommendationPercentage: 120
+  . . .
+----
+
+. Configure your namespace binding. By default, the `RightSizingRecommendation` feature uses the `open-cluster-management-global-set` namespace for binding policies to clusters.
+
+.. To bind generated policies to a different namespace and cluster set, add your namespace to the `namespaceBinding` specification. *Important:* Ensure that the target namespace is part of a valid `ClusterSet` before you apply the change. The policies that you generate might not apply to any clusters if there is no valid binding.
+
++
+See the following example where the `<your-namespace-binding>` namespace is the value for `namespaceBinding`:
+
++
+[source,yaml]
+----
+apiVersion: observability.open-cluster-management.io/v1beta2
+kind: MultiClusterObservability
+metadata:
+  name: observability
+spec:
+  . . .
+  capabilities:
+    platform:
+      analytics:
+        namespaceRightSizingRecommendation:
+          enabled: true
+          namespaceBinding: <your-namespace-binding>
+  . . .
+----

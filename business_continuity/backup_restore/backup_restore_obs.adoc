@@ -1,0 +1,98 @@
+[#backup-restore-obs]
+= Backing up and restoring Observability service
+
+Backup and restore the Observability service to keep data safe and to support continuity during the hub cluster migration or backup. To help with disruption in metric data collection, use the same S3-compatible object store for both the primary and backup hub clusters.
+
+.Prerequsites
+
+- Ensure that you can run a restore operation for backup types by completing the xref:../business_continuity/backup_restore/backup_restore.adoc#restoring-backup-restore-operation[Using the restore operation for backup types] process.
+
+.Procedure
+
+Complete the following steps to backup and restore the Observability service:
+
+. To ensure the Observability service recognizes the hub cluster as the `local-cluster`, a managed hub cluster, change the `spec.disableHubSelfManagement` parameter in the `MultiClusterHub` custom resource to `false`.
+
++
+*Note:* If you change the default name of your `local-cluster` to another value, the results appear within the changed local cluster name.
+
+. To preserve the tenant ID of the `observatorium` resource as you manually back up and restore the `observatorium` resource, run the following command:
+
++
+[source,bash]
+----
+oc get observatorium -n open-cluster-management-observability -o yaml > observatorium-backup.yaml
+----
+
+. To backup the `observability` deployment, run the following command:
+
++
+[source,bash]
+----
+oc get mco observability -o yaml > mco-cr-backup.yaml
+----
+
+. Shut down the Thanos compactor on your primary hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc scale statefulset observability-thanos-compact -n open-cluster-management-observability --replicas=0
+----
+
+.. Verify the compactor is not active by running the following command:
+
++
+[source,bash]
+----
+oc get pods observability-thanos-compact-0 -n open-cluster-management-observability
+----
+
+. Restore the `backup` resources such as the automatically backed-up ConfigMaps and Secrets listed in the backup and restore configuration for Observability.
+
+. To preserve the tenant ID for maintaing continuity in the metrics ingestion and querying, restore the `observatorium` resource to the backup hub cluster. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f observatorium-backup.yaml
+----
+
+. Apply the backed up `MultiClusterObservability` custom resource to start the Observability service on the new restored hub cluster. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f mco-cr-backup.yaml
+----
++
+The operator starts the Observability service and detects the existing `observatorium` resource, reusing the preserved tenant ID instead of creating a new one.
+
+. Verify that the Observability service runs on your new hub cluster. Run the following command:
+
++
+[source,bash]
+----
+oc get pods -n open-cluster-management-observability
+----
+
+. Verify that the `observability-controller` `managedclusteraddon` does not have a status in the `DEGRADED` column, and that the `PROGRESSING` status is not set to `False`. Run the following command:
+
++
+[source,bash]
+----
+oc get managedclusteraddons -A | awk 'NR==1 || /observability-controller/
+----
+
+. Verify metrics collection from your managed clusters by accesing Grafana.
+
+. Verify that your managed clusters are connected to your new hub cluster by checking for the `Available` status for each managed cluster.
+
+. Shut down the Observability service on your previous hub cluster by removing the resources. Run the following command:
+
++
+[source,bash]
+----
+oc delete mco observability
+----
+

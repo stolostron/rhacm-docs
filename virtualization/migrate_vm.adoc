@@ -1,0 +1,82 @@
+[#migrate-vm]
+= Migrating virtual machines between clusters (Technology Preview)
+
+Migrating virtual machines helps you move resources during cluster upgrades, times when you need to clear a node for maintenance, or during configuration changes. When you enable migration, the {ocp-virt} is automatically installed on your managed clusters with the `acm/cnv-operator-install` label. The migration toolkit for virtualization is also installed on your hub cluster.
+
+*Required access:* Cluster administrator
+
+.Prerequsites
+
+- You must have access to the `openshift-cnv` namespace.
+- You have the `kubevirt.io:admin` role as both a target and a source cluster
+- You have the `kubevirt.io-acm-hub:admin` for your hub cluster and `kubevirt.io-acm-managed:admin` for your target managed cluster. 
+
+- You have the latest version of {ocp-short} installed. See the link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/overview/index[{ocp-short} Overview].
+
+To start migration for virtual machines complete the following steps:
+
+. Enable `cnv-mtv-integrations-preview` component for the integration of {ocp-virt}. 
+.. Run the following command to edit your `multiclusterhub` instance:
+
++
+[source,bash]
+----
+oc edit MultiClusterHub multiclusterhub -n open-cluster-management
+----
+
+.. From the `components` specification, set the `enabled` parameter to `true` for the `cnv-mtv-integrations-preview` component.
+
+. Verify that the migration toolkit for virtualization is available on your cluster. Run the following command:
+
++
+[source,bash]
+----
+oc get clustermanagementaddon mtv-operator  -o jsonpath='{.status.installProgressions[*].conditions[*].reason}
+----
+  
+. Verify that the `kubevirt-hyperconverged` resource is available on your cluster with the following command:
+  
++
+[source,bash]
+----
+oc get clustermanagementaddon kubevirt-hyperconverged -o jsonpath='{.status.installProgressions[*].conditions[*].reason}
+----
+  
+. Verify that the `kubevirt-hyperconverged-operator` is available on your cluster with the following command:
+
++
+[source.bash]
+----
+oc get clustermanagementaddon kubevirt-hyperconverged-operator -o jsonpath='{.status.installProgressions[*].conditions[*].reason}
+----
+
+. To designate a cluster as a source or target for the virtual machine migration, apply the following label to your clusters: `acm/cnv-operator-install: "true"`.
+
+. Enable cross-cluster migration from the {ocp-virt-short} console. Complete the following steps:
+.. From the navigation menu, select *Virtualization* > *Overview*.
+.. To access the preview features, click *Settings* > *Preview Features*.
+.. Set `Enable Kubevirt cross cluster migration` to `true`.
+
+. *Optional:* Configure your network for the live migration within your `HyperConverged` resource by updating the `customizedVariables` specification. Add the network key and value to your `cnv-hco-config` `AddOnDeploymentConfig` resource. Your `AddOnDeployment` resource might resemble the following sample:
+
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: cnv-hco-config
+  namespace: open-cluster-management
+spec:
+  agentInstallNamespace: openshift-cnv
+  customizedVariables:
+    - name: LIVE_NETWORK_KEY
+      value: network
+    - name: LIVE_NETWORK_VALUE
+      value: {{ NetworkAttachmentDefinition name like lm-network }}
+----
+
+[#mig-add-res]
+== Additional resources 
+
+- To learn how to move virtual machines to other nodes in the cluster, see https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/virtualization/live-migration#virt-preserving-lm-perms_virt-about-live-migration[Live migration].
