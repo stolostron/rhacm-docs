@@ -1,0 +1,107 @@
+[#enable-gitops-addon-without-argocd]
+= Enabling {gitops} add-on without the _ArgoCD_ agent
+
+The `Basic` mode for pull model does not include the `ArgoCD` agent, so the pull model gives you a simpler setup for your hub cluster management and only gives you the necessary statuses of the health of your hub clusters. This mode enables the {gitops-short} add-on to the managed clusters that you selected with the `Placement`. 
+
+After enabling the add-on, the `Basic` mode deploys the {gitops-short} `ArgoCD` components that are suitable for the cluster workflows. 
+
+.Prerequisites 
+
+* {acm-short} hub cluster installed
+* Managed clusters that are registered with {acm-short}
+* {gitops-short} operator that is installed on the hub cluster
+* A `Placement` resource that is defined to select target managed clusters
+* `ManagedClusterSet` that is bound to the target namespace
+
+To enable a {gitops-short} add-on without the `ArgoCD` agent, complete the following sections: 
+
+* <<create-gitopscluster-resource, Creating a _GitOpsCluster_ resource>>
+* <<verify-installation, Verifying the installation>>
+* <<additional-resources, Additional resources>> 
+
+[#create-gitopscluster-resource]
+== Creating a `GitOpsCluster` resource
+
+To enable basic pull model, create a `GitOpsCluster` resource. The controller automatically creates the following resources for each managed cluster selected by the `Placement` policy: 
+
+* `AddOnDeploymentConfig` resource in the managed cluster namespace
+* `ManagedClusterAddOn` resource in the managed cluster namespace
+
+The {gitops} add-on deploys to each selected managed cluster and installs the following resources:
+
+* {gitops-short} operator in the `openshift-gitops-operator` namespace
+* ArgoCD instance in the  `openshift-gitops` namespace
+
+To create a `GitOpsCluster` resource, complete the following steps:
+
+. On your hub cluster, create a `GitOpsCluster` resource to enable the {gitops} add-on by adding the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: gitops-clusters
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: all-openshift-clusters
+    namespace: openshift-gitops
+  gitopsAddon:
+    enabled: true
+----
+
+. Apply the YAML sample by running the following command: 
+
++
+[source,bash]
+----
+oc apply -f gitopscluster-example.yaml 
+----
+
+[#verify-installation]
+== Verifying the installation 
+
+To verify the necessary installations and resources for successful deployment, complete the following steps:
+
+. Verify that the `GitOpsCluster` resource has a status for successful deployment by running the following command:  
+
++
+[source,bash]
+----
+oc get gitopscluster gitops-clusters -n openshift-gitops -o yaml
+----
+
+. Verify that the {gitops-short} add-on controller is working by running the following command: 
+
++
+[source,bash]
+----
+oc get pods -n open-cluster-management-agent-addon
+----
+
+. Verify the {gitops-short} operator is working by running the following command: 
+
++
+[source,bash]
+----
+oc get pods -n openshift-gitops-operator
+----
+
+. Verify the `ArgoCD`` instance is working by running the following command:
+
++
+[source,bash]
+----
+oc get pods -n openshift-gitops
+----
+
+[#additional-resources]
+== Additional resources 
+
+Continue setting up the {gitops-short} add-on by completing xref:../gitops/gitops_manage_addon.adoc#manage-gitops-addon[Managing the {gitops} add-on].
