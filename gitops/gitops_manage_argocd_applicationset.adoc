@@ -1,0 +1,399 @@
+[#mangage-gitops-argocd-applicationset]
+= Managing the _ArgoCD_ _ApplicationSet_ in any namespace 
+
+{acm-short} {product-version} enhances the `ArgoCD` pull model by removing the `openshift-gitops` namespace restriction for the `ApplicationSet` resources.  With this enhancement, you can create `ApplicationSet` resources in any namespace on your hub clusters. 
+
+To fully manage your `ArgoCD` `ApplicationSet` resources, complete the following sections: 
+
+* <<install-gitops-operator, Installing the {gitops-short} operator>> 
+* <<enable-applicationset-hub-cluster, Enabling the _ApplicationSet_ in any namespace on the hub cluster>>
+* <<enable-application-managed-cluster, Enabling the _Application_ in any namespace on the managed cluster>>
+* <<deploy-standard-configuration, Deploying _ApplicationSet_ in any namespace for standard configurations>>
+* <<deploy-advanced-configuration, Deploying _ApplicationSet_ in any namespace for advanced configurations>>
+
+[#install-gitops-operator]
+==  Installing the {gitops-short} operator 
+
+Before you can manage the `ArgoCD` `ApplicationSet` resources, you must install the {gitops-short} operator and register all ACM managed clusters. Complete the following steps:  
+
+. On your hub cluster, install the {gitops-short} operator with the default `ArgoCD` instance in the default `openshift-gitops` namespace. 
+. Register all {acm-short} managed clusters by creating a `gitopsCluster` custom resource referring to a `Placement` for selecting all non local-cluster managed clusters, by adding the following YAML: 
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: argo-acm-importer
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    cluster: notused
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: all-openshift-clusters
+    namespace: openshift-gitops
+----
+
+. Apply the YAML sample by running the following command: 
+
++
+[source,bashl]
+----
+oc apply -f gitopscluster-example.yaml
+----
+
+[#enable-applicationset-hub-cluster]
+== Enabling the _ApplicationSet_ in any namespace on the hub cluster 
+
+To enable the `ArgoCD` `ApplicationSet` in any namespace on your hub cluster, complete the following steps: 
+
+. On your command-line interface, clone the Github repository by running the following command:
+
++
+[source,bashl]
+----
+git clone https://github.com/stolostron/multicloud-integrations
+----
+
+. Go to the Github repository that you cloned by running the following command: 
+
++
+[source,bashl]
+----
+cd multicloud-integrations/deploy/appset-any-namespace
+----
+
+. Enable the `ApplicationSet` in any namespace by running the following command: 
+
++
+[source,bash]
+----
+ ./setup-appset-any-namespace.sh --namespace openshift-gitops --argocd-name openshift-gitops 
+----
+
+. Verify that the {gitops-short} instance restarted and is running on your hub cluster by running the following command on your hub cluster: 
+
++
+[source,bashl]
+----
+oc get pods -n openshift-gitops 
+----
+
+[#enable-application-managed-cluster]
+== Enabling the _Application_ in any namespace on the managed clusters 
+
+The {acm-short} {gitops-short} add-on launches a {gitops-short} instance that you can use to enable the `Application` in any namespace on your managed cluster. To enable the `ArgoCD` `Application` in any namespace on the managed clusters, complete the following steps:
+
+. Create a global `ManagedClusterSetBinding` resource by adding the following YAML sample: 
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: global
+  namespace: openshift-gitops
+spec:
+  clusterSet: global
+----
+
+. Apply  the YAML sample by running the following command: 
+
++
+[source,bashl]
+----
+oc apply -f managedclustersetbinding-example.yaml
+----
+
+. Create a  `Placement` custom resource for selecting the managed clusters where the (gitops-short) add-on gets enabled by adding the following YAML sample:.
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: all-openshift-clusters
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "In"
+          values:
+          - OpenShift
+----
+
+. Apply the YAML sample by running the following command: 
+
++
+[source,bashl]
+----
+oc apply -f placement-example.yaml
+----
+
+. Create the `GitOpsCluster` with the `gitopsAddon` specification by adding the following YAML sample: 
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: argo-acm-importer
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    cluster: notused
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: all-openshift-clusters
+    namespace: openshift-gitops
+  gitopsAddon:
+    enabled: true
+    overrideExistingConfigs: true
+    reconcileScope: All-Namespaces
+----
+.. The `GitOpsCluster.gitopsAddon.enabled` value is set to true. 
+.. The `GitOpsCluster.gitopsAddon.reconcileScope` value  is set to `All-Namespaces`. 
+
+. Apply the YAML sample by running the following command: 
+
++
+[source,bashl]
+----
+oc apply -f gitopscluster-example.yaml
+----
+
+. Verify that the {gitops-short} instance restarted and is running on your managed clusters by running the following commands on your managed clusters: 
+
++
+[source,bashl]
+----
+oc get pods -n openshift-gitops 
+----
+
+[#deploy-standard-configuration]
+== Deploying the _ApplicationSet_ for standard configurations
+
+You can create your `ArgoCD` `ApplicationSet` in any custom namespace on your hub cluster. You can deploy your `ArgoCD` `ApplicationSet` through standard or advanced configurations. 
+
+If you have limited support for role-based access control (RBAC), then you might want to deploy the `ApplicationSet` for standard configurations. 
+
+For simple RBAC management, you have the following benefits: 
+
+* No namespaces specified in the GitHub repository resources 
+* The destination of the workload namespace is specified in the `Application` template. 
+* The `ApplicationSet` uses the default `AppProject`
+
+To deploy the `ApplicationSet` for standard configurations, complete the following steps: 
+
+. In the `openshift-gitops` namespace, create a `Placement` and `AppProject` resource.  
+. Create the `ApplicationSet` in the `appset-2`` namespace with the default `AppProject` by adding the following YAML sample:  
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+  name: appset-2
+----
+
+. Apply the YAML sample by running the following command: 
+
++
+[source,bashl]
+----
+oc apply -f namespace-example.yaml
+----
+
+. Create the `ApplicationSet` in the `appse-2` namespace with the default `AppProject` by adding the following YAML sample:  
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: helloworld
+  namespace: appset-2                                                              
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: all-openshift-clusters
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+      name: '{{name}}-helloworld'
+    spec:
+      destination:
+        namespace: helloworld                                                          
+        server: https://kubernetes.default.svc
+      project: default                                                                         
+      source:
+        path: helloworld                                                                                             
+        repoURL: https://github.com/stolostron/application-samples.git                   
+        targetRevision: HEAD
+      syncPolicy:
+        automated: {}
+----
+
+. Apply the YAML sample by running the following command: 
+
++
+[source,bashl]
+----
+oc apply -f applicationset-example.yaml
+----
+
+.. The `ApplicationSet` gets created in the `appset-2`  namespace.
+.. The `Application` resources get deployed to the `Helloworld` namespace on the specified managed clusters.
+.. The default `ArgoCD` `AppProject` configuration gets applied
+.. All the `Application` resources defined in the specified path of the Github repository are not namespace specific. 
+
+[#deploy-advanced-configuration]
+== Deploying the _ApplicationSet_ for advanced configurations
+
+If you have support for role-based access control (RBAC), then you have the option to deploy the `ApplicationSet` for advanced configurations.
+
+For advanced configurations with RBAC management, you have the following benefits: 
+
+* The workload namespaces specified in the GitHub repository resources 
+* The destination of the workload namespace that is specified in the `ApplicationSet` matches the GitHub repository  
+* The `ApplicationSet` uses the `ArgoCD` `AppProject`` for RBAC control 
+
+To deploy the `ApplicationSet` for advanced configurations, complete the following steps:
+
+. In the `openshift-gitops` namespace, create a `Placement` and `AppProject` resource.  
+. Create the `ApplicationSet` in the bgdk namespace with the non-default bgdk `AppProject` by adding the following YAML sample:  
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+  name: bgdk
+----
+
+. Apply the YAML sample by running the following command: 
+
++
+[source,bashl]
+----
+oc apply -f namespace-example.yaml
+----
+
+. Set the non-default bgdk `AppProject` configuration in the {gitops-short} namespace by adding the following YAML sample:  
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: bgdk                                                                               
+  namespace: openshift-gitops
+spec:
+  sourceNamespaces:
+  - bgdk
+  sourceRepos:
+  - https://github.com/redhat-developer-demos/openshift-gitops-examples.git
+  destinations:
+  - namespace: bgdk
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+----
+
+. Apply the YAML sample by running the following command: 
+
++
+[source,bashl]
+----
+oc apply -f appproject-example.yaml
+----
+
+. Apply the customized `ArgoCD` `AppProject` configuration to the `ApplicationSet`
+by adding the following YAML sample:  
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bgdk-2
+  namespace: bgdk
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: all-openshift-clusters
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+      name: '{{name}}-bgdk'
+    spec:
+      destination:
+        namespace: bgdk
+        server: https://kubernetes.default.svc
+      project: bgdk                                                   
+      source:
+        path: apps/bgd/overlays/bgdk
+        repoURL: https://github.com/redhat-developer-demos/openshift-gitops-examples.git
+        targetRevision: HEAD
+      syncPolicy:
+        automated: {}
+----
+
+. Apply the YAML sample by running the following command: 
+
++
+[source,bashl]
+----
+oc apply -f applicationset-example.yaml
+----
+
+Your customized `ArgoCD` `AppProject` is created in the  {gitops-short} namespace that includes the following configurations: 
+
+* `sourceNamespaces` is the namespace where the `Application` itself  gets created.
+* `sourceRepos` is the repository that the `Application` template uses.
+* `destinations` is  the namespace  where the `Application` will deploy its workloads.
+* `clusterResourceWhitelist` is a cluster scoped resource list that the `Application` is allowed to deploy. In this scenario, this namespace is mandatory because the `Application` must create a new namespace.
+
+
