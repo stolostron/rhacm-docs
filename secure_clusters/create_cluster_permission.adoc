@@ -1,0 +1,95 @@
+[#create-cluster-permission]
+= Creating a cluster permission 
+
+When the service account is created, it does not have any permission associated to it. To grant permissions to the new service account, use the `ClusterPermission` resource. Create the `ClusterPermission` resource in the managed cluster namespace on the hub cluster. Use the `ClusterPermission` resource to create roles, cluster roles resources on the managed clusters, and bind them to a service account through a `RoleBinding` or `ClusterRoleBinding` resource.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+- are there any prereqs for this? 
+
+.Procedure 
+
+Complete the following steps to create a `ClusterPermission` resource that grants permissions to a managed service account:
+
+. To grant the `<managed-sa-sample>` service account permission to the sample mortgage application that is deployed to the `mortgage` namespace on `<managed-cluster>`, create a YAML file with the following content: 
+
++
+[source,yaml]
+----
+apiVersion: rbac.open-cluster-management.io/v1alpha1
+kind: ClusterPermission
+metadata:
+  name: <clusterpermission-msa-subject-sample>
+  namespace: <managed-cluster>
+spec:
+  roles:
+  - namespace: default
+    rules:
+    - apiGroups: ["apps"]
+      resources: ["deployments"]
+      verbs: ["get", "list", "create", "update", "delete", "patch"]
+    - apiGroups: [""]
+      resources: ["configmaps", "secrets", "pods", "podtemplates", "persistentvolumeclaims", "persistentvolumes"]
+      verbs: ["get", "update", "list", "create", "delete", "patch"]
+    - apiGroups: ["storage.k8s.io"]
+      resources: ["*"]
+      verbs: ["list"]
+  - namespace: mortgage
+    rules:
+    - apiGroups: ["apps"]
+      resources: ["deployments"]
+      verbs: ["get", "list", "create", "update", "delete", "patch"]
+    - apiGroups: [""]
+      resources: ["configmaps", "secrets", "pods", "services", "namespace"]
+      verbs: ["get", "update", "list", "create", "delete", "patch"]
+  clusterRole:
+    rules:
+    - apiGroups: ["*"]
+      resources: ["*"]
+      verbs: ["get", "list"]
+  roleBindings:
+  - namespace: default
+    roleRef:
+      kind: Role
+    subject:
+      apiGroup: authentication.open-cluster-management.io
+      kind: ManagedServiceAccount
+      name: <managed-sa-sample>
+  - namespace: mortgage
+    roleRef:
+      kind: Role
+    subject:
+      apiGroup: authentication.open-cluster-management.io
+      kind: ManagedServiceAccount
+      name: <managed-sa-sample>
+  clusterRoleBinding:
+    subject:
+      apiGroup: authentication.open-cluster-management.io
+      kind: ManagedServiceAccount
+      name: <managed-sa-sample>
+----
+
+. Save the YAML file and name the file, `cluster-permission.yaml`.
+//should the name match the name in the previous example?
+
+. Apply your YAML file by running the following command:
+
++
+[source,bash]
+----
+oc apply -f cluster-permission.yaml
+----
+
+. The sample `<clusterpermission>` creates a role called `<clusterpermission-msa-subject-sample>` in the `mortgage` namespace. If one does not already exist, create a namespace `mortgage`. 
+. Review the resources that are created on the `<managed-cluster>` namespace. 
+
+After you create the sample, `<clusterpermission>`, the following resources are created in the sample managed cluster:
+
+* One `Role` called `<clusterpermission-msa-subject-sample>` in the default namespace.
+* One `RoleBinding` called `<clusterpermission-msa-subject-sample>` in the default namespace for binding the role to the managed service account. 
+* One `Role` called `<clusterpermission-msa-subject-sample>` in the mortgage namespace.
+* One `RoleBinding` called `<clusterpermission-msa-subject-sample>` in the mortgage namespace for binding the role to the managed service account.
+* One `ClusterRole` called `<clusterpermission-msa-subject-sample>`. 
+* One `ClusterRoleBinding` called `<clusterpermission-msa-subject-sample>` for binding the `ClusterRole` to the managed service account. 
