@@ -1,0 +1,155 @@
+[#enable-gitops-appset]
+= Enabling the _ApplicationSet_ resource in any namespace
+
+You can enable the  `ApplicationSet` and application resources in any namespace on your hub clusters.
+
+To enable your Argo CD `ApplicationSet` resources, complete the following sections:
+
+*Required access:* Cluster administrator
+
+== Enabling the _ApplicationSet_ resource in any namespace on the hub cluster 
+
+To enable the Argo CD `ApplicationSet` resource in any namespace on your hub cluster, complete the following steps: 
+
+. From your command-line interface, clone the GitHub repository by running the following command:
+
++
+[source,bash]
+----
+git clone https://github.com/stolostron/multicloud-integrations
+----
+
+. Go to the GitHub repository that you cloned by running the following command: 
+
++
+[source,bash]
+----
+cd multicloud-integrations/deploy/appset-any-namespace
+----
+
+. Enable the `ApplicationSet` resource in any namespace by running the following command: 
+
++
+[source,bash]
+----
+ ./setup-appset-any-namespace.sh --namespace openshift-gitops --argocd-name openshift-gitops 
+----
+
+. Verify that the {gitops-short} instance restarted and is running on your hub cluster. Run the following command on your hub cluster: 
+
++
+[source,bash]
+----
+oc get pods -n openshift-gitops 
+----
+
+== Enabling the _Application_ resource in any namespace on the managed clusters 
+
+The {acm-short} {gitops-short} add-on launches a {gitops-short} instance that you can use to enable the `Application` resource in any namespace on your managed cluster. To enable the Argo CD `Application` resource in any namespace on the managed clusters, complete the following steps:
+
+. Create a global `ManagedClusterSetBinding` resource by adding the following YAML file sample: 
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: global
+  namespace: openshift-gitops
+spec:
+  clusterSet: global
+----
+
+. Apply the YAML file sample by running the following command: 
+
++
+[source,bash]
+----
+oc apply -f managedclustersetbinding-example.yaml
+----
+
+. Create a `Placement` custom resource for selecting the managed clusters where the (gitops-short) add-on gets enabled. Add the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: all-openshift-clusters
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "In"
+          values:
+          - OpenShift
+----
+
+. Apply the YAML file sample by running the following command: 
+
++
+[source,bash]
+----
+oc apply -f placement-example.yaml
+----
+
+. Create the `GitOpsCluster` resource and add the `gitopsAddon` specification. Your YAML file might resemble the following sample: 
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: argo-acm-importer
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    cluster: notused
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: all-openshift-clusters
+    namespace: openshift-gitops
+  gitopsAddon:
+    enabled: true
+    overrideExistingConfigs: true
+    reconcileScope: All-Namespaces
+----
+
+. Apply the YAML file sample by running the following command: 
+
++
+[source,bash]
+----
+oc apply -f gitopscluster-example.yaml
+----
+
+. Verify that the {gitops-short} instance restarted and is running on your managed clusters by running the following command on your managed clusters: 
+
++
+[source,bash]
+----
+oc get pods -n openshift-gitops 
+----
+
+.Additional resources
+
+Continue to fully manage your Argo CD `ApplicationSet` resources by deploying them. For directions, see xref:../gitops/gitops_manage_argocd_appset.adoc#manage-gitops-argocd-appset[Managing the Argo CD _ApplicationSet_ resource in any namespace for pull model (Technology Preview)]. 
+
+To learn more about the Argo CD `ApplicationSet` resources, see the following resources: 
+
+* link:https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Appset-Any-Namespace/[ApplicationSet in any namespace]
+* link:https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/[Applications in any namespace] 
