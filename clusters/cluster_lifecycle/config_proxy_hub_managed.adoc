@@ -1,0 +1,120 @@
+[#config-proxy-hub-managed]
+= Configuring the proxy between hub cluster and managed cluster
+
+To register a managed cluster to your {mce} hub cluster, you need to transport the managed cluster to your {mce-short} hub cluster. Sometimes your managed cluster cannot directly reach your {mce-short} hub cluster. In this instance, configure the proxy settings to allow the communications from the managed cluster to access the {mce-short} hub cluster through a HTTP or HTTPS proxy server.
+
+For example, the {mce-short} hub cluster is in a public cloud, and the managed cluster is in a private cloud environment within a firewall-protected network. The communications out of the private cloud can only go through a HTTP or HTTPS proxy server. 
+
+.Prerequisites
+
+- You have an active HTTP or HTTPS proxy server that supports HTTP tunnels. For example, HTTP connect method. 
+- You have a manged cluster that can reach the HTTP or HTTPS proxy server, and the proxy server can access the {mce-short} hub cluster. 
+
+Complete the following steps to configure the proxy settings between your hub cluster and managed cluster:
+
+. Create a `KlusterConfig` resource with either a HTTP or HTTPS proxy configuration.
+
+.. Apply the following YAML sample to the resource to use a HTTP proxy configuration:
+
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: http-proxy
+spec:
+  hubKubeAPIServerConfig:
+    proxyURL: "http://<username>:<password>@<ip>:<port>" 
+----
+
+..  A certificate authority (CA) bundle is required for HTTPS proxy. To create a `KlusterConfig` resource for HTTPS proxy where the required certificate authority bundle is defined, run the following command:
+
++
+[source,bash]
+----
+oc create -n <configmap-namespace> configmap <configmap-name> --from-file=ca.crt=/path/to/ca/file
+----
++
+See the following configuration where the CA bundle refers to a config map that contains one or multiple CA certificates with HTTPS proxy:  
+
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: https-proxy
+spec:
+  hubKubeAPIServerConfig:
+    proxyURL: "https://<username>:<password>@<ip>:<port>"
+    trustedCABundles:
+    - name: "proxy-ca-bundle"
+      caBundle:
+        name: <configmap-name>
+        namespace: <configmap-namespace>
+----
+
+. When creating a managed cluster, choose the `KlusterletConfig` resource by adding an annotation that refers to the `KlusterletConfig` resource. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    agent.open-cluster-management.io/klusterlet-config: <klusterlet-config-name>
+  name:<managed-cluster-name>
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60 
+----
+
++ 
+*Notes:*
++
+* You might need to toggle the YAML view to add the annotation to the `ManagedCluster` resource when you operate on the {mce-short} console.
+* You can use a global `KlusterletConfig` to enable the configuration on every managed cluster without using an annotation for binding.
+
+[#disable-proxy-hub-managed]
+== Disabling the proxy between hub cluster and managed cluster
+
+If your development changes, you might need to disable the HTTP or HTTPS proxy. Complete the following steps:
+
+. Go to the `ManagedCluster` resource.
+. Remove the `agent.open-cluster-management.io/klusterlet-config` annotation.
+
+[#config-klusterlet-nodes]
+== Optional: Configuring the klusterlet to run on specific nodes
+
+When you create a cluster using {acm}, you can specify which nodes you want to run the managed cluster klusterlet by configuring the `nodeSelector` and `tolerations` annotation for the managed cluster. Complete the following steps to configure these settings: 
+
+. Select the managed cluster that you want to update from the Clusters page in the console. 
+
+. Set the *YAML* switch to *On* to view the YAML content.
++
+*Note:* The YAML editor is only available when importing or creating a cluster. To edit the managed cluster YAML definition after importing or creating, you must use the {ocp-short} command-line interface or the {acm-short} search feature.
+
+. Add the `nodeSelector` annotation to the managed cluster YAML definition. The key for this annotation is: `open-cluster-management/nodeSelector`. The value of this annotation is a string map with JSON formatting.
+
+. Add the `tolerations` entry to the managed cluster YAML definition. The key of this annotation is: `open-cluster-management/tolerations`. The value of this annotation represents a link:https://github.com/kubernetes/api/blob/release-1.24/core/v1/types.go#L3007[toleration] list with JSON formatting.
+The resulting YAML might resemble the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    open-cluster-management/nodeSelector: '{"dedicated":"acm"}'
+    open-cluster-management/tolerations: '[{"key":"dedicated","operator":"Equal","value":"acm","effect":"NoSchedule"}]' 
+----
+
+. To make sure that you can deploy your content to the correct nodes, see link:../../add-ons/configure_klusterlet_addons.adoc#configure-klusterlet-addons[Configuring klusterlet add-ons].
+
+[#add-resources-config-proxy-hub]
+== Additional resources
+
+* xref:../cluster_lifecycle/cluster_proxy_addon_config.adoc#cluster-proxy-addon-settings[Enabling proxy settings for cluster proxy add-ons]
