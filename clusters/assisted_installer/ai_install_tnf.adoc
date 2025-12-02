@@ -1,0 +1,181 @@
+[#install-tnf-cluster-ai]
+= Installing a two nodes with fencing cluster with {ai} (Technology Preview)
+
+A two nodes with fencing (TNF) cluster is an {ocp} cluster that has two control plane nodes. Use TNF clusters to ensure redundancy at the edge and limit hardware costs.
+
+.Prerequisites
+
+- You are using the `baremetal` or `none` platform.
+- You have 2 control plane nodes configured.
+- You have access to the baseboard management controller (BMC) of the platform nodes.
+- Your {ocp-short} version is 4.20 or later.
+
+.Procedure
+
+Complete the following steps to install a TNF cluster by using {ai}:
+
+. Enable the TNF cluster installation feature with {ai} by setting an environment variable on the `assisted-service` pod.
+
+.. Create the following `ConfigMap` resource:
++
+[source,yaml]
+----
+apiVersion: v1
+data:
+  TNF_CLUSTERS_SUPPORT: "true"
+kind: ConfigMap
+metadata:
+  name: assisted-service-custom
+  namespace: multicluster-engine
+----
+
+.. Reference the `ConfigMap` resource in an annotation on the `AgentServiceConfig` resource. Run the following command:
++
+[source,bash]
+----
+oc annotate agentserviceconfig agent unsupported.agent-install.openshift.io/assisted-service-configmap=assisted-service-custom
+----
+
+. Configure the TNF cluster object on the hub cluster by creating the required resources.
+
+.. Create a namespace. Use the following YAML sample:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tnf-cluster
+----
+
+.. Create a pull secret. Use the following YAML sample. Replace variables where needed:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: pull-secret
+  namespace: tnf-cluster
+data:
+  .dockerconfigjson: <your-base64-pull-secret>
+----
+
+.. Create a `AgentClusterInstall` resource. Use the following YAML sample. Replace variables where needed:
++
+[source,yaml]
+----
+apiVersion: extensions.hive.openshift.io/v1beta1
+kind: AgentClusterInstall
+metadata:
+  name: tnf-cluster
+  namespace: tnf-cluster
+spec:
+  platformType: BareMetal
+  apiVIPs: [192.168.122.10]
+  ingressVIPs: [192.168.122.20]
+  clusterDeploymentRef:
+    name: tnf-cluster
+  imageSetRef:
+    name: img4.20.0-rc.3-x86-64-appsub
+  networking:
+    clusterNetwork:
+    - cidr: 10.128.0.0/14
+      hostPrefix: 23
+    machineNetwork:
+    - cidr: 192.168.122.0/24
+    serviceNetwork:
+    - 172.30.0.0/16
+  provisionRequirements:
+    controlPlaneAgents: 2
+  sshPublicKey: <your-public-ssh-key>
+----
+
+.. Create a `ClusterDeployment` resource. Use the following YAML sample. Replace variables where needed:
++
+[source,yaml]
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: tnf-cluster
+  namespace: tnf-cluster
+spec:
+  baseDomain: <yourdomain.com>
+  clusterInstallRef:
+    group: extensions.hive.openshift.io
+    kind: AgentClusterInstall
+    name: tnf-cluster
+    version: v1beta1
+  clusterName: tnf-cluster
+  controlPlaneConfig:
+    servingCertificates: {}
+  platform:
+    agentBareMetal:
+      agentSelector:
+        cluster: tnf
+  pullSecretRef:
+    name: pull-secret
+----
+
+.. Create a `ClusterDeployment` resource. Use the following YAML sample. Replace variables where needed:
++
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: tnf-cluster
+  namespace: tnf-cluster
+spec:
+  clusterRef:
+    name: tnf-cluster
+    namespace: tnf-cluster
+  pullSecretRef:
+    name: pull-secret
+  sshAuthorizedKey: <your-public-ssh-key>
+----
+
+. Create a fencing credentials secret. Use the following YAML sample. Replace value where needed:
+
++
+[source,yaml]
+----
+apiVersion: v1
+stringData:
+  address: https://bmc.example.com
+  certificateVerification: Disabled
+  username: <username>
+  password: <password>
+kind: Secret
+metadata:
+  name: node-0-fencing-credentials
+  namespace: tnf-cluster
+type: Opaque
+----
+- *Optional:* The `certificateVerification` field default value is `Enabled`.
++
+*Note:* Fencing credentials for an Agent are stored as a Kubernetes secret in the Agent namespace that the Agent references in the `agent.spec.fencingCredentialsSecretRef` field.
+
+. Set the fencing credentials to approve two Agents. Use one of the following methods:
+
+- Manually create the secret and add an annotation on the Agent `BareMetalHost` resource that references the secret. Use the following annotation key:
++
+[source,bash]
+----
+bmac.agent-install.openshift.io/fencing-credentials-secret-name
+----
++
+*Note:* The {ai} sets the Agent `fencingCredentialsSecretRef` field to the value of the annotation.
+
+- Set an annotation on the Agent `BareMetalHost` resource to create the secret from the `BareMetalHost` BMC configuration. Then, set the Agent `fencingCredentialsSecretRef` to the secret name, which is `<your-agent-name>-fencing-credentials`. Use the following annotation key:
++
+[source,bash]
+----
+bmac.agent-install.openshift.io/create-fencing-credentials-secret
+----
++
+*Note:* You can use any value.
+
+- Manually create the secret. Then, manually set the Agent zfencingCredentialsSecretRef` field to the secret name.
