@@ -1,0 +1,135 @@
+[#import-custom-bundle-ca]
+= Customizing the hub cluster API server URL and CA bundle during import
+
+You might not be able to register a managed cluster on your {mce-short} hub cluster if intermediate components exist between the managed cluster and the hub cluster. Example intermediate components include a Virtual IP, load balancer, reverse proxy, or API gateway. If you have an intermediate component, you must use a custom server URL and CA bundle for the hub cluster API server when importing a managed cluster.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+- You must configure the intermediate component so that the hub cluster API server is accessible for the managed cluster.
+- If the intermediate component terminates the SSL connections between the managed cluster and hub cluster API server, you must bridge the SSL connections and pass the authentication information from the original requests to the back end of the hub cluster API server. You can use the User Impersonation feature of the Kubernetes API server to bridge the SSL connections.
++
+The intermediate component extracts the client certificate from the original requests, adds Common Name (CN) and Organization (O) of the certificate subject as impersonation headers, and then forwards the modified impersonation requests to the back end of the hub cluster API server.
++
+*Note:* If you bridge the SSL connections, the cluster proxy add-on does not work.
+
+.Procedure
+
+To use a custom hub cluster API server URL and CA bundle when importing a managed cluster, complete the following steps:
+
+. Create a `KlusterConfig` resource with the custom hub cluster API server URL and CA bundle. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: <name> <1>
+spec:
+  hubKubeAPIServerConfig:
+    url: "https://api.example.com:6443" <2>
+    serverVerificationStrategy: UseCustomCABundles
+    trustedCABundles:
+    - name: <custom-ca-bundle> <3>
+      caBundle:
+        name: <custom-ca-bundle-configmap> <4>
+        namespace: <multicluster-engine> <5>
+----
+<1> Add your klusterlet config name.
+<2> Add your custom server URL.
+<3> Add your custom CA bundle name. You can use any value except `auto-detected`, which is reserved for internal use.
+<4> Add your name of the CA bundle config map. You can create the config map by running the following command: `oc create -n <configmap-namespace> configmap <configmap-name> --from-file=ca.crt=/path/to/ca/file`
+<5> Add your namespace of the CA bundle config map.
+
+. Select the `KlusterletConfig` resource when creating a managed cluster by adding an annotation that refers to the resource. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    agent.open-cluster-management.io/klusterlet-config: <1>
+  name: <2>
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+----
+<1> Add your klusterlet config name.
+<2> Add your cluster name.
++
+*Notes:*
++
+* If you use the console, you might need to enable the YAML view to add the annotation to the `ManagedCluster` resource.
+* You can use a global `KlusterletConfig` to enable the configuration on every managed cluster without using an annotation for binding.
+
+[#config-gloabl-klusterletconfig]
+== Configuring the global _KlusterletConfig_
+
+If you create a `KlusterletConfig` resource and set the name to `global`, the configurations in the global `KlusterletConfig` are automatically applied on every managed cluster.
+
+In an environment that has a global `KlusterletConfig`, create a cluster-specific `KlusterletConfig` resource and bind it with a managed cluster by adding the `agent.open-cluster-management.io/klusterlet-config: <klusterletconfig-name>` annotation to the `ManagedCluster` resource. The value of the cluster-specific `KlusterletConfig` specification overrides the global `KlusterletConfig` value if you set different values for the same field. 
+
+See the following example where the `hubKubeAPIServerURL` field has different values set in your `KlusterletConfig` and the global `KlusterletConfig`. The `https://api.example.test.com:6443` value overrides the `https://api.example.global.com:6443` value:
+
+*Deprecation:* The `hubKubeAPIServerURL` field is deprecated. 
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: test
+spec:
+  hubKubeAPIServerConfig:
+    url: "https://api.example.test.com:6443"
+---
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  hubKubeAPIServerConfig:
+    url: "https://api.example.global.com:6443"
+----
+
+The value of the global `KlusterletConfig` is used if there is no cluster-specific `KlusterletConfig` bound to a managed cluster, or the same field is missing or does not have a value in the cluster-specific `KlusterletConfig`. 
+
+See the following example, where the `"example.global.com"` value in the `hubKubeAPIServerURL` field of the global `KlusterletConfig` overrides your `KlusterletConfig`:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: test
+spec:
+  hubKubeAPIServerURL: ""
+—
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  hubKubeAPIServerURL: "example.global.com"
+----
+
+See the following example, where the `"example.global.com"` value in the `hubKubeAPIServerURL` field of the global `KlusterletConfig` also overrides your `KlusterletConfig`:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: test
+---
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  hubKubeAPIServerURL: "example.global.com"
+----
