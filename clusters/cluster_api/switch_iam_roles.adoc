@@ -1,0 +1,154 @@
+[#switch-iam-roles-capi]
+= Switching from AWS credentials to IAM roles on your managed cluster (Technology Preview)
+
+You can switch to using Identity and Access Management (IAM) roles when deploying a managed cluster with Cluster API. If you created a managed cluster with Amazon Web Services (AWS) credentials, you can switch from AWS credentials to IAM roles to use `cluster-api-provider-aws` to create {rosa-hcp} clusters without storing AWS credentials on your managed cluster.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+- You need a {ocp} or {rosa-hcp} bootstrap cluster that you created with AWS credentials. You can use temporary credentials. See link:https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html[Request temporary security credentials] in the AWS documentation to learn more.
+- You need {acm} installed on the bootstrap cluster.
+- You need to disable HyperShift components before enabling Cluster API and Cluster API Provider AWS.
+
+.Procedure
+
+Complete the following steps:
+
+. Edit the `MultiClusterEngine` resource. Run the following command:
+
++
+[source,bash]
+----
+oc edit multiclusterengine engine
+----
+
+. Disable the `hypershift` and `hypershift-local-hosting` components, and enable the `cluster-api` and `cluster-api-provider-aws` components. See the following example:
+
++
+[source,yaml]
+----
+- configOverrides: {}
+  enabled: false
+  name: hypershift
+- configOverrides: {}
+  enabled: false
+  name: hypershift-local-hosting
+- configOverrides: {}
+  enabled: true
+  name: cluster-api
+- configOverrides: {}
+  enabled: true
+  name: cluster-api-provider-aws
+----
+
+. Verify that the Cluster API and Cluster API Provider AWS deployments are running. Run the following command:
+
++
+[source,bash]
+----
+oc get deploy -n multicluster-engine
+----
++
+The output might resemble the following example:
+
++
+----
+NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE
+capa-controller-manager               1/1     1            1           12d
+capi-controller-manager               1/1     1            1           12d
+----
+
+. Pause the `MultiClusterEngine` custom resource so that the Cluster API Provider AWS controller service account can update. Run the following command:
+
++
+[source,bash]
+----
+oc annotate mce multiclusterengine installer.multicluster.openshift.io/pause=true
+----
+
+. Retrieve the OpenID Connect (OIDC) provider details. Run the following command:
+
++
+[source,bash]
+----
+export OIDC_PROVIDER=$(oc get authentication.config.openshift.io cluster -ojson | jq -r .spec.serviceAccountIssuer | sed 's/https:\/\///')
+----
+
+. Set your AWS account ID. Run the following command. Change the account ID value:
+
++
+[source,bash]
+----
+export AWS_ACCOUNT_ID={YOUR_AWS_ACCOUNT_ID}
+----
+
+. Create the trust policy file for the `capa-controller-manager` IAM role. Run the following command:
+
++
+[source,bash]
+----
+cat ./trust.json
+----
+
+. Define who is allowed to assume an associated IAM role by adding the following content to the file:
+
++
+[source,bash]
+----
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::${AWS_ACCOUNT_ID}:oidc-provider/${OIDC_PROVIDER}"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "${OIDC_PROVIDER}:sub": "system:serviceaccount:multicluster-engine:capa-controller-manager"
+        }
+      }
+    }
+  ]
+}
+----
+
+. Create the IAM role and attach the required AWS policies. Run the following commands:
+
++
+[source,bash]
+----
+aws iam create-role --role-name "capa-manager-role" --assume-role-policy-document file://trust.json --description "IAM role for CAPA to assume"
+
+aws iam attach-role-policy --role-name capa-manager-role --policy-arn arn:aws:iam::aws:policy/AWSCloudFormationFullAccess
+
+aws iam attach-role-policy --role-name capa-manager-role --policy-arn arn:aws:iam::aws:policy/AmazonVPCFullAccess
+----
+
+.  Retrieve the IAM role Amazon Resource Name (ARN). Run the following commands:
+
++
+[source,bash]
+----
+export APP_IAM_ROLE_ARN=$(aws iam get-role --role-name=capa-manager-role --query Role.Arn --output text)
+
+export IRSA_ROLE_ARN=eks.amazonaws.com/role-arn=$APP_IAM_ROLE_ARN
+----
+
+. Annotate the service account with the IAM role ARN. Run the following command:
+
++
+[source,bash]
+----
+oc annotate serviceaccount -n multicluster-engine capa-controller-manager $IRSA_ROLE_ARN
+----
+
+. Restart the Cluster API Provider AWS deployment. Run the following command:
+
++
+[source,bash]
+----
+oc rollout restart deployment capa-controller-manager -n multicluster-engine
+----
