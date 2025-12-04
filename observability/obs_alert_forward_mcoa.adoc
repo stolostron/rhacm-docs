@@ -1,0 +1,227 @@
+[#forward-alert-mcoa]
+= Forwarding alerts for multicluster observability add-on
+
+Configure alert forwarding for the multicluster observability add-on to send alerts to the Alertmanager of the Observability stack from your managed clusters. By default, multicluster observability add-on is not configured to send alerts from Prometheus on your managed clusters to the hub cluster Alertmanager.
+
+Create a policy to configure alert forwarding when you use the multicluster observability add-on.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+- You must have the multicluster observability add-on is enabled. For more details, see xref:../observability/obs_enable_mcoa.adoc#enable-mcoa[Enabling the multicluster observability add-on].
+
+.Procedure
+
+Complete the following steps to create a policy to configure alert forwarding for the multicluster observability add-on:
+
+. To configure alert forwarding for platform metrics, create a YAML file named `mcoa-alert-forward-platform.yaml`. 
+.. Add the base domain of your hub cluster for the `$hubBaseDomain` parameter. If you make custom changes to the `additionalAlertmanagerConfigs` specification of the config map, be sure to add the changes directly into the policy, before applying the policy.
+
++
+See the following example:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: mcoa-alert-forward-platform
+  namespace: open-cluster-management-global-set
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: mcoa-alert-forward-platform
+      spec:
+        namespaceSelector:
+          exclude:
+          - kube-*
+          include:
+          - default
+        object-templates-raw: |
+          {{ $hubBaseDomain:= "INPUT_BASE_DOMAIN" }}
+          {{ $hubName := (split "." $hubBaseDomain)._0 }}
+          {{- $cmo := (lookup "v1" "ConfigMap" "openshift-monitoring" "cluster-monitoring-config") }}
+          {{- $cy := dict }}
+          {{- if and $cmo $cmo.data }}
+            {{- $cy = (index $cmo "data" "config.yaml") | fromYaml }}
+          {{- end }}
+
+          {{- $mangedConfig := dict }}
+ 
+          {{- $pm := `
+            prometheusK8s:
+              additionalAlertmanagerConfigs:
+              - apiVersion: v2
+                bearerToken:
+                  key: token
+                  name: observability-alertmanager-accessor-%[1]s
+                scheme: https
+                staticConfigs:
+                - alertmanager-open-cluster-management-observability.apps.%[2]s
+                tlsConfig:
+                  ca:
+                    key: service-ca.crt
+                    name: hub-alertmanager-router-ca-%[1]s
+                  insecureSkipVerify: false
+              externalLabels:
+                managed_cluster: %[3]s
+          ` }}
+
+            {{- $mangedConfig = merge $mangedConfig
+                              ((printf $pm $hubName $hubBaseDomain (fromClusterClaim "id.openshift.io"))| fromYaml)
+          }}
+          - complianceType: mustonlyhave
+            objectDefinition:
+              apiVersion: v1
+              data:
+                config.yaml: |
+                  {{ (merge $cy $mangedConfig)| toYaml |autoindent }}
+              kind: ConfigMap
+              metadata:
+                name: cluster-monitoring-config
+                namespace: openshift-monitoring
+            recordDiff: InStatus
+  remediationAction: inform
+----
+
+.. Create a `PlacementBinding` resource to bind the policy to the `global` placement.See the following sample:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: mcoa-alert-forward-platform-placement
+  namespace: open-cluster-management-global-set
+placementRef:
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+  name: global
+subjects:
+- apiGroup: policy.open-cluster-management.io
+  kind: Policy
+  name: mcoa-alert-forward-platform
+----
+
+.. To apply the policy changes across all managed clusters and enable alert forwarding from your managed clusters to the hub cluster, change the `remediationAction` parameter value to `enforce`.
++
+*Note:* The `remediationAction` of the previous policy is set to `inform` mode. From the console, validate your changes by viewing the policy from the *Governance* page. Your policy appears as non-compliant.
+
+.. Apply your YAML file. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f ./forward-platform-alerts.yaml
+----
+
++
+*Note:* If you have managed clusters other than a {ocp} cluster, you must create the appropriate `PlacementBinding` resource targeting the managed clusters.
+
+. To configure alert forwarding for user workload metrics, create a YAML file named `mcoa-alert-forward-uwl`.
+.. Add the base domain for your hub cluster in the `$hubBaseDomain` parameter. Your YAML file might resemble the following example:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: mcoa-alert-forward-uwl
+  namespace: open-cluster-management-global-set
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: mcoa-alert-forward-uwl
+      spec:
+        namespaceSelector:
+          exclude:
+          - kube-*
+          include:
+          - default
+        object-templates-raw: |
+          {{ $hubBaseDomain:= "INPUT_BASE_DOMAIN" }}
+          {{ $hubName := (split "." $hubBaseDomain)._0 }}
+ 
+          {{- $cmo := (lookup "v1" "ConfigMap" "openshift-user-workload-monitoring" "user-workload-monitoring-config") }}
+          {{- $cy := dict }}
+          {{- if and $cmo $cmo.data }}
+            {{- $cy = (index $cmo "data" "config.yaml") | fromYaml }}
+          {{- end }}
+
+          {{- $mangedConfig := dict }}
+ 
+          {{- $pm := `
+            prometheus:
+              additionalAlertmanagerConfigs:
+              - apiVersion: v2
+                bearerToken:
+                  key: token
+                  name: observability-alertmanager-accessor-%[1]s
+                scheme: https
+                staticConfigs:
+                - alertmanager-open-cluster-management-observability.apps.%[2]s
+                tlsConfig:
+                  ca:
+                    key: service-ca.crt
+                    name: hub-alertmanager-router-ca-%[1]s
+                  insecureSkipVerify: false
+              externalLabels:
+                managed_cluster: %[3]s
+          ` }}
+
+            {{- $mangedConfig = merge $mangedConfig
+                              ((printf $pm $hubName $hubBaseDomain (fromClusterClaim "id.openshift.io"))| fromYaml)
+          }}
+          - complianceType: mustonlyhave
+            objectDefinition:
+              apiVersion: v1
+              data:
+                config.yaml: |
+                  {{ (merge $cy $mangedConfig )| toYaml |autoindent }}
+              kind: ConfigMap
+              metadata:
+                name: user-workload-monitoring-config
+                namespace: openshift-user-workload-monitoring
+            recordDiff: InStatus
+  remediationAction: inform
+----
+
+.. Create a `PlacementBinding` resource to bind the policy to the `global` placement. Your YAML file might resemble the following sample:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: mcoa-alert-forward-uwl-placement
+  namespace: open-cluster-management-global-set
+placementRef:
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+  name: global
+subjects:
+- apiGroup: policy.open-cluster-management.io
+  kind: Policy
+  name: mcoa-alert-forward-uwl
+----
+
+.. Apply your YAML file. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f ./forward-uwl-alerts.yaml
+----
