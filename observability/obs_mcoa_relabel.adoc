@@ -1,0 +1,44 @@
+[#relabeling-mcoa-default-metrics]
+= Relabeling default metrics for the multicluster observability add-on
+
+Relabel configurations to modify or remove the default metrics that you are collecting. Relabel configurations in each `ScrapeConfig` resource or globally in the `remoteWrite` configuration of the `PrometheusAgent` resource.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+- You have installed and enabled the multicluster observability add-on. For more information, see xref:../observability/obs_enable_mcoa.adoc#enable-mcoa[Enabling the multicluster observability add-on].
+
+.Procedure
+
+Complete the following step to remove a default metric by relabeling the metric for the multicluster observability add-on:
+
+. To remove the `Watchdog` alert metric, add the `writeRelabelConfigs` specification to the `remoteWrite` configuration of the `PrometheusAgent` resource. The metric removal is complete after it is federated. Your `PrometheusAgent` resource might resemble the following YAML file:
+
++
+[source,yaml]
+----
+apiVersion: monitoring.rhobs/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: platform-metrics-alerts
+  namespace: open-cluster-management-observability
+spec:
+  jobName: alerts
+  metricRelabelings:
+    - action: labeldrop
+      regex: managed_cluster|id
+    - action: drop
+      regex: ^Watchdog$
+      sourceLabels:
+        - alertname
+  metricsPath: /federate
+  params:
+    'match[]':
+      - '{__name__="ALERTS"}'
+  scheme: HTTPS
+  scrapeClass: not-configurable
+  staticConfigs:
+    - targets:
+        - not-configurable
+----
