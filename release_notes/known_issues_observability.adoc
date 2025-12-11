@@ -7,6 +7,43 @@ For your {ocp} cluster, see link:https://docs.redhat.com/en/documentation/opensh
 
 For more about deprecations and removals, see xref:../release_notes/acm_deprecate_remove.adoc#deprecations-removals-acm[Deprecations and removals for {acm-short}]. 
 
+[#mcoa-fails]
+== Multicluster observability add-on fails to collect metrics
+
+The `multicluster-observability-addon-manager` pod is in a `OOMKilled` state because the pod watches all config maps and secrets on the hub cluster, causing it to use too many resources. When you enable the multicluster observability add-on, the metric collection fails. 
+
+To avoid this issue, do not enable the multicluster observability add-on. The multicluster observability add-on is disabled by default. If you enabled multicluster observability add-on, disable the add-on by setting `enabled` to `false` in the `MulticlusterObservability` custom resource. See the following `MultiClusterObservability` custom resource example:
+
++
+[source,yaml]
+----
+apiVersion: observability.open-cluster-management.io/v1beta2
+kind: MultiClusterObservability
+metadata:
+  name: observability
+spec:
+  capabilities:
+    platform:
+      metrics:
+        default:
+          enabled: false
+    userWorkloads:
+      metrics:
+        default:
+          enabled: false
+----
+
+[#alert-forward-fails]
+== Manually configured alert forwarding fails
+
+When you upgrade to {acm-short} {product-version} alert forwarding fails if you disabled automatic configuration by setting `mco-disable-alerting: true` in the `MultiClusterObservability` custom resource, and if you manually configured alert forwarding. The failure happens after you upgrade because the name of the `observability-alertmanager-accessor` and `hub-alertmanager-router-ca` secrets were changed to include a postfix of the hub cluster name.
+
+To fix this issue, update your alert forwarding configuration that you manually configured to use the new names of the secrets.
+
+For platform alerts, update the secret name in the `cluster-monitoring-config` config map in the `openshift-monitoring` namespace. For user workload alerts, update the secret name in the `user-workload-monitoring-config` config map in the `openshift-user-workload-monitoring` namespace. Find the new secret names in the `openshift-monitoring` and `openshift-user-workload-monitoring` namespaces.
+
+link:https://issues.redhat.com/browse/ACM-26604[ACM-26604]
+
 [#retention-change]
 == Retention change causes data loss 
 
