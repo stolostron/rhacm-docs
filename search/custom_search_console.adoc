@@ -1,7 +1,7 @@
-[#custom-search-console]
-== Customizing the search console
+[#customize-search-console]
+= Customizing the search console
 
-Customize your search results and limits to improve search results. The search operator watches the `search-v2-operator` custom resource, reconciles the changes and updates active pods.
+Customize your search console to specify how you want data and search results to be displayed. 
 
 *Required access:* Cluster administrator
 
@@ -68,119 +68,6 @@ data:
         "searchText": "kind:VirtualMachine"
       }
     ] 
-----
-
-. Modify the default values in the `search-v2-operator` custom resource.
-.. To view details of the custom resource, run the following command:
-
-+
-[source,bash]
-----
-oc get search search-v2-operator -n <acm-namespace> -o yaml
-----
-
-.. If the empty directory size is limited for your PostgreSQL database, save your PostgreSQL data on a persistent volume claim to improve search performance.
-+
-*Notes:*
-
-- When you install {acm-short}, the PostgreSQL database is configured to save the PostgreSQL data in an empty directory (`emptyDir`) volume.
-- To receive information-only alerts about search storage, consider setting up the persistent volume claim for search.
-
-.. To back up your search data, select a storage class from your {acm-short} hub cluster.
-.. For example, create a persistent volume claim if you select the `gp2` storageclass and mount the claim to the `search-postgres` pod. Your configuration might resemble the following example:
-
-+
-[source,yaml]
-----
-apiVersion: search.open-cluster-management.io/v1alpha1
-kind: Search
-metadata:
-  name: search-v2-operator
-  namespace: open-cluster-management
-  labels:
-    cluster.open-cluster-management.io/backup: ""
-spec:
-  dbStorage:
-    size: 10Gi
-    storageClassName: gp2
-----
-
-.. Modify the storage size if you need to. By default, the storage size is `10Gi`. For example, `20Gi` might be sufficient for about 200 managed clusters.
-
-. Optimize cost by tuning the pod memory or CPU requirements, replica count, and update log levels for any of the four search pods: `indexer`, `database`, `queryapi`, or `collector`.
-
-.. Update the `deployment` section of the `search-v2-operator` custom resource. There are four deployments managed by the `search-v2-operator`, which can be updated individually.
-.. Apply resources for the `indexer`, `database`, `queryapi`, or `collector` pod.
-.. Add multiple environment variables in the `envVar` section to specify a value for each variable that you name.
-.. Specify a value for each variable that you name by adding multiple environment variables in the `envVar` specification.
-.. Add the `- -v=3` argument for the `queryapi` specification to control the log level verbosity for any of the four pods.
-Your `search-v2-operator` custom resource might resemble the following file:
-
-+
-[source,yaml]
-----
-apiVersion: search.open-cluster-management.io/v1alpha1
-kind: Search
-metadata:
-  name: search-v2-operator
-  namespace: open-cluster-management
-spec:
-  deployments:
-    collector:
-      resources:
-        limits:
-          cpu: 500m
-          memory: 128Mi
-        requests:
-          cpu: 250m
-          memory: 64Mi
-    indexer:
-      replicaCount: 3
-    database:
-        envVar:
-          - name: POSTGRESQL_EFFECTIVE_CACHE_SIZE
-            value: 1024MB
-          - name: POSTGRESQL_SHARED_BUFFERS
-            value: 512MB
-          - name: WORK_MEM
-            value: 128MB
-    queryapi:
-      arguments:
-      - -v=3
-----
-
-. Apply memory resources for the `indexer` pod. See the following example:
-+
-[source,yaml]
-----
-    indexer:
-      resources:
-        limits:
-          memory: 5Gi
-        requests:
-          memory: 1Gi 
-----
-
-. Define the node placement for search pods.
-.. Update the `Placement` resource of search pods by using the `nodeSelector` parameter, or the `tolerations` parameter. View the following example configuration:
-
-+
-[source,yaml]
-----
-spec:
- dbStorage:
-  size: 10Gi
- deployments:
-  collector: {}
-  database: {}
-  indexer: {}
-  queryapi: {}
- nodeSelector:
-  node-role.kubernetes.io/infra: ""
- tolerations:
- - effect: NoSchedule
-  key: node-role.kubernetes.io/infra
-  operator: Exists
 ----
 
 . Specify your search query by selecting the *Advanced search* drop-down button to filter the _Column_, _Operator_, and _Value_ options or add a search constraint.
