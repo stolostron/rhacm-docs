@@ -14,7 +14,24 @@ Install the {gate} from the {olm} catalog to install Gatekeeper on your cluster.
 
 The {gate} custom resource tells the {gate} to start the Gatekeeper installation on the cluster. Complete the following steps to configure the {gate} custom resource:
 
-. Enable the `auditEventsInvolvedNamespace` parameter to manage the namespace audit event you want to create. When you enable this parameter, the Gatekeeper controller deployment runs with the following argument: `--audit-events-involved-namespace=true`.
+. Enable the `auditEventsInvolvedNamespace` parameter to manage the namespace audit event you want to create. When you enable this parameter, the Gatekeeper controller deployment runs with the following argument: `--audit-events-involved-namespace=true`. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: operator.gatekeeper.sh/v1alpha1
+kind: Gatekeeper
+metadata:
+  name: gatekeeper
+spec:
+  audit:
+    auditChunkSize: 66
+    auditEventsInvolvedNamespace: Enabled
+    auditFromCache: Enabled
+    auditInterval: 10s
+    constraintViolationLimit: 55
+---
+----
 
 . Specify `containerArguments` in the `audit` and `webhook` specification by providing a list of argument names and values to pass to the container. Omit leading dashes from the argument name. An omitted value is treated as `true`. Arguments that you provide are ignored if the argument is set previously by the operator or configurations from other fields. See the following list of flags that are deny-listed and are not currently supported:
 
@@ -28,23 +45,146 @@ The {gate} custom resource tells the {gate} to start the Gatekeeper installation
 - `client-cert-name`
 - `tls-min-version`
 
-. For Gatekeeper version 3.20 and later, specify `audit.podAnnotations` that are specific to the audit pod by providing a list of annotation names and values to add to the pod. An omitted value is treated as `true`.
++
+View the following partial YAML file example:
 
-. Enable the `admissionEventsInvolvedNamespace` parameter to manage the namespace admission event you want to create. When you enable this parameter, the Gatekeeper controller deployment runs with the following argument: `--admission-events-involved-namespace=true`.
++
+[source,yaml]
+----
+    containerArguments:
+    - name: ""
+      value: ""
+    resources:
+      limits:
+        cpu: 500m
+        memory: 150Mi
+      requests:
+        cpu: 500m
+        memory: 130Mi
+---
+----
+
+. For Gatekeeper version 3.20 and later, specify `audit.podAnnotations` that are specific to the audit pod by providing a list of annotation names and values to add to the pod. An omitted value is treated as `true`. View the following example:
+
++
+[source,yaml]
+----
+    emitAuditEvents: Enabled
+    logLevel: DEBUG
+    podAnnotations: {} 
+    replicas: 1
+---
+----
+
+. Enable the `admissionEventsInvolvedNamespace` parameter to manage the namespace admission event you want to create. When you enable this parameter, the Gatekeeper controller deployment runs with the following argument: `--admission-events-involved-namespace=true`. See the following example:
+
++
+[source,yaml]
+----
+  validatingWebhook: Enabled
+  mutatingWebhook: Enabled
+  webhook:
+    admissionEventsInvolvedNamespace: Enabled
+---
+----
 
 . *Optional:* If you want to enforce your Gatekeeper constraints, set the `failurePolicy` parameter to `Fail`. By default, the `failurePolicy` parameter for Gatekeeper is set to `Ignore`. If the Gatekeeper webhook becomes unavailable, constraints are not enforced.
 
-. Define `operations` for your webhook. Use one or more of the following supported values: `CREATE`, `UPDATE`, `CONNECT`, and `DELETE`.
++
+[source,yaml]
+----
+    containerArguments:
+    - name: ""
+      value: ""
+    disabledBuiltins:
+     - http.send
+    emitAdmissionEvents: Enabled
+    failurePolicy: Fail
+---
+----
 
-. For version 3.20 and later, specify `rules` to overwrite the `rules` configuration in the `webhook` configuration. The `rules` parameter preceeds the `operations` field.
+. Define `operations` for your webhook. Use one or more of the following supported values: `CREATE`, `UPDATE`, `CONNECT`, and `DELETE`. See the following example:
+
++
+[source,yaml]
+----
+     operations:
+     - CREATE
+     - UPDATE
+     - CONNECT
+    replicas: 3
+    resources:
+      limits:
+        cpu: 480m
+        memory: 140Mi
+      requests:
+        cpu: 400m
+        memory: 120Mi
+---
+----
+
+. For version 3.20 and later, specify `rules` to overwrite the `rules` configuration in the `mutatingWebhookConfig` specification. The `rules` parameter preceeds the `operations` field. See the following example:
+
++
+[source,yaml]
+----
+    rules:
+    - operations: []
+      resources: []
+    timeoutSeconds: 3
+  ---
+----
 
 . For version 3.20 and later, specify the timeout for the webhook configuration by defining a value for the `timeoutSeconds` parameter.
 
-. For version 3.20 and later, configure the mutating webhook by adding configurations for the `mutatingWebhookConfig` specification. The configurations override the values from `spec.webhook` or are specific to the mutating webhook.
++
+[source,yaml]
+----
+    rules:
+    - operations: []
+      resources: []
+    timeoutSeconds: 1
+----
 
-. Use the `config` section to exclude namespaces from certain processes for all constraints on your cluster.
+. For version 3.20 and later, configure the mutating webhook by adding configurations for the `mutatingWebhookConfig` specification. The configurations override the values from `spec.webhook` or are specific to the mutating webhook. See the following example:
 
-. The `disableDefaultMatches` parameter is a boolean parameter that disables appending the default exempt namespaces provided by the Gatekeeper operator. The default exempt namespaces are {ocp-short} or Kubernetes system namespaces. By default, this parameter is set to `false` to allow the default namespaces to be appended.
++
+[source,yaml]
+----
+  mutatingWebhookConfig:
+    failurePolicy: ""
+    logMutations: Disabled
+    mutationAnnotations: Disabled
+    namespaceSelector: {}
+    operations: []
+    rules:
+---
+----
+
+. Use the `config` section to exclude namespaces from certain processes for all constraints on your cluster. See the following example:
+
++
+[source,yaml]
+----
+  config:
+    matches: 
+      - excludedNamespaces: ["test-*", "my-namespace"] 
+        processes: ["*"] 
+---
+----
+
+. The `disableDefaultMatches` parameter is a boolean parameter that disables appending the default exempt namespaces provided by the Gatekeeper operator. The default exempt namespaces are {ocp-short} or Kubernetes system namespaces. By default, this parameter is set to `false` to allow the default namespaces to be appended. See the following example:
+
++
+[source,yaml]
+----
+  config:
+    matches: 
+      - excludedNamespaces: ["test-*", "my-namespace"] 
+        processes: ["*"] 
+    disableDefaultMatches: false
+---
+----
 
 +
 See the following sample YAML file:
