@@ -32,13 +32,35 @@ For more about deprecations and removals, see xref:../release_notes/acm_deprecat
 
 See the following known issues and limitations that might occur while using networking features.
 
-//awaiting clarity to doc a known issue
-
 [#source-ip-ocp-ovnk]
 === Source IP not retained for applications on {ocp-short} with OVN-Kubernetes
 //2.13:ACM-18680
 
 If you are using {ocp-short} versions between 4.18 and versions earlier than 4.19.5 with OVN-Kubernetes for Submariner, the source IP is not retained when packets reach the destination pod. As a result, applications that rely on the source IP, such as `NetworkPolicy`, might not work correctly.
+
+To preserve your source IP for hub cluster traffic on the OVN Kubernetes versions, enable the Submariner SNAT handler. Complete the following steps:
+
+. Create a `ConfigMap` resource named `submariner-global` in the `submariner-operator` namespace with the following configuration. Create the following resource to configure Submariner to manage SNAT and override the default behavior of OVN-Kubernetes:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ {{ name: submariner-global}}
+  namespace: submariner-operator
+data:
+  {{ enable-snat-handler: "true"}}
+----
+
+. Restart the `route-agent` pods apply the `ConfigMap` resources changes. Run the following command:
+
++
+[source,bash]
+----
+oc delete pod -n submariner-operator -l app=submariner-routeagent
+----
 
 [#cluster-management-addon-needed]
 === Without _ClusterManagementAddon_ submariner add-on fails
