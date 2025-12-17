@@ -42,119 +42,12 @@ Install those add-ons in a different {mce-short} namespace so that the {mce-shor
 
 . Log in to your {acm-short} with the CLI.
 
-. Create the `AddOnDeploymentConfig` resource to specify a different add-on installation namespace. See the following example where `agentInstallNamespace` references `open-cluster-management-agent-addon-discovery`:
+. Update the `hypershift-addon-deploy-config` install add-ons in the `open-cluster-management-agent-addon-discovery` namespace. Run the following command:
 
 +
-[source,yaml]
+[source,bash]
 ----
-apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: AddOnDeploymentConfig
-metadata:
-  name: addon-ns-config
-  namespace: multicluster-engine
-spec:
-  agentInstallNamespace: open-cluster-management-agent-addon-discovery
-----
-
-. Run `oc apply -f <filename>.yaml` to apply the file.
-
-. Update the existing `ClusterManagementAddOn` resources for the add-ons so that the add-ons are installed in the `open-cluster-management-agent-addon-discovery` namespace that is specified in the `AddOnDeploymentConfig` resource that you created. See the following example with `open-cluster-management-global-set` as the namespace:
-
-+
-[source,yaml]
-----
-apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: ClusterManagementAddOn
-metadata:
-  name: work-manager
-spec:
-  addonMeta:
-    displayName: work-manager
-  installStrategy:
-    placements:
-    - name: global
-      namespace: open-cluster-management-global-set
-      rolloutStrategy:
-        type: All
-    type: Placements
-----
-
-.. Add the `addonDeploymentConfigs` to the `ClusterManagementAddOn`. See the following example:
-
-+
-[source,yaml]
-----
-apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: ClusterManagementAddOn
-metadata:
-  name: work-manager
-spec:
-  addonMeta:
-    displayName: work-manager
-  installStrategy:
-    placements:
-    - name: global
-      namespace: open-cluster-management-global-set
-      rolloutStrategy:
-        type: All
-      configs:
-      - group: addon.open-cluster-management.io
-        name: addon-ns-config
-        namespace: multicluster-engine
-        resource: addondeploymentconfigs
-    type: Placements
-----
-
-.. Add the `AddOnDeploymentConfig` to the `managed-serviceaccount`. See the following example:
-
-+
-[source,yaml]
-----
-apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: ClusterManagementAddOn
-metadata:
-  name: managed-serviceaccount
-spec:
-  addonMeta:
-    displayName: managed-serviceaccount
-  installStrategy:
-    placements:
-    - name: global
-      namespace: open-cluster-management-global-set
-      rolloutStrategy:
-        type: All
-      configs:
-      - group: addon.open-cluster-management.io
-        name: addon-ns-config
-        namespace: multicluster-engine
-        resource: addondeploymentconfigs
-    type: Placements
-----
-
-.. Add the `addondeploymentconfigs` value to the `ClusterManagementAddOn` resource named, `cluster-proxy`. See the following example:
-
-+
-[source,yaml]
-----
-apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: ClusterManagementAddOn
-metadata:
-  name: cluster-proxy
-spec:
-  addonMeta:
-    displayName: cluster-proxy
-  installStrategy:
-    placements:
-    - name: global
-      namespace: open-cluster-management-global-set
-      rolloutStrategy:
-        type: All
-      configs:
-      - group: addon.open-cluster-management.io
-        name: addon-ns-config
-        namespace: multicluster-engine
-        resource: addondeploymentconfigs
-    type: Placements
+oc patch addondeploymentconfig hypershift-addon-deploy-config -n multicluster-engine --type=merge -p '{"spec":{"customizedVariables":[{"name":"configureMceImport","value":"true"}]}}'
 ----
 
 . Run the following command to verify that the add-ons for the {acm-short} `local-cluster` are re-installed into the namespace that you specified:
@@ -171,10 +64,11 @@ See the following output example:
 +
 [source,bash]
 ----
-NAME                                 READY   UP-TO-DATE   AVAILABLE    AGE
-cluster-proxy-proxy-agent            1/1     1            1           24h
-klusterlet-addon-workmgr             1/1     1            1           24h
-managed-serviceaccount-addon-agent   1/1     1            1           24h
+NAME                                                  READY   STATUS    RESTARTS   AGE
+application-manager-6b7f74b8f7-7sd25                  1/1     Running   0          1d15h
+cluster-proxy-proxy-agent-7985ddfdb6-kng5p            3/3     Running   0          1d15h
+klusterlet-addon-workmgr-55fd575b4b-rs5vz             1/1     Running   0          1d15h
+managed-serviceaccount-addon-agent-54bd989b94-g6gz9   1/1     Running   0          1d15h
 ----
 
 Create a _KlusterletConfig_ resource. {mce-short} has a local-cluster, which is a hub cluster that is managed. A resource named `klusterlet` is created for this local-cluster.
@@ -291,6 +185,22 @@ spec:
 
 +
 After you create the auto import secret in the {mce-short} managed cluster namespace in the {acm-short} cluster, the managed cluster is registered.
+
+. Alternatively, extract the import manifest for your {mce-short} cluster. Run the following command. Replace `<mce-a>` with the name of your {mce-short} cluster:
+
++
+[source,bash]
+----
+oc get secret mce-hosting-east-import -n <mce-a> -o jsonpath={.data.import\\.yaml} | base64 --decode > import.yaml
+----
+
+. Apply the `import.yaml` file to your {mce-short} cluster. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f import.yaml
+----
 
 . Run the following command to get the status:
 
