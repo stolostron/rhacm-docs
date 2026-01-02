@@ -12,9 +12,9 @@ Install the {gate} from the {olm} catalog to install Gatekeeper on your cluster.
 
 .Procedure
 
-The {gate} custom resource tells the {gate} to start the Gatekeeper installation on the cluster. Complete the following steps to configure the {gate} custom resource:
+The {gate} custom resource is a cluster-scoped resource and must be named `gatekeeper`. Both the validating and mutating webhooks are enabled by default. Use the `validatingWebhook` and `mutatingWebhook` parameters to enable or disable the webhooks. Complete the following steps to configure the {gate} custom resource:
 
-. Enable the `auditEventsInvolvedNamespace` parameter to manage the namespace audit event you want to create. When you enable this parameter, the Gatekeeper controller deployment runs with the following argument: `--audit-events-involved-namespace=true`. See the following example:
+. Enable the `validatingWebhook` and `mutatingWebhook` parameters. Your YAML file might resemble the following example:
 
 +
 [source,yaml]
@@ -22,14 +22,21 @@ The {gate} custom resource tells the {gate} to start the Gatekeeper installation
 apiVersion: operator.gatekeeper.sh/v1alpha1
 kind: Gatekeeper
 metadata:
-  name: gatekeeper
+ name: gatekeeper
+spec:
+ validatingWebhook: Enabled
+ mutatingWebhook: Enabled
+----
+
+. Enable the `auditEventsInvolvedNamespace` parameter to manage the namespace audit event you want to create. When you enable this parameter, the Gatekeeper controller deployment runs with the following argument: `--audit-events-involved-namespace=true`. See the following example:
+
++
+[source,yaml]
+----
+...
 spec:
   audit:
-    auditChunkSize: 66
     auditEventsInvolvedNamespace: Enabled
-    auditFromCache: Enabled
-    auditInterval: 10s
-    constraintViolationLimit: 55
 ---
 ----
 
@@ -51,28 +58,25 @@ View the following partial YAML file example:
 +
 [source,yaml]
 ----
+...
+spec:
+  webhook:
     containerArguments:
-    - name: ""
-      value: ""
-    resources:
-      limits:
-        cpu: 500m
-        memory: 150Mi
-      requests:
-        cpu: 500m
-        memory: 130Mi
+    - name: exempt-namespace-prefix
+      value: sample-test-
 ---
 ----
 
-. For Gatekeeper version 3.20 and later, specify `audit.podAnnotations` that are specific to the audit pod by providing a list of annotation names and values to add to the pod. An omitted value is treated as `true`. View the following example:
+. For Gatekeeper version 3.20 and later, specify `audit.podAnnotations` that are specific to the audit pod by providing a list of annotation names and values to add to the pod. View the following example:
 
 +
 [source,yaml]
 ----
-    emitAuditEvents: Enabled
-    logLevel: DEBUG
-    podAnnotations: {} 
-    replicas: 1
+...
+spec:
+  audit:
+    podAnnotations:
+      foo: bar
 ---
 ----
 
@@ -81,8 +85,8 @@ View the following partial YAML file example:
 +
 [source,yaml]
 ----
-  validatingWebhook: Enabled
-  mutatingWebhook: Enabled
+...
+spec:
   webhook:
     admissionEventsInvolvedNamespace: Enabled
 ---
@@ -93,57 +97,58 @@ View the following partial YAML file example:
 +
 [source,yaml]
 ----
-    containerArguments:
-    - name: ""
-      value: ""
-    disabledBuiltins:
-     - http.send
-    emitAdmissionEvents: Enabled
+...
+spec:
+  webhook:
     failurePolicy: Fail
----
 ----
 
-. Define `operations` for your webhook. Use one or more of the following supported values: `CREATE`, `UPDATE`, `CONNECT`, and `DELETE`. See the following example:
+. Define `operations` for your webhook. Use one or more of the following supported values: `CREATE`, `UPDATE`, `CONNECT`, and `DELETE`. By default, the operations are `CREATE` and `UPDATE`. See the following example:
 
 +
 [source,yaml]
 ----
+...
+spec:
+  webhook:
      operations:
      - CREATE
      - UPDATE
      - CONNECT
-    replicas: 3
-    resources:
-      limits:
-        cpu: 480m
-        memory: 140Mi
-      requests:
-        cpu: 400m
-        memory: 120Mi
+----
+
+. For version 3.20 and later, specify `rules` to overwrite the `rules` in the `webhook` and `mutatingWebhookConfig` specifications. The `rules` parameter supersedes the `operations` field. See the following example:
+
++
+[source,yaml]
+----
+...
+spec:
+  webhook:
+    rules:
+    - apiGroups:
+      - ""
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - Pods
+      - Deployments
 ---
 ----
 
-. For version 3.20 and later, specify `rules` to overwrite the `rules` configuration in the `mutatingWebhookConfig` specification. The `rules` parameter preceeds the `operations` field. See the following example:
+. For version 3.20 and later, specify a custom timeout for the webhook configuration by defining a value for the `timeoutSeconds` parameter.
 
 +
 [source,yaml]
 ----
-    rules:
-    - operations: []
-      resources: []
-    timeoutSeconds: 3
-  ---
-----
-
-. For version 3.20 and later, specify the timeout for the webhook configuration by defining a value for the `timeoutSeconds` parameter.
-
-+
-[source,yaml]
-----
-    rules:
-    - operations: []
-      resources: []
-    timeoutSeconds: 1
+...
+spec:
+  webhook:
+    timeoutSeconds: 10
+---
 ----
 
 . For version 3.20 and later, configure the mutating webhook by adding configurations for the `mutatingWebhookConfig` specification. The configurations override the values from `spec.webhook` or are specific to the mutating webhook. See the following example:
@@ -151,25 +156,29 @@ View the following partial YAML file example:
 +
 [source,yaml]
 ----
+...
+spec:
   mutatingWebhookConfig:
-    failurePolicy: ""
+    failurePolicy: Ignore
     logMutations: Disabled
     mutationAnnotations: Disabled
     namespaceSelector: {}
     operations: []
-    rules:
----
+    rules: []
+    timeoutSeconds: 1
 ----
 
-. Use the `config` section to exclude namespaces from certain processes for all constraints on your cluster. See the following example:
+. Use the `config` section to exclude namespaces from certain processes for all constraints on your cluster using the Gatekeeper `Config` custom resource. See the following example:
 
 +
 [source,yaml]
 ----
+...
+spec:
   config:
     matches: 
       - excludedNamespaces: ["test-*", "my-namespace"] 
-        processes: ["*"] 
+        processes: ["*"]  
 ---
 ----
 
@@ -178,10 +187,9 @@ View the following partial YAML file example:
 +
 [source,yaml]
 ----
+...
+spec:
   config:
-    matches: 
-      - excludedNamespaces: ["test-*", "my-namespace"] 
-        processes: ["*"] 
     disableDefaultMatches: false
 ---
 ----
@@ -345,3 +353,5 @@ oc explain gatekeeper.spec.audit.auditFromCache
 
 - For more information, see link:https://open-policy-agent.github.io/gatekeeper/website/docs/audit/#configuring-audit[Configuring Audit] in the Gatekeeper documentation.
 - For more information about configuring fail-open and fail-closed behavior, see link:https://open-policy-agent.github.io/gatekeeper/website/docs/failing-closed[Gatekeeper documentation].
+- For a list of arguments to use for the `containerArguments` parameter, see link:https://open-policy-agent.github.io/gatekeeper/website/docs/runtime-flags[Runtime Flags] in the Gatekeeper documentation.
+- To read explanations about the difference betewwen the `Config` resource and the flags for exempting namespaces, see link:https://open-policy-agent.github.io/gatekeeper/website/docs/exempt-namespaces/[Exempting Namespaces] in the Gatekeeper documentation.
