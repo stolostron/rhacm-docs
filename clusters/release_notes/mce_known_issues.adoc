@@ -37,6 +37,38 @@ link:https://issues.redhat.com/browse/ACM-7523[ACM-7523]
 
 Learn about Known issues for Cluster lifecycle with {mce-short}, such as issues with creating, discovering, importing, and removing clusters, and more cluster management issues for {mce-short}.
 
+[#hypershift-infra-node-config]
+== HyperShift operator does not receive infrastructure node configuration
+
+When {acm-short} or {mce-short} is installed with infrastructure node selection configured, by using `nodeSelector` and `tolerations` for infrastructure node, the HyperShift operator deployment does not receive the settings. 
+
+Even if the `multicluster engine` subscription is configured to place pods on infrastructure nodes by using `nodeSelector` and `tolerations`, the HyperShift operator pods are scheduled on regular worker nodes instead of the designated infrastructure nodes.
+
+The HyperShift operator deployment does not automatically propagate the infrastructure node placement configuration from the subscription.
+
+After you install the HyperShift add-on, manually patch the HyperShift operator deployment to add the infrastructure node selector and tolerations. See the following example:
+
++
+[source,yaml]
+----
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+      tolerations:
+      - key: node-role.kubernetes.io/infra
+        operator: Exists
+        effect: NoSchedule
+----
+
+To resolve the problem, apply a patch to the operator deployment in the `hypershift` namespace by running the following command with the specifications for your infrastructure nodes:
+
++
+[source,bash]
+----
+oc patch deployment operator -n hypershift --type=merge -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/infra":""},"tolerations":[{"key":"node-role.kubernetes.io/infra","operator":"Exists","effect":"NoSchedule"}]}}}}'
+----
+
+The manual patch ensures that the operator pods are placed on the correct nodes to comply with your infrastructure requirements.
+
 [#cluster-curator-stuck-hub-upgrade]
 === _ClusterCurator_ status becomes stuck when upgrading the hub cluster
 
