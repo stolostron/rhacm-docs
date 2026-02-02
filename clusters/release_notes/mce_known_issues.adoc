@@ -38,7 +38,7 @@ link:https://issues.redhat.com/browse/ACM-7523[ACM-7523]
 Learn about Known issues for Cluster lifecycle with {mce-short}, such as issues with creating, discovering, importing, and removing clusters, and more cluster management issues for {mce-short}.
 
 [#hypershift-infra-node-config]
-== HyperShift operator does not receive infrastructure node configuration
+=== HyperShift operator does not receive infrastructure node configuration
 
 When {acm-short} or {mce-short} is installed with infrastructure node selection configured, by using `nodeSelector` and `tolerations` for infrastructure node, the HyperShift operator deployment does not receive the settings. 
 
@@ -48,7 +48,6 @@ The HyperShift operator deployment does not automatically propagate the infrastr
 
 After you install the HyperShift add-on, manually patch the HyperShift operator deployment to add the infrastructure node selector and tolerations. See the following example:
 
-+
 [source,yaml]
 ----
       nodeSelector:
@@ -61,13 +60,50 @@ After you install the HyperShift add-on, manually patch the HyperShift operator 
 
 To resolve the problem, apply a patch to the operator deployment in the `hypershift` namespace by running the following command with the specifications for your infrastructure nodes:
 
-+
 [source,bash]
 ----
 oc patch deployment operator -n hypershift --type=merge -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/infra":""},"tolerations":[{"key":"node-role.kubernetes.io/infra","operator":"Exists","effect":"NoSchedule"}]}}}}'
 ----
 
 The manual patch ensures that the operator pods are placed on the correct nodes to comply with your infrastructure requirements.
+
+[#hcp-fails-rosa]
+=== HyperShift installation fails on {rosa} due to admission webhook error
+
+When you install {mce} 2.10 on {rosa}, the HyperShift installation job might fail repeatedly with an admission webhook error similar to the following message: `namespace-validation.managed.openshift.io denied the request`. See the following explanations for the error:
+
+* The installation process attempts to create a `hypershift` namespace that includes the `openshift.io/cluster-monitoring: "true"` label. 
+
+* The {rosa} managed admission webhooks prevent users from modifying protected labels on namespaces, including the `cluster-monitoring` label.
+
+* The platform monitoring flag defaults to monitoring the operator, which adds the `cluster-monitoring` label to the `hypershift` namespace. 
+
+* In managed environments, such as {rosa}, the service provider typically handles platform-level monitoring. Therefore, this monitoring is not required and conflicts with namespace protection policies.
+
+To resolve this issue, create a `ConfigMap` in the `local-cluster` namespace to disable platform monitoring by following these steps:
+
+. Create a YAML file for the `ConfigMap` with the following content:
+
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: hypershift-operator-install-flags
+  namespace: local-cluster
+data:
+  installFlagsToAdd: "--platform-monitoring=None"
+  installFlagsToRemove: ""
+----
+
+. Apply the `ConfigMap` to your cluster. Run the following command, replacing `<filename>` with the name of your YAML file:
+
+[source,bash]
+----
+oc apply -f <filename>.yaml
+----
+
+This configuration instructs the HyperShift installer to skip the `cluster-monitoring` label, which avoids the admission webhook conflict.
 
 [#cluster-curator-stuck-hub-upgrade]
 === _ClusterCurator_ status becomes stuck when upgrading the hub cluster
