@@ -1,11 +1,11 @@
 [#enable-gitops-addon-without-argocd]
 = Enabling {gitops} add-on without the _ArgoCD_ agent
 
-The `Basic` mode for pull model does not include the `ArgoCD` agent, so the pull model gives you a simpler setup for your hub cluster management and only gives you the necessary statuses of the health of your hub clusters. This mode enables the {gitops-short} add-on to the managed clusters that you selected with the `Placement`. 
+The `Basic` mode for pull model does not include the `ArgoCD` agent, so the pull model gives you a simpler setup for your hub cluster management and only gives you the necessary statuses of the health of your hub clusters. This mode enables the {gitops-short} add-on to the managed clusters that you selected with the `Placement`.
 
-After enabling the add-on, the `Basic` mode deploys the {gitops-short} `ArgoCD` components that are suitable for the cluster workflows. 
+After enabling the add-on, the `Basic` mode deploys the {gitops-short} `ArgoCD` components that are suitable for the cluster workflows. For {ocp-short} managed clusters, it is strongly recommended to enable OLM-based deployment by setting `olmSubscription.enabled: true`.
 
-.Prerequisites 
+.Prerequisites
 
 * {acm-short} hub cluster installed
 * Managed clusters that are registered with {acm-short}
@@ -13,19 +13,24 @@ After enabling the add-on, the `Basic` mode deploys the {gitops-short} `ArgoCD` 
 * A `Placement` resource that is defined to select target managed clusters
 * `ManagedClusterSet` that is bound to the target namespace
 
-To enable a {gitops-short} add-on without the `ArgoCD` agent, complete the following sections: 
+To enable a {gitops-short} add-on without the `ArgoCD` agent, complete the following sections:
 
 == Creating a `GitOpsCluster` resource
 
-To enable basic pull model, create a `GitOpsCluster` resource. The controller automatically creates the following resources for each managed cluster selected by the `Placement` policy: 
+To enable basic pull model, create a `GitOpsCluster` resource. The controller automatically creates the following resources for each managed cluster selected by the `Placement`:
 
 * `AddOnDeploymentConfig` resource in the managed cluster namespace
 * `ManagedClusterAddOn` resource in the managed cluster namespace
+* `ArgoCD` `Policy` on the hub cluster for deploying the `ArgoCD` custom resource to managed clusters
 
 The {gitops} add-on deploys to each selected managed cluster and installs the following resources:
 
 * {gitops-short} operator in the `openshift-gitops-operator` namespace
-* ArgoCD instance in the  `openshift-gitops` namespace
+* `ArgoCD` instance in the `openshift-gitops` namespace
+
+*Note:* The `ArgoCD` `Policy` is created once and is user-owned. You can modify the `Policy` to add RBAC, applications, or customize `ArgoCD` settings. The controller does not automatically update the `Policy` after creation.
+
+*Important:* By default, the {gitops-short} add-on might not provide sufficient privileges for the {gitops-short} controllers on managed clusters, especially when managing resources outside the `openshift-gitops` namespace. If the {gitops-short} controllers require additional privileges, see the link:https://docs.redhat.com/en/documentation/red_hat_openshift_gitops[{gitops-short} documentation] for details. You can modify the `ArgoCD` `Policy` that the `GitOpsCluster` generates to assign additional roles and elevate the privileges for the {gitops-short} controllers.
 
 To create a `GitOpsCluster` resource, complete the following steps:
 
@@ -51,19 +56,55 @@ spec:
     enabled: true
 ----
 
-. Apply the YAML sample by running the following command: 
+. Apply the YAML sample by running the following command:
 
 +
 [source,bash]
 ----
-oc apply -f gitopscluster-example.yaml 
+oc apply -f gitopscluster-example.yaml
 ----
 
-== Verifying the installation 
+== Enabling OLM-based deployment
+
+For {ocp-short} managed clusters, it is strongly recommended to enable OLM-based deployment. To enable the OLM-based deployment, complete the following steps:
+
+. On your hub cluster, create a `GitOpsCluster` resource with the `olmSubscription` enabled by adding the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: gitops-clusters-olm
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: all-openshift-clusters
+    namespace: openshift-gitops
+  gitopsAddon:
+    enabled: true
+    olmSubscription:
+      enabled: true
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f gitopscluster-example.yaml
+----
+
+== Verifying the installation
 
 To verify the necessary installations and resources for successful deployment, complete the following steps:
 
-. Verify that the `GitOpsCluster` resource has a status for successful deployment by running the following command:  
+. Verify that the `GitOpsCluster` resource has a status for successful deployment by running the following command:
 
 +
 [source,bash]
@@ -71,7 +112,23 @@ To verify the necessary installations and resources for successful deployment, c
 oc get gitopscluster gitops-clusters -n openshift-gitops -o yaml
 ----
 
-. Verify that the {gitops-short} add-on controller is working by running the following command: 
+. Check the status conditions for specific information by running the following command:
+
++
+[source,bash]
+----
+oc get gitopscluster gitops-clusters -n openshift-gitops -o jsonpath='{.status.conditions}' | jq
+----
+
+. Verify that the `ArgoCD` `Policy` was created on the hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc get policy gitops-clusters-argocd-policy -n openshift-gitops
+----
+
+. Verify that the {gitops-short} add-on controller is working on the managed cluster by running the following command:
 
 +
 [source,bash]
@@ -79,7 +136,7 @@ oc get gitopscluster gitops-clusters -n openshift-gitops -o yaml
 oc get pods -n open-cluster-management-agent-addon
 ----
 
-. Verify the {gitops-short} operator is working by running the following command: 
+. Verify the {gitops-short} operator is working on the managed cluster by running the following command:
 
 +
 [source,bash]
@@ -87,7 +144,7 @@ oc get pods -n open-cluster-management-agent-addon
 oc get pods -n openshift-gitops-operator
 ----
 
-. Verify the `ArgoCD`` instance is working by running the following command:
+. Verify the `ArgoCD` instance is working on the managed cluster by running the following command:
 
 +
 [source,bash]
@@ -95,6 +152,6 @@ oc get pods -n openshift-gitops-operator
 oc get pods -n openshift-gitops
 ----
 
-.Additional resources 
+.Additional resources
 
 Continue setting up the {gitops-short} add-on by completing xref:../gitops/gitops_manage_addon.adoc#manage-gitops-addon[Managing the {gitops} add-on].

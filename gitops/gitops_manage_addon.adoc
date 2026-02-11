@@ -1,21 +1,25 @@
 [#manage-gitops-addon]
-= Managing the {gitops} add-on  
+= Managing the {gitops} add-on
 
-The {gitops-short} add-on automates the deployment and lifecycle management of the managed clusters. Based on your architecture and connectivity requirements, decide if you want to deploy the GitOps add-on with the `ArgoCD` agent component. Otherwise, you can deploy the {gitops-short} add-on without the `ArgoCD` agent. 
+The {gitops-short} add-on automates the deployment and lifecycle management of {gitops-short} on managed clusters. Based on your architecture and connectivity requirements, decide if you want to deploy the GitOps add-on with the `ArgoCD` agent component. Otherwise, you can deploy the {gitops-short} add-on without the `ArgoCD` agent.
 
 *Important:* If you enable the {gitops-short} add-on by using the `GitOpsCluster` custom resource, then the `GitOpsCluster` disables the `Push Model` for all applications.
 
-When you enable the {gitops-short} add-on, you have the following deployment modes: 
+When you enable the {gitops-short} add-on, you have the following deployment modes:
 
-* `Basic` mode: Deploys the {gitops-short} operator and the `ArgoCD`  instance on managed clusters through the `GitOpsCluster` custom resource. 
+* `Basic` mode: Deploys the {gitops-short} operator and an `ArgoCD` instance on managed clusters through the `GitOpsCluster` custom resource. For {ocp-short} managed clusters, it is strongly recommended to enable OLM-based deployment by setting `olmSubscription.enabled: true`.
 
-* `Agent` mode: Includes all basic mode components along with the `ArgoCD` agent for enhanced pull-based architecture. 
+* `Agent` mode: Includes all `Basic` mode components along with the `ArgoCD` agent for enhanced pull-based architecture (Technology Preview).
 
-To enable the {gitops-short} add-on for your selected managed clusters, reference your `Placement` and use the `GitOpsCluster` custom resource as the interface for enabling. 
+To enable the {gitops-short} add-on for your selected managed clusters, reference your `Placement` and use the `GitOpsCluster` custom resource as the interface for enabling.
 
-.Prerequisites 
+*Note:* When the {gitops-short} add-on is enabled, the `GitOpsCluster` controller creates an `ArgoCD` `Policy` on the hub cluster. This `Policy` deploys the `ArgoCD` custom resource to managed clusters through the {acm-short} policy framework. The `Policy` is created once and is user-owned, which means you can modify the `Policy` to add RBAC, applications, or customize `ArgoCD` settings. The controller does not automatically update the `Policy` after creation.
 
-If you want to enable the {gitops-short} add-on with the `ArgoCD` agent, use the `Agent` mode. See xref:../gitops/gitops_addon_with_argocd.adoc#enable-gitops-addon-with-argocd[Enabling {gitops} add-on with _ArgoCD_ agent] 
+*Important:* By default, the {gitops-short} add-on might not provide sufficient privileges for the {gitops-short} controllers on managed clusters, especially when managing resources outside the `openshift-gitops` namespace. If the {gitops-short} controllers require additional privileges, see the link:https://docs.redhat.com/en/documentation/red_hat_openshift_gitops[{gitops-short} documentation] for details. You can modify the `ArgoCD` `Policy` that the `GitOpsCluster` generates to assign additional roles and elevate the privileges for the {gitops-short} controllers.
+
+.Prerequisites
+
+If you want to enable the {gitops-short} add-on with the `ArgoCD` agent, use the `Agent` mode. See xref:../gitops/gitops_addon_with_argocd.adoc#enable-gitops-addon-with-argocd[Enabling {gitops} add-on with _ArgoCD_ agent (Technology Preview)]
 
 If you want to enable the {gitops-short} add-on without the `ArgoCD` agent, use the `Basic` mode. See xref:../gitops/gitops_addon_without_argocd.adoc#enable-gitops-addon-without-argocd[Enabling {gitops} add-on without the _ArgoCD_ agent]
 
@@ -26,28 +30,23 @@ The {gitops-short} add-on supports various configuration options to customize th
 
 The {gitops-short} add-on supports the following configuration options in the `gitopsAddon` specification:
 
-* `enabled`: Enable or disable the GitOps add-on. The default is `false`. 
-* `gitOpsOperatorImage`: Custom container image for the GitOps operator.
-* `gitOpsImage`: Custom container image for `ArgoCD` components.
-* `redisImage`: Custom container image for `Redis`.
-* `gitOpsOperatorNamespace`: Namespace where the GitOps operator is deployed. The default is `openshift-gitops-operator`.
-* `gitOpsNamespace`: Namespace where `ArgoCD` instance is deployed. The default is`openshift-gitops`.
-* `reconcileScope`: Control `ArgoCD` reconciliation scope that includes `All-Namespaces` or `Single-Namespace`. The default: `Single-Namespaces`.
-* `overrideExistingConfigs`: Override existing `AddOnDeploymentConfig` values with new values from `GitOpsCluster` specification. Must be set to `true` when performing any uninstall operation. The default is `false`.
-* `argoCDAgent`: `ArgoCD` agent configuration sub-section. 
+* `enabled`: Enable or disable the GitOps add-on. The default is `false`.
+* `gitOpsOperatorImage`: Custom container image for the GitOps operator. This is the only image that needs to be specified. All other component images, such as `ArgoCD`, `Redis`, and `Repo Server`, are determined by the operator.
+* `overrideExistingConfigs`: Override existing `AddOnDeploymentConfig` values with new values from the `GitOpsCluster` specification. Must be set to `true` when performing any uninstall operation. The default is `false`.
+* `argoCDAgent`: `ArgoCD` agent configuration sub-section (Technology Preview).
+* `olmSubscription`: OLM `Subscription` configuration sub-section. For {ocp-short} managed clusters, it is strongly recommended to enable OLM-based deployment. Set `olmSubscription.enabled` to `true` to enable.
 
-The Argo CD Agent supports the following configuration options in the `argoCDAgent` specification:
+The `ArgoCD` agent supports the following configuration options in the `argoCDAgent` specification (Technology Preview):
 
-* `enabled`: Enable or disable the agent. The default `false`.
+* `enabled`: Enable or disable the agent. The default is `false`.
 * `propagateHubCA`: Propagate hub certified authority (CA) certificate to managed clusters. The default is `true`.
-* `image`: Custom agent container image.
-* `serverAddress`: Override the `ArgoCD` agent principal server address.
-* `serverPort`: Override the  `ArgoCD` agent principal server port.
+* `serverAddress`: Override the `ArgoCD` agent principal server address. When empty, the controller automatically discovers the address from the {ocp-short} Route.
+* `serverPort`: Override the `ArgoCD` agent principal server port. When empty, the controller automatically discovers the port.
 * `mode`: Agent operation mode. The default is `managed`.
 
-To configure the {gitops-short} add-on setting, complete the following steps on your hub cluster: 
+To configure the {gitops-short} add-on setting, complete the following steps on your hub cluster:
 
-. Customize your container images for the {gitops-short} components by adding the YAML sample with the `GitOpsCluster`:
+. Customize the container image for the {gitops-short} operator by adding the YAML sample with the `GitOpsCluster`:
 
 +
 [source,yaml]
@@ -68,82 +67,46 @@ spec:
   gitopsAddon:
     enabled: true
     gitOpsOperatorImage: "registry.redhat.io/openshift-gitops-1/gitops-operator@sha256:..."
-    gitOpsImage: "registry.redhat.io/openshift-gitops-1/argocd@sha256:..."
-    redisImage: "registry.redhat.io/rhel8/redis-6@sha256:..."
 ----
-
-. Apply the YAML sample by running the following command:  
-
-+
-[source,bash]
-----
-oc apply -f gitopscluster-example.yaml 
-----
-
-. Customize the namespaces where you deploy the the {gitops-short} components by adding the following YAML with the `GitOpsCluster`:
-
-+
-[source,yaml]
-----
-apiVersion: apps.open-cluster-management.io/v1beta1
-kind: GitOpsCluster
-metadata:
-  name: gitops-custom-namespaces
-  namespace: openshift-gitops
-spec:
-  argoServer:
-    argoNamespace: openshift-gitops
-  placementRef:
-    kind: Placement
-    apiVersion: cluster.open-cluster-management.io/v1beta1
-    name: all-openshift-clusters
-    namespace: openshift-gitops
-  gitopsAddon:
-    enabled: true
-    gitOpsOperatorNamespace: openshift-gitops-operator
-    gitOpsNamespace: openshift-gitops
-----
-
-. Apply the YAML sample by running the following command:  
-
-+
-[source,bash]
-----
-oc apply -f gitopscluster-example.yaml 
-----
-
-. Specify if the `ArgoCD` agent can reconcile application in all namespaces by adding the following YAML with the `GitOpsCluster`:
-
-+
-[source,yaml]
-----
-apiVersion: apps.open-cluster-management.io/v1beta1
-kind: GitOpsCluster
-metadata:
-  name: gitops-reconcile-scope
-  namespace: openshift-gitops
-spec:
-  argoServer:
-    argoNamespace: openshift-gitops
-  placementRef:
-    kind: Placement
-    apiVersion: cluster.open-cluster-management.io/v1beta1
-    name: all-openshift-clusters
-    namespace: openshift-gitops
-  gitopsAddon:
-    enabled: true
-    reconcileScope: 
-----
-+
-.. For the `reconcileScope` field, give it the `All-Namespaces` value if you want the `ArgoCD` instance to reconcile applications in all namespaces.
-.. For the `reconcileScope` field, give it the `Single-Namespace` value if you want the the `ArgoCD` instance to only reconcile applications in its own namespace.
 
 . Apply the YAML sample by running the following command:
 
 +
 [source,bash]
 ----
-oc apply -f gitopscluster-example.yaml 
+oc apply -f gitopscluster-example.yaml
+----
+
+. For {ocp-short} managed clusters, it is strongly recommended to enable OLM-based deployment. Add the `olmSubscription` section to the `GitOpsCluster` with the following YAML:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: gitops-olm-deployment
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: all-openshift-clusters
+    namespace: openshift-gitops
+  gitopsAddon:
+    enabled: true
+    olmSubscription:
+      enabled: true
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f gitopscluster-example.yaml
 ----
 
 
@@ -151,12 +114,12 @@ oc apply -f gitopscluster-example.yaml
 
 You can skip specific {gitops-short} add-on functionalities that you do not want. See xref:../gitops/gitops_skip_addon.adoc#skip-gitops-addon[Skipping the {gitops-short} add-on enforcement].
 
-To verify that your {gitops-short} add-on works, see xref:../gitops/gitops_verify_addon.adoc#verify-gitops-addon[Verifying the {gitops-short) add-on functions].
+To verify that your {gitops-short} add-on works, see xref:../gitops/gitops_verify_addon.adoc#verify-gitops-addon[Verifying the {gitops-short} add-on functions].
 
 To verify that your `ArgoCD` agent works, see xref:../gitops/gitops_verify_argocd.adoc#verify-argocd-agent[Verifying the _ArgoCD_ agent function].
 
-To learn more about {gitops-short}, see the following documentation: 
+To learn more about {gitops-short}, see the following documentation:
 
 * xref:../gitops/gitops_push_pull.adoc#gitops-push-pull[Deploying Argo CD with Push and Pull model]
 * xref:../gitops/gitops_registering.adoc#gitops-register[Registering managed clusters to {gitops} operator]
-* xref:../gitops/gitops_console.adoc#gitops-console[GitOps console] 
+* xref:../gitops/gitops_console.adoc#gitops-console[GitOps console]

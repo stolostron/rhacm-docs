@@ -47,7 +47,7 @@ oc get pods -n openshift-gitops
 
 The {acm-short} {gitops-short} add-on launches a {gitops-short} instance that you can use to enable the `Application` resource in any namespace on your managed cluster. To enable the Argo CD `Application` resource in any namespace on the managed clusters, complete the following steps:
 
-. Create a global `ManagedClusterSetBinding` resource by adding the following YAML file sample: 
+. On the hub cluster, create a global `ManagedClusterSetBinding` resource by adding the following YAML file sample: 
 
 +
 [source,yaml]
@@ -70,7 +70,7 @@ spec:
 oc apply -f managedclustersetbinding-example.yaml
 ----
 
-. Create a `Placement` custom resource for selecting the managed clusters where the (gitops-short) add-on gets enabled. Add the following YAML file sample:
+. On the hub cluster, create a `Placement` custom resource for selecting the managed clusters where the (gitops-short) add-on gets enabled. Add the following YAML file sample:
 
 +
 [source,yaml]
@@ -104,7 +104,7 @@ spec:
 oc apply -f placement-example.yaml
 ----
 
-. Create the `GitOpsCluster` resource and add the `gitopsAddon` specification. Your YAML file might resemble the following sample: 
+. On the hub cluster, create the `GitOpsCluster` resource and add the `gitopsAddon` specification. Your YAML file might resemble the following sample: 
 
 +
 [source,yaml]
@@ -125,8 +125,6 @@ spec:
     namespace: openshift-gitops
   gitopsAddon:
     enabled: true
-    overrideExistingConfigs: true
-    reconcileScope: All-Namespaces
 ----
 
 . Apply the YAML file sample by running the following command: 
@@ -143,6 +141,103 @@ oc apply -f gitopscluster-example.yaml
 [source,bash]
 ----
 oc get pods -n openshift-gitops 
+----
+
+. On the hub cluster, modify the default policy template to enable the `Application` resource in any namespace on all managed clusters. The default policy template is created by the `GitOpsCluster` resource when the {gitops-short} add-on is enabled. Modify the policy by adding the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: PR.PT Protective Technology
+    policy.open-cluster-management.io/controls: PR.PT-3 Least Functionality
+    policy.open-cluster-management.io/standards: NIST-CSF
+  name: gitopscluster1-argocd-policy
+  namespace: openshift-gitops
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: mc-gitops-ocp-argocd-config-policy
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: argoproj.io/v1beta1
+            kind: ArgoCD
+            metadata:
+              labels:
+                apps.open-cluster-management.io/gitopsaddon: "true"
+              name: acm-openshift-gitops
+              namespace: openshift-gitops
+            spec:
+              controller:
+                enabled: true
+                env:
+                - name: ARGOCD_APPLICATION_NAMESPACES
+                  value: '*'
+              server:
+                enabled: false
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: argoproj.io/v1alpha1
+            kind: AppProject
+            metadata:
+              name: default
+              namespace: openshift-gitops
+            spec:
+              clusterResourceWhitelist:
+              - group: '*'
+                kind: '*'
+              destinations:
+              - namespace: '*'
+                server: '*'
+              sourceRepos:
+              - '*'
+              sourceNamespaces:
+              - '*'
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              name: argo-admin
+            subjects:
+              - kind: ServiceAccount
+                name: acm-openshift-gitops-argocd-application-controller
+                namespace: openshift-gitops
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: cluster-admin
+        pruneObjectBehavior: None
+        remediationAction: enforce
+        severity: medium
+  remediationAction: enforce
+----
+
++
+The policy template configures the following changes on the managed clusters:
+
++
+--
+* The Argo CD application controller can reconcile applications in any namespace by specifying the `ARGOCD_APPLICATION_NAMESPACES` environment variable to `*` in the `acm-openshift-gitops` `ArgoCD` resource.
+* The Argo CD application itself can be deployed into any namespace by specifying `sourceNamespaces` to `*` in the default `AppProject` resource.
+* The service account of the Argo CD application controller is granted the `cluster-admin` role.
+--
+
+. Apply the YAML file sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f policy-example.yaml
 ----
 
 .Additional resources

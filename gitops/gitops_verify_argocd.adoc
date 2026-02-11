@@ -1,9 +1,9 @@
 [#verify-argocd-agent]
-= Verifying the _ArgoCD_ agent function 
+= Verifying the _ArgoCD_ agent function (Technology Preview)
 
-When you use the `ArgoCD` agent, you need to check that it works. To check that the `ArgoCD` instance is working, complete the following steps: 
+When you use the `ArgoCD` agent, you need to check that it works. To check that the `ArgoCD` instance is working, complete the following steps:
 
-. Verify Argo CD components are working by running the following command:
+. On the managed cluster, verify `ArgoCD` components are working by running the following command:
 
 +
 [source,bash]
@@ -11,7 +11,7 @@ When you use the `ArgoCD` agent, you need to check that it works. To check that 
 oc get pods -n openshift-gitops
 ----
 
-. Check `ArgoCD` application controller logs by running the following command:
+. On the managed cluster, check `ArgoCD` application controller logs by running the following command:
 
 +
 [source,bash]
@@ -19,28 +19,63 @@ oc get pods -n openshift-gitops
 oc logs -n openshift-gitops -l app.kubernetes.io/name=argocd-application-controller
 ----
 
-If you have enabled the `ArgoCD` agent, check that it is working by completing the following steps: 
+If you have enabled the `ArgoCD` agent, check that the hub principal and managed cluster agent are working by completing the following steps:
 
-. Verify the agent is working by running the following command:
-
-+
-[source,bash]
-----
-oc get pods -n openshift-gitops
-----
-
-. Check that the agent logs are working by running the following command:
+. On the hub cluster, verify the agent principal pod is working by running the following command:
 
 +
 [source,bash]
 ----
-oc logs -n openshift-gitops
+oc get pods -n openshift-gitops -l app.kubernetes.io/name=openshift-gitops-agent-principal
 ----
 
-. Verify that the `ManifestWork` status is set for the certificate authorization (CA) propagation by running the following command:
+. On the hub cluster, check the agent principal logs for agent connections by running the following command:
 
 +
 [source,bash]
 ----
-oc get manifestwork -n <managed-cluster-name> argocd-agent-ca-propagation -o yaml
+oc logs -n openshift-gitops -l app.kubernetes.io/name=openshift-gitops-agent-principal --tail=20
 ----
+
+. On the managed cluster, verify the agent is working by running the following command:
+
++
+[source,bash]
+----
+oc get pods -n openshift-gitops -l app.kubernetes.io/part-of=argocd-agent
+----
+
+. On the managed cluster, check the agent logs by running the following command:
+
++
+[source,bash]
+----
+oc logs -n openshift-gitops -l app.kubernetes.io/part-of=argocd-agent --tail=50
+----
+
+. On the hub cluster, verify that the `ManifestWork` status is set for the certificate authority (CA) propagation by running the following command:
+
++
+[source,bash]
+----
+oc get manifestwork -n <managed-cluster-name> -l app.kubernetes.io/managed-by=multicloud-integrations
+----
+
+. On the hub cluster, verify the agent principal `Route` exists by running the following command:
+
++
+[source,bash]
+----
+oc get route -n openshift-gitops -l app.kubernetes.io/part-of=argocd-agent
+----
+
+. On the hub cluster, verify the cluster secret was created with the proper server URL by running the following command:
+
++
+[source,bash]
+----
+oc get secret cluster-<managed-cluster-name> -n openshift-gitops -o jsonpath='{.data.server}' | base64 -d
+----
+
++
+The server URL should contain `?agentName=<managed-cluster-name>` as a query parameter.
