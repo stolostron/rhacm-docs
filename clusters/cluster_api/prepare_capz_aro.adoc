@@ -1,0 +1,120 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#prepare-create-aro-hcp-capz]
+= Preparing to create Azure Red Hat OpenShift {hcp} clusters by using Cluster API Provider for Azure
+
+[role="_abstract"]
+
+Before creating an Azure Red Hat OpenShift {hcp} cluster by using Cluster API Provider for Azure, you must complete the following preparation procedure.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+- You need the `MultiClusterEngine` resource either from the {acm-short} installation, or the {mce-short} standalone installation.
+- You need a valid Microsoft Azure subscription with permissions to create Azure Red Hat OpenShift {hcp} resources.
+- You need the OpenShift CLI (`oc`). See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/cli_tools/openshift-cli-oc[OpenShift CLI (oc)] in the {ocp-short} documentation to learn more.
+- You need the `jq` tool. See link:https://jqlang.org/[./jq] to learn more.
+- You need the Azure Service Operator v2. See link:https://azure.github.io/azure-service-operator/[Azure Service Operator v2] to learn more.
+- Your hub cluster must have internet access.
+
+.Procedure
+
+. Set the `cluster-api` component to `true`. Run the following command:
++
+[source,bash]
+----
+oc patch mce multiclusterengine --type=merge -p '{"spec":{"overrides":{"components":[{"name":"cluster-api","enabled": true}]}}}'
+----
+
+. Set the `cluster-api-provider-azure-preview` component to `true`. Run the following command:
++
+[source,bash]
+----
+oc patch mce multiclusterengine --type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift","enabled": false}]}}}'
+----
+
+. Set the `hypershift` component to `false`. Run the following command:
++
+[source,bash]
+----
+oc patch mce multiclusterengine --type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift","enabled": false}]}}}'
+----
+
+. Set the `hypershift-local-hosting` component to `false`. Run the following command:
++
+[source,bash]
+----
+oc patch mce multiclusterengine --type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift-local-hosting","enabled": false}]}}}'
+----
+
+.. Verify that the components report the correct state. Run the following command:
++
+[source,bash]
+----
+oc get multiclusterengine multiclusterengine -o json | \
+  jq -r '.spec.overrides.components[] | [.name, .enabled] | @tsv' | \
+  column -t -s $'\t' -N "COMPONENT,ENABLED"
+----
++
+The output might look similar to the following example:
++
+[source,bash]
+----
+COMPONENT                                ENABLED
+cluster-api                              true
+cluster-api-provider-azure-preview       true
+hypershift                               false
+hypershift-local-hosting                 false
+----
+
+. Enable the Cluster API. Run the following command:
++
+[source,bash]
+----
+oc patch mce multiclusterengine --type=merge -p "{\"spec\":{\"overrides\":{\"components\":$(oc get mce multiclusterengine -o json | jq -c '.spec.overrides.components | map(if .name == "cluster-api" then .enabled = true else . end)')}}}"
+----
+
+.. Verify that the Cluster API is enabled. Run the following command:
++
+[source,bash]
+----
+oc get mce multiclusterengine -o json | \
+  jq -r '.spec.overrides.components[] | select(.name == "cluster-api") | [.name, .enabled] | @tsv'
+----
++
+Make sure the output matches the following sample:
++
+[source,bash]
+----
+cluster-api	true
+----
+
+. Enable the Cluster API Provider for Azure. Run the following command:
++
+[source,bash]
+----
+oc patch mce multiclusterengine --type=merge -p "{\"spec\":{\"overrides\":{\"components\":$(oc get mce multiclusterengine -o json | jq -c '.spec.overrides.components | map(if .name == "cluster-api-provider-azure-preview" then .enabled = true else . end)')}}}"
+----
+
+.. Verify that the Cluster API Provider for Azure is enabled. Run the following command:
++
+[source,bash]
+----
+oc get mce multiclusterengine -o json | \
+  jq -r '.spec.overrides.components[] | select(.name == "cluster-api-provider-azure-preview") | [.name, .enabled] | @tsv'
+----
++
+Make sure the output matches the following sample:
++
+[source,bash]
+----
+cluster-api-provider-azure-preview	true
+----
+
+. Verify that the operators are 
+
+[role="_additional-resources"]
+.Additional resources
+
+- 
