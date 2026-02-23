@@ -1,0 +1,106 @@
+[#fine-grain-rbac-cli]
+= Fine-grained role-based access control _MulticlusterRoleAssignment_
+
+The `MulticlusterRoleAssignment` custom resource provides a declarative method for defining role-based access control (RBAC) across a multicluster environment. You can use this resource to create a centralized definition on the hub cluster that specifies which users or groups receive permissions on targeted managed clusters.
+
+When you apply a `MulticlusterRoleAssignment` resource, the system creates the corresponding standard Kubernetes RBAC bindings—either a `RoleBinding` or a `ClusterRoleBinding`—on the selected managed clusters.
+
+[#mra-specification]
+== Resource specification
+
+The resource definition consists of two primary sections: the subject (who receives the permission) and the role assignments (the permissions granted and where they apply).
+
+- The `spec.subject` field defines the identity receiving the permissions.
+
+.Subject specification
+|===
+| Field | Description
+
+| `kind`
+| The type of identity. Supported values are `User` or `Group`.
+
+| `name`
+| The name of the user or group (for example, `jane.doe@example.com` or `dev-team`).
+|===
+
+- The `spec.roleAssignments` field is a list of rules that define the roles to be granted and the target clusters.
+
+.Role assignment specification
+|===
+| Field | Description
+
+| `clusterRole`
+| The name of the `ClusterRole` to assign. **Note:** This role must exist on the managed cluster before the assignment.
+
+| `clusterSelection`
+| Specifies the target clusters for this assignment using standard placement references.
+
+| `targetNamespaces`
+| (Optional) A list of namespaces on the managed cluster where the role applies. This field determines the scope of the resulting binding.
+|===
+
+[#mra-binding-scope]
+== Binding scope
+
+The resulting RBAC resource on the managed cluster depends on whether you include the `targetNamespaces` field:
+
+* *Namespace-scoped (`RoleBinding`):* When you list one or more namespaces in `targetNamespaces`, the system generates a `RoleBinding` within each of those specific namespaces. The subject receives permissions only within those namespaces.
+* *Cluster-scoped (`ClusterRoleBinding`):* When you omit `targetNamespaces` or leave it empty, the system generates a `ClusterRoleBinding`. The subject receives permissions across the entire managed cluster.
+
+[#mra-cluster-selection]
+== Cluster selection
+
+The `clusterSelection` field references {acm-short} placement resources to determine which managed clusters receive the assignment.
+
+*Important:*
+You must create the placement resource before you create the `MulticlusterRoleAssignment`. The resource references existing placements and does not define the placement logic itself.
+
+
+* `ClusterSet` selection example
+
+The following placement selects all clusters that are members of the `cs01` `ManagedClusterSet`:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement-cs01
+  namespace: cs01-bound-namespace
+spec:
+  clusterSets:
+  - cs01
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Equal
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Equal
+----
+
+* Cluster name selection example
+
+The following placement selects specific clusters by name using a label selector:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement-specific-clusters
+  namespace: specific-clusters-namespace
+spec:
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: name
+          operator: In
+          values:
+          - cluster01
+          - cluster02
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Equal
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Equal
+----
