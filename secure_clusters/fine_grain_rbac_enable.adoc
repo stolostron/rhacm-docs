@@ -24,62 +24,23 @@ See the following prerequisites that are needed to enable fine-grained role-base
 - Configure the {acm-short} hub cluster and all managed clusters with the same identity providers (IdP). Users, groups, and group memberships must be identical across the environment to ensure that an identity authenticated on the hub cluster maps correctly to the same identity on the managed clusters. (link to the OCP feature)
 
 .Procedure 
-//add the two steps and remove these.
 
-Complete the following steps to enable `fine-grained-rbac` in the `MultiClusterHub` resource. 
+Enable the fine-grained-rbac component in the MultiClusterHub resource.
 
-. Run the following command to edit the `MultiClusterHub` resource. Run `oc get mch -A` to get the name and namespace of the `MultiClusterHub` resource if you do not use the `open-cluster-management` namespace:
+. Run the following command to patch the resource:
 
-+
 [source,bash]
 ----
-oc edit mch -n open-cluster-management multiclusterhub
+oc patch mch multiclusterhub -n open-cluster-management --type=json -p='[{"op": "add", "path": "/spec/overrides/components/-", "value": {"name": "fine-grained-rbac", "enabled": true}}]'
 ----
 
-. Change the `configOverrides` specification from `enabled: false` to `enabled: true`.  See the following example with the feature enabled:
+NOTE: multiclusterhub is the default name of the MultiClusterHub custom resource, and open-cluster-management is the default namespace.
 
-+
-[source,yaml]
-----
-    - configOverrides: {}
-      enabled: true
-      name: fine-grained-rbac
-----
+Apply the environment=virtualization label to the local-cluster (Hub) only. This enables the necessary policies and RBAC configurations. Run the following command:
 
-. Label your `local-cluster` with `environment=virtualization`. Run the following command:
-
-+
 [source,bash]
 ----
-oc label managedclusters local-cluster environment=virtualization
-----
-
-. Create a `ClusterRoleBinding` resource to add the `kubevirt.io-acm-hub:view` role. Run the following command:
-
-+
-[source,bash]
-----
-oc create clusterrolebinding <cluster-role-binding-name> --clusterrole=kubevirt.io-acm-hub:view --user=<user-name>
-----
-
-+
-Your `ClusterRolebinding` resource might resemble the following YAML file:
-
-+
-[source,yaml]
-----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: kubevirt.io-acm-hub:view
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: <cluster-role-name>
-subjects:
-- kind: User
-  apiGroup: rbac.authorization.k8s.io
-  name: <user-name>
+oc label managedcluster local-cluster environment=virtualization
 ----
 
 //point to the UI doc
