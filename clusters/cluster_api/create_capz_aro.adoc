@@ -1,20 +1,245 @@
+:_mod-docs-content-type: PROCEDURE
+
 [create-aro-hcp-capz]
 = Creating Azure Red Hat OpenShift {hcp} clusters by using Cluster API Provider for Azure
 
-
+[role="_abstract"]
+Create an Azure Red Hat OpenShift {hcp} managed cluster by using Cluster API Provider for Azure to reduce costs and setup time by swapping dedicated master VMs for a managed, containerized control plane. Use a GitOps workflow to provision and scale clusters by using the same declarative manifests that you use for your applications.
 
 *Required access:* Cluster administrator
 
 .Prerequisites
 
-== test
-
-
+- You must complete the preparation procedure. See xref:../cluster_api/prepare_capz_aro.adoc##prepare-create-aro-hcp-capz[Preparing to create Azure Red Hat OpenShift {hcp} clusters by using Cluster API Provider for Azure] to learn more.
+- You need the `clusterctl` tool. See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/cli_tools/openshift-cli-oc[OpenShift CLI (oc)] in the {ocp-short} documentation to learn more.
 
 .Procedure
 
+. Create a cluster namespace. Run the following command:
 
++
+[source,bash]
+----
+export CLUSTER_NAME="aro-hcp-cluster"
+export CLUSTER_NAMESPACE="aro-clusters"
 
-== Additional resources
+oc create namespace ${CLUSTER_NAMESPACE}
+----
 
-- 
+. Create a YAML file named `aro-hcp-cluster.yaml` to define your cluster resources. Add the following content to the file:
+
++
+[source,yaml]
+----
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: aro-hcp-cluster
+  namespace: aro-clusters
+  labels:
+    cluster.x-k8s.io/cluster-name: aro-hcp-cluster
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 10.128.0.0/14
+    services:
+      cidrBlocks:
+        - 172.30.0.0/16
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+    kind: AROControlPlane
+    name: aro-hcp-cluster
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+    kind: AROCluster
+    name: aro-hcp-cluster
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: AROCluster
+metadata:
+  name: aro-hcp-cluster
+  namespace: aro-clusters
+spec:
+  location: eastus
+  resourceGroupName: aro-hcp-cluster-rg
+  subscriptionID: "<subscription_id>"
+  resources:
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+kind: AROControlPlane
+metadata:
+  name: aro-hcp-cluster
+  namespace: aro-clusters
+spec:
+  location: eastus
+  subscriptionID: "<subscription_id>"
+  version: "4.21.0"
+  resources:
+---
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: MachinePool
+metadata:
+  name: aro-hcp-cluster-workers
+  namespace: aro-clusters
+spec:
+  clusterName: aro-hcp-cluster
+  replicas: 3
+  template:
+    spec:
+      bootstrap:
+        dataSecretName: ""
+      clusterName: aro-hcp-cluster
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+        kind: AROMachinePool
+        name: aro-hcp-cluster-workers
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: AROMachinePool
+metadata:
+  name: aro-hcp-cluster-workers
+  namespace: aro-clusters
+spec:
+  resources:
+----
+
++
+- Replace `<subscription_id>` with your subscription ID.
+- Define your infrastructure resources in `spec.resources` field of the `AROCluster` resource.
+- Define your control plane resources in `spec.resources` field of the `AROControlPlane` resource.
+- Define your node pool resources in `spec.resources` field of the `AROMachinePool` resource.
+
+. Run the following command to apply the file:
+
++
+[source,bash]
+----
+oc apply -f aro-hcp-cluster.yaml
+----
+
++
+*Note:* It might take 15 to 20 minutes for the managed cluster to provision. You can check the status of the Cluster API resources by running the following command:
+
++
+[source,bash]
+----
+clusterctl describe cluster ${CLUSTER_NAME} -n ${CLUSTER_NAMESPACE} --show-conditions=all
+----
+
++
+You can check the status of the Azure Service Operator resources by running the following command:
+
++
+[source,bash]
+----
+oc get HcpOpenShiftCluster,HcpOpenShiftClustersNodePool -n ${CLUSTER_NAMESPACE}
+----
+
++
+You can check the Cluster API Provider for Azure controller logs by running the following command:
+
++
+[source,bash]
+----
+oc logs -n multicluster-engine deployment/capz-controller-manager -f
+----
+
+.Verification
+
+. Check your managed cluster status.
+
+.. Check the Cluster API status. Run the following command:
+
++
+[source,bash]
+----
+oc get cluster ${CLUSTER_NAME} -n ${CLUSTER_NAMESPACE}
+----
+
+.. *Optional:* Check the detailed cluster status and conditions. Run the following command:
+
++
+[source,bash]
+----
+clusterctl describe cluster ${CLUSTER_NAME} -n ${CLUSTER_NAMESPACE} --show-conditions=all
+----
+
++
+If your cluster is ready, the output reseembles the following example:
+
++
+[source,bash]
+----
+NAME              CLUSTERCLASS   AVAILABLE   CP AVAILABLE   AGE
+aro-hcp-cluster                  True        True           20m
+----
+
+. Verify your infrastructure resources.
+
+.. Check the `AROCluster` status. Run the following command:
+
++
+[source,bash]
+----
+oc get arocluster ${CLUSTER_NAME} -n ${CLUSTER_NAMESPACE}
+----
+
+.. Check the `AROControlPlane` status. Run the following command:
+
++
+[source,bash]
+----
+oc get arocontrolplane ${CLUSTER_NAME} -n ${CLUSTER_NAMESPACE}
+----
+
+.. Check the `AROMachinePool` status. Run the following command:
+
++
+[source,bash]
+----
+oc get aromachinepool -n ${CLUSTER_NAMESPACE}
+----
+
+. Verify your Azure Service Operator resources.
+
+.. Check the {hcp} cluster status in Microsoft Azure. Run the following command:
+
++
+[source,bash]
+----
+oc get HcpOpenShiftCluster ${CLUSTER_NAME} -n ${CLUSTER_NAMESPACE}
+----
+
+.. Check the node pool status. Run the following command:
+
++
+[source,bash]
+----
+oc get HcpOpenShiftClustersNodePool -n ${CLUSTER_NAMESPACE}
+----
+
+. Get your managed cluster `kubeconfig` file. The `kubeconfig`` is automatically created when the managed cluster is ready. Run the following command:
+
++
+[source,bash]
+----
+oc get secret ${CLUSTER_NAME}-kubeconfig -n ${CLUSTER_NAMESPACE} -o jsonpath='{.data.value}' | base64 -d > ${CLUSTER_NAME}-kubeconfig
+----
+
+. Test the connection to your managed cluster. Run the following command:
+
++
+[source,bash]
+----
+export KUBECONFIG=${CLUSTER_NAME}-kubeconfig
+oc get nodes
+----
+
+. Get the console URL from the control plane status. Run the following command:
+
++
+[source,bash]
+----
+oc get arocontrolplane ${CLUSTER_NAME} -n ${CLUSTER_NAMESPACE} -o jsonpath='{.status.consoleURL}'
+----
