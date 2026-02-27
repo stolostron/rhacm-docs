@@ -1,0 +1,54 @@
+[#troubleshooting-manifest-webhook-limits]
+= Troubleshooting _MultiClusterRoleAssignment_ size limits
+
+When you enable fine-grained role-based access control for virtualization, the `MultiClusterRoleAssignment` controller aggregates `roleAssignment` entries from `MultiClusterRoleAssignment` resources into a single shared `ClusterPermission` resource for each managed cluster namespace.
+
+If your `roleAssignments` list exceeds the `ManifestWork` manifests size limit of 512 KB for a cluster, new assignments for the cluster fail to apply.
+
+== Symptoms: Troubleshooting ManifestWork manifest size limits
+
+The following symptoms indicate that you have exceeded the manifest size limits:
+
+- When you apply a valid `MultiClusterRoleAssignment` resource, the permissions are not created on the managed cluster.
+
+- The following error message appears in the logs of the `ClusterPermission` controller: `denied the request: the size of manifests is X bytes which exceeds the 512000 limit.`
+
+== Identifying the problem: Troubleshooting ManifestWork manifest size limits
+
+To confirm if the `ManifestWork` manifest size limit is the problem, check the `mra-managed-permissions` `ClusterPermission` resource. Complete the following steps:
+
+. Compare the desired bindings with the active bindings. If the numbers do not match, the latest changes do not apply from the `mra-managed-permissions` `ClusterPermission` resource. Replace `<managed-cluster-namespace>` with the namespace of your managed cluster.
+
+.. Run the following command to count the desired bindings:
+
++
+[source,bash]
+----
+oc get clusterpermission mra-managed-permissions -n <managed-cluster-namespace> -o yaml | grep "owner/" | wc -l
+----
+
+.. Run the following command to count the active bindings that are successfully applied:
+
++
+[source,bash]
+----
+oc get clusterpermission mra-managed-permissions -n <managed-cluster-namespace> -o yaml | grep "reason: AppliedManifestComplete" | wc -l
+----
+
+. Check the current capacity of the `ClusterPermission` specification. When there are more than 360,000 bytes, you are at or exceeding the limit. Run the following command:
+
++
+[source,bash]
+----
+oc get clusterpermission mra-managed-permissions -n <managed-cluster-namespace> -o jsonpath='{.spec}' | wc -c
+----
+
+== Resolving the problem: Troubleshooting ManifestWork manifest size limits
+
+To resolve the problem, remove assignments from some of the `MultiClusterRoleAssignment` objects. Complete the following steps:
+
+. Identify `roleAssignments` in your `MultiClusterRoleAssignment` resources that you can manage separately for the affected cluster.
+
+. Remove the `roleAssignments` that you can manage separately from the `spec.roleAssignments` list in your `MultiClusterRoleAssignment` resources.
+
+. Re-create the `roleAssignment` permissions as separate `ClusterPermission` resources.
