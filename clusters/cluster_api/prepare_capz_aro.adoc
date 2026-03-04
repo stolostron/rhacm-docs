@@ -19,6 +19,61 @@ Before creating an Azure Red Hat OpenShift {hcp} managed cluster by using Cluste
 
 .Procedure
 
+. Check if the `hypershift` and `hypershift-local-hosting` components are disabled. Run the following command:
+
++
+[source,bash]
+----
+oc get multiclusterengine multiclusterengine -o json | \
+  jq -r '.spec.overrides.components[] | [.name, .enabled] | @tsv' | \
+  column -t -s $'\t' -N "COMPONENT,ENABLED"
+----
+
++
+The output might look similar to the following example:
+
++
+[source,bash]
+----
+COMPONENT                                ENABLED
+hypershift                               false
+hypershift-local-hosting                 false
+----
+
+. If the components are enabled, disable both components.
+
+.. Run the following command to disable the `hypershift` component:
+
++
+[source,bash]
+----
+oc patch mce multiclusterengine --type=merge -p "{\"spec\":{\"overrides\":{\"components\":$(oc get mce multiclusterengine -o json | jq -c '.spec.overrides.components | map(if .name == "hypershift" then .enabled = false else . end)')}}}"
+----
+
+.. Run the following command to disable the `hypershift-local-hosting` component:
+
++
+[source,bash]
+----
+oc patch mce multiclusterengine --type=merge -p "{\"spec\":{\"overrides\":{\"components\":$(oc get mce multiclusterengine -o json | jq -c '.spec.overrides.components | map(if .name == "hypershift-local-hosting" then .enabled = false else . end)')}}}"
+----
+
+. Verify that the components are disabled. Run the following command:
+
++
+[source,bash]
+----
+oc get deployment -n hypershift
+----
+
++
+Make sure the output matches the following sample:
+
++
+----
+No resources found in hypershift namespace.
+----
+
 . Enable the Cluster API component. Run the following command:
 
 +
@@ -93,61 +148,6 @@ capi-controller-manager                   1/1     1            1           2m
 
 +
 If the operators are not ready, wait until they are ready.
-
-. Check if the `hypershift` and `hypershift-local-hosting` components are disabled. Run the following command:
-
-+
-[source,bash]
-----
-oc get multiclusterengine multiclusterengine -o json | \
-  jq -r '.spec.overrides.components[] | [.name, .enabled] | @tsv' | \
-  column -t -s $'\t' -N "COMPONENT,ENABLED"
-----
-
-+
-The output might look similar to the following example:
-
-+
-[source,bash]
-----
-COMPONENT                                ENABLED
-hypershift                               false
-hypershift-local-hosting                 false
-----
-
-. If the components are enabled, disable both components.
-
-.. Run the following command to disable the `hypershift` component:
-
-+
-[source,bash]
-----
-oc patch mce multiclusterengine --type=merge -p "{\"spec\":{\"overrides\":{\"components\":$(oc get mce multiclusterengine -o json | jq -c '.spec.overrides.components | map(if .name == "hypershift" then .enabled = false else . end)')}}}"
-----
-
-.. Run the following command to disable the `hypershift-local-hosting` component:
-
-+
-[source,bash]
-----
-oc patch mce multiclusterengine --type=merge -p "{\"spec\":{\"overrides\":{\"components\":$(oc get mce multiclusterengine -o json | jq -c '.spec.overrides.components | map(if .name == "hypershift-local-hosting" then .enabled = false else . end)')}}}"
-----
-
-. Verify that the components are disabled. Run the following command:
-
-+
-[source,bash]
-----
-oc get deployment -n hypershift
-----
-
-+
-Make sure the output matches the following sample:
-
-+
-----
-No resources found in hypershift namespace.
-----
 
 . Configure your Microsoft Azure credentials.
 
