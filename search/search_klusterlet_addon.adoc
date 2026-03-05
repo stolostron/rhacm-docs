@@ -15,7 +15,7 @@ Resource requirements for the `klusterlet-addon-search` pod in a managed cluster
 oc edit managedclusteraddon search-collector -n xyz
 ----
 
-. Append the resource requirements as annotations. View the following example:
+. Append the resource requirements as annotations. When you define both `annotations` and `resourceRequirements`, the `annotations` value overrides the `resourceRequirements` value. View the following example:
 
 +
 [source,yaml]
@@ -26,7 +26,59 @@ metadata:
   annotations: addon.open-cluster-management.io/search_memory_limit: 2048Mi
   addon.open-cluster-management.io/search_memory_request: 512Mi
 ----
++
+*Notes:* 
 
-The annotation overrides the resource requirements on the managed clusters and automatically restarts the pod with new resource requirements.
+- The annotation overrides the resource requirements on the managed clusters and automatically restarts the pod with new resource requirements.
 
-*Note:* You can discover all resources defined in your managed cluster by using the API Explorer in the console. Alternatively, you can discover all resources by running the following command: `oc api-resources`
+- You can discover all resources defined in your managed cluster by using the API Explorer in the console. Alternatively, you can discover all resources by running the following command:
+
++ 
+[source,bash]
+----
+oc api-resources
+---- 
+
+. Create an `AddonDeploymentConfig` resource and update the limit in the `resourceRequirements` field for the  `klusterlet-addon-search` deployment . Your `AddonDeploymentConfig` resource might resemble the following example:
+
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnDeploymentConfig
+metadata:
+  name: search-addon-resources
+  namespace: your-managed-ns
+spec:
+  resourceRequirements:
+  - containerID: deployments:klusterlet-addon-search:collector
+    resources:
+      limits:
+        memory: 1024Mi
+      requests:
+        memory: 512Mi
+----
+
+. Add the `backup` label to include the `AddOnDeploymentConfig` resource to the cluster backups. Run the following command:
+
++
+[source,bash]
+----
+oc label addondeploymentconfig search-addon-resources -n <namespace-for-search-addon-resources> cluster.open-cluster-management.io/backup=""
+----
+
+. Apply the `search-addon-resources` `AddOnDeploymentConfig` file to your klusterlet add-on by running the following command:
+
++
+[source,bash]
+----
+oc apply -f search-addon-resources.yaml
+----
+
+. Update the `klusterlet-addon-search` deployment to use the new `AddonDeploymentConfig` resource. Run the following command:
+
++
+[source,bash]
+----
+oc patch managedclusteraddon search-collector -n your-test-managed --type merge -p '{"spec": { "configs": [{"group": "addon.open-cluster-management.io","resource": "addondeploymentconfigs","name": "search-addon-resources","namespace": "your-test-managed"}]}}'
+----
