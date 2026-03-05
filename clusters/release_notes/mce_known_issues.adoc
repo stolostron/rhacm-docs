@@ -19,7 +19,7 @@ Learn about known issues and limitations during {mce-short} installation.
 [#unclaimed-hive-clusters]
 === Unclaimed Hive clusters might be recreated during ClusterPool custom resource definition changes
 
-During a {mce-short} upgrade or modification to the `ClusterPool` custom resource definition, Hive might delete and recreate all unclaimed clusters. This is expected behavior and ensures that unclaimed clusters reflect the latest configuration defined in the updated `ClusterPool` resource specification.
+During a {mce-short} upgrade or modification to the `ClusterPool` custom resource definition, Hive might delete and re-create all unclaimed clusters. This is expected behavior and ensures that unclaimed clusters reflect the latest configuration defined in the updated `ClusterPool` resource specification.
 
 link:https://issues.redhat.com/browse/ACM-21686[ACM-21686]
 
@@ -36,6 +36,43 @@ link:https://issues.redhat.com/browse/ACM-7523[ACM-7523]
 == Cluster management
 
 Learn about Known issues for Cluster lifecycle with {mce-short}, such as issues with creating, discovering, importing, and removing clusters, and more cluster management issues for {mce-short}.
+
+=== Resource deletion during cluster distribution updates
+
+When a change occurs in the cluster because of the `Placement` resource, cluster redistribution occurs across multiple `PlacementDecisions` resources. During the sequential update, a cluster is temporarily missing from all `PlacementDecisions` resources.
+
+Controllers that monitor `PlacementDecisions` resources identify this temporary deletion as cluster removal. This sequence leads to unnecessary resource deletion and recreation. For example, the `addon-management-controller` deletes and re-creates `ManagedClusterAddOns`, which cause workload disruption.
+
+link:https://issues.redhat.com/browse/ACM-27799[ACM-27799]
+
+[#hypershift-capi-conflict]
+=== HyperShift operator and Cluster API components conflict
+
+{acm-short} and {mce-short} enable the `hypershift` and `hypershift-local-hosting` components by default. 
+
+To manage {rosa} clusters by using the `cluster-api` and `cluster-api-provider-aws` components, you must disable the `hypershift` and `hypershift-local-hosting` components to prevent API conflicts.
+
+When you enable and then disable the `cluster-api` and `cluster-api-provider-aws` components, custom resource definitions of a higher version might remain in the cluster.
+
+You must manually remove the custom resource definitions before you re-enable the `hypershift-local-hosting` component. Use the following command to remove the custom resource definitions:
+
+[source,bash]
+----
+oc delete crd <crd-name>
+----
+
+Remove the following custom resource definitions:
+
+* `clusterresourcesetbindings.addons.cluster.x-k8s.io`
+* `clusterresourcesets.addons.cluster.x-k8s.io`
+* `clusters.cluster.x-k8s.io`
+* `clusterclasses.cluster.x-k8s.io`
+* `machines.cluster.x-k8s.io`
+* `machinesets.cluster.x-k8s.io`
+* `machinedeployments.cluster.x-k8s.io`
+* `machinepools.cluster.x-k8s.io`
+* `machinehealthchecks.cluster.x-k8s.io`
+* `machinedrainrules.cluster.x-k8s.io`
 
 [#hypershift-infra-node-config]
 === HyperShift operator does not receive infrastructure node configuration
@@ -283,7 +320,7 @@ status:
 
 . Create a proxy server to expose the `bootArtifacts` with short URLs.
 
-. Copy the `bootArtifacts` and add them them to the proxy by running the following commands:
+. Copy the `bootArtifacts` and add them to the proxy by running the following commands:
 
 +
 ----
