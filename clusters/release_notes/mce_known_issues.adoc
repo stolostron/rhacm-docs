@@ -37,6 +37,95 @@ link:https://issues.redhat.com/browse/ACM-7523[ACM-7523]
 
 Learn about Known issues for Cluster lifecycle with {mce-short}, such as issues with creating, discovering, importing, and removing clusters, and more cluster management issues for {mce-short}.
 
+=== Cluster API and Cluster API Provider for Azure deployments not creating pods
+
+When you deploy `cluster-api` and `cluster-api-provider-azure` components, the Cluster API controllers might not create pods.
+
+To work around the issue, complete the following steps:
+
+. Verify that the `cluster-api` component is enabled. Run the following command:
+
++
+[source,bash]
+----
+oc get mce multiclusterengine -o json | \
+  jq -r '.spec.overrides.components[] | select(.name | contains("cluster-api"))'
+----
+
+. Check if the `hypershift` component is conflicting. Run the following command:
+
++
+[source,bash]
+----
+oc get deployment -n hypershift
+----
+
+. Force {mce-short} reconciliation. Run the following command:
+
++
+[source,bash]
+----
+oc annotate mce multiclusterengine force-reconcile=$(date +%s) --overwrite
+----
+
+link:https://issues.redhat.com/browse/ACM-30244[ACM-30244]
+
+=== HyperShift conflict when creating Microsoft Azure Red Hat OpenShift {hcp} clusters by using Cluster API Provider for Azure
+
+You might not be able to create Azure Red Hat OpenShift {hcp} clusters by using Cluster API Provider for Azure if the `hypershift` and `cluster-api` controllers are running at the same time.
+
+To resolve the issue, complete the following steps:
+
+. Disable the `hypershift` component. Run the following command:
+
++
+[source,bash]
+----
+oc patch mce multiclusterengine --type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift","enabled":false},{"name":"hypershift-local-hosting","enabled":false}]}}}'
+----
+
+. Wait for the `hypershift` component to be removed. Run the following command:
+
++
+[source,bash]
+----
+oc wait --for=delete namespace/hypershift --timeout=5m
+----
+
+link:https://issues.redhat.com/browse/ACM-30244[ACM-30244]
+
+=== Microsoft Azure authentication errors when creating Microsoft Azure Red Hat OpenShift {hcp} clusters by using Cluster API Provider for Azure
+
+When you create Azure Red Hat OpenShift {hcp} clusters by using Cluster API Provider for Azure, the cluster creation might fail because of Microsoft Azure authentication errors.
+
+To work around the issue, make sure that you are able to connect to Microsoft Azure with your credentials. Complete the following steps:
+
+. Verify your Microsoft Azure credentials secret. Run the following command. Replace `<cluster-namespace>` with the namespace of your cluster:
+
++
+[source,bash]
+----
+oc get secret aso-credential -n <cluster-namespace> -o yaml
+----
+
+. Test the Microsot Azure connection. Run the following command:
+
++
+[source,bash]
+----
+oc run azure-cli --rm -it --image=mcr.microsoft.com/azure-cli -- bash
+----
+
+. Log in to Microsoft Azure inside the pod. Run the following command. Replace `<client_id>`, `<client_secret>`, and `<tenant_id>` with your Microsoft Azure credentials:
+
++
+[source,bash]
+----
+az login --service-principal --username <client_id> --password <client_secret> --tenant <tenant_id>
+----
+
+link:https://issues.redhat.com/browse/ACM-30244[ACM-30244]
+
 === Resource deletion during cluster distribution updates
 
 When a change occurs in the cluster because of the `Placement` resource, cluster redistribution occurs across multiple `PlacementDecisions` resources. During the sequential update, a cluster is temporarily missing from all `PlacementDecisions` resources.
