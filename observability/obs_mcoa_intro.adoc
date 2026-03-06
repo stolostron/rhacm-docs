@@ -1,0 +1,67 @@
+[#obs-mcoa-intro]
+= Multicluster observability add-on
+
+Use the multicluster observability add-on as an alternative way to collect metrics from your managed clusters. Configure metrics collection by using names, matchers, and recording rules for both platform and user workloads. The multicluster observability add-on use the Prometheus Operator and Prometheus Agent from the Red Hat OpenShift Cluster Observabililty Operator to federate, downsample, and remote-write metrics to your hub cluster. Reduce data loss during network partitions between your managed and hub clusters when you enable the multicluster observability add-on. By default, the multicluster observability add-on is disabled.
+
+== Managed cluster workloads
+
+Managed cluster monitoring workloads use the Prometheus Operator and Prometheus Agent from the Cluster Observability Operator. The multicluster observability add-on uses the existing `obo-prometheus-operator` from Red Hat OpenShift Cluster Observabililty Operator on a managed cluster to reconcile Prometheus custom resources. If `obo-prometheus-operator` is not present, the multicluster observability add-on deploys `obo-prometheus-operator` within the configured `agentInstallNamespace`.
+
+Both of the multicluster observability add-on and Cluster Observabililty Operator share the `monitoring.rhobs` API Group for the `ScrapeConfig` and `PrometheusAgent` resources.
+
+For other managed clusters that are not {ocp-short} clusters, the following resources are deployed:
+
+- Node exporter
+- Kube state metrics
+- Prometheus server
+
+*Note:* For clusters other than {ocp-short}, the cluster ID of other managed clusters use the `id.k8s.io` claim of the managed cluster, while the current endpoint operator uses the cluster name.
+
+== Configurable APIs
+
+Control monitoring behavior on your managed clusters by configuring default resource configurations. The following default resources are automatically created for platform monitoring and to have functional dashboards, `PrometheusAgent`, `ScrapeConfig`, and `PrometheusRule`. View the following descriptions of each API:
+
+`PrometheusAgent`:: Defines a `PrometheusAgent` deployment, a resource-optimized Prometheus instance for remote-write workflows. Configures remote-write targets, scrape intervals, and resource limits. Use the `PrometheusAgent` resource as your metrics collector.
+
+`ScrapeConfig`:: A list of metrics to be federated from a given `target`. Configure the following specifications, `job_name`, `metrics_path`, `params`, and `relabel_configs`. You can override the `target` configuration for user workloads.
+
+`PrometheusRule`:: Supports alerting and recording rule definitions that you can apply for each cluster. Supports groups of rules with evaluation intervals and alert annotations or labels.
+
+`ClusterManagementAddOn`:: Placements and configurations for deploying your managed clusters. Configurations include an `AddonDeploymentConfig` resource to customize the deployment of the multicluster observability add-on on managed clusters. You can use this configuration to customize the node placement and select the installation namespace on your managed clusters, where the Prometheus Agent pods are deployed.
+
++
+*Note:* A single `AddonDeploymentConfig` resource is used for all placements. 
+
+== Default platform metrics
+
+By default, the multicluster observability add-on collects platform metrics from your managed clusters. There are a set of `ScrapeConfig` resources that are automatically generated and deployed to all of your managed clusters. All placements that you reference within the `ClusterManagementAddOn` resource automatically receive the `ScrapeConfig` configurations. Use the default `ScrapeConfig` resources for platform workload dashboards.
+
+The following default platform metrics are collected:
+
+- `platform-metrics-hcp`, which is specific for the {hcp} platform
+- `platform-metrics-virtualization`, which is specific for the {ocp-virt} platform
+- `platform-metrics-alerts`, which is specific for custom alert rule metrics across all platforms
+- `platform-metrics-default`, which is specific for default metrics across all platfroms
+
+== Health status of the multicluster observability add-on
+
+The multicluster observability add-on health status is reported through the `ManagedClusterAddOn` resource. From the {ocp-short} console for each managed cluster, the `ManagedClusterResource` is displayed in the *Fleet Management* view. The status is degraded if some resources are not deployed or the platform `PrometheusAgent` resource is not running.
+
+*Note:* For {ocp-short} versions earlier than version 4.20, select *All Clusters* from the *Cluster* switcher.
+
+The following alerting rules are pushed to all managed clusters:
+
+`MetricsCollectorNotIngestingSamples`:: Alerts you when the `PrometheusAgent` resource is not federating any metrics.
+`MetricsCollectorRemoteWriteFailures`:: Alerts you when there is a high failure rate for remote-write requests in the `PrometheusAgent` resource of your managed cluster.
+`MetricsCollectorRemoteWriteBehind`:: Alerts you when the `PrometheusAgent` resource remote-write is too slow.
+
+== Additional resources
+
+- xref:../observability/obs_enable_mcoa.adoc#enable-mcoa[Enabling the multicluster observability add-on]
+- xref:../observability/obs_mcoa_config_apis.adoc#config-apis-mcoa[Configuring APIs for the multicluster obsservability add-on]
+- xref:../observability/obs_mcoa_add_custom_metrics.adoc#add-custom-metrics-mcoa[Adding custom metrics for the multicluster observability add-on]
+- xref:../observability/obs_mcoa_federate.adoc#federate-uw-coo[Federating user workloads from Cluster Observability Operator]
+- xref:../observability/obs_mcoa_relabel.adoc#relabeling-mcoa-default-metrics[Relabeling default metrics for the multicluster observability add-on]
+- xref:../observability/obs_export_metrics_external.adoc#export-metrics-external[Exportng metrics to external endpoints for the multicluster observability add-on]
+- xref:../observability/obs_alert_forward.adoc#forward-alert-mcoa[Forwarding alerts for multicluster observability add-on]
+

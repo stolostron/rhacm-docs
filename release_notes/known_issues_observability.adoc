@@ -3,9 +3,47 @@
 
 Review the known issues for {acm}. The following list contains known issues for this release, or known issues that continued from the previous release. 
 
-For your {ocp} cluster, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/release_notes#ocp-4-15-known-issues [{ocp-short} known issues].
+For your {ocp} cluster, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/release_notes#ocp-4-15-known-issues[{ocp-short} known issues].
 
 For more about deprecations and removals, see xref:../release_notes/acm_deprecate_remove.adoc#deprecations-removals-acm[Deprecations and removals for {acm-short}]. 
+
+[#mcoa-fails]
+== Multicluster observability add-on fails to collect metrics
+
+The `multicluster-observability-addon-manager` pod is in a `OOMKilled` state because the pod watches all config maps and secrets on the hub cluster, causing it to use too many resources. When you enable the multicluster observability add-on, the metric collection fails. 
+
+To avoid this issue, do not enable the multicluster observability add-on. The multicluster observability add-on is disabled by default. If you enabled multicluster observability add-on, disable the add-on by setting `enabled` to `false` in the `MulticlusterObservability` custom resource. See the following `MultiClusterObservability` custom resource example:
+
+[source,yaml]
+----
+apiVersion: observability.open-cluster-management.io/v1beta2
+kind: MultiClusterObservability
+metadata:
+  name: observability
+spec:
+  capabilities:
+    platform:
+      metrics:
+        default:
+          enabled: false
+    userWorkloads:
+      metrics:
+        default:
+          enabled: false
+----
+
+link:https://issues.redhat.com/browse/ACM-26604[ACM-26604]
+
+[#alert-forward-fails]
+== Manually configured alert forwarding fails
+
+When you upgrade to {acm-short} {product-version} alert forwarding fails if you disabled automatic configuration by setting `mco-disable-alerting: true` in the `MultiClusterObservability` custom resource, and if you manually configured alert forwarding. The failure happens after you upgrade because the name of the `observability-alertmanager-accessor` and `hub-alertmanager-router-ca` secrets were changed to include a postfix of the hub cluster name.
+
+To fix this issue, update your alert forwarding configuration that you manually configured to use the new names of the secrets.
+
+For platform alerts, update the secret name in the `cluster-monitoring-config` config map in the `openshift-monitoring` namespace. For user workload alerts, update the secret name in the `user-workload-monitoring-config` config map in the `openshift-user-workload-monitoring` namespace. Find the new secret names in the `openshift-monitoring` and `openshift-user-workload-monitoring` namespaces.
+
+link:https://issues.redhat.com/browse/ACM-26604[ACM-26604]
 
 [#retention-change]
 == Retention change causes data loss 
@@ -51,7 +89,7 @@ link:https://issues.redhat.com/browse/ACM-9681[ACM-9681]
 
 You must use a label in your defined {acm-short} hub cluster namespace. The label, `openshift.io/cluster-monitoring: "true"` causes the Cluster Monitoring Operator to scrape the namespace for metrics. 
 
-When {acm-short} is deployed or an installation is upgraded, the {acm-short} Observability `ServiceMonitors` and `PrometheusRule` resources are no longer present in the `openshift-monitoring` namespace. 
+When {acm-short} is deployed or an installation is upgraded, the {acm-short} observability `ServiceMonitors` and `PrometheusRule` resources are no longer present in the `openshift-monitoring` namespace. 
 
 link:https://issues.redhat.com/browse/ACM-8499[ACM-8499]
 
@@ -68,127 +106,6 @@ Complete the following steps to disable alert forwarding:
 The HTTPS proxy with a self-signed CA certificate is not supported. 
 
 link:https://issues.redhat.com/browse/ACM-7118[ACM-7118]
-
-[#duplicate-local-clusters-in-kubernetes-service-level-overview-api-server-dashboard]
-== Duplicate local-clusters on Service-level Overview dashboard
-
-When various hub clusters deploy {acm-short} observability using the same S3 storage, _duplicate_ `local-clusters` can be detected and displayed within the _Kubernetes/Service-Level Overview/API Server_ dashboard. The duplicate clusters affect the results within the following panels: _Top Clusters_, _Number of clusters that has exceeded the SLO_, and _Number of clusters that are meeting the SLO_. The `local-clusters` are unique clusters associated with the shared S3 storage. To prevent multiple `local-clusters` from displaying within the dashboard, it is recommended for each unique hub cluster to deploy observability with a S3 bucket specifically for the hub cluster.
-
-link:https://issues.redhat.com/browse/ACM-16885[ACM-16885]
-
-[#observability-endpoint-operator-fails-to-pull-image]
-== Observability endpoint operator fails to pull image
-
-The Observability endpoint operator fails if you create a pull-secret to deploy to the `MultiClusterObservability` custom resource and there is no pull-secret in the `open-cluster-management-observability` namespace. When you import a new cluster, or import a Hive cluster that is created with {acm-short}, you need to manually create a pull-image secret on the managed cluster.
-
-For more information, see link:../observability/observability_enable.adoc#enabling-observability[Enabling observability].
-
-link:https://issues.redhat.com/browse/ACM-9259[ACM-9259]
-
-[#missing-data-roks]
-== There is no data from Red Hat OpenShift Kubernetes Service on IBM Cloud clusters
-
-{acm-short} observability does not display data from a Red Hat OpenShift Kubernetes Service on IBM Cloud cluster on some panels within built-in dashboards. This is because Red Hat OpenShift Kubernetes Service on IBM Cloud does not expose any API server metrics from servers they manage. 
-
-The following Grafana dashboards contain panels that do not support these clusters: `Kubernetes/API server`, `Kubernetes/Compute Resources/Workload`, `Kubernetes/Compute Resources/Namespace(Workload)`
-
-link:https://issues.redhat.com/browse/ACM-12114[ACM-12114]
-
-[#missing-etcd-data-roks]
-== There is no etcd data from Red Hat OpenShift Kubernetes Service on IBM Cloud clusters
-
-For Red Hat OpenShift Kubernetes Service on IBM Cloud clusters, {acm-short} observability does not display data in the _etcd_ panel of the dashboard.
-
-link:https://issues.redhat.com/browse/ACM-12114[ACM-12114]
-
-[#observability-annotation-query-failed]
-== Metrics are unavailable in the Grafana console
-
-* Annotation query failed in the Grafana console: 
-
-+
-When you search for a specific annotation in the Grafana console, you might receive the following error message due to an expired token: 
-+
-`"Annotation Query Failed"`
-+
-Refresh your browser and verify you are logged into your hub cluster.
-
-* Error in _rbac-query-proxy_ pod:
-+
-Due to unauthorized access to the `managedcluster` resource, you might receive the following error when you query a cluster or project:
-+
-`no project or cluster found`
-+
-Check the role permissions and update appropriately. See link:../secure_clusters/rbac.adoc#role-based-access-control[Role-based access control] for more information. 
-
-link:https://issues.redhat.com/browse/ACM-5625[ACM-5625]
-
-[#prometheus-data-loss]
-== Prometheus data loss on managed clusters
-
-By default, Prometheus on OpenShift uses ephemeral storage. Prometheus loses all metrics data whenever it is restarted.
-
-When observability is enabled or disabled on {ocp-short} managed clusters that are managed by {acm-short}, the observability endpoint operator updates the `cluster-monitoring-config` `ConfigMap` by adding additional alertmanager configuration that restarts the local Prometheus automatically. 
-
-link:https://issues.redhat.com/browse/ACM-17137[ACM-17137]
-
-[#error-ingesting-out-of-order-samples]
-== Error ingesting out-of-order samples
-
-Observability `receive` pods report the following error message:
-
-----
-Error on ingesting out-of-order samples
-----
-
-The error message means that the time series data sent by a managed cluster, during a metrics collection interval is older than the time series data it sent in the previous collection interval. When this problem happens, data is discarded by the Thanos receivers and this might create a gap in the data shown in Grafana dashboards. If the error is seen frequently, it is recommended to increase the metrics collection interval to a higher value. For example, you can increase the interval to 60 seconds.
-
-The problem is only noticed when the time series interval is set to a lower value, such as 30 seconds. Note, this problem is not seen when the metrics collection interval is set to the default value of 300 seconds.
-
-link:https://issues.redhat.com/browse/ACM-15666[ACM-15666]
-
-[#grafana-dev-fails-upgrade]
-== Grafana deployment fails after upgrade
-
-If you have a `grafana-dev` instance deployed in earlier versions before 2.6, and you upgrade the environment to 2.6, the `grafana-dev` does not work. You must delete the existing `grafana-dev` instance by running the following command:
-
-----
-./setup-grafana-dev.sh --clean
-----
-
-Re-create the instance with the following command:
-
-----
-./setup-grafana-dev.sh --deploy
-----
-
-link:https://issues.redhat.com/browse/ACM-25815[ACM-25815]
-
-[#hub-self-management-list-grafana]
-== Enabling _disableHubSelfManagement_ causes empty list in Grafana dashboard
-
-The Grafana dashboard shows an empty label list if the `disableHubSelfManagement` parameter is set to `true` in the `mulitclusterengine` custom resource. You must set the parameter to `false` or remove the parameter to see the label list. See link:../install/adv_config_install.adoc#disable-hub-self-management[disableHubSelfManagement] for more details.
-
-link:https://issues.redhat.com/browse/ACM-4942[ACM-4942]
-
-[#fqdn-not-supported]
-=== Endpoint URL cannot have fully qualified domain names (FQDN)
-
-When you use the FQDN or protocol for the `endpoint` parameter, your observability pods are not enabled. The following error message is displayed:
-
-[source,bash]
-----
-Endpoint url cannot have fully qualified paths
-----
-
-Enter the URL without the protocol. Your `endpoint` value must resemble the following URL for your secrets:
-
-[source,bash]
-----
-endpoint: example.com:443
-----
-
-link:https://issues.redhat.com/browse/ACM-4806[ACM-4806]
 
 [#grafana-downsampled-mismatch]
 === Grafana downsampled data mismatch
@@ -210,13 +127,6 @@ You must manually update the Thanos Query front-end data source configuration. C
 Your query data appears from the Grafana dashboard.
 
 link:https://issues.redhat.com/browse/ACM-3748[ACM-3748]
-
-[#metrics-proxy-not-detected]
-== Metrics collector does not detect proxy configuration
-
-A proxy configuration in a managed cluster that you configure by using the `addonDeploymentConfig` is not detected by the metrics collector. As a workaround, you can enable the proxy by removing the managed cluster `ManifestWork`. Removing the `ManifestWork` forces the changes in the `addonDeploymentConfig` to be applied.
-
-link:https://issues.redhat.com/browse/ACM-8488[ACM-8488]
 
 [#limits-custom-obs-urls]
 == Limitations when using custom managed cluster Observatorium API or Alertmanager URLs

@@ -19,12 +19,14 @@ Learn about known issues and limitations during {mce-short} installation.
 [#unclaimed-hive-clusters]
 === Unclaimed Hive clusters might be recreated during ClusterPool custom resource definition changes
 
-During a {mce-short} upgrade or modification to the `ClusterPool` custom resource definition, Hive might delete and recreate all unclaimed clusters. This is expected behavior and ensures that unclaimed clusters reflect the latest configuration defined in the updated `ClusterPool` resource specification.
+During a {mce-short} upgrade or modification to the `ClusterPool` custom resource definition, Hive might delete and re-create all unclaimed clusters. This is expected behavior and ensures that unclaimed clusters reflect the latest configuration defined in the updated `ClusterPool` resource specification.
 
 link:https://issues.redhat.com/browse/ACM-21686[ACM-21686]
 
 [#installnamespace-field-limit]
 === _installNamespace_ field can only have one value
+
+*Note:* The `spec.installNamespace` field is deprecated. See link:../release_notes/mce_deprecate_remove.adoc#mce-deprecation-removal[Product deprecations and removals] to learn more.
 
 When enabling the `managed-serviceaccount` add-on, the `installNamespace` field in the `ManagedClusterAddOn` resource must have `open-cluster-management-agent-addon` as the value. Other values are ignored. The `managed-serviceaccount` add-on agent is always deployed in the `open-cluster-management-agent-addon` namespace on the managed cluster.
 
@@ -33,35 +35,138 @@ link:https://issues.redhat.com/browse/ACM-7523[ACM-7523]
 [#cluster-issues-mce]
 == Cluster management
 
-Learn about Known issues for Cluster lifecycle with {mce-short}, such as issues with creating, discovering, importing, and removing clusters, and more cluster management issues for {mce-short}. 
+Learn about Known issues for Cluster lifecycle with {mce-short}, such as issues with creating, discovering, importing, and removing clusters, and more cluster management issues for {mce-short}.
 
-[#hcp-capi-known-issue]
-=== _cluster-api-provider-aws_ webhooks block hosted control plane deployments
+=== Resource deletion during cluster distribution updates
 
-Hosted control planes for {ocp-short} cannot manage infrastructure resources in AWS because of API conflicts between the `cluster-api-provider-aws` resource and the `hypershift` resource that is installed by the `hypershift-local-hosting` component. 
+When a change occurs in the cluster because of the `Placement` resource, cluster redistribution occurs across multiple `PlacementDecisions` resources. During the sequential update, a cluster is temporarily missing from all `PlacementDecisions` resources.
 
-To use the `hypershift` component for the AWS platform hosted clusters, _do not_ enable the `cluster-api` and `cluster-api-provider-aws` components, which are set to `enabled: false` by default. See the following default settings with the components disabled:
+Controllers that monitor `PlacementDecisions` resources identify this temporary deletion as cluster removal. This sequence leads to unnecessary resource deletion and recreation. For example, the `addon-management-controller` deletes and re-creates `ManagedClusterAddOns`, which cause workload disruption.
+
+link:https://issues.redhat.com/browse/ACM-27799[ACM-27799]
+
+[#hypershift-capi-conflict]
+=== HyperShift operator and Cluster API components conflict
+
+{acm-short} and {mce-short} enable the `hypershift` and `hypershift-local-hosting` components by default. 
+
+To manage {rosa} clusters by using the `cluster-api` and `cluster-api-provider-aws` components, you must disable the `hypershift` and `hypershift-local-hosting` components to prevent API conflicts.
+
+When you enable and then disable the `cluster-api` and `cluster-api-provider-aws` components, custom resource definitions of a higher version might remain in the cluster.
+
+You must manually remove the custom resource definitions before you re-enable the `hypershift-local-hosting` component. Use the following command to remove the custom resource definitions:
+
+[source,bash]
+----
+oc delete crd <crd-name>
+----
+
+Remove the following custom resource definitions:
+
+* `clusterresourcesetbindings.addons.cluster.x-k8s.io`
+* `clusterresourcesets.addons.cluster.x-k8s.io`
+* `clusters.cluster.x-k8s.io`
+* `clusterclasses.cluster.x-k8s.io`
+* `machines.cluster.x-k8s.io`
+* `machinesets.cluster.x-k8s.io`
+* `machinedeployments.cluster.x-k8s.io`
+* `machinepools.cluster.x-k8s.io`
+* `machinehealthchecks.cluster.x-k8s.io`
+* `machinedrainrules.cluster.x-k8s.io`
+
+[#hypershift-infra-node-config]
+=== HyperShift operator does not receive infrastructure node configuration
+
+When {acm-short} or {mce-short} is installed with infrastructure node selection configured, by using `nodeSelector` and `tolerations` for infrastructure node, the HyperShift operator deployment does not receive the settings. 
+
+Even if the `multicluster engine` subscription is configured to place pods on infrastructure nodes by using `nodeSelector` and `tolerations`, the HyperShift operator pods are scheduled on regular worker nodes instead of the designated infrastructure nodes.
+
+The HyperShift operator deployment does not automatically propagate the infrastructure node placement configuration from the subscription.
+
+After you install the HyperShift add-on, manually patch the HyperShift operator deployment to add the infrastructure node selector and tolerations. See the following example:
 
 [source,yaml]
 ----
-      - configOverrides: {}
-        enabled: false
-        name: cluster-api
-      - configOverrides: {}
-        enabled: false
-        name: cluster-api-provider-aws 
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+      tolerations:
+      - key: node-role.kubernetes.io/infra
+        operator: Exists
+        effect: NoSchedule
 ----
 
-Ensure that if `hypershift-local-hosting` is enabled, as it is in the following YAML sample, that the previous components are not enabled. 
+To resolve the problem, apply a patch to the operator deployment in the `hypershift` namespace by running the following command with the specifications for your infrastructure nodes:
 
+[source,bash]
+----
+oc patch deployment operator -n hypershift --type=merge -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/infra":""},"tolerations":[{"key":"node-role.kubernetes.io/infra","operator":"Exists","effect":"NoSchedule"}]}}}}'
+----
+
+The manual patch ensures that the operator pods are placed on the correct nodes to comply with your infrastructure requirements.
+
+link:https://issues.redhat.com/browse/ACM-24191[ACM-24191]
+
+[#hcp-fails-rosa]
+=== HyperShift installation fails on {rosa} due to admission webhook error
+
+When you install {mce} 2.10 on {rosa}, the HyperShift installation job might fail repeatedly with an admission webhook error similar to the following message: `namespace-validation.managed.openshift.io denied the request`. See the following explanations for the error:
+
+* The installation process attempts to create a `hypershift` namespace that includes the `openshift.io/cluster-monitoring: "true"` label. 
+
+* The {rosa} managed admission webhooks prevent users from modifying protected labels on namespaces, including the `cluster-monitoring` label.
+
+* The platform monitoring flag defaults to monitoring the operator, which adds the `cluster-monitoring` label to the `hypershift` namespace. 
+
+* In managed environments, such as {rosa}, the service provider typically handles platform-level monitoring. Therefore, this monitoring is not required and conflicts with namespace protection policies.
+
+To resolve this issue, create a `ConfigMap` in the `local-cluster` namespace to disable platform monitoring by following these steps:
+
+. Create a YAML file for the `ConfigMap` with the following content:
+
++
 [source,yaml]
 ----
-      - configOverrides: {}
-        enabled: true
-        name: hypershift-local-hosting 
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: hypershift-operator-install-flags
+  namespace: local-cluster
+data:
+  installFlagsToAdd: "--platform-monitoring=None"
+  installFlagsToRemove: ""
 ----
 
-link:https://issues.redhat.com/browse/ACM-21708[ACM-21708]
+. Apply the `ConfigMap` to your cluster. Run the following command, replacing `<filename>` with the name of your YAML file:
+
++
+[source,bash]
+----
+oc apply -f <filename>.yaml
+----
+
+This configuration instructs the HyperShift installer to skip the `cluster-monitoring` label, which avoids the admission webhook conflict.
+
+link:https://issues.redhat.com/browse/ACM-26040[ACM-26040]
+
+[#cluster-curator-stuck-hub-upgrade]
+=== _ClusterCurator_ status becomes stuck when upgrading the hub cluster
+
+When you use the `ClusterCurator` resource to upgrade the hub cluster, the `ClusterCurator` status becomes stuck, even if the upgrade is successful. During upgrade, the hub cluster reboots, which stops the `Job` resource pod monitoring.
+
+To work around the issue, manually upgrade the hub cluster. If you already used the cluster curator to upgrade the hub cluster, you must delete the `ClusterCurator` resource hub cluster namespace so that future upgrades appear in the console.
+
+link:https://issues.redhat.com/browse/ACM-26863[ACM-26863]
+
+[#clc-state-metrics-pod-crash]
+=== The _clusterlifecycle-state-metrics_ pod might crash and restart
+
+The `clusterlifecycle-state-metrics` pod in the `multicluster-engine` namespace might crash and restart. The behavior is inconsistent, but typically happens when managed cluster metrics are refreshed at the same time that you create, hibernate, or resume a Hive `ClusterDeployment`.
+
+After the crash, the pod restarts and functions normally. The crash does not affect cluster operations, but it can affect managed cluster metrics.
+
+If you restart while Prometheus is scraping metrics, you might lose the data for that moment.
+
+link:https://issues.redhat.com/browse/ACM-26874[ACM-26874]
 
 [#klusterlet-noexecute-taint]
 === Klusterlet add-on does not tolerate `node-role.kubernetes.io/infra` taint with `NoExecute` effect
@@ -84,7 +189,7 @@ link:https://issues.redhat.com/browse/ACM-9128[ACM-9128]
 
 After you delete a `ManagedClusterSet`, the label that is added to each managed cluster that associates the cluster to the cluster set is not automatically removed. Manually remove the label from each of the managed clusters that were included in the deleted managed cluster set. The label resembles the following example: `cluster.open-cluster-management.io/clusterset:<ManagedClusterSet Name>`.
 
-link:https://issues.redhat.com/browse/ACM-20727[ACM-20727]
+link:https://github.com/stolostron/backlog/issues/20727[GH-20727]
 
 [#hive-cluster-claim]
 === ClusterClaim error
@@ -101,7 +206,7 @@ You can delete the invalid claim.
 
 If the malformed claim is deleted, claims begin successfully reconciling again without any further interaction.
 
-link:https://issues.redhat.com/browse/ACM-19968[ACM-19968]
+link:https://github.com/stolostron/backlog/issues/19968[GH-19968]
 
 [#clusterimageset-fast-channel]
 === The product channel out of sync with provisioned cluster
@@ -110,7 +215,7 @@ The `clusterimageset` is in `fast` channel, but the provisioned cluster is in `s
 
 Change to the right channel in the {ocp-short} console. Click **Administration** > **Cluster Settings** > **Details Channel**.
 
-link:https://issues.redhat.com/browse/ACM-17790[ACM-17790]
+link:https://github.com/stolostron/backlog/issues/18380[GH-18380]
 
 [#cluster-provision-fails-ansible-proxy]
 === Cluster provision with Ansible automation fails in proxy environment
@@ -120,21 +225,21 @@ An Automation template that is configured to automatically provision a managed c
 * The hub cluster has cluster-wide proxy enabled. 
 * The {aap-short} can only be reached through the proxy.
 
-link:https://issues.redhat.com/browse/ACM-17659[ACM-17659]
+link:https://github.com/stolostron/backlog/issues/17659[GH-17659]
 
 [#no-delete-cluster-namespace-before-remove-cluster]
 === Cannot delete managed cluster namespace manually
 
 You cannot delete the namespace of a managed cluster manually. The managed cluster namespace is automatically deleted after the managed cluster is detached. If you delete the managed cluster namespace manually before the managed cluster is detached, the managed cluster shows a continuous terminating status after you delete the managed cluster. To delete this terminating managed cluster, manually remove the finalizers from the managed cluster that you detached.
 
-link:https://issues.redhat.com/browse/ACM-13474[13474]
+link:https://github.com/stolostron/backlog/issues/13474[GH-13474]
 
 [#automatic-secret-updates-for-provisioned-clusters-is-not-supported]
 === Automatic secret updates for provisioned clusters is not supported
 
 When you change your cloud provider access key on the cloud provider side, you also need to update the corresponding credential for this cloud provider on the console of {mce-short}. This is required when your credentials expire on the cloud provider where the managed cluster is hosted and you try to delete the managed cluster.
 
-link:https://issues.redhat.com/browse/ACM-3702[ACM-3702]
+link:https://github.com/stolostron/backlog/issues/3706[GH-3706]
 
 [#cluster-might-not-be-destroyed]
 === Process to destroy a cluster does not complete
@@ -166,14 +271,14 @@ oc delete ns <namespace>
 +
 Replace `_namespace_` with the namespace of the managed cluster.
 
-link:https://issues.redhat.com/browse/ACM-4748[ACM-4748]
+link:https://github.com/stolostron/backlog/issues/4748[GH-4748]
 
 [#no-upgrade-os-on-osd]
 === Cannot upgrade {ocp-short} managed clusters on {ocp-short} Dedicated with the console
 
 You cannot use the {acm-short} console to upgrade {ocp-short} managed clusters that are in the {ocp-short} Dedicated environment.
 
-link:https://issues.redhat.com/browse/ACM-8922[ACM-8922]
+link:https://github.com/stolostron/backlog/issues/8922[GH-8922]
 
 [#non-ocp-logs]
 === Non-{ocp-short} managed clusters require _ManagedServiceAccount_ or _LoadBalancer_ for pod logs 
@@ -215,7 +320,7 @@ status:
 
 . Create a proxy server to expose the `bootArtifacts` with short URLs.
 
-. Copy the `bootArtifacts` and add them them to the proxy by running the following commands:
+. Copy the `bootArtifacts` and add them to the proxy by running the following commands:
 
 +
 ----
@@ -225,7 +330,7 @@ do curl -k oc get infraenv qe2 -ojsonpath="{.status.bootArtifacts.${artifact}}"`
 
 . Add the `ipxeScript` artifact proxy URL to the `bootp` parameter in `libvirt.xml`.
 
-link:https://issues.redhat.com/browse/ACM-25157[ACM-25157]
+link:https://github.com/stolostron/backlog/issues/25157[GH-25157]
 
 [#managedclusterset-api-limitation]
 === ManagedClusterSet API specification limitation
@@ -248,56 +353,6 @@ You can specify a custom ingress domain by using the `ClusterDeployment` resourc
 
 link:https://issues.redhat.com/browse/ACM-6279[ACM-6279]
 
-[#managedclusteraddon-status-stuck]
-=== `ManagedClusterAddon` status becomes stuck
-
-If you define configurations in the `ManagedClusterAddon` to override some configurations in the `ClusterManagementAddon`, the `ManagedClusterAddon` might become stuck at the following status:
-
-[source,bash]
-----
-progressing... mca and work configs mismatch
-----
-
-When you check the `ManagedClusterAddon` status, a part of the configurations has an empty `spec` hash, even if the configurations exist. See the following example:
-
-[source,yaml]
-----
-status:
-  conditions:
-  - lastTransitionTime: "20xx-09-09T16:08:42Z"
-    message: progressing... mca and work configs mismatch
-    reason: Progressing
-    status: "True"
-    type: Progressing
-...
-  configReferences:
-  - desiredConfig:
-      name: deploy-config
-      namespace: open-cluster-management-hub
-      specHash: b81380f1f1a1920388d90859a5d51f5521cecd77752755ba05ece495f551ebd0
-    group: addon.open-cluster-management.io
-    lastObservedGeneration: 1
-    name: deploy-config
-    namespace: open-cluster-management-hub
-    resource: addondeploymentconfigs
-  - desiredConfig:
-      name: cluster-proxy
-      specHash: ""
-    group: proxy.open-cluster-management.io
-    lastObservedGeneration: 1
-    name: cluster-proxy
-    resource: managedproxyconfigurations 
-----
-
-To resolve the issue, delete the `ManagedClusterAddon` by running the following command to reinstall and recover the `ManagedClusterAddon`. Replace `<cluster-name>` with the `ManagedClusterAddon` namespace. Replace `<addon-name>` with the `ManagedClusterAddon` name:
-
-[source,bash]
-----
-oc -n <cluster-name> delete managedclusteraddon <addon-name>
-----
-
-link:https://issues.redhat.com/browse/ACM-14961[ACM-14961]
-
 [#settings-limit-msa-agent]
 === _tolerations_ and _nodeSelector_ settings do not affect the _managed-serviceaccount_ agent
 
@@ -314,6 +369,7 @@ If the `managed-serviceaccount` add-on is required, you can work around the issu
 To learn more about how to use the `addonDeploymentConfig` custom resource to configure `tolerations` and `nodeSelector` for add-on, see link:../../add-ons/configure_klusterlet_addons.adoc#configure-klusterlet-addons[Configuring klusterlet add-ons].
 
 link:https://issues.redhat.com/browse/ACM-7523[ACM-7523]
+//this one doesn't match the issue we attached. GH is not the option here. --bcs 11/2025
 
 [#cluster-issues-cim]
 == Central infrastructure management

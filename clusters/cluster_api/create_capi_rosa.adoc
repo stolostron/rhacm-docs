@@ -1,0 +1,328 @@
+[#create-rosa-hcp-capi-cluster]
+= Creating a {rosa-hcp} cluster with Cluster API
+
+A {rosa-hcp} cluster is a deployment model for {rosa} where the cluster control plane is hosted and managed in a Red Hat Amazon Web Services (AWS) account. Complete the steps in the following topics to create a {rosa-hcp} cluster by using Cluster API. 
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+- You need an AWS access key. See link:https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html[Manage access keys for IAM users] in the AWS documentation to learn more.
+- The AWS {rosa} managed policies are attached to your AWS user permissions. See link:https://docs.aws.amazon.com/rosa/latest/userguide/security-iam-awsmanpol.html[AWS managed policies for ROSA] in the AWS documentation to learn more.
+- You need the OpenShift CLI (`oc`). See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/cli_tools/openshift-cli-oc[OpenShift CLI (oc)] in the {ocp-short} documentation to learn more.
+- You need the ROSA CLI (`rosa`). See link:https://docs.redhat.com/en/documentation/red_hat_openshift_service_on_aws/4/html/cli_tools/rosa-cli[ROSA CLI] in the {rosa} documentation to learn more. 
+
+== Creating a service account
+
+You need a service account before creating a {rosa-hcp} cluster. If you have a service account, you do not need to complete this section. 
+
+.Procedure
+
+Complete the following steps:
+
+. Create a service account by navigating to *Identity & Access Management* > *Service Accounts* in the console.
+
+. Click the *Create service account* button.
+
+. For every new service account you create, activate the account by using the ROSA CLI.
+
+.. Log in to your new service account. Run the following command. Replace values where needed:
+
++
+[source,bash]
+----
+rosa login --client-id <your-client-id> --client-secret <your-client-secret>
+----
+
+.. Activate your service account. Run the following command:
+
++
+[source,bash]
+----
+rosa whoami
+----
+
+== Setting AWS credentials
+
+You need to set your AWS credentials before creating a {rosa-hcp} cluster. Complete the following steps:
+
+. If you are not using multi-factor authentication with AWS, set your AWS credentials by using the AWS access key you created. Run the following command. Replace values where needed:
+
++
+[source,bash]
+----
+echo '[default]
+aws_access_key_id = <your-access-key>
+aws_secret_access_key = <your-secret-access-key>
+region = us-east-1
+' | base64 -w 0
+----
+
+. If you are using multi-factor authentication with AWS, run the following command. Replace values where needed:
+
++
+[source,bash]
+----
+echo '[default]
+aws_access_key_id = <your-access-key>
+aws_secret_access_key = <your-secret-access-key>
+aws_session_token= <your-aws-session-token>
+region = us-east-1
+' | base64 -w 0
+----
+
+. Update the `capa-manager-bootstrap-credentials` secret.
+
+.. Copy the output of the previous command and add the output to the `capa-manager-bootstrap-credentials` secret. Run the following command to edit the secret:
++
+[source,bash]
+----
+oc edit secret -n multicluster-engine capa-manager-bootstrap-credentials
+----
+
+.. Add your output to the `credentials` field. See the following example: 
++
+[source,bash]
+----
+apiVersion: v1
+data:
+  credentials: <your-aws-credentials>
+kind: Secret
+metadata:
+	name: capa-manager-bootstrap-credentials
+	namespace: multicluster-engine
+----
+*Optional:* If you want to use AWS IAM roles with your service account to authenticate the `capa-controller-manager`, see the Additional resources section and complete the steps in _Switching from AWS credentials to IAM roles on your Cluster API managed cluster (Technology Preview)_.
+
+. Restart the `capa-controller-manager` deployment. Run the following command:
+
++
+[source,bash]
+----
+oc rollout restart deployment capa-controller-manager -n multicluster-engine
+----
+
+== Authenticating {ocm}
+
+The Cluster API Provider for AWS controller requires {ocm} credentials to provision {rosa-hcp}. Complete the following steps:
+
+. Create a Kubernetes secret in the target namespace with the service account credentials you created. The `ROSAControlPlane` resource references this secret during provisioning. Run the following command. Replace values where needed:
+
++   
+[source,bash]
+----
+oc create namespace <your-rosa-hcp-namespace>
+  oc -n <your-rosa-hcp-namespace> create secret generic rosa-creds-secret \
+    --from-literal=ocmClientID='....' \
+    --from-literal=ocmClientSecret='eyJhbGciOiJIUzI1NiIsI....' \
+    --from-literal=ocmApiUrl='https://api.openshift.com'
+----
+
+. *Optional:* You can consume the secret without referencing it from your `ROSAControlPlane` resource by calling the secret `rosa-creds-secret` and creating it in the `multicluster-engine` namespace. Run the following command:
+
++
+[source,bash]
+----
+oc -n multicluster-engine create secret generic rosa-creds-secret \
+  --from-literal=ocmClientID='....' \
+  --from-literal=ocmClientSecret='eyJhbGciOiJIUzI1NiIsI....' \
+  --from-literal=ocmApiUrl='https://api.openshift.com'
+----
+
+== Creating a {rosa-hcp} cluster
+
+After creating a service account, setting your AWS credentials, and authenticating your {ocm} credentials, complete the following steps to create a {rosa-hcp} cluster:
+
+. Create the `AWSClusterControllerIdentity` resource. See the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: AWSClusterControllerIdentity
+metadata:
+  name: "default"
+spec:
+  allowedNamespaces: {}
+----
+
+. Create the `ROSARoleConfig` resource . See the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: ROSARoleConfig
+metadata:
+  name: "role-config"
+  namespace: "ns-rosa-hcp"
+spec:
+  accountRoleConfig:
+    prefix: "rosa"
+    version: "4.20.0"  
+  operatorRoleConfig:
+    prefix: "rosa"
+  credentialsSecretRef:
+    name: rosa-creds-secret
+  oidcProviderType: Managed
+----
+
+. Create the `ROSANetwork` resource. See the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: ROSANetwork
+metadata:
+  name: "rosa-vpc"
+  namespace: "ns-rosa-hcp"
+  spec:
+    region: "us-west-2"
+    stackName: "rosa-hcp-net"
+    availabilityZones:
+    - "us-west-2a"
+    - "us-west-2b"
+    - "us-west-2c"
+    cidrBlock: 10.0.0.0/16
+    identityRef:
+      kind: AWSClusterControllerIdentity
+      name: default
+----
+
+. Verify that the `ROSARoleConfig` resource is created. Check that the `ROSARoleConfig` status contains the `accountRolesRef`, `oidcID`, `oidcProviderARN`, and `operatorRolesRef`. Run the following command:
+
++
+[source,bash]
+----
+oc get rosaroleconfig  -n ns-rosa-hcp role-config -o yaml
+----
+
+. Verify that the `ROSANetwork` resource is created. The `ROSANetwork` status contains the created subnets. Run the following command:
+
++
+[source,bash]
+----
+oc get rosanetwork -n ns-rosa-hcp rosa-vpc -o yaml
+----
+
+. Create the required custom resources for the `ROSAControlPlane` resource.
+
+.. Create the `ManagedCluster` resource with the following YAML file content:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: rosa-hcp-1
+  spec:
+    hubAcceptsClient: true
+----
+
+.. Create the `Cluster` resource with the following YAML file content:
++
+[source,yaml]
+----
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: "rosa-hcp-1"
+  namespace: "ns-rosa-hcp"
+  spec:
+    clusterNetwork:
+      pods:
+        cidrBlocks: ["192.168.0.0/16"]
+    infrastructureRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+      kind: ROSACluster
+      name: "rosa-hcp-1"
+      namespace: "ns-rosa-hcp"
+    controlPlaneRef:
+      apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+      kind: ROSAControlPlane
+      name: "rosa-cp-1"
+      namespace: "ns-rosa-hcp"
+----
+
+. Create the `ROSACluster` resource with the following YAML file content:
+
++
+[source,yaml]
+----
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: ROSACluster
+metadata:
+  name: "rosa-hcp-1"
+  namespace: "ns-rosa-hcp"
+  spec: {}
+----
+
+. Create the `ROSAControlPlane` resource with the following YAML file content. Make sure the `region` matches the AWS region you used to create the `ROSANetwork` resource:
+
++
+[source,yaml]
+----
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+kind: ROSAControlPlane
+metadata:
+  name: "rosa-cp-1"
+  namespace: "ns-rosa-hcp"
+  spec:
+    credentialsSecretRef:
+      name: rosa-creds-secret
+    rosaClusterName: rosa-hcp-1
+    domainPrefix: rosa-hcp
+    rosaRoleConfigRef:
+      name: role-config
+    version: "4.20.0"
+    region: "us-west-2"
+    rosaNetworkRef:
+      name: "rosa-vpc"
+    network:
+      machineCIDR: "10.0.0.0/16"
+      podCIDR: "10.128.0.0/14"
+      serviceCIDR: "172.30.0.0/16"
+    defaultMachinePoolSpec:
+      instanceType: "m5.xlarge"
+      autoscaling:
+        maxReplicas: 6
+        minReplicas: 3
+    additionalTags:
+      env: "demo"
+      profile: "hcp"
+----
+
+. Check the `ROSAControlPlane` status. Run the following command. Make sure the `READY` column says `true`:
+
++
+[source,bash]
+----
+oc get ROSAControlPlane rosa-cp-1 -n ns-rosa-hcp
+----
++
+*Note:* The {rosa-hcp} cluster might need up to 40 minutes to fully provision.
+
+. After the `ROSAControlPlane` resource provisioning is completed, verify the `ROSAMachinePool` is created. Run the following command:
+
++   
+[source,bash]
+----
+oc get ROSAMachinePool -n ns-rosa-hcp
+----
++
+The following output might be displayed:
+
++
+----
+NAMESPACE     NAME        READY   REPLICAS
+ns-rosa-hcp   workers-0   true    1
+ns-rosa-hcp   workers-1   true    1
+ns-rosa-hcp   workers-2   true    1
+----
++
+*Note:* The default available `ROSAMachinePools` count is based on the assigned availability zones.
+
+== Additional resources
+
+- If you want to use AWS IAM roles with your service account to authenticate the `capa-controller-manager`, complete the steps in xref:switch_iam_roles.adoc#switch-iam-roles-capi[Switching from AWS credentials to IAM roles on your Cluster API managed cluster (Technology Preview)].

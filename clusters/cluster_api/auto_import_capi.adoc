@@ -1,0 +1,111 @@
+[#auto-import-capi]
+= Enabling automatic import for Cluster API clusters (Technology Preview)
+
+You can save time by automatically importing clusters that you provision by using the Cluster API.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* You need the `MultiClusterEngine` resource either from the {acm-short} installation, or the {mce-short} standalone installation.
+
+== Preparing your hub cluster
+
+Before you can automatically import provisioned clusters with the Cluster API, you must complete the following steps:
+
+. Enable the `ClusterImporter` feature gate in the `ClusterManager` resource by adding the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: ClusterManager
+metadata:
+  name: cluster-manager
+spec:
+  registrationConfiguration:
+    featureGates:
+    - feature: ClusterImporter
+      mode: Enable
+----
+
+. Configure the import controller to create cluster import configuration secrets by setting `clusterImportConfig` to `true`. Your `ConfigMap` resource might resemble the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: import-controller-config
+  namespace: multicluster-engine
+data:
+  clusterImportConfig: "true"
+----
+
+.. If you do not have a `ConfigMap` resource yet, run the following command to apply the changes. Replace `<filename>` with your file name:
+
++
+[source,bash]
+----
+oc apply -f <filename>.yaml
+----
+
+.. If you already have a `ConfigMap` resource, run the following command to apply the changes:
+
++
+[source,bash]
+----
+oc patch configmap import-controller-config -n multicluster-engine --type merge -p '{"data":{"clusterImportConfig":"true"}}'
+----
+
+. Bind the Cluster API manager permissions to the import controller service account. Add the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-manager-registration-capi
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: capi-manager-role
+subjects:
+- kind: ServiceAccount
+  name: registration-controller-sa
+  namespace: open-cluster-management-hub
+----
+
+. Run the following command to apply the changes. Replace `<filename>` with your file name:
+
++
+[source,bash]
+----
+oc apply -f <filename>.yaml
+----
+
+== Creating the _ManagedCluster_ resource
+
+To enable automatic import, create a `ManagedCluster` resource with the same name and namespace as your Cluster API cluster. Complete the following steps:
+
+. Create a `ManagedCluster` resource  by adding the following YAML sample. Add the name of your Cluster API cluster to the `name` parameter:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: <clusterapi_cluster_name>
+spec:
+  hubAcceptsClient: true
+----
+. Run the following command to apply the changes. Replace `<filename>` with your file name:
+
++
+[source,bash]
+----
+oc apply -f <filename>.yaml
+----

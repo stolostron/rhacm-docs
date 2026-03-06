@@ -1,13 +1,17 @@
 [#backup-validation-using-a-policy]
 = Validating your backup or restore configurations
  
-When you set the `cluster-backup` option to `true` on the `MultiClusterHub` resource, {mce-short} installs the cluster backup and restore operator Helm chart that is named the `cluster-backup-chart`. This chart installs the `backup-restore-enabled` and `backup-restore-auto-import` policies. Use these policies to view information about issues with your backup and restore components.
+When you set the `cluster-backup` option to `true` on the `MultiClusterHub` resource, {mce-short} installs the cluster backup and restore operator Helm chart that is named the `cluster-backup-chart`. This chart installs the `backup-restore-enabled` policy. Use the policy to view information about issues with your backup and restore components.
 
 *Important:* A hub cluster is automatically imported and self-managed as the `local-cluster`. If you disable self-management by setting `disableHubSelfManagement` to `true` on the `MultiClusterHub` resource, the local cluster feature is disabled, the `backup-restore-enabled` policy is not placed on the hub cluster, and the policy templates do not produce any reports.
 
 If a hub cluster is managed by a global hub cluster, or if it is installed on a managed cluster instance, the self-management option is disabled by setting the `disableHubSelfManagement` to `true`. In this instance, you can still enable the `backup-restore-enabled` policy on the hub cluster. Set the `is-hub=true` label on the `ManagedCluster` resource that represents the local cluster. 
 
-The `backup-restore-enabled` policy includes a set of templates that check for the following constraints:
+The `backup-restore-enabled` policy validates the {acm-short} hub cluster backup and restore configuration and applies to local hub clusters, global hub clusters, and managed clusters where the {acm-short} hub cluster is installed. The policy includes a set of templates that check for the following constraints:
+
+- *Cluster backup component validation*
++
+* `acm-cluster-backup-enabled` template checks if the `cluster-backup` component is enabled in the `MultiClusterHub` resource. The template validates that the backup functionality has the correct configuration for the `MultiClusterHub` resource. If the `cluster-backup` component is disabled with the `enabled: false` flag in the `spec.overrides.components` field of the `MultiClusterHub` resource, the policy becomes  `noncompliant` and displays instructions for enablement.
 
 - *OADP channel validation*
 +
@@ -67,15 +71,13 @@ For a definition of the `BackupCollision`, see xref:../backup_restore/backup_sch
 +
 ** The `acm-validation-policy-schedule` backups are set to expire after you set a time for the backups cron schedule. If no cron job is running to create backups, the old `acm-validation-policy-schedule` backup is deleted because it expired and a new one is not created. As a result, if no `acm-validation-policy-schedule` backups exists, there are no active cron jobs generating backups.
 
-The `backup-restore-auto-import` policy includes a set of templates that check for the following constraints:
-
 - *Auto import secret validation*
 +
-* The `auto-import-account-secret` template checks whether a `ManagedServiceAccount` secret is created in the managed cluster namespaces other than the `<your-local-cluster-name>` namespace. The backup controller regularly scans for imported managed clusters. As soon as a managed cluster is discovered, the backup controller creates the `ManagedServiceAccount` resource in the managed cluster namespace. This process initiates token creation on the managed cluster. However, if the managed cluster is not accessible at the time of this operation, the `ManagedServiceAccount` is unable to create the token. For example, if the managed cluster is hibernating, it is unable to create the token. So, if a hub backup is executed during this period, the backup then lacks a token for auto-importing the managed cluster.
+* The `auto-import-account-secret` template checks whether a `ManagedServiceAccount` secret is created in the managed cluster namespaces other than the `<your-local-cluster-name>` namespace. The backup controller regularly scans for imported managed clusters. When a managed cluster is discovered, the backup controller creates the `ManagedServiceAccount` resource in the managed cluster namespace. This process starts the token creation on the managed cluster. If the managed cluster is not accessible at the time of this operation, the `ManagedServiceAccount` is unable to create the token. For example, if the managed cluster is hibernating, it is unable to create the token. If you then start a hub cluster backup, the backup lacks a token for automatically importing the managed cluster.
 
 - *Auto import backup label validation*
 +
-* The `auto-import-backup-label` template verifies the existence of a `ManagedServiceAccount` secret in the managed cluster namespaces other than the `<your-local-cluster-name>` namespace. If the template finds the `ManagedServiceAccount` secret, then the template enforces the `cluster.open-cluster-management.io/backup` label on the secret. This label is crucial for including the `ManagedServiceAccount` secrets in {acm-short} backups.
+* The `auto-import-backup-label` template verifies the existence of a `ManagedServiceAccount` secret in the managed cluster namespaces other than the `<your-local-cluster-name>` namespace. If the template finds the `ManagedServiceAccount` secret, then the template enforces the `cluster.open-cluster-management.io/backup` label on the secret. This label is required for including the `ManagedServiceAccount` secrets in {acm-short} backups.
 
 [#protecting-data-using-server-side-encryption]
 == Protecting data using server-side encryption

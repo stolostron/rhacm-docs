@@ -1,0 +1,203 @@
+[#enable-gitops-addon-with-argocd]
+= Enabling {gitops} add-on with _ArgoCD_ agent
+
+The `Agent` mode for the pull model enables the {gitops-short} add-on for `Advanced` pull model with the `ArgoCD` agent to get detailed statuses on the health of your application. Use this `Agent` mode in environments with network restrictions, enhanced security requirements, or when you implement a pull model for application delivery. The advanced pull model is powered by the `ArgoCD` agent and gives you a fully automated {gitops-short} experience. 
+
+To enable the {gitops-short} add-on with the `ArgoCD` agent, complete the following sections: 
+
+.Prerequisites 
+
+* {acm-short} hub cluster installed
+* Managed clusters registered with {acm-short}
+* {gitops-short} operator installed on the hub cluster
+* A `Placement` resource to select target managed clusters
+* `ManagedClusterSet` bound to the target namespace
+* {gitops-short} operator subscription configured with the `ArgoCD` agent environment 
+* The `ArgoCD` custom resource that are configured for the `Agent` mode
+
+== Configuring subscriptions and resources 
+
+To enable the `ArgoCD` agent, you must configure the {gitops-short} operator subscription and the `ArgoCD` custom resource. To configure the necessary subscriptions and resources, complete the following steps:
+
+
+. On the hub cluster only, modify the {gitops-short} operator subscription to include the required environment variables by running the following command:
+
++
+[source,bash]
+----
+oc edit subscription gitops-operator -n openshift-gitops-operator
+----
+
+. Add the following environment variables to the `spec.config.env` file by adding the following YAML sample:
+
++
+[source,yaml]
+----
+spec:
+  config:
+    env:
+    - name: ARGOCD_CLUSTER_CONFIG_NAMESPACES
+      value: openshift-gitops
+    - name: ARGOCD_PRINCIPAL_TLS_SERVER_ALLOW_GENERATE
+      value: "false"
+    - name: ARGOCD_PRINCIPAL_REDIS_SERVER_ADDRESS
+      value: openshift-gitops-redis:6379
+----
+
+. Replace the existing `ArgoCD` custom resource with the compatible `Agent` mode configuration by adding the following YAML sample:
+
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec:
+  controller:
+    enabled: false
+  argoCDAgent:
+    principal:
+      allowedNamespaces:
+      - '*'
+      auth: mtls:CN=system:open-cluster-management:cluster:([^:]+):addon:gitops-addon:agent:gitops-addon-agent
+      enabled: true
+----
+
+. Apply the YAML sample by running the following command:  
+
++
+[source,bash]
+----
+oc apply -f argocd-example.yaml
+----
+
+* *Note:* On the hub cluster only, this configuration disables the traditional `ArgoCD` controller and enables the agent principal with mutual TLS authentication.
+
+== Enabling _ArgoCD_ agent 
+
+Create a `GitOpsCluster` resource to manage the `ArgoCD` agent add-on deployment. The controller controller automatically creates the following resources for each managed cluster selected by the `Placement`
+
+The `GitOpsCluster` controller performs the following operations:
+
+* Creates and automated PKI management 
+* Creates `ArgoCD` cluster secrets configured for agent mode
+* Deploys the Argo CD Agent on each selected managed cluster
+
+To enable the advanced pull model Argo CD Agent architecture, complete the following steps:
+
+. On your managed cluster, create a `GitOpsCluster`` resource with the `ArgoCD` agent enabled by adding the following YAML sample: 
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: gitops-agent-clusters
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: production-clusters
+    namespace: openshift-gitops
+  gitopsAddon:
+    enabled: true
+    argoCDAgent:
+      enabled: true
+----
+
+. Apply the YAML sample by running the following command:  
+
++
+[source,bash]
+----
+oc apply -f gitopscluster-example.yaml
+----
+
+== Verifying the _ArgoCD_ installation 
+
+After the `ArgoCD` agent is successfully deployed, verify the advanced `Pull Model` workflow is completed by creating an application on the hub cluster and confirming it works on the managed cluster. 
+
+To verify the necessary installations and resources for successful deployment, complete the following steps:
+
+. Check the `GitOpsCluster` status for specific `Agent` conditions by running the following command:
+
++
+[source,bash]
+----
+oc get gitopscluster gitops-agent-clusters -n openshift-gitops -o jsonpath='{.status.conditions}' | jq
+----
+
+. Confirm that you see the following condition types in the status:
+
++
+* `Ready`: The `GitOpsCluster` is ready and all the components are functioning. 
+* `PlacementResolved`: The `Placement` reference is resolved and the managed clusters are retrieved. 
+* `ClustersRegistered`: The managed clusters are successfully registered with  the `ArgoCD` server.
+* `AddOnDeploymentConfigsReady`: The `AddOnDeploymentConfigs` are created for all the managed clusters.
+* `ManagedClusterAddOnsReady`: The `ManagedClusterAddons` creates and updates the managed clusters. 
+* `AddOnTemplateReady`: The dynamic `AddOnTemplate` created for the `ArgoCD` agent mode. 
+* `ArgoCDAgentPrereqsReady`: The agent prerequisites are set up.
+* `CertificatesReady`: The TLS certificates are signed.
+* `ManifestWorksApplied`: The CA certificates propagated to managed clusters.
+
+. Create an `ArgoCD` application resource in the managed cluster namespace by adding the following YAML file: 
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guestbook
+  namespace: <managed cluster name>
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/argoproj/argocd-example-apps.git
+    targetRevision: HEAD
+    path: guestbook
+  destination:
+    server: https://<principal-external-ip:port>?agentName=<managed cluster name>
+    namespace: guestbook
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+----
+
+. Apply the YAML sample by running the following command: 
+
++
+[source,bash]
+----
+oc apply -f application-example.yaml 
+----
+
+. On the managed cluster, verify that the application resources are deployed by running the following command:
+
++
+[source,bash]
+----
+oc get all -n guestbook
+----
+
+. On the hub cluster, verify the application status is reflected back to you by running the following command:
+
++
+[source,bash]
+----
+oc get application guestbook -n <managed cluster name>
+----
+
+. Confirm that the status shows `Synced` when the application is successfully deployed.
+
+.Additional resources 
+
+Continue setting up the {gitops-short} add-on by completing xref:../gitops/gitops_manage_addon.adoc#manage-gitops-addon[Managing the {gitops} add-on].
