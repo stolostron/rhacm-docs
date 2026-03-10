@@ -1,37 +1,86 @@
-[#global-hub-ztp-prep]
-= Preparing for ClusterInstance ZTP migration
 
-The Cluster Instance Zero Touch Provisioning (ZTP) migration allows the Multicluster Global Hub to transition cluster management from legacy SiteConfig or BareMetalHost methods to the modern ClusterInstance custom resource.
+[#preparing-hubs-for-migration]
+= Preparing the hub clusters for migration
 
-The migration ensures that managed hubs can handle high-scale environments by standardizing how cluster instances are represented and synchronized across the fleet. This process is essential for maintaining a single point of control while managing a large number of distributed clusters.
-
-
-A successful migration results in consistent resource definitions, improved scalability, and reduced manual configuration for edge cluster deployments.
-
-When a cluster administrator needs to upgrade management capabilities, they prepare the environment for ClusterInstance migration to ensure compatibility and prevent data loss during the transition.
-
-.Key components
-* **Multicluster Global Hub Operator:** Manages the deployment of global hub components.
-* **ClusterInstance CR:** The primary resource used to define and manage cluster lifecycles.
-* **Managed Hub Agent:** Synchronizes migration states between the global hub and regional hubs.
-
+To migrate managed clusters between hub clusters, you must configure the target hub cluster to match the source hub cluster environment and establish connectivity through the multicluster global hub.
 
 .Prerequisites
-* Red Hat Advanced Cluster Management (RHACM) version 2.9 or later is installed.
-* The Multicluster Global Hub operator is running.
-* Access to the global hub cluster with `cluster-admin` privileges.
+
+* Ensure all managed clusters have network connectivity to the target hub cluster.
+* Verify version compatibility:
+** {acm-short} on the source hub must be version _N_. The target hub must be version _N_ to _N+1_ (including EUS support).
+** {ocp-short} 4.x must be installed on both hubs and be compatible with the {acm-short} version.
+** Multicluster global hub (latest stable) must be available for installation on the target hub only.
 
 .Procedure
-. Log in to the global hub cluster.
-. Verify that all managed hubs are in a `Joined` state.
-. Back up existing `SiteConfig` and `ManagedCluster` resources.
-. Disable any automated reconciliation loops that might conflict with the new `ClusterInstance` definitions.
-. Ensure the `OperatorHub` resource has default catalog sources disabled if a restricted network is used:
+
+. Install the {acm-short} operator on the target hub from the OperatorHub. See link:https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.15/html/install/installing-the-operator-on-the-target-hub[Installing the operator on the target hub].
+
+. Create a YAML file named `mch-siteconfig.yaml` to enable the `siteconfig` operator as you see in the following example:
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: open-cluster-management
+spec:
+  overrides:
+    components:
+      - name: siteconfig
+        enabled: true
+----
+
+. Apply the `mch-siteconfig.yaml` file to your cluster. Run the following command:
+
 +
 [source,bash]
 ----
-oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+oc apply -f mch-siteconfig.yaml
 ----
 
-.Results
-The environment is ready for the creation of ClusterInstance resources.
+. Verify that the `siteconfig-controller-manager` deployment is available. Run the following command:
+
++
+[source,bash]
+----
+oc get deployment -n open-cluster-management siteconfig-controller-manager
+----
+
+//. Prepare the target hub for Zero Touch Provisioning (ZTP) by following the link:https://github.com/openshift-kni/telco-reference/blob/main/telco-ran/configuration/argocd/README.md#preparation-of-hub-cluster-for-ztp[ZTP hub preparation guide].
+//we cannot link to the ZTP guide in the telco reference doc--please point me to the correct official documentation for ZTP hub preparation and I will update the link accordingly--if not we need to document the steps here in the migration guide.--please give me those steps that we need.
+//. *Optional:* If observability is enabled on the source hub, configure it on the target hub by following the link:https://github.com/stolostron/multicluster-observability-operator[Multicluster Observability Operator guide].
+//cannot point to this
+//. Install the multicluster global hub operator on the target hub. See the link:https://github.com/stolostron/multicluster-global-hub#run-the-operator-in-the-cluster[Multicluster global hub installation guide].
+//cannot point to this
+
+. Create a YAML file named `mce-msa.yaml` to enable the `managedserviceaccount` component:
+
++
+[source,yaml]
+----
+apiVersion: multicluster.openshift.io/v1
+kind: MultiClusterEngine
+metadata:
+  name: multiclusterengine
+spec:
+  overrides:
+    components:
+      - name: managedserviceaccount
+        enabled: true
+----
+
+. Apply the `mce-msa.yaml` file to your cluster:
++
+[source,bash]
+----
+oc apply -f mce-msa.yaml
+----
+
+. Import the source hub cluster as a managed hub cluster to the global hub.
+
++
+*Important:* You must include the `global-hub.open-cluster-management.io/deploy-mode: hosted` label during the import process for the migration to function.
+
+For detailed instructions, see link:https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.15/html/clusters/cluster_mce_overview#import-intro[Importing a target managed cluster].
