@@ -12,6 +12,32 @@ For more about deprecations and removals, see xref:../release_notes/acm_deprecat
 
 Backup and restore known issues and limitations are listed here, along with workarounds if they are available.
 
+[#passive-sync-restore-failed]
+= Passive sync restore does not recover after transient _BackupStorageLocation_ failures
+
+When you configure a `Restore` resource in passive sync mode by setting `syncRestoreWithNewBackups` to `true` and the `BackupStorageLocation` becomes temporarily unavailable, the Velero restore operation fais with a `FailedValidation` status.
+
+After you restore the `BackupStorageLocation` and create successsful backups, the {product-title-short} `Restore` resource remains in the `Error` phase. This occurs because failed Velero restore objects persist in the cluster, which prevents the controller from attempting new restores.
+
+The issue causes the following conditions:
+
+* The secondary hub cluster appears unhealthy.
+* Automated disaster recovery scripts or tools identify the cluster as not ready for switchover.
+* The `Restore` operation does not automatically resume sync operations after you resolve the `BackupStorageLocation` issue.
+
+To resume the backup sync operation, manually delete the failed Velero restore objects. Run the following command:
+
+[source,bash]
+----
+oc -n open-cluster-management-backup delete restore.velero.io <failed_restore_name>
+----
+
+After the failed objects are deleted, the `Restore` controller performs the following actions:
+
+* Detects that the Velero restore objects are missing.
+* Creates new Velero restore objects based on the latest available backups.
+* Updates the `Restore` resource phase to `Enabled`.
+
 [#restore-limitations]
 === Velero restore limitations
 
