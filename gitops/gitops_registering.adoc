@@ -20,10 +20,15 @@ To configure {gitops-short} with the Push model, you can register a set of one o
 Complete the following steps to register managed clusters to {gitops-short}:
 
 . Create a managed cluster set by binding it to the namespace where {gitops-short} is deployed. 
-.. For more general information about creating a `ManagedClusterSetBinding`, go to the _Additional resources_ section and see _Creating a ManagedClusterSetBinding resource_ . 
-.. For placement information, see link:../clusters/cluster_lifecycle/placement_filter.adoc[Filtering with _ManagedCluster_ objects].
 
-. In the namespace that is used in managed cluster set binding, create a `Placement` custom resource to select a set of managed clusters to register to an {gitops-short} operator instance. Use the `multicloud-integration` placement example as a template. See _Using ManagedClusterSets with Placement_ for placement information. 
++
+- See link:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-a-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource]. 
++
+- For placement information, see link:../clusters/cluster_lifecycle/placement_filter.adoc[Filtering with _ManagedCluster_ objects].
+
+
+. In the namespace that is used in managed cluster set binding, create a `Placement` custom resource to select a set of managed clusters to register to a {gitops-short} operator instance. Use the `multicloud-integration` placement example as a template. See _Using ManagedClusterSets with Placement_ for placement information. 
+
 +
 *Notes:* 
 +
@@ -33,6 +38,7 @@ Complete the following steps to register managed clusters to {gitops-short}:
 . Create a `GitOpsCluster` custom resource to register the set of managed clusters from the placement decision to the specified instance of {gitops-short}. This enables the {gitops-short} instance to deploy applications to any of those {acm-short} managed clusters. Use the `_multicloud-integrations_` {gitops-short} cluster example.
 +
 *Note:* The referenced `Placement` resource must be in the same namespace as the `GitOpsCluster` resource. See the following example:
+
 +
 [source,yaml]
 ----
@@ -50,7 +56,10 @@ spec:
     apiVersion: cluster.open-cluster-management.io/v1beta1
     name: all-openshift-clusters <1>
 ----
-<1> The `placementRef.name` value is `all-openshift-clusters`, and is specified as target clusters for the {gitops-short} instance that is installed in `argoNamespace: openshift-gitops`. The `argoServer.cluster` specification requires the `<your-local-cluster-name>` value.
+
++
+- The `placementRef.name` value is `all-openshift-clusters`, and is specified as target clusters for the {gitops-short} instance that is installed in `argoNamespace: openshift-gitops`. 
+- The `argoServer.cluster` specification requires the `<your-local-cluster-name>` value.
 
 . Save your changes. You can now follow the {gitops-short} workflow to manage your applications.
 
@@ -114,6 +123,7 @@ eks-1    true          https://5E336C922AB16684A332C10535B8D407.gr7.us-east-2.ek
 ----
 
 . To verify that the cluster secret is generated, go to the `openshift-gitops` namespace and confirm that that `GitOpsCluster` resource status reports, `successful`. 
+
 +
 *Notes:* 
 
@@ -129,7 +139,22 @@ eks-1    true          https://5E336C922AB16684A332C10535B8D407.gr7.us-east-2.ek
 
 When you integrate with the {gitops-short} operator, for every managed cluster that is bound to the {gitops-short} namespace through the placement and `ManagedClusterSetBinding` custom resources, a secret with a token to access the `ManagedCluster` is created in the {gitops-short} instance server namespace. 
 
-The {gitops-short} controller needs this secret to sync resources to the managed cluster. By default, the service account application manager works with the cluster administrator permissions on the managed cluster to generate the {gitops-short} cluster secret in the {gitops-short} instance server namespace. The default namespace is `openshift-gitops`. 
+The {gitops-short} controller needs the secret to sync resources to the managed cluster. By default, the service account `application-manager` works with the cluster administrator permissions on the managed cluster to generate the secure {gitops-short} cluster secret in the {gitops-short} instance server namespace. The default namespace is `openshift-gitops.`
+
+The {gitops-short} instance server namespace renders secure cluster secrets based on the following priority order:
+
+Cluster proxy service:: The cluster proxy service is the default option because the `cluster-proxy` add-on is always enabled in {mce-short}. You can use the secure Argo CD cluster secrets that are rendered by the cluster proxy service in all Kubernetes clusters. The secrets include the following components:
+
++
+- Server URL: The cluster proxy URL for the managed cluster.
+- caData: The service Certificate Authority (CA) from the `openshift-service-ca` config map in the managed cluster namespace for Transport Layer Security (TLS).
+- Bearer token: The `ManagedServiceAccount` `application-manager` token.
+
+Managed cluster client configurations:: If the cluster proxy is unavailable, for example, if the `cluster-proxy` add-on is disabled in {mce-short}, the system automatically detects the API server endpoint and CA of the managed cluster. You can use the secure Argo CD cluster secrets that are rendered by the managed cluster client configurations only in {ocp-short} clusters. The secrets include the following components:
+
++
+- Server URL and caData: Derived from the client configuration in the managed cluster specification.
+- Bearer token: Derived from the same `ManagedServiceAccount` `application-manager` token. 
 
 If you do not want this default, create a service account with customized permissions on the managed cluster for generating the {gitops-short} cluster secret in the {gitops-short} instance server namespace. The default namespace is still, `openshift-gitops`. For more information, see xref:../gitops/gitops_service_account_argo_cd.adoc#gitops-service-account-argo-cd[Creating a customized service account for Argo CD push model].
 
@@ -139,8 +164,6 @@ If you do not want this default, create a service account with customized permis
 For more information, see the following resources and examples: 
 
 - xref:../gitops/gitops_tolerations_config.adoc#tolerations-config[Configuring application placement tolerations for GitOps]
-
-- link:https://github.com/open-cluster-management-io/multicloud-integrations/blob/main/examples/managedclustersetbinding.yaml[`multicloud-integrations` managed cluster set binding] 
 
 - link:../clusters/cluster_lifecycle/create_clusterset.adoc#creating-a-managedclusterset[Creating a _ManagedClusterSet_] 
 
