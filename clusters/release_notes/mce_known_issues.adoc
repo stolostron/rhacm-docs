@@ -37,6 +37,42 @@ link:https://issues.redhat.com/browse/ACM-7523[ACM-7523]
 
 Learn about Known issues for Cluster lifecycle with {mce-short}, such as issues with creating, discovering, importing, and removing clusters, and more cluster management issues for {mce-short}.
 
+== Cluster API Provider Metal3 certificate generation fails after upgrade
+
+After you upgrade from {mce} version 2.10 or 2.10.1 to version 2.11, the automatic generation of certificates for the Cluster API Provider Metal3 webhooks fail. As a result, webhooks do not validate.
+
+To resolve the issue, manually delete the existing secret and the renamed service. The operator then regenerates the correct secret.
+
+Complete the following steps on your managed cluster:
+
+. Delete the webhook service. Run the following command:
+
++
+[source,bash]
+----
+oc delete capm3-webhook-service -n multicluster-engine
+----
+
+. Delete the Transport Layer Security (TLS) secret. Run the following command:
+
++
+[source,bash]
+----
+oc delete secret capm3-webhook-service-cert -n multicluster-engine
+----
+
+. Clear the error annotations. Run the following command:
+
++
+[source,bash]
+----
+oc annotate service mce-capm3-webhook-service -n multicluster-engine \
+service.alpha.openshift.io/serving-cert-generation-error- \
+service.alpha.openshift.io/serving-cert-generation-error-num- \
+service.beta.openshift.io/serving-cert-generation-error- \
+service.beta.openshift.io/serving-cert-generation-error-num-
+----
+
 === Resource deletion during cluster distribution updates
 
 When a change occurs in the cluster because of the `Placement` resource, cluster redistribution occurs across multiple `PlacementDecisions` resources. During the sequential update, a cluster is temporarily missing from all `PlacementDecisions` resources.
