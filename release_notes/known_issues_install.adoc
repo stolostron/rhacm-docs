@@ -33,9 +33,9 @@ dataimage.metal3.io/target-0-0 patched
 link:https://issues.redhat.com/browse/ACM-21889[ACM-21889]
 
 [#add-on-stuck-upgrade]
-== The _kubevirt-hyperconverged_ add-on failed to apply in upgrade from {acm-short} {product-version-prev} to {product-version}
+== The _kubevirt-hyperconverged_ add-on stuck in `in progress` status during upgrade from {acm-short} {product-version-prev} to {product-version}
 
-During an upgrade from {acm-short} {product-version-prev} to {product-version}, you cannot apply the `kubevirt-hyperconverged-operator` add-on and you receive an error similar to the following error:
+During an upgrade from {acm-short} {product-version-prev} to {product-version}, the `kubevirt-hyperconverged-operator` resource is not cleaned up and you receive the following error in the `ManifestWork`:
 
 [source,bash]
 ----
@@ -57,13 +57,14 @@ oc delete clustermanagementaddon kubevirt-hyperconverged-operator --ignore-not-f
 oc delete addontemplate kubevirt-hyperconverged-operator --ignore-not-found
 ----
 
-Get the namespace that is specified in the `installer.namespace` label of the `kubevirt-hyperconverged` `ClusterManagementAddOn` resource. Run the following command and record the output for use in the next step:
+. Get the installer namespace from the `kubevirt-hyperconverged` label. Run the following command and note the output for use in the next step:
 
 +
 [source,bash]
 ----
 oc get clustermanagementaddon kubevirt-hyperconverged -o jsonpath='{.metadata.labels.installer\.namespace}'
 ----
+
 . Create the `ClusterManagementAddOn` resource. Replace `<installer_namespace>` with the value that you retrieved in the previous step:
 
 +
@@ -90,16 +91,7 @@ spec:
       namespace: <installer_namespace>
 ----
 
-. Run `oc apply ClusterManagementAddOn` to apply your resource.
-
-. Reorder the `ManifestWork` resources so that the RBAC resources are defined before the `OperatorPolicy` to ensure the service account is authorized before the policy is processed. Run the following command:
-
-+
-[source,bash]
-----
-oc get managedcluster -l 'acm/cnv-operator-install=true' \
-  -o jsonpath='{.items[*].metadata.name}'
-----
+. Run `oc apply -f <filename.yaml>` to apply your resource.
 
 . Create a local YAML file that is named `manifestwork.yaml` with the following content. Replace `<cluster_name>` with the name of your managed cluster in all instances:
 
@@ -114,126 +106,9 @@ metadata:
 spec:
   manifestConfigs:
   - feedbackScrapeType: Poll
-    resourceIdentifier:
-      group: hco.kubevirt.io
-      name: kubevirt-hyperconverged
-      namespace: openshift-cnv
-      resource: hyperconvergeds
-    updateStrategy:
-      type: CreateOnly
-  workload:
-    manifests:
-    - apiVersion: rbac.authorization.k8s.io/v1
-      kind: Role
-      metadata:
-        name: operatorpolicy-manager
-        namespace: open-cluster-management-policies
-      rules:
-      - apiGroups: ["policy.open-cluster-management.io"]
-        resources: ["operatorpolicies"]
-        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-    - apiVersion: rbac.authorization.k8s.io/v1
-      kind: RoleBinding
-      metadata:
-        name: operatorpolicy-manager-binding
-        namespace: open-cluster-management-policies
-      roleRef:
-        apiGroup: rbac.authorization.k8s.io
-        kind: Role
-        name: operatorpolicy-manager
-      subjects:
-      - kind: ServiceAccount
-        name: klusterlet-work-sa
-        namespace: open-cluster-management-agent
-    - apiVersion: rbac.authorization.k8s.io/v1
-      kind: RoleBinding
-      metadata:
-        name: operatorpolicy-manager-hosted-binding
-        namespace: open-cluster-management-policies
-      roleRef:
-        apiGroup: rbac.authorization.k8s.io
-        kind: Role
-        name: operatorpolicy-manager
-      subjects:
-      - kind: ServiceAccount
-        name: klusterlet-<cluster_name>-work-sa
-        namespace: open-cluster-management-<cluster_name>
-    - apiVersion: policy.open-cluster-management.io/v1beta1
-      kind: OperatorPolicy
-      metadata:
-        name: kubevirt-hyperconverged-operator
-        namespace: open-cluster-management-policies
-      spec:
-        remediationAction: enforce
-        complianceType: musthave
-        operatorGroup:
-          name: openshift-cnv
-          namespace: openshift-cnv
-          targetNamespaces:
-          - openshift-cnv
-        subscription:
-          channel: stable
-          name: kubevirt-hyperconverged
-          namespace: openshift-cnv
-        upgradeApproval: Automatic
-    - apiVersion: hco.kubevirt.io/v1beta1
-      kind: HyperConverged
-      metadata:
-        name: kubevirt-hyperconverged
-        annotations:
-          deployOVS: "false"
-        namespace: openshift-cnv
-      spec:
-        virtualMachineOptions:
-          disableFreePageReporting: false
-          disableSerialConsoleLog: true
-        higherWorkloadDensity:
-          memoryOvercommitPercentage: 100
-        liveMigrationConfig:
-          allowAutoConverge: false
-          allowPostCopy: false
-          completionTimeoutPerGiB: 800
-          parallelMigrationsPerCluster: 5
-          parallelOutboundMigrationsPerNode: 2
-          progressTimeout: 150
-        certConfig:
-          ca:
-            duration: 48h0m0s
-            renewBefore: 24h0m0s
-          server:
-            duration: 24h0m0s
-            renewBefore: 12h0m0s
-        applicationAwareConfig:
-          allowApplicationAwareClusterResourceQuota: false
-          vmiCalcConfigName: DedicatedVirtualResources
-        featureGates:
-          decentralizedLiveMigration: true
-          deployTektonTaskResources: false
-          enableCommonBootImageImport: true
-          withHostPassthroughCPU: false
-          downwardMetrics: false
-          disableMDevConfiguration: false
-          enableApplicationAwareQuota: false
-          deployKubeSecondaryDNS: false
-          nonRoot: true
-          alignCPUs: false
-          enableManagedTenantQuota: false
-          primaryUserDefinedNetworkBinding: false
-          deployVmConsoleProxy: false
-          persistentReservation: false
-          autoResourceLimits: false
-          deployKubevirtIpamController: false
-        workloadUpdateStrategy:
-          batchEvictionInterval: 1m0s
-          batchEvictionSize: 10
-          workloadUpdateMethods:
-          - LiveMigrate
-        uninstallStrategy: BlockUninstallIfWorkloadsExist
-        resourceRequirements:
-          vmiCPUAllocationRatio: 10
 ----
 
-. Apply the updated `ManifestWork` to the hub cluster:
+. Apply the updated `ManifestWork` resource to the hub cluster:
 
 +
 [source,terminal]
