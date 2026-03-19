@@ -16,18 +16,81 @@ Follow the link:../install/cleanup_reinstall.adoc#cleanup-reinstall[Cleaning up 
 
 link:https://issues.redhat.com/browse/ACM-14343[ACM-14343]
 
-[#install-siteconfig-ibbf]
-== Cannot remove data image resources after a cluster reinstallation with Image-Based Break/Fix
+[#add-on-stuck-upgrade]
+== The _kubevirt-hyperconverged_ add-on is stuck in `in progress` status during upgrade from {acm-short} {product-version-prev} to {product-version}
 
-If you change the `spec.nodes.<node-id>.bmcAddress` field while reinstalling a cluster with the Image-Based Break/Fix, the {sco} is unable to contact the original machine nd cannot delete the data image resources from the original cluster. To work around this issue, remove the finalizer from the data image resources before reinstalling a cluster with Image-Based Break/Fix.
+During an upgrade from {acm-short} {product-version-prev} to {product-version}, the `kubevirt-hyperconverged-operator` resource is not cleaned up and you receive the following error in the `ManifestWork` resource:
 
-* To remove the finalizer from the data image resources, run the following command:
+[source,bash]
+----
+Failed to apply manifest: operatorpolicies.policy.open-cluster-management.io
+"kubevirt-hyperconverged-operator" is forbidden: User
+"system:serviceaccount:open-cluster-management-agent:klusterlet-work-sa"
+cannot get resource "operatorpolicies" in API group
+"policy.open-cluster-management.io" in the namespace "open-cluster-management-policies"
+----
+
+To resolve the issue, complete the following steps:
+
+. Remove existing resources. Run the following commands:
 
 +
 [source,bash]
 ----
-$ oc patch dataimages.metal3.io -n target-0 target-0-0 --patch '{"metadata":{"finalizers":[]}}' --type merge 
-dataimage.metal3.io/target-0-0 patched
+oc delete clustermanagementaddon kubevirt-hyperconverged-operator --ignore-not-found
+
+oc delete addontemplate kubevirt-hyperconverged-operator --ignore-not-found
 ----
 
-link:https://issues.redhat.com/browse/ACM-21889[ACM-21889]
+. Get the namespace that is specified in the `installer.namespace` label of the `kubevirt-hyperconverged` `ClusterManagementAddOn` resource. Run the following command and record the output to use in step 4:
+
++
+[source,bash]
+----
+oc get clustermanagementaddon kubevirt-hyperconverged -o jsonpath='{.metadata.labels.installer\.namespace}'
+----
+
+. Delete the previous `ClusterManagementAddOn` resource, which is version `v1alpha1`. Run the following command:
+
++
+[source,bash]
+----
+oc delete clustermanagementaddon kubevirt-hyperconverged
+----
+
+. Create the `ClusterManagementAddOn` resource. See the following example and replace `<installer_namespace>` with the value that you retrieved in the previous step:
+
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1beta1
+kind: ClusterManagementAddOn
+metadata:
+  name: kubevirt-hyperconverged
+  annotations:
+    addon.open-cluster-management.io/lifecycle: "addon-manager"
+spec:
+  addOnMeta:
+    description: Kubevirt Hyperconverged
+    displayName: Kubevirt Hyperconverged
+  defaultConfigs:
+    - group: addon.open-cluster-management.io
+      resource: addontemplates
+      name: kubevirt-hyperconverged
+  installStrategy:
+    type: Placements
+    placements:
+    - name: openshift-cnv
+      namespace: <installer_namespace>
+----
+
+. Run the following command to apply your resource:
+
++
+[source,bash]
+----
+oc apply -f <filename.yaml
+----
+
+link:https://issues.redhat.com/browse/ACM-31036[ACM-31036]
+
