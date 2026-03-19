@@ -1,12 +1,12 @@
 [#troubleshooting-no-placementdecision-mce]
 = Troubleshooting missing PlacementDecision after creating Placement
 
-If no `PlacementDescision` is generated after creating a `Placement`, follow the procedure to troubleshoot the problem.
+If no `PlacementDecision` is generated after creating a `Placement`, follow the procedure to troubleshoot the problem.
 
 [#symptom-no-placementdecision-mce]
 == Symptom: Missing PlacementDecision after creating Placement
 
-After creating a `Placement`, a `PlacementDescision` is not automatically generated.
+After creating a `Placement`, a `PlacementDecision` is not automatically generated.
 
 [#resolving-no-placementdecision-mce]
 == Resolving the problem: Missing PlacementDecision after creating Placement
@@ -69,4 +69,44 @@ Events:
   Normal  ScoreUpdate     3s      placementController  cluster1:200 cluster2:145 cluster3:189 cluster4:200
 ----
 +
-*Note:* The placement controller assigns a score and generates an event for each filtered `ManagedCluster`. The placement controller genereates a new event when the cluster score changes.
+*Note:* The placement controller assigns a score and generates an event for each filtered `ManagedCluster`. The placement controller generates a new event when the cluster score changes.
+
+. Check if clusters are being filtered due to taints by running the following command:
++
+----
+kubectl get managedcluster <cluster-name> -o yaml
+----
++
+Replace `cluster-name` with the name of a cluster that you expected to be selected.
++
+Look for the `taints` section in the output. If the cluster has taints, it will only be selected by placements with matching tolerations. The output might resemble the following example:
++
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: cluster.open-cluster-management.io/unreachable
+      timeAdded: '2022-02-21T08:11:06Z'
+----
++
+In this example, the cluster has an `unreachable` taint. To select this cluster, your placement must include a matching toleration:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: demo-placement
+  namespace: default
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+----
++
+Built-in taints are automatically added to clusters when they become unavailable or unreachable. See xref:../cluster_lifecycle/placement_filter.adoc#placement-tolerations[Filtering `ManagedClusters` by using taints and tolerations] for more information about taints and tolerations.
