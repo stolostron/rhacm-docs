@@ -37,6 +37,82 @@ link:https://issues.redhat.com/browse/ACM-7523[ACM-7523]
 
 Learn about Known issues for Cluster lifecycle with {mce-short}, such as issues with creating, discovering, importing, and removing clusters, and more cluster management issues for {mce-short}.
 
+=== Cluster API Provider Metal3 certificate generation fails after upgrade
+
+After you upgrade from {mce} version 2.10 or 2.10.1 to version 2.11, the automatic generation of certificates for the Cluster API Provider Metal3 webhooks fail due to a naming conflict in the target resources. As a result, webhooks do not validate.
+
+To resolve the issue, manually delete the existing secret and the renamed service. The operator then regenerates the correct secret.
+
+Complete the following steps on your managed cluster:
+
+. Delete the webhook service. Run the following command:
+
++
+[source,bash]
+----
+oc delete service capm3-webhook-service -n multicluster-engine
+----
+
+. Delete the Transport Layer Security (TLS) secret. Run the following command:
+
++
+[source,bash]
+----
+oc delete secret capm3-webhook-service-cert -n multicluster-engine
+----
+
+. Clear the error annotations. Run the following command:
+
++
+[source,bash]
+----
+oc annotate service mce-capm3-webhook-service -n multicluster-engine \
+service.alpha.openshift.io/serving-cert-generation-error- \
+service.alpha.openshift.io/serving-cert-generation-error-num- \
+service.beta.openshift.io/serving-cert-generation-error- \
+service.beta.openshift.io/serving-cert-generation-error-num-
+----
+
+. Delete the stale webhook configurations. Run the following commands:
+
++
+[source,bash]
+----
+oc delete mutatingwebhookconfiguration capm3-mutating-webhook-configuration
+----
+
++
+[source,bash]
+----
+oc delete validatingwebhookconfiguration capm3-validating-webhook-configuration
+----
+
+. Delete the new TLS secret. Run the following command:
+
++
+[source,bash]
+----
+oc delete secret mce-capm3-webhook-service-cert -n multicluster-engine
+----
+
+. Restart the pod to regenerate the certificate. Run the following command:
+
++
+[source,bash]
+----
+oc delete pod mce-capm3-controller-manager-<hash> -n multicluster-engine
+----
+
+. Delete the old `controller-manager` deployment. Run the following command:
+
++
+[source,bash]
+----
+oc delete deployment capm3-controller-manager -n multicluster-engine
+----
+
+link:https://redhat.atlassian.net/browse/MGMT-23257[MGMT-23257]
+
 === Cluster API and Cluster API Provider for Azure deployments not creating pods
 
 When you deploy `cluster-api` and `cluster-api-provider-azure` components, the Cluster API controllers might not create pods.
