@@ -1,0 +1,120 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#migrate-allowlist-mcoa]
+= Migrating custom allowlist
+
+[role="_abstract"]
+Use the `allowlist-migration` command-line interface to convert the `observability-metrics-allowlist` custom resource to `ScrapeConfig` and `PrometheusRule` resources. Converting to the `ScrapeConfig` and `PrometheusRule` resources allows for a scalable way to manage your custom allowlist configuration.
+
+Download the `allowlist-migration` binary file for your operating system and input your custom allowlist from the console to receive the equivalent `ScrapeConfig` and `PrometheusRule` resources.
+
+*Required access:* Cluster administrator
+
+.Prerequsites
+
+- Ensure the `multicluster-observability-addon` is installed on the hub cluster.
+
+.Procedure
+
+. From the *Fleet Management* perspective in the console, then click *Help* > *Command Line Tools*.
+
+. Find the list of available downloads in the *Advanced Cluster Management Observability Migration Tool - latest* section.
+
+. Download the `allowlist-migration` binary file for your operating system and architecture.
+
+. Change the permissions. Run the following command:
+
++
+[source,bash]
+----
+chmod +x /path/to/migration
+----
+
+. To generate your `ScrapeConfig` and `PrometheusRule` resources, run the following command:
+
++
+[source,bash]
+----
+/path/to/migration allowlist.yaml output/dir
+----
+
+. Add the generated `ScrapeConfig` resources to your cluster by running the following command:
+
++
+[source,bash]
+----
+oc apply -f <output/dir>/custom-scrapeconfig.yaml -n open-cluster-management-observability
+----
+
+. Add the generated `PrometheusRule` resources to your cluster by running the following command:
+
++
+[source,bash]
+----
+oc apply -f <output/dir>/custom-prometheusrule.yaml -n open-cluster-management-observability
+----
+
+. Add the generated `ScrapeConfig` and `PrometheusRule` resources to the `ClusterManagementAddOn` resource. Run the following command:
+
++
+[source,bash]
+----
+oc patch clustermanagementaddon multicluster-observability-addon --type=json -p='[
+{
+   "op": "add",
+   "path": "/spec/installStrategy/placements/0/configs/-",
+   "value": {
+      "group": "monitoring.rhobs",
+      "resource": "scrapeconfigs",
+      "name": "custom-scrapeconfig",
+      "namespace": "open-cluster-management-observability"
+   }
+},
+{
+   "op": "add",
+   "path": "/spec/installStrategy/placements/0/configs/-",
+   "value": {
+      "group": "monitoring.coreos.com",
+      "resource": "prometheusrules",
+      "name": "custom-prometheusrule",
+      "namespace": "open-cluster-management-observability"
+   }
+}
+]'
+----
+
+.Verification
+
+. Verify that the generated `ScrapeConfig` resource exists on your hub cluster. Run the following command:
+
++
+[source,bash]
+----
+oc get ScrapeConfig -n open-cluster-management-observability
+----
+
+. Ensure that the generated `PrometheusRule` resource exists on your hub cluster. Run the following command:
+
++
+[source,bash]
+----
+oc get PrometheusRule -n open-cluster-management-observability
+----
+
+. Verify that the `ScrapeConfig` resource is propogated to the managed cluster. Run the following command:
+
++
+[source,bash]
+----
+oc get ScrapeConfig -n open-cluster-management-agent-addon
+----
+
+. Check that the `PrometheusRule` resource is propogated to the managed cluster. Run the following command:
+
++
+[source,bash]
+----
+oc get PrometheusRule -n open-cluster-management-agent-addon
+----
+
+. Verify custom metrics collection by entering a query in Grafana. For example, enter the following query to verify use of the `ScrapeConfig` resource: `up{job="my-app"}`.
