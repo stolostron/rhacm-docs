@@ -1,11 +1,13 @@
 [#rolling-back-migration]
 = Rolling back cluster migration
 
-If there are any problems with migration, the {global-hub} attempts an _automatic_ rollback to restore clusters to the source hub cluster. If an automatic rollback fails due to environmental issues, such as power outages or network disconnections, you can initiate a _manual_ rollback after the environment recovers.
+For any problems with your cluster migration, the {global-hub} attempts an _automatic_ rollback to restore clusters to the source hub cluster. If an automatic rollback fails as a result of environmental issues, such as power outages or network disconnections, you can initiate a _manual_ rollback after the environment recovers.
 
-*Note:* Rollback only affects clusters that failed the migration process. Clusters that migrated successfully remain on the target hub cluster and are not rolled back.
+*Notes:* 
 
-During an automatic rollback, resources on the target hub are removed, and the clusters remain managed by the source hub cluster. You can check the status of the automated rollback. You can also initiate a manual rollback by adding a specific annotation to the `ManagedClusterMigration` resource.
+* Rollback only affects clusters that failed the migration process. Clusters that migrated successfully remain on the target hub cluster and are not rolled back.
+
+* During an automatic rollback, resources on the target hub are removed, and the clusters remain managed by the source hub cluster. You can check the status of the automated rollback. You can also initiate a manual rollback by adding a specific annotation to the `ManagedClusterMigration` resource.
 
 .Prerequisites
 
@@ -13,13 +15,12 @@ There are no requirements for automatic rollback. However, before you initiate a
 
 * The source hub cluster is healthy and accessible.
 * The target {global-hub} cluster is healthy and accessible.
-* All managed clusters have network connectivity to both the source and target hub clusters.
+* All managed clusters are connected to both the source cluster and target hub cluster.
 * The connection between the {global-hub} and Kafka is healthy.
-//how do they know this?
 
 .Procedure
 
-See the following process to monitor automatic rollback, and to initiate a manual rollback.
+See the following process to monitor _automatic_ rollback, and to initiate a manual rollback if necessary.
 
 . Monitor the status of an automatic rollback by running the following command:
 
@@ -29,10 +30,9 @@ See the following process to monitor automatic rollback, and to initiate a manua
 oc get managedclustermigration ztp-sno-migration -n multicluster-global-hub
 ----
 
-+
-If the rollback is successful, the migration resource enters the `Failed` phase, indicating the migration did not complete but the environment was restored.
+. Check for a successful rollback. The migration resource enters the `Failed` phase, indicating the migration did not complete but the environment was restored.
 
-. Initiate a manual rollback by adding the `migration-request` annotation to the `ManagedClusterMigration` resource. 
+. If you need to rollback manually, initiate a rollback by adding the `migration-request` annotation to the `ManagedClusterMigration` resource. Run the following command:
 
 +
 [source,bash]
@@ -50,16 +50,17 @@ oc get managedclustermigration ztp-sno-migration -n multicluster-global-hub
 oc describe managedclustermigration ztp-sno-migration -n multicluster-global-hub
 ----
 
-. Verify the rollback completion by checking the resource conditions. Run the following command:
+. Verify the rollback success by checking the resource conditions. Run the following command:
+
 +
 [source,bash]
 ----
 oc get managedclustermigration ztp-sno-migration -n multicluster-global-hub -o yaml
 ----
+
+. Check the output for a successful rollback, which contains the `ResourceRolledBack` and `ResourceCleaned` types with a status of `True`. See the following YAML example:
+
 +
-A successful rollback contains the `ResourceRolledBack` and `ResourceCleaned` types with a status of `True`.
-+
-.Example success conditions
 [source,yaml]
 ----
 status:
@@ -74,7 +75,7 @@ status:
       type: ResourceCleaned
 ----
 
-. Switch your CLI context to the source hub and verify that the managed clusters are available:
+. In the terminal, switch to the source hub cluster and verify that the managed clusters are available. Run the following command:
 
 +
 [source,bash]
