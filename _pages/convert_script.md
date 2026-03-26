@@ -12,7 +12,7 @@ Run the conversion script to quickly convert existing guides and prepare them fo
 
 ## Prerequisites
 
-- You need the `convert.sh` file. Contact the build focal to get the file or download it from the team Slack channel.
+- You need the `convert.sh` file. Contact the tools focal to get the file or download it from the team Slack channel.
 
 ## Converting a guide
 
