@@ -31,7 +31,7 @@ To convert a guide, complete the following steps:
 4. Run the conversion script on the guide that you want to convert. Run the following command. Replace `<path-to-guide>` with the directory path to the guide you want to convert. For example, `cluster/cluster_lifecycle`:
 
    ```
-   ./run.sh <path-to-guide>
+   ./convert.sh <path-to-guide>
    ```
 
 5. Delete the `convert.sh` file before committing and pushing any changes.
