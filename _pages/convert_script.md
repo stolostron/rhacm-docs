@@ -8,7 +8,7 @@ render_with_liquid: false
 
 Run the conversion script to quickly convert existing guides and prepare them for the DITA migration.
 
-  **Important:** The conversion script only converts the basic outline of an AsciiDoc file. You still have to manually review each file and make additional content, structural, or architectural changes as needed.
+**Important:** The conversion script only converts the basic outline of an AsciiDoc file. You still have to manually review each file and make additional content, structural, or architectural changes as needed.
 
 ## Prerequisites
 
