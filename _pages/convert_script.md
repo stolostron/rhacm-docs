@@ -18,7 +18,7 @@ Run the conversion script to quickly convert existing guides and prepare them fo
 
 To convert a guide, complete the following steps:
 
-1. Copy the `convert.sh` to  the`rhacm-docs` project folder.
+1. Copy the `convert.sh` file to  the`rhacm-docs` project folder.
 
 2. In the command line, navigate to the main `rhacm-docs` project folder. Use the `cd` command.
 
