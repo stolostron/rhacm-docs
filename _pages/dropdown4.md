@@ -14,4 +14,10 @@ children:
     - title: divider
     - title: Vale overview
       permalink: /vale_overview
+    - title: divider
+    - title: Creating a PDF
+      permalink: /create_pdf
+    - title: divider
+    - title: Conversion script
+      permalink: /convert_script
 ---
