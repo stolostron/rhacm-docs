@@ -1,0 +1,91 @@
+
+[#preparing-hubs-for-migration]
+= Preparing the hub clusters for migration
+
+To migrate managed clusters between hub clusters, you must configure the target hub cluster to match the source hub cluster environment and establish connectivity through the {global-hub}.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+See the following prerequisites before you begin:
+
+* Ensure all managed clusters are connected by network to the target hub cluster.
+* Verify version compatibility. See xref:../global_hub/global_hub_ztp_migration_prep.adoc#ztp-migration-overview[Zero Touch Provisioning migration overview] for supported versions of {acm-short} and {ocp-short}.
+* Install the {acm-short} operator on the target hub cluster. See link:../install/install_connected.adoc#installing-while-connected-online[Installing while connected online].
+* Become familiar with the `siteconfig` operator. See _{sco}_ in the _Additional resources_ section.
+
+.Procedure
+
+Prepare your hub cluster for migration. You need to enable the `siteconfig` feature and prepare other resources for migration.
+
+. Create a YAML file to enable the `siteconfig` operator as you see in the following example where `siteconfig` is set to `enabled: true`:
+
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  name: multiclusterhub
+  namespace: open-cluster-management
+spec:
+  overrides:
+    components:
+      - name: siteconfig
+        enabled: true
+----
+
+. Apply the file to your cluster. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f mch-siteconfig.yaml
+----
+
+. Verify that the `siteconfig-controller-manager` deployment is in the `available` status. Run the following command:
+
++
+[source,bash]
+----
+oc get deployment -n open-cluster-management siteconfig-controller-manager
+----
+
+. Prepare the target hub cluster for Zero Touch Provisioning (ZTP). See the link:../mce_acm_integration/siteconfig/siteconfig_enable.adoc#enabling-sco[{Enabling the sco}] documentation.
+
+. *Optional:* If the observability feature is enabled on the source hub cluster, configure it on the target hub cluster. See _Enabling the observability service_ in the _Additional resources_ section.
+
+. Install the {global-hub} operator on the target hub cluster. See the xref:../global_hub/global_hub_overview.adoc#multicluster-global-hub[multicluster global hub] documentation for directions.
+
+. Create a YAML file to enable the `ManagedServiceAccount` component. See the following example where `managedserviceaccount` component is set to `enabled: true`:
+
++
+[source,yaml]
+----
+apiVersion: multicluster.openshift.io/v1
+kind: MultiClusterEngine
+metadata:
+  name: multiclusterengine
+spec:
+  overrides:
+    components:
+      - name: managedserviceaccount
+        enabled: true
+----
+
+. Apply the file to your cluster. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f mce-msa.yaml
+----
+
+. Import the source hub cluster as a managed hub cluster to the {global-hub}. *Important:* You must include the `global-hub.open-cluster-management.io/deploy-mode: hosted` label during the import process for the migration to function. For detailed instructions, see link:../cluster_lifecycle/import_intro.adoc#import-intro[Cluster import].
+
+== Additional resources
+
+- See the link:../mce_acm_integration/siteconfig/siteconfig_intro.adoc#siteconfig-intro[{sco}] documentation.
+
+- See the xref:../global_hub/global_hub_overview.adoc#multicluster-global-hub[multicluster global hub] documentation
