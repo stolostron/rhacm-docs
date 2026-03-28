@@ -1,0 +1,88 @@
+[#ztp-migration-verify-hub]
+= Verifying the source hub cluster status for migration
+
+Before you initiate the ZTP cluster migration process, verify the current state and resource health of the managed clusters on the source hub cluster to ensure eligibility for transfer.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* Configure {ocp-short} to run `oc` commands. See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/cli_tools/openshift-cli-oc#cli-getting-started[Getting started with the CLI] for information about installing and configuring the command-line tool.
+
+.Procedure
+
+. List the managed clusters to identify the candidates for migration by running the following command:
+
++
+[source,bash]
+----
+oc get managedcluster
+----
+
+. Verify that the output displays `True` for the `JOINED` and `AVAILABLE` columns for all clusters you intend to migrate as you see in the following example for `sno1`, `sno2`, `sno1`:
+
++
+[source,bash]
+----
+NAME   HUB ACCEPTED   MANAGED CLUSTER URLS   JOINED   AVAILABLE   AGE
+sno1   true                                  True     True        30d
+sno2   true                                  True     True        25d
+sno3   true                                  True     True        20d
+----
+
+. Check the status of the `ClusterInstance` resources to ensure provisioning is complete. Run the following command:
+
++
+[source,bash]
+----
+oc get clusterinstance -A
+----
+
+. See the following output example to check for a `completed` status on all clusters. *Important:* You can only migrate clusters that display `Completed` in the `PROVISIONSTATUS` column. If a cluster is still provisioning, wait for the process to complete before proceeding:
+
++
+[source,bash]
+----
+NAMESPACE   NAME   PAUSED   PROVISIONSTATUS   PROVISIONDETAILS         AGE
+sno1        sno1            Completed         Provisioning completed   30d
+----
+
+. Verify the `ImageClusterInstall` resources to ensure the installation requirements are met. Run the following command:
+
++
+[source,bash]
+----
+oc get imageclusterinstall -A
+----
+
+. Confirm that each cluster shows `ClusterInstallationSucceeded` in the `COMPLETED` column and `HostValidationSucceeded` in the `REQUIREMENTSMET` column. Other states indicate that the installation is incomplete or has encountered errors. See the following output:
+
++
+[source,bash]
+----
+NAMESPACE   NAME   REQUIREMENTSMET           COMPLETED                      BAREMETALHOSTREF
+sno1        sno1   HostValidationSucceeded   ClusterInstallationSucceeded   sno1
+sno2        sno2   HostValidationSucceeded   ClusterInstallationSucceeded   sno2
+sno3        sno3   HostValidationSucceeded   ClusterInstallationSucceeded   sno3
+----
+
+. Check the `ClusterDeployment` resources to confirm the operational state of the clusters:
+
++
+[source,bash]
+----
+oc get clusterdeployment -A
+----
+
+. Verify that the `PROVISIONSTATUS` value is `Provisioned` and the `POWERSTATE` is `Running` in the output. This status indicates that the cluster deployment is successful and the cluster is ready for migration. See the following example output:
+
++
+[source,bash]
+----
+NAMESPACE   NAME   INFRAID       PLATFORM        REGION   VERSION   CLUSTERTYPE   PROVISIONSTATUS   POWERSTATE   AGE
+sno1        sno1   sno1-abc123   none-platform            4.x.x                   Provisioned       Running      30d
+sno2        sno2   sno2-def456   none-platform            4.x.x                   Provisioned       Running      25d
+sno3        sno3   sno3-ghi789   none-platform            4.x.x                   Provisioned       Running      20d
+----
+
+//From here we will link to the next steps.
