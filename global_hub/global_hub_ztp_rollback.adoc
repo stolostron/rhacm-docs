@@ -1,0 +1,87 @@
+[#rolling-back-migration]
+= Rolling back cluster migration
+
+For any problems with your cluster migration, the {global-hub} attempts an _automatic_ rollback to restore clusters to the source hub cluster. If an automatic rollback fails as a result of environmental issues, such as power outages or network disconnections, you can initiate a _manual_ rollback after the environment recovers.
+
+*Required access:* Cluster administrator
+
+*Notes:* 
+
+* Rollback only affects clusters that failed the migration process. Clusters that migrated successfully remain on the target hub cluster and are not rolled back.
+
+* During an automatic rollback, resources on the target hub cluster are removed, and the clusters remain managed by the source hub cluster. You can check the status of the automated rollback. You can also initiate a manual rollback by adding a specific annotation to the `ManagedClusterMigration` resource.
+
+.Prerequisites
+
+There are no requirements for automatic rollback. However, before you initiate a manual rollback, ensure the following conditions are true:
+
+* The source hub cluster is healthy and accessible.
+* The target {global-hub} cluster is healthy and accessible.
+* All managed clusters are connected to both the source hub cluster and target hub cluster.
+* The connection between the {global-hub} and Kafka is healthy.
+
+.Procedure
+
+See the following process to monitor _automatic_ rollback, and to initiate a manual rollback if necessary.
+
+. Monitor the status of an automatic rollback by running the following command:
+
++
+[source,bash]
+----
+oc get managedclustermigration ztp-sno-migration -n multicluster-global-hub
+----
+
+. Check for a successful rollback. The migration resource enters the `Failed` phase, indicating the migration did not complete but the environment was restored.
+
+. If you need to rollback manually, initiate a rollback by adding the `migration-request` annotation to the `ManagedClusterMigration` resource. Run the following command:
+
++
+[source,bash]
+----
+oc annotate managedclustermigration ztp-sno-migration -n multicluster-global-hub \
+  global-hub.open-cluster-management.io/migration-request=rollback
+----
+
+. Monitor the progress and view the detailed status of the rollback by running the following commands:
+
++
+[source,bash]
+----
+oc get managedclustermigration ztp-sno-migration -n multicluster-global-hub
+
+oc describe managedclustermigration ztp-sno-migration -n multicluster-global-hub
+----
+
+. Verify the rollback success by checking the resource conditions. Run the following command:
+
++
+[source,bash]
+----
+oc get managedclustermigration ztp-sno-migration -n multicluster-global-hub -o yaml
+----
+
+. Check the output for a successful rollback, which contains the `ResourceRolledBack` and `ResourceCleaned` types with a status of `True`. See the following YAML example:
+
++
+[source,yaml]
+----
+status:
+  conditions:
+    - message: Registering rollback completed
+      reason: ResourceRolledBack
+      status: "True"
+      type: ResourceRolledBack
+    - message: Resources have been successfully cleaned up from the hub clusters
+      reason: ResourceCleaned
+      status: "True"
+      type: ResourceCleaned
+----
+
+. In the terminal, switch to the source hub cluster and verify that the managed clusters are available. Run the following command:
+
++
+[source,bash]
+----
+oc get managedcluster <cluster_name>
+----
