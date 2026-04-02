@@ -1,6 +1,9 @@
+:_mod-docs-content-type: PROCEDURE
+
 [#capi-managed-assisted]
 = Installing a managed cluster with Cluster API
 
+[role="_abstract"]
 You can install an {ocp-short} managed cluster with the Cluster API by using the `metal3` infrastructure provider and the {ocp-short} assisted bootstrap and control plane providers.
 
 * A `ControlPlane` resource defines the control plane properties.
@@ -28,8 +31,7 @@ You can install an {ocp-short} managed cluster with the Cluster API by using the
 
 * Infrastructure provider: A provider, such as the `cluster-api-provider-metal3`, manages the physical or virtual resources.
 
-[#steps-provision]
-== Provisioning a workload with Cluster API
+.Procedure
 
 . Enable the services that you need to provision a workload. By default, `assisted-service` is enabled. By default, `cluster-api-provider-metal3` and `cluster-api-provider-openshift-assisted` are disabled. Ensure all three services are `enabled: true`. Run the following command to edit the resource: 
 
@@ -79,19 +81,20 @@ spec:
     services:
       cidrBlocks:
         - 10.96.0.0/12
-  controlPlaneRef: <1>
+  controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1alpha2 
     kind: OpenshiftAssistedControlPlane 
     name:  <cluster-name> 
     namespace:  <cluster-namespace>
-  infrastructureRef: <2>
+  infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1 
     kind: Metal3Cluster 
     name: <cluster-name>
     namespace: <cluster-namespace>
 ----
-<1> `OpenshiftAssistedControlPlane` is the control plane.
-<2> `Metal3Cluster` is the infrastructure.
++
+- In `controlPlaneRef.kind`, `OpenshiftAssistedControlPlane` is the control plane.
+- In `infrastructureRef.kind`, `Metal3Cluster` is the infrastructure.
 
 . Apply the YAML content by running the following command:
 
@@ -115,7 +118,7 @@ metadata:
   name: <cluster-name>
   namespace: <cluster-namespace>
   annotations: {}
-spec: <1>
+spec:
   openshiftAssistedConfigSpec:
     sshAuthorizedKey: "{{ ssh_authorized_key }}" 
     nodeRegistration:
@@ -139,8 +142,9 @@ spec: <1>
       namespace: <cluster-namespace>
   replicas: 3
 ----
-<1> The `.spec.openshiftAssistedConfigSpec.sshAuthorizedKey` is used to access nodes in the _boot_ phase, also known as _discovery_ phase.
-<2> The `.spec.config.sshAuthorizedKey` is used to access the provisioned {ocp-short} nodes.
++
+- The `.spec.openshiftAssistedConfigSpec.sshAuthorizedKey` is used to access nodes in the _boot_ phase, also known as _discovery_ phase.
+- The `.spec.config.sshAuthorizedKey` is used to access the provisioned {ocp-short} nodes.
 
 . Apply the YAML file. Run the following command:
 
@@ -159,15 +163,16 @@ oc apply -f <filename>.yaml
 ----
 apiVersion: v1
 kind: Secret
-metadata: <1>
+metadata:
   name: pull-secret 
   namespace: <cluster-namespace>
-data: <2>
+data:
   .dockerconfigjson: <encoded_docker_configuration> 
 type: kubernetes.io/dockerconfigjson
 ----
-<1> Ensure that the `<cluster-namespace>` value matches the target namespace.
-<2> Specify the base64-encoded configuration file as the value for `<encoded_docker_configuration>`. 
++
+- Ensure that the `<cluster-namespace>` value matches the target namespace.
+- Specify the base64-encoded configuration file as the value for `<encoded_docker_configuration>`. 
 
 . Run the following command to apply the file:
 
@@ -189,11 +194,12 @@ metadata:
   namespace: <cluster-namespace>
 spec:
   controlPlaneEndpoint:
-    host: <cluster-name>.lab.home <1>
+    host: <cluster-name>.lab.home
     port: 6443
   noCloudProvider: true
 ----
-<1> The `host` is the `<clusterName>.<baseDomain>*` value with the `clusterName` from the `Cluster` resource, and the `baseDomain` is defined in the `OpenshiftAssistedControlPlane` resource.
++
+- The `host` is the `<clusterName>.<baseDomain>*` value with the `clusterName` from the `Cluster` resource, and the `baseDomain` is defined in the `OpenshiftAssistedControlPlane` resource.
 
 . Apply the file. Run the following command:
 
@@ -220,7 +226,7 @@ spec:
       automatedCleaningMode: disabled
       dataTemplate:
         name: <cluster-name-template>
-      image: <1>
+      image:
         checksum: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/sha256sum.txt
         checksumType: sha256
         url: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.19/4.19.0/rhcos-4.19.0-x86_64-nutanix.x86_64.qcow2
@@ -232,10 +238,11 @@ metadata:
    name: <cluster-name-template>
    namespace: <cluster-namespace>
 spec:
-   clusterName: <cluster-name> <2>
+   clusterName: <cluster-name>
 ----
-<1> The image matches the `distributionVersion` value and the version from link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
-<2> Set the `clusterName` to the same value that it is in the `Cluster` resource
++
+- The `spec.template.spec.image` matches the `distributionVersion` value and the version from link:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/[{ocp-short} Releases].
+- Set the `<cluster-name>` to the same value that it is in the `Cluster` resource
 
 . Apply the file. Run the following command:
 
@@ -274,13 +281,14 @@ spec:
           name: <cluster-name-worker>
           apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1 
           kind: OpenshiftAssistedConfigTemplate
-      infrastructureRef: <2>
+      infrastructureRef:
         name: <cluster-name-workers-2>
         apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
         kind: Metal3MachineTemplate
 ----
-<1> The bootstrap configuration is also referenced in the next resource for installation.
-<2> The infrastructure reference points to the resource to provision.
++
+- The `spec.bootstrap` configuration is also referenced in the next resource for installation.
+- The `infrastructureRef` reference points to the resource to provision.
 
 . Apply the file. Run the following command:
 
@@ -307,11 +315,12 @@ spec:
     spec:
       nodeRegistration:
         kubeletExtraLabels:
-          - 'metal3.io/uuid="${METADATA_UUID}"'<1>
-      sshAuthorizedKey: "{{ ssh_authorized_key }}" <2>
+          - 'metal3.io/uuid="${METADATA_UUID}"'
+      sshAuthorizedKey: "{{ ssh_authorized_key }}"
 ----
-<1> The `kubeletExtraLabels` cannot change from this value.
-<2> Enter your `sshAuthorizedKey`.
++
+- The `kubeletExtraLabels` cannot change from this value.
+- Enter your key in the `sshAuthorizedKey` field.
 
 . Create the `Metal3MachineTemplate` that is referenced in the `MachineDeployment` resource. See the following example:
 
@@ -353,9 +362,9 @@ spec:
 oc apply -f <filename>.yaml
 ----
 
-. Verify your cluster provisioning status.
+.Verification
 
-.. Run `oc get cluster --namespace <cluster-namespace> <cluster-name> -o yaml` to check your `Cluster` resource status.
+. Run `oc get cluster --namespace <cluster-namespace> <cluster-name> -o yaml` to check your `Cluster` resource status.
 
 +
 See the following output and status:
@@ -376,7 +385,7 @@ status:
     type: InfrastructureReady
 ----
 
-.. Run the `oc get metal3cluster --namespace <cluster-namespace> <cluster-name> -o yaml` command to check your cluster infrastructure status.
+. Run the `oc get metal3cluster --namespace <cluster-namespace> <cluster-name> -o yaml` command to check your cluster infrastructure status.
 
 +
 See the following output and status:
@@ -394,7 +403,7 @@ status:
     type: BaremetalInfrastructureReady
 ----
 
-.. Run the `oc get openshiftassistedcontrolplane --namespace <cluster-namespace> <cluster-name> -o yaml` command to check your control plane status.
+. Run the `oc get openshiftassistedcontrolplane --namespace <cluster-namespace> <cluster-name> -o yaml` command to check your control plane status.
 
 +
 See the following output and status:
@@ -424,7 +433,7 @@ status:
     type: UpgradeCompleted
 ----
 
-.. Run the `oc get machinedeployment --namespace <cluster-namespace> <cluster-name> -o yaml` command to check your machine deployments status.
+. Run the `oc get machinedeployment --namespace <cluster-namespace> <cluster-name> -o yaml` command to check your machine deployments status.
 
 + 
 See the following output and status:
@@ -445,7 +454,7 @@ status:
     type: MachineSetReady
 ----
 
-.. Run the `kubectl get machine -l cluster.x-k8s.io/cluster-name=cluster-name -n test-capi -o yaml` command to check your machines.
+. Run the `kubectl get machine -l cluster.x-k8s.io/cluster-name=cluster-name -n test-capi -o yaml` command to check your machines.
 
 + 
 See the following output and status:

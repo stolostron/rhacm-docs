@@ -1,0 +1,100 @@
+[#ztp-apply-clusterinstance-hub]
+= Applying _ClusterInstance_ applications to the target hub cluster
+
+After the migration completes successfully, you must apply the `ClusterInstance` applications to the target hub cluster. `ClusterInstance` resources are managed by {gitops-short} and are not automatically migrated. `ClusterInstance` applications manage the declarative configuration of your Zero Touch Provisioning (ZTP) clusters, including `ClusterInstance` custom resources, cluster-specific secrets, and infrastructure configurations.
+
+*Required access:* Cluster administrator
+
+.Prerequisites 
+
+* Ensure that the status for your migration is in the `Completed` phase before you attempt to apply `ClusterInstance` applications. Verify the status by running the following command:
+
++
+[source,bash]
+----
+oc get managedclustermigration -n multicluster-global-hub
+----
+
+.Procedure
+
+Complete the following procedure to apply the `ClusterInstance` applications:
+
+. Export the applications that manage your `ClusterInstance` resources, secrets, and configurations. On the source hub cluster, export the `ClusterInstance` applications by running the following command:
+
++
+[source,bash]
+----
+oc get application -n openshift-gitops <clusterinstance-sno-clusters> -o yaml > clusterinstance-app.yaml
+----
+
+. Modify `ClusterInstance` resources in the Git repository to suppress the rendering of `BareMetalHost` and `ImageClusterInstall` manifests, which are migrated with their status preserved. You receive conflicts if you re-render these resources on the target hub cluster. 
+
+.. In your Git repository, locate the `ClusterInstance` definitions.
+
+.. Add the `suppressedManifests` field to the `spec` section of each `ClusterInstance` resource. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: siteconfig.open-cluster-management.io/v1alpha1
+kind: ClusterInstance
+metadata:
+  name: sno1
+  namespace: sno1
+spec:
+  suppressedManifests:
+    - BareMetalHost
+    - ImageClusterInstall
+----
+
+.. Add and commit your changes to your Git repository. Run the following commands:
+
++
+[source,bash]
+----
+git add clusterinstance/*.yaml
+
+git commit -m "Add suppressedManifests to prevent re-rendering migrated resources"
+----
+
+.. Commit your changes with the following command:
+
++
+[source,bash]
+----
+git push origin main
+----
+
+. Apply the exported applications to the target hub cluster. Run the following command on the hub cluster:
+
++
+[source,bash]
+----
+oc apply -f clusterinstance-app.yaml
+----
+
+. Verify that the resources are reconciled and compliant. Check the status of the `ClusterInstance` resources by running the following command:
+
++
+[source,bash]
+----
+oc get clusterinstance -A
+----
+
+. From the output, ensure that the `PROVISIONSTATUS` is in the `Completed` phase, and that the `PROVISIONDETAILS` displays the `Provisioning completed`.
+
+. Verify that the {acm-short} policies are applied and compliant. Run the following command:
+
++
+[source,bash]
+----
+oc get policy -A
+----
+
+. Verify that the migrated managed clusters are available on the target hub cluster. Run the following command:
+
++
+[source,bash]
+----
+oc get managedcluster sno1,sno2,sno3
+----
