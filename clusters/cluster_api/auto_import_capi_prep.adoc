@@ -1,0 +1,90 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#prep-auto-import-capi]
+= Preparing your hub cluster for Cluster API clusters (Technology Preview)
+
+[role="_abstract"]
+Before you can automatically import provisioned clusters with the Cluster API, you must complete the following procedure.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* You need the `MultiClusterEngine` resource either from the {acm-short} installation, or the {mce-short} standalone installation.
+
+.Procedure
+
+Complete the following steps to prepare your hub cluster for automatic import of Cluster API clusters:
+
+. Enable the `ClusterImporter` feature gate in the `ClusterManager` resource by adding the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: operator.open-cluster-management.io/v1
+kind: ClusterManager
+metadata:
+  name: cluster-manager
+spec:
+  registrationConfiguration:
+    featureGates:
+    - feature: ClusterImporter
+      mode: Enable
+----
+
+. Configure the import controller to create cluster import configuration secrets by setting `clusterImportConfig` to `true`. Your `ConfigMap` resource might resemble the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: import-controller-config
+  namespace: multicluster-engine
+data:
+  clusterImportConfig: "true"
+----
+
+.. If you do not have a `ConfigMap` resource yet, run the following command to apply the changes. Replace `<filename>` with your file name:
+
++
+[source,bash]
+----
+oc apply -f <filename>.yaml
+----
+
+.. If you already have a `ConfigMap` resource, run the following command to apply the changes:
+
++
+[source,bash]
+----
+oc patch configmap import-controller-config -n multicluster-engine --type merge -p '{"data":{"clusterImportConfig":"true"}}'
+----
+
+. Bind the Cluster API manager permissions to the import controller service account. Add the following YAML file sample:
+
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-manager-registration-capi
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: capi-manager-role
+subjects:
+- kind: ServiceAccount
+  name: registration-controller-sa
+  namespace: open-cluster-management-hub
+----
+
+. Run the following command to apply the changes. Replace `<filename>` with your file name:
+
++
+[source,bash]
+----
+oc apply -f <filename>.yaml
+----
