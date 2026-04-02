@@ -1,135 +1,18 @@
+:_mod-docs-content-type: PROCEDURE
+
 [#create-rosa-hcp-capi-cluster]
 = Creating a {rosa-hcp} cluster with Cluster API
 
+[role="_abstract"]
 A {rosa-hcp} cluster is a deployment model for {rosa} where the cluster control plane is hosted and managed in a Red Hat Amazon Web Services (AWS) account. Complete the steps in the following topics to create a {rosa-hcp} cluster by using Cluster API. 
 
 *Required access:* Cluster administrator
 
 .Prerequisites
 
-- You need an AWS access key. See link:https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html[Manage access keys for IAM users] in the AWS documentation to learn more.
-- The AWS {rosa} managed policies are attached to your AWS user permissions. See link:https://docs.aws.amazon.com/rosa/latest/userguide/security-iam-awsmanpol.html[AWS managed policies for ROSA] in the AWS documentation to learn more.
-- You need the OpenShift CLI (`oc`). See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/cli_tools/openshift-cli-oc[OpenShift CLI (oc)] in the {ocp-short} documentation to learn more.
-- You need the ROSA CLI (`rosa`). See link:https://docs.redhat.com/en/documentation/red_hat_openshift_service_on_aws/4/html/cli_tools/rosa-cli[ROSA CLI] in the {rosa} documentation to learn more. 
-
-== Creating a service account
-
-You need a service account before creating a {rosa-hcp} cluster. If you have a service account, you do not need to complete this section. 
+- You must prepare before creating a {rosa-hcp} cluster. Complete the steps in xref:../cluster_api/create_capi_rosa_prep.adoc#prep-create-rosa-hcp-capi-cluster[Preparing for creating a {rosa-hcp} cluster with Cluster API].
 
 .Procedure
-
-Complete the following steps:
-
-. Create a service account by navigating to *Identity & Access Management* > *Service Accounts* in the console.
-
-. Click the *Create service account* button.
-
-. For every new service account you create, activate the account by using the ROSA CLI.
-
-.. Log in to your new service account. Run the following command. Replace values where needed:
-
-+
-[source,bash]
-----
-rosa login --client-id <your-client-id> --client-secret <your-client-secret>
-----
-
-.. Activate your service account. Run the following command:
-
-+
-[source,bash]
-----
-rosa whoami
-----
-
-== Setting AWS credentials
-
-You need to set your AWS credentials before creating a {rosa-hcp} cluster. Complete the following steps:
-
-. If you are not using multi-factor authentication with AWS, set your AWS credentials by using the AWS access key you created. Run the following command. Replace values where needed:
-
-+
-[source,bash]
-----
-echo '[default]
-aws_access_key_id = <your-access-key>
-aws_secret_access_key = <your-secret-access-key>
-region = us-east-1
-' | base64 -w 0
-----
-
-. If you are using multi-factor authentication with AWS, run the following command. Replace values where needed:
-
-+
-[source,bash]
-----
-echo '[default]
-aws_access_key_id = <your-access-key>
-aws_secret_access_key = <your-secret-access-key>
-aws_session_token= <your-aws-session-token>
-region = us-east-1
-' | base64 -w 0
-----
-
-. Update the `capa-manager-bootstrap-credentials` secret.
-
-.. Copy the output of the previous command and add the output to the `capa-manager-bootstrap-credentials` secret. Run the following command to edit the secret:
-+
-[source,bash]
-----
-oc edit secret -n multicluster-engine capa-manager-bootstrap-credentials
-----
-
-.. Add your output to the `credentials` field. See the following example: 
-+
-[source,bash]
-----
-apiVersion: v1
-data:
-  credentials: <your-aws-credentials>
-kind: Secret
-metadata:
-	name: capa-manager-bootstrap-credentials
-	namespace: multicluster-engine
-----
-*Optional:* If you want to use AWS IAM roles with your service account to authenticate the `capa-controller-manager`, see the Additional resources section and complete the steps in _Switching from AWS credentials to IAM roles on your Cluster API managed cluster (Technology Preview)_.
-
-. Restart the `capa-controller-manager` deployment. Run the following command:
-
-+
-[source,bash]
-----
-oc rollout restart deployment capa-controller-manager -n multicluster-engine
-----
-
-== Authenticating {ocm}
-
-The Cluster API Provider for AWS controller requires {ocm} credentials to provision {rosa-hcp}. Complete the following steps:
-
-. Create a Kubernetes secret in the target namespace with the service account credentials you created. The `ROSAControlPlane` resource references this secret during provisioning. Run the following command. Replace values where needed:
-
-+   
-[source,bash]
-----
-oc create namespace <your-rosa-hcp-namespace>
-  oc -n <your-rosa-hcp-namespace> create secret generic rosa-creds-secret \
-    --from-literal=ocmClientID='....' \
-    --from-literal=ocmClientSecret='eyJhbGciOiJIUzI1NiIsI....' \
-    --from-literal=ocmApiUrl='https://api.openshift.com'
-----
-
-. *Optional:* You can consume the secret without referencing it from your `ROSAControlPlane` resource by calling the secret `rosa-creds-secret` and creating it in the `multicluster-engine` namespace. Run the following command:
-
-+
-[source,bash]
-----
-oc -n multicluster-engine create secret generic rosa-creds-secret \
-  --from-literal=ocmClientID='....' \
-  --from-literal=ocmClientSecret='eyJhbGciOiJIUzI1NiIsI....' \
-  --from-literal=ocmApiUrl='https://api.openshift.com'
-----
-
-== Creating a {rosa-hcp} cluster
 
 After creating a service account, setting your AWS credentials, and authenticating your {ocm} credentials, complete the following steps to create a {rosa-hcp} cluster:
 
@@ -323,6 +206,6 @@ ns-rosa-hcp   workers-2   true    1
 +
 *Note:* The default available `ROSAMachinePools` count is based on the assigned availability zones.
 
-== Additional resources
+.Additional resources
 
 - If you want to use AWS IAM roles with your service account to authenticate the `capa-controller-manager`, complete the steps in xref:switch_iam_roles.adoc#switch-iam-roles-capi[Switching from AWS credentials to IAM roles on your Cluster API managed cluster (Technology Preview)].
