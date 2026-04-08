@@ -1,0 +1,73 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#configure-subs-resources-gitops]
+= Configuring subscriptions and resources for Argo CD 
+
+[role="_abstract"]
+To enable the `ArgoCD` agent, you must configure the {gitops-short} operator subscription and the `ArgoCD` custom resource. To configure the necessary subscriptions and resources, complete the following steps:
+
+*Required access*: Cluster administrator
+
+.Procedure
+
+. On the hub cluster only, modify the {gitops-short} operator subscription to include the required environment variables by running the following command:
+
++
+[source,bash]
+----
+oc edit subscription gitops-operator -n openshift-gitops-operator
+----
+
+. Add the following environment variables to the `spec.config.env` file by adding the following YAML sample:
+
++
+[source,yaml]
+----
+spec:
+  config:
+    env:
+    - name: ARGOCD_CLUSTER_CONFIG_NAMESPACES
+      value: openshift-gitops
+    - name: ARGOCD_PRINCIPAL_TLS_SERVER_ALLOW_GENERATE
+      value: "false"
+    - name: ARGOCD_PRINCIPAL_REDIS_SERVER_ADDRESS
+      value: openshift-gitops-redis:6379
+----
+
+. Replace the existing `ArgoCD` custom resource with the compatible `Agent` mode configuration by adding the following YAML sample:
+
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec:
+  controller:
+    enabled: false
+  argoCDAgent:
+    principal:
+      auth: mtls:CN=system:open-cluster-management:cluster:([^:]+):addon:gitops-addon:agent:gitops-addon-agent
+      enabled: true
+    namespaces:
+      allowedNamespaces:
+      - '*'
+----
+
+. Apply the YAML sample by running the following command:  
+
++
+[source,bash]
+----
+oc apply -f argocd-example.yaml
+----
+
+* *Note:* On the hub cluster only, this configuration disables the traditional `ArgoCD` controller and enables the agent principal with mutual TLS authentication.
+
+.Additional resources
+
+- See xref:../gitops/gitops_addon_with_argocd.adoc#enable-gitops-addon-with-argocd[Enabling {gitops} add-on with _ArgoCD_ agent (Technology Preview)] for more information about enabling the `ArgoCD` agent with the pull model.
+
