@@ -1,0 +1,51 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#add-root-ca-klusterlet-ca]
+= Adding a root CA to the klusterlet CA bundles
+
+If you are using the `UseAutoDetectedCABundle` or `UseCustomCABundles` strategy and you move to a new root certificate authority (CA), update the root CA by adding a root CA to the klusterlet CA bundles and then update the root CA.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* You are using the `UseAutoDetectedCABundle` or zUseCustomCABundles` strategy.
+
+.Procedure
+
+. Extract the root CA certificate and save it as `root-ca-bundle.crt`.
+
+. Create a `ConfigMap` with the root CA bundle. Run the following command:
+
++
+[source,bash]
+----
+oc create configmap root-ca-bundle \
+  --from-file=ca.crt=/path/to/root-ca-bundle.crt \
+  -n multicluster-engine
+----
+
+. Add the root CA to the `trustedCABundles` field by editing the global `KlusterletConfig`. Run the following command:
+
++
+[source,bash]
+----
+oc edit klusterletconfig global
+----
+
+. Add the root CA bundle to `trustedCABundles` field. See the following YAML sample:
+
++
+[source,yaml]
+----
+spec:
+  hubKubeAPIServerConfig:
+    trustedCABundles:
+    - name: root-ca
+      caBundle:
+        name: root-ca-bundle
+        namespace: multicluster-engine
+----
+. Wait for the configuration to apply to all managed clusters. This might take up to 5 minutes.
+
+. Complete the steps in xref:../hub_cert_update.adoc#update-hub-kubeapi-cert[Updating the hub cluster _KubeAPIServer_ certificate].

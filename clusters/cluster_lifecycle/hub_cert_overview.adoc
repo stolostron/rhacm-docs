@@ -1,0 +1,34 @@
+:_mod-docs-content-type: CONCEPT
+
+[#hub-cert-klusterlet-overview]
+= Hub cluster _KubeAPIServer_ certificates and managed cluster CA trust overview
+
+[role="_abstract"]
+When the klusterlet on managed clusters connects to the hub cluster `KubeAPIServer`, it uses a certificate authority (CA) bundle to verify the hub cluster certificate. {acm-short} determines this CA bundle from the `hubKubeAPIServerConfig` field in the `KlusterletConfig` resource and applies it to managed clusters.
+
+To view the certificates in the CA bundle currently used on a managed cluster, run the following command on the hub cluster. Replace `<managed-cluster-name>` with your cluster name:
+
++
+[source,bash]
+----
+oc -n <managed-cluster-name> get secret <managed-cluster-name>-import -o jsonpath='{.data.import\.yaml}' | base64 -d | grep bootstrap-hub-kubeconfig -A 4 | grep "kubeconfig:" | awk '{ system("echo "$2" | base64 -d")}' | grep certificate-authority-data | awk '{system("echo "$2" | base64 -d")}'
+----
+
+*Notes:*
+
+* This command does not work for a `ManagedCluster` with the label `local-cluster:true` because that cluster uses an internal endpoint to access the hub `KubeAPIServer`.
+* For other clusters, if the output is empty, the klusterlet is using the system trust store.
+
+Updating the hub cluster `KubeAPIServer` certificate can cause managed clusters to go offline unless you follow the correct procedure. The correct procedure depends on your hub `KubeAPIServer` verification strategy and what is changing in the certificate chain.
+
+{acm-short} uses `serverVerificationStrategy` in the `KlusterletConfig` to control how managed clusters verify the hub `KubeAPIServer` certificate. The strategies are `UseAutoDetectedCABundle`, `UseSystemTruststore`, and `UseCustomCABundles`. For details, see xref:../set_verification_strat.adoc#set-hub-kube-api-server[Setting the hub cluster `KubeAPIServer` verification strategy].
+
+To check your current strategy, run the following command:
+
++
+[source,bash]
+----
+oc get klusterletconfig global -o yaml
+----
+
+Look for `spec.hubKubeAPIServerConfig.serverVerificationStrategy`. If the `KlusterletConfig` does not exist or this field is not set, your strategy is set to `UseAutoDetectedCABundle`.

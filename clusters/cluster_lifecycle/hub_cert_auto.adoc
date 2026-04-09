@@ -1,0 +1,97 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#update-root-ca-auto-ca]
+= Updating the root CA with auto-detected CA bundles
+
+[role="_abstract"]
+If you are using the `UseAutoDetectedCABundle` strategy and you move to a new root certificate authority (CA), update the root CA by temporarily adding the new CA to `trustedCABundles`, updating the certificate, and removing the temporary configuration.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* You are using the `UseAutoDetectedCABundle` strategy.
+
+.Procedure
+
+. Prepare the new CA bundle by extracting the root and intermediate CA certificates from your new certificate and save the file as `new-ca-bundle.crt`. Do not include the leaf certificate.
+
+. Create a `ConfigMap` with the new CA bundle. Run the following command:
+
++
+[source,bash]
+----
+oc create configmap new-root-ca-bundle \
+  --from-file=ca.crt=/path/to/new-ca-bundle.crt \
+  -n multicluster-engine
+----
+
+. Add the new CA bundle by editing the global `KlusterletConfig`. Run the following command:
+
++
+[source,bash]
+----
+oc edit klusterletconfig global
+----
+
+. Add the new CA bundle to `trustedCABundles`. See the following YAML sample:
+
++
+[source,yaml]
+----
+spec:
+  hubKubeAPIServerConfig:
+    trustedCABundles:
+    - name: new-root-ca
+      caBundle:
+        name: new-root-ca-bundle
+        namespace: multicluster-engine
+----
+
++
+*Note:* Managed clusters now trust both the auto-detected old CA bundle and the new CA bundle.
+
+. Wait for the configuration to apply to all managed clusters. This might take up to 5 minutes.
+
+. Complete the steps in xref:../hub_cert_update.adoc#update-hub-kubeapi-cert[Updating the hub cluster _KubeAPIServer_ certificate] to update the certificate and verify that managed clusters remain available.
+
+. Remove the temporary CA configuration by editing the global `KlusterletConfig`. Run the following command:
+
++
+[source,bash]
+----
+oc edit klusterletconfig global
+----
+
+. Remove the `trustedCABundles` section or the entire `hubKubeAPIServerConfig` section so that `spec` no longer contains that configuration. Your resource might resemble the following sample after you remove the hub cluster API server configuration:
+
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec: {}
+----
+
++
+*Note:* Adjust the edit to match your desired final `KlusterletConfig`; if you need other fields under `spec`, keep them and only remove `hubKubeAPIServerConfig`.
+
+. Wait for the configuration to apply to all managed clusters. This might take up to 5 minutes.
+
+. Verify that managed clusters are available at least 15 minutes. Run the following command. Make sure the status in the output is `AVAILABLE=True`:
+
++
+[source,bash]
+----
+oc get managedclusters -w
+----
+
+. Delete the temporary `ConfigMap`. Run the following command:
+
++
+[source,bash]
+----
+oc delete configmap new-root-ca-bundle -n multicluster-engine
+----

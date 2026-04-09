@@ -1,0 +1,102 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#update-root-ca-custom-ca]
+= Updating the root CA with custom CA bundles
+
+[role="_abstract"]
+If you are using the `UseCustomCABundles` strategy and you move to a new root certificate authority (CA), update the root CA by adding the new CA to `trustedCABundles`, updating the certificate, and removing the old CA entries.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* You are using the `UseCustomCABundles` strategy.
+
+.Procedure
+
+. Prepare the new CA bundle by extracting the root and intermediate CA certificates from your new certificate and save the file as `new-ca-bundle.crt`. Do not include the leaf certificate.
+
+. Create a `ConfigMap` with the new CA bundle. Run the following command:
+
++
+[source,bash]
+----
+oc create configmap new-root-ca-bundle \
+  --from-file=ca.crt=/path/to/new-ca-bundle.crt \
+  -n multicluster-engine
+----
+
+. Add the new CA bundle to `trustedCABundles` by editing the global `KlusterletConfig`. Run the following command:
+
++
+[source,bash]
+----
+oc edit klusterletconfig global
+----
+
+. Add the new CA bundle to the `trustedCABundles` field without removing existing entries. See the following YAML sample:
+
++
+[source,yaml]
+----
+spec:
+  hubKubeAPIServerConfig:
+    serverVerificationStrategy: UseCustomCABundles
+    trustedCABundles:
+    - name: existing-ca
+      caBundle:
+        name: existing-ca-configmap
+        namespace: multicluster-engine
+    - name: new-root-ca
+      caBundle:
+        name: new-root-ca-bundle
+        namespace: multicluster-engine
+----
+
++
+*Note:* Managed clusters now trust both the old and new CA bundles.
+
+. Wait for the configuration to apply to all managed clusters. This might take up to 5 minutes.
+
+. Complete the steps in xref:../hub_cert_update.adoc#update-hub-kubeapi-cert[Updating the hub cluster _KubeAPIServer_ certificate] to update the certificate and verify that managed clusters remain available.
+
+. Remove the old CA by editing the global `KlusterletConfig`. Run the following command:
+
++
+[source,bash]
+----
+oc edit klusterletconfig global
+----
+
+. Remove the old CA bundle entry from the `trustedCABundles`. Keep the entries that you need. See the following YAML sample:
+
++
+[source,yaml]
+----
+spec:
+  hubKubeAPIServerConfig:
+    serverVerificationStrategy: UseCustomCABundles
+    trustedCABundles:
+    - name: new-root-ca
+      caBundle:
+        name: new-root-ca-bundle
+        namespace: multicluster-engine
+----
+
+. Wait for the configuration to apply to all managed clusters. This might take up to 5 minutes.
+
+. Verify that managed clusters are available at least 15 minutes. Run the following command. Make sure the status in the output is `AVAILABLE=True`:
+
++
+[source,bash]
+----
+oc get managedclusters -w
+----
+
+. *Optional:* Delete the old `ConfigMap` if it is no longer needed. Run the following command:
+
++
+[source,bash]
+----
+oc delete configmap existing-ca-configmap -n multicluster-engine
+----
