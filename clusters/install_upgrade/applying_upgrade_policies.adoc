@@ -1,0 +1,44 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#apply-upgrade-policies]
+= Applying upgrade policies to managed clusters
+
+[role="_abstract"]
+Use {acm-short} policies to configure managed clusters to use the local disconnected resources.
+
+.Procedure
+
+To apply the upgrade policies, you need to override the default registry. Create an `ImageContentSourcePolicy` resource by using a governance policy to redirect image requests to your local mirror. Then, configure the disconnected catalog source. See the following steps:
+
+. In the console, select **Governance** > **Create policy**.
+. Use the YAML editor to define a `ConfigurationPolicy` that contains your `ImageContentSourcePolicy` details.
+. Set the remediation action to **Enforce**.
+. Change the default catalog location to your local registry.
+. Create a new policy. Click **Governance** > **Create policy**.
+. Define a `CatalogSource` object in the YAML that points to your local `<registry_host_name>:<port>/olm/redhat-operators:v1` registry.
+. Enforce the policy to update the managed clusters.
+. Redirect the cluster upgrade queries to your hub cluster {update-service} instance.
+.. Find the {update-service} route on the hub: `oc get routes -n openshift-update-service`.
+.. Create a policy that updates the `ClusterVersion` resource:
+
++
+[source,yaml]
+----
+spec:
+  object-templates:
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: config.openshift.io/v1
+        kind: ClusterVersion
+        metadata:
+          name: version
+        spec:
+          channel: <your-channel>
+          upstream: https://<update-service-route>/api/upgrades_info/v1/graph
+----
+. Navigate to **Infrastructure** > **Clusters**.
+. Select a **Ready** cluster.
+. From the **Actions** menu, select **Upgrade cluster**.
+. Select the target version and confirm.
+
+If no versions appear, ensure both the current and target release images are mirrored correctly.
