@@ -1,7 +1,7 @@
 :_mod-docs-content-type: PROCEDURE
 
 [#deploy-update-service]
-= Deploying {update-service} in a disconnected environment
+= Deploying the {update-service} in a disconnected environment
 
 [role="_abstract"]
 Deploy the {update-service} operator and instance on your hub cluster to manage upgrades for disconnected clusters.
@@ -14,9 +14,51 @@ Deploy the {update-service} operator and instance on your hub cluster to manage 
 .. Deploy the operator. This creates the `openshift-update-service` project.
 .. Verify that the operator pods are in the `running` state: `oc get pods -n openshift-update-service`.
 
+. Create a graph data `init container`. {update-service} uses graph data information to find the available upgrades. In a connected environment, {update-service} pulls the graph data information for available upgrades directly from the link:https://github.com/openshift/cincinnati-graph-data[update-service graph data GitHub repository]. In a disconnected environment, you must make the graph data available in a local repository by using an `init container`.
+
+.. Clone the _graph data_ Git repository by running the following command:
+
++
+[source,bash]
+----
+git clone https://github.com/openshift/cincinnati-graph-data
+----
+
+.. Create a file that has the information for your graph data `init`. You can find a sample link:https://github.com/openshift/cincinnati-operator/blob/master/dev/Dockerfile[Dockerfile] in the `cincinnati-operator` GitHub repository.
++
+* The `FROM` value is the external registry where {update-service} finds the images.
+* The `RUN` commands create the directory and package the upgrade files. 
+* The `CMD` command copies the package file to the local repository and extracts the files for an upgrade.
+
+.. Run the following command to build the `graph data init container`:
+
++
+[source,bash]
+----
+podman build -f <docker-path> -t <graph-path>:latest
+----
++
+* Replace `<docker-path>` with the path to the file that you created in the previous step.
++
+* Replace `<graph-path>` with the path to your local graph data init container.
+
+.. Run the following command to push the `graph data init container`:
+
++
+[source,bash]
+----
+podman push <graph-path>:latest --authfile=<pull-secret>.json
+----
++
+* Replace `<graph-path>` with the path to your local graph data init container.
++
+* Replace `<pull-secret>` with the path to your pull secret file.
+
+*Optional:* If you do not have `podman` installed, replace `podman` with `docker` in step three and four.
+
 . Configure registry certificates. If you are using a secure external registry, {update-service} requires the CA certificate.
 
-.. Create a `ConfigMap` resourcein the `openshift-config` namespace:
+.. Create a `ConfigMap` resource in the `openshift-config` namespace. See the following sample:
 
 +
 [source,yaml]
@@ -65,4 +107,4 @@ spec:
 
 .Next steps
 
-When the {update-service} is running, you can apply policies to managed clusters to point to the local registry and update service.
+When the {update-service} is running, you can apply policies to managed clusters to point to the local registry and update servic
