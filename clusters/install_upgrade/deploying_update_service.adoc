@@ -1,0 +1,68 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#deploy-update-service]
+= Deploying {update-service} in a disconnected environment
+
+[role="_abstract"]
+Deploy the {update-service} operator and instance on your hub cluster to manage upgrades for disconnected clusters.
+
+.Procedure
+
+. Deploy the operator.
+
+.. In the hub cluster {ocp-catalog}, select **{update-service} Operator**.
+.. Deploy the operator. This creates the `openshift-update-service` project.
+.. Verify that the operator pods are in the `running` state: `oc get pods -n openshift-update-service`.
+
+. Configure registry certificates. If you are using a secure external registry, {update-service} requires the CA certificate.
+
+.. Create a `ConfigMap` resourcein the `openshift-config` namespace:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trusted-ca
+data:
+  updateservice-registry: |
+    -----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----
+----
+
+.. Patch the image configuration to trust the CA. Run the following command, replacing the name of the `trusted-ca` with the name in your `ConfigMap` if it changed:
+
++
+[source,bash]
+----
+oc patch image.config.openshift.io cluster -p '{"spec":{"additionalTrustedCA":{"name":"trusted-ca"}}}' --type merge
+----
+
+. Deploy the {update-service} instance.
+
+.. In the {ocp-short} console, navigate to **Installed Operators** > **{update-service} Operator**.
+.. Select **Create Instance**.
+.. Define the instance using your local registry details:
+
++
+[source,yaml]
+----
+apiVersion: update-service.openshift.io/v1beta2
+kind: update-service
+metadata:
+  name: openshift-cincinnati-instance
+  namespace: openshift-update-service
+spec:
+  registry: <registry-host-name>:<port>
+  replicas: 1
+  repository: ${LOCAL_REGISTRY}/ocp4/release
+  graphDataImage: '<host-name>:<port>/cincinnati-graph-data-container'
+----
+
+.. Select **Create** and verify the status with `oc get pods`.
+
+.Next steps
+
+When the {update-service} is running, you can apply policies to managed clusters to point to the local registry and update service.
