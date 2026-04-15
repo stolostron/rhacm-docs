@@ -18,9 +18,9 @@ Use `Agent` mode for the pull model to enable the {gitops-short} add-on and rece
 
 .Procedure 
 
-Create a `GitOpsCluster` resource to manage the `ArgoCD` agent add-on deployment. To enable the advanced pull model for Argo CD Agent architecture, complete the following steps:
+Create a `GitOpsCluster` resource to manage the `ArgoCD` agent add-on deployment. The `GitOpsCluster` controller performs automated PKI management and deploys the `ArgoCD` agent on each selected managed cluster. To enable the advanced pull model for Argo CD Agent architecture, complete the following steps:
 
-. On your managed cluster, create a `GitOpsCluster`` resource with the `ArgoCD` agent enabled by adding the following YAML sample: 
+. On your hub cluster, create a `GitOpsCluster` resource with the `ArgoCD` agent enabled by adding the following YAML sample: 
 
 +
 [source,yaml]
@@ -42,7 +42,14 @@ spec:
     enabled: true
     argoCDAgent:
       enabled: true
+      mode: managed
 ----
++
+*Notes:* 
+
+- The `mode` field determines the agent operation mode. The default value is `managed`. If you want to change the mode to `autonomous`, set the `mode` field to `autonomous` in the `argoCDAgent` specification. The only valid values are `managed` and `autonomous`. For more information about agent operation modes, see the {gitops-short} documentation.
+
+- For {ocp-short} managed clusters, it is strongly recommended to enable OLM-based deployment by adding `olmSubscription.enabled: true` to the `gitopsAddon` specification. For more information, see xref:../gitops/gitops_manage_addon.adoc#manage-gitops-addon[Managing the {gitops} add-on].
 
 . Apply the YAML sample by running the following command:  
 
@@ -51,6 +58,17 @@ spec:
 ----
 oc apply -f gitopscluster-example.yaml
 ----
+
+. The controller automatically discovers the `ArgoCD` agent principal server address from the {ocp-short} Route. Verify the discovered address by running the following command:
+
++
+[source,bash]
+----
+oc get gitopscluster gitops-agent-clusters -n openshift-gitops -o jsonpath='{.spec.gitopsAddon.argoCDAgent.serverAddress}'
+----
+
++
+*Note:* If you need to override auto-discovery for non-standard setups, you can manually specify `serverAddress` and `serverPort` in the `argoCDAgent` specification.
 
 == Verifying the _ArgoCD_ installation 
 
@@ -78,6 +96,15 @@ oc get gitopscluster gitops-agent-clusters -n openshift-gitops -o jsonpath='{.st
 `ArgoCDAgentPrereqsReady`:: The agent prerequisites are set up.
 `CertificatesReady`:: The TLS certificates are signed.
 `ManifestWorksApplied`:: The CA certificates propagated to managed clusters.
+`ArgoCDPolicyReady`:: The `ArgoCD` `Policy` is created for managing the `ArgoCD` custom resource on managed clusters.
+
+. Verify the agent principal is running on the hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc get pods -n openshift-gitops -l app.kubernetes.io/name=openshift-gitops-agent-principal
+----
 
 . Create an `ArgoCD` application resource in the managed cluster namespace by adding the following YAML file: 
 
@@ -88,7 +115,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: guestbook
-  namespace: <managed cluster name>
+  namespace: <managed-cluster-name>
 spec:
   project: default
   source:
@@ -96,20 +123,31 @@ spec:
     targetRevision: HEAD
     path: guestbook
   destination:
-    server: https://<principal-external-ip:port>?agentName=<managed cluster name>
+    server: https://<principal-server-address>:<port>?agentName=<managed-cluster-name>
     namespace: guestbook
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
 ----
 
-. Apply the YAML sample by running the following command: 
++
+*Note:* The `<principal-server-address>` and `<port>` values are automatically discovered and stored in the `ArgoCD` cluster secret. Retrieve the server URL from the cluster secret by running the following command:
 
 +
 [source,bash]
 ----
-oc apply -f application-example.yaml 
+oc get secret cluster-<managed-cluster-name> -n openshift-gitops -o jsonpath='{.data.server}' | base64 -d
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f application-example.yaml
 ----
 
 . On the managed cluster, verify the deployment of the application resources by running the following command:
