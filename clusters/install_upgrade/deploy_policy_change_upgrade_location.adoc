@@ -1,0 +1,131 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#deploy-policy-change-upgrade-location]
+= Optional: Deploying the _ClusterVersion_ policy to change the upgrade location
+
+[role="_abstract"]
+You can push the `ClusterVersion` policy to the managed cluster to change the default location where it retrieves its upgrades.
+
+.Procedure 
+
+Complete the following steps to deploy a policy to change the managed cluster parameter:
+
+. From the managed cluster, confirm that the _ClusterVersion_ upstream parameter is currently the default public {update-service} operand by running the following command:
+
++
+[source,bash]
+----
+oc get clusterversion -o yaml
+----
+
+. From the hub cluster, identify the route URL to the {update-service} operand by running the following command and plan to use the results from the output later in the procedure:
+
++
+[source,bash]
+----
+oc get routes
+----
+
+. In the hub cluster console menu, select *Governance* > *Create a policy*.
+
+. Set the `YAML` switch to _On_ to view the YAML version of the policy.
+
+. Delete all of the content in the `YAML` code and paste the following `YAML` content with the `Policy` and `PlacementBinding` resources:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-cluster-version
+  namespace: default
+  annotations:
+    policy.open-cluster-management.io/standards: null
+    policy.open-cluster-management.io/categories: null
+    policy.open-cluster-management.io/controls: null
+spec:
+  disabled: false
+  remediationAction: enforce
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-cluster-version
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: config.openshift.io/v1
+                kind: ClusterVersion
+                metadata:
+                  name: version
+                spec:
+                  channel: stable-4.4
+                  upstream: >-
+                    https://example-cincinnati-policy-engine-uri/api/upgrades_info/v1/graph <1>
+
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-cluster-version
+  namespace: default
+placementRef:
+  name: placement-policy-cluster-version
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-cluster-version
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-cluster-version
+  namespace: default
+spec:
+  clusterSelector:
+    matchExpressions:
+      []
+----
++
+* Replace the `https://example-cincinnati-policy-engine-uri/api/upgrades_info/v1/graph` values with the path to your hub cluster {update-service} operand.
+* `matchExpressions` selects all clusters if you do not specify any expressions.
+
+. Run the `oc get get routes -A` command on the hub cluster to determine the path to the operand.
+
+. Find the route to `update-service`. The path to the operand is the value in the `HOST/PORT` field.
+
+. Select *Enforce if supported*. 
+
+. Select *Create* to create the policy.
+
+. In the managed cluster command-line interface, confirm that the upstream parameter in the `ClusterVersion` is updated with the local hub cluster {update-service} URL by running the following command:
+
++
+[source,bash]
+----
+oc get clusterversion -o yaml
+----
+
+. Ensure that the the results resemble the following content:
+
++
+[source,yaml]
+----
+apiVersion: v1
+items:
+- apiVersion: config.openshift.io/v1
+  kind: ClusterVersion
+[..]
+  spec:
+    channel: stable-4.4
+    upstream: https://<hub-cincinnati-uri>/api/upgrades_info/v1/graph
+----
+
+.Additional resources
+
+Return to xref:../install_upgrade/upgrade_cluster_overview.adoc#upgrade-clusters-mce-overview[Upgrading disconnected clusters by using policies] for an overview.
