@@ -1,20 +1,12 @@
+:_mod-docs-content-type: PROCEDURE
+
 [#enable-cim]
 = Enabling the {cim} service
 
+[role="_abstract"]
 The {cim} service is provided with the {mce-short} and deploys {ocp-short} clusters. The {cim} service is deployed automatically if you installed {acm-short} and enabled the `MultiClusterHub` Operator on the hub cluster, but you have to enable the service manually in this case. 
 
-See the following sections:
-
-* <<enable-cim-bmh-crd,Creating a bare metal host custom resource definition>>
-* <<enable-cim-provision,Creating or modifying the _Provisioning_ resource>>
-* <<enable-cim-disconnected,Enabling {cim} in disconnected environments>>
-* <<enable-cim-connected,Enabling {cim} in connected environments>>
-* <<fips-install-cim,Installing a FIPS-enabled cluster by using the {ai}>>
-
-[#enable-cim-prerequisites]
-== Prerequisites
-
-See the following prerequisites before enabling the {cim} service:
+.Prerequisites
 
 - You must have a deployed hub cluster on a supported {ocp-short} version and a supported {acm} version.
 - You need internet access for your hub cluster.
@@ -25,18 +17,20 @@ See the following prerequisites before enabling the {cim} service:
 - You need a configured default storage class.
 - For disconnected environments only, complete the procedure for link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/edge_computing/ztp-deploying-far-edge-clusters-at-scale#ztp-acm-preparing-to-install-disconnected-acm_ztp-deploying-disconnected[Clusters at the network far edge] in the {ocp-short} documentation.
 
-[#enable-cim-bmh-crd]
-== Creating a bare metal host custom resource definition
+.Procedure
 
-You need a bare metal host custom resource definition before enabling the {cim} service. 
+Complete the following steps to enable the {cim} service:
 
-. Check if you already have a bare metal host custom resource definition by running the following command:
+. Create a bare metal host custom resource definition.
+
+.. Check if you already have a bare metal host custom resource definition by running the following command:
 
 +
 [source,bash]
 ----
 oc get crd baremetalhosts.metal3.io
 ----
+
 +
 - If you have a bare metal host custom resource definition, the output shows the date when the resource was created.
 - If you do not have the resource, you receive an error that resembles the following:
@@ -47,7 +41,7 @@ oc get crd baremetalhosts.metal3.io
 Error from server (NotFound): customresourcedefinitions.apiextensions.k8s.io "baremetalhosts.metal3.io" not found
 ----
 
-. If you do not have a bare metal host custom resource definition, download the link:https://raw.githubusercontent.com/openshift/baremetal-operator/master/config/base/crds/bases/metal3.io_baremetalhosts.yaml[metal3.io_baremetalhosts.yaml] file and apply the content by running the following command to create the resource:
+.. If you do not have a bare metal host custom resource definition, download the link:https://raw.githubusercontent.com/openshift/baremetal-operator/master/config/base/crds/bases/metal3.io_baremetalhosts.yaml[metal3.io_baremetalhosts.yaml] file and apply the content by running the following command to create the resource:
 
 +
 [source,bash]
@@ -55,38 +49,17 @@ Error from server (NotFound): customresourcedefinitions.apiextensions.k8s.io "ba
 oc apply -f
 ----
 
-[#enable-cim-provision]
-== Creating or modifying the _Provisioning_ resource
+. Create or modify the `Provisioning` resource.
 
-You need a `Provisioning` resource before enabling the {cim} service.
-
-. Check if you have the `Provisioning` resource by running the following command:
+.. Check if you have the `Provisioning` resource by running the following command:
 
 +
 [source,bash]
 ----
 oc get provisioning
 ----
-+
-- If you already have a `Provisioning` resource, modify the `Provisioning` resource.
-- If you do not have a `Provisioning` resource, you receive a `No resources found` error. Continue to create the `Provisioning` resource.
 
-. Modify the `Provisioning` resource.
-
-+
-If you already have a `Provisioning` resource, you must modify the resource if your hub cluster is installed on one of the following platforms:
-
-+
-- Bare metal
-- Red Hat OpenStack Platform
-- VMware vSphere
-- User-provisioned infrastructure (UPI) method and the platform is `None`
-
-+
-If your hub cluster is installed on a different platform, continue at _Enabling {cim} in disconnected environments_ or _Enabling {cim} in connected environments_.
-
-+
-Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces by running the following command:
+.. If you already have a `Provisioning` resource, and if your hub cluster is installed on Bare metal, Red Hat OpenStack Platform, VMware vSphere, or User-provisioned infrastructure (UPI) and the platform is `None`, modify the `Provisioning` resource to allow the Bare Metal Operator to watch all namespaces. Run the following command:
 
 +
 [source,bash]
@@ -94,9 +67,11 @@ Modify the `Provisioning` resource to allow the Bare Metal Operator to watch all
 oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
 ----
 
-. Create the _Provisioning_ resource if you do not have a `Provisioning` resource. 
++
+If your hub cluster is installed on a different platform, continue at xref:../ai_enable_cim_disconnect.adoc[Enabling {cim} in disconnected environments] or xref:../ai_enable_cim_connect.adoc[Enabling {cim} in connected environments].
 
-.. Create the following `Provisioning` resource YAML file:
+
+.. If you do not have a `Provisioning` resource, you receive a `No resources found` error. Create the following `Provisioning` resource YAML file. Skip this step if you previously modified your `Provisioning` resource:
 
 +
 [source,yaml]
@@ -110,7 +85,7 @@ spec:
   watchAllNamespaces: true
 ----
 
-.. Apply the content by running the following command:
+.. Apply the content by running the following command. Skip this step if you previously modified your `Provisioning` resource:
 
 +
 [source,bash]
@@ -118,236 +93,7 @@ spec:
 oc apply -f
 ----
 
-[#enable-cim-disconnected]
-== Enabling {cim} in disconnected environments
-
-To enable {cim} in disconnected environments, complete the following steps:
-
-. Create a `ConfigMap` in the same namespace as your infrastructure operator to specify the values for `ca-bundle.crt` and `registries.conf` for your mirror registry. Your file `ConfigMap` might resemble the following example:
-
-+
-[source,yaml]
-----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: <mirror-config>
-  namespace: multicluster-engine
-  labels:
-    app: assisted-service
-data:
-  ca-bundle.crt: |    
-    <certificate-content>
-  registries.conf: |
-    unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
-    [[registry]]
-       prefix = ""
-       location = "registry.redhat.io/multicluster-engine"
-       mirror-by-digest-only = true
-       [[registry.mirror]]
-       location = "mirror.registry.com:5000/multicluster-engine"
-----
-+
-*Note:* You must set `mirror-by-digest-only` to `true` because release images are specified by using a digest.
-+
-Registries in the list of `unqualified-search-registries` are automatically added to an authentication ignore list in the `PUBLIC_CONTAINER_REGISTRIES` environment variable. The specified registries do not require authentication when the pull secret of the managed cluster is validated.
-
-. Write the key pairs representing the headers and query parameters that you want to send with every `osImage` request. If you don't need both parameters, write key pairs for only headers or query parameters.
-
-*Important:* Headers and query parameters are only encrypted if you use HTTPS. Make sure to use HTTPS to avoid security issues.
-
-.. Create a file named `headers` and add content that resembles the following example:
-
-+
-[source,json]
-----
-{
-  "Authorization": "Basic xyz"
-}
-----
-
-.. Create a file named `query_params` and add content that resembles the following example:
-
-+
-[source,json]
-----
-{
-  "api_key": "myexampleapikey",
-}
-----
-
-. Create a secret from the parameter files that you created by running the following command. If you only created one parameter file, remove the argument for the file that you didn't create:
-
-+
-[source,bash]
-----
-oc create secret generic -n multicluster-engine os-images-http-auth --from-file=./query_params --from-file=./headers
-----
-
-. If you want to use HTTPS `osImages` with a self-signed or third-party CA certificate, add the certificate to the `image-service-additional-ca` `ConfigMap`. To create a certificate, run the following command:
-
-+
-[source,bash]
-----
-oc -n multicluster-engine create configmap image-service-additional-ca --from-file=<file-name>
-----
-
-. Create the `AgentServiceConfig` custom resource by saving the following YAML content in the `agent_service_config.yaml` file:
-
-+
-[source,yaml]
-----
-apiVersion: agent-install.openshift.io/v1beta1
-kind: AgentServiceConfig
-metadata:
- name: agent
-spec:
-  databaseStorage:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: <db_volume_size> 
-  filesystemStorage:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: <fs_volume_size>
-  mirrorRegistryRef:
-    name: <mirror_config> <1>
-  unauthenticatedRegistries:
-    - <unauthenticated_registry> <2>
-  imageStorage:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: <img_volume_size> <3>
-  OSImageAdditionalParamsRef:
-	    name: os-images-http-auth
-  OSImageCACertRef:
-    name: image-service-additional-ca
-  osImages: 
-    - openshiftVersion: "<ocp_version>" <4>
-      version: "<ocp_release_version>" <5>
-      url: "<iso_url>" <6>
-      cpuArchitecture: "x86_64"
-----
-
-+
-<1> Replace `mirror_config` with the name of the `ConfigMap` that contains your mirror registry configuration details.
-+
-<2> Include the optional `unauthenticated_registry` parameter if you are using a mirror registry that does not require authentication. Entries on this list are not validated or required to have an entry in the pull secret. 
-+
-<3> Replace `img_volume_size` with the size of the volume for the `imageStorage` field. This value specifies how much storage is allocated to store base Red Hat Enterprise Linux CoreOS images. The minimum value is `10Gi`, but the value for best practice is at least `50Gi`, especially if you are opting for the default set of images instead of defining a limited set using `osImages`. You need to allow at least `2Gi` of image storage for each instance of Red Hat Enterprise Linux CoreOS that is configured in `osImages`.
-+
-<4> Replace `ocp_version` with the supported {ocp-short} version to install.
-+
-<5> Replace `ocp_release_version` with the specific install version, for example, `49.83.202103251640-0`.
-+
-<6> Replace `iso_url` with the ISO url. You can find ISO url values at the link:https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/[rhoc].
-
-If you are using HTTPS `osImages` with self-signed or third-party CA certificates, reference the certificate in the `OSImageCACertRef` spec.
-
-*Important:* If you are using the late binding feature, the {ocp-short} release images that you use when creating your clusters must be the same.
-
-You can verify that your {cim} service is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. 
-
-[#enable-cim-connected]
-== Enabling {cim} in connected environments
-
-To enable {cim} in connected environments, create the `AgentServiceConfig` custom resource by saving the following YAML content in the `agent_service_config.yaml` file:
-
-[source,yaml]
-----
-apiVersion: agent-install.openshift.io/v1beta1
-kind: AgentServiceConfig
-metadata:
- name: agent
-spec:
-  databaseStorage:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: <db_volume_size> <1>
-  filesystemStorage:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: <fs_volume_size> <2>
-  imageStorage:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: <img_volume_size> <3>
-----
-<1> Replace `db_volume_size` with the volume size for the `databaseStorage` field, for example `10Gi`. This value specifies how much storage is allocated for storing files such as database tables and database views for the clusters. The minimum value that is required is `1Gi`. You might need to use a higher value if there are many clusters.
-<2> Replace `fs_volume_size` with the size of the volume for the `filesystemStorage` field, for example `200M` for each cluster and `2-3Gi` for each supported {ocp-short} version. The minimum value that is required is `1Gi`, but the recommended value is at least `100Gi`. This value specifies how much storage is allocated for storing logs, manifests, and `kubeconfig` files for the clusters. You might need to use a higher value if there are many clusters. 
-<3> Replace `img_volume_size` with the size of the volume for the `imageStorage` field. This value specifies how much storage is allocated to store base Red Hat Enterprise Linux CoreOS images. The minimum value is `10Gi`, but the value for best practice is at least `50Gi`, especially if you are opting for the default set of images instead of defining a limited set using `osImages`. You need to allow at least `2Gi` of image storage for each instance of Red Hat Enterprise Linux CoreOS that is configured in `osImages`.
-
-See _Enabling {cim} in disconnected environments_ for details about how to define custom image set in `osImages`.
-
-Your {cim} service is configured. You can verify that it is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running. 
-
-[#fips-install-cim]
-== Installing a FIPS-enabled cluster by using the {ai}
-//this should be a standalone, as should most of these sections and we need to remove previous OCP versions from this, Oliver is adding it to his tech debt --bsc 5/2025
-
-When you install a supported {ocp-short} cluster that is in FIPS mode, do not specify any Red Hat Enterprise Linux version for the installers.
-
-*Required access:* You must have access to edit the `AgentServiceConfig` and `AgentClusterInstall` resources.
-
-[#fips-install-cim-415]
-=== Installing a {ocp-short} cluster version 4.15 and earlier
-//this needs to be removed
-
- If you install a {ocp-short} cluster version 4.15 and earlier, complete the following steps to update the `AgentServiceConfig` resource:
-
-. Log in to you managed cluster by using the following command:
-
-+
-[source,bash]
-----
-oc login
-----
-
-. Add the `agent-install.openshift.io/service-image-base: el8` annotation in the `AgentServiceConfig` resource.
-+
-Your `AgentServiceConfig` resource might resemble the following YAML:
-
-+
-[source,yaml]
-----
-apiVersion: agent-install.openshift.io/v1beta1 
-kind: AgentServiceConfig 
-metadata: 
-  annotations: 
-    agent-install.openshift.io/service-image-base: el8 
-...
-----
-
-[#fips-install-cim-416]
-=== Installing a {ocp-short} cluster version 4.16 and later
-//this needs to be removed, we are on OCP 4.17-4.19 in this 2.14 version--this can remain in older doc
-
-If you install a {ocp-short} cluster version 4.16 and later, complete the following steps to update the `AgentServiceConfig` resource: 
-
-. Log in to you managed cluster by using the following command:
-
-+
-[source,bash]
-----
-oc login
-----
-
-. If the `agent-install.openshift.io/service-image-base: el8` annotation is present in the `AgentServiceConfig` resource, remove the annotation.
-
-[#additional-resources-cim-enable]
-== Additional resources
+.Additional resources
 
 - For additional information about zero touch provisioning, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/edge_computing/ztp-deploying-far-edge-clusters-at-scale#ztp-deploying-far-edge-clusters-at-scale[Challenges of the network far edge] in the {ocp-short} documentation.
 
