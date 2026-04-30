@@ -1,0 +1,57 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#prepare-disconnected-registry]
+= Preparing the disconnected mirror registry to use with {update-service}
+
+[role="_abstract"]
+If you use the {acm-short} hub cluster to manage, upgrade, and install components with the the `MultiClusterHub` operator, you can use the {update-service} and {acm-short} policies to upgrade multiple clusters in a disconnected environment.
+
+{update-service} is a separate operator and operand that monitors available versions for managed clusters and makes them accessible for upgrading in restricted networks.
+
+{update-service} performs the following actions:
+* Monitors upgrade availability for disconnected clusters.
+* Identifies updates mirrored to your local site by using the graph data file.
+* Notifies you of available upgrades via the console.
+
+To upgrade in a disconnected environment, you must mirror the target version image and the current version image to your local registry. You must also provide graph data for {update-service} to identify upgrade paths.
+
+.Prerequisites 
+
+Before you use {update-service} to upgrade disconnected clusters, ensure you have the following requirements:
+
+* A supported version of {acm-short}. See link:../install/install_overview.adoc#installing[Installing and upgrading].
+* A supported {ocp-short} version with restricted {olm} configured. Take note of the catalog source image.
+* An {ocp-short} cluster that is managed by the hub cluster.
+* Access credentials to a local repository for mirroring images.
+* An image for the current cluster version that remains available in the mirrored images. If an upgrade fails, the cluster reverts to the version present when the upgrade was initiated. See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/registry/configuring-registry-operator#images-configuration-cas_configuring-registry-operator[Configuring additional trust stores for image registry access]
+
+.Procedure
+
+. Create a script file to mirror your images. Replace `<pull-secret>` with the path to your {ocp-short} pull secret:
+
++
+[source,bash]
+----
+UPSTREAM_REGISTRY=quay.io
+PRODUCT_REPO=openshift-release-dev
+RELEASE_NAME=ocp-release
+OCP_RELEASE=4.17.2-x86_64
+LOCAL_REGISTRY=$(hostname):5000
+LOCAL_SECRET_JSON=<pull-secret>
+
+oc adm -a ${LOCAL_SECRET_JSON} release mirror \
+--from=${UPSTREAM_REGISTRY}/${PRODUCT_REPO}/${RELEASE_NAME}:${OCP_RELEASE} \
+--to=${LOCAL_REGISTRY}/ocp4 \
+--to-release-image=${LOCAL_REGISTRY}/ocp4/release:${OCP_RELEASE}
+----
+
+. Run the script to mirror the images and separate the release images from the release content.
+
+.Next steps
+
+When your registry is prepared, you can deploy the {update-service} operator. See xref:../install_upgrade/deploy_update_service_operator.adoc#deploy-update-service-operator[Deploying the {update-service} operator] for instructions.
+
+
+.Additional resources
+
+* xref:../install_upgrade/upgrade_cluster_overview.adoc#upgrade-clusters-mce-overview[Upgrading disconnected clusters by using policies]

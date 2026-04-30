@@ -1,0 +1,97 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#deploy-policy-change-location]
+= Optional: Deploying a _CatalogSource_ policy to change default location
+
+[role="_abstract"]
+You can push the `Catalogsource` policy to the managed cluster to change the default location from a connected location to your disconnected local registry.
+
+.Procedure 
+
+. In the console menu, select *Governance* > *Create policy*.
+
+. Set the `YAML` switch to _On_ to view the YAML version of the policy.
+
+. Delete all of the content in the `YAML` code. 
+
+. Paste the following `YAML` content into the window to create a custom `Policy` resource and its associated `PlacementBinding` and `PlacementRule` resources:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-catalog
+  namespace: default
+spec:
+  disabled: false
+  remediationAction: enforce
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-catalog
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: config.openshift.io/v1
+                kind: OperatorHub
+                metadata:
+                  name: cluster
+                spec:
+                  disableAllDefaultSources: true
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: CatalogSource
+                metadata:
+                  name: my-operator-catalog
+                  namespace: openshift-marketplace
+                spec:
+                  sourceType: grpc
+                  image: '<registry_host_name>:<port>/olm/redhat-operators:v1'
+                  displayName: My Operator Catalog
+                  publisher: grpc
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-catalog
+  namespace: default
+placementRef:
+  name: placement-policy-catalog
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-catalog
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-catalog
+  namespace: default
+spec:
+  clusterSelector:
+    matchExpressions:
+      [] 
+----
++
+* Replace `'<registry_host_name>:<port>/olm/redhat-operators:v1'` with the path to your local restricted catalog source image.
+* `matchExpressions` selects all clusters if you do not specify any expressions.
+
+. Select *Enforce if supported*.
+
+. Select *Create* to create the policy.
+
+.Next steps
+
+Go to xref:../install_upgrade/deploy_policy_change_upgrade_location.adoc#deploy-policy-change-upgrade-location[Optional: Deploying the _ClusterVersion_ policy to change the upgrade location] to deploy a policy to override the default registry with the {update-service} operand, or go to xref:../install_upgrade/upgrade_clusters_disconnected.adoc#upgrade-clusters-disconnected[Upgrading clusters in a disconnected environment] to view, select, and upgrade your cluster.
+
+.Additional resources
+
+* xref:../install_upgrade/upgrade_cluster_overview.adoc#upgrade-clusters-mce-overview[Upgrading disconnected clusters by using policies]
