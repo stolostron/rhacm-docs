@@ -1,18 +1,28 @@
+:_mod-docs-content-type: PROCEDURE
+
 [#enable-cim-aws]
 = Enabling {cim} on Amazon Web Services
 
-If you are running your hub cluster on Amazon Web Services and want to enable the {cim} service, complete the following steps after xref:cim_enable.adoc#enable-cim[Enabling the {cim} service]:
+[role="_abstract"]
+If you are running your hub cluster on Amazon Web Services and want to enable the {cim} service, complete the following procedure.
+
+.Prerequisites
+
+- Complete the steps in xref:../assisted_installer/ai_enable_cim.adoc#enable-cim[Enabling the {cim} service].
+
+.Procedure
 
 . Make sure you are logged in at the hub cluster and find the unique domain configured on the `assisted-image-service` by running the following command:
 +
 ----
 oc get routes --all-namespaces | grep assisted-image-service
 ----
-//do we get routes with the integrated console? A bug came out for other topics, could not get a review on this in time, please check next time this is edited. --bcs 6/23
+
 +
 Your domain might resemble the following example: `assisted-image-service-multicluster-engine.apps.<yourdomain>.com`
 
 . Make sure you are logged in at the hub cluster and create a new `IngressController` with a unique domain using the `NLB` `type` parameter. See the following example:
+
 +
 [source,yaml]
 ----
@@ -36,10 +46,12 @@ spec:
           type: NLB
 ----
 
-. Add `<yourdomain>` to the `domain` parameter in `IngressController` by replacing `<domain>` in `nlb-apps.<domain>.com` with `<yourdomain>`.
+- Add `<yourdomain>` to the `domain` parameter in `IngressController` by replacing `<domain>` in `nlb-apps.<domain>.com` with `<yourdomain>`.
 
 . Apply the new `IngressController` by running the following command:
+
 +
+[source,bash]
 ----
 oc apply -f ingresscontroller.yaml
 ----
@@ -47,30 +59,40 @@ oc apply -f ingresscontroller.yaml
 . Make sure that the value of the `spec.domain` parameter of the new `IngressController` is not in conflict with an existing `IngressController` by completing the following steps:
 
 .. List all `IngressControllers` by running the following command:
+
 +
+[source,bash]
 ----
 oc get ingresscontroller -n openshift-ingress-operator
 ----
 
 .. Run the following command on each of the `IngressControllers`, except the `ingress-controller-with-nlb` that you just created:
+
 +
+[source,bash]
 ----
 oc edit ingresscontroller <name> -n openshift-ingress-operator
 ----
+
 +
 If the `spec.domain` report is missing, add a default domain that matches all of the routes that are exposed in the cluster except `nlb-apps.<domain>.com`.
+
 +
 If the `spec.domain` report is provided, make sure that the `nlb-apps.<domain>.com` route is excluded from the specified range.
 
 . Run the following command to edit the `assisted-image-service` route to use the `nlb-apps` location:
+
 +
+[source,bash]
 ----
 oc edit route assisted-image-service -n <namespace>
 ----
+
 +
 The default namespace is where you installed the {mce-short}.
 
 . Add the following lines to the `assisted-image-service` route:
+
 +
 [source,yaml]
 ----
@@ -81,6 +103,7 @@ metadata:
 ----
 
 . In the `assisted-image-service` route, find the URL value of `spec.host`. The URL might resemble the following example: 
+
 +
 ----
 assisted-image-service-multicluster-engine.apps.<yourdomain>.com
@@ -89,7 +112,9 @@ assisted-image-service-multicluster-engine.apps.<yourdomain>.com
 . Replace `apps` in the URL with `nlb-apps` to match the domain configured in the new `IngressController`.
 
 . To verify that the {cim} service is enabled on Amazon Web Services, run the following command to verify that the pods are healthy:
+
 +
+[source,bash]
 ----
 oc get pods -n multicluster-engine | grep assist
 ----
