@@ -4,7 +4,7 @@
 = Managing alerts
 
 [role="_abstract"]
-Configure observability alerts to monitor both your hub cluster and managed cluster activity, forward platform and user workload alerts to the Alertmanager on your hub cluster, and route notifications to external systems such as Slack, email, or PagerDuty.
+Configure observability alerts to monitor both your hub cluster and managed cluster activity, forward platform and user workload alerts to the Alertmanager on your hub cluster, and route notifications to external systems such as Slack, email, or PagerDuty. Override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for Alertmanager.
 
 .Prerequisites
 
@@ -22,11 +22,9 @@ You must have the following credentials and complete the following actions to ma
 
 - For the user workload for Prometheus, add a label to alerting rules in order to force only user workload Prometheus that are deployed in the `openshift-user-workload-monitoring` namespace to evaluate the alerting rule and prevents the Thanos Ruler instance from processing them. For help, see link:https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/4.19/html-single/configuring_user_workload_monitoring/index#enabling-alert-routing-for-user-defined-projects_preparing-to-configure-the-monitoring-stack-uwm[Enabling alert routing for user-defined projects] in the {ocp-short} documentation.
 
-== Configuring Alertmanager
+.Procedure
 
-Integrate external messaging tools such as email, Slack, and PagerDuty to receive notifications from Alertmanager. You must override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for Alertmanager. Complete the following steps to update the custom receiver rules:
-
-. Extract the data from the `alertmanager-config` secret. Run the following command:
+. Configure Alertmanager by extracting the data from the `alertmanager-config` secret. Run the following command:
 
 +
 [source,bash]
@@ -70,9 +68,12 @@ After you modify the secret, your changes are applied immediately. For an exampl
 
 == Securing communication from Alertmanager to third-party endpoints
 
+[role="_abstract"]
 Enable secure external communication from Alertmanager to third-party endpoints such as Slack, email, and PagerDuty by keeping your credentials secure and manageable through Kubernetes `Secret` resources. You can create `Secret` resources with arbitrary content that you can mount within your `alertmanager` pods for access to authorization credentials.
 
-To reference secrets within your Alertmanager configuration, add the `Secret` resource content within the `open-cluster-management-observability` namespace and mount the content within the `alertmanager` pods. For example, to create and mount a `tls` secret, complete the following steps:
+//.Procedure
+
+. To reference secrets within your Alertmanager configuration, add the `Secret` resource content within the `open-cluster-management-observability` namespace and mount the content within the `alertmanager` pods.
 
 . To create a `tls` secret with TLS certificates, run the following command:
 
@@ -81,7 +82,6 @@ To reference secrets within your Alertmanager configuration, add the `Secret` re
 ----
 oc create secret tls tls --cert=</path/to/cert.crt> --key=</path/to/cert.key> -n open-cluster-management-observability
 ----
-
 
 . To mount the `tls` secret to your `MultiClusterObservability` resource, add it to the `advanced` section. Your resource might resemble the following content:
 
@@ -93,7 +93,6 @@ advanced:
  alertmanager: 
    secrets: ['tls']
 ----
-
 
 . To add a reference of your `tls` secret within your Alertmanager configuration, add the path of your secret to the configuration. Your resource might resemble the following configuration:
 
@@ -143,8 +142,14 @@ oc -n open-cluster-management-observability replace secret --filename=-
 
 == Forwarding alerts
 
-After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to Alertmanager on your hub cluster. By default, all platform alerts are sent to Alertmanager on your hub cluster. When you enable user workload alerts on your {ocp-short} managed clusters, user workload alerts are also sent to your hub cluster. You can use the `alertmanager-config` YAML file to configure alerts with an external notification system.
+[role="_abstract"]
+After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to Alertmanager on your hub cluster. By default, all platform alerts are sent to Alertmanager on your hub cluster. When you enable user workload alerts on your {ocp-short} managed clusters, user workload alerts are also sent to your hub cluster. 
 
+//.Procedure
+
+. Create the `alertmanager-config` YAML file to configure alerts with an external notification system.
+
++
 View the following example of the `alertmanager-config` YAML file:
 
 [source,yaml]
@@ -163,7 +168,7 @@ receivers:
     text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
 ----
 
-If you want to configure a proxy for alert forwarding, add the following `global` entry to the `alertmanager-config` YAML file:
+. If you want to configure a proxy for alert forwarding, add the following `global` entry to the `alertmanager-config` YAML file:
 
 [source,yaml]
 ----
@@ -173,8 +178,9 @@ global:
     proxy_url: http://****
 ----
 
-To forward user workload alerts, the alerts must be processed by the user workload Prometheus instance and not by Thanos ruler. See the following example of the `PrometheusRule` resource:
+. To forward user workload alerts, configure the alerts to be processed by the user workload Prometheus instance and not by Thanos ruler. See the following example of the `PrometheusRule` resource:
 
++
 [source,yaml]
 ----
 apiVersion: monitoring.coreos.com/v1
@@ -186,11 +192,14 @@ metadata:
 
 == Disabling alert forwarding for managed clusters
 
+[role="_abstract"]
 To disable alert forwarding for managed clusters, add the `mco-disable-alerting: "true"` annotation to the `MultiClusterObservability` custom resource. When you set the `mco-disable-alerting: "true"` annotation, both the platform and user workload alerts are not forwarded to the Alertmanager on your hub cluster. The forwarding configuration on your managed clusters is reverted.
 
 Configuration updates to the `cluster-monitoring-config` config map in the `openshift-monitoring` namespace are reverted. Setting the annotation ensures that the `cluster-monitoring-config` config map is not managed or updated by the observability operator endpoint. After you update the configuration, both platform and user workload Prometheus instances on your managed cluster restarts. Complete the following steps:
 
 When the changes are reverted, a config map named `cluster-monitoring-reverted` is created in the `open-cluster-management-addon-observability` namespace. Any new, alert forward configurations that are manually added are not reverted from the config map.
+
+//.Procedure
 
 . Run the following command to  set the `mco-disable-alerting` annotation to `"true"`:
 
@@ -206,11 +215,14 @@ oc annotate MultiClusterObservability observability mco-disable-alerting=true
 
 == Disabling user workload alert forwarding for managed clusters
 
+[role="_abstract"]
 To disable user workload alert forwarding for managed clusters, add the `mco-disable-uwl-alerting: "true"` annotation to the `MultiClusterObservability` custom resource. When you set the annotation, forwarding user workload alerts to Alertmanager on your hub cluster stops and platform alerts continue to forward to Alertmanager.
 
 Setting the annotation ensures that the `user-workload-monitoring-config` config map is not managed or updated by the observability operator endpoint. After you update the configuraion, the user workload Prometheus instance on your managed cluster restarts.
 
-Run the following command to set the `mco-disable-uwl-alerting` annotation to `"true"`:
+//.Procedure
+
+. Run the following command to set the `mco-disable-uwl-alerting` annotation to `"true"`:
 
 [source,bash]
 ----
@@ -219,11 +231,12 @@ oc annotate MultiClusterObservability observability mco-disable-uwl-alerting=tru
 
 == Silencing alerts
 
+[role="_abstract"]
 Add alerts that you do not want to receive. You can silence alerts by the alert name, match label, or time duration. After you add the alert that you want to silence, an ID is created. Your ID for your silenced alert might resemble the following string, `d839aca9-ed46-40be-84c4-dca8773671da`.
 
-Continue reading for ways to silence alerts:
+//.Procedure
 
-- To silence a {acm-short} alert, you must have access to the `alertmanager` pods in the `open-cluster-management-observability` namespace. For example, enter the following command in the `observability-alertmanager-0` pod terminal to silence `SampleAlert`: 
+. To silence a {acm-short} alert, you must have access to the `alertmanager` pods in the `open-cluster-management-observability` namespace. Run the following command in the `observability-alertmanager-0` pod terminal to silence `SampleAlert`: 
 
 +
 [source,bash]
@@ -231,7 +244,7 @@ Continue reading for ways to silence alerts:
 amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" alertname="SampleAlert"
 ----
 
-- Silence an alert by using multiple match labels. The following command uses `match-label-1` and `match-label-2`:
+. Silence an alert by using multiple match labels. The following command uses `match-label-1` and `match-label-2`:
 
 +
 [source,bash]
@@ -239,15 +252,15 @@ amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --
 amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" <match-label-1>=<match-value-1> <match-label-2>=<match-value-2>
 ----
 
-- If you want to silence an alert for a specific period of time, use the `--duration` flag. Run the following command to silence the `SampleAlert` for an hour:
+. If you want to silence an alert for a specific period of time, use the `--duration` flag. Run the following command to silence the `SampleAlert` for an hour:
 
 +
 [source,bash]
 ----
 amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" --duration="1h" alertname="SampleAlert"
 ----
-+
-You can also specify a start or end time for the silenced alert. Enter the following command to silence the `SampleAlert` at a specific start time:
+
+. Define a start or end time for the silenced alert. Run the following command to silence the `SampleAlert` at a specific start time:
 
 +
 [source,bash]
@@ -255,7 +268,7 @@ You can also specify a start or end time for the silenced alert. Enter the follo
 amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --comment="Silencing sample alert" --start="2023-04-14T15:04:05-07:00" alertname="SampleAlert"
 ----
 
-- To view all silenced alerts that are created, run the following command:
+. To view all silenced alerts that are created, run the following command:
 
 +
 [source,bash]
@@ -263,7 +276,7 @@ amtool silence add --alertmanager.url="http://localhost:9093" --author="user" --
 amtool silence --alertmanager.url="http://localhost:9093"
 ----
 
-- If you no longer want an alert to be silenced, end the silencing of the alert by running the following command:
+. If you no longer want to silence an alert, end the silencing by running the following command:
 
 +
 [source,bash]
@@ -271,7 +284,7 @@ amtool silence --alertmanager.url="http://localhost:9093"
 amtool silence expire --alertmanager.url="http://localhost:9093" "d839aca9-ed46-40be-84c4-dca8773671da"
 ----
 
-- To end the silencing of all alerts, run the following command:
+. To end the silencing of all alerts, run the following command:
 
 +
 [source,bash]
@@ -281,6 +294,7 @@ amtool silence expire --alertmanager.url="http://localhost:9093" $(amtool silenc
 
 == Migrating observability storage
 
+[role="_abstract"]
 If you use alert silencers, you can migrate observability storage while retaining the silencers from its earlier state. To do this, migrate your {acm-short} observability storage by creating new `StatefulSets` and `PersistentVolumes` (PV) resources that use your chosen `StorageClass` resource. 
 
 *Note:* The storage for PVs is different from the object storage used to store the metrics collected from your clusters.  
@@ -290,7 +304,7 @@ When you use `StatefulSets` and PVs to migrate your observability data to new st
 - *Observatorium or Thanos:* Receives data then uploads it to object storage. Some of its components store data in PVs. For this data, the Observatorium or Thanos automatically regenerates the object storage on a startup, so there is no consequence if you lose this data.  
 - *Alertmanager:* Only stores silenced alerts. If you want to keep these silenced alerts, you must migrate that data to the new PV. 
 
-To migrate your observability storage, complete the following steps:
+//.Procedure
 
 . In the `MultiClusterObservability`, set the `.spec.storageConfig.storageClass` field to the new storage class. 
 . To ensure the data of the earlier `PersistentVolumes` is retained even when you delete the `PersistentVolumeClaim`, go to all your existing `PersistentVolumes`.
@@ -308,15 +322,18 @@ To migrate your observability storage, complete the following steps:
 
 == Suppressing alerts
 
+[role="_abstract"]
 Suppress {acm-short} alerts across your clusters globally that are less severe. Suppress alerts by defining an inhibition rule in the `alertmanager-config` in the `open-cluster-management-observability` namespace. 
 
-An inhibition rule mutes an alert when there is a set of parameter matches that match another set of existing matchers. In order for the rule to take effect, both the target and source alerts must have the same label values for the label names in the `equal` list. Your `inhibit_rules` might resemble the following:
+//.Procedure
+
+. Mute an alert when there is a set of parameter matches that match another set of existing matchers. In order for the rule to take effect, both the target and source alerts must have the same label values for the label names in the `equal` list. Your `inhibit_rules` might resemble the following:
 
 [source,yaml]
 ----
 global:
   resolve_timeout: 1h
-inhibit_rules:<1>
+inhibit_rules:
   - equal:
       - namespace
     source_match:<2>
@@ -324,15 +341,15 @@ inhibit_rules:<1>
     target_match_re:
       severity: warning|info
 ----
-<1> The `inhibit_rules` parameter section is defined to look for alerts in the same namespace. When a `critical` alert is initiated within a namespace and if there are any other alerts that contain the severity level `warning` or `info` in that namespace, only the `critical` alerts are routed to the Alertmanager receiver. The following alerts might be displayed when there are matches:
+* The `inhibit_rules` parameter section is defined to look for alerts in the same namespace. When a `critical` alert is initiated within a namespace and if there are any other alerts that contain the severity level `warning` or `info` in that namespace, only the `critical` alerts are routed to the Alertmanager receiver. The following alerts might be displayed when there are matches:
 
 +
 ----
 ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
 ALERTS{alertname="foo", namespace="ns-1", severity="warning"}
 ----
-+
-<2> If the value of the `source_match` and `target_match_re` parameters do not match, the alert is routed to the receiver:
+
+- If the value of the `source_match` and `target_match_re` parameters do not match, the alert is routed to the receiver:
 
 +
 ----
@@ -340,7 +357,7 @@ ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
 ALERTS{alertname="foo", namespace="ns-2", severity="warning"}
 ----
 
-- To view suppressed alerts in {acm-short}, enter the following command:
+. To view suppressed alerts in {acm-short}, enter the following command:
 
 +
 [source,bash]
@@ -350,5 +367,5 @@ amtool alert --alertmanager.url="http://localhost:9093" --inhibited
 
 .Additional resources
 
-- See xref:../observability/adv_config_obs.adoc#adv-config-obs[Observability advanced configuration] for more details.
-- For more observability topics, see xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service].
+* xref:../observability/adv_config_obs.adoc#adv-config-obs[Observability advanced configuration]
+* xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service]
