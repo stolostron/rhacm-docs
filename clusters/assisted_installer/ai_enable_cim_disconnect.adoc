@@ -1,0 +1,135 @@
+[#enable-cim-disconnected]
+= Enabling {cim} in disconnected environments
+
+To enable {cim} in disconnected environments, complete the following steps:
+
+. Create a `ConfigMap` in the same namespace as your infrastructure operator to specify the values for `ca-bundle.crt` and `registries.conf` for your mirror registry. Your file `ConfigMap` might resemble the following example:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: <mirror-config>
+  namespace: multicluster-engine
+  labels:
+    app: assisted-service
+data:
+  ca-bundle.crt: |    
+    <certificate-content>
+  registries.conf: |
+    unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
+    [[registry]]
+       prefix = ""
+       location = "registry.redhat.io/multicluster-engine"
+       mirror-by-digest-only = true
+       [[registry.mirror]]
+       location = "mirror.registry.com:5000/multicluster-engine"
+----
++
+*Note:* You must set `mirror-by-digest-only` to `true` because release images are specified by using a digest.
++
+Registries in the list of `unqualified-search-registries` are automatically added to an authentication ignore list in the `PUBLIC_CONTAINER_REGISTRIES` environment variable. The specified registries do not require authentication when the pull secret of the managed cluster is validated.
+
+. Write the key pairs representing the headers and query parameters that you want to send with every `osImage` request. If you don't need both parameters, write key pairs for only headers or query parameters.
+
+*Important:* Headers and query parameters are only encrypted if you use HTTPS. Make sure to use HTTPS to avoid security issues.
+
+.. Create a file named `headers` and add content that resembles the following example:
+
++
+[source,json]
+----
+{
+  "Authorization": "Basic xyz"
+}
+----
+
+.. Create a file named `query_params` and add content that resembles the following example:
+
++
+[source,json]
+----
+{
+  "api_key": "myexampleapikey",
+}
+----
+
+. Create a secret from the parameter files that you created by running the following command. If you only created one parameter file, remove the argument for the file that you didn't create:
+
++
+[source,bash]
+----
+oc create secret generic -n multicluster-engine os-images-http-auth --from-file=./query_params --from-file=./headers
+----
+
+. If you want to use HTTPS `osImages` with a self-signed or third-party CA certificate, add the certificate to the `image-service-additional-ca` `ConfigMap`. To create a certificate, run the following command:
+
++
+[source,bash]
+----
+oc -n multicluster-engine create configmap image-service-additional-ca --from-file=<file-name>
+----
+
+. Create the `AgentServiceConfig` custom resource by saving the following YAML content in the `agent_service_config.yaml` file:
+
++
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: AgentServiceConfig
+metadata:
+ name: agent
+spec:
+  databaseStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <db_volume_size> 
+  filesystemStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <fs_volume_size>
+  mirrorRegistryRef:
+    name: <mirror_config> <1>
+  unauthenticatedRegistries:
+    - <unauthenticated_registry> <2>
+  imageStorage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: <img_volume_size> <3>
+  OSImageAdditionalParamsRef:
+	    name: os-images-http-auth
+  OSImageCACertRef:
+    name: image-service-additional-ca
+  osImages: 
+    - openshiftVersion: "<ocp_version>" <4>
+      version: "<ocp_release_version>" <5>
+      url: "<iso_url>" <6>
+      cpuArchitecture: "x86_64"
+----
+
++
+<1> Replace `mirror_config` with the name of the `ConfigMap` that contains your mirror registry configuration details.
++
+<2> Include the optional `unauthenticated_registry` parameter if you are using a mirror registry that does not require authentication. Entries on this list are not validated or required to have an entry in the pull secret. 
++
+<3> Replace `img_volume_size` with the size of the volume for the `imageStorage` field. This value specifies how much storage is allocated to store base Red Hat Enterprise Linux CoreOS images. The minimum value is `10Gi`, but the value for best practice is at least `50Gi`, especially if you are opting for the default set of images instead of defining a limited set using `osImages`. You need to allow at least `2Gi` of image storage for each instance of Red Hat Enterprise Linux CoreOS that is configured in `osImages`.
++
+<4> Replace `ocp_version` with the supported {ocp-short} version to install.
++
+<5> Replace `ocp_release_version` with the specific install version, for example, `49.83.202103251640-0`.
++
+<6> Replace `iso_url` with the ISO url. You can find ISO url values at the link:https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/[rhoc].
+
+If you are using HTTPS `osImages` with self-signed or third-party CA certificates, reference the certificate in the `OSImageCACertRef` spec.
+
+*Important:* If you are using the late binding feature, the {ocp-short} release images that you use when creating your clusters must be the same.
+
+You can verify that your {cim} service is healthy by checking the `assisted-service` and `assisted-image-service` deployments and ensuring that their pods are ready and running.
