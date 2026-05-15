@@ -1,0 +1,80 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#design-dashboards-configmaps]
+= Designing Grafana dashboards with a config map
+
+Design your Grafana dashboard with a Kubernetes config map. Wrapping your dashboard layout into a config map ensures reproducibility and persistence across environments. Use the `generate-dashboard-configmap-yaml.sh` script to generate the dashboard config map, and to be sure tosave the config map locally.
+
+[role="_abstract"]
+----
+./generate-dashboard-configmap-yaml.sh "Your Dashboard Name"
+Save dashboard <your-dashboard-name> to ./your-dashboard-name.yaml
+----
+
+.Prerequisites
+
+- You must have created a dashboard within your `grafana-dev` instance.
+- You must have permissions to apply configurations to the `open-cluster-management-observability` namespace.
+
+.Procedure
+
+. If you have permissions to run the automation scripts, run the following command and replace the dashboard name:
+
++
+[source,bash]
+----
+./generate-dashboard-configmap-yaml.sh "Example dashboard name"
+----
++
+Your might receive the following output:
+
++
+[source,bash]
+----
+Save dashboard <demo-dashboard> to ./demo-dashboard.yaml
+----
+
+. If you do not have permissions to run the previously mentioned script, complete the following steps:
+
+.. Open your custom dashboard from the Grafana console and click the *Dashboard settings* icon. 
+.. Click the *JSON Model* icon from the side navigation panel.
+.. Copy the dashboard JSON data and paste it in the `_data_` section.
+.. Modify the `_name_` and replace `_$your-dashboard-name_`. 
+.. Generate and enter a universally unique identifier (UUID) in the `uid` field in `data.$your-dashboard-name.json.$$your_dashboard_json`. You can use a program such as _uuidegen_ to create a UUID. 
+.. Create a YAML file Your `ConfigMap` might resemble the following file:
+
++
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: $your-dashboard-name
+  namespace: open-cluster-management-observability
+  labels:
+    grafana-custom-dashboard: "true"
+data:
+  $your-dashboard-name.json: |-
+    $your_dashboard_json
+----
++
+*Note:* If your dashboard is not located in the _General_ folder, use the `observability.open-cluster-management.io/dashboard-folder` annotation to specify the target folder name. See the following example:
+
++
+[source,yaml]
+----
+annotations:
+  observability.open-cluster-management.io/dashboard-folder: Custom
+----
+
+. Apply the YAML file fromo the CLI or {ocp-short} console to create the config map. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f demo-dashboard.yaml
+----
+
+. To apply the YAML from the console, navigate to the {ocp-short} console.
+.. Open the YAML editor and paste the config map definition.
+.. Click *Create* to make the dashboard available in the folder.
