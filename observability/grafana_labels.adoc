@@ -1,7 +1,7 @@
 :_mod-docs-content-type: PROCEDURE
 
-[#using-managed-cluster-labels]
-= Using managed cluster labels in Grafana
+[#enabling-managed-cluster-labels]
+= Enabling managed cluster labels in Grafana
 
 [role="_abstract"]
 Enable managed cluster labels to use them with Grafana dashboards. When observability is enabled in the hub cluster, the `observability-managed-cluster-label-allowlist` ConfigMap is created in the `open-cluster-management-observability` namespace. The ConfigMap contains a list of managed cluster labels maintained by the `observabilty-rbac-query-proxy` pod, to populate a list of label names to filter from within the _ACM - Cluster Overview_ Grafana dashboard. By default, observability ignores a subset of labels in the `observability-managed-cluster-label-allowlist` ConfigMap.
@@ -65,12 +65,10 @@ data:
       - vendor
 ----
 
-== Enabling managed cluster labels
+. Enable a managed cluster label that is in the `ignore_labels` parameter section. From the `observability-managed-cluster-label-allowlist` config map, move the label to the `labels` parameter section.
+.. Enable the `local-cluster` and `name` labels. The config map resyncs after 30 seconds to ensure that the cluster labels are updated. Your `observability-managed-cluster-label-allowlist` config map might resemble the following content:
 
-Enable a managed cluster label that is already disabled by removing the label from the `ignore_labels` list in the `observability-managed-cluster-label-allowlist` ConfigMap.
-
-For example, enable the `local-cluster` and `name` labels. Your `observability-managed-cluster-label-allowlist` ConfigMap might resemble the following content:
-
++
 [source,yaml]
 ----
 data:
@@ -86,35 +84,31 @@ data:
       - name
 ----
 
+. Check the `observability-rbac-query-proxy` pod logs in the `open-cluster-management-observability` namespace to verify where the label is listed. Run the following command:
 
-The ConfigMap resyncs after 30 seconds to ensure that the cluster labels are updated. After you update the ConfigMap, check the `observability-rbac-query-proxy` pod logs in the `open-cluster-management-observability` namespace to verify where the label is listed. The following information might be displayed in the pod log:
++
+[source,bash]
+----
+oc logs -n open-cluster-management-observability deployment/observability-rbac-query-proxy | grep -i "label"
+----
++
+The following information might be displayed in the pod log:
 
 ----
 enabled managedcluster labels: <label>
 ----
 
-From the Grafana dashboard, verify that the label is listed as a value in the _Label_ drop-down menu.
+. To remove the managed cluster labels from the _Label_ drop-down filter in Grafana, add the label name to the `ignore_labels` list.
 
-== Disabling managed cluster labels
+. Check the `observability-rbac-query-proxy` pod logs in the `open-cluster-management-observability` namespace to verify that the label is disabled. Run the following command:
 
-Exclude a managed cluster label from being listed in the _Label_ drop-down filter. Add the label name to the `ignore_labels` list. For example, your YAML might resemble the following file if you add `local-cluster` and `name` back into the `ignore_labels` list:
-
-[source,yaml]
++
+[source,bash]
 ----
-data:
-  managed_cluster.yaml: |
-    ignore_labels:
-      - clusterID
-      - installer.name
-      - installer.namespace
-      - local-cluster
-      - name
-    labels:
-      - cloud
-      - vendor
+oc logs -n open-cluster-management-observability deployment/observability-rbac-query-proxy | grep -i "label"
 ----
-
-Check the `observability-rbac-query-proxy` pod logs in the `open-cluster-management-observability` namespace to verify where the label is listed. The following information might be displayed in the pod log:
++
+The following information might be displayed in the pod log:
 
 ----
 disabled managedcluster label: <label>
