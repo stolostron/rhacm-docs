@@ -1,0 +1,66 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#obs-exporting-metrics]
+= Exporting metrics to external endpoints
+
+[role="_abstract"]
+To support the Prometheus Remote-Write specification in real time, export metrics to external endpoints.
+
+.Procedure
+
+. Create the Kubernetes secret for an external endpoint with the access information of the external endpoint in the `open-cluster-management-observability` namespace. View the following example secret:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: victoriametrics
+  namespace: open-cluster-management-observability
+type: Opaque
+stringData:
+  ep.yaml: |
+    url: http://victoriametrics:8428/api/v1/write
+    http_client_config:
+      basic_auth:
+        username: test
+        password: test
+      tls_config:
+        secret_name:
+        ca_file_key:
+        cert_file_key:
+        key_file_key:
+        insecure_skip_verify:
+----
+* The `ep.yaml` parameter is the key of the content and is used in the `MultiClusterObservability` custom resource in next step. Currently, observability supports exporting metrics to endpoints without any security checks, with Basic authentication or with `tls` enablement. View the following tables for a full list of supported parameters:
+* The `url` parameter is required and the URL for the external endpoint. Enter the value as a string.
+* The `http_client_config` parameter is optional and is the advanced configuration for the HTTP client.
+* The `basic_auth` parameter is optional and is the HTTP client configuration for Basic authentication.
+* The `username` parameter is optional and is the user name for basic authorization. Enter the value as a string.
+* The `password` is optional and is the password for basic authorization. Enter the value as a string.
+* The `tls_config` parameter is optional and is the HTTP client configuration for TLS.
+* The `secret_name` parameter is required and is the name of the secret that contains certificates. Enter the value as a string.
+* The `ca_file_key` parameter is required and the key of the CA certificate in the secret. This parameter is only optional if the `insecure_skip_verify` parameter is set to `true`. Enter the value as a string.
+* The `cert_file_key` parameter is required and is the key of the client certificate in the secret. Enter the value as a string.
+* The `key_file_key` parameter is required and is the key of the client key in the secret. Enter the value as a string.
+* The `insecure_skip_verify` parameter is optional and used to skip the verification for target certificate. Enter the value as a boolean value.
+
+. To add a list of external endpoints that you want to export, add the `writeStorage` parameter to the `MultiClusterObservability` custom resource. View the following example:
+
++
+[source,yaml]
+----
+spec:
+  storageConfig:
+    writeStorage:
+    - key: ep.yaml
+      name: victoriametrics
+----
+* Each item contains two attributes: _name_ and _key_. _Name_ is the name of the Kubernetes secret that contains endpoint access information, and _key_ is the key of the content in the secret. If you add more than one item to the list, then the metrics are exported to multiple external endpoints.
+
+. View the status of metric export after the metrics export is enabled by checking the `acm_remote_write_requests_total` metric.
+
+.. From the {ocp-short} console of your hub cluster, navigate to the _Metrics_ page by clicking *Metrics* in the _Observe_ section. 
+
+.. Then query the `acm_remote_write_requests_total` metric. The value of that metric is the total number of requests with a specific response for one external endpoint, on one observatorium API instance. The `name` label is the name for the external endpoint. The `code` label is the return code of the HTTP request for the metrics export.
