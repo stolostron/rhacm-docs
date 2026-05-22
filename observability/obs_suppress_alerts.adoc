@@ -1,0 +1,47 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#suppress-alerts]
+= Suppressing alerts
+
+[role="_abstract"]
+Suppress {acm-short} alerts across your clusters globally that are less severe. Suppress alerts by defining an inhibition rule in the `alertmanager-config` in the `open-cluster-management-observability` namespace. 
+
+.Procedure
+
+. Mute an alert when there is a set of parameter matches that match another set of existing matchers. In order for the rule to take effect, both the target and source alerts must have the same label values for the label names in the `equal` list. Your `inhibit_rules` might resemble the following:
+
+[source,yaml]
+----
+global:
+  resolve_timeout: 1h
+inhibit_rules:
+  - equal:
+      - namespace
+    source_match:<2>
+      severity: critical
+    target_match_re:
+      severity: warning|info
+----
+* The `inhibit_rules` parameter section is defined to look for alerts in the same namespace. When a `critical` alert is initiated within a namespace and if there are any other alerts that contain the severity level `warning` or `info` in that namespace, only the `critical` alerts are routed to the Alertmanager receiver. The following alerts might be displayed when there are matches:
+
++
+----
+ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
+ALERTS{alertname="foo", namespace="ns-1", severity="warning"}
+----
+
+- If the value of the `source_match` and `target_match_re` parameters do not match, the alert is routed to the receiver:
+
++
+----
+ALERTS{alertname="foo", namespace="ns-1", severity="critical"}
+ALERTS{alertname="foo", namespace="ns-2", severity="warning"}
+----
+
+. To view suppressed alerts in {acm-short}, enter the following command:
+
++
+[source,bash]
+----
+amtool alert --alertmanager.url="http://localhost:9093" --inhibited
+----

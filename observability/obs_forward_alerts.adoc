@@ -1,0 +1,52 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#obs-forward-alerts]
+= Forwarding alerts
+
+[role="_abstract"]
+After you enable observability, alerts from your {ocp-short} managed clusters are automatically sent to Alertmanager on your hub cluster. By default, all platform alerts are sent to Alertmanager on your hub cluster. When you enable user workload alerts on your {ocp-short} managed clusters, user workload alerts are also sent to your hub cluster. 
+
+.Procedure
+
+. Create the `alertmanager-config` YAML file to configure alerts with an external notification system.
+
++
+View the following example of the `alertmanager-config` YAML file:
+
+[source,yaml]
+----
+global:
+  slack_api_url: '<slack_webhook_url>'
+
+route:
+  receiver: 'slack-notifications'
+  group_by: [alertname, datacenter, app]
+
+receivers:
+- name: 'slack-notifications'
+  slack_configs:
+  - channel: '#alerts'
+    text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
+----
+
+. If you want to configure a proxy for alert forwarding, add the following `global` entry to the `alertmanager-config` YAML file:
+
+[source,yaml]
+----
+global:
+  slack_api_url: '<slack_webhook_url>'
+  http_config:
+    proxy_url: http://****
+----
+
+. To forward user workload alerts, configure the alerts to be processed by the user workload Prometheus instance and not by Thanos ruler. See the following example of the `PrometheusRule` resource:
+
++
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    openshift.io/prometheus-rule-evaluation-scope: leaf-prometheus
+----

@@ -1,0 +1,70 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#configure-obs-alerts]
+= Configuring observability alerts
+
+[role="_abstract"]
+Configure observability alerts to monitor both your hub cluster and managed cluster activity, forward platform and user workload alerts to the Alertmanager on your hub cluster, and route notifications to external systems such as Slack, email, or PagerDuty. Override the `alertmanager-config` secret in the `open-cluster-management-observability` namespace to add integrations, and configure routes for Alertmanager.
+
+.Prerequisites
+
+* Enable observability on your hub cluster.
+
+* Have the create permission for `Secret` resources in the `open-cluster-management-observability` namespace.
+
+* Have edit permission on the `MultiClusterObservability` resource.
+
+* Configure the Prometheus instances on your managed cluster to help prevent metric loss during restart. For help, see link:https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/4.19/html-single/configuring_user_workload_monitoring/index#configuring-persistent-storage_storing-and-recording-data-uwm[Configuring persistent storage] in the {ocp-short} documentation.
+
+* Enable user workload monitoring and alerts on your managed clusters. For help, see link:https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/4.19/html-single/configuring_user_workload_monitoring/index[Configuring user workload monitoring] and link:https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/4.19/html-single/managing_alerts/index[Managing alerts] in the {ocp-short} documentation.
+
+* For the user workload for Prometheus, add a label to alerting rules to force only user workload Prometheus that are deployed in the `openshift-user-workload-monitoring` namespace to evaluate the alerting rule and prevents the Thanos Ruler instance from processing them. For help, see link:https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/4.19/html-single/configuring_user_workload_monitoring/index#enabling-alert-routing-for-user-defined-projects_preparing-to-configure-the-monitoring-stack-uwm[Enabling alert routing for user-defined projects] in the {ocp-short} documentation.
+
+.Procedure
+
+. Configure Alertmanager by extracting the data from the `alertmanager-config` secret. Run the following command:
+
++
+[source,bash]
+----
+oc -n open-cluster-management-observability get secret alertmanager-config --template='{{ index .data "alertmanager.yaml" }}' |base64 -d > alertmanager.yaml
+----
+
+. Edit and save the `alertmanager.yaml` file configuration by running the following command:
+
++
+[source,bash]
+----
+oc -n open-cluster-management-observability create secret generic alertmanager-config --from-file=alertmanager.yaml --dry-run -o=yaml |  oc -n open-cluster-management-observability replace secret --filename=-
+----
++
+Your updated secret might resemble the following content:
+
++
+[source,yaml]
+----
+global
+  smtp_smarthost: 'localhost:25'
+  smtp_from: 'alertmanager@example.org'
+  smtp_auth_username: 'alertmanager'
+  smtp_auth_password: 'password'
+templates: 
+- '/etc/alertmanager/template/*.tmpl'
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h 
+  receiver: team-X-mails
+  routes:
+  - match_re:
+      service: ^(foo1|foo2|baz)$
+    receiver: team-X-mails
+----
+
+After you modify the secret, your changes are applied immediately. For an example of Alertmanager, see link:https://github.com/prometheus/alertmanager/blob/main/doc/examples/simple.yml[prometheus/alertmanager].
+
+.Additional resources
+
+* xref:../observability/adv_config_obs.adoc#adv-config-obs[Observability advanced configuration]
+* xref:../observability/observe_environments_intro.adoc#observing-environments-intro[Observability service]
