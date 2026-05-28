@@ -1,0 +1,75 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#enable-hub-templates]
+= Enabling the hub cluster template add-on
+
+[role="_abstract"]
+Enable the `governance-standalone-hub-templating` add-on to resolve hub cluster templates on managed clusters.
+
+.Procedure
+
+. Log in to your hub cluster and access the managed cluster namespace. 
+. Create a `ManagedClusterAddOn` resource named `governance-standalone-hub-templating`. Your YAML file might resemble the following resource:
+
++
+[source,yaml]
+----
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ManagedClusterAddOn
+metadata:
+  name: governance-standalone-hub-templating
+  namespace: <cluster name>
+  labels:
+    cluster.open-cluster-management.io/backup: ''
+spec:
+  installNamespace: open-cluster-management-agent-addon
+----
++
+*Notes:* 
+
+* The `spec.installNamespace` field is deprecated. See link:../clusters/release_notes/mce_deprecate_remove.adoc#mce-deprecation-removal[Product deprecations and removals] to learn more.
+* By default, the agent on the managed cluster only has access to `ManagedCluster` resources on the hub cluster. Define the `.ManagedClusterLabels` parameter in the hub cluster templates to allow access to the `ManagedCluster` resources that are deployed directly to the managed cluster. 
+
+. Apply the `governance-standalone-hub-templating` file to your cluster by running the following command:
+
++
+[source,bash]
+----
+oc apply -f governance-standalone-hub-templating.yaml
+----
+
+. Configure the access path by using role-based access control resources. To grant hub cluster template access to other resources, add permissions into the following resources: `Roles`, `ClusterRoles`, `RoleBindings`, and `ClusterRoleBindings`.
+
++
+*Note:* The name of the add-on group depends on the name of your managed cluster. See the following standard form: `system:open-cluster-management:cluster:<cluster name>:addon:governance-standalone-hub-templating`.
+
+. Create a `Role` resource in the managed cluster namespace. Name the role `cm-reader`. Run the following command: 
+
++
+[source,bash]
+----
+oc create role -n <cluster name> cm-reader --verb=get,list,watch --resource=configmaps
+----
+
+. Create a `Rolebinding` resource in the managed cluster namespace. Name the role binding, `cm-reader-binding`. Run the following command:
+
++
+[source,bash]
+----
+oc create rolebinding -n <cluster name> cm-reader-binding --role=cm-reader --group=system:open-cluster-management:cluster:<cluster name>:addon:governance-standalone-hub-templating
+----
+
+. Apply the `backup` label to both the role and role binding to ensure these resources on the hub cluster are backed up and restored. Run the following commands:
+
++
+[source,yaml]
+----
+oc label role cm-reader -n <managed_cluster_name> cluster.open-cluster-management.io/backup=""
+
+oc label rolebinding cm-reader-binding -n <managed_cluster_name> cluster.open-cluster-management.io/backup=""
+---- 
+
+After you add these resources, the add-on can match the hub cluster templates, and the state of the policy gets saved in a secret on the managed clusters. The secret prevents interruptions if the hub cluster becomes temporarily unavailable to the managed cluster.
+
+
+
