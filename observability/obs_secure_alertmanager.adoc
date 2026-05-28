@@ -1,0 +1,80 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#obs-secure-alertmanager]
+= Securing communication from Alertmanager to third-party endpoints
+
+[role="_abstract"]
+Secure external communication from Alertmanager to third-party endpoints such as Slack, email, and PagerDuty for access to authorization credentials. Create `Secret` resources with arbitrary content that you can mount within your `alertmanager` pods.
+
+.Procedure
+
+. To reference secrets within your Alertmanager configuration, add the `Secret` resource content within the `open-cluster-management-observability` namespace and mount the content within the `alertmanager` pods.
+
+. To create a `tls` secret with TLS certificates, run the following command:
+
++
+[source,bash]
+----
+oc create secret tls tls --cert=</path/to/cert.crt> --key=</path/to/cert.key> -n open-cluster-management-observability
+----
+
+. To mount the `tls` secret to your `MultiClusterObservability` resource, add it to the `advanced` section. Your resource might resemble the following content:
+
++
+[source,yaml]
+----
+...
+advanced: 
+ alertmanager: 
+   secrets: ['tls']
+----
+
+. To add a reference of your `tls` secret within your Alertmanager configuration, add the path of your secret to the configuration. Your resource might resemble the following configuration:
+
++
+[source,yaml]
+----
+tls_config: 
+ cert_file: '/etc/alertmanager/secrets/tls/tls.crt'
+ key_file: '/etc/alertmanager/secrets/tls/tls.key'
+----
+
+. To verify that the secrets are within your `alertmanager` pods, run the following command:
+
++
+[source,bash]
+----
+oc -n open-cluster-management-observability get secret alertmanager-config --template='{{ index .data "alertmanager.yaml" }}' |base64 -d > alertmanager.yaml
+----
++
+Your YAML might resemble the following contents:
+
++
+[source,yaml]
+----
+"global":
+  "http_config":
+    "tls_config":
+      "cert_file": "/etc/alertmanager/secrets/storyverify/tls.crt"
+      "key_file": "/etc/alertmanager/secrets/storyverify/tls.key"
+----
+
+. To save the `alertmanager.yaml` configuration in the `alertmanager-config` secret, run the following command:
+
++
+[source,bash]
+----
+oc -n open-cluster-management-observability create secret generic alertmanager-config --from-file=alertmanager.yaml --dry-run -o=yaml 
+----
+
+. To replace the previous secret with your new secret, run the following command:
+
++
+[source,bash]
+----
+oc -n open-cluster-management-observability replace secret --filename=-
+----
+
+.Additional resources
+
+* xref:../observability/obs_alerts.adoc
