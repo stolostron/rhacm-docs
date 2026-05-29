@@ -1,11 +1,13 @@
 [#uninstall-gitops-addon]
 = Uninstalling the {gitops-short} add-on
 
-To completely uninstall the {gitops-short} add-on, complete the following steps in order. The order matters because resources have dependencies that require proper cleanup sequencing.
+To completely uninstall the {gitops-short} add-on, complete the following steps. Do not skip or switch steps to prevent dependency issues during cleanup.
 
-*Important:* The add-on framework runs pre-delete cleanup Jobs on each managed cluster to remove `ArgoCD` CRs, OLM Subscription/CSV, and operator resources. Plan for the uninstall to take several minutes. Do not force-remove finalizers before the cleanup completes.
+*Important:* The add-on framework runs pre-delete clean up jobs on each managed cluster to remove `ArgoCD` custom resources, OLM Subscription resources, and operator resources. The uninstall might take several minutes. Do not remove finalizers before the clean up completes.
 
-. Delete the `GitOpsCluster` resource by running the following command:
+.Procedure
+
+. Delete the `GitOpsCluster` resource. Runthe following command:
 
 +
 [source,bash]
@@ -13,19 +15,26 @@ To completely uninstall the {gitops-short} add-on, complete the following steps 
 oc delete gitopscluster <name> -n openshift-gitops --ignore-not-found
 ----
 
-. Delete the auto-generated `Policy` and `PlacementBinding` resources by running the following commands:
+. Delete the auto-generated `Policy` resources. Run the following command. Replace `<name>` with the name of the `Policy` resource:
 
 +
 [source,bash]
 ----
 oc delete policy <name>-argocd-policy -n openshift-gitops --ignore-not-found
+----
+
+Delete the `PlacementBinding` resources. Run the following command. Replace `<name>` with the name of the `PlacementBinding` resource:
+
++
+[source,bash]
+----
 oc delete placementbinding <name>-argocd-policy-binding -n openshift-gitops --ignore-not-found
 ----
 
 +
-*Important:* If the `Policy` is not deleted, it continues to enforce the `ArgoCD` custom resource on managed clusters even after the add-on is removed.
+*Note:* If the `Policy` is not deleted, it continues to enforce the `ArgoCD` custom resource on managed clusters even after the add-on is removed.
 
-. Delete the `ManagedClusterAddOn` resource for each managed cluster by running the following command:
+. Delete the `ManagedClusterAddOn` resource for each managed cluster. Run the following command. Replace `<managed_cluster_namespace>` with the namespace of the managed cluster:
 
 +
 [source,bash]
@@ -34,7 +43,7 @@ oc -n <managed_cluster_namespace> delete managedclusteraddon gitops-addon
 ----
 
 +
-Wait for the `ManagedClusterAddOn` to be fully deleted (this can take 2-5 minutes as the pre-delete cleanup Job runs on each managed cluster):
+*Note:* Wait for the `ManagedClusterAddOn` to be fully deleted. This might take 2 to 5 minutes.:
 
 +
 [source,bash]
@@ -42,7 +51,7 @@ Wait for the `ManagedClusterAddOn` to be fully deleted (this can take 2-5 minute
 oc get managedclusteraddon -A | grep gitops-addon
 ----
 
-. Verify that the `ManagedClusterAddOn` resources are removed from managed cluster namespaces by running the following command:
+. Verify that the `ManagedClusterAddOn` resources are removed from managed cluster namespaces. Run the following command. Replace `<managed-cluster-name>` with the name of the managed cluster:
 
 +
 [source,bash]
@@ -50,7 +59,7 @@ oc get managedclusteraddon -A | grep gitops-addon
 oc get managedclusteraddon gitops-addon -n <managed-cluster-name>
 ----
 
-. If agent mode was enabled, clean up the hub-side agent resources:
+. If you enabled the agent mode, clean up the hub cluster agent resources. Run the following command. Replace `<managed-cluster-name>` with the name of the managed cluster:
 
 +
 [source,bash]
