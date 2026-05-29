@@ -51,7 +51,7 @@ spec:
 
 - The `mode` field determines the agent operation mode. The default value is `managed`. If you want to change the mode to `autonomous`, set the `mode` field to `autonomous` in the `argoCDAgent` specification. The only valid values are `managed` and `autonomous`. For more information about agent operation modes, see the {gitops-short} documentation.
 
-- For {ocp-short} managed clusters, it is strongly recommended to enable OLM-based deployment by adding `olmSubscription.enabled: true` to the `gitopsAddon` specification. For more information, see xref:../gitops/gitops_manage_addon.adoc#manage-gitops-addon[Managing the {gitops} add-on].
+- For {ocp-short} managed clusters, you can enable OLM-based deployment by adding `olmSubscription.enabled: true` to the `gitopsAddon` specification in case the add-on auto-detection of the cluster type is not working properly. For more information, see xref:../gitops/gitops_manage_addon.adoc#manage-gitops-addon[Managing the {gitops} add-on].
 
 . Apply the YAML sample by running the following command:  
 
@@ -105,64 +105,69 @@ See the following condition types in the status:
 oc get pods -n openshift-gitops -l app.kubernetes.io/name=openshift-gitops-agent-principal
 ----
 
-.. Create an `ArgoCD` application resource in the managed cluster namespace by adding the following YAML file: 
+.. Deploy applications by using an `ApplicationSet` resource on the hub cluster. In agent mode, use `destination.name` so the principal routes the application to the correct agent. See the following YAML sample:
 
 +
 [source,yaml]
 ----
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
-  name: guestbook
-  namespace: <managed-cluster-name>
+  name: guestbook-appset
+  namespace: openshift-gitops
 spec:
-  project: default
-  source:
-    repoURL: https://github.com/argoproj/argocd-example-apps.git
-    targetRevision: HEAD
-    path: guestbook
-  destination:
-    server: https://<principal-server-address>:<port>?agentName=<managed-cluster-name>
-    namespace: guestbook
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-    - CreateNamespace=true
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: <app-placement-name>
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: '{{name}}-guestbook'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps
+        targetRevision: HEAD
+        path: guestbook
+      destination:
+        name: '{{name}}'
+        namespace: guestbook
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
 ----
 
 +
-*Note:* The `<principal-server-address>` and `<port>` values are automatically discovered and stored in the `ArgoCD` cluster secret. Retrieve the server URL from the cluster secret by running the following command:
-
-+
-[source,bash]
-----
-oc get secret cluster-<managed-cluster-name> -n openshift-gitops -o jsonpath='{.data.server}' | base64 -d
-----
+*Note:* The `destination.name: '{{name}}'` field uses destination-based mapping so the principal routes applications to the correct agent. The `configMapRef: acm-placement` references the duck-type `ConfigMap` that the `GitOpsCluster` controller creates automatically.
 
 .. Apply the YAML sample by running the following command:
 
 +
 [source,bash]
 ----
-oc apply -f application-example.yaml
+oc apply -f applicationset.yaml
 ----
 
-.. On the managed cluster, verify the deployment of the application resources by running the following command:
-
-+
-[source,bash]
-----
-oc get all -n guestbook
-----
-
-.. On the hub cluster, verify that the application status shows `Synced` when the application is successfully deployed. Run the following command:
+.. On the managed cluster, verify the agent is running by running the following command:
 
 +
 [source,bash]
 ----
-oc get application guestbook -n <managed cluster name>
+oc get pods -n openshift-gitops -l app.kubernetes.io/part-of=argocd-agent --context <managed-cluster-context>
+----
+
+.. On the hub cluster, verify that the application status shows `Synced` by running the following command:
+
++
+[source,bash]
+----
+oc get applications.argoproj.io -n openshift-gitops
 ----
 
 .Additional resources 

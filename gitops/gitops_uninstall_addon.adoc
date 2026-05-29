@@ -1,17 +1,31 @@
 [#uninstall-gitops-addon]
 = Uninstalling the {gitops-short} add-on
 
-To completely uninstall the {gitops-short} add-on, including the operator and the `GitOpsCluster` resource, complete the following steps:
+To completely uninstall the {gitops-short} add-on, complete the following steps in order. The order matters because resources have dependencies that require proper cleanup sequencing.
 
-. Delete the `GitOpsCluster` resource by running the following command: 
+*Important:* The add-on framework runs pre-delete cleanup Jobs on each managed cluster to remove `ArgoCD` CRs, OLM Subscription/CSV, and operator resources. Plan for the uninstall to take several minutes. Do not force-remove finalizers before the cleanup completes.
+
+. Delete the `GitOpsCluster` resource by running the following command:
 
 +
 [source,bash]
 ----
-oc delete gitopscluster gitops-clusters -n openshift-gitops
+oc delete gitopscluster <name> -n openshift-gitops --ignore-not-found
 ----
 
-. Delete the `ManagedClusterAddOn` resource by running the following command: 
+. Delete the auto-generated `Policy` and `PlacementBinding` resources by running the following commands:
+
++
+[source,bash]
+----
+oc delete policy <name>-argocd-policy -n openshift-gitops --ignore-not-found
+oc delete placementbinding <name>-argocd-policy-binding -n openshift-gitops --ignore-not-found
+----
+
++
+*Important:* If the `Policy` is not deleted, it continues to enforce the `ArgoCD` custom resource on managed clusters even after the add-on is removed.
+
+. Delete the `ManagedClusterAddOn` resource for each managed cluster by running the following command:
 
 +
 [source,bash]
@@ -19,10 +33,27 @@ oc delete gitopscluster gitops-clusters -n openshift-gitops
 oc -n <managed_cluster_namespace> delete managedclusteraddon gitops-addon
 ----
 
-. Verify that the `ManagedClusterAddOn` resources are removed from managed cluster namespaces by running the following command: 
++
+Wait for the `ManagedClusterAddOn` to be fully deleted (this can take 2-5 minutes as the pre-delete cleanup Job runs on each managed cluster):
+
++
+[source,bash]
+----
+oc get managedclusteraddon -A | grep gitops-addon
+----
+
+. Verify that the `ManagedClusterAddOn` resources are removed from managed cluster namespaces by running the following command:
 
 +
 [source,bash]
 ----
 oc get managedclusteraddon gitops-addon -n <managed-cluster-name>
+----
+
+. If agent mode was enabled, clean up the hub-side agent resources:
+
++
+[source,bash]
+----
+oc delete secret cluster-<managed-cluster-name> -n openshift-gitops --ignore-not-found
 ----
