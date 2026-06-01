@@ -1,226 +1,29 @@
-:_mod-docs-content-type: PROCEDURE
+:_mod-docs-content-type: CONCEPT
 
 [#adv-template-processing]
-= Using advanced template processing in policies
+= Advanced template processing in policies
 
 [role="_abstract"]
-Use both managed cluster and hub cluster templates to reduce the need to create separate policies for each target cluster or hardcode configuration values in the policy definitions. For security, both resource-specific and the generic lookup functions in hub cluster templates are restricted to the namespace of the policy on the hub cluster.
+Managed cluster and hub cluster templates reduce the need to create separate policies for each target cluster or hard code configuration values in policy definitions. For security, resource-specific and generic `lookup` functions in hub cluster templates are restricted to the policy namespace on the hub cluster.
 
-*Important:* If you use hub cluster templates to propagate secrets or other sensitive data, that causes sensitive data exposure in the managed cluster namespace on the hub cluster and on the managed clusters where that policy is distributed. The template content is expanded in the policy, and policies are not encrypted by the {ocp-short} ETCD encryption support. To address this, use `fromSecret` or `copySecretData`, which automatically encrypts the values from the secret, or `protect` to encrypt other values.
-
-Continue reading for advanced template use-cases:
+*Important:* Using hub cluster templates to propagate secrets or other sensitive data exposes the data in the managed cluster namespace on the hub cluster, and on the managed clusters where that policy is distributed. Template content expands within the policy, and policies are not encrypted by the {ocp-short} etcd encryption support. To address this, use `fromSecret` or `copySecretData` to automatically encrypt values from the secret, or use `protect` to encrypt other values.
 
 == Special annotation for reprocessing
 
 Hub cluster templates are resolved to the data in the referenced resources during policy creation, or when the referenced resources are updated.
 
-If you need to manually initiate an update, use the special annotation, `policy.open-cluster-management.io/trigger-update`, to indicate changes for the data referenced by the templates. Any change to the special annotation value automatically initiates template processing. Additionally, the latest contents of the referenced resource are read and updated in the policy definition that is propagated for processing on managed clusters. A way to use this annotation is to increment the value by one each time.
+If you need to manually initiate an update, use the `policy.open-cluster-management.io/trigger-update` annotation to indicate changes for the data referenced by the templates. Any change to the special annotation value automatically initiates template processing. Additionally, the latest contents of the referenced resource are read and updated in the policy definition that is propagated for processing on managed clusters. A way to use this annotation is to increment the value by one each time.
 
-== Bypassing template processing
+== Template processing bypass methods
 
-By default, {acm-short} processes all Go templates. You might create a policy that contains a template in `policy-templates` that is not intended to be processed by {acm-short}.  To bypass template processing for a particular template, change `{{ template content }}` to `{{ pass:[`{{ template content }}`] }}`. Then, the template returns a raw string to be processed by a subsequent templating engine.
+By default, {acm-short} processes all Go templates. To bypass template processing for a specific template, change `{{ template content }}` to `{{ pass:[`{{ template content }}`] }}`. Then, the template returns a raw string to be processed by a subsequent templating engine.
 
-If you want to completely bypass the template resolution for a configuration policy, add the `policy.open-cluster-management.io/disable-templates: "true"` annotation in the relevant `ConfigurationPolicy` that is contained in your `Policy` resource.
-
-== Configuration policy `objectSelector`
-
-To iterate over many objects that are filtered by a label with `ConfigurationPolicy`, use the `objectSelector` and specify the `kind` in the `objectDefinition`. The `objectSelector` is similar to the `namespaceSelector`, except that it does not have name filtering capabilities. To filter by name, use the `skipObject` Go template function. If you reference `{{ skipObject }}` at any time, it signals to skip that particular object from those that are selected by the `objectSelector` for the policy.
-
-See the following YAML sample that selects objects that have the label `foo: bar`, but skips objects that have a name with the suffix `-prod`:
-
-[source,yaml]
-----
-...
-object-templates:
-  - objectSelector:
-      matchExpressions:
-      - key: foo
-        operator: In
-        values:
-        - bar
-    objectDefinition:
-      apiVersion: v1
-      kind: ConfigMap
-      data:
-        key: '{{ if (hasSuffix "-prod" .ObjectName) }}{{ skipObject }}{{ end }}{{ hasNodesWithExactRoles "infra" }}'
-----
-
-== Processing raw templates in configuration policies
-
-The `object-template-raw` parameter is an optional parameter that supports advanced templating use-cases, such as the `if` conditional function and the `range` loop function. The `object-templates-raw` parameter accepts a string containing Go templates, and when you use these templates, they must result in an `object-templates` array.
-
-For example, see the following YAML sample that adds the `species-category: mammal` label to any `ConfigMap` in the `default` namespace that has a `name` key equal to `Sea Otter`:
-
-[source,yaml]
-----
-object-templates-raw: |
-  {{- range (lookup "v1" "ConfigMap" "default" "").items }}
-  {{- if eq .data.name "Sea Otter" }}
-  - complianceType: musthave
-    objectDefinition:
-      kind: ConfigMap
-      apiVersion: v1
-      metadata:
-        name: {{ .metadata.name }}
-        namespace: {{ .metadata.namespace }}
-        labels:
-          species-category: mammal
-  {{- end }}
-  {{- end }}
-----
-
-*Note:* While `spec.object-templates` and `spec.object-templates-raw` are optional, exactly one of the two parameter fields must be set.
-
-View the following policy example that uses advanced templates to create and configure infrastructure `MachineSet` objects for your managed clusters.
-
-[source,yaml]
-----
-apiVersion: policy.open-cluster-management.io/v1
-kind: ConfigurationPolicy
-metadata:
-  name: create-infra-machineset
-spec:
-  remediationAction: enforce
-  severity: low
-  object-templates-raw: |
-    {{- /* Specify the parameters needed to create the MachineSet  */ -}}
-    {{- $machineset_role := "infra" }}
-    {{- $region := "ap-southeast-1" }}
-    {{- $zones := list "ap-southeast-1a" "ap-southeast-1b" "ap-southeast-1c" }}
-    {{- $infrastructure_id := (lookup "config.openshift.io/v1" "Infrastructure" "" "cluster").status.infrastructureName }}
-    {{- $worker_ms := (index (lookup "machine.openshift.io/v1beta1" "MachineSet" "openshift-machine-api" "").items 0) }}
-    {{- /* Generate the MachineSet for each zone as specified  */ -}}
-    {{- range $zone := $zones }}
-    - complianceType: musthave
-      objectDefinition:
-        apiVersion: machine.openshift.io/v1beta1
-        kind: MachineSet
-        metadata:
-          labels:
-            machine.openshift.io/cluster-api-cluster: {{ $infrastructure_id }} 
-          name: {{ $infrastructure_id }}-{{ $machineset_role }}-{{ $zone }} 
-          namespace: openshift-machine-api
-        spec:
-          replicas: 1
-          selector:
-            matchLabels:
-              machine.openshift.io/cluster-api-cluster: {{ $infrastructure_id }} 
-              machine.openshift.io/cluster-api-machineset: {{ $infrastructure_id }}-{{ $machineset_role }}-{{ $zone }} 
-          template:
-            metadata:
-              labels:
-                machine.openshift.io/cluster-api-cluster: {{ $infrastructure_id }} 
-                machine.openshift.io/cluster-api-machine-role: {{ $machineset_role }} 
-                machine.openshift.io/cluster-api-machine-type: {{ $machineset_role }} 
-                machine.openshift.io/cluster-api-machineset: {{ $infrastructure_id }}-{{ $machineset_role }}-{{ $zone }} 
-            spec:
-              metadata:
-                labels:
-                  node-role.kubernetes.io/{{ $machineset_role }}: "" 
-              taints: 
-                - key: node-role.kubernetes.io/{{ $machineset_role }}
-                  effect: NoSchedule
-              providerSpec:
-                value:
-                  ami:
-                    id: {{ $worker_ms.spec.template.spec.providerSpec.value.ami.id }}
-                  apiVersion: awsproviderconfig.openshift.io/v1beta1
-                  blockDevices:
-                    - ebs:
-                        encrypted: true
-                        iops: 2000
-                        kmsKey:
-                          arn: ''
-                        volumeSize: 500
-                        volumeType: io1
-                  credentialsSecret:
-                    name: aws-cloud-credentials
-                  deviceIndex: 0
-                  instanceType: {{ $worker_ms.spec.template.spec.providerSpec.value.instanceType }}
-                  iamInstanceProfile:
-                    id: {{ $infrastructure_id }}-worker-profile 
-                  kind: AWSMachineProviderConfig
-                  placement:
-                    availabilityZone: {{ $zone }} 
-                    region: {{ $region }}
-                  securityGroups:
-                    - filters:
-                        - name: tag:Name
-                          values:
-                            - {{ $infrastructure_id }}-worker-sg 
-                  subnet:
-                    filters:
-                      - name: tag:Name
-                        values:
-                          - {{ $infrastructure_id }}-private-{{ $zone }} 
-                  tags:
-                    - name: kubernetes.io/cluster/{{ $infrastructure_id }} 
-                      value: owned
-                  userDataSecret:
-                    name: worker-user-data
-    {{- end }}
-----
-
-== Resolving hub templates after defining configuration policies 
-
-By default, if you use the hub templates in the `ConfigurationPolicy` and `OperatorPolicy` resources, you must correspond the `Policy` resources that are defined on the hub cluster with these resources. 
-
-You can define configuration policies directly on the managed clusters. For example, {gitops-short} is one that you can define configuration policies directly on the managed cluster. To resolve hub templates on the managed cluster in that situation, you can enable the `governance-standalone-hub-templating` add-on. 
-
-To enable the `governance-standalone-hub-templating` add-on, complete the following steps: 
-
-. On your hub cluster, go to the managed cluster namespace. 
-. Create a `ManagedClusterAddOn` resource with the `governance-standalone-hub-templating` name by using the following YAML sample: 
-
-+
-[source,yaml]
-----
-apiVersion: addon.open-cluster-management.io/v1alpha1
-kind: ManagedClusterAddOn
-metadata:
-  name: governance-standalone-hub-templating
-  namespace: <cluster name>
-  labels:
-    cluster.open-cluster-management.io/backup: ''
-spec:
-  installNamespace: open-cluster-management-agent-addon
-----
-+
-*Note:* The `spec.installNamespace` field is deprecated. See link:../clusters/release_notes/mce_deprecate_remove.adoc#mce-deprecation-removal[Product deprecations and removals] to learn more.
-
-By default, the agent on the managed cluster only has access to the `ManagedCluster` resources on the hub cluster. You can use the `.ManagedClusterLabels` template variable in the hub cluster templates inside the `ConfigurationPolicies` that are deployed directly to the managed cluster. 
-
-If you want the hub template to access other resources, such as the `lookup` or `fromConfigMap` function calls, you must add those specific permissions to the add-on group. You can add these permissions through resources, such as `Roles`, `ClusterRoles`, `RoleBindings`, and `ClusterRoleBindings`. 
-
-The name of the add-on group depends on the name of your managed cluster, but it has the following standard form: `system:open-cluster-management:cluster:<cluster name>:addon:governance-standalone-hub-templating`.
-
-To allow access to `Configmaps` in your managed cluster namespace on your hub cluster, complete the following steps: 
-
-. Add the `Role` resource by running the following command: 
-
-+
-[source,bash]
-----
-oc create role -n <cluster name> cm-reader --verb=get,list,watch --resource=configmaps
-----
-
-. Add the `Rolebinding` by running the following command: 
-
-+
-[source,bash]
-----
-oc create rolebinding -n <cluster name> cm-reader-binding --role=cm-reader --group=system:open-cluster-management:cluster:<cluster name>:addon:governance-standalone-hub-templating
-----
-
-. To ensure these resources on the hub cluster get backed up and restored, add the following label to each resource that you create: `cluster.open-cluster-management.io/backup`. 
-
-After you add these resources, the add-on can resolve the hub templates, and the state of the policy gets saved on a secret on the managed clusters. This secret prevents interruptions if the hub cluster becomes temporarily unavailable to the managed cluster.
+To completely bypass the template resolution for a configuration policy, add the `policy.open-cluster-management.io/disable-templates: "true"` annotation to the relevant `ConfigurationPolicy` resource within the `Policy` resource.
 
 .Additional resources
 
-*  See link:../business_continuity/backup_restore/backup_arch.adoc#backed-up-resources[Resources that are backed up] for more details on backing up and restoring resources. 
-* See xref:../governance/template_functions.adoc#template-functions[Template functions] for more details.
-* Return to xref:../governance/template_support_intro.adoc#template-processing[Template processing].
-* See xref:../governance/manage_policies.adoc[Policy CLI] for tools to resolve Go templates locally.
-* See xref:../governance/config_policy_ctrl.adoc#kubernetes-config-policy-controller[Kubernetes configuration policy controller] for more details.
-* Also refer to the link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/backup_and_restore/control-plane-backup-and-restore#backing-up-etcd-data_backup-etcd[Backing up etcd data].
+* xref:../governance/template_functions.adoc#template-functions[Template functions]
+* xref:../governance/template_support_intro.adoc#template-processing[Template processing].
+* xref:../governance/manage_policies.adoc[Policy CLI]
+* xref:../governance/config_policy_ctrl.adoc#kubernetes-config-policy-controller[Kubernetes configuration policy controller]
+* link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/backup_and_restore/control-plane-backup-and-restore#backing-up-etcd-data_backup-etcd[Backing up etcd data]
