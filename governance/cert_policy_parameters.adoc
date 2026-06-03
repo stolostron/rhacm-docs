@@ -1,0 +1,109 @@
+:_mod-docs-content-type: REFERENCE
+
+[#cert-policy-parameters]
+= Certificate policy controller schema and parameters
+
+
+[role="_abstract"]
+Review the structural YAML file composition and parameter definitions required to configure custom resource definitions for the certificate policy controller.
+
+* Certificate policy YAML file structure
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: CertificatePolicy
+metadata:
+  name: certificate-policy-example
+spec:
+  namespaceSelector:
+    include: ["default"]
+    exclude: []
+    matchExpressions: []
+    matchLabels: {}
+  labelSelector:
+    myLabelKey: myLabelValue
+  remediationAction:
+  severity: 
+  minimumDuration:
+  minimumCADuration:
+  maximumDuration:
+  maximumCADuration:
+  allowedSANPattern:
+  disallowedSANPattern:
+----
+
+* Certificate policy controller YAML file table
+
+.Certificate policy controller parameters table
+|===
+| Field | Optional or required |Description
+
+| `apiVersion`
+| Required
+| Set the value to `policy.open-cluster-management.io/v1`.
+
+| `kind`
+| Required
+| Set the value to `CertificatePolicy` to indicate the type of policy.
+
+| `metadata.name`
+| Required
+| The name to identify the policy.
+
+| `metadata.labels`
+| Optional
+| In a certificate policy, the `category=system-and-information-integrity` label categorizes the policy and facilitates querying the certificate policies.
+If there is a different value for the `category` key in your certificate policy, the value is overridden by the certificate controller.
+
+| `spec.namespaceSelector`
+| Required
+| Determines namespaces in the managed cluster where secrets are monitored. The `include` and `exclude` parameters accept file path expressions to include and exclude namespaces by name. The `matchExpressions` and `matchLabels` parameters specify namespaces to be included by label. See the link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/[Kubernetes labels and selectors] documentation. The resulting list is compiled by using the intersection of results from all parameters.
+
+*Note:* If the `namespaceSelector` for the certificate policy controller does not match any namespace, the policy is considered compliant.
+
+| `spec.labelSelector`
+| Optional
+| Specifies identifying attributes of objects. See the link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/[Kubernetes labels and selectors] documentation.
+
+| `spec.remediationAction`
+| Required
+| Specifies the remediation of your policy. Set the parameter value to `inform`. Certificate policy controller only supports `inform` feature.
+
+| `spec.severity`
+| Optional
+| Informs the user of the severity when the policy is non-compliant. Use the following parameter values: `low`, `medium`, `high`, or `critical`.
+
+| `spec.minimumDuration`
+| Required
+| When a value is not specified, the default value is `100h`. This parameter specifies the smallest duration (in hours) before a certificate is considered non-compliant. The parameter value uses the time duration format from Golang. See link:https://golang.org/pkg/time/#ParseDuration[Golang Parse Duration] for more information.
+
+| `spec.minimumCADuration`
+| Optional
+| Set a value to identify signing certificates that might expire soon with a different value from other certificates. If the parameter value is not specified, the CA certificate expiration is the value used for the `minimumDuration`. See link:https://golang.org/pkg/time/#ParseDuration[Golang Parse Duration] for more information.
+
+| `spec.maximumDuration`
+| Optional
+| Set a value to identify certificates that have been created with a duration that exceeds your desired limit. The parameter uses the time duration format from Golang. See link:https://golang.org/pkg/time/#ParseDuration[Golang Parse Duration] for more information.
+
+| `spec.maximumCADuration`
+| Optional
+| Set a value to identify signing certificates that have been created with a duration that exceeds your defined limit. The parameter uses the time duration format from Golang. See link:https://golang.org/pkg/time/#ParseDuration[Golang Parse Duration] for more information.
+
+| `spec.allowedSANPattern`
+| Optional
+| A regular expression that must match every SAN entry that you have defined in your certificates. This parameter checks DNS names against patterns. See the link:https://golang.org/pkg/regexp/syntax/[Golang Regular Expression syntax] for more information.
+
+| `spec.disallowedSANPattern`
+| Optional
+| A regular expression that must not match any SAN entries you have defined in your certificates. This parameter checks DNS names against patterns.
+
+*Note:* To detect wild-card certificate, use the following SAN pattern: `disallowedSANPattern: "[\\*]"`
+
+See the link:https://golang.org/pkg/regexp/syntax/[Golang Regular Expression syntax] for more information.
+|===
+
+== Certificate policy sample
+
+When your certificate policy controller is created on your hub cluster, a replicated policy is created on your managed cluster.
