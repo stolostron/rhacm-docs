@@ -4,134 +4,31 @@
 = Certificate policy controller
 
 [role="_abstract"]
-You can use the certificate policy controller to detect certificates that are close to expiring, time durations (hours) that are too long, or contain DNS names that fail to match specified patterns. You can add the certificate policy to the `policy-templates` field of the policy on the hub cluster, which propagates to the selected managed clusters by using the governance framework. See the xref:../governance/hub_policy_framework.adoc#hub-policy-framework[Hub cluster policy framework] documentation for more details on the hub cluster policy.
+You can use the certificate policy controller to detect certificates that are close to expiring, time durations (hours) that are too long, or contain DNS names that fail to match specified patterns. You can add the certificate policy to the `policy-templates` field of the policy on the hub cluster, which propagates to the selected managed clusters by using the governance framework.
 
-Configure and customize the certificate policy controller by updating the following parameters in your controller policy: 
+When you create the certificate policy controller on your hub cluster, a replicated policy is created on your managed cluster.
 
-- `minimumDuration` 
-- `minimumCADuration`
-- `maximumDuration`
-- `maximumCADuration`
-- `allowedSANPattern`
-- `disallowedSANPattern`
+* Non-compliant scernarios
 
-Your policy might become non-compliant due to either of the following scenarios:
-
++
+A policy status changes to non-compliant when either of these situations occurs:
++
 * When a certificate expires in less than the minimum duration of time or exceeds the maximum time.
 * When DNS names fail to match the specified pattern.
 
-The certificate policy controller is created on your managed cluster. The controller communicates with the local Kubernetes API server to get the list of secrets that contain certificates and determine all non-compliant certificates.
+The certificate policy controller runs on your managed cluster. The controller communicates with the local Kubernetes API server to get the list of secrets that contain certificates and find all non-compliant certificates.
 
-Certificate policy controller does not support the `enforce` feature.
 
-*Note:* The certificate policy controller automatically looks for a certificate in a secret in only the `tls.crt` key. If a secret is stored under a different key, add a label named `certificate_key_name` with a value set to the key to let the certificate policy controller know to look in a different key. For example, if a secret contains a certificate stored in the key named `sensor-cert.pem`, add the following label to the secret: `certificate_key_name: sensor-cert.pem`.
+*Notes:* 
 
-== Certificate policy controller YAML structure
+* Certificate policy controller does not support the `enforce` feature.
+* The certificate policy controller automatically looks for a certificate in a secret in only the `tls.crt` key. If you store a secret in a different key, define the `certificate_key_name` parameter. For example, if you have a secret that contains a `sensor-cert.pem` certificate, add the following label to the secret: `certificate_key_name: sensor-cert.pem`.
 
-View the following example of a certificate policy and review the element in the YAML table:
-
-[source,yaml]
-----
-apiVersion: policy.open-cluster-management.io/v1
-kind: CertificatePolicy
-metadata:
-  name: certificate-policy-example
-spec:
-  namespaceSelector:
-    include: ["default"]
-    exclude: []
-    matchExpressions: []
-    matchLabels: {}
-  labelSelector:
-    myLabelKey: myLabelValue
-  remediationAction:
-  severity: 
-  minimumDuration:
-  minimumCADuration:
-  maximumDuration:
-  maximumCADuration:
-  allowedSANPattern:
-  disallowedSANPattern:
-----
-
-== Certificate policy controller YAML table
-
-.Parameter table
-|===
-| Field | Optional or required |Description
-
-| `apiVersion`
-| Required
-| Set the value to `policy.open-cluster-management.io/v1`.
-
-| `kind`
-| Required
-| Set the value to `CertificatePolicy` to indicate the type of policy.
-
-| `metadata.name`
-| Required
-| The name to identify the policy.
-
-| `metadata.labels`
-| Optional
-| In a certificate policy, the `category=system-and-information-integrity` label categorizes the policy and facilitates querying the certificate policies.
-If there is a different value for the `category` key in your certificate policy, the value is overridden by the certificate controller.
-
-| `spec.namespaceSelector`
-| Required
-| Determines namespaces in the managed cluster where secrets are monitored. The `include` and `exclude` parameters accept file path expressions to include and exclude namespaces by name. The `matchExpressions` and `matchLabels` parameters specify namespaces to be included by label. See the link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/[Kubernetes labels and selectors] documentation. The resulting list is compiled by using the intersection of results from all parameters.
-
-*Note:* If the `namespaceSelector` for the certificate policy controller does not match any namespace, the policy is considered compliant.
-
-| `spec.labelSelector`
-| Optional
-| Specifies identifying attributes of objects. See the link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/[Kubernetes labels and selectors] documentation.
-
-| `spec.remediationAction`
-| Required
-| Specifies the remediation of your policy. Set the parameter value to `inform`. Certificate policy controller only supports `inform` feature.
-
-| `spec.severity`
-| Optional
-| Informs the user of the severity when the policy is non-compliant. Use the following parameter values: `low`, `medium`, `high`, or `critical`.
-
-| `spec.minimumDuration`
-| Required
-| When a value is not specified, the default value is `100h`. This parameter specifies the smallest duration (in hours) before a certificate is considered non-compliant. The parameter value uses the time duration format from Golang. See link:https://golang.org/pkg/time/#ParseDuration[Golang Parse Duration] for more information.
-
-| `spec.minimumCADuration`
-| Optional
-| Set a value to identify signing certificates that might expire soon with a different value from other certificates. If the parameter value is not specified, the CA certificate expiration is the value used for the `minimumDuration`. See link:https://golang.org/pkg/time/#ParseDuration[Golang Parse Duration] for more information.
-
-| `spec.maximumDuration`
-| Optional
-| Set a value to identify certificates that have been created with a duration that exceeds your desired limit. The parameter uses the time duration format from Golang. See link:https://golang.org/pkg/time/#ParseDuration[Golang Parse Duration] for more information.
-
-| `spec.maximumCADuration`
-| Optional
-| Set a value to identify signing certificates that have been created with a duration that exceeds your defined limit. The parameter uses the time duration format from Golang. See link:https://golang.org/pkg/time/#ParseDuration[Golang Parse Duration] for more information.
-
-| `spec.allowedSANPattern`
-| Optional
-| A regular expression that must match every SAN entry that you have defined in your certificates. This parameter checks DNS names against patterns. See the link:https://golang.org/pkg/regexp/syntax/[Golang Regular Expression syntax] for more information.
-
-| `spec.disallowedSANPattern`
-| Optional
-| A regular expression that must not match any SAN entries you have defined in your certificates. This parameter checks DNS names against patterns.
-
-*Note:* To detect wild-card certificate, use the following SAN pattern: `disallowedSANPattern: "[\\*]"`
-
-See the link:https://golang.org/pkg/regexp/syntax/[Golang Regular Expression syntax] for more information.
-|===
-
-== Certificate policy sample
-
-When your certificate policy controller is created on your hub cluster, a replicated policy is created on your managed cluster. 
-
+ 
 .Additional resources
 
-- Learn how to manage a certificate policy, see xref:../governance/create_policy.adoc#managing-security-policies[Managing security policies] for more details. 
-
-- Refer to xref:../governance/policy_controllers_intro.adoc#policy-controllers[Policy controllers introduction] for more topics.
-
-- See link:../secure_clusters/cert_intro.adoc#cert-intro[Certificates].
+* xref:../governance/hub_policy_framework.adoc#hub-policy-framework[Hub cluster policy framework]
+* link:../governance/cert_policy_parameters#cert-policy-parameters[Certificate policy controller schema and parameters]
+* xref:../governance/create_policy.adoc#managing-security-policies[Managing security policies]
+* xref:../governance/policy_controllers_intro.adoc#policy-controllers[Policy controllers introduction]
+* link:../secure_clusters/cert_intro.adoc#cert-intro[Certificates]
