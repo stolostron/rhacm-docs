@@ -72,6 +72,46 @@ oc get gitopscluster gitops-agent-clusters -n openshift-gitops -o jsonpath='{.sp
 +
 *Note:* If you need to override auto-discovery for non-standard setups, you can manually specify `serverAddress` and `serverPort` in the `argoCDAgent` specification.
 
+. Grant the cluster view role to the Argo CD Agent service account on all managed clusters to view the live remote manifest from the hub cluster Argo CD console.
+
+.. On your hub cluster, modify the default policy template created by the `GitOpsCluster` resource when the {gitops-short} add-on is enabled. Add the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: <gitopscluster-name>-argocd-policy
+  namespace: openshift-gitops
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: <gitopscluster-name>-argocd-config-policy
+      spec:
+        remediationAction: enforce
+        severity: medium
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              name: acm-openshift-gitops-argocd-agent-cluster-reader
+            subjects:
+              - kind: ServiceAccount
+                name: acm-openshift-gitops-agent-agent
+                namespace: openshift-gitops
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: view
+----
+
 . Create an application on the hub cluster and confirm it works on the managed cluster to verify the completion of the advanced `Pull Model` workflow. To verify the necessary installations and resources for successful deployment, complete the following steps:
 
 .. Check the `GitOpsCluster` status for specific `Agent` conditions by running the following command:
