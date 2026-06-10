@@ -1,0 +1,158 @@
+:_mod-docs-content-type: REFERENCE
+
+[#object-selection-raw-templates]
+= Object selector and raw template parameters
+
+[role="_abstract"]
+Configuration policies support advanced parameters like `objectSelector` and `object-templates-raw` to filter objects or process complex logic, such as loops and conditionals.
+
+* Configuration policy objectSelector:
+
++
+To iterate over multiple objects filtered by a label within a `ConfigurationPolicy` resource, use the `objectSelector` parameter and specify the object `kind` in the `objectDefinition` parameter. The `objectSelector` parameter operates similarly to `namespaceSelector` but does not support name filtering. To filter by name, use the `skipObject` Go template function. Referencing `{{ skipObject }}` excludes that specific object from the selection.
+
+** Object selection configuration example
+
++
+[source,yaml]
+----
+...
+object-templates:
+  - objectSelector:
+      matchExpressions:
+      - key: foo
+        operator: In
+        values:
+        - bar
+    objectDefinition:
+      apiVersion: v1
+      kind: ConfigMap
+      data:
+        key: '{{ if (hasSuffix "-prod" .ObjectName) }}{{ skipObject }}{{ end }}{{ hasNodesWithExactRoles "infra" }}'
+----
+
+* Raw template processing
+
++
+The optional `object-templates-raw` parameter supports advanced templating use cases, such as the `if` conditional function and the `range` loop function. The `object-templates-raw` parameter accepts a string containing Go templates that must resolve to an `object-templates` array.
+
++
+*Note:* You must set exactly one of either `spec.object-templates` or `spec.object-templates-raw`.
+
+** Raw template configuration example with conditional labels
+
++
+[source,yaml]
+----
+object-templates-raw: |
+  {{- range (lookup "v1" "ConfigMap" "default" "").items }}
+  {{- if eq .data.name "Sea Otter" }}
+  - complianceType: musthave
+    objectDefinition:
+      kind: ConfigMap
+      apiVersion: v1
+      metadata:
+        name: {{ .metadata.name }}
+        namespace: {{ .metadata.namespace }}
+        labels:
+          species-category: mammal
+  {{- end }}
+  {{- end }}
+----
+
++
+** Policy configuration example creating infrastructure `MachineSet` objects
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: create-infra-machineset
+spec:
+  remediationAction: enforce
+  severity: low
+  object-templates-raw: |
+    {{- /* Specify the parameters needed to create the MachineSet  */ -}}
+    {{- $machineset_role := "infra" }}
+    {{- $region := "ap-southeast-1" }}
+    {{- $zones := list "ap-southeast-1a" "ap-southeast-1b" "ap-southeast-1c" }}
+    {{- $infrastructure_id := (lookup "config.openshift.io/v1" "Infrastructure" "" "cluster").status.infrastructureName }}
+    {{- $worker_ms := (index (lookup "machine.openshift.io/v1beta1" "MachineSet" "openshift-machine-api" "").items 0) }}
+    {{- /* Generate the MachineSet for each zone as specified  */ -}}
+    {{- range $zone := $zones }}
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: machine.openshift.io/v1beta1
+        kind: MachineSet
+        metadata:
+          labels:
+            machine.openshift.io/cluster-api-cluster: {{ $infrastructure_id }} 
+          name: {{ $infrastructure_id }}-{{ $machineset_role }}-{{ $zone }} 
+          namespace: openshift-machine-api
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              machine.openshift.io/cluster-api-cluster: {{ $infrastructure_id }} 
+              machine.openshift.io/cluster-api-machineset: {{ $infrastructure_id }}-{{ $machineset_role }}-{{ $zone }} 
+          template:
+            metadata:
+              labels:
+                machine.openshift.io/cluster-api-cluster: {{ $infrastructure_id }} 
+                machine.openshift.io/cluster-api-machine-role: {{ $machineset_role }} 
+                machine.openshift.io/cluster-api-machine-type: {{ $machineset_role }} 
+                machine.openshift.io/cluster-api-machineset: {{ $infrastructure_id }}-{{ $machineset_role }}-{{ $zone }} 
+            spec:
+              metadata:
+                labels:
+                  node-role.kubernetes.io/{{ $machineset_role }}: "" 
+              taints: 
+                - key: node-role.kubernetes.io/{{ $machineset_role }}
+                  effect: NoSchedule
+              providerSpec:
+                value:
+                  ami:
+                    id: {{ $worker_ms.spec.template.spec.providerSpec.value.ami.id }}
+                  apiVersion: awsproviderconfig.openshift.io/v1beta1
+                  blockDevices:
+                    - ebs:
+                        encrypted: true
+                        iops: 2000
+                        kmsKey:
+                          arn: ''
+                        volumeSize: 500
+                        volumeType: io1
+                  credentialsSecret:
+                    name: aws-cloud-credentials
+                  deviceIndex: 0
+                  instanceType: {{ $worker_ms.spec.template.spec.providerSpec.value.instanceType }}
+                  iamInstanceProfile:
+                    id: {{ $infrastructure_id }}-worker-profile 
+                  kind: AWSMachineProviderConfig
+                  placement:
+                    availabilityZone: {{ $zone }} 
+                    region: {{ $region }}
+                  securityGroups:
+                    - filters:
+                        - name: tag:Name
+                          values:
+                            - {{ $infrastructure_id }}-worker-sg 
+                  subnet:
+                    filters:
+                      - name: tag:Name
+                        values:
+                          - {{ $infrastructure_id }}-private-{{ $zone }} 
+                  tags:
+                    - name: kubernetes.io/cluster/{{ $infrastructure_id }} 
+                      value: owned
+                  userDataSecret:
+                    name: worker-user-data
+    {{- end }}
+----
+
+.Additional resources
+
+* xref:../governance/template_functions.adoc#template-functions[Template functions]
+* xref:../governance/config_policy_ctrl.adoc#kubernetes-config-policy-controller[Kubernetes configuration policy controller]
