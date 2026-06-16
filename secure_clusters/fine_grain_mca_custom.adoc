@@ -1,36 +1,34 @@
-[id="using-custom-roles-multiclusterroleassignment"]
-= Using custom roles with MulticlusterRoleAssignment
+:_mod-docs-content-type: PROCEDURE
 
-In addition to the built-in roles provided in fine-grained role-based access control (RBAC) roles for virtualization, you can create custom `ClusterRole` resources to define permissions that are tailored to your environment. Custom roles are useful when the built-in roles do not match your access requirements, such as granting console-only access to virtual machines without lifecycle control.
+[#fine-grain-mca-custom]
+= Managing custom roles with _MulticlusterRoleAssignment_
 
-You must ensure that the custom role exists on each managed cluster before the assignment takes effect. You can create a custom `ClusterRole`, distribute it by using a governance policy, and assign it through `MultiClusterRoleAssignments`.
+Beyond the built-in fine-grained RBAC roles for virtualization, you can create custom `ClusterRole` resources to define environment-specific permissions. Use custom roles when built-in options do not meet your access requirements, such as granting console-only access to virtual machines without lifecycle control. 
+
+Ensure the custom role exists on each managed cluster before the assignment. Create the custom`ClusterRole`, distribute it by using a governance policy, and assign it through `MultiClusterRoleAssignment` resources.
 
 *Required access:* Cluster administrator
 
-== Prerequisites
+. Prerequisites
 
 * Enable fine-grained role-based access control. See _Enabling fine-grained role-based access control for virtualization_ for the procedure.
 * Ensure that the governance policy framework is enabled on your hub cluster.
 * Ensure you have a `Placement` resource that targets the desired managed clusters.
+* The hub cluster user must have the `acm-vm-fleet:view` `ClusterRole` bound on the hub cluster. To create a `ClusterRoleBinding` on the hub cluster to grant this role see xref:../secure_clusters/fine-grain-roles-descriptions.adoc#fine-grain-roles-descriptions[Fine-grained RBAC roles and descriptions].
+* Learn about the following custom role labeling requirements:
 
-== Creating a custom role
++
+** *Label:* `rbac.open-cluster-management.io/filter`
+*** *Value:* `vm-clusterroles`
+** *Label:* `clusterview.open-cluster-management.io/discoverable`
+*** *Value:* `"true"`
+** *Label:* `rbac.open-cluster-management.io/custom-role`
+*** *Value:* `"true"`
 
-Create a custom `ClusterRole` on the hub cluster with the required labels. Custom roles must include specific labels to integrate with the Red Hat Advanced Cluster Management console and `MulticlusterRoleAssignment`.
+.Procedure
 
-The following table describes the required labels for custom roles:
+. Create a YAML file that defines your custom `ClusterRole`. The following example creates a role that is named `kvm-console-only` to grant read-only access to virtual machines and the VNC console:
 
-.Required labels for custom roles
-[cols="1,1", options="header"]
-|===
-| Label | Value
-| `rbac.open-cluster-management.io/filter` | `vm-clusterroles`
-| `clusterview.open-cluster-management.io/discoverable` | `"true"`
-| `rbac.open-cluster-management.io/custom-role` | `"true"`
-|===
-
-Complete the following steps to create a custom role:
-
-. Create a YAML file that defines your custom `ClusterRole`. The following example creates a role named `kvm-console-only` that grants read-only access to virtual machines and the VNC console:
 +
 [source,yaml]
 ----
@@ -53,19 +51,17 @@ rules:
 ----
 
 . Apply the resource on the hub cluster by running the following command:
+
 +
 [source,bash]
 ----
 oc apply -f <your-custom-clusterrole>.yaml
 ----
 
-== Propagating custom roles to managed clusters
+. Automatically propagate custom roles from the hub cluster to all managed clusters by using a policy. The policy discovers any `ClusterRole` with the `rbac.open-cluster-management.io/custom-role: "true"` label on the hub cluster and enforces the existence of those roles on the managed clusters.
 
-Use a policy to automatically propagate custom roles from the hub cluster to all managed clusters. The policy discovers any `ClusterRole` with the `rbac.open-cluster-management.io/custom-role: "true"` label on the hub cluster and enforces the existence of those roles on the managed clusters.
+.. Create a `ServiceAccount` with permission to list cluster-scoped resources on the hub cluster. The policy uses this service account to discover custom roles. Create a YAML file that is named `hub-service-account.yaml` with the following content:
 
-Complete the following steps to create the propagation policy:
-
-. Create a `ServiceAccount` with permission to list cluster-scoped resources on the hub cluster. The policy uses this service account to discover custom roles. Create a YAML file with the following content and apply it:
 +
 [source,yaml]
 ----
@@ -98,7 +94,16 @@ subjects:
     namespace: open-cluster-management-global-set
 ----
 
-. Create the `Policy` resource YAML file and apply it to the hub cluster:
+.. Apply the file to your hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc apply -f hub-service-account.yaml
+----
+
+.. Create the `Policy` resource YAML file that is named `policy-custom-vm-roles.yaml` with the following content:
+
 +
 [source,yaml]
 ----
@@ -137,7 +142,15 @@ spec:
             {{hub- end hub}}
 ----
 
-. Create a `PlacementBinding` to bind the policy to a `Placement` that targets your managed clusters. Create a YAML file with the following content and apply it:
+.. Apply the policy to your hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc apply -f policy-custom-vm-roles.yaml
+----
+
+.. Create a `PlacementBinding` to bind the policy to a `Placement` that targets your managed clusters. Create a YAML file that is named `placement-binding.yaml` with the following content:
 +
 [source,yaml]
 ----
@@ -156,22 +169,28 @@ subjects:
     name: policy-custom-vm-roles
 ----
 
-. Verify that the policy is compliant on all target clusters by running the following command:
+.. Apply the placement binding by running the following command:
+
++
+[source,bash]
+----
+oc apply -f placement-binding.yaml
+----
+
+.. Verify that the policy is compliant on all target clusters by running the following command. The output must show `Compliant` in the compliance state column for all clusters:
+
 +
 [source,bash]
 ----
 oc get policy policy-custom-vm-roles -n open-cluster-management-global-set
 ----
-+
-The output must show `Compliant` in the compliance state column for all clusters.
 
-== Referencing a custom role in a MulticlusterRoleAssignment
+. After you create a custom role and propagate it to managed clusters, reference that role in a `MulticlusterRoleAssignment` resource. You can create role assignments by using the console or the command-line interface:
 
-After you create a custom role and propagate it to managed clusters, reference it in a `MulticlusterRoleAssignment` resource. You can create role assignments by using the console or the command-line interface (CLI):
+* *Console reference:* Follow the steps to create a role assignment for built-in roles in the console at xref:../secure_clusters/fine_grain_ui_roles.adoc#fine-grain-ui-roles[Creating role assignments by using roles in the console]. 
 
-* *Console:* Follow the same steps as you would when creating a role assignment for built-in roles. For the full procedure, see xref:../secure_clusters/index.adoc#fine-grain-ui-roles[Creating role assignments by using roles in the console].
+* *Command-line reference:* Apply a `MulticlusterRoleAssignment` resource that references the custom role. See the following example that grants the `kvm-console-only` role to the `jane.developer` user on clusters that are selected by a the `global` placement:
 
-* *CLI:* Apply a `MulticlusterRoleAssignment` resource that references the custom role:
 +
 [source,yaml]
 ----
@@ -194,12 +213,7 @@ spec:
             namespace: open-cluster-management-global-set
 ----
 
-[NOTE]
-====
-The `clusterSelection` field uses a `Placement` resource to determine which managed clusters the role assignment applies to. For more information, see xref:../secure_clusters/index.adoc#mra-placement[Creating and using placements].
-====
+*Notes:* 
 
-[NOTE]
-====
-The hub user must have the `acm-vm-fleet:view` `ClusterRole` bound on the hub cluster. Create a `ClusterRoleBinding` on the hub cluster to grant this role before proceeding. For more information, see xref:../secure_clusters/index.adoc#fine-grain-roles-descriptions[Fine-grained RBAC roles and descriptions].
-====
+* The `clusterSelection` field uses a `Placement` resource to determine to which managed clusters the role assignment applies. For more information, see xref:../secure_clusters/fine_grain_mca.adoc#fine-grain-mca[Fine-grained role-based access control _MulticlusterRoleAssignment_].
+
