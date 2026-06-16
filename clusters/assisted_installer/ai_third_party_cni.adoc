@@ -1,0 +1,107 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#config-third-party-cni]
+= Configuring third-party CNI plugins for on-premises cluster installation
+
+[role="_abstract"]
+When you install on-premises {ocp-short} clusters by using the {cim} feature, you can select a third-party Container Network Interface (CNI) plugin instead of the built-in OVN-Kubernetes option. Using a third-party CNI plugin helps you maintain operational consistency or use special network functions.
+
+.Prerequisites
+
+- You must enable the {cim} service. See xref:../assisted_installer/ai_enable_cim.adoc#enable-cim[Enabling the {cim} service] for more information.
+- You need version-compatible CNI manifests from your CNI vendor. The installer does not ship or generate manifests for third-party CNIs.
+- You need to upload CNI manifests before installation if you choose `CiscoACI`, `Cilium`, `Calico`, or `None`.
+
+.Procedure
+
+. Create a `ConfigMap` that contains your CNI manifests. Each key in the `ConfigMap` is a manifest filename, and the value is its content. See the following example for Cilium:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: <cilium-cni-manifests>
+  namespace: <cluster-namespace>
+data:
+  cilium-olm.yaml: |
+    apiVersion: operators.coreos.com/v1alpha1
+    kind: Subscription
+    metadata:
+      name: cilium
+      namespace: cilium
+    spec:
+      channel: "1.17"
+      name: cilium-olm
+      source: certified-operators
+      sourceNamespace: openshift-marketplace
+  cilium-config.yaml: |
+    <cilium-config-manifest>
+----
+
++
+- Replace `<cilium-cni-manifests>` with the name of your `ConfigMap` resource.
+- Replace `<cluster-namespace>` with the namespace of your cluster.
+- Replace `<cilium-config-manifest>` with the content of your Cilium configuration manifest.
+
+. Set `spec.networking.networkType` and reference the `ConfigMap` in your `AgentClusterInstall` resource. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: extensions.hive.openshift.io/v1beta1
+kind: AgentClusterInstall
+metadata:
+  name: <cluster-name>
+  namespace: <cluster-namespace>
+spec:
+  clusterDeploymentRef:
+    name: <cluster-name>
+  imageSetRef:
+    name: openshift-v<image-version>
+  networking:
+    networkType: Cilium
+    clusterNetwork:
+    - cidr: 10.128.0.0/14
+      hostPrefix: 23
+    serviceNetwork:
+    - 172.30.0.0/16
+  provisionRequirements:
+    controlPlaneAgents: 3
+    workerAgents: 2
+  manifestsConfigMapRefs:
+  - name: cilium-cni-manifests
+----
+
++
+- Replace `<cluster-name>` with the name of your cluster.
+- Replace `<cluster-namespace>` with the namespace of your cluster.
+- Replace `<image-version>` with the version of {ocp-short} that you are using.
+
++
+*Notes:*
+
+- You can reference multiple `ConfigMap` resources. Manifest names must be unique across all referenced `ConfigMap` resources.
+- If you leave `networkType` empty, OVN-Kubernetes is selected for {ocp-short} version 4.12 and later, IPv6, or {sno} clusters.
+
+.Verification
+
+* Verify that the cluster passes validation before installation. Run the following command:
+
++
+[source,bash]
+----
+kubectl get agentclusterinstall <cluster-name> -n <cluster-namespace> \
+  -o jsonpath='{range .status.conditions[*]}{.type}{"\t"}{.message}{"\n"}{end}'
+----
+
++
+- Replace `<cluster-name>` with the name of your cluster.
+- Replace `<cluster-namespace>` with the namespace of your cluster.
+
+.Additional resources
+
+- link:https://access.redhat.com/articles/5436171[Certified OpenShift CNI Plug-ins]
+- xref:../cluster_lifecycle/create_cluster_on_prem.adoc#creating-a-cluster-on-premises[Creating a cluster in an on-premises environment]
+- link:https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/latest/html/installing_openshift_container_platform_with_the_assisted_installer/index[Installing {ocp-short} with the {ai}]
