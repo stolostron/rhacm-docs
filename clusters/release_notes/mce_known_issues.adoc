@@ -560,3 +560,51 @@ link:https://issues.redhat.com/browse/ACM-14719[ACM-14719]
 If you remove the `BareMetalHost` resource from a hub cluster, the nodes shut down. You can manually power on the nodes again.
 
 link:https://issues.redhat.com/browse/ACM-15319[ACM-15319]
+
+[#siteconfig-stale-neighbor-cache]
+=== Managed cluster fails to rejoin the hub cluster after server replacement with Image-Based Break/Fix
+
+After a bare-metal server is replaced by using Image-Based Break/Fix, or the cluster reinstallation feature of the {sco}, the managed cluster might fail to rejoin the hub cluster. 
+
+This issue occurs because the hub cluster node that hosts the API VIP retains a stale neighbor cache entry that maps the managed cluster IP address to the MAC address of the previous server. 
+
+The replacement server uses the same IP address, but has a different MAC address, which causes the hub cluster to send reply packets to the wrong Layer 2 address.
+
+The klusterlet agent on the managed cluster display logs repeated timeout errors similar to the following message:
+
+[source,bash]
+----
+dial tcp <hub-api-address>:6443: i/o timeout
+----
+
+The {sco} reimport process loops indefinitely because the managed cluster never becomes healthy. 
+
+To work around this issue, flush the stale neighbor cache entry on the hub cluster node that hosts the API VIP. Complete the following steps:
+
+. Identify the hub cluster node that is running the API VIP.
+
+. Verify that a stale neighbor cache entry exists on the hub cluster node by running the following command. Replace `<spoke-ip-address>` with the IP address of the managed cluster and `<bridge-interface>` with the network bridge interface name on the hub cluster node:
+
++
+[source,bash]
+----
+sudo ip neigh show to <spoke-ip-address> dev <bridge-interface>
+----
+
+. Delete the stale neighbor cache entry by running the following command:
+
++
+[source,bash]
+----
+sudo ip neigh del <spoke-ip-address> dev <bridge-interface>
+----
+
+. Verify that the managed cluster status changes to `Available` by running the following command. Replace `<cluster-name>` with the name of your managed cluster:
+
++
+[source,bash]
+----
+oc get managedcluster <cluster-name>
+----
+
+link:https://issues.redhat.com/browse/ACM-30330[ACM-30330]
