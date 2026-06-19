@@ -1,0 +1,71 @@
+:_mod-docs-content-type: CONCEPT
+
+[#propagate-hosted-labels]
+= Propagating labels to hosted clusters across hub clusters
+
+[role="_abstract"]
+Propagate user-defined labels to `ManagedCluster` resources across {acm-short} and {mce-short} hub clusters for discovered hosted clusters. Labels can originate from a `HostedCluster` custom resource on an {mce-short} cluster or from a `ManagedCluster` on the {acm-short} hub cluster.
+
+You can propagate user-defined labels to `ManagedCluster` resources in two ways:
+
+* From a `HostedCluster` custom resource: Labels added to a `HostedCluster` on the {mce-short} cluster are automatically applied to the corresponding `ManagedCluster` resource on the {mce-short} cluster and on the {acm-short} hub cluster.
+
+* From the {acm-short} hub cluster: Labels added to a `ManagedCluster` on the {acm-short} hub cluster are synced to the corresponding `ManagedCluster` on the {mce-short} cluster.
+
+The `HostedCluster` custom resource is the source of truth. If a label conflict exists, the `HostedCluster` value takes precedence. System-managed labels are not propagated.
+
+*Required access:* Cluster administrator
+
+* System labels excluded from propagation
+
+The following labels are never propagated:
+
+*Exact key matches:*
+
+`name`, `vendor`, `cloud`, `region`, `openshiftVersion`, `openshiftVersion-major`, `openshiftVersion-major-minor`, `clusterID`, `local-cluster`, `velero.io/exclude-from-backup`
+
+*Prefix-based exclusions:*
+
+`open-cluster-management.io/`, `feature.open-cluster-management.io/`, `kubernetes.io/`, `openshift.io/`, `k8s.io/`
+
+*Exception:* Labels with the `cluster.open-cluster-management.io/` prefix are propagated. This allows `ClusterSet` membership label, `cluster.open-cluster-management.io/clusterset`, to be synced across hub clusters.
+
+== Label conflict behavior
+
+The controller only propagates new labels and does not overwrite existing labels that it is not already tracking. The following rules apply:
+
+* If the label key does not exist on the target `ManagedCluster`, the label is added and tracked.
+
+* If the label key already exists on the target with the same value, the label is tracked but not modified.
+
+* If the label key already exists on the target with a different value and the controller is already tracking it, the value is overwritten with the source value.
+
+* If the label key already exists on the target with a different value and the controller is not tracking it, the label is not overwritten. The existing local value is preserved.
+
+The controller tracks which labels it has propagated using the following annotations on the `ManagedCluster` resource:
+
+`hypershift.open-cluster-management.io/propagated-labels`::
+Labels propagated from the {acm-short} hub cluster.
+
+`hypershift.open-cluster-management.io/hc-propagated-labels`::
+Labels propagated from the `HostedCluster` custom resource.
+
+== Untracking a label
+
+An administrator can stop the controller from managing a specific label by removing that label key from the tracking annotation. For example, if the `propagated-labels` annotation contains `env,team` and you want to untrack `env`:
+
++
+[source,bash]
+----
+oc annotate managedcluster <managed-cluster-name> hypershift.open-cluster-management.io/propagated-labels=team --overwrite
+----
+
+Once untracked, the controller no longer overwrites that label, and the administrator can set it to any local value. The label is not re-tracked unless it is removed from the target and re-propagated from the source.
+
+
+
+.Additional resources
+
+* xref:./acm_propagate_labels_hc.adoc#propagate-labels-hc[Propagating HostedCluster labels to ManagedCluster resources]
+* xref:./acm_propagate_labels_hub.adoc#propagate-labels-hub[Propagating labels from {acm-short} hub cluster to {mce-short} ManagedCluster resources]
+* link:https://github.com/stolostron/hypershift-addon-operator/blob/main/docs/management/discovering_hostedclusters.md[Discovering hosted clusters in the hypershift-addon-operator repository]

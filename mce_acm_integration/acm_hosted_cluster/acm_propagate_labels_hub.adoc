@@ -1,0 +1,64 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#propagate-labels-hub]
+= Propagating labels from {acm-short} hub cluster to {mce-short} ManagedCluster resources
+
+[role="_abstract"]
+Labels added to a `ManagedCluster` on the {acm-short} hub cluster (representing a discovered hosted cluster) are synced to the corresponding `ManagedCluster` on the {mce-short} cluster. This allows centralized label management from the {acm-short} hub cluster without accessing individual {mce-short} clusters.
+
+*Important:* If a label key is owned by the `HostedCluster` (tracked in the `hc-propagated-labels` annotation), hub-to-spoke sync skips that key. The `HostedCluster` always takes precedence.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* Access to the {acm-short} hub cluster to add labels on `ManagedCluster` resources.
+
+* The `ManagedCluster` on the {acm-short} hub represents a discovered hosted cluster (with annotation `open-cluster-management/created-via: hypershift`).
+
+* The corresponding {mce-short} cluster is reachable from the {acm-short} hub.
+
+* You completed the shared prerequisites in xref:./acm_propagate_labels.adoc#propagate-hosted-labels[Propagating labels to hosted clusters across hubs].
+
+.Procedure
+
+. Log in to the {acm-short} hub cluster.
+
+. Identify `ManagedCluster` resources representing discovered hosted clusters. These are identified by the `open-cluster-management/created-via: hypershift` annotation:
+
++
+[source,bash]
+----
+oc get managedclusters -o json | jq -r '.items[] | select(.metadata.annotations["open-cluster-management/created-via"] == "hypershift") | .metadata.name'
+----
+
+. Add a label to the `ManagedCluster` on the {acm-short} hub cluster:
+
++
+[source,bash]
+----
+oc label managedcluster <managed-cluster-name> env=production
+----
+
+. Verify the label was synced to the corresponding `ManagedCluster` on the {mce-short} cluster:
+
++
+[source,bash]
+----
+oc get managedcluster <managed-cluster-name> --show-labels
+----
+
+. Verify that the controller is tracking propagated labels. Run the following command on the {mce-short} cluster:
+
++
+[source,bash]
+----
+oc get managedcluster <managed-cluster-name> -o jsonpath='{.metadata.annotations}' | jq .
+----
+
+. Confirm that the `hypershift.open-cluster-management.io/propagated-labels` annotation lists the label keys that you added on the {acm-short} hub cluster.
+
+.Additional resources
+
+* xref:./acm_propagate_labels.adoc#propagate-hosted-labels[Propagating labels to hosted clusters across hubs]
+* xref:./acm_propagate_labels_hc.adoc#propagate-labels-hc[Propagating HostedCluster labels to ManagedCluster resources]
