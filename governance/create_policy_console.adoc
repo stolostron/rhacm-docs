@@ -1,0 +1,92 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#create-policy-console]
+= Creating a cluster security policy from the console
+
+[role="_abstract"]
+
+
+.Procedure
+. Log in to your {acm-short}.
+. Go to the _Governance_ page and click *Create policy*. As you create your new policy from the console, a YAML file is also created in the YAML editor. 
+. To view the YAML editor, select the toggle at the beginning of the _Create policy_ form to enable it.
+. Complete the _Create policy_ form, then select the *Submit* button. If you choose to create a pod policy, your YAML file might resemble the following policy:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-pod
+  annotations:
+    policy.open-cluster-management.io/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
+    policy.open-cluster-management.io/controls: 'control example'
+    policy.open-cluster-management.io/standards: 'NIST,HIPAA'
+    policy.open-cluster-management.io/description:
+spec:
+  complianceType: musthave
+  namespaces:
+    exclude: ["kube*"]
+    include: ["default"]
+    pruneObjectBehavior: None
+  object-templates:
+  - complianceType: musthave
+    objectDefinition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: pod1
+      spec:
+        containers:
+        - name: pod-name
+          image: 'pod-image'
+          ports:
+          - containerPort: 80
+  remediationAction: enforce
+  disabled: false
+----
+
+. Create the following `PlacementBinding` example:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-pod
+placementRef:
+  name: placement-pod
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
+subjects:
+- name: policy-pod
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+----
+
+. Create the following `Placement` example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+ kind: Placement
+ metadata:
+   name: placement-pod
+spec:
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchLabels:
+          cloud: "IBM"
+    tolerations:
+        - key: cluster.open-cluster-management.io/unavailable
+          operator: Exists
+        - key: cluster.open-cluster-management.io/unreachable
+          operator: Exists
+----
+
+. *Optional:* Add a description for your policy. 
+. Click *Create Policy*.
