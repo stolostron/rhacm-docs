@@ -15,7 +15,7 @@ To enable the `ArgoCD` agent, you must configure the {gitops-short} operator sub
 +
 [source,bash]
 ----
-oc edit subscription gitops-operator -n openshift-gitops-operator
+oc edit subscription.operators openshift-gitops-operator -n openshift-gitops-operator
 ----
 
 . Add the following environment variables to the `spec.config.env` field by adding the following YAML sample:
@@ -27,7 +27,7 @@ spec:
   config:
     env:
     - name: ARGOCD_CLUSTER_CONFIG_NAMESPACES
-      value: openshift-gitops
+      value: openshift-gitops,local-cluster
     - name: ARGOCD_PRINCIPAL_TLS_SERVER_ALLOW_GENERATE
       value: "false"
     - name: ARGOCD_PRINCIPAL_REDIS_SERVER_ADDRESS
@@ -51,9 +51,9 @@ spec:
   - '*'
   argoCDAgent:
     principal:
-      auth: mtls:CN=system:open-cluster-management:cluster:([^:]+):addon:gitops-addon:agent:gitops-addon-agent
       enabled: true
-      auth: mtls:CN=system:open-cluster-management:cluster:([^:]+):addon:gitops-addon:agent:gitops-addon-agent
+      destinationBasedMapping: true
+      auth: "mtls:CN=system:open-cluster-management:cluster:([^:]+):addon:gitops-addon:agent:gitops-addon-agent"
       namespace:
         allowedNamespaces:
         - '*'
@@ -72,6 +72,63 @@ oc apply -f argocd-example.yaml
 
 *Note:* On the hub cluster only, this configuration disables the traditional `ArgoCD` controller and enables the agent principal with mutual TLS authentication. The `sourceNamespaces` field with `*` allows applications from any namespace. The `server.route.enabled` field creates an {ocp-short} Route for the agent principal, which is used for agent-to-hub communication.
 
+. Configure the `default` `AppProject` in `openshift-gitops` with wildcard settings. Apply the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: openshift-gitops
+spec:
+  sourceNamespaces:
+  - <source-namespace>
+  destinations:
+  - name: <destination-namespace>
+    namespace: <destination-namespace>
+    server: <destination-server>
+  clusterResourceWhitelist:
+  - group: <group>
+    kind: <kind>
+  sourceRepos:
+  - <source-repo>
+----
+
++
+- Replace `<source-namespace>` with the source namespace.
+- Replace `<destination-namespace>` with the destination namespace.
+- Replace `<destination-server>` with the destination server.
+- Replace `<group>` with the group.
+- Replace `<kind>` with the kind.
+- Replace `<source-repo>` with the source repository.
+
++
+*Note:* The principal only propagates `AppProject` resources whose destinations and `sourceNamespaces` match the agent configuration. Without wildcards, propagation is skipped and agents cannot find the `AppProject` applications.
+
+. Apply the YAML sample. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f appproject.yaml
+----
+
+. Verify that a `ManagedClusterSetBinding` for the `ManagedClusterSet` exists in the `openshift-gitops` namespace. Without a `ManagedClusterSetBinding`, the `Placement` controller cannot find any managed clusters. See the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: default
+  namespace: openshift-gitops
+spec:
+  clusterSet: default
+----
+
 .Additional resources
 
-- See xref:../gitops/gitops_addon_with_argocd.adoc#enable-gitops-addon-with-argocd[Enabling {gitops} add-on with _ArgoCD_ agent (Technology Preview)] for more information about enabling the `ArgoCD` agent with the pull model.
+- xref:../gitops/gitops_addon_with_argocd.adoc#enable-gitops-addon-with-argocd[Enabling {gitops} add-on with _ArgoCD_ agent (Technology Preview)]
