@@ -1,0 +1,65 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#propagate-labels-hc]
+= Propagating HostedCluster labels to ManagedCluster resources
+
+[role="_abstract"]
+Propagate labels from a `HostedCluster` custom resource on the {mce-short} cluster to the corresponding `ManagedCluster` resources on the {mce-short} and the {acm-short} hub cluster.  The `HostedCluster` is the source of truth. If the same label key exists with a different value, the `HostedCluster` value takes precedence.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* Access to the {mce-short} cluster where the `HostedCluster` custom resources reside.
+
+* `HostedCluster` custom resources exist on the {mce-short} cluster with hosted clusters that have been discovered by the {acm-short} hub.
+
+* You completed the shared prerequisites in _Label propagation for hosted clusters between {acm-short} and {mce-short} hub clusters_.
+
+.Procedure
+
+. Log in to the {mce-short} cluster.
+
+. Add a label to the `HostedCluster` custom resource:
+
++
+[source,bash]
+----
+oc label hostedcluster <hosted-cluster-name> -n <namespace> env=production
+----
+
+. Verify the label was propagated to the corresponding `ManagedCluster` on the {mce-short} cluster:
+
++
+[source,bash]
+----
+oc get managedcluster <managed-cluster-name> --show-labels
+----
+
+. Verify the label was also propagated to the {acm-short} hub `ManagedCluster` if the {mce-short} hub was imported.
+
+. Verify that the controller is tracking propagated labels. Run the following command on the target cluster:
+
++
+[source,bash]
+----
+oc get managedcluster <managed-cluster-name> -o jsonpath='{.metadata.annotations}' | jq .
+----
+
+. Confirm that the `hypershift.open-cluster-management.io/hc-propagated-labels` annotation lists the label keys that you added to the `HostedCluster` custom resource.
+
+. Untrack a label to stop the controller from managing a specific label. Remove that label key from the tracking annotation. Run the following command, if the `hc-propagated-labels` annotation contains `env,team` and you want to untrack `env`:
+
++
+[source,bash]
+----
+oc annotate managedcluster <managed-cluster-name> hypershift.open-cluster-management.io/hc-propagated-labels=team --overwrite
+----
+
++
+*Note:* Once untracked, the controller no longer overwrites that label, and the administrator can set it to any local value. The label is not re-tracked unless it is removed from the target and re-propagated from the source.
+
+.Additional resources
+
+* xref:./acm_propagate_labels.adoc#propagate-hosted-labels[Label propagation for hosted clusters between {acm-short} and {mce-short} hub clusters]
+* xref:./acm_propagate_labels_hub.adoc#propagate-labels-hub[Propagating labels from {acm-short} hub cluster to {mce-short} ManagedCluster resources]
