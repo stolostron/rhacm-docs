@@ -1,26 +1,30 @@
 :_mod-docs-content-type: PROCEDURE
 
-[#managing-security-policies]
-= Managing security policies
+[#creating-security-policies]
+= Creating security policies
 
 [role="_abstract"]
 Create a security policy to report and validate your cluster compliance based on your specified security standards, categories, and controls.
 
 *Required access:* Cluster administrator
 
-*Important:*
+.Prerequisites
+
 * You must define a placement and placement binding to apply your policy to a specific cluster. The `PlacementBinding` resource binds the placement. Enter a valid value for the cluster _Label selector_ field to define a `Placement` and `PlacementBinding` resource.
-* In order to use a `Placement` resource, a `ManagedClusterSet` resource must be bound to the namespace of the `Placement` resource with a `ManagedClusterSetBinding` resource. Refer to link:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource] for additional details.  
+
+* To use a `Placement` resource, a `ManagedClusterSet` resource must be bound to the namespace of the `Placement` resource with a `ManagedClusterSetBinding` resource. Refer to link:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource] for additional details.  
 
 .Procedure
 
 . Create a policy by running the following command:
+
 +
+[source,bash]
 ----
 oc create -f policy.yaml -n <policy-namespace>
 ----
 
-. Define the template that the policy uses. Edit your YAML file by adding a `policy-templates` field to define a template. Your policy might resemble the following YAML file:
+. Edit your YAML file by adding a `policy-templates` field to define the template the policy uses. Your policy might resemble the following YAML file:
 
 +
 [source,yaml]
@@ -78,267 +82,18 @@ subjects:
   kind: Policy
 ----
 
-== Viewing your security policy from the command line
-
-. View details for a specific security policy by running the following command:
-+
-----
-oc get policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace> -o yaml
-----
-
-. View a description of your security policy by running the following command:
-+
-----
-oc describe policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace>
-----
-
-== Creating a cluster security policy from the console
-
-After you log in to your {acm-short}, navigate to the _Governance_ page and click *Create policy*. As you create your new policy from the console, a YAML file is also created in the YAML editor. To view the YAML editor, select the toggle at the beginning of the _Create policy_ form to enable it.
-
-. Complete the _Create policy_ form, then select the *Submit* button. Your YAML file might resemble the following policy:
-
-+
-[source,yaml]
-----
-apiVersion: policy.open-cluster-management.io/v1
-kind: Policy
-metadata:
-  name: policy-pod
-  annotations:
-    policy.open-cluster-management.io/categories: 'SystemAndCommunicationsProtections,SystemAndInformationIntegrity'
-    policy.open-cluster-management.io/controls: 'control example'
-    policy.open-cluster-management.io/standards: 'NIST,HIPAA'
-    policy.open-cluster-management.io/description:
-spec:
-  complianceType: musthave
-  namespaces:
-    exclude: ["kube*"]
-    include: ["default"]
-    pruneObjectBehavior: None
-  object-templates:
-  - complianceType: musthave
-    objectDefinition:
-      apiVersion: v1
-      kind: Pod
-      metadata:
-        name: pod1
-      spec:
-        containers:
-        - name: pod-name
-          image: 'pod-image'
-          ports:
-          - containerPort: 80
-  remediationAction: enforce
-  disabled: false
-----
-+
-See the following `PlacementBinding` example:
-
-+
-[source,yaml]
-----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  name: binding-pod
-placementRef:
-  name: placement-pod
-  kind: Placement
-  apiGroup: cluster.open-cluster-management.io
-subjects:
-- name: policy-pod
-  kind: Policy
-  apiGroup: policy.open-cluster-management.io
-----
-+
-See the following `Placement` example:
-
-+
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1beta1
- kind: Placement
- metadata:
-   name: placement-pod
-spec:
-  predicates:
-  - requiredClusterSelector:
-      labelSelector:
-        matchLabels:
-          cloud: "IBM"
-    tolerations:
-        - key: cluster.open-cluster-management.io/unavailable
-          operator: Exists
-        - key: cluster.open-cluster-management.io/unreachable
-          operator: Exists
-----
-
-. *Optional:* Add a description for your policy. 
-. Click *Create Policy*. A security policy is created from the console.
-
-== Viewing your security policy from the console
-
-. Navigate to the _Governance_ page to view a table list of your policies. *Note:* You can filter the table list of your policies by selecting the _Policies_ tab or _Cluster violations_ tab.
-
-. Select one of your policies to view more details. The _Details_, _Clusters_, and _Templates_ tabs are displayed. When the cluster or policy status cannot be determined, the following message is displayed: `No status`.
-
-. Alternatively, select the _Policies_ tab to view the list of policies. Expand a policy row to view the _Description_, _Standards_, _Controls_, and _Categories_ details.
-
-== Creating policy sets from the command line
-
-By default, the policy set is created with no policies or placements. You must create a placement for the policy set and have at least one policy that exists on your cluster. When you create a policy set, you can add numerous policies. 
-
-Run the following command to create a policy set from the command line:
-
-----
-oc apply -f <policyset-filename>
-----
-
-== Creating policy sets from the console
-
-. From the navigation menu, select *Governance*. 
-
-. Select the _Policy sets_ tab. 
-
-. Select the *Create policy set* button and complete the form. 
-
-. Add the details for your policy set and select the *Submit* button.
-
-Your policy is listed from the policy table. 
-
-== Adding a policy to a policy set from the command line
-
-. Run the following command to edit your policy set: 
-
-+
-----
-oc edit policysets <your-policyset-name>
-----
-
-. Add the policy name to the list in the `policies` section of the policy set. 
-
-. Apply your added policy in the placement section of your policy set with the following command: 
-
-----
-oc apply -f <your-added-policy.yaml>
-----
-
-`PlacementBinding` and `Placement` are both created. 
-
-*Note:* If you delete the placement binding, the policy is still placed by the policy set.
-
-== Adding a policy to a policy set from the console
-
-. Add a policy to the policy set by selecting the _Policy sets_ tab. 
-
-. Select the Actions icon and select *Edit*. The _Edit policy set_ form appears.
-
-. Navigate to the _Policies_ section of the form to select a policy to add to the policy set. 
-
-== Disabling security policies
-
-Your policy is enabled by default. Disable your policy from the console.
-
-After you log in to your {acm} console, navigate to the _Governance_ page to view a table list of your policies.
-
-Select the *Actions* icon > *Disable policy*. The _Disable Policy_ dialog box appears.
-
-Click *Disable policy*. Your policy is disabled.
-
-== Deleting a security policy
-
-Delete a security policy from the command line or the console.
-
-Use the following procedure to delete from the command line:
-
-. Delete a security policy by running the following command:
-
-+
-----
-oc delete policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace>
-----
-
-. Verify that your policy is removed by running the following command: `oc get policies.policy.open-cluster-management.io <policy-name> -n <policy-namespace>`
-
-Use the following procedure to delete a security policy from the console. 
-
-. From the navigation menu, click *Governance* to view a table list of your policies. 
-
-. Click the *Actions* icon for the policy you want to delete in the policy violation table.
-
-. Click *Remove*. 
-
-. From the _Remove policy_ dialog box, click *Remove policy*.
-
-== Deleting policy sets from the console
-
-. From the _Policy sets_ tab, select the *Actions* icon for the policy set. When you click *Delete*, the _Permanently delete Policyset?_ dialogue box appears. 
-
-. Click the *Delete* button.
-
-== Cleaning up resources that are created by policies
-
-Use the `pruneObjectBehavior` parameter in a configuration policy to clean up resources that are created by the policy. When `pruneObjectBehavior` is set, the related objects are only cleaned up after the configuration policy (or parent policy) associated with them is deleted. 
-
-View the following descriptions of the values that can be used for the parameter:
-
-* `DeleteIfCreated`: Cleans up any resources created by the policy.
-* `DeleteAll`: Cleans up all resources managed by the policy.
-* `None`: This is the default value and maintains the same behavior from previous releases, where no related resources are deleted.
-
-You can set the value directly in the YAML file as you create a policy from the command line. 
-
-From the console, you can select the value in the _Prune Object Behavior_ section of the _Policy templates_ step.
-
-*Notes:*
-
-- If a policy that installs an operator has the `pruneObjectBehavior` parameter defined, then additional clean up is needed to complete the operator uninstall. You might need to delete the operator `ClusterServiceVersion` object as part of this cleanup.
-
-- As you disable the `config-policy-addon` resource on the managed cluster, the `pruneObjbectBehavior` is ignored. To automatically clean up the related resources on the policies, you must remove the policies from the managed cluster before the add-on is disabled.
-
-== Policy command-line tool
-
-With the `policytools` command-line tool, you can interact with policies locally to help with creating and debugging.  The `policytools` command-line tool is available for download from the hub cluster console. See link:../console/console.adoc#command-line-tools[Command line tools].
-
-`template-resolver`:: The `template-resolver` is a subcommand for `policytools` that resolves managed cluster and hub cluster templates that are embedded in policies. The `template-resolver` reads from either a file, or from standard input.
-
-+
-To resolve a policy with hub cluster templates, you must provide the `--cluster-name` argument with the name of a managed cluster that is imported into {acm-short}, and you must provide the `--hub-kubeconfig` argument with the path to a `kubeconfig` file that references the hub cluster.
-
-+
-If the input policy uses the `.ObjectName` or `.ObjectNamespace` template variables, you need to set the values with the `--object-name` and `--object-namespace` arguments.
-
-+
-The `template-resolver` subcommand connects to the managed cluster and hub cluster to retrieve information that is necessary to resolve the templates. Provide paths by using the `--save-resources` and `--save-hub-resources` arguments to save the resources that the `template-resolver` retrieves. Those saved files can be used as inputs for the `dryrun` subcommand.
-
-+
-*Technology Preview:* The `policytools` command-line interface introduces a `--lint` argument for the `template-resolver` subcommand to print any linting issues, along with the resolved Go templates from the input policy. To generate a Static Analysis Results Interchange Format (SARIF) report of the linter results, specify a file path with the `--sarif` argument.
-
-`dryrun`:: The `dryrun` is a subcommand for `policytools` that evaluates a `ConfigurationPolicy` resource locally by using static input resources for the cluster state.
-
-+
-To run a policy, add the path to the `ConfigurationPolicy` YAML by using the `--policy` flag. You can provide additional resource YAML files, which are used as the current cluster state. For example, if your policy defines a specific configuration for a namespace, provide the current namespace state to see what the policy does. Multiple resources can be in the same resource file.
-
-+
-To evaluate a policy against the current state of a live cluster, use the `--from-cluster` flag or set the `DRYRUN_FROM_CLUSTER` environment variable to `true`.  
-
-The `dryrun` subcommand reads the current state of resources directly from the cluster that you configured in your `kubeconfig` file or from the cluster that is specified by the `KUBECONFIG` environment variable. In both these scenarios, the `dryun` subcommand does not gather information from the resource files. 
-
-When you enable the `--from-cluster` flag, it ignores any YAML resource files that are provided as input. Enabling the  `--from-cluster` flag allows you to test a policy against your actual cluster state without manually exporting and supporting resource files.
-
-+
-By default, `dryrun` prints the differences between the desired states of objects that are defined in the policy and the current state of those resources, as well as compliance messages that the `ConfigurationPolicy` creates. 
-
-To save the compliance messages to a separate file, use the `--messages-path` argument. To save the full policy status, including additional information about the related objects, use the `--status-path` argument.
-
-+
-If the policy is `NonCompliant` based on the input, the tool returns a non-zero exit code. To compare the resulting status against a known status, use the `--desired-status` argument. For example, to verify that the policy reports a missing resource, provide a YAML file with the missing resource inside a `.relatedObjects` list. To verify that the policy is `NonCompliant`, create a YAML file with the `compliant: NonCompliant` line.
-
 .Additional resources
 
-* View more descriptions of the policy YAML files in the xref:../governance/hub_policy_framework.adoc#hub-policy-framework[Hub cluster policy framework][Policy overview].
-* See link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#resources-that-support-set-based-requirements[Resources that support support set-based requirements] in the Kubernetes documentation for a valid expression.
-* View the stable `Policysets`, which require the Policy Generator for deployment, link:https://github.com/open-cluster-management-io/policy-collection/tree/main/policygenerator/policy-sets/stable[PolicySets-- Stable].
-* Refer to xref:../governance/grc_intro.adoc#governance[Governance] for more topics about policies.
-
+* link:../governance/view_policy_cli.adoc#view-policy-cli[Viewing your security policy from the command line]
+* link:../governance/create_policy_console.adoc#create-policy-console[Creating a cluster security policy from the console]
+* link:../governance/view_policy_console.adoc#view-policy-console[Viewing your security policy from the console]
+* link:../governance/create_policy_set.adoc#create-policy-set[Creating a policy set]
+* link:../governance/add_policy_policy_set.adoc#add-policy-policy-set[Adding a policy to a policy set]
+* link:../governance/disable_policy.adoc#disable-policy[Disabling a security policy]
+* link:../governance/delete_policy.adoc#delete-policy[Deleting a security policy]
+* link:../governance/delete_policy_set.adoc#delete-policy-sets[Deleting a policy set]
+* link:../governance/cleanup_resource_policy.adoc#cleanup-resources[Cleaning up resources that are created by policies]
+* link:../governance/hub_policy_framework.adoc#hub-policy-framework[Hub cluster policy framework]
+* link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#resources-that-support-set-based-requirements[Resources that support support set-based requirements]
+* link:https://github.com/open-cluster-management-io/policy-collection/tree/main/policygenerator/policy-sets/stable[PolicySets-- Stable]
+* link:../governance/grc_intro.adoc#governance[Governance]
