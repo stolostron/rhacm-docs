@@ -1,0 +1,50 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#troubleshooting-multicluster-roleassign-upgrade]
+= Troubleshooting _MultiClusterRoleAssignment_ resources after upgrade
+
+[role="_abstract"]
+After you upgrade from {acm-short} {product-version-prev} to {product-version}, existing `MulticlusterRoleAssignment` resources that you created from the console might be non-functional.
+
+== Symptom: `MulticlusterRoleAssignment` resources are non-functional after upgrade
+
+After you upgrade your hub cluster from {acm-short} {product-version-prev} to {product-version}, one or more of the following symptoms occur:
+
+* Existing `MultiClusterRoleAssignment` resources remain on the hub cluster, but the assigned users or groups no longer receive the expected permissions on managed clusters.
+
+* Role assignments that you created by using the Fleet Management console in {product-version-prev} no longer take effect after the upgrade.
+
++
+*Note:* New {product-version} installations are not affected. This issue applies only when you upgrade from {product-version-prev} with existing `MultiClusterRoleAssignment` resources.
+
+== Identifying the problem: Missing `placements` field
+
+In {product-version}, each `MultiClusterRoleAssignment` resource requires the `placements` parameter within the `spec.roleAssignments[].clusterSelection` parameter. Resources that you created by using the console in {product-version-prev} do not include this parameter.
+
+Automatic migration of existing resources is not supported during upgrade.
+
+To verify whether a resource is missing the `placements` parameter, run the following command on the hub cluster. Replace `<namespace>` and `<name>` with the namespace and name of the `MultiClusterRoleAssignment` resource:
+
++
+[source,bash]
+----
+oc get multiclusterroleassignment <name> -n <namespace> -o yaml
+----
+
+Check each entry for the `spec.roleAssignments` parameter. When `clusterSelection.placements` is not present, the role assignment cannot select target managed clusters in {product-version}.
+
+== Resolving the problem: Re-create affected resources
+
+. Delete the affected `MultiClusterRoleAssignment` resource. Run the following command and replace `<namespace>` and `<name>` with the values for your resource:
+
++
+[source,bash]
+----
+oc delete multiclusterroleassignment <name> -n <namespace>
+----
+
+. Re-create the resource by using the console or by applying a YAML file that includes the required `placements` parameter within the `spec.roleAssignments[].clusterSelection` parameter.
+
+.Additional resources
+
+* link:../secure_clusters/fine_grain_mca_examples.adoc#fine-grain-mca-examples[_MultiClusterRoleAssignment_ examples for fine-grained role-based access control]
