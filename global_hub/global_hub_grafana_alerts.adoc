@@ -1,4 +1,4 @@
-:_mod-docs-content-type:
+:_mod-docs-content-type: CONCEPT
 
 [#global-hub-grafana-alerts]
 = Grafana alerts (Technology Preview)
@@ -8,129 +8,17 @@ You can configure three Grafana alerts, which are stored in the `multicluster-gl
 
 See the following descriptions of the alerts:
 
-* Suspicious policy change: This alert rule watches the suspicious policies change. If the following events occur more than five times in one hour, it creates notifications.
+Suspicious policy change:: This alert rule watches the suspicious policies change. If the following events occur more than five times in one hour, it creates notifications.
 +
 - A policy was enabled or disabled.
 - A policy was updated.
 
-* Suspicious cluster compliance status change: This alert rule watches the cluster compliance status and policy events for a cluster. There are two rules in this alert:
+Suspicious cluster compliance status change:: This alert rule watches the cluster compliance status and policy events for a cluster. There are two rules in this alert:
 +
 - Cluster compliance status changes frequently: If a cluster compliance status changes from `compliance` to `non-compliance` more than three times in one hour, it creates notifications.
 - Too many policy events in a cluster: For a policy in a cluster, if there are more than 20 events in five minutes, it creates notifications. If this alert is always firing, the data in the `event.local_policies` table increases too fast.
 
-* Cron Job failed: This alert watches the cron jobs that are described in xref:../global_hub/global_hub_config_cronjobs.adoc#global-hub-configuring-cronjobs[Configuring the cron jobs] for failed events. There are two rules in this alert:
+Cron Job failed:: This alert watches the cron jobs that are described in xref:../global_hub/global_hub_cronjobs.adoc#global-hub-configuring-cronjobs[{global-hub} cron job settings] for failed events. There are two rules in this alert:
 +
 - Local compliance job failed: If this alert rule creates notifications, it means the local compliance status synchronization job failed. It might cause the data in the `history.local_compliance` table to be lost. Run the job manually, if necessary.
 - Data retention job failed: If this alert rule starts creating notifications, it means the data retention job failed. You can run it manually.
-
-== Deleting a default Grafana alert rule
-
-If the default Grafana alert rules do not provide useful information, you can delete the Grafana alert rule by including a `deleteRules` section in the `multicluster-global-hub-custom-alerting` config map. See xref:../global_hub_configuring.adoc#global-hub-customize-grafana-alerting-resources[Customize Grafana alerting resources] for more information about the `multicluster-global-hub-custom-alerting` config map.
-
-To delete all of the default alerts, the `deleteRules` configuration section should resemble the following example:
-
-----
-    deleteRules:
-      - orgId: 1
-        uid: globalhub_suspicious_policy_change
-      - orgId: 1
-        uid: globalhub_cluster_compliance_status_change_frequently
-      - orgId: 1
-        uid: globalhub_high_number_of_policy_events
-      - orgId: 1
-        uid: globalhub_data_retention_job
-      - orgId: 1
-        uid: globalhub_local_compliance_job
-----
-
-== Customizing Grafana alerts
-
-The {global-hub} supports creating custom Grafana alerts. Complete the following steps to customize your Grafana alerts:
-
-=== Customizing your grafana.ini file
-
-To customize your `grafana.ini` file, create a secret named `multicluster-global-hub-custom-grafana-config` in the namespace where you installed your {global-hub} operator. The secret data key is `grafana.ini`, as seen in the following example. Replace the required information with your own credentials:
-
-[source,yaml]
-----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: multicluster-global-hub-custom-grafana-config
-  namespace: multicluster-global-hub
-type: Opaque
-stringData:
-  grafana.ini: |
-    [smtp]
-    enabled = true
-    host = smtp.google.com:465
-    user = <example@google.com>
-    password = <password>
-    ;cert_file =
-    ;key_file =
-    skip_verify = true
-    from_address = <example@google.com>
-    from_name = Grafana 
-    ;ehlo_identity = dashboard.example.com <1>
-----
-<1>The `EHLO` identity in the `SMTP` dialog, which defaults to `instance_name`.
-
-*Note:* You cannot configure the section that already contains the `multicluster-global-hub-default-grafana-config` secret.
-
-=== Customizing Grafana alerting resources
-
-The {global-hub} supports customizing the alerting resources, which is explained in link:https://grafana.com/docs/grafana/v10.1/alerting/set-up/provision-alerting-resources/file-provisioning/[Create and manage alerting resources using file provisioning] in the Grafana documentation. 
-
-To customize the alerting resources, create a config map named `multicluster-global-hub-custom-alerting` in the `multicluster-global-hub` namespace.
-
-The config map data key is `alerting.yaml`, as in the following example:
-
-[source,yaml]
-----
-apiVersion: v1
-data:
-  alerting.yaml: |
-    contactPoints:
-      - orgId: 1
-        name: globalhub_policy
-        receivers:
-          - uid: globalhub_policy_alert_email
-            type: email
-            settings:
-              addresses: <example@redhat.com>
-              singleEmail: false
-          - uid: globalhub_policy_alert_slack
-            type: slack
-            settings:
-              url: <Slack-webhook-URL>
-              title: |
-                {{ template "globalhub.policy.title" . }}
-              text: |
-                {{ template "globalhub.policy.message" . }}              
-    policies:
-      - orgId: 1
-        receiver: globalhub_policy
-        group_by: ['grafana_folder', 'alertname']
-        matchers:
-          - grafana_folder = Policy
-        repeat_interval: 1d
-    deleteRules:
-      - orgId: 1
-        uid: [Alert Rule Uid]
-    muteTimes:
-      - orgId: 1
-        name: mti_1
-        time_intervals:
-          - times:
-              - start_time: '06:00'
-                end_time: '23:59'
-                location: 'UTC'
-            weekdays: ['monday:wednesday', 'saturday', 'sunday']
-            months: ['1:3', 'may:august', 'december']
-            years: ['2020:2022', '2030']
-            days_of_month: ['1:5', '-3:-1']
-kind: ConfigMap
-metadata:
-  name: multicluster-global-hub-custom-alerting
-  namespace: multicluster-global-hub
-----
