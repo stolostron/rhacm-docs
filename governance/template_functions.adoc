@@ -8,145 +8,7 @@ Reference Kubernetes resources such as resource-specific and generic template fu
 
 If you use the generic function, `lookup`, which is more advanced, familiarize yourself with the YAML structure of the resource that is being looked up. In addition to these functions, utility functions such as `base64enc`, `base64dec`, `indent`, `autoindent`, `toInt`, `toBool`, and more are available.
 
-To conform templates with YAML syntax, you must define templates in the policy resource as strings using quotes or a block character (`|` or `>`). This causes the resolved template value to also be a string. To override this, use `toInt` or `toBool` as the final function in the template to initiate further processing that forces the value to be interpreted as an integer or boolean respectively.
-
-== _copySecretData_
-
-The `copySecretData` function copies all of the `data` contents of the specified secret. View the following sample of the function:
-
-[source,yaml]
-----
-...
-objectDefinition:
-  apiVersion: v1
-  kind: Secret
-  metadata:
-    name: my-secret-copy
-  data: '{{ copySecretData "default" "my-secret" }}'
-----
-+
-* When you use this function with hub cluster templates, the output is automatically encrypted using the _protect_ function.
-
-== _copyConfigMapData_
-
-The `copyConfigMapData` function copies all of the `data` content of the specified config map. View the following sample of the function:
-
-[source,yaml]
-----
-...
-objectDefinition:
-  apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: my-secret-copy
-  data: '{{ copyConfigMapData "default" "my-configmap" }}'
-----
-
-== _getNodesWithExactRoles_
-
-The `getNodesWithExactRoles` function returns a list of nodes with only the roles that you specify, and ignores nodes that have any additional roles except the `node-role.kubernetes.io/worker` role. View the following sample function where you are selecting `"infra"` nodes and ignoring the storage nodes:
-
-[source,yaml]
-----
-...
-objectDefinition:
-  apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: my-configmap
-    data:
-      infraNode: |
-        {{- range $i,$nd := (getNodesWithExactRoles "infra").items }}
-        node{{ $i }}: {{ $nd.metadata.name }}
-        {{- end }}
-      replicas: {{ len ((getNodesWithExactRoles "infra").items) | toInt }}
-----
-
-== _hasNodesWithExactRoles_
-
-The `hasNodesWithExactRoles` function returns the `true` value if the cluster contains nodes with only the roles that you specify, and ignores nodes that have any additional roles except the `node-role.kubernetes.io/worker` role. View the following sample of the function:
-
-[source,yaml]
-----
-...
-objectDefinition:
-  apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: my-configmap
-  data:
-    key: '{{ hasNodesWithExactRoles "infra" }}'
-----
-
-== _skipObject_
-
-The `skipObject` function is only available in managed cluster templates in a `ConfigurationPolicy` resource. Calling `{{ skipObject }}` at any time inside a Go template signals to skip that particular object for the policy. When you use the `skipObject` with the `objectSelector`, you can further filter objects selected by name. You can call `skipObject` by itself inside a conditional or with an optional boolean argument.
-
-View the following example that selects objects that have the label `foo: bar`, but skips objects that have a name with the suffix `-prod`:
-
-[source,yaml]
-----
-...
-object-templates:
-  - objectSelector:
-      matchExpressions:
-      - key: foo
-        operator: In
-        values:
-        - bar
-    objectDefinition:
-      apiVersion: v1
-      kind: ConfigMap
-      data:
-        key: '{{ skipObject (hasSuffix "-prod" .ObjectName) }}{{ hasNodesWithExactRoles "infra" }}'
-----
-
-== Sprig open source
-
-{acm-short} supports most of the template functions from the `sprig` open source project, except for `env` and `expandenv`. View the following table:
-
-.Table of supported, community Sprig functions
-|===
-| Sprig library | Functions 
-
-| Cryptographic and security
-| `htpasswd`
-
-| Date
-| `date`, `mustToDate`, `now`, `toDate`
-
-| Default 
-| `default`, `empty`, `fromJson`, `mustFromJson`, `ternary`, `toJson`, `toRawJson`, `mustToRawJson`
-
-The `Json` functions listed are also aliased to an equivalent uppercase `JSON` function.
-
-| Dictionaries and dict
-| `dict`, `dig`, `get`, `hasKey`, `keys`, `merge`, `mustMerge`, `set`, `unset`, `values`
-
-| Encoding
-| `b64dec`, `b64enc`
-
-| Flow control
-| `fail`
-
-| Integer math
-| `add`, `mul`, `div`, `round`, `sub` 
-
-| Integer slice
-| `until`, `untilStep`, 
-
-| Lists
-| `append`, `has`, `list`, `mustAppend`, `mustHas`, `mustPrepend`, `mustSlice`, `prepend`, `slice`
-
-| String lists
-| `concat`, `join`, `sortAlpha`, `split`, `splitn`, `splitList`
-
-| Strings
-| `cat`, `contains`, `hasPrefix`, `hasSuffix`,  `lower`, `mustRegexFind`, `mustRegexFindAll`, `mustRegexMatch`, `quote`, `regexFind`, `regexFindAll`, `regexMatch`, `regexQuoteMeta`, `replace`, `substr`, `trim`, `trimAll`, `trunc`, `upper`
-
-| Version comparison
-| `semver`, `semverCompare`
-|===
+Policy templates are expressed as strings in the YAML manifest, using quotes or a block scalar (`|` or `>`). After processing, the resolved value is also a string. The `toInt` and `toBool` functions convert template output to integer or boolean types when the enforced resource expects those data types.
 
 .Additional resources
 
@@ -165,9 +27,14 @@ The `Json` functions listed are also aliased to an equivalent uppercase `JSON` f
 * xref:../governance/template_function_to_yaml.adoc#to-yaml[toYaml]
 * xref:../governance/template_function_protect.adoc#protect[protect]
 * xref:../governance/template_function_to_literal.adoc#to-literal[toLiteral]
+* xref:../governance/template_function_copy_secret_data.adoc#copy-secret-data[copySecretData]
+* xref:../governance/template_function_copy_configmap_data.adoc#copy-configmap-data[copyConfigMapData]
+* xref:../governance/template_function_get_nodes_exact_roles.adoc#get-nodes-exact-roles[getNodesWithExactRoles]
+* xref:../governance/template_function_has_nodes_exact_roles.adoc#has-nodes-exact-roles[hasNodesWithExactRoles]
+* xref:../governance/template_function_skip_object.adoc#skip-object[skipObject]
+* xref:../governance/template_function_sprig.adoc#sprig-open-source[Sprig open source]
 * xref:../governance/template_support_intro.adoc#template-processing[Template processing]
 * xref:../governance/adv_template_process.adoc#adv-template-processing[Advanced template processing in policies]
 * xref:../governance/policy_cli_tool.adoc#policy-cli-tool[Policy command line interface]
 * link:https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/[Kubernetes labels and selectors]
 * link:https://golang.org/pkg/text/template[Golang documentation - Package templates]
-* link:https://masterminds.github.io/sprig/[Sprig Function Documentation]
