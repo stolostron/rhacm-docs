@@ -14,9 +14,56 @@ The image vulnerability policy is checked by the Kubernetes configuration policy
 
 * The Image vulnerability policy is not supported on the ARM architecture.
 
+[#image-vulnerability-policy-yaml]
+== Image vulnerability policy YAML structure
+
+Review the policy manifests for the image vulnerability policy, including the `OperatorPolicy` and `ConfigurationPolicy` samples.
+
+* A policy that creates the subscription (`container-security-operator`) to reference the name and channel. This operator policy must have `spec.remediationAction` set to `enforce` to create the resources. View the following example:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1beta1
+kind: OperatorPolicy
+metadata:
+  name: operatorpolicy-imagemanifestvuln
+spec:
+  remediationAction: enforce
+  severity: high
+  complianceType: musthave
+  upgradeApproval: Automatic
+  subscription:
+    name: container-security-operator
+    namespace: openshift-operators
+    source: redhat-operators
+    sourceNamespace: openshift-marketplace
+----
+
+* An `inform` configuration policy to audit whether any `ImageManifestVuln` objects were created by the image vulnerability scans. View the following example:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: policy-imagemanifestvuln-example-imv
+spec:
+  remediationAction: inform
+  severity: high
+  namespaceSelector:
+    exclude: ["kube-*"]
+    include: ["*"]
+  object-templates:
+    - complianceType: mustnothave
+      objectDefinition:
+        apiVersion: secscan.quay.redhat.com/v1alpha1
+        kind: ImageManifestVuln
+----
+
 .Additional resources
 
-* xref:../governance/image_vuln_yaml.adoc#image-vulnerability-policy-yaml[Image vulnerability policy YAML structure]
 * xref:../governance/manage_policies.adoc#creating-security-policies[Creating security policies]
 * xref:../governance/config_policy_ctrl.adoc#kubernetes-config-policy-controller[Kubernetes configuration policy controller]
 * link:https://github.com/quay/container-security-operator[Quay repository]
