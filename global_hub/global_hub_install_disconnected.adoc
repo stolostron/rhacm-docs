@@ -22,15 +22,15 @@ You must meet the following requirements before you install {global-hub} in a di
 
 .Procedure
 
-. Create operator packages in the mirror catalog with the oc-mirror plug-in.
+. Configure a mirror registry by creating operator packages in the mirror catalog with the `oc-mirror` plug-in. See the following substeps:
 +
+*Notes:*
 Red Hat provides the {global-hub} and AMQ Streams operators in the Red Hat operators catalog, which are delivered by the `registry.redhat.io/redhat/redhat-operator-index` index image. When you prepare your mirror of this catalog index image, you can choose to either mirror the entire catalog as provided by Red Hat, or you can mirror a subset that contains only the operator packages that you intend to use.
 +
 If you are creating a full mirror catalog, no special considerations are needed as all of the packages required to install {global-hub} and AMQ Streams are included. However, if you are creating a partial or filtered mirrored catalog, for which you identify particular packages to be included, you must to include the `multicluster-global-hub-operator-rh` and `amq-streams` package names in your list. 
-+
-Complete the following steps to create a local mirror registry of the `multicluster-global-hub-operator-rh` and `amq-streams` packages:
 
-.. Create a `ImageSetConfiguration` YAML file to configure and add the operator image. Your YAML file might resemble the following content, with the current version replacing `4.x`:
+.. Create a local mirror registry of the `multicluster-global-hub-operator-rh` and `amq-streams` packages. You need a `ImageSetConfiguration` YAML file to configure and add the operator image. Your YAML file might resemble the following content, with the current version replacing `4.x`:
+
 +
 [source,yaml]
 ----
@@ -53,7 +53,8 @@ mirror:
   helm: {}
 ----
 
-.. Mirror the image set directly to the target mirror registry by using the following command:
+.. Mirror the image set directly to the target mirror registry. Run the following command:
+
 +
 [source,bash]
 ----
@@ -62,11 +63,10 @@ oc mirror --config=./imageset-config.yaml docker://myregistry.example.com:5000
 
 .. Mirror the image set in a fully disconnected environment. For more details, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/disconnected_environments/mirroring-in-disconnected-environments#installing-mirroring-installation-images[Mirroring images for a disconnected installation].
 
-. Add the registry and catalog to your disconnected cluster.
-+
-To make your mirror registry and catalog available on your disconnected cluster. Complete the following steps:
+. Add the registry and catalog to your disconnected cluster to make your mirror registry and catalog available on your disconnected cluster. Complete the following substeps:
 
 .. Disable the default catalog sources of Operator Hub. Run the following command to update the `OperatorHub` resource:
+
 +
 [source,bash]
 ----
@@ -76,7 +76,8 @@ oc patch OperatorHub cluster --type json \
 
 .. Mirror the Operator catalog by completing the procedure, link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/operators/index#olm-mirror-catalog_olm-restricted-networks[Mirroring the Operator catalog].
 
-.. Add the `CatalogSource` resource for your mirrored catalog into the `openshift-marketplace` namespace. Your `CatalogSource` YAML file might be similar to the following example, with `4.x` set as the supported version:
+.. Add the `CatalogSource` resource for your mirrored catalog into the `openshift-marketplace` namespace. Your `CatalogSource` YAML file might be similar to the following example, with `4.x` set as the supported version. Take note of the value of the `metadata.name` field:
+
 +
 [source,yaml]
 ----
@@ -91,21 +92,21 @@ spec:
   secrets:
   - <global-hub-secret>
 ----
-+
-*Note:* Take note of the value of the `metadata.name` field. 
 
 .. Save the updated file.
 
 .. Query the available `PackageManifest` resource to verify that the required packages are available from your disconnected cluster. Run the following command: 
+
 +
 [source,bash]
 ----
 oc -n openshift-marketplace get packagemanifests
 ----
 
-.. Verify that the displayed list includes entries showing the `multicluster-global-hub-operator-rh` and `amq-streams` packages. Verify that the catalog source for your mirror catalog supplies these packages. 
+.. Ensure that the displayed list includes entries showing the `multicluster-global-hub-operator-rh` and `amq-streams` packages. Verify that the catalog source for your mirror catalog supplies these packages. 
 
-.. To change the build in the `amq-strimzi` catalog source, create a {global-hub} annotation. Apply the following YAML: 
+.. To change the build in the `amq-strimzi` catalog source, create a {global-hub} annotation. Apply the following YAML resource: 
+
 +
 [source,yaml]
 ----
@@ -122,17 +123,19 @@ spec:
   ......
 ----
 
-. Configure the image registry.
+. Configure the image registry. In order to have your cluster obtain container images for the {global-hub} operator from your local mirror registry, rather than from the internet-hosted registries, you must configure an `ImageContentSourcePolicy` resource on your disconnected cluster to redirect image references to your mirror registry. The `ImageContentSourcePolicy` only support the image mirror with image *digest*.
+
 +
-In order to have your cluster obtain container images for the {global-hub} operator from your local mirror registry, rather than from the internet-hosted registries, you must configure an `ImageContentSourcePolicy` resource on your disconnected cluster to redirect image references to your mirror registry. The `ImageContentSourcePolicy` only support the image mirror with image *digest*.
+*Notes:*
 +
-If you mirrored your catalog using the `oc adm catalog mirror` command, the needed image content source policy configuration is in the `imageContentSourcePolicy.yaml` file inside the `manifests-` directory that is created by that command.
+If you mirrored your catalog using the `oc adm catalog mirror` command, the image content source policy configuration is in the `imageContentSourcePolicy.yaml` file inside the `manifests-` directory that is created by that command.
+
 +
 If you used the `oc-mirror` plug-in to mirror your catalog instead, the `imageContentSourcePolicy.yaml` file is within the `oc-mirror-workspace/results-` directory created by the `oc-mirror` plug-in.
+
 +
-In either case, you can apply the policies to your disconnected command using an `oc apply` or `oc replace` command such as `oc replace -f ./<path>/imageContentSourcePolicy.yaml`
-+
-The required image content source policy statements can vary based on how you created your mirror registry, but are similar to this example:
+In either case, you can apply the policies to your disconnected command using an `oc apply` or `oc replace` command such as `oc replace -f ./<path>/imageContentSourcePolicy.yaml`. The image content source policy statements can vary based on how you created your mirror registry, but are similar to the following example:
+
 +
 [source,yaml]
 ----
@@ -161,66 +164,68 @@ spec:
     source: registry.redhat.io/amq-streams  
 ----
 +
-You can configure different image registries for different managed hubs with the `ManagedClusterImageRegistry`. See link:../clusters/cluster_lifecycle/specify_img_registry.adoc#import-cluster-managedclusterimageregistry[Importing a cluster that has a ManagedClusterImageRegistry] to use the `ManagedClusterImageRegistry` API to replace the agent image.
-+
-By completing the previous step, a label and an annotation are added to the selected `ManagedCluster`. This means that the agent image in the cluster are replaced with the mirror image.
+*Note:* You can configure different image registries for different managed hubs with the `ManagedClusterImageRegistry`. See link:../clusters/cluster_lifecycle/specify_img_registry.adoc#import-cluster-managedclusterimageregistry[Importing a cluster that has a ManagedClusterImageRegistry] to use the `ManagedClusterImageRegistry` API to replace the agent image. The following `Label` and `Annotation` are added to the selected `ManagedCluster` resource. The agent image in the cluster is replaced with the mirror image:
+
 +
 * Label: `multicluster-global-hub.io/image-registry=<namespace.managedclusterimageregistry-name>`
 * Annotation: `multicluster-global-hub.io/image-registries: <image-registry-info>`
 
-. Configure the {global-hub} image pull secret in an {ocp-short} cluster.
-+
-If the Operator or Operand images that are referenced by a subscribed Operator require access to a private registry, you can either link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/operators/index#olm-creating-catalog-from-index_olm-managing-custom-catalogs[provide access to all namespaces in the cluster, or to individual target tenant namespaces]. 
-+
-You can configure the image pull secret in an existing {ocp-short} cluster.
+. Configure the {global-hub} image pull secret in an {ocp-short} cluster. If the Operator or Operand images that are referenced by a subscribed Operator require access to a private registry, you can go to link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/operators/index#olm-creating-catalog-from-index_olm-managing-custom-catalogs[Adding a catalog source to a cluster] for more information. You can configure the image pull secret in an existing {ocp-short} cluster.
 +
 *Note:* Applying the image pull secret on a pre-existing cluster causes a rolling restart of all of the nodes.
-+
-Complete the following steps to configure the pull secret: 
 
-.. Export the user name from the pull secret:
+.. Configure the pull secret by exporting the user name and password. Run the following command:
+
 +
+[source,bash]
 ----
 export USER=<the-registry-user>
 ----
 
-.. Export the password from the pull secret:
+.. Export the password from the pull secret. Run the following command:
+
 +
+[source,bash]
 ----
 export PASSWORD=<the-registry-password>
 ----
 
-.. Copy the pull secret:
+.. Copy the pull secret. Run the following command:
+
 +
+[source,bash]
 ----
 oc get secret/pull-secret -n openshift-config --template='{{index .data ".dockerconfigjson" | base64decode}}' > pull_secret.yaml
 ----
 
-.. Log in using the pull secret:
+.. Log in using the pull secret. Run the following command:
+
 +
+[source,bash]
 ----
 oc registry login --registry=${REGISTRY} --auth-basic="$USER:$PASSWORD" --to=pull_secret.yaml
 ----
 
-.. Specify the {global-hub} image pull secret:
+.. Specify the {global-hub} image pull secret. Run the following command:
+
 +
+[source,bash]
 ----
 oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=pull_secret.yaml
 ----
 
-.. Remove the old pull secret:
+.. Remove the old pull secret, then run the following command:
+
 +
+[source,bash]
 ----
 rm pull_secret.yaml
 ----
 
-. Configure the {global-hub} image pull secret to an individual namespace.
-+
-You can configure the image pull secret to an individual namespace by completing the following steps:
+.. Configure the {global-hub} image pull secret to an individual namespace. You can configure the image pull secret to an individual namespace. Create the secret in the tenant namespace by running the following command:
 
-.. Create the secret in the tenant namespace by running the following command:
 +
-[source,shell]
+[source,bash]
 ----
 oc create secret generic <secret_name> -n <tenant_namespace> \
 --from-file=.dockerconfigjson=<path/to/registry/credentials> \
@@ -228,15 +233,15 @@ oc create secret generic <secret_name> -n <tenant_namespace> \
 ----
 
 .. Link the secret to the service account for your operator or operand:
+
 +
-[source,shell]
+[source,bash]
 ----
 oc secrets link <operator_sa> -n <tenant_namespace> <secret_name> --for=pull
 ----
 
-. Install the {global-hub} Operator.
-+
-You can install and subscribe an Operator from the {ocp-catalog}. See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/operators/administrator-tasks#olm-adding-operators-to-a-cluster[Adding Operators to a cluster] for the procedure. After adding the Operator, you can check the status of the {global-hub} Operator by running the following command: 
+. Install the {global-hub} Operator. You can install and subscribe an Operator from the {ocp-catalog}. See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/operators/administrator-tasks#olm-adding-operators-to-a-cluster[Adding Operators to a cluster] for the procedure. After adding the Operator, you can check the status of the {global-hub} Operator by running the following command: 
+
 +
 [source,bash]
 ----
@@ -247,8 +252,8 @@ multicluster-global-hub-operator-687584cb7c-fnftj   1/1     Running   0         
 
 .Additional resources
 
-- link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/disconnected_environments/mirroring-in-disconnected-environments#creating-mirror-registry[Create a mirror registry]
+* link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/disconnected_environments/mirroring-in-disconnected-environments#creating-mirror-registry[Create a mirror registry]
 
-- link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/disconnected_environments/mirroring-in-disconnected-environments[Mirroring in disconnected environments]
+* link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/disconnected_environments/mirroring-in-disconnected-environments[Mirroring in disconnected environments]
 
-- link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/operators/index#olm-mirror-catalog_olm-restricted-networks[Mirroring an Operator catalog]
+* link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/operators/index#olm-mirror-catalog_olm-restricted-networks[Mirroring an Operator catalog]
