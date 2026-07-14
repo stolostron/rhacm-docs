@@ -1,0 +1,64 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#discovery-import-console]
+= Importing discovered {rosa} and hosted control plane clusters by using the console
+
+[role="_abstract"]
+Import from the console. You must modify the resource and set the `importAsManagedCluster` field to `true` in the console.
+
+.Procedure
+
+. Log in to your hub cluster from the console.
+. Select *Search* from the navigation menu. 
+. From the search bar, enter the following query: "DiscoveredCluster".
+. The `DiscoveredCluster` resource results appear.
+. Go to the `DiscoveredCluster` resource and set `importAsManagedCluster` to `true`. See the following example, where `importAsManagedCluster` is set to `true` and `<4.x.z>` is your supported {ocp-short} version:
+
++
+[source,yaml]
+----
+apiVersion: discovery.open-cluster-management.io/v1
+kind: DiscoveredCluster
+metadata:
+  name: 28c17977-fc73-4050-b5cc-a5aa2d1d6892
+  namespace: discovery
+spec:
+  openshiftVersion: <4.x.z>
+  isManagedCluster: false
+  cloudProvider: aws   
+  name: 28c17977-fc73-4050-b5cc-a5aa2d1d6892   
+  displayName: rosa-dc
+  status: Active
+  importAsManagedCluster: true <1>
+  type: <supported-type> <2>
+----
+<1> By setting the field to `true`, the `Discovery-Operator` imports the `DiscoveredCluster` resource, creates a `ManagedCluster` resource and if the {acm-short} is installed, creates the `KlusterletAddOnConfig` resource. It also creates the `Secret` resources for your automatic import.
+<2> You must use `ROSA` or `MultiClusterEngineHCP` as the parameter value.
+
+. To verify that the `DiscoveredCluster` resource is imported, go to the *Clusters* page. Check the import status of your cluster from the _Cluster list_ tab.
+. If you want to detach managed clusters for Discovery to prevent automatic reimport, select the *Detach cluster* option. The `Discovery-Operator` adds the following annotation, `discovery.open-cluster-management.io/previously-auto-imported: 'true'`.
+
++
+Your `DiscoveredCluster` resource might resemble the following YAML:
+
++
+[source,yaml]
+----
+apiVersion: discovery.open-cluster-management.io/v1
+kind: DiscoveredCluster
+metadata:
+  annotations:
+    discovery.open-cluster-management.io/previously-auto-imported: 'true'
+----
+
+. To verify that the `DiscoveredCluster` resource is not reimported automatically, check for the following message in the `Discovery-Operator` logs, where `"rosa-dc"` is this discovered cluster:
+
++
+[source,bash]
+----
+2024-06-12T14:11:43.366Z INFO reconcile	Skipped automatic import for DiscoveredCluster due to 
+existing 'discovery.open-cluster-management.io/previously-auto-imported' annotation {"Name": "rosa-dc"}
+----
+
++
+*Note:* If you want to reimport the `DiscoveredCluster` resource automatically, you must remove the previously mentioned annotation.
