@@ -1,0 +1,88 @@
+:_mod-docs-content-type: REFERENCE
+
+[#policy-adv-config-governance-metrics]
+= Governance metrics
+
+[role="_abstract"]
+The policy framework exposes metrics that show policy distribution and status on the hub cluster and managed clusters.
+
+Use these metrics to monitor policy compliance across the fleet and to assess configuration policy evaluation performance on managed clusters. Hub metrics (`policy_governance_info`) track root and propagated policies. Managed cluster metrics (`cluster_policy_governance_info`) track policy status on each cluster. The evaluation duration histogram helps you tune concurrency and evaluation intervals. If you enable observability, you can query these metrics from the Grafana _Explore_ page.
+
+The policy framework exposes the following metrics:
+
+* `policy_governance_info`
+
++
+The `policy_governance_info` metric records compliance status for root and propagated policies on the hub cluster.
+
+The {ocp-short} monitoring component collects this metric. If you enable observability, the component collects some aggregate data.
+
+When you create a policy, you create a _root_ policy. The framework watches for root policies, `Placement` resources, and `PlacementBindings` resources for information about where to create _propagated_ policies on managed clusters.
+
+For both root and propagated policies, the metric records the following values:
+
+- `0`: compliant
+- `1`: non-compliant
+- `-1`: unknown or pending
+
+The `policy_governance_info` metric uses the following labels:
+
+- `type`: `root` or `propagated`
+- `policy`: name of the associated root policy
+- `policy_namespace`: namespace on the hub cluster where the root policy is defined
+- `cluster_namespace`: namespace for the cluster where the policy is distributed
+
+These labels and values enable queries that show policy activity in the cluster that might otherwise be difficult to track.
+
++
+* If you do not need these metrics and have performance or security concerns, disable collection by setting the `DISABLE_REPORT_METRICS` environment variable to `true` in the propagator deployment.
+* You can add `policy_governance_info` to the observability allowlist as a custom metric. See _Adding custom metrics_ for more details.
+
+* `cluster_policy_governance_info`
+
++
+The `cluster_policy_governance_info` metric records compliance status for policies on managed clusters.
+
+The {ocp-short} monitoring component collects this metric. If you enable observability, the component collects the data.
+
+For managed cluster policies, the metric records the following values:
+
+- `0`: compliant
+- `1`: non-compliant
+- `-1`: unknown or pending
+
+The `cluster_policy_governance_info` metric uses the following labels:
+
+- `kind`: kind of the policy
+- `policy`: name of the policy
+- `policy_namespace`: namespace on the managed cluster where the policy is defined
+- `severity`: severity specified on the policy
+
+Use these labels and values to enable detailed queries on changes in the cluster that might be difficult to track.
+
++
+* You can add `cluster_policy_governance_info` to the observability `allowlist` as a custom metric. See _Adding custom metrics_ for more details.
+
+* `config_policies_evaluation_duration_seconds`
+
++
+The `config_policies_evaluation_duration_seconds` histogram tracks how long the configuration policy controller takes to evaluate policies that are ready on a managed cluster.
+
+Use this metric to determine whether to change the `ConfigurationPolicy` `evaluationInterval` for resource-intensive policies that do not need frequent evaluation. You can also increase concurrency at the cost of higher resource utilization on the Kubernetes API server. See _Configure configuration policy controller concurrency_ for more details.
+
+Query the histogram with the following metrics:
+
+- `config_policies_evaluation_duration_seconds_bucket`: cumulative buckets in seconds (1, 3, 9, 10.5, 15, 30, 60, 90, 120, 180, 300, 450, 600, and greater)
+- `config_policies_evaluation_duration_seconds_count`: count of all events
+- `config_policies_evaluation_duration_seconds_sum`: sum of all values
+
+To calculate average evaluation time, use a Prometheus query similar to the following expression:
+
+`rate(config_policies_evaluation_duration_seconds_sum[10m])/rate(config_policies_evaluation_duration_seconds_count[10m])`
+
+The `config-policy-controller` pod in the `open-cluster-management-agent-addon` namespace on managed clusters calculates this metric. The controller does not send this metric to observability by default.
+
+.Additional resources
+
+* link:../observability/obs_metrics.adoc#adding-custom-metrics[Adding custom metrics]
+* xref:../governance/policy_adv_config_config_policy_concurrency.adoc#policy-adv-config-config-policy-concurrency[Configure configuration policy controller concurrency]
