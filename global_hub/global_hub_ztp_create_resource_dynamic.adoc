@@ -1,0 +1,79 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#ztp-create-resource-dynamic]
+= Creating a _ManagedClusterMigration_ resource to migrate a dynamic placement
+
+[role="_abstract"]
+To start the {global-hub} ZTP cluster migration, you must create a `ManagedClusterMigration` custom resource. You can define the clusters to migrate by using a _static_ list, or by using a _dynamic_ placement resource. Use this procedure to select clusters that are based on labels and dynamic placement rules.
+
+*Required access:* Cluster administrator
+
+.Procedure
+
+. Create a file that is named `migration-placement.yaml` with the following content to define the `clusterSet` binding and `Placement` in the {global-hub} agent namespace, `multicluster-global-hub-agent`, on the source hub cluster:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: global
+  namespace: multicluster-global-hub-agent
+spec:
+  clusterSet: global
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: migration-50
+  namespace: multicluster-global-hub-agent
+spec:
+  numberOfClusters: 50
+  clusterSets:
+    - global
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: local-cluster
+              operator: NotIn
+              values:
+                - "true"
+----
+
+. Apply the placement resources to the source hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc apply -f migration-placement.yaml
+----
+
+. Create a file named `migration-resource.yaml` with the following content to initiate the migration on the {global-hub}:
+
++
+[source,yaml]
+----
+apiVersion: global-hub.open-cluster-management.io/v1alpha1
+kind: ManagedClusterMigration
+metadata:
+  name: ztp-sno-migration
+  namespace: multicluster-global-hub
+spec:
+  to: local-cluster
+  from: hub2
+  includedManagedClustersPlacementRef: migration-50
+  supportedConfigs:
+    stageTimeout: 15m
+----
+
+. Apply the migration resource to the {global-hub} by running the following command:
+
++
+[source,bash]
+----
+oc apply -f migration-resource.yaml
+----
+
+Continue to xref:../global_hub/global_hub_ztp_create_resource_verify.adoc#ztp-create-resource-verify[Verifying the migration resource status].
