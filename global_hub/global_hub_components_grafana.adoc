@@ -1,0 +1,88 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#global-hub-integrating-grafana]
+= Integrating an existing version of Grafana
+
+[role="_abstract"]
+Using an existing Grafana instance might work with {global-hub} if you rely on your own Grafana to get metrics from multiple sources, such as Prometheus, from different clusters and you aggregate the metrics yourself. To get {global-hub} data into your own Grafana, configure the data source and import the dashboards.
+
+.Procedure
+
+. Collect the PostgreSQL connection information from the {global-hub} Grafana `datasource` secret by running the following command:
+
++
+[source,bash]
+----
+oc get secret multicluster-global-hub-grafana-datasources -n multicluster-global-hub -ojsonpath='{.data.datasources\.yaml}' | base64 -d
+----
+
++
+The output resembles the following example:
+
++
+[source,yaml]
+----
+apiVersion: 1
+datasources:
+- access: proxy
+  isDefault: true
+  name: Global-Hub-DataSource
+  type: postgres
+  url: postgres-primary.multicluster-global-hub.svc:5432
+  database: hoh
+  user: guest
+  jsonData:
+    sslmode: verify-ca
+    tlsAuth: true
+    tlsAuthWithCACert: true
+    tlsConfigurationMethod: file-content
+    tlsSkipVerify: true
+    queryTimeout: 300s
+    timeInterval: 30s
+  secureJsonData:
+    password: xxxxx
+    tlsCACert: xxxxx
+----
+
+. Configure the `datasource` in your own Grafana instance by adding a source, such as PostgreSQL, and complete the required fields with the information that you previously extracted.
+
++
+See the following required fields:
+
+* Name
+* Host
+* Database
+* User
+* Password
+* TLS/SSL Mode
+* TLS/SSL Method
+* CA Cert
+
+. If your Grafana is not in the {global-hub} cluster, expose PostgreSQL by using the `LoadBalancer` so that PostgreSQL can be accessed from outside. Add the following value into the `PostgresCluster` operand:
+
++
+[source,yaml]
+----
+service:
+  type: LoadBalancer
+----
+
++
+After you add that content, get the `EXTERNAL-IP` from the `postgres-ha` service. See the following example:
+
++
+[source,bash]
+----
+oc get svc postgres-ha -n multicluster-global-hub
+NAME          TYPE           CLUSTER-IP      EXTERNAL-IP                        PORT(S)          AGE
+postgres-ha   LoadBalancer   172.30.227.58   xxxx.us-east-1.elb.amazonaws.com   5432:31442/TCP   128m
+----
+
++
+After running that command, you can use `xxxx.us-east-1.elb.amazonaws.com:5432` as the PostgreSQL connection host.
+
+. Import the existing dashboards.
+
+.. Follow the steps in link:https://grafana.com/docs/grafana/latest/dashboards/manage-dashboards/#export-and-import-dashboards[Export and import dashboards] in the official Grafana documentation to export the dashboard from the existing Grafana instance.
+
+.. Follow the steps in link:https://grafana.com/docs/grafana/latest/dashboards/manage-dashboards/#export-and-import-dashboards[Export and import dashboards] in the official Grafana documentation to import a dashboard into the {global-hub} Grafana instance.
