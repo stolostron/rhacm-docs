@@ -1,0 +1,110 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-pull-advanced-autonomous]
+= Enabling the {gitops} add-on with Argo CD Agent in autonomous mode
+
+[role="_abstract"]
+In autonomous mode, the managed cluster is the source of truth. Applications are created on the managed cluster, and the agent syncs specs and status back to the hub principal as a read-only mirror.
+
+*Required access:* Cluster administrator
+
+In autonomous mode, the spoke cluster is the source of truth. Applications are created on the managed cluster, and the agent syncs specs and status back to the hub principal, which acts as a read-only mirror. This mode is recommended for App of Apps workflows where all ongoing changes flow through Git after initial bootstrap.
+
+*Procedure*
+
+Complete the following steps:
+
+. Create a `GitOpsCluster` resource with autonomous mode by adding the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: autonomous-gitops
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: gitops-placement
+  gitopsAddon:
+    enabled: true
+    argoCDAgent:
+      enabled: true
+      mode: autonomous
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f gitopscluster.yaml
+----
+
+. Customize the auto-generated `ArgoCD` `Policy` to add RBAC for the managed clusters, following the same pattern as the managed mode example. Export the auto-generated `Policy`, add a `ClusterRoleBinding` as a second policy-template, and re-apply it.
+
+*Important:* Do not add `Application` resources to the auto-generated `ArgoCD` `Policy`. The auto-generated `Policy` is for configuring the spoke cluster (`ArgoCD` settings, RBAC) only. For deploying applications, use one of the following approaches.
+
+. Deploy applications to the managed cluster by using one of the following methods:
+
+   * *Create a separate OCM Policy* to deploy an App of Apps bootstrap `Application` to managed clusters. This is a new `Policy`, separate from the auto-generated `ArgoCD` `Policy`. After the bootstrap `Application` is deployed, all ongoing changes flow through Git. See the following YAML sample for the bootstrap policy:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: autonomous-app-bootstrap
+  namespace: openshift-gitops
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: autonomous-app-bootstrap-config
+        spec:
+          pruneObjectBehavior: None
+          remediationAction: enforce
+          severity: medium
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: argoproj.io/v1alpha1
+                kind: Application
+                metadata:
+                  name: app-of-apps-root
+                  namespace: openshift-gitops
+                spec:
+                  project: default
+                  source:
+                    repoURL: https://github.com/YOUR-ORG/YOUR-GITOPS-REPO
+                    targetRevision: HEAD
+                    path: apps
+                  destination:
+                    server: https://kubernetes.default.svc
+                    namespace: openshift-gitops
+                  syncPolicy:
+                    automated:
+                      prune: true
+                      selfHeal: true
+----
+
+   * *Use Git* to manage applications after initial bootstrap. With autonomous mode, the managed cluster Argo CD watches Git repositories and syncs changes automatically. The agent syncs application specs and status back to the hub principal for visibility.
+
+. Verify the autonomous mode deployment by completing the following steps:
+
+   1. On the hub cluster, verify that autonomous applications are visible as read-only mirrors by running the following command:
+
+   [source,bash]
+----
+   oc get applications.argoproj.io -n openshift-gitops
+
+----

@@ -1,0 +1,122 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-pull-basic-deploy]
+= Deploying an application with the basic Pull model
+
+[role="_abstract"]
+Deploy applications across managed clusters by using an `ApplicationSet` resource that targets the basic Pull model.
+
+*Required access:* Cluster administrator
+
+In the basic pull model, applications are deployed using an `ApplicationSet` resource on the hub cluster with specific pull-model annotations and labels. The propagation controller detects these annotations and creates `ManifestWork` resources to distribute the `Application` to managed clusters, where the local Argo CD instance reconciles it.
+
+Complete the following steps:
+
+. Create a separate `Placement` resource for the `ApplicationSet` to select which managed clusters receive the application. This `Placement` is distinct from the `GitOpsCluster` `Placement` created earlier. See xref:../gitops/gitops_placement.adoc#gitops-placement[Configuring Placement resources for GitOps] for details. Add the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: app-placement
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "In"
+          values:
+          - OpenShift
+        - key: local-cluster
+          operator: DoesNotExist
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f app-placement.yaml
+----
+
+. Create the `ApplicationSet` resource with the pull-model annotations and labels. The following annotations and labels are required for the basic pull model:
+
+   * `apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"` (label) - enables the propagation controller to distribute the `Application` via `ManifestWork`.
+   * `apps.open-cluster-management.io/ocm-managed-cluster: '\{\{name\}\}'` (annotation) - specifies which managed cluster receives the `Application`.
+   * `argocd.argoproj.io/skip-reconcile: "true"` (annotation) - prevents the hub Argo CD from reconciling the `Application` (only the spoke Argo CD reconciles it).
+   * `apps.open-cluster-management.io/ocm-managed-cluster-app-namespace` (annotation) - specifies the namespace on the managed cluster where the `Application` object is created.
+   * `destination.server: https://kubernetes.default.svc` - the `Application` is reconciled locally by the managed cluster Argo CD.
+
+See the following YAML sample:
+
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook-appset
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: app-placement
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: '{{name}}-guestbook'
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+      annotations:
+        argocd.argoproj.io/skip-reconcile: "true"
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps
+        targetRevision: HEAD
+        path: guestbook
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: guestbook
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+----
+
+*Note:* The `destination.server: https://kubernetes.default.svc` and the pull-model annotations are what distinguish the basic pull model from the other models. The propagation controller strips the annotations, rewrites the destination to in-cluster, and wraps the `Application` in a `ManifestWork` for delivery to the managed cluster. The `configMapRef: acm-placement` references the duck-type `ConfigMap` that the `GitOpsCluster` controller creates automatically during reconciliation.
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f applicationset.yaml
+----
+
+. Verify the deployment by running the following command on the hub:
+
++
+[source,bash]
+----
+oc get applications.argoproj.io -n openshift-gitops
+----
+
+*Additional resources*
+
+* Continue setting up the {gitops} add-on by completing _Managing the {gitops} add-on_.

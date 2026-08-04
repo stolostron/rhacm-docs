@@ -1,0 +1,144 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-pull-basic-enable]
+= Enabling the {gitops} add-on for the basic Pull model
+
+[role="_abstract"]
+Create the `Placement` and `GitOpsCluster` resources so that the {gitops} add-on deploys Argo CD on the selected managed clusters.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* {acm-short} hub cluster installed.
+* Managed clusters registered with {acm-short}.
+* {gitops} operator installed on the hub cluster.
+* `ManagedClusterSet` bound to the target namespace.
+
+.Procedure
+
+. Create a `ManagedClusterSetBinding` resource to bind the `ManagedClusterSet` to the `openshift-gitops` namespace by adding the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: default
+  namespace: openshift-gitops
+spec:
+  clusterSet: default
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f managedclustersetbinding.yaml
+----
+
+. Create a `Placement` resource for the `GitOpsCluster` to select which managed clusters receive the add-on by adding the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: gitops-placement
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "In"
+          values:
+          - OpenShift
+        - key: local-cluster
+          operator: DoesNotExist
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f gitops-placement.yaml
+----
+
+. Create a `GitOpsCluster` resource to enable the {gitops} add-on by adding the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: gitops-clusters
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: gitops-placement
+  gitopsAddon:
+    enabled: true
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f gitopscluster.yaml
+----
+
+The `GitOpsCluster` controller automatically creates the following resources during reconciliation:
+
+* The `acm-placement` duck-type `ConfigMap` in the `argoServer.argoNamespace` - this is the ConfigMap referenced by `configMapRef` in the `ApplicationSet` `clusterDecisionResource` generator. It tells the `ApplicationSet` controller how to read `PlacementDecision` resources. The auto-created ConfigMap looks like the following:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acm-placement
+  namespace: openshift-gitops
+data:
+  apiVersion: cluster.open-cluster-management.io/v1beta1
+  kind: placementdecisions
+  statusListKey: decisions
+  matchKey: clusterName
+----
+
+* A `Role` and `RoleBinding` granting the `ApplicationSet` controller service account `list` access to `PlacementDecision` and `PlacementRule` resources in the Argo CD namespace. This is required for the `clusterDecisionResource` generator to read the `PlacementDecision` resources that the `Placement` controller creates.
+* An `ArgoCD` `Policy` named `<gitopscluster-name>-argocd-policy` that configures the `ArgoCD` custom resource on managed clusters.
+
+These resources are automatically created - you do not need to create them manually. If you need to verify that they were created, run the following commands:
+
+[source,bash]
+----
+oc get configmap acm-placement -n openshift-gitops -o yaml
+oc get role openshift-gitops-applicationset-controller-placement -n openshift-gitops
+oc get rolebinding openshift-gitops-applicationset-controller-placement -n openshift-gitops
+oc get policy <gitopscluster-name>-argocd-policy -n openshift-gitops
+----
+
+. Verify that the `ArgoCD` `Policy` was created on the hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc get policy gitops-clusters-argocd-policy -n openshift-gitops
+----

@@ -1,0 +1,85 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-pull-basic-customize]
+= Customizing the Argo CD policy for the basic Pull model
+
+[role="_abstract"]
+Customize the auto-generated `ArgoCD` `Policy` to add the RBAC that managed clusters need for the basic Pull model.
+
+*Required access:* Cluster administrator
+
+The auto-generated `ArgoCD` `Policy` configures the `ArgoCD` custom resource on managed clusters. This `Policy` is for spoke cluster configuration only, such as RBAC and `ArgoCD` settings.
+
+By default, the {gitops} add-on might not provide sufficient privileges for the {gitops-short} controllers on managed clusters, especially when managing resources outside the `openshift-gitops` namespace. Export the auto-generated `Policy`, add a `ClusterRoleBinding`, and re-apply it. The following example shows a complete `Policy` with RBAC:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: gitops-clusters-argocd-policy
+  namespace: openshift-gitops
+  annotations:
+    policy.open-cluster-management.io/standards: NIST-CSF
+    policy.open-cluster-management.io/categories: PR.PT Protective Technology
+    policy.open-cluster-management.io/controls: PR.PT-3 Least Functionality
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: gitops-clusters-argocd-config-policy
+        spec:
+          pruneObjectBehavior: None
+          remediationAction: enforce
+          severity: medium
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: argoproj.io/v1beta1
+                kind: ArgoCD
+                metadata:
+                  name: acm-openshift-gitops
+                  namespace: openshift-gitops
+                  labels:
+                    apps.open-cluster-management.io/gitopsaddon: "true"
+                spec:
+                  server:
+                    enabled: false
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: gitops-clusters-argocd-rbac-policy
+        spec:
+          pruneObjectBehavior: None
+          remediationAction: enforce
+          severity: medium
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRoleBinding
+                metadata:
+                  name: acm-openshift-gitops-cluster-admin
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: ClusterRole
+                  name: cluster-admin
+                subjects:
+                  - kind: ServiceAccount
+                    name: acm-openshift-gitops-argocd-application-controller
+                    namespace: openshift-gitops
+----
+
+Apply the YAML sample by running the following command:
+
+[source,bash]
+----
+oc apply -f policy.yaml
+----
+
+*Important:* The `cluster-admin` `ClusterRole` in this example grants full cluster administrator privileges. This is only an example. For production environments, see the {gitops} documentation for configuring the Argo CD application controller with appropriate least-privilege permissions for managing resources outside its namespace.

@@ -1,0 +1,52 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-pull-appset-deploy]
+= Deploying the _ApplicationSet_ resource for standard configurations
+
+[role="_abstract"]
+Deploy an `ApplicationSet` resource for standard Pull-model configurations after you enable `ApplicationSet` in any namespace.
+
+*Required access:* Cluster administrator
+
+For simple RBAC management, create the `ApplicationSet` resource in a custom namespace with the default `AppProject`:
+
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: helloworld
+  namespace: appset-2
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: app-placement
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+      name: '{{name}}-helloworld'
+    spec:
+      destination:
+        namespace: helloworld
+        server: https://kubernetes.default.svc
+      project: default
+      source:
+        path: helloworld
+        repoURL: https://github.com/stolostron/application-samples.git
+        targetRevision: HEAD
+      syncPolicy:
+        automated: {}
+----
+
+*Additional resources*
+
+* ApplicationSet in any namespace
+* Applications in any namespace

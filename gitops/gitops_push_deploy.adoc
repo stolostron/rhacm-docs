@@ -1,0 +1,114 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-push-deploy]
+= Deploying an application with the Push model
+
+[role="_abstract"]
+Deploy applications from the hub Argo CD server to managed clusters by using an `ApplicationSet` resource.
+
+*Required access:* Cluster administrator
+
+In the Push model, the hub Argo CD pushes resources directly to managed clusters. The `ApplicationSet` uses `destination.server: '\{\{server\}\}'` to target each managed cluster's API server.
+
+*Prerequisites*
+
+* Complete the _Registering managed clusters to {gitops} operator_ procedure.
+* If your `openshift-gitops-argocd-application-controller` service account is _not_ assigned as a cluster administrator, add `ClusterRoleBinding` privileges. The `cluster-admin` `ClusterRole` is only an example - see the {gitops} documentation for configuring least-privilege permissions.
+
+*Procedure*
+
+Complete the following steps:
+
+. Create a separate `Placement` resource for the `ApplicationSet` to select which managed clusters receive the application. This `Placement` is distinct from the `GitOpsCluster` `Placement`. See xref:../gitops/gitops_placement.adoc#gitops-placement[Configuring Placement resources for GitOps] for details. Add the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: app-placement
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "In"
+          values:
+          - OpenShift
+        - key: local-cluster
+          operator: DoesNotExist
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f app-placement.yaml
+----
+
+. Create the `ApplicationSet` resource. In the Push model, use `destination.server: '\{\{server\}\}'` to push application resources directly from the hub to each managed cluster. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook-allclusters
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: app-placement
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: '{{name}}-guestbook'
+    spec:
+      destination:
+        namespace: guestbook
+        server: '{{server}}'
+      project: default
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps.git
+        targetRevision: HEAD
+        path: guestbook
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+----
+
+*Note:* The `destination.server: '\{\{server\}\}'` field is what distinguishes the Push model from the pull models. The hub Argo CD directly communicates with each managed cluster's API server. The `configMapRef: acm-placement` references the duck-type `ConfigMap` that the `GitOpsCluster` controller creates automatically during reconciliation.
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f applicationset.yaml
+----
+
+. Verify the application is deployed by running the following command:
+
++
+[source,bash]
+----
+oc get applications.argoproj.io -n openshift-gitops
+----
+
+*Important:* With a large number of managed clusters, consider potential strain on the {gitops-short} controller memory and CPU usage. To optimize resource management, see Configuring resource quota or requests in the {gitops} documentation.

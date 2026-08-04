@@ -1,0 +1,135 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-push-register]
+= Registering managed clusters to the {gitops} operator
+
+[role="_abstract"]
+Register managed clusters with the Argo CD server on the hub by creating a `Placement` and `GitOpsCluster` resource for the Push model.
+
+*Required access:* Cluster administrator
+
+*Note:* Cluster registration as described in this section is for the Push model only. The Pull model handles registration automatically through the `GitOpsCluster` resource.
+
+To configure {gitops-short} with the Push model, register a set of one or more {acm} managed clusters to an instance of the {gitops-short} operator.
+
+.Prerequisites
+
+* Install the {gitops} operator on your {acm-short} hub cluster.
+* Import one or more managed clusters.
+* Create a `ManagedClusterSet` and bind it to the namespace where {gitops-short} is deployed. See xref:../clusters/cluster_lifecycle/create_clusterset.adoc#creating-a-managedclusterset[Creating a _ManagedClusterSet_] and xref:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource].
+* Enable the `ManagedServiceAccount` add-on to rotate the token that the Argo CD Push model uses to connect to the managed cluster.
+
+.Procedure
+
+Complete the following steps to register managed clusters to {gitops-short}:
+
+. Create a `Placement` resource for the `GitOpsCluster` to select which managed clusters to register. Add the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: gitops-placement
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "In"
+          values:
+          - OpenShift
+        - key: local-cluster
+          operator: DoesNotExist
+----
+
+. Create a `GitOpsCluster` custom resource to register the managed clusters by adding the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: gitops-cluster-push
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: gitops-placement
+----
+
+. Apply the YAML samples and save your changes.
+
+The `GitOpsCluster` controller automatically creates the following resources during reconciliation:
+
+* The `acm-placement` duck-type `ConfigMap` in the `argoServer.argoNamespace` - this is the ConfigMap referenced by `configMapRef` in the `ApplicationSet` `clusterDecisionResource` generator. It tells the `ApplicationSet` controller how to read `PlacementDecision` resources. The auto-created ConfigMap looks like the following:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acm-placement
+  namespace: openshift-gitops
+data:
+  apiVersion: cluster.open-cluster-management.io/v1beta1
+  kind: placementdecisions
+  statusListKey: decisions
+  matchKey: clusterName
+----
+
+* A `Role` and `RoleBinding` granting the `ApplicationSet` controller service account `list` access to `PlacementDecision` and `PlacementRule` resources in the Argo CD namespace. This is required for the `clusterDecisionResource` generator to read the `PlacementDecision` resources that the `Placement` controller creates.
+
+These resources are automatically created - you do not need to create them manually. If you need to verify that they were created, run the following commands:
+
+[source,bash]
+----
+oc get configmap acm-placement -n openshift-gitops -o yaml
+oc get role openshift-gitops-applicationset-controller-placement -n openshift-gitops
+oc get rolebinding openshift-gitops-applicationset-controller-placement -n openshift-gitops
+----
+
+*Registering non-{ocp-short} clusters to {gitops}*
+
+*Note:* This capability is for the Push model only.
+
+You can use the `GitOpsCluster` resource to register a non-{ocp-short} cluster. If the API server URL in the `ManagedCluster` resource `spec` is empty, update it manually by running the following command:
+
+[source,bash]
+----
+oc edit managedclusters <cluster-name>
+----
+
+Verify that the `spec` includes the client configuration:
+
+[source,yaml]
+----
+spec:
+  managedClusterClientConfigs:
+  - caBundle: <base64-encoded-ca>
+    url: https://<api-server-url>
+----
+
+*{gitops} token*
+
+*Note:* The token and cluster secret mechanisms described in this section are for the Push model only.
+
+When you integrate with the {gitops-short} operator, for every managed cluster bound through the placement and `ManagedClusterSetBinding`, a secret with a token to access the `ManagedCluster` is created in the {gitops-short} namespace. The secure cluster secrets are rendered based on the following priority order:
+
+*Cluster proxy service:* The default option because the `cluster-proxy` add-on is always enabled in multicluster engine operator. Secrets include the cluster proxy URL, service CA, and `ManagedServiceAccount` `application-manager` token.
+
+*Managed cluster client configurations:* If the cluster proxy is unavailable. Secrets include the API server URL and CA from the managed cluster specification, plus the same `ManagedServiceAccount` token.
+
+If you do not want the default service account, see _Creating a customized service account for Argo CD push model_.

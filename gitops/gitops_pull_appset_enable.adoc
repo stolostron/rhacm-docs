@@ -1,0 +1,128 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-pull-appset-enable]
+= Enabling the _ApplicationSet_ resource in any namespace
+
+[role="_abstract"]
+Enable the Argo CD `ApplicationSet` resource so that you can create it in namespaces other than the Argo CD installation namespace.
+
+*Required access:* Cluster administrator
+
+Complete the following steps:
+
+. Enable the Argo CD `ApplicationSet` resource in any namespace on the hub cluster by running the following commands:
+
++
+[source,bash]
+----
+git clone https://github.com/stolostron/multicloud-integrations
+cd multicloud-integrations/deploy/appset-any-namespace
+./setup-appset-any-namespace.sh --namespace openshift-gitops --argocd-name openshift-gitops
+----
+
+. Verify that the {gitops-short} instance restarted and is running on your hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc get pods -n openshift-gitops
+----
+
+. Enable the `Application` resource in any namespace on the managed clusters. Modify the auto-generated `ArgoCD` `Policy` from the basic pull model to add `ARGOCD_APPLICATION_NAMESPACES`, `AppProject` wildcard settings, and RBAC. The following example shows the complete modified `Policy`:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: <gitopscluster-name>-argocd-policy
+  namespace: openshift-gitops
+  annotations:
+    policy.open-cluster-management.io/standards: NIST-CSF
+    policy.open-cluster-management.io/categories: PR.PT Protective Technology
+    policy.open-cluster-management.io/controls: PR.PT-3 Least Functionality
+spec:
+  disabled: false
+  remediationAction: enforce
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: <gitopscluster-name>-argocd-config-policy
+      spec:
+        pruneObjectBehavior: None
+        remediationAction: enforce
+        severity: medium
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: argoproj.io/v1beta1
+            kind: ArgoCD
+            metadata:
+              labels:
+                apps.open-cluster-management.io/gitopsaddon: "true"
+              name: acm-openshift-gitops
+              namespace: openshift-gitops
+            spec:
+              controller:
+                enabled: true
+                env:
+                - name: ARGOCD_APPLICATION_NAMESPACES
+                  value: '*'
+              server:
+                enabled: false
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: <gitopscluster-name>-argocd-appset-rbac-policy
+      spec:
+        pruneObjectBehavior: None
+        remediationAction: enforce
+        severity: medium
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: argoproj.io/v1alpha1
+            kind: AppProject
+            metadata:
+              name: default
+              namespace: openshift-gitops
+            spec:
+              clusterResourceWhitelist:
+              - group: '*'
+                kind: '*'
+              destinations:
+              - namespace: '*'
+                server: '*'
+              sourceRepos:
+              - '*'
+              sourceNamespaces:
+              - '*'
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              name: argo-admin
+            subjects:
+              - kind: ServiceAccount
+                name: acm-openshift-gitops-argocd-application-controller
+                namespace: openshift-gitops
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: cluster-admin
+----
+
+*Important:* The `cluster-admin` `ClusterRole` is only an example. See the {gitops} documentation for appropriate least-privilege permissions.
+
+. Apply the YAML file by running the following command:
+
++
+[source,bash]
+----
+oc apply -f policy.yaml
+----
