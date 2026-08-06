@@ -8,9 +8,91 @@ An OpenShift CIS scan policy is a configuration policy for Center for Internet S
 
 An OpenShift CIS scan policy is a Kubernetes configuration policy in {acm-short}. {ocp-short} supports OpenShift CIS scan policies.
 
-.Additional resources
+Review the policy manifests and resources of the OpenShift CIS scan policy. When you create an OpenShift CIS scan policy the following resources are created: `ScanSettingBinding`, `ComplianceSuite`, and `ComplianceCheckResult`.
 
-* link:../governance/ocp_cis_resources.adoc#ocp-cis-policy-resources[OpenShift CIS scan policy resources]
+* A `ScanSettingBinding` resource (`cis`) to identify which profiles to scan:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: compliance-cis-scan
+spec:
+  remediationAction: inform
+  severity: high
+  object-templates:
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: compliance.openshift.io/v1alpha1
+        kind: ScanSettingBinding
+        metadata:
+          name: cis
+          namespace: openshift-compliance
+        profiles:
+        - apiGroup: compliance.openshift.io/v1alpha1
+          kind: Profile
+          name: ocp4-cis
+        - apiGroup: compliance.openshift.io/v1alpha1
+          kind: Profile
+          name: ocp4-cis-node
+        settingsRef:
+          apiGroup: compliance.openshift.io/v1alpha1
+          kind: ScanSetting
+          name: default
+----
+
+* A `ComplianceSuite` resource (`compliance-suite-cis`) to verify if the scan is complete by checking the `status` field:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: compliance-suite-cis
+spec:
+  remediationAction: inform
+  severity: high
+  object-templates:
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: compliance.openshift.io/v1alpha1
+        kind: ComplianceSuite
+        metadata:
+          name: cis
+          namespace: openshift-compliance
+        status:
+          phase: DONE
+----
+
+* A `ComplianceCheckResult` resource (`compliance-suite-cis-results`) which reports the results of the scan suite by checking the `ComplianceCheckResult` custom resources (CR):
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: compliance-suite-cis-results
+spec:
+  remediationAction: inform
+  severity: high
+  object-templates:
+    - complianceType: mustnothave # this template reports the results for scan suite: cis by looking at ComplianceCheckResult CRs
+      objectDefinition:
+        apiVersion: compliance.openshift.io/v1alpha1
+        kind: ComplianceCheckResult
+        metadata:
+          namespace: openshift-compliance
+          labels:
+            compliance.openshift.io/check-status: FAIL
+            compliance.openshift.io/suite: cis
+----
+
+.Additional resources
 
 * link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/security_and_compliance/compliance-operator#understanding-compliance-operator[Understanding the Compliance Operator]
 
+* xref:../governance/manage_policies.adoc#creating-security-policies[Creating security policies]

@@ -8,6 +8,93 @@ The Essential 8 (E8) scan policy contains references to the E8 security profiles
 
 The E8 scan policy is a Kubernetes configuration policy in {acm-short}. {ocp-short} supports the E8 scan policy.
 
+Review the policy manifests and resources of the E8 scan policy.
+
+* A `ScanSettingBinding` resource to identify which profiles to scan:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: compliance-suite-e8
+spec:
+  remediationAction: inform
+  severity: high
+  object-templates:
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: compliance.openshift.io/v1alpha1
+        kind: ScanSettingBinding
+        metadata:
+          name: e8 
+          namespace: openshift-compliance
+        profiles:
+        - apiGroup: compliance.openshift.io/v1alpha1
+          kind: Profile
+          name: ocp4-e8
+        - apiGroup: compliance.openshift.io/v1alpha1
+          kind: Profile
+          name: rhcos4-e8
+        settingsRef:
+          apiGroup: compliance.openshift.io/v1alpha1
+          kind: ScanSetting
+          name: default
+----
+
+* A `ComplianceSuite` resource to verify if the scan is complete by checking the `status` field:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: compliance-suite-e8
+spec:
+  remediationAction: inform
+  severity: high
+  object-templates:
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: compliance.openshift.io/v1alpha1
+        kind: ComplianceSuite
+        metadata:
+          name: e8
+          namespace: openshift-compliance
+        status:
+          phase: DONE
+----
++
+*Note:* After you delete the E8 policy, it is removed from your target cluster or clusters.
+
+* A `ComplianceCheckResult` resource that reports the results of the scan suite by checking the `ComplianceCheckResult` custom resources:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: compliance-suite-e8-results
+spec:
+  remediationAction: inform
+  severity: high
+  object-templates:
+    - complianceType: mustnothave
+      objectDefinition:
+        apiVersion: compliance.openshift.io/v1alpha1
+        kind: ComplianceCheckResult
+        metadata:
+          namespace: openshift-compliance
+          labels:
+            compliance.openshift.io/check-status: FAIL
+            compliance.openshift.io/suite: e8
+----
++
+*Note:* Automatic remediation is supported. To create the `ScanSettingBinding` resource, set the remediation action to `enforce`.
+
 .Additional resources
 
 * xref:../governance/manage_policies.adoc#creating-security-policies[Creating security policies]
