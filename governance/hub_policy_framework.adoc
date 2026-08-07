@@ -62,15 +62,228 @@ subjects:
 
 *Best practice:* Use the command line interface to make updates to the policies when you use the `Placement` resource.
 
+Review the YAML structure, parameter definitions, and a sample manifest for hub cluster policies in the {acm-short} Governance policy framework.
+
+* Hub cluster policy YAML structure
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name:
+  annotations:
+    policy.open-cluster-management.io/standards:
+    policy.open-cluster-management.io/categories:
+    policy.open-cluster-management.io/controls:
+    policy.open-cluster-management.io/description:
+spec:
+  disabled:
+  remediationAction:
+  dependencies:
+  - apiVersion: policy.open-cluster-management.io/v1
+    compliance:
+    kind: Policy
+    name: 
+    namespace:
+  policy-templates:
+    - objectDefinition:
+        apiVersion:
+        kind:
+        metadata:
+          name:
+        spec:
+----
+
+* Placement and PlacementBinding YAML structure
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+bindingOverrides:
+  remediationAction:
+subFilter:
+  name:
+placementRef:
+  name:
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
+subjects:
+- name:
+  kind:
+  apiGroup:
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name:
+spec:
+----
+
+* Policy YAML file table
+
++
+.Parameter table
+|===
+| Field | Optional or required | Description
+
+| `apiVersion`
+| Required
+| Set the value to `policy.open-cluster-management.io/v1`.
+
+| `kind`
+| Required
+| Set the value to `Policy` to indicate the type of policy.
+
+| `metadata.name`
+| Required
+| The name for identifying the policy resource.
+
+| `metadata.annotations`
+| Optional
+| Used to specify a set of security details that describes the set of standards the policy is trying to validate. All annotations documented here are represented as a string that contains a comma-separated list.
+
+| `bindingOverrides.remediationAction`
+| Optional
+| When this parameter is set to `enforce`, it provides a way for you to override the remediation action of the related `PlacementBinding` resources for configuration policies. The default value is `null`.
+
+| `subFilter`
+| Optional
+| Set this parameter to `restriction` to select a subset of bound policies. The default value is `null`.
+
+| `annotations.policy.open-cluster-management.io/standards`
+| Optional
+| The name or names of security standards the policy is related to.
+For example, National Institute of Standards and Technology (NIST) and Payment Card Industry (PCI).
+
+| `annotations.policy.open-cluster-management.io/categories`
+| Optional
+| A security control category represents specific requirements for one or more standards.
+For example, a System and Information Integrity category might indicate that your policy contains a data transfer protocol to protect personal information, as required by the HIPAA and PCI standards.
+
+| `annotations.policy.open-cluster-management.io/controls`
+| Optional
+| The name of the security control that is checked.
+For example, Access Control or System and Information Integrity.
+
+| `spec.disabled`
+| Required
+| Set the value to `true` or `false`. The `disabled` parameter provides the ability to enable and disable your policies.
+
+| `spec.remediationAction`
+| Optional
+| Specifies the remediation of your policy. The parameter values are `enforce` and `inform`. If specified, the `spec.remediationAction` value that is defined overrides any `remediationAction` parameter defined in the child policies in the `policy-templates` section. For example, if the `spec.remediationAction` value is set to `enforce`, then the `remediationAction` in the `policy-templates` section is set to `enforce` during runtime.
+
+| `spec.copyPolicyMetadata`
+| Optional
+| Specifies whether the labels and annotations of a policy should be copied when replicating the policy to a managed cluster. If you set to `true`, all of the labels and annotations of the policy are copied to the replicated policy. If you set to `false`, only the policy framework specific policy labels and annotations are copied to the replicated policy.
+
+| `spec.dependencies`
+| Optional
+| Used to create a list of dependency objects detailed with extra considerations for compliance.
+
+| `spec.policy-templates`
+| Required
+| Used to create one or more policies to apply to a managed cluster.
+
+| `spec.policy-templates.extraDependencies`
+| Optional
+| For policy templates, this is used to create a list of dependency objects detailed with extra considerations for compliance.
+
+| `spec.policy-templates.ignorePending`
+| Optional
+| Used to mark a policy template as compliant until the dependency criteria is verified.
+|===
+
++
+*Notes:* 
+
+- Some policy kinds might not support the `enforce` feature.
+
+- You can view policy violations based on the standards and categories that you define for your policy on the _Policies_ page, in the console.
+
+* Policy sample file for roles
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-role
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: AC Access Control
+    policy.open-cluster-management.io/controls: AC-3 Access Enforcement
+    policy.open-cluster-management.io/description:
+spec:
+  remediationAction: inform
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-role-example
+        spec:
+          remediationAction: inform # the policy-template spec.remediationAction is overridden by the preceding parameter value for spec.remediationAction.
+          severity: high
+          namespaceSelector:
+            include: ["default"]
+          object-templates:
+            - complianceType: mustonlyhave # role definition should exact match
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: sample-role
+                rules:
+                  - apiGroups: ["extensions", "apps"]
+                    resources: ["deployments"]
+                    verbs: ["get", "list", "watch", "delete","patch"]
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-role
+placementRef:
+  name: placement-policy-role
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
+subjects:
+- name: policy-role
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement-policy-role
+spec:
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - {key: environment, operator: In, values: ["dev"]}
+    tolerations:
+        - key: cluster.open-cluster-management.io/unavailable
+          operator: Exists
+        - key: cluster.open-cluster-management.io/unreachable
+          operator: Exists
+----
+
 .Additional resources
 
 * xref:../governance/grc_arch.adoc#governance-architecture[Governance policy framework architecture]
 * xref:../governance/policy_controllers_intro.adoc#policy-controllers[Policy controllers]
 * xref:../governance/grc_dashboard.adoc#grc-dashboard[Governance dashboard]
-* link:../governance/manage_policies.adoc#creating-security-policies[Creating security policies]
+* xref:../governance/manage_policies.adoc#creating-security-policies[Creating security policies]
 * xref:../governance/policy_dependencies.adoc#policy-dependencies[Policy dependencies]
 * xref:../governance/policy_deployment.adoc#policy-deployment[Policy deployment]
-* link:../governance/hub_policy_framework_yaml.adoc#hub-policy-yaml-parameters[Hub cluster policy components]
 * link:../clusters/cluster_lifecycle/placement_overview.adoc#placement-overview[Placement overview]
 * link:../clusters/cluster_lifecycle/taints_tolerations.adoc#adding-a-toleration-to-a-placement[Adding a toleration to a placement]
 * link:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource]
