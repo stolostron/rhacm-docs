@@ -530,6 +530,44 @@ link:https://issues.redhat.com/browse/ACM-7523[ACM-7523]
 
 Learn about known issues and limitations for central infrastructure management with {mce-short}.
 
+[#assisted-incorrect-cached-image-disconnected]
+=== {ai} pulls incorrect cached image in disconnected environments
+
+In a disconnected environment, {ai} might pull an incorrect cached release image instead of the image from your disconnected registry.
+
+To work around the issue, prevent the `cluster-image-set-controller` from recreating the `ClusterImageSet` resources during deletion. Delete the `ClusterImageSet` resources on the hub cluster to clear the hub cluster image cache. After you restart the installation, the image is pulled correctly from the disconnected registry.
+
+Complete the following steps:
+
+. Create a `ConfigMap` that points the controller to a Git repository that does not exist. Run the following command:
+
++
+[source,bash]
+----
+oc create configmap cluster-image-set-git-repo -n multicluster-engine \
+  --from-literal=gitRepoUrl=https://github.com/stolostron/does-not-exist.git \
+  --from-literal=channel=fast \
+  --dry-run=client -o yaml > cluster-image-set-git-repo-cm.yaml
+----
+
+. Apply the changes. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f cluster-image-set-git-repo-cm.yaml
+----
+
+. Delete the `ClusterImageSet` resources on the hub cluster to clear the hub cluster image cache. Run the following command:
+
++
+[source,bash]
+----
+oc delete clusterimagesets --all --ignore-not-found=true --wait=true --timeout=5m
+----
+
+link:https://issues.redhat.com/browse/ACM-29986[ACM-29986]
+
 [#install-sno-ocp-infra]
 === A {sno} cluster installation requires a matching {ocp-short} with {infra}
 
