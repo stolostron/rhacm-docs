@@ -1,0 +1,74 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#rbac-enable-observability]
+= Enabling RBAC for Observability
+
+[role="_abstract"]
+To view the observability metrics for a managed cluster, you must have `view` access to that managed cluster on the hub cluster.
+Complete the following steps for observability RBAC features:
+
+*Required access:* Cluster administrator
+
+.Procedure
+
+. Access managed cluster metrics. Users are denied access to managed cluster metrics, if they are not assigned to the `view` role for the managed cluster on the hub cluster.
++
+Run the following command to verify if a user has the authority to create a `managedClusterView` role in the managed cluster namespace:
+
++
+[source,bash]
+----
+oc auth can-i create ManagedClusterView -n <managedClusterName> --as=<user>
+----
+
+. Create a `managedClusterView` role in the managed cluster namespace. Run the following command:
+
++
+[source,bash]
+----
+oc create role create-managedclusterview --verb=create --resource=managedclusterviews -n <managedClusterName>
+----
+
+. Apply and bind the role to a user by creating a role bind. Run the following command:
+
++
+[source,bash]
+----
+oc create rolebinding user-create-managedclusterview-binding --role=create-managedclusterview --user=<user>  -n <managedClusterName>
+----
+
+. Search for resources. To verify if a user has access to resource types, use the following command:
+
++
+[source,bash]
+----
+oc auth can-i list <resource-type> -n <namespace> --as=<rbac-user>
+----
++
+*Note:* `<resource-type>` must be plural.
+
+. To view observability data in Grafana, you must have a `RoleBinding` resource in the same namespace of the managed cluster.
++
+View the following `RoleBinding` example:
++
+[source,yaml]
+----
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+ name: <replace-with-name-of-rolebinding>
+ namespace: <replace-with-name-of-managedcluster-namespace>
+subjects:
+ - kind: <replace with User|Group|ServiceAccount>
+   apiGroup: rbac.authorization.k8s.io
+   name: <replace with name of User|Group|ServiceAccount>
+roleRef:
+ apiGroup: rbac.authorization.k8s.io
+ kind: ClusterRole
+ name: view
+----
+
+.Additional resources
+
+* link:../governance/rolebinding_policy.adoc#role-binding-policy[Role binding policy]
+* link:../observability/adv_config_obs.adoc#adv-config-obs[Observability advanced configuration]
