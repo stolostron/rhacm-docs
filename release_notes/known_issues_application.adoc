@@ -9,6 +9,72 @@ For more about deprecations and removals, see xref:../release_notes/acm_deprecat
 
 See the following known issues for the Application lifecycle component.
 
+[#admin-no-sub-deploy-cluster-scoped-res]
+== Subscription users without admin rights cannot deploy cluster-scoped resources
+
+If you don't have the `open-cluster-management:subscription-admin` `ClusterRoleBinding`, and create or update a `Subscription` resource, the subscription cannot deploy cluster-scoped resources through a Git, Helm repository, or object storage channel subscription. Cluster-scoped resources include `ClusterRoleBinding`, `ClusterRole`, `Namespace`, and `CustomResourceDefinition`.
+
+As a result, the subscription deploys only namespace-scoped resources.
+
+To work around the issue, bind the user who creates or updates the `Subscription` resource to the `open-cluster-management:subscription-admin` `ClusterRoleBinding` on the hub cluster.
+
+link:https://issues.redhat.com/browse/ACM-39827[ACM-39827]
+
+[#argo-pull-model-appset-non-default-namespace]
+== _ManifestWork_-based Pull model applications are rejected in non-default `ApplicationSet` namespaces
+
+When an `ApplicationSet` runs outside the `openshift-gitops` namespace by using the _ApplicationSet in any namespace_ feature, the controller creates generated pull-model `Application` objects in that custom namespace.
+
+The tenant-isolation check requires a `PlacementDecision` in the `Application` namespace that selects the target cluster before the controller creates a `ManifestWork`. Without that `PlacementDecision`, the controller silently rejects the applications, and the applications never propagate to managed clusters. 
+
+The check prevents a namespace with only the permission to create `Application` resources from targeting any managed cluster.
+
+To work around the issue, create a `ManagedClusterSetBinding` and a `Placement` that selects the target cluster or clusters in the `ApplicationSet` namespace. See the following example:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: global
+  namespace: <applicationset-namespace>
+spec:
+  clusterSet: global
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: my-managed-cluster-1
+  namespace: <applicationset-namespace>
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: name
+          operator: In
+          values:
+          - <target-managed-cluster-name>
+----
+
+link:https://issues.redhat.com/browse/ACM-39827[ACM-39827]
+
+[#cluster-admin-subscription-reconcile-delay]
+== Cluster-admin subscriptions on managed clusters delay initial resource deployment
+
+Subscriptions that use `cluster-admin` privilege elevation on a managed cluster experience a delay in initial resource deployment. The subscription controller confirms cluster-admin eligibility by checking whether the subscription appears in `status.appliedResources` field of the `AppliedManifestWork`. The work agent populates the field at different times after you create the subscription.
+
+If first local subscription reconcile runs before the work agent updates that status, the controller treats the `cluster-admin` status as unresolved and does not deploy resources during that reconcile cycle. As a result, deployment is delayed.
+
+If the work agent status is current when the first reconcile runs, no delay occurs. Otherwise, resource deployment begins after one to three subscription reconcile loops complete. The default reconcile interval in appsub mode is 3 minutes per loop, so deployment can begin up to 9 minutes after you create the subscription.
+
+link:https://issues.redhat.com/browse/ACM-39827[ACM-39827]
+
 [#upgrading-permission-errors]
 == Upgrading to {gitops} 1.17 causes permission errors 
 
