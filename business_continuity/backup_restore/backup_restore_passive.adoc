@@ -1,0 +1,63 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#restore-backup-passive]
+= Restoring passive resources
+
+[role="_abstract"]
+Restore passive hub cluster data on a standby hub without activating managed cluster connections. Use passive restore for active-passive disaster recovery configurations.
+
+.Procedure
+
+* Restoring passive resources while checking for backups
+
++
+
+Use the `restore-acm-passive-sync` sample to restore passive data, while continuing to check if new backups are available and restore them automatically. To automatically restore new backups, you must set the `syncRestoreWithNewBackups` parameter to `true`. You must also only restore the latest passive data.
+
+Set the `VeleroResourcesBackupName` and `VeleroCredentialsBackupName` parameters to `latest`, and the `VeleroManagedClustersBackupName` parameter to `skip`. Immediately after the `VeleroManagedClustersBackupName` is set to `latest`, the managed clusters are activated on the new hub cluster and is now the primary hub cluster.
+
+When the activated managed cluster becomes the primary hub cluster, the restore resource is set to `Finished` and the `syncRestoreWithNewBackups` is ignored, even if set to `true`.
+
+By default, the controller checks for new backups every 30 minutes when the `syncRestoreWithNewBackups` is set to `true`. If new backups are found, it restores the backed up resources. You can change the duration of the check by updating the `restoreSyncInterval` parameter.
+
+If you want to run the same restore operation again after the restore operation is complete, you must create a new `restore.cluster.open-cluster-management.io` resource with the same `spec` options.
+
+For example, see the following resource that checks for backups every 10 minutes:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm-passive-sync
+  namespace: open-cluster-management-backup
+spec:
+  syncRestoreWithNewBackups: true # restore again when new backups are available
+  restoreSyncInterval: 10m # check for new backups every 10 minutes
+  cleanupBeforeRestore: CleanupRestored
+  veleroManagedClustersBackupName: skip
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+----
+
+* Restoring passive resources
+
++
+
+Use the `restore-acm-passive` sample to restore hub cluster resources in a passive configuration. Passive data is backup data such as secrets, ConfigMaps, applications, policies, and all the managed cluster custom resources, which do not activate a connection between managed clusters and hub clusters. The backup resources are restored on the hub cluster by the credentials backup and restore resources.
+
+See the following sample:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm-passive
+  namespace: open-cluster-management-backup
+spec:
+  cleanupBeforeRestore: CleanupRestored
+  veleroManagedClustersBackupName: skip
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+----

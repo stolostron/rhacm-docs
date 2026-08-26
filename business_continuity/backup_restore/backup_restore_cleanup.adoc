@@ -1,0 +1,32 @@
+:_mod-docs-content-type: REFERENCE
+
+[#clean-hub-restore]
+= Cleaning the hub cluster after restore
+
+[role="_abstract"]
+When you restore hub cluster data, Velero updates existing resources but does not clean up delta resources from a previous restore. Use the `cleanupBeforeRestore` property to control post-restore cleanup behavior.
+
+Velero updates existing resources if they have changed with the currently restored backup. Velero does not clean up delta resources, which are resources created by a previous restore and not part of the currently restored backup. This limits the scenarios you can use when restoring hub cluster data on a new hub cluster. Unless the restore is applied only once, you cannot reliably use the new hub cluster as a passive configuration. The data on the hub cluster does not reflect the data available with the restored resources.
+
+To address this limitation, when a `Restore.cluster.open-cluster-management.io` resource is created, the backup operator runs a post restore operation that cleans up the hub cluster. The operation removes any resources created by a previous {acm-short} restore that are not part of the currently restored backup.
+
+The post restore cleanup uses the `cleanupBeforeRestore` property to identify the subset of objects to clean up. You can use the following options for the post restore cleanup:
+
+* `None`: No clean up necessary, just begin Velero restore. Use `None` on a brand new hub cluster.
+* `CleanupRestored`: Clean up all resources created by a previous {acm-short} restore that are not part of the currently restored backup.
+* `CleanupAll`: Clean up all resources on the hub cluster that might be part of a {acm-short} backup, even if they were not created as a result of a restore operation.
+
+*Important:*
+
+* The `CleanupAll` option removes all hub cluster data, including the content that the user creates. Avoid using the `CleanupAll` option except as a last resort with extreme caution. Instead, use the `CleanupRestored` option to prevent updating the hub cluster content when the hub cluster is designated as a passive candidate for a disaster scenario. Use a clean hub cluster as a passive cluster.
+* Always use `cleanupBeforeRestore = None` to avoid losing restored resources that you filter out with the restore options `excludedResource`, `excludedNamespaces`, `excludedResources`, or other options that filter out the restored resources.
+
+*Notes:*
+
+* Velero sets the status, `PartiallyFailed`, for a velero restore resource if the restored backup has no resources. This means that a `restore.cluster.open-cluster-management.io` resource can be in `PartiallyFailed` status if any of the created `restore.velero.io` resources do not restore any resources because the corresponding backup is empty.
+* The `restore.cluster.open-cluster-management.io` resource is run once, unless you use the `syncRestoreWithNewBackups:true` to keep restoring passive data when new backups are available. After the restore operation is complete and you want to run another restore operation on the same hub cluster, you have to create a new `restore.cluster.open-cluster-management.io` resource.
+* Although you can create multiple `restore.cluster.open-cluster-management.io` resources, only one can be active at any moment in time.
+
+.Additional resources
+
+* xref:../backup_restore/backup_restore_passive.adoc[Restoring passive resources while checking for backups]
