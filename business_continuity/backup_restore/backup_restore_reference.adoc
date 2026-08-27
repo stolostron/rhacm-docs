@@ -1,0 +1,176 @@
+:_mod-docs-content-type: REFERENCE
+
+[#restore-backup-reference]
+= Restore operation reference
+
+[role="_abstract"]
+Reference information for restore operations, including backup types, cleanup options, YAML samples, and advanced filter options.
+
+== Restore operation and backup types
+
+Use the restore operation to restore all three backup types that the backup operation creates. You can restore all types or only a selected type, such as managed clusters, user credentials, or hub cluster resources.
+
+The restore defines the following three required `spec` properties, where the restore logic is defined for the types of backed up files:
+
+* `veleroManagedClustersBackupName` is used to define the restore option for the managed clusters activation resources.
+* `veleroCredentialsBackupName` is used to define the restore option for the user credentials.
+* `veleroResourcesBackupName` is used to define the restore option for the hub cluster resources (`Applications`, `Policy`, and other hub cluster resources like managed cluster passive data).
+
+The valid options for the previously mentioned properties are following values:
+
+* `latest` - This property restores the last available backup file for this type of backup.
+* `skip` - This property does not attempt to restore this type of backup with the current restore operation.
+* `<backup_name>` - This property restores the specified backup pointing to it by name.
+
+The name of the `restore.velero.io` resources that are created by the `restore.cluster.open-cluster-management.io` is generated using the following template rule, `<restore.cluster.open-cluster-management.io name>-<velero-backup-resource-name>`. View the following descriptions:
+
+* `restore.cluster.open-cluster-management.io name` is the name of the current `restore.cluster.open-cluster-management.io` resource, which initiates the restore.
+* `velero-backup-resource-name` is the name of the Velero backup file that is used for restoring the data. For example, the `restore.cluster.open-cluster-management.io` resource named `restore-acm` creates `restore.velero.io` restore resources. View the following examples for the format:
+
+** `restore-acm-acm-managed-clusters-schedule-20210902205438` is used for restoring managed cluster activation data backups. In this sample, the `backup.velero.io` backup name used to restore the resource is `acm-managed-clusters-schedule-20210902205438`.
+** `restore-acm-acm-credentials-schedule-20210902206789` is used for restoring credential backups. In this sample, the `backup.velero.io` backup name used to restore the resource is `acm-credentials-schedule-20210902206789`.
+** `restore-acm-acm-resources-schedule-20210902201234` is used for restoring application, policy, and other hub cluster resources like managed cluster passive data backups. In this sample, the `backup.velero.io` backup name used to restore the resource is `acm-resources-schedule-20210902201234`.
+
+*Note:* If `skip` is used for a backup type, `restore.velero.io` is not created.
+
+View the following YAML sample of the cluster `Restore` resource. In this sample, all three types of backed up files are being restored, using the latest available backed up files:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+  namespace: open-cluster-management-backup
+spec:
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+----
+
+*Note:* Only managed clusters created by the Hive API are automatically connected with the new hub cluster when the `acm-managed-clusters` backup from the managed clusters backup is restored on another hub cluster. All other managed clusters remain in the `Pending Import` state and must be imported back onto the new hub cluster.
+
+[#clean-hub-restore]
+== Cleaning the hub cluster after restore
+
+When you restore hub cluster data, Velero updates existing resources but does not clean up delta resources from a previous restore. Use the `cleanupBeforeRestore` property to control post-restore cleanup behavior.
+
+Velero updates existing resources if they have changed with the currently restored backup. Velero does not clean up delta resources, which are resources created by a previous restore and not part of the currently restored backup. This limits the scenarios you can use when restoring hub cluster data on a new hub cluster. Unless the restore is applied only once, you cannot reliably use the new hub cluster as a passive configuration. The data on the hub cluster does not reflect the data available with the restored resources.
+
+To address this limitation, when a `Restore.cluster.open-cluster-management.io` resource is created, the backup operator runs a post restore operation that cleans up the hub cluster. The operation removes any resources created by a previous {acm-short} restore that are not part of the currently restored backup.
+
+The post restore cleanup uses the `cleanupBeforeRestore` property to identify the subset of objects to clean up. You can use the following options for the post restore cleanup:
+
+* `None`: No clean up necessary, just begin Velero restore. Use `None` on a brand new hub cluster.
+* `CleanupRestored`: Clean up all resources created by a previous {acm-short} restore that are not part of the currently restored backup.
+* `CleanupAll`: Clean up all resources on the hub cluster that might be part of a {acm-short} backup, even if they were not created as a result of a restore operation.
+
+*Important:*
+
+* The `CleanupAll` option removes all hub cluster data, including the content that the user creates. Avoid using the `CleanupAll` option except as a last resort with extreme caution. Instead, use the `CleanupRestored` option to prevent updating the hub cluster content when the hub cluster is designated as a passive candidate for a disaster scenario. Use a clean hub cluster as a passive cluster.
+* Always use `cleanupBeforeRestore = None` to avoid losing restored resources that you filter out with the restore options `excludedResource`, `excludedNamespaces`, `excludedResources`, or other options that filter out the restored resources.
+
+*Notes:*
+
+* Velero sets the status, `PartiallyFailed`, for a velero restore resource if the restored backup has no resources. This means that a `restore.cluster.open-cluster-management.io` resource can be in `PartiallyFailed` status if any of the created `restore.velero.io` resources do not restore any resources because the corresponding backup is empty.
+* The `restore.cluster.open-cluster-management.io` resource is run once, unless you use the `syncRestoreWithNewBackups:true` to keep restoring passive data when new backups are available. After the restore operation is complete and you want to run another restore operation on the same hub cluster, you have to create a new `restore.cluster.open-cluster-management.io` resource.
+* Although you can create multiple `restore.cluster.open-cluster-management.io` resources, only one can be active at any moment in time.
+
+== Restore operation samples
+
+Use the following YAML samples to restore selected backup types or a specific named backup.
+
+* Restore all three types of backed up resources:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+  namespace: open-cluster-management-backup
+spec:
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+----
+
+* Restore only managed cluster resources:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+  namespace: open-cluster-management-backup
+spec:
+  veleroManagedClustersBackupName: latest
+  veleroCredentialsBackupName: skip
+  veleroResourcesBackupName: skip
+----
+
+* Restore the resources for managed clusters only, using the `acm-managed-clusters-schedule-20210902205438` backup:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-acm
+  namespace: open-cluster-management-backup
+spec:
+  veleroManagedClustersBackupName: acm-managed-clusters-schedule-20210902205438
+  veleroCredentialsBackupName: skip
+  veleroResourcesBackupName: skip
+----
+
+*Notes:*
+
+* The `restore.cluster.open-cluster-management.io` resource is still active if the phase is `Enabled` or `Running`. The resource run is completed if the phase changes to `Finished`. After the restore operation is completed, you can run another restore operation on the same hub cluster.
+* Only one `restore.cluster.open-cluster-management.io` can run at one time.
+
+== Advanced restore options
+
+Use advanced restore options defined by the `velero.io.restore` specification to filter the resources that you restore.
+
+For example, you can use the following YAML sample to restore resources only from the `vb-managed-cls-2` managed cluster namespace and to exclude the global `ManagedCluster` resources:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+  name: restore-filter-sample
+  namespace: open-cluster-management-backup
+spec:
+  cleanupBeforeRestore: None
+  veleroCredentialsBackupName: latest
+  veleroResourcesBackupName: latest
+  veleroManagedClustersBackupName: latest
+  excludedResources:
+    - ManagedCluster
+  includedNamespaces:
+    - vb-managed-cls-2
+----
+
+If you want more options for the `velero.io.restore` specification when you create the {acm} restore resource, see the following restore filters:
+
+[source,yaml]
+----
+spec:
+  includedResources
+  includedNamespaces
+  excludedResources
+  excludedNamespaces
+  LabelSelector
+  OrLabelSelector
+----
+
+*Note:* For any of the Velero restore filters, set the `cleanupBeforeRestore` field to `None` to prevent having to clean up hub cluster resources that are part of the restored backup, but are not being restored because of the applied filter.
+
+.Additional resources
+
+* xref:../backup_restore/backup_restore_operations.adoc[Restore operations]
+* link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/backup_and_restore/oadp-application-backup-and-restore[_DataProtectionApplication_]
+* link:../../clusters/cluster_lifecycle/import_cli.adoc[Importing the cluster with the auto import secret]
