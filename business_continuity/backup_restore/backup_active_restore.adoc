@@ -1,4 +1,4 @@
-:_mod-docs-content-type: PROCEDURE
+:_mod-docs-content-type: CONCEPT
 
 [#keep-hub-active-restore]
 = Running the restore operation while the primary hub cluster is active
@@ -6,114 +6,10 @@
 [role="_abstract"]
 In a typical disaster recovery restore operation, the primary hub cluster is inactive, and there is no conflict with the restore hub cluster. You might need to keep the original hub cluster active during or after your restore operation, for example, you would typically need to do this if you run a disaster recovery simulation test.
 
-When you restore data to a new hub cluster while your primary hub cluster is still active, both hub clusters try to manage the same cluster fleet. If the primary hub cluster takes control of the managed clusters, it might override the policy or application changes that you made to your new hub cluster. 
+When you restore data to a new hub cluster while your primary hub cluster is still active, both hub clusters try to manage the same cluster fleet. If the primary hub cluster takes control of the managed clusters, it might override the policy or application changes that you made to your new hub cluster.
 
-To safely restore the hub data on your new hub cluster while keeping the primary hub cluster active, configure the primary hub cluster before you run the disaster recovery test. Complete the following tasks: 
+To safely restore the hub data on your new hub cluster while keeping the primary hub cluster active, configure the primary hub cluster before you run the disaster recovery test. Complete the following topics in order:
 
-
-== Preparing the primary hub cluster
-
-Before running the restore operation and keeping the hub cluster active, you must prepare the primary hub cluster.
-
-To prepare the primary hub cluster, complete the following steps: 
-
-. Pause the `BackupSchedule` resource by setting the `paused` property to `true`. See the following example:
-
-+
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: BackupSchedule
-metadata:
- name: schedule-acm-msa
- namespace: open-cluster-management-backup
-spec:
- veleroSchedule: 0 */1 * * *
- veleroTtl: 120h
- useManagedServiceAccount: true
- paused: true
-----
-
-. Tag the primary hub cluster resources with the backup annotation. Complete the following steps:
-
-.. Create a file named `restore-acm.yaml`.
-
-.. Add the following content to the file:
-
-+
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: Restore
-metadata:
- name: restore-acm
- namespace: open-cluster-management-backup
-spec:
- cleanupBeforeRestore: None
- veleroManagedClustersBackupName: latest
- veleroCredentialsBackupName: latest
- veleroResourcesBackupName: latest
-----
-
-.. Apply the file and run the restore operation by running the following command:
-
-+
-[source,bash]
-----
-oc -f apply restore-acm.yaml
-----
-
-+
-*Note:* When you run the `Restore` resource, it tags all hub cluster resources that would be backed up if you enabled the `BackupSchedule`. The resources are tagged with the `velero.io/backup-name: backupName` label, where `backupName` is the name of the latest backup created by the primary hub cluster.
-
-+
-As a result, any restore operation that runs on the primary cluster by using a `Restore` resource with the `cleanupBeforeRestore` option set to `CleanupRestored` processes these resources, and deletes all resources if they are not part of the latest backup.
-
-== Running the restore operation on the new hub cluster
-
-After you prepare the primary hub cluster, run the restore operation on the new hub cluster and move your managed clusters. The managed clusters connect to the new hub cluster and do not move back to the initial hub cluster because the automatic import feature is now disabled on the backup hub cluster.
-
-Run the restore operation on the new hub cluster by completing the following steps:
-
-. Add the following content the `restore-acm.yaml` file:
-
-+
-[source,yaml]
-----
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: Restore
-metadata:
- name: restore-acm
- namespace: open-cluster-management-backup
-spec:
- cleanupBeforeRestore: None
- veleroManagedClustersBackupName: latest
- veleroCredentialsBackupName: latest
- veleroResourcesBackupName: latest
-----
-+
-*Note:* Setting `veleroManagedClustersBackupName` to `latest` restores managed clusters and connects them with the secondary hub cluster.
-
-. Apply the file and run the restore operation by running the following command:
-
-+
-[source,bash]
-----
-oc -f apply restore-acm.yaml
-----
-
-== Cleaning up managed cluster resources on the backup hub cluster
-
-After the restore and after the managed clusters successfully connect to the new hub cluster, clean up the managed cluster resources from the initial backup hub cluster. If you want to restore the data to the backup after your recovery test completes, skip cleaning the resources 
-
-To clean up the managed clusters from the backup hub cluster, complete the following steps:
-
-. Make sure that the managed cluster status is `Unknown` on the primary hub before deleting the `ManagedCluster` global resource. If the status is not `Unknown`, your workloads are uninstalled from the managed cluster.
-. Decide if you want to remove the `ManagedCluster` global resource. Doing so deletes the managed cluster namespace.
-. Delete the `ManagedCluster` global resource from the backup hub cluster for each of the managed clusters that you moved to the new hub cluster by using the restore operation.
-
-*Important:* 
-
-* Make sure that the managed cluster status is `Unknown` on the primary hub before deleting the `ManagedCluster` global resource. If the status is not `Unknown`, your workloads are uninstalled from the managed cluster.
-
-* Removing the `ManagedCluster` global resource also deletes the managed cluster namespace.
+* xref:../backup_restore/backup_active_restore_prepare.adoc[Preparing the primary hub cluster]
+* xref:../backup_restore/backup_active_restore_run.adoc[Running the restore operation on the new hub cluster]
+* xref:../backup_restore/backup_active_restore_cleanup.adoc[Cleaning up managed cluster resources on the backup hub cluster]
