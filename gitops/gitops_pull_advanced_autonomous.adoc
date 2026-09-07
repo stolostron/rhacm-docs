@@ -4,15 +4,11 @@
 = Enabling the {gitops} add-on with Argo CD Agent in autonomous mode
 
 [role="_abstract"]
-In autonomous mode, the managed cluster is the source of truth. Applications are created on the managed cluster, and the agent syncs specs and status back to the hub principal as a read-only mirror.
+In autonomous mode, the managed cluster is the source of truth. Applications are created on the managed cluster, and the agent synchronizes specs and the status back to the hub principal as a read-only mirror. Use autonomous mode for workflows where all ongoing changes go through Git after the initial bootstrap.
 
 *Required access:* Cluster administrator
 
-In autonomous mode, the spoke cluster is the source of truth. Applications are created on the managed cluster, and the agent syncs specs and status back to the hub principal, which acts as a read-only mirror. This mode is recommended for App of Apps workflows where all ongoing changes flow through Git after initial bootstrap.
-
-*Procedure*
-
-Complete the following steps:
+. Procedure
 
 . Create a `GitOpsCluster` resource with autonomous mode by adding the following YAML sample:
 
@@ -46,14 +42,117 @@ spec:
 oc apply -f gitopscluster.yaml
 ----
 
-. Customize the auto-generated `ArgoCD` `Policy` to add RBAC for the managed clusters, following the same pattern as the managed mode example. Export the auto-generated `Policy`, add a `ClusterRoleBinding` as a second policy-template, and re-apply it.
+. Customize the auto-generated `ArgoCD` `Policy` to add RBAC for the managed clusters. The following example shows the complete `Policy` with RBAC added as a second policy-template:
 
-*Important:* Do not add `Application` resources to the auto-generated `ArgoCD` `Policy`. The auto-generated `Policy` is for configuring the spoke cluster (`ArgoCD` settings, RBAC) only. For deploying applications, use one of the following approaches.
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: agent-gitops-argocd-policy
+  namespace: openshift-gitops
+  annotations:
+    policy.open-cluster-management.io/standards: NIST-CSF
+    policy.open-cluster-management.io/categories: PR.PT Protective Technology
+    policy.open-cluster-management.io/controls: PR.PT-3 Least Functionality
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: agent-gitops-argocd-config-policy
+        spec:
+          pruneObjectBehavior: None
+          remediationAction: enforce
+          severity: medium
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: argoproj.io/v1beta1
+                kind: ArgoCD
+                metadata:
+                  name: acm-openshift-gitops
+                  namespace: openshift-gitops
+                  labels:
+                    apps.open-cluster-management.io/gitopsaddon: "true"
+                spec:
+                  server:
+                    enabled: false
+                  argoCDAgent:
+                    agent:
+                      enabled: true
+                      allowedNamespaces:
+                        - "*"
+                      client:
+                        principalServerAddress: "<auto-discovered>"
+                        principalServerPort: "443"
+                        mode: "managed"
+                      tls:
+                        secretName: argocd-agent-client-tls
+                        rootCASecretName: argocd-agent-ca
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: agent-gitops-argocd-rbac-policy
+        spec:
+          pruneObjectBehavior: None
+          remediationAction: enforce
+          severity: medium
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRoleBinding
+                metadata:
+                  name: acm-openshift-gitops-cluster-admin
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: ClusterRole
+                  name: cluster-admin
+                subjects:
+                  - kind: ServiceAccount
+                    name: acm-openshift-gitops-argocd-application-controller
+                    namespace: openshift-gitops
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f policy.yaml
+----
++
+*Notes:* 
+* The `cluster-admin` `ClusterRole` in this example grants full cluster administrator privileges.
+* Do not add `Application` resources to the auto-generated `ArgoCD` `Policy`. The auto-generated `Policy` is for configuring the managed cluster.
+
+. Export the `Policy` and add a `ClusterRoleBinding`. Run the following command:
+
++
+[source,bash]
+----
+oc get application -n openshift-gitops -l app=policies -o yaml > policies-app.yaml
+----
+
+. Apply the `Policy` by running the following command:
+
++
+[source,bash]
+----
+oc apply -f policies-app.yaml
+----
 
 . Deploy applications to the managed cluster by using one of the following methods:
 
-   * *Create a separate OCM Policy* to deploy an App of Apps bootstrap `Application` to managed clusters. This is a new `Policy`, separate from the auto-generated `ArgoCD` `Policy`. After the bootstrap `Application` is deployed, all ongoing changes flow through Git. See the following YAML sample for the bootstrap policy:
-
++
+* Create a separate OCM Policy to deploy an App of Apps bootstrap `Application` to managed clusters. After the bootstrap `Application` is deployed, all ongoing changes flow through Git. See the following YAML sample for the bootstrap policy:
++
 [source,yaml]
 ----
 apiVersion: policy.open-cluster-management.io/v1
@@ -96,8 +195,10 @@ spec:
                       prune: true
                       selfHeal: true
 ----
++
+* Use Git to manage applications after initial bootstrap. With autonomous mode, the managed cluster Argo CD watches Git repositories and synchronizes changes automatically. The agent synchronzies application specs and the status back to the hub principal for visibility.
 
-   * *Use Git* to manage applications after initial bootstrap. With autonomous mode, the managed cluster Argo CD watches Git repositories and syncs changes automatically. The agent syncs application specs and status back to the hub principal for visibility.
+.Verification
 
 . On the hub cluster, verify that autonomous applications are visible as read-only mirrors by running the following command:
 
