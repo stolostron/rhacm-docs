@@ -1,0 +1,70 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#enable-acm-mcp-lightspeed]
+= Configure {lightspeed-short} to use the {mcp-short} (Technology Preview)
+
+[role="_abstract"]
+Configure {lightspeed-short} to use the {mcp-short} so that you can query {acm-short} search data from the Lightspeed assistant.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* The {mcp-short} is installed on your {acm-short} hub cluster. See xref:../mcp/install_acm_mcp.adoc#install-acm-mcp[Installing the {mcp-short}].
+* {lightspeed-short} is installed and configured on the {acm-short} hub cluster where you want to add the {mcp-short}. For more information, see link:https://docs.redhat.com/en/documentation/red_hat_openshift_lightspeed/1.0/html/install/index[Red Hat OpenShift Lightspeed] installation documentation.
+
+*Important:*
+
+* If you already have MCP servers configured in your `OLSConfig` custom resource, add the {mcp-short} to the existing list rather than replacing it.
+* Use the exact configuration that is shown in this topic for proper functionality.
+* The `acm-search`, which is the default namespace for the Helm chart, is used as the service URL.
+
+.Procedure
+
+. Edit the `OLSConfig` custom resource to add the {mcp-short}. Run the following command: 
+
++
+[source,bash]
+----
+oc edit olsconfig cluster
+----
+
+* If you do not have MCP servers configured in your `OLSConfig` custom resource, add `featureGates` and `mcpServers` to the following configuration:
+
++
+[source,yaml]
+----
+spec:
+  featureGates:
+    - MCPServer
+  mcpServers:
+    - headers:
+        - name: Authorization
+          valueFrom:
+            type: kubernetes
+      name: acm
+      timeout: 30
+      url: 'http://acm-mcp-server.acm-search.svc.cluster.local/mcp'
+----
+
+* If your `OLSConfig` custom resource already has MCP servers configured, add the {mcp-short} to the existing `mcpServers` list. Your configuration might resemble the following example:
+
++
+[source,yaml]
+----
+mcpServers:
+  - name: existing-server
+    # ... existing server config ...
+  - name: acm
+    streamableHTTP:
+      enableSSE: false
+      headers:
+        kubernetes-authorization: kubernetes
+      sseReadTimeout: 10
+      timeout: 30
+      url: 'http://acm-mcp-server.acm-search.svc.cluster.local/mcp'
+----
+
+.Additional resources
+
+* link:https://docs.redhat.com/en/documentation/red_hat_openshift_lightspeed/1.0/html/configure/ols-configuring-openshift-lightspeed#ols-enabling-mcp-server_ols-configuring-openshift-lightspeed[Enabling a custom MCP server]
