@@ -1,0 +1,67 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#config-infra-node-acm]
+= Configuring infrastructure nodes for {acm-short}
+
+[role="_abstract"]
+Configure your {ocp-short} cluster to contain infrastructure nodes to run approved {acm-short} management components. Running components on infrastructure nodes avoids allocating {ocp-short} subscription quota for the nodes that are running {acm-short} management components.
+
+After adding infrastructure nodes to your {ocp-short} cluster, follow the xref:../get_started/install_connected_cli.adoc#install-command-line-acm[Installing from the command-line interface] instructions and add configurations to the {olm} subscription and `MultiClusterHub` custom resource.
+
+Follow the procedures that are described in link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/machine_management/creating-infrastructure-machinesets[Creating infrastructure machine sets] in the {ocp-short} documentation. Infrastructure nodes are configured with a Kubernetes `taints` and `labels` to keep non-management workloads from running on them.
+
+.Procedure
+
+. To be compatible with the infrastructure node enablement provided by {acm-short}, ensure your infrastructure nodes have the following `taints` and `labels` applied:
+
++
+[source,yaml]
+----
+metadata:
+  labels:
+    node-role.kubernetes.io/infra: ""
+spec:
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/infra
+----
+
+. Add the following additional configuration before applying the {olm} Subscription:
+
++
+[source,yaml]
+----
+spec:
+  config:
+    nodeSelector:
+      node-role.kubernetes.io/infra: ""
+    tolerations:
+    - key: node-role.kubernetes.io/infra
+      effect: NoSchedule
+      operator: Exists
+----
+
+. Add the following additional configuration before you apply the `MultiClusterHub` custom resource:
+
++
+[source,yaml]
+----
+spec:
+  nodeSelector:
+    node-role.kubernetes.io/infra: ""
+----
+
+. Update any add-ons to include the following node selectors and tolerations. You need to use the instructions link:../add-ons/configure_klusterlet_addons.adoc#configure-klusterlet-addons[Configuring klusterlet add-ons]:
+
++
+[source,yaml]
+----
+    nodeSelector:
+      node-role.kubernetes.io/infra: ""
+    tolerations:
+    - key: node-role.kubernetes.io/infra
+      effect: NoSchedule
+      operator: Exists
+----
+
+. If you used Red Hat OpenShift Data Foundation as a storage provisioner, make sure _Container Storage Interface_ pods can run on infrastructure nodes. Learn more at link:https://docs.redhat.com/it/documentation/red_hat_openshift_data_foundation/4.18/html/managing_and_allocating_storage_resources/managing-container-storage-interface-component-placements_rhodf#managing-container-storage-interface-component-placements_rhodf[Managing container storage interface (CSI) component placements] in the Red Hat OpenShift Data Foundation documentation.
