@@ -4,15 +4,13 @@
 = Deploying an application with the `ManifestWork`-based pull model
 
 [role="_abstract"]
-Deploy applications across managed clusters by using an `ApplicationSet` resource that targets the `ManifestWork`-based pull model.
+In the `ManifestWork`-based pull model, applications are deployed by using an `ApplicationSet` resource on the hub cluster with specific pull-model annotations and labels. The propagation controller detects these annotations and creates `ManifestWork` resources to distribute the `Application` to managed clusters, where the local Argo CD instance reconciles it.
 
 *Required access:* Cluster administrator
 
-In the `ManifestWork`-based pull model, applications are deployed using an `ApplicationSet` resource on the hub cluster with specific pull-model annotations and labels. The propagation controller detects these annotations and creates `ManifestWork` resources to distribute the `Application` to managed clusters, where the local Argo CD instance reconciles it.
+.Procedure
 
-Complete the following steps:
-
-. Create a separate `Placement` resource for the `ApplicationSet` to select which managed clusters receive the application. This `Placement` is distinct from the `GitOpsCluster` `Placement` created earlier. See xref:../gitops/gitops_placement.adoc#gitops-placement[Configuring Placement resources for {gitops}] for details. Add the following YAML sample:
+. Create a `Placement` resource for the `ApplicationSet` to select which managed clusters receive the application. Add the following YAML sample:
 
 +
 [source,yaml]
@@ -39,6 +37,8 @@ spec:
         - key: local-cluster
           operator: DoesNotExist
 ----
++
+*Note:* This `Placement` is different from the `GitOpsCluster` `Placement` that you created previously.
 
 . Apply the YAML sample by running the following command:
 
@@ -48,16 +48,9 @@ spec:
 oc apply -f app-placement.yaml
 ----
 
-. Create the `ApplicationSet` resource with the pull-model annotations and labels. The following annotations and labels are required for the `ManifestWork`-based pull model:
+. Create the `ApplicationSet` resource with the pull-model annotations and labels. Use the following YAML sample:
 
-   * `apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"` (label) - enables the propagation controller to distribute the `Application` via `ManifestWork`.
-   * `apps.open-cluster-management.io/ocm-managed-cluster: '\{\{name\}\}'` (annotation) - specifies which managed cluster receives the `Application`.
-   * `argocd.argoproj.io/skip-reconcile: "true"` (annotation) - prevents the hub Argo CD from reconciling the `Application` (only the spoke Argo CD reconciles it).
-   * `apps.open-cluster-management.io/ocm-managed-cluster-app-namespace` (annotation) - specifies the namespace on the managed cluster where the `Application` object is created.
-   * `destination.server: https://kubernetes.default.svc` - the `Application` is reconciled locally by the managed cluster Argo CD.
-
-See the following YAML sample:
-
++
 [source,yaml]
 ----
 apiVersion: argoproj.io/v1alpha1
@@ -98,10 +91,18 @@ spec:
         syncOptions:
         - CreateNamespace=true
 ----
++
+The following annotations and labels are required for the `ManifestWork`-based pull model:
++
+* `apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"`: Enables the propagation controller to distribute the `Application` by using the `ManifestWork` resource.
+* `apps.open-cluster-management.io/ocm-managed-cluster: '\{\{name\}\}'`: Specifies which managed cluster receives the `Application`.
+* `argocd.argoproj.io/skip-reconcile: "true"`: Prevents the hub cluster Argo CD instancefrom reconciling the `Application`.
+* `apps.open-cluster-management.io/ocm-managed-cluster-app-namespace`: Specifies the namespace on the managed cluster where the `Application` object is created.
+* `destination.server: https://kubernetes.default.svc`: The managed cluster Argo CD instance reconciles the `Application` locally.
++
+*Note:* The `destination.server: https://kubernetes.default.svc` and the pull-model annotations are what distinguish the `ManifestWork`-based pull model from the other models.
 
-*Note:* The `destination.server: https://kubernetes.default.svc` and the pull-model annotations are what distinguish the `ManifestWork`-based pull model from the other models. The propagation controller strips the annotations, rewrites the destination to in-cluster, and wraps the `Application` in a `ManifestWork` for delivery to the managed cluster. The `configMapRef: acm-placement` references the duck-type `ConfigMap` that the `GitOpsCluster` controller creates automatically during reconciliation.
-
-. Apply the YAML sample by running the following command:
+. Apply the YAML sample. Run the following command:
 
 +
 [source,bash]
@@ -109,7 +110,7 @@ spec:
 oc apply -f applicationset.yaml
 ----
 
-. Verify the deployment by running the following command on the hub:
+. Verify the deployment. Runthe following command on your hub cluster:
 
 +
 [source,bash]
@@ -117,6 +118,7 @@ oc apply -f applicationset.yaml
 oc get applications.argoproj.io -n openshift-gitops
 ----
 
-*Additional resources*
+.Additional resources
 
-* Continue setting up the {gitops} add-on by completing _Managing the {gitops} add-on_.
+* *xref:../gitops/gitops_placement.adoc#gitops-placement[Configuring Placement resources for {gitops}] for details. 
+* xref:../gitops/gitops_pull_addon_overview.adoc#gitops-addon-overview[Managing the {gitops} add-on]
