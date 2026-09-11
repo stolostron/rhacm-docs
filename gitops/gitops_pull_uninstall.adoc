@@ -6,13 +6,13 @@
 [role="_abstract"]
 Uninstall the {gitops} add-on in the correct order so that dependencies and finalizers are cleaned up successfully.
 
+*Important:* The uninstall takes several minutes. Do not force-remove finalizers before the cleanup completes. You must complete the uninstall in the correct order due to resource dependencies.
+
 *Required access:* Cluster administrator
 
-To completely uninstall the {gitops} add-on, complete the following steps in order. The order matters because resources have dependencies and finalizers that require proper cleanup sequencing.
+.Procedure
 
-*Important:* Plan for the uninstall to take several minutes. The add-on framework runs pre-delete cleanup Jobs on each managed cluster to remove `ArgoCD` CRs, the `GitOpsService` CR, OLM Subscription/CSV, and operator resources. Do not force-remove finalizers before the cleanup completes.
-
-. Delete any `ApplicationSet` resources and wait for the generated `Application` resources to be removed by running the following commands:
+. Delete any `ApplicationSet` resources and wait for the generated `Application` resources to be removed. Run the following command. Replace `<applicationset-name>` with the name of your `ApplicationSet`:
 
 +
 [source,bash]
@@ -20,14 +20,14 @@ To completely uninstall the {gitops} add-on, complete the following steps in ord
 oc delete applicationset <applicationset-name> -n openshift-gitops --ignore-not-found
 ----
 
-Verify all generated `Application` resources are gone:
+. Verify that all generated `Application` resources are removed. Run the following command:
 
 [source,bash]
 ----
 oc get applications.argoproj.io -n openshift-gitops
 ----
 
-. Delete the `Placement` resources by running the following commands:
+. Delete the `Placement` resources by running the following commands. Replace `<gitops-placement-name>` and `<app-placement-name>` with the names of your `Placement` resources:
 
 +
 [source,bash]
@@ -36,7 +36,7 @@ oc delete placement <gitops-placement-name> -n openshift-gitops --ignore-not-fou
 oc delete placement <app-placement-name> -n openshift-gitops --ignore-not-found
 ----
 
-. Delete the `GitOpsCluster` resource by running the following command:
+. Delete the `GitOpsCluster` resource by running the following command. Replace `<name>` with the name of your `GitOpsCluster`:
 
 +
 [source,bash]
@@ -44,7 +44,7 @@ oc delete placement <app-placement-name> -n openshift-gitops --ignore-not-found
 oc delete gitopscluster <name> -n openshift-gitops --ignore-not-found
 ----
 
-. Delete the auto-generated `Policy` and `PlacementBinding` resources by running the following commands:
+. Delete the auto-generated `Policy` and `PlacementBinding` resources. Run the following commands. Replace `<name>` with the name of your `Policy` and `PlacementBinding`:
 
 +
 [source,bash]
@@ -52,16 +52,10 @@ oc delete gitopscluster <name> -n openshift-gitops --ignore-not-found
 oc delete policy <name>-argocd-policy -n openshift-gitops --ignore-not-found
 oc delete placementbinding <name>-argocd-policy-binding -n openshift-gitops --ignore-not-found
 ----
++
+*Important:* If the `Policy` is not deleted, it continues to enforce the `ArgoCD` custom resource on managed clusters even after the add-on is removed. If the controller recreates the `Policy` before the `GitOpsCluster` is fully removed, delete the `Policy` and `PlacementBinding` again by repeating this step.
 
-*Important:* If the `Policy` is not deleted, it continues to enforce the `ArgoCD` custom resource on managed clusters even after the add-on is removed. During cleanup, the `GitOpsCluster` controller may also recreate the `Policy` before the `GitOpsCluster` is fully removed - if this happens, delete the `Policy` and `PlacementBinding` again after the `GitOpsCluster` deletion is complete:
-
-[source,bash]
-----
-oc delete policy <name>-argocd-policy -n openshift-gitops --ignore-not-found
-oc delete placementbinding <name>-argocd-policy-binding -n openshift-gitops --ignore-not-found
-----
-
-. Wait for the `ArgoCD` custom resource to be removed from each managed cluster. The add-on cleanup Job handles this. Monitor the removal:
+. Wait for the `ArgoCD` custom resource to be removed from each managed cluster. Monitor the removal. Run the following command. Replace `<managed-cluster-context>` with the context of the managed cluster:
 
 +
 [source,bash]
@@ -69,7 +63,7 @@ oc delete placementbinding <name>-argocd-policy-binding -n openshift-gitops --ig
 oc get argocd acm-openshift-gitops -n openshift-gitops --context <managed-cluster-context>
 ----
 
-. For {ocp-short} managed clusters with OLM-based deployment, verify that the OLM `Subscription` created by the add-on is also removed:
+. For {ocp-short} managed clusters with {olm}-based deployment, verify that the {olm} `Subscription` created by the add-on is also removed. Run the following command. Replace `<managed-cluster-context>` with the context of the managed cluster:
 
 +
 [source,bash]
@@ -77,7 +71,7 @@ oc get argocd acm-openshift-gitops -n openshift-gitops --context <managed-cluste
 oc get subscription.operators.coreos.com -l apps.open-cluster-management.io/gitopsaddon=true -A --context <managed-cluster-context>
 ----
 
-. If agent mode was enabled, clean up the hub-side agent resources:
+. If you enabled agent mode, delete the hub cluster agent resources. Run the following commands. Replace `<managed-cluster-name>` with the name of the managed cluster:
 
 +
 [source,bash]
@@ -87,7 +81,7 @@ oc delete secret cluster-<managed-cluster-name> -n openshift-gitops --ignore-not
 oc delete secret <managed-cluster-name>-application-manager-cluster-secret -n openshift-gitops --ignore-not-found
 ----
 
-. Clean up the `ManagedClusterSetBinding` if it is no longer needed:
+. Delete the `ManagedClusterSetBinding`. Run the following command:
 
 +
 [source,bash]
