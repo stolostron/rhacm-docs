@@ -1,0 +1,72 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#msa-enable-automatic-import]
+= Enabling automatic import
+
+[role="_abstract"]
+Enable the Managed Service Account component and the automatic import feature on your backup schedule.
+
+.Procedure
+
+. Enable the Managed Service Account component by setting the `managedserviceaccount` `enabled` parameter to `true` in the `MultiClusterEngine` resource. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: multicluster.openshift.io/v1
+kind: MultiClusterEngine
+metadata:
+  name: multiclusterengine
+spec:
+  overrides:
+    components:
+      - enabled: true
+        name: managedserviceaccount
+----
+
+. Enable the automatic import feature for the `BackupSchedule.cluster.open-cluster-management.io` resource by setting the `useManagedServiceAccount` parameter to `true`. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: BackupSchedule
+metadata:
+  name: schedule-acm-msa
+  namespace: open-cluster-management-backup
+spec:
+  veleroSchedule:
+  veleroTtl: 120h
+  useManagedServiceAccount: true
+----
++
+* The default token validity duration is set to twice the value of `veleroTtl` to increase the chance of the token being valid for all backups storing the token for their entire lifecycle. In some cases, you might need to control how long a token is valid by setting a value for the optional `managedServiceAccountTTL` property.
+
+* Use `managedServiceAccountTTL` with caution if you need to update the default token expiration time for the generated tokens. Changing the token expiration time from the default value might result in producing backups with tokens set to expire during the lifecycle of the backup. As a result, the import feature does not work for the managed clusters.
++
+*Important*: Do not use `managedServiceAccountTTL` unless you need to control how long the token is valid.
++
+See the following example for using the `managedServiceAccountTTL` property:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: BackupSchedule
+metadata:
+  name: schedule-acm-msa
+  namespace: open-cluster-management-backup
+spec:
+  veleroSchedule:
+  veleroTtl: 120h
+  useManagedServiceAccount: true
+  managedServiceAccountTTL: 300h
+----
+
+After you enable the automatic import feature, the backup component starts processing imported managed clusters by creating the following:
+
+- A `ManagedServiceAddon` named `managed-serviceaccount`.
+- A `ManagedServiceAccount` named `auto-import-account`.
+- A `ManifestWork` for each `ManagedServiceAccount` to set up a `klusterlet-bootstrap-kubeconfig` `RoleBinding` for the `ManagedServiceAccount` token on the managed cluster.
+
+The token is only created if the managed cluster is accessible when you create the Managed Service Account, otherwise it is created later once the managed cluster becomes available.
