@@ -36,6 +36,26 @@ gitopsAddon:
     enabled: true
 ----
 
+[#leftover-res-incorrect-gitops-uninstall]
+== Leftover resources after incorrect {gitops} add-on uninstall
+
+If you do not uninstall the {gitops} add-on in the correct order, you might encounter some ofthe following issues:
+
+* If the `Policy` is not deleted, it continues to enforce the `ArgoCD` custom resource on managed clusters, causing the operator and Argo CD to be re-created even after the add-on is removed.
+* If the `PlacementBinding` is not deleted, the `Policy` remains bound to the `Placement`, making re-enforcement more likely.
+* If finalizers are not cleared, leftover `Application` resources with finalizers can block namespace deletion. If needed, patch the finalizer by running the following command. Replace `<name>` with the name of your `Application`:
+
++
+[source,bash]
+----
+oc patch application <name> -n openshift-gitops --type=json -p '[{"op":"remove","path":"/metadata/finalizers"}]'
+----
+
+* Application workload namespaces, such as `guestbook`, are not removed by the add-on. Delete them manually if needed.
+* If you added custom `ClusterRoleBinding` resources, such as `acm-openshift-gitops-cluster-admin`, through the `Policy`, they remain on managed clusters after uninstall. Delete them manually if needed.
+
+To avoid these issues, uninstall the add-on in the correct order by using the procedure in xref:../gitops/gitops_pull_uninstall.adoc#gitops-pull-uninstall[Uninstall the {gitops-short} add-on].
+
 [#subscription-application-incorrect-warning]
 == Subscription application displays incorrect warning message
 
