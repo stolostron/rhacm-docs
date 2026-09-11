@@ -1,0 +1,73 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#active-restore-prepare]
+= Preparing the primary hub cluster
+
+[role="_abstract"]
+Before running the restore operation and keeping the hub cluster active, prepare the primary hub cluster before you run a disaster recovery test while keeping the primary hub cluster active.
+
+.Procedure
+
+. Pause the `BackupSchedule` resource by setting the `paused` property to `true`. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: BackupSchedule
+metadata:
+ name: schedule-acm-msa
+ namespace: open-cluster-management-backup
+spec:
+ veleroSchedule: 0 */1 * * *
+ veleroTtl: 120h
+ useManagedServiceAccount: true
+ paused: true
+----
+
+. Tag the primary hub cluster resources with the backup annotation. Complete the following steps:
+
+.. Create a file named `restore-acm.yaml`.
+
+.. Add the following content to the file:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+ name: restore-acm
+ namespace: open-cluster-management-backup
+spec:
+ cleanupBeforeRestore: None
+ veleroManagedClustersBackupName: latest
+ veleroCredentialsBackupName: latest
+ veleroResourcesBackupName: latest
+----
+
+.. Apply the file and run the restore operation by running the following command:
+
++
+[source,bash]
+----
+oc apply -f restore-acm.yaml
+----
+
++
+*Note:* When you run the `Restore` resource, it tags all hub cluster resources that would be backed up if you enabled the `BackupSchedule`. The resources are tagged with the `velero.io/backup-name: backupName` label, where `backupName` is the name of the latest backup created by the primary hub cluster.
+
++
+As a result, any restore operation that runs on the primary cluster by using a `Restore` resource with the `cleanupBeforeRestore` option set to `CleanupRestored` processes these resources, and deletes all resources if they are not part of the latest backup.
+
+. Disable the automatic import for managed clusters.
+
++
+.. Set the following annotation on the `ManagedCluster` global resource for all managed clusters that you want to move to the restore hub cluster. By setting the annotation, you prevent the backup hub cluster from recovering any managed cluster after the managed cluster moves to the restore hub cluster:
+
++
+[source,yaml]
+----
+annotations:
+   import.open-cluster-management.io/disable-auto-import: ''
+----

@@ -1,0 +1,43 @@
+:_mod-docs-content-type: CONCEPT
+
+[#backup-arch-activation]
+= Resources restored at managed cluster activation time
+
+[role="_abstract"]
+Some backed up resources are restored only when managed cluster activation data is restored on a new hub cluster.
+
+When you add the `cluster.open-cluster-management.io/backup` label to a resource, the resource is automatically backed up in the `acm-resources-generic-schedule` backup, except for the `Secrets` and `ConfigMap` resources which are backed up in the `acm-credentials-schedule-<timestamp>` backup. Set the label value to `cluster-activation` if you need to restore any of the resources after you move the managed clusters to the new hub cluster, and when you use `veleroManagedClustersBackupName: latest` on the restore resource.
+
+When you set the `cluster.open-cluster-management.io/backup` label to `cluster-activation`, you ensure that the resource is not restored unless you activate the managed cluster. View the following example:
+
+[source,yaml]
+----
+apiVersion: my.group/v1alpha1
+kind: MyResource
+metadata:
+  labels:
+    cluster.open-cluster-management.io/backup: cluster-activation
+----
+
+*Note:* For any managed cluster namespace, or any resource in it, you must restore either one at the cluster activation step. Therefore, if you need to add to the backup resource created in the managed cluster namespace, then use the `cluster-activation` value for the `cluster.open-cluster-management.io/backup` label. To understand the restore process, see the following information:
+
+* If you restore the namespace, then the `managedcluster-import-controller` deletes the namespace.
+* If you restore the `managedCluster` custom resource, then the `cluster-manager-registration-controller` creates the namespace.
+
+Aside from the activation data resources that are identified by using the `cluster.open-cluster-management.io/backup: cluster-activation` label and stored by the `acm-resources-generic-schedule` backup, the cluster backup and restore operator includes a few resources in the activation set by default. The following resources are backed up by the `acm-managed-clusters-schedule` backup:
+
+* `managedcluster.cluster.open-cluster-management.io`
+* `klusterletaddonconfig.agent.open-cluster-management.io`
+* `managedclusteraddon.addon.open-cluster-management.io`
+* `managedclusterset.cluster.open-cluster-management.io`
+* `managedclusterset.clusterview.open-cluster-management.io`
+* `managedclustersetbinding.cluster.open-cluster-management.io`
+* `clusterpool.hive.openshift.io`
+* `clusterclaim.hive.openshift.io`
+* `clustercurator.cluster.open-cluster-management.io`
+
+* Backup label function
++
+You can backup third-party resources with cluster backup and restore by adding the `cluster.open-cluster-management.io/backup` label to the resources. The value of the label can be any string, including an empty string. Use a value that can help you identify the component that you are backing up. For example, use the `cluster.open-cluster-management.io/backup: idp` label if the components are provided by an IDP solution.
++
+*Note:* Use the `cluster-activation` value for the `cluster.open-cluster-management.io/backup` label if you want the resources to be restored when the managed clusters activation resources are restored. When you restore the managed clusters activation resources, the restore starts for the managed clusters that are actively managed by the hub cluster.
