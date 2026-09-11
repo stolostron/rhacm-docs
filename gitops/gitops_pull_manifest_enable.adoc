@@ -10,14 +10,13 @@ Create the `Placement` and `GitOpsCluster` resources so that the {gitops} add-on
 
 .Prerequisites
 
-* {acm-short} hub cluster installed.
-* Managed clusters registered with {acm-short}.
-* {gitops} operator installed on the hub cluster.
-* `ManagedClusterSet` bound to the target namespace.
+* You have managed clusters registered with {acm-short}.
+* The {gitops} operator is installed on your hub cluster.
+* The `ManagedClusterSet` is bound to the target namespace.
 
 .Procedure
 
-. Create a `ManagedClusterSetBinding` resource to bind the `ManagedClusterSet` to the `openshift-gitops` namespace by adding the following YAML sample:
+. Create a `ManagedClusterSetBinding` resource to bind the `ManagedClusterSet` to the `openshift-gitops` namespace. Add the following YAML sample:
 
 +
 [source,yaml]
@@ -31,7 +30,7 @@ spec:
   clusterSet: default
 ----
 
-. Apply the YAML sample by running the following command:
+. Apply the YAML sample. Run the following command:
 
 +
 [source,bash]
@@ -39,7 +38,7 @@ spec:
 oc apply -f managedclustersetbinding.yaml
 ----
 
-. Create a `Placement` resource for the `GitOpsCluster` to select which managed clusters receive the add-on by adding the following YAML sample:
+. Create a `Placement` resource for the `GitOpsCluster` to select which managed clusters receive the add-on. Add the following YAML sample:
 
 +
 [source,yaml]
@@ -67,7 +66,7 @@ spec:
           operator: DoesNotExist
 ----
 
-. Apply the YAML sample by running the following command:
+. Apply the YAML sample. Run the following command:
 
 +
 [source,bash]
@@ -75,7 +74,7 @@ spec:
 oc apply -f gitops-placement.yaml
 ----
 
-. Create a `GitOpsCluster` resource to enable the {gitops} add-on by adding the following YAML sample:
+. Create a `GitOpsCluster` resource to enable the {gitops} add-on. Add the following YAML sample:
 
 +
 [source,yaml]
@@ -96,17 +95,23 @@ spec:
     enabled: true
 ----
 
-. Apply the YAML sample by running the following command:
+. Apply the YAML sample. Run the following command:
 
 +
 [source,bash]
 ----
 oc apply -f gitopscluster.yaml
 ----
++
+*Note:* The `GitOpsCluster` controller automatically creates the following resources during reconciliation:
++
+* The `acm-placement` duck-type `ConfigMap` in the `argoServer.argoNamespace`
+* A `Role` and `RoleBinding`
+* An `ArgoCD` `Policy` named `<gitopscluster-name>-argocd-policy`
 
-The `GitOpsCluster` controller automatically creates the following resources during reconciliation:
+.Verification
 
-* The `acm-placement` duck-type `ConfigMap` in the `argoServer.argoNamespace` - this is the ConfigMap referenced by `configMapRef` in the `ApplicationSet` `clusterDecisionResource` generator. It tells the `ApplicationSet` controller how to read `PlacementDecision` resources. The auto-created ConfigMap looks like the following:
+. Make sure that the `acm-placement` ConfigMap resembled the following example:
 
 [source,yaml]
 ----
@@ -122,10 +127,7 @@ data:
   matchKey: clusterName
 ----
 
-* A `Role` and `RoleBinding` granting the `ApplicationSet` controller service account `list` access to `PlacementDecision` and `PlacementRule` resources in the Argo CD namespace. This is required for the `clusterDecisionResource` generator to read the `PlacementDecision` resources that the `Placement` controller creates.
-* An `ArgoCD` `Policy` named `<gitopscluster-name>-argocd-policy` that configures the `ArgoCD` custom resource on managed clusters.
-
-These resources are automatically created - you do not need to create them manually. If you need to verify that they were created, run the following commands:
+. Verify that each of the resources were created. Run the following commands:
 
 [source,bash]
 ----
