@@ -1,0 +1,47 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#restore-hub-return-primary]
+= Returning to the primary hub cluster
+
+[role="_abstract"]
+Return to the primary hub cluster and make it the active hub cluster that manages the cluster fleet after your disaster recovery tests finish.
+
+.Procedure
+
+. Create a backup on the restore hub cluster by applying the following resource:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: BackupSchedule
+metadata:
+ name: schedule-acm-msa
+ namespace: open-cluster-management-backup
+spec:
+ veleroSchedule: "0 */1 * * *"
+ veleroTtl: 120h
+ useManagedServiceAccount: true
+ paused: false
+----
+
+. Make sure the {acm-short} backups are generated and have the `Completed` status.
+. Pause the backup schedule by setting the `paused=true` property on the `schedule-acm-msa BackupSchedule` resource.
+. Restore all the resources from the secondary hub cluster backup by applying the following restore resource:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Restore
+metadata:
+ name: restore-acm
+ namespace: open-cluster-management-backup
+spec:
+ cleanupBeforeRestore: CleanupRestored
+ veleroManagedClustersBackupName: latest
+ veleroCredentialsBackupName: latest
+ veleroResourcesBackupName: latest
+----
++
+*Note:* When you set the `cleanupBeforeRestore` property to `CleanupRestored`, a cleanup operation runs after all resources are restored. This cleanup operation removes any hub resource that is not part of the restored backup.
