@@ -1,18 +1,18 @@
 :_mod-docs-content-type: PROCEDURE
 
 [#gitops-pull-rollout]
-= Implementing progressive rollout strategy by using _ApplicationSet_ resource (Technology Preview)
+= Implementing progressive rollout strategy (Technology Preview)
 
 [role="_abstract"]
-Use a progressive rollout strategy with an `ApplicationSet` resource to control how applications are updated across managed clusters.
+Use a progressive rollout strategy with an `ApplicationSet` resource to control how applications are updated across managed clusters. Make changes safely and more reliably across your entire cluster fleet by catching configuration errors early, and rolling out changes in smaller, more manageable steps.
+
+The `ApplicationSet` controller organizes the clusters into groups and processes one group at a time through the Argo CD health cycle.
 
 *Required access:* Cluster administrator
 
-By implementing the progressive rollout strategy to your application in your cluster fleet, you have a {gitops}-based process that makes changes safely across your entire cluster fleet. The `ApplicationSet` controller organizes the clusters into groups and processes one group at a time through the Argo CD health cycle.
+.Procedure
 
-.Enabling the progressive rollout strategy
-
-. Enable progressive syncs by running the following command:
+. Enable progressive synchronization. Run the following command:
 
 +
 [source,bash]
@@ -20,7 +20,7 @@ By implementing the progressive rollout strategy to your application in your clu
 oc -n openshift-gitops patch argocd openshift-gitops --type='merge' -p '{"spec":{"applicationSet":{"extraCommandArgs":["--enable-progressive-syncs"]}}}'
 ----
 
-. Restart the controller by running the following command:
+. Restart the controller. Run the following command:
 
 +
 [source,bash]
@@ -28,8 +28,7 @@ oc -n openshift-gitops patch argocd openshift-gitops --type='merge' -p '{"spec":
 oc -n openshift-gitops rollout restart deployment openshift-gitops-applicationset-controller
 ----
 
-
-.Understanding a sample ApplicationSet resource for the progressive rollout strategy
+. Customize the `ApplicationSet` resource for your progressive rollout strategy. Use the following YAML template:
 
 [source,yaml]
 ----
@@ -92,13 +91,20 @@ spec:
         syncOptions:
         - CreateNamespace=true
 ----
++
+* Use the `preserveFields` parameter to list the labels that you want the `ApplicationSet` to ingore. Without this field, the controller overwrites or deletes labels not defined in the template.
 
-Use the `preserveFields` parameter to list the labels that need to be ignored by the `ApplicationSet` controller. Without this field, the controller overwrites or deletes labels not defined in the template.
+. Apply the `ApplicationSet` resource. Run the following command:
 
++
+[source,bash]
+----
+oc apply -f guestbook-allclusters-app-set.yaml
+----
 
-.Understanding labels for the progressive rollout strategy
+.Verification
 
-Ensure each application has a unique label specifying its promotion order:
+. Make sure that application has a unique label that specifies thepromotion order. Run the following commands:
 
 [source,bash]
 ----
@@ -106,8 +112,5 @@ oc -n openshift-gitops label applications.argoproj.io/cluster1-guestbook-app env
 oc -n openshift-gitops label applications.argoproj.io/cluster2-guestbook-app envLabel=env-qa
 oc -n openshift-gitops label applications.argoproj.io/cluster3-guestbook-app envLabel=env-prod
 ----
-
-
-.Understanding changes to the Git repository
-
-When Argo CD detects committed changes, the `ApplicationSet` controller detects `OutOfSync` applications and schedules a staged rollout. The controller processes `env-dev` first, then `env-qa`, then `env-prod` - each group must reach `Healthy` before the next begins.
++
+*Note:* When Argo CD detects committed changes, the `ApplicationSet` controller detects `OutOfSync` applications and schedules a staged rollout. The controller processes `env-dev` first, then `env-qa`, then `env-prod`. Each group must reach the `Healthy` status before the next begins.
