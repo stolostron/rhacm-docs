@@ -1,0 +1,117 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-pull-rollout]
+= Implement progressive rollout strategy (Technology Preview)
+
+[role="_abstract"]
+Use a progressive rollout strategy with an `ApplicationSet` resource to control how applications are updated across managed clusters. Make changes safely and more reliably across your entire cluster fleet by catching configuration errors early, and rolling out changes in smaller, more manageable steps.
+
+The `ApplicationSet` controller organizes the clusters into groups and processes one group at a time through the Argo CD health cycle.
+
+*Required access:* Cluster administrator
+
+.Procedure
+
+. Enable progressive synchronization. Run the following command:
+
++
+[source,bash]
+----
+oc -n openshift-gitops patch argocd openshift-gitops --type='merge' -p '{"spec":{"applicationSet":{"extraCommandArgs":["--enable-progressive-syncs"]}}}'
+----
+
+. Restart the controller. Run the following command:
+
++
+[source,bash]
+----
+oc -n openshift-gitops rollout restart deployment openshift-gitops-applicationset-controller
+----
+
+. Customize the `ApplicationSet` resource for your progressive rollout strategy. Use the following YAML template:
+
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook-allclusters-app-set
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: app-placement
+      requeueAfterSeconds: 30
+  strategy:
+    type: RollingSync
+    rollingSync:
+      steps:
+      - name: dev-stage
+        matchExpressions:
+        - key: envLabel
+          operator: In
+          values: [env-dev]
+        maxUpdate: 100%
+      - name: qa-stage
+        matchExpressions:
+        - key: envLabel
+          operator: In
+          values: [env-qa]
+        maxUpdate: 100%
+      - name: prod-stage
+        matchExpressions:
+        - key: envLabel
+          operator: In
+          values: [env-prod]
+        maxUpdate: 100%
+  template:
+    preserveFields:
+    - metadata.labels.envLabel
+    metadata:
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+      name: '{{name}}-guestbook-app'
+    spec:
+      destination:
+        namespace: guestbook
+        server: https://kubernetes.default.svc
+      project: default
+      sources:
+      - repoURL: https://github.com/argoproj/argocd-example-apps.git
+        targetRevision: main
+        path: guestbook
+      syncPolicy:
+        syncOptions:
+        - CreateNamespace=true
+----
++
+* Use the `preserveFields` parameter to list the labels that you want the `ApplicationSet` to ingore. Without this field, the controller overwrites or deletes labels not defined in the template.
+
+. Apply the `ApplicationSet` resource. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f guestbook-allclusters-app-set.yaml
+----
+
+.Verification
+
+. Make sure that application has a unique label that specifies thepromotion order. Run the following commands:
+
++
+[source,bash]
+----
+oc -n openshift-gitops label applications.argoproj.io/cluster1-guestbook-app envLabel=env-dev
+oc -n openshift-gitops label applications.argoproj.io/cluster2-guestbook-app envLabel=env-qa
+oc -n openshift-gitops label applications.argoproj.io/cluster3-guestbook-app envLabel=env-prod
+----
++
+*Note:* When Argo CD detects committed changes, the `ApplicationSet` controller detects `OutOfSync` applications and schedules a staged rollout. The controller processes `env-dev` first, then `env-qa`, then `env-prod`. Each group must reach the `Healthy` status before the next begins.

@@ -1,0 +1,124 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-pull-manifest-deploy]
+= Deploy an application with the `ManifestWork`-based pull model
+
+[role="_abstract"]
+In the `ManifestWork`-based pull model, applications are deployed by using an `ApplicationSet` resource on the hub cluster with specific pull-model annotations and labels. The propagation controller detects these annotations and creates `ManifestWork` resources to distribute the `Application` to managed clusters, where the local Argo CD instance reconciles it.
+
+*Required access:* Cluster administrator
+
+.Procedure
+
+. Create a `Placement` resource for the `ApplicationSet` to select which managed clusters receive the application. Add the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: app-placement
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "In"
+          values:
+          - OpenShift
+        - key: local-cluster
+          operator: DoesNotExist
+----
++
+*Note:* This `Placement` is different from the `GitOpsCluster` `Placement` that you created previously.
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f app-placement.yaml
+----
+
+. Create the `ApplicationSet` resource with the pull-model annotations and labels. Use the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook-appset
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: app-placement
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: '{{name}}-guestbook'
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+      annotations:
+        argocd.argoproj.io/skip-reconcile: "true"
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps
+        targetRevision: HEAD
+        path: guestbook
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: guestbook
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+----
++
+The following annotations and labels are required for the `ManifestWork`-based pull model:
++
+* `apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"`: Enables the propagation controller to distribute the `Application` by using the `ManifestWork` resource.
+* `apps.open-cluster-management.io/ocm-managed-cluster: '\{\{name\}\}'`: Specifies which managed cluster receives the `Application`.
+* `argocd.argoproj.io/skip-reconcile: "true"`: Prevents the hub cluster Argo CD instancefrom reconciling the `Application`.
+* `apps.open-cluster-management.io/ocm-managed-cluster-app-namespace`: Specifies the namespace on the managed cluster where the `Application` object is created.
+* `destination.server: https://kubernetes.default.svc`: The managed cluster Argo CD instance reconciles the `Application` locally.
++
+*Note:* The `destination.server: https://kubernetes.default.svc` and the pull-model annotations are what distinguish the `ManifestWork`-based pull model from the other models.
+
+. Apply the YAML sample. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f applicationset.yaml
+----
+
+. Verify the deployment. Runthe following command on your hub cluster:
+
++
+[source,bash]
+----
+oc get applications.argoproj.io -n openshift-gitops
+----
+
+.Additional resources
+
+* xref:../gitops/gitops_placement.adoc#gitops-placement[Configure Placement resources for {gitops}] for details. 
+* xref:../gitops/gitops_pull_addon_overview.adoc#gitops-addon-overview[{gitops} add-on overview]
