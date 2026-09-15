@@ -1,0 +1,178 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#installing-while-connected-online-mce]
+= Installing while connected online
+
+[role="_abstract"]
+The {mce-short} is installed with {olm}, which manages the installation, update, and removal of the components that encompass the {mce-short}. Learn how to prepare for installation and how to install the {mce-short}.
+
+*Required access:* Cluster administrator
+
+After you prepare, you can install from the {ocp-catalog} console, or from the {ocp-short} command-line interface.
+
+.Prerequisites
+
+Before you start the installation procedure, you must complete the preparation process. See xref:../get_started/prepare_install_mce_connected.adoc#preparing-to-install-mce[Preparing to install {mce-short}].
+
+.Procedure
+
+* Installing from the {ocp-catalog} console:
+
+. From the _Administrator_ view in your {ocp-short} navigation, install the {ocp-catalog} console that is provided with {ocp-short}.
+. Go to *Ecosystem* > *Software Catalog*.
+. Choose the Operator that you want to install.
+. On the _Operator Installation_ page, select the options for your installation:
+ 
++
+Namespace:: The {mce-short} engine must be installed in its own namespace, or project. 
+
+  - By default, the {ocp-catalog} console installation process creates a namespace titled `multicluster-engine`. *Continue to use the `multicluster-engine` namespace if it is available.  
+  
+  - If there is already a namespace named `multicluster-engine`, select a different namespace.
+
+Channel:: The channel that you select corresponds to the release that you are installing. When you select the channel, it installs the identified release, and establishes that the future errata updates within that release are obtained.
+
+Approval strategy:: The approval strategy identifies the human interaction that is required for applying updates to the channel or release to which you subscribed. 
+
+  - Select *Automatic*, which is selected by default, to ensure any updates within that release are automatically applied. 
+  
+  - Select *Manual* to receive a notification when an update is available. If you have concerns about when the updates are applied, this might be best practice for you.
++
+*Note:* To update to the next minor release, you must return to the {ocp-catalog} and select a new channel for the more current release.
+
+. Select *Install* to apply your changes and create the operator. 
+
+. Create the _MultiClusterEngine_ custom resource.
+ .. In the {ocp-short} console navigation, select *Installed Operators* > *multicluster engine for Kubernetes*.
+ .. Select the *MultiCluster Engine* tab.
+ .. Select *Create MultiClusterEngine*.
+ .. Update the default values in the YAML file. See options in the _MultiClusterEngine advanced configuration_ section of the documentation.
++
+The following example shows the default template:
++
+[source,yaml]
+----
+apiVersion: multicluster.openshift.io/v1
+kind: MultiClusterEngine
+metadata:
+  name: multiclusterengine
+spec: {}
+----
+
+.. Select *Create* to initialize the custom resource. It can take up to 10 minutes for the {mce-short} engine to build and start.
+
++
+After the `MultiClusterEngine` resource is created, the status for the resource is `Available` on the `MultiCluster Engine` tab.
+
+* Installing from the {ocp-short} command-line interface:
+
+. Create a {mce-short} namespace where the operator requirements are contained. Run the following command, where `<namespace>` is the name for your {mce-short} namespace. The value for `<namespace>` might be referred to as _Project_ in the {ocp-short} environment:
++
+[source,bash]
+----
+oc create namespace <namespace>
+----
+
+. Switch your project namespace to the one that you created. Replace `namespace` with the name of the namespace that you created in step 1.
++
+[source,bash]
+----
+oc project <namespace>
+----
+
+. Create a YAML file to configure an `OperatorGroup` resource. Each namespace can have only one operator group. Replace `default` with the name of your operator group. Replace `namespace` with the name of your project namespace. See the following example:
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: <default>
+  namespace: <namespace>
+spec:
+  targetNamespaces:
+  - <namespace>
+----
+
+. Run the following command to create the `OperatorGroup` resource. Replace `operator-group` with the name of the operator group YAML file that you created:
++
+[source,bash]
+----
+oc apply -f <path-to-file>/<operator-group>.yaml
+----
+
+. Create a YAML file to configure an {ocp-short} Subscription. Your file appears similar to the following example, with `<stable-2.x>` changed to represent the supported version you are using:
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: multicluster-engine
+spec:
+  sourceNamespace: openshift-marketplace
+  source: redhat-operators
+  channel: stable-2.x
+  installPlanApproval: Automatic
+  name: multicluster-engine
+----
++
+*Note:* To configure infrastructure nodes, see xref:../get_started/config_infra_nodes_mce.adoc#config-infra-node-mce[Configuring infrastructure nodes for {mce-short}].
+
+. Run the following command to create the {ocp-short} Subscription. Replace `subscription` with the name of the subscription file that you created:
++
+[source,bash]
+----
+oc apply -f <path-to-file>/<subscription>.yaml
+----
+
+. Create a YAML file to configure the `MultiClusterEngine` custom resource. Your default template should look similar to the following example:
++
+[source,yaml]
+----
+apiVersion: multicluster.openshift.io/v1
+kind: MultiClusterEngine
+metadata:
+  name: multiclusterengine
+spec: {}
+----
+
+. Run the following command to create the `MultiClusterEngine` custom resource. Replace `custom-resource` with the name of your custom resource file:
++
+[source,bash]
+----
+oc apply -f <path-to-file>/<custom-resource>.yaml
+----
++
+If this step fails with the following error, the resources are still being created and applied. Run the command again in a few minutes when the resources are created:
++
+[source,bash]
+----
+error: unable to recognize "./mce.yaml": no matches for kind "MultiClusterEngine" in version "operator.multicluster-engine.io/v1"
+----
+
+. Run the following command to get the custom resource. It can take up to 10 minutes for the `MultiClusterEngine` custom resource status to display as `Available` in the `status.phase` field after you run the following command:
++
+[source,bash]
+----
+oc get mce -o=jsonpath='{.items[0].status.phase}'
+----
++
+*Important:* If you are reinstalling the {mce-short} and the pods do not start, you might need to clean up artifacts. Copy the following script into a file:
++
+[source,bash]
+----
+#!/bin/bash
+oc delete apiservice v1.admission.cluster.open-cluster-management.io v1.admission.work.open-cluster-management.io
+oc delete validatingwebhookconfiguration multiclusterengines.multicluster.openshift.io
+oc delete mce --all 
+----
+
++
+*Notes:*
+
+- A `ServiceAccount` with a `ClusterRoleBinding` automatically gives cluster administrator privileges to 
+{mce-short} and to any user credentials with access to the namespace where you install 
+{mce-short}.
+
+- You can now configure your {ocp-short} cluster to contain infrastructure nodes to run approved management components. Running components on infrastructure nodes avoids allocating {ocp-short} subscription quota for the nodes that are running those management components. See xref:../get_started/config_infra_nodes_mce.adoc#config-infra-node-mce[Configuring infrastructure nodes for {mce-short}] for that procedure.
