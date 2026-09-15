@@ -6,6 +6,10 @@
 [role="_abstract"]
 Register non-{ocp-short} managed clusters with the Argo CD server on the hub cluster so that you can deploy applications to managed clusters.
 
+When you integrate managed clusters with the {gitops-short} operator, a secret containing a token to access each managed cluster is automatically created in the GitOps instance server namespace. The {gitops-short} controller requires this secret to successfully sync resources to the managed cluster.
+
+By default, the `application-manager` service account operates with cluster-admin permissions on the managed cluster to generate the {gitops-short} cluster secret. If you do not want to use the default service account, see xref:../gitops/gitops_push_service_account.adoc#gitops-push-service-account[Create a customized service account for Argo CD Push model].
+
 *Note:* Registering non-{ocp-short} clusters to the {gitops} operator is only available for the Push model.
 
 *Required access:* Cluster administrator
@@ -13,7 +17,7 @@ Register non-{ocp-short} managed clusters with the Argo CD server on the hub clu
 .Prerequisites
 
 * Install the {gitops} operator on your {acm-short} hub cluster.
-* Import one or more managed clusters.
+* Import one or more non-{ocp-short} managed clusters.
 * Create a `ManagedClusterSet` and bind it to the namespace where {gitops-short} is deployed. See xref:../clusters/cluster_lifecycle/create_clusterset.adoc#creating-a-managedclusterset[Creating a _ManagedClusterSet_] and xref:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource].
 * Enable the `ManagedServiceAccount` add-on to rotate the token that the Argo CD Push model uses to connect to the managed cluster.
 
@@ -107,14 +111,33 @@ spec:
     url: https://<api-server-url>
 ----
 
-== {gitops} token
+.Verification
 
-*Note:* The token and cluster secret mechanisms described in this section are for the Push model only.
+. Make sure that the `acm-placement` ConfigMap resembled the following example:
 
-When you integrate with the {gitops-short} operator, for every managed cluster bound through the placement and `ManagedClusterSetBinding`, a secret with a token to access the `ManagedCluster` is created in the {gitops-short} namespace. The secure cluster secrets are rendered based on the following priority order:
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acm-placement
+  namespace: openshift-gitops
+data:
+  apiVersion: cluster.open-cluster-management.io/v1beta1
+  kind: placementdecisions
+  statusListKey: decisions
+  matchKey: clusterName
+----
 
-*Cluster proxy service:* The default option because the `cluster-proxy` add-on is always enabled in multicluster engine operator. Secrets include the cluster proxy URL, service CA, and `ManagedServiceAccount` `application-manager` token.
+. Verify that each of the resources were created. Run the following commands:
 
-*Managed cluster client configurations:* If the cluster proxy is unavailable. Secrets include the API server URL and CA from the managed cluster specification, plus the same `ManagedServiceAccount` token.
+[source,bash]
+----
+oc get configmap acm-placement -n openshift-gitops -o yaml
+oc get role openshift-gitops-applicationset-controller-placement -n openshift-gitops
+oc get rolebinding openshift-gitops-applicationset-controller-placement -n openshift-gitops
+----
 
-If you do not want the default service account, see xref:../gitops/gitops_push_service_account.adoc#gitops-push-service-account[Create a customized service account for Argo CD Push model].
+.Additional resources
+
+* xref:../gitops/gitops_push_register.adoc#gitops-push-register[Register {ocp-short} managed clusters to the {gitops} operator]
