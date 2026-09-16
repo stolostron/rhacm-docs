@@ -1,0 +1,46 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#cannot-reach-ipxe-script]
+= Client cannot reach iPXE script
+
+[role="_abstract"]
+iPXE is an open source network boot firmware. See link:https://ipxe.org/[iPXE] for more details.
+
+When booting a node, the URL length limitation in some DHCP servers cuts off the `ipxeScript` URL in the `InfraEnv` custom resource definition, resulting in the following error message in the console:
+
+`no bootable devices`
+
+.Procedure
+
+To work around the issue, complete the following steps:
+
+. Apply the `InfraEnv` custom resource definition when using an assisted installation to expose the `bootArtifacts`, which might resemble the following file:
+
++
+[source,yaml]
+----
+status:
+  agentLabelSelector:
+    matchLabels:
+      infraenvs.agent-install.openshift.io: qe2
+  bootArtifacts:
+    initrd: https://assisted-image-service-multicluster-engine.redhat.com/images/0000/pxe-initrd?api_key=0000000&arch=x86_64&version=4.11
+    ipxeScript: https://assisted-service-multicluster-engine.redhat.com/api/assisted-install/v2/infra-envs/00000/downloads/files?api_key=000000000&file_name=ipxe-script
+    kernel: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.12/latest/rhcos-live-kernel-x86_64
+    rootfs: https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.12/latest/rhcos-live-rootfs.x86_64.img
+----
+
+. Create a proxy server to expose the `bootArtifacts` with short URLs.
+
+. Copy the `bootArtifacts` and add them to the proxy by running the following commands:
+
++
+[source,bash]
+----
+for artifact in oc get infraenv qe2 -ojsonpath="{.status.bootArtifacts}" | jq ". | keys[]" | sed "s/\"//g"
+do curl -k oc get infraenv qe2 -ojsonpath="{.status.bootArtifacts.${artifact}}"` -o $artifact 
+----
+
+. Add the `ipxeScript` artifact proxy URL to the `bootp` parameter in `libvirt.xml`.
+
+link:https://github.com/stolostron/backlog/issues/25157[GH-25157]
