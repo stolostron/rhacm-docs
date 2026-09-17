@@ -1,0 +1,48 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#subscription-operator-does-not-create-an-scc]
+= Subscription operator does not create an SCC
+
+[role="_abstract"]
+Learn about {ocp} SCC at link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/authentication_and_authorization/index#managing-pod-security-policies[Managing security context constraints], which is an additional configuration required on the managed cluster.
+
+Different deployments have different security context and different service accounts. The subscription operator cannot create an SCC CR automatically.. Administrators control permissions for pods. A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace. To manually create an SCC CR in your namespace, complete the following steps:
+
+.Procedure
+
+. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
+
++
+----
+nginx-ingress-52edb
+nginx-ingress-52edb-backend
+----
+
++
+. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example, where `kind: SecurityContextConstraints` is added:
+
++
+[source,yaml]
+----
+apiVersion: security.openshift.io/v1
+ defaultAddCapabilities:
+ kind: SecurityContextConstraints
+ metadata:
+   name: ingress-nginx
+   namespace: ns-sub-1
+ priority: null
+ readOnlyRootFilesystem: false
+ requiredDropCapabilities:
+ fsGroup:
+   type: RunAsAny
+ runAsUser:
+   type: RunAsAny
+ seLinuxContext:
+   type: RunAsAny
+ users:
+ - system:serviceaccount:my-operator:nginx-ingress-52edb
+ - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
+----
+
++
+link:https://github.com/stolostron/backlog/issues/24248[GH-24248]

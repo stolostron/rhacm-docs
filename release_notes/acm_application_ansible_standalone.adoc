@@ -1,0 +1,71 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#application-ansible-standalone]
+= Application Ansible hook stand-alone mode
+
+[role="_abstract"]
+Ansible hook stand-alone mode is not supported. To deploy Ansible hook on the hub cluster with a subscription, you might use the following subscription YAML:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-rhacm-gitops-demo
+  namespace: hello-openshift
+  annotations:
+    apps.open-cluster-management.io/github-path: myapp
+    apps.open-cluster-management.io/github-branch: master
+spec:
+  hooksecretref:
+      name: toweraccess
+  channel: rhacm-gitops-demo/ch-rhacm-gitops-demo
+  placement:
+     local: true
+----
+However, this configuration might never create the Ansible instance, since the `spec.placement.local:true` has the subscription running on `standalone` mode. You need to create the subscription in hub mode.
+
+.Procedure
+
+. Create a placement rule that deploys to `local-cluster`. See the following sample where `local-cluster: "true"` refers to your hub cluster:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata: 
+  name: <towhichcluster>
+  namespace: hello-openshift
+spec:
+  clusterSelector:
+    matchLabels:
+      local-cluster: "true" 
+----
+. Reference that placement rule in your subscription. See the following sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-rhacm-gitops-demo
+  namespace: hello-openshift
+  annotations:
+    apps.open-cluster-management.io/github-path: myapp
+    apps.open-cluster-management.io/github-branch: master
+spec:
+  hooksecretref:
+      name: toweraccess
+  channel: rhacm-gitops-demo/ch-rhacm-gitops-demo
+  placement:
+     placementRef:
+        name: <towhichcluster>
+        kind: PlacementRule
+----
++
+After applying both, you should see the Ansible instance created in your hub cluster.
+
++
+link:https://github.com/stolostron/backlog/issues/8036[GH-8036]

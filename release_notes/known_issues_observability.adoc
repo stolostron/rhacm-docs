@@ -1,3 +1,5 @@
+:_mod-docs-content-type: CONCEPT
+
 [#known-issues-observability]
 = Observability known issues
 
@@ -7,107 +9,10 @@ For your {ocp} cluster, see link:https://docs.redhat.com/en/documentation/opensh
 
 For more about deprecations and removals, see xref:../release_notes/acm_deprecate_remove.adoc#deprecations-removals-acm[Deprecations and removals for {acm-short}].
 
-[#alert-forward-fails]
-== Manually configured alert forwarding fails
-
-When you update to {acm-short} {product-version-prev} and later, alert forwarding fails if you disabled automatic configuration by setting `mco-disable-alerting: true` in the `MultiClusterObservability` custom resource, and if you manually configured alert forwarding.
-
-Alert forwarding fails after you update because the name of the `observability-alertmanager-accessor` and `hub-alertmanager-router-ca` secrets were changed to include a postfix of the hub cluster ID.
-
-The hub cluster ID is obtained from the `uuid` field in the metadata of the `ClusterVersion` custom resource on the hub cluster. The ID, with dashes removed and trimmed to the first 19 characters, is appended to the `alertmanager` secrets.
-
-To fix this issue, update your alert forwarding configuration that you manually configured to use the new names of the secrets.
-
-For platform alerts, update the secret name in the `cluster-monitoring-config` config map in the `openshift-monitoring` namespace. For user workload alerts, update the secret name in the `user-workload-monitoring-config` config map in the `openshift-user-workload-monitoring` namespace. Find the new secret names in the `openshift-monitoring` and `openshift-user-workload-monitoring` namespaces.
-
-link:https://issues.redhat.com/browse/ACM-26604[ACM-26604]
-
-[#retention-change]
-== Retention change causes data loss 
-
-The default retention for all resolution levels, such as `retentionResolutionRaw`, `retentionResolution5m`, or `retentionResolution1h`, is 365 days (`365d`). This `365d` default retention means that the default retention for a 1 hour resolution has decreased from indefinite, `0d` to `365d`. This retention change might cause you to lose data. If you did not set an explicit value for the resolution retention in your `MultiClusterObservability` `spec.advanced.retentionConfig` parameter, you might lose data.  
-
-For more information, see link:../observability/customize_observability.adoc#adding-advanced-config[Adding advanced configuration for retention].
-
-link:https://issues.redhat.com/browse/ACM-11048[ACM-11048]
-
-[#permission-to-managed-cluster-monitoring-denied]
-== Observatorium API gateway pods in a restored hub cluster might have stale tenant data
-
-The Observatorium API gateway pods in a restored hub cluster might contain stale tenant data after a backup and restore procedure because of a Kubernetes limitation. See link:https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#mounted-configmaps-are-updated-automatically[Mounted ConfigMaps are updated automatically] for more about the limitation.
-
-As a result, the Observatorium API and Thanos gateway rejects metrics from collectors, and the {acm-short} Grafana dashboards do not display data.
-
-See the following errors from the Observatorium API gateway pod logs:
-
-----
-level=error name=observatorium caller=logchannel.go:129 msg="failed to forward metrics" returncode="500 Internal Server Error" response="no matching hashring to handle tenant\n"
-----
-
-Thanos receives pods logs with the following errors:
-
-----
-caller=handler.go:551 level=error component=receive component=receive-handler tenant=xxxx err="no matching hashring to handle tenant" msg="internal server error"
-----
-
-See the following procedure to resolve this issue:
-
-. Scale down the `observability-observatorium-api` deployment instances from `N` to `0`.
-. Scale up the `observability-observatorium-api` deployment instances from `0` to `N`. 
-
-*Note:* `N` = `2` by default, but might be greater than `2` in some custom configuration environments.
-
-This restarts all Observatorium API gateway pods with the correct tenant information, and the data from collectors start displaying in Grafana in between 5-10 minutes.
-
-link:https://issues.redhat.com/browse/ACM-9681[ACM-9681]
-
-[#permission-to-add-denied]
-== Permission to add _PrometheusRules_ and _ServiceMonitors_ in _openshift-monitoring_ namespace denied
-
-You must use a label in your defined {acm-short} hub cluster namespace. The label, `openshift.io/cluster-monitoring: "true"` causes the Cluster Monitoring Operator to scrape the namespace for metrics. 
-
-When {acm-short} is deployed or an installation is updated, the {acm-short} observability `ServiceMonitors` and `PrometheusRule` resources are no longer present in the `openshift-monitoring` namespace. 
-
-link:https://issues.redhat.com/browse/ACM-8499[ACM-8499]
-
-[#lack-of-support-for-proxy-settings]
-== Lack of support for proxy settings
-
-The Prometheus `AdditionalAlertManagerConfig` resource of the observability add-on does not support proxy settings. You must disable the observability alert forwarding feature. 
-
-Complete the following steps to disable alert forwarding:
-
-. Go to the `MultiClusterObservability` resource.
-. Update the `mco-disabling-alerting` parameter value to `true`
-
-The HTTPS proxy with a self-signed CA certificate is not supported. 
-
-link:https://issues.redhat.com/browse/ACM-7118[ACM-7118]
-
-[#grafana-downsampled-mismatch]
-=== Grafana downsampled data mismatch
-
-When you attempt to query historical data and there is a discrepancy between the calculated step value and downsampled data, the result is empty. For example, if the calculated step value is `5m` and the downsampled data is in a one-hour interval, data does not appear from Grafana.
-
-This discrepancy occurs because a URL query parameter must be passed through the Thanos Query front-end data source. Afterwards, the URL query can perform additional queries for other downsampling levels when data is missing.
-
-You must manually update the Thanos Query front-end data source configuration. Complete the following steps:
-
-. Go to the Query front-end data source.
-
-. To update your query parameters, click the _Misc_ section.
-
-. From the _Custom query parameters_ field, select *`max_source_resolution=auto`*.
-
-. To verify that the data is displayed, refresh your Grafana page. 
-
-Your query data appears from the Grafana dashboard.
-
-link:https://issues.redhat.com/browse/ACM-3748[ACM-3748]
-
-[#limits-custom-obs-urls]
-== Limitations when using custom managed cluster Observatorium API or Alertmanager URLs
-
-Custom Observatorium API and Alertmanager URLs only support intermediate components with TLS passthrough. If both custom URLs are pointing to the same intermediate component, you must use separate sub-domains because {ocp-short} routers do not support two separate route objects with the same host.
-
-link:https://issues.redhat.com/browse/ACM-11407[ACM-11407]
+* xref:../release_notes/acm_alert_forward_fails.adoc#alert-forward-fails[Manually configured alert forwarding fails]
+* xref:../release_notes/acm_retention_change.adoc#retention-change[Retention change causes data loss]
+* xref:../release_notes/acm_obs_stale_tenant.adoc#permission-to-managed-cluster-monitoring-denied[Observatorium API gateway pods in a restored hub cluster might have stale tenant data]
+* xref:../release_notes/acm_permission_to_add_denied.adoc#permission-to-add-denied[Permission to add _PrometheusRules_ and _ServiceMonitors_ in _openshift-monitoring_ namespace denied]
+* xref:../release_notes/acm_lack_of_support_for_proxy_settings.adoc#lack-of-support-for-proxy-settings[Lack of support for proxy settings]
+* xref:../release_notes/acm_grafana_downsampled_mismatch.adoc#grafana-downsampled-mismatch[Grafana downsampled data mismatch]
+* xref:../release_notes/acm_limits_custom_obs_urls.adoc#limits-custom-obs-urls[Limitations when using custom managed cluster Observatorium API or Alertmanager URLs]

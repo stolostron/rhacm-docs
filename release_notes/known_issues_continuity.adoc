@@ -1,3 +1,5 @@
+:_mod-docs-content-type: CONCEPT
+
 [#known-issues-continuity]
 = Business continuity known issues
 
@@ -7,126 +9,11 @@ For your {ocp} cluster, see link:https://docs.redhat.com/en/documentation/opensh
 
 For more about deprecations and removals, see xref:../release_notes/acm_deprecate_remove.adoc#deprecations-removals-acm[Deprecations and removals for {acm-short}].
 
-[#known-issues-backup-restore]
-== Backup and restore known issues
-
-Backup and restore known issues and limitations are listed here, along with workarounds if they are available.
-
-[#passive-sync-restore-failed]
-=== Passive sync restore does not recover after transient _BackupStorageLocation_ failures
-
-When you configure a `Restore` resource in passive sync mode by setting `syncRestoreWithNewBackups` to `true`, and the `BackupStorageLocation` becomes temporarily unavailable, the Velero restore operation fails with a `FailedValidation` status.
-
-After you restore the `BackupStorageLocation` and create successsful backups, the {acm-short} `Restore` resource remains in the `Error` phase. This happens because failed Velero restore objects persist in the cluster, which prevents the controller from attempting new restores.
-
-The issue causes the following conditions:
-
-* The secondary hub cluster appears unhealthy.
-* Automated disaster recovery scripts or tools identify the cluster as not ready for switchover.
-* The `Restore` operation does not automatically resume sync operations after you resolve the `BackupStorageLocation` issue.
-
-To resume the backup sync operation, manually delete the failed Velero restore objects. Run the following command. Replace `<failed_restore_name>` with the name of the failed Velero restore object:
-
-[source,bash]
-----
-oc -n open-cluster-management-backup delete restore.velero.io <failed_restore_name>
-----
-
-After the failed objects are deleted, the `Restore` controller performs the following actions:
-
-* Detects that the Velero restore objects are missing.
-* Creates new Velero restore objects based on the latest backups.
-* Updates the `Restore` resource phase to `Enabled`.
-
-[#restore-limitations]
-=== Velero restore limitations
-
-A new hub cluster can have a different configuration than the active hub cluster if the new hub cluster, where the data is restored, has user-created resources. For example, this can include an existing policy that was created on the new hub cluster before the backup data is restored on the new hub cluster.
-
-Velero skips existing resources if they are not part of the restored backup, so the policy on the new hub cluster remains unchanged, resulting in a different configuration between the new hub cluster and active hub cluster.
-
-To address this limitation, the cluster backup and restore operator runs a post restore operation to clean up the resources created by the user or a different restore operation when a `restore.cluster.open-cluster-management.io` resource is created.
-
-For more information, see the link:../business_continuity/backup_restore/backup_restore.adoc#restore-backup[Cleaning the hub cluster after restore] topic. 
-
-link:https://github.com/stolostron/backlog/issues/21861[GH-21861]
-
-[#imported-clusters-not-displayed]
-=== Passive configurations do not display managed clusters
-
-Managed clusters are only displayed when the activation data is restored on the passive hub cluster.
-
-link:https://github.com/stolostron/backlog/issues/22098[GH-22098]
-
-[#managed-cluster-resources-not-restored]
-=== Managed cluster resource not restored
-
-When you restore the settings for the `local-cluster` managed cluster resource and overwrite the `local-cluster` data on a new hub cluster, the settings are misconfigured. Content from the previous hub cluster `local-cluster` is not backed up because the resource contains `local-cluster` specific information, such as the cluster URL details.
-
-You must manually apply any configuration changes that are related to the `local-cluster` resource on the restored cluster. See _Prepare the new hub cluster_ in the link:../business_continuity/backup_restore/backup_install.adoc#dr4hub-install-backup-and-restore[Installing the backup and restore operator] topic.
-
-link:https://github.com/stolostron/backlog/issues/21054[GH-21054]
-
-[#restored-hive-managed-clusters-unable-new-hub]
-=== Restored Hive managed clusters might not be able to connect with the new hub cluster
-
-When you restore the backup of the changed or rotated certificate of authority (CA) for the Hive managed cluster, on a new hub cluster, the managed cluster fails to connect to the new hub cluster. The connection fails because the `admin` `kubeconfig` secret for this managed cluster, available with the backup, is no longer valid. 
-
-You must manually update the restored `admin` `kubeconfig` secret of the managed cluster on the new hub cluster.
-
-link:https://github.com/stolostron/backlog/issues/25461[GH-25461]
-
-[#imported-managed-clusters-pending-import]
-=== Imported managed clusters show a _Pending Import_ status
-
-Managed clusters that are manually imported on the primary hub cluster show a `Pending Import` status when the activation data is restored on the passive hub cluster. For more information, see link:../business_continuity/backup_restore/backup_msa.adoc#auto-connect-clusters-msa[Connecting clusters by using a Managed Service Account].
-
-link:https://issues.redhat.com/browse/ACM-1890[ACM-1890]
-
-[#appliedmanifestwork-not-removed]
-=== The _appliedmanifestwork_ is not removed from managed clusters after restoring the hub cluster
-
-When the hub cluster data is restored on the new hub cluster, the `appliedmanifestwork` is not removed from managed clusters that have a placement rule for an application subscription that is not a fixed cluster set.
-
-See the following example of a placement rule for an application subscription that is not a fixed cluster set:
-
-[source,yaml]
-----
-spec:
-  clusterReplicas: 1
-  clusterSelector:
-    matchLabels:
-      environment: dev
-----
-
-As a result, the application is orphaned when the managed cluster is detached from the restored hub cluster.
-
-To avoid the issue, specify a fixed cluster set in the placement rule. See the following example:
-
-[source,yaml]
-----
-spec:
-  clusterSelector:
-    matchLabels:
-      environment: dev
-----
-
-You can also delete the remaining `appliedmanifestwork` manually by running the folowing command:
-
-----
-oc delete appliedmanifestwork <the-left-appliedmanifestwork-name>
-----
-
-link:https://github.com/stolostron/backlog/issues/27129[GH-27129]
-
-[#known-issues-volsync]
-== Volsync known issues
-
-[#ca-certificate-hub-restore]
-=== Restoring the connection of a managed cluster with custom CA certificates to its restored hub cluster might fail
-
-After you restore the backup of a hub cluster that manages a cluster with custom CA certificates, the connection between the managed cluster and the hub cluster might fail. This is because the CA certificate was not backed up on the restored hub cluster. To restore the connection, copy the custom CA certificate information that is in the namespace of your managed cluster to the `<managed_cluster>-admin-kubeconfig` secret on the restored hub cluster. 
-
-*Note:* If you copy this CA certificate to the hub cluster before creating the backup copy, the backup copy includes the secret information. When you use the backup copy to restore in the future, the connection between the hub cluster and managed cluster automatically completes.
-
-link:https://github.com/stolostron/backlog/issues/19481[GH-19481]
+* xref:../release_notes/acm_passive_sync_restore_failed.adoc#passive-sync-restore-failed[Passive sync restore does not recover after transient _BackupStorageLocation_ failures]
+* xref:../release_notes/acm_restore_limitations.adoc#restore-limitations[Velero restore limitations]
+* xref:../release_notes/acm_imported_clusters_not_displayed.adoc#imported-clusters-not-displayed[Passive configurations do not display managed clusters]
+* xref:../release_notes/acm_mc_not_restored.adoc#managed-cluster-resources-not-restored[Managed cluster resource not restored]
+* xref:../release_notes/acm_restored_hive_connect.adoc#restored-hive-managed-clusters-unable-new-hub[Restored Hive managed clusters might not be able to connect with the new hub cluster]
+* xref:../release_notes/acm_imported_pending.adoc#imported-managed-clusters-pending-import[Imported managed clusters show a _Pending Import_ status]
+* xref:../release_notes/acm_appliedmanifestwork_not_removed.adoc#appliedmanifestwork-not-removed[The _appliedmanifestwork_ is not removed from managed clusters after restoring the hub cluster]
+* xref:../release_notes/acm_ca_certificate_hub_restore.adoc#ca-certificate-hub-restore[Restoring the connection of a managed cluster with custom CA certificates to its restored hub cluster might fail]
