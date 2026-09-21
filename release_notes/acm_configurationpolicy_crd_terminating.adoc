@@ -1,0 +1,35 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#configurationpolicy-crd-terminating]
+= _ConfigurationPolicy_ stuck in terminating
+
+[role="_abstract"]
+When you remove the `config-policy-controller` add-on from a managed cluster by disabling the policy controller in the `KlusterletAddonConfig` or by detaching the cluster, the `ConfigurationPolicy` custom resource definition might get stuck in a terminating state. If the `ConfigurationPolicy` custom resource definition is stuck in a terminating state, new policies might not be added to the cluster if the add-on is reinstalled later. You can also receive the following error:
+
+----
+template-error; Failed to create policy template: create not allowed while custom resource definition is terminating
+----
+
+.Procedure
+
+. Use the following command to check if the custom resource definition is stuck:
+
++
+[source,bash]
+----
+oc get crd configurationpolicies.policy.open-cluster-management.io -o=jsonpath='{.metadata.deletionTimestamp}'
+----
+
+. If a deletion timestamp is on the resource, the custom resource definition is stuck. To resolve the issue, remove all finalizers from configuration policies that remain on the cluster. Use the following command on the managed cluster and replace `<cluster-namespace>` with the managed cluster namespace:
+
++
+[source,bash]
+----
+oc get configurationpolicy -n <cluster-namespace> -o name | xargs oc patch -n <cluster-namespace> --type=merge -p '{"metadata":{"finalizers": []}}'
+----
++
+The configuration policy resources are automatically removed from the cluster and the custom resource definition exits its terminating state. If the add-on has already been reinstalled, the custom resource definition is recreated automatically without a deletion timestamp.
+
+.Additional resources
+
+* link:https://github.com/stolostron/backlog/issues/25139[GH-25139]
