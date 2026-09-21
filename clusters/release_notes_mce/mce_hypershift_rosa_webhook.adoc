@@ -1,0 +1,44 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#hypershift-rosa-webhook]
+= HyperShift installation fails on {rosa} due to admission webhook error
+
+[role="_abstract"]
+When you install {mce} 2.10 on {rosa}, the HyperShift installation job might fail repeatedly with an admission webhook error similar to the following message: `namespace-validation.managed.openshift.io denied the request`. See the following explanations for the error. To resolve this issue, create a `ConfigMap` in the `local-cluster` namespace to disable platform monitoring.
+
+* The installation process attempts to create a `hypershift` namespace that includes the `openshift.io/cluster-monitoring: "true"` label. 
+
+* The {rosa} managed admission webhooks prevent users from modifying protected labels on namespaces, including the `cluster-monitoring` label.
+
+* The platform monitoring flag defaults to monitoring the operator, which adds the `cluster-monitoring` label to the `hypershift` namespace. 
+
+* In managed environments, such as {rosa}, the service provider typically handles platform-level monitoring. Therefore, this monitoring is not required and conflicts with namespace protection policies.
+
+.Procedure
+
+. Create a YAML file for the `ConfigMap` with the following content:
+
++
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: hypershift-operator-install-flags
+  namespace: local-cluster
+data:
+  installFlagsToAdd: "--platform-monitoring=None"
+  installFlagsToRemove: ""
+----
+
+. Apply the `ConfigMap` to your cluster to instruct the HyperShift installer to skip the `cluster-monitoring` label, which avoids the admission webhook conflict. Run the following command. Replace `<filename>` with the name of your YAML file:
+
++
+[source,bash]
+----
+oc apply -f <filename>.yaml
+----
+
+.Additional resources
+
+* link:https://issues.redhat.com/browse/ACM-26040[ACM-26040]
