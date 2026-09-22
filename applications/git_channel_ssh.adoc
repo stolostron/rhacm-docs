@@ -1,0 +1,61 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#git-SSH-connection]
+= Making an SSH connection to a Git server
+
+[role="_abstract"]
+You can connect to a Git server by using SSH.
+
+.Procedure
+
+. Create a secret to contain your private SSH key in `sshKey` field in `data`. If the key is passphrase-protected, specify the password in `passphrase` field. This secret must be in the same namespace as the channel CR. Create this secret using a `oc` command to create a secret generic `git-ssh-key --from-file=sshKey=./.ssh/id_rsa`, then add base64 encoded `passphrase`. See the following sample:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git-ssh-key
+  namespace: channel-ns
+data:
+  sshKey: LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQ21GbGN6STFOaTFqZEhJQUFBQUdZbU55ZVhCMEFBQUFHQUFBQUJDK3YySHhWSIwCm8zejh1endzV3NWODMvSFVkOEtGeVBmWk5OeE5TQUgcFA3Yk1yR2tlRFFPd3J6MGIKOUlRM0tKVXQzWEE0Zmd6NVlrVFVhcTJsZWxxVk1HcXI2WHF2UVJ5Mkc0NkRlRVlYUGpabVZMcGVuaGtRYU5HYmpaMmZOdQpWUGpiOVhZRmd4bTNnYUpJU3BNeTFLWjQ5MzJvOFByaDZEdzRYVUF1a28wZGdBaDdndVpPaE53b0pVYnNmYlZRc0xMS1RrCnQwblZ1anRvd2NEVGx4TlpIUjcwbGVUSHdGQTYwekM0elpMNkRPc3RMYjV2LzZhMjFHRlMwVmVXQ3YvMlpMOE1sbjVUZWwKSytoUWtxRnJBL3BUc1ozVXNjSG1GUi9PV25FPQotLS0tLUVORCBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0K
+  passphrase: cGFzc3cwcmQK
+type: Opaque
+----
+
+. Configure the channel with the secret. See the following sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: my-channel
+  namespace: channel-ns
+spec:
+  secretRef:
+    name: git-ssh-key
+  pathname: <Git SSH URL>
+  type: Git
+----
+
++
+The subscription controller does an `ssh-keyscan` with the provided Git hostname to build the `known_hosts` list to prevent an Man-in-the-middle (MITM) attack in the SSH connection. If you want to skip this and make insecure connection, use `insecureSkipVerify: true` in the channel configuration. This is not best practice, especially in production environments.
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: my-channel
+  namespace: channel-ns
+spec:
+  secretRef:
+    name: git-ssh-key
+  pathname: <Git SSH URL>
+  type: Git
+  insecureSkipVerify: true
+----
