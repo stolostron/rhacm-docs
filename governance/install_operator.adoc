@@ -53,3 +53,53 @@ oc -n <managed cluster namespace> get operatorpolicy install-quay
 .Additional resources
 
 * xref:../governance/operator_pol_ctrl.adoc#operator-policy-ctrl[Operator policy controller]
+
+[#manage-existing-operator-with-operatorpolicy]
+== Managing an already installed operator with an operator policy
+
+[role="_abstract"]
+Use an `OperatorPolicy` resource to manage an operator that is already installed by {olm} without an `OperatorPolicy` resource, for example Red Hat OpenShift Data Foundation. Align the policy with the existing `Subscription` and `ClusterServiceVersion` resources instead of forcing a reinstall.
+
+.Required access: Cluster administrator
+
+.Procedure
+
+. On the managed cluster, inventory the existing operator resources. For OpenShift Data Foundation, run the following commands:
+
++
+[source,bash]
+----
+oc -n openshift-storage get subscription odf-operator -o yaml
+oc -n openshift-storage get installplan
+oc -n openshift-storage get csv
+----
+
+. Create an `OperatorPolicy` resource whose `spec.subscription` fields match the existing `Subscription` package, channel, catalog `source`, and `sourceNamespace`. Do not set a different `startingCSV` value that conflicts with the installed `ClusterServiceVersion`.
+
+. Choose an upgrade approval approach:
+
+* To allow the policy to approve operator upgrades when `remediationAction` is `enforce`, set `spec.upgradeApproval` to `Automatic`.
+* To keep version upgrades under administrator control, set `spec.upgradeApproval` to `Manual` or `None`. Approve `InstallPlan` resources manually on the managed cluster when required.
+
+. *Optional:* If a pending `InstallPlan` for a newer z-stream or dependency must not mark the policy `NonCompliant` while the installed operator remains healthy, set `spec.complianceConfig.upgradesAvailable` to `Compliant`. The default value is `Compliant`.
+
+. Verify the policy status on the managed cluster:
+
++
+[source,bash]
+----
+oc -n <managed-cluster-namespace> get operatorpolicy <operator-policy-name> -o yaml
+----
+
++
+Confirm that the `OperatorPolicy` resource is `Compliant`, that a single operator installation remains, and that any remaining `InstallPlan` resources match the intended approval strategy.
+
+*Notes:*
+
+* Do not set `installPlanApproval` under `spec.subscription`. That field makes the policy noncompliant. Use `spec.upgradeApproval` instead. For more information, see xref:../governance/operator_pol_ctrl.adoc#operator-policy-ctrl[Operator policy controller].
+* Operators with multiple related `ClusterServiceVersion` resources, such as OpenShift Data Foundation, can report pending dependency `InstallPlan` resources in the policy status. Treat those messages as part of {olm} upgrade planning rather than as a failed operator install when the installed CSVs remain `Succeeded`.
+* If the `Subscription` resource name on the cluster does not match the name that the `OperatorPolicy` resource expects, the policy can report that the required `Subscription` is missing. Align the existing `Subscription` metadata and package fields with the policy.
+
+.Additional resources
+
+* xref:../governance/operator_pol_ctrl.adoc#operator-policy-ctrl[Operator policy controller]
