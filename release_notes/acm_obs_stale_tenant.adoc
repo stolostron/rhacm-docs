@@ -1,0 +1,36 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#obs-stale-tenant]
+= Observatorium API gateway pods have stale tenant data after hub restore
+
+[role="_abstract"]
+The Observatorium API gateway pods in a restored hub cluster might contain stale tenant data after a backup and restore procedure because of a Kubernetes limitation. See link:https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#mounted-configmaps-are-updated-automatically[Mounted config maps are updated automatically] for more about the limitation.
+
+As a result, the Observatorium API and Thanos gateway rejects metrics from collectors, and the {acm-short} Grafana dashboards do not display data.
+
+See the following errors from the Observatorium API gateway pod logs:
+
+[source,bash]
+----
+level=error name=observatorium caller=logchannel.go:129 msg="failed to forward metrics" returncode="500 Internal Server Error" response="no matching hashring to handle tenant\n"
+----
+
+Thanos receives pods logs with the following errors:
+
+[source,bash]
+----
+caller=handler.go:551 level=error component=receive component=receive-handler tenant=xxxx err="no matching hashring to handle tenant" msg="internal server error"
+----
+
+See the following procedure to restart all Observatorium API gateway pods with the correct tenant information, and the data from collectors start displaying in Grafana in between 5-10 minutes:
+
+.Procedure
+
+. Scale down the `observability-observatorium-api` deployment instances from `N` to `0`.
+. Scale up the `observability-observatorium-api` deployment instances from `0` to `N`. 
++
+*Note:* `N` = `2` by default, but might be greater than `2` in some custom configuration environments.
+
+.Additional resources
+
+* link:https://issues.redhat.com/browse/ACM-9681[ACM-9681]
