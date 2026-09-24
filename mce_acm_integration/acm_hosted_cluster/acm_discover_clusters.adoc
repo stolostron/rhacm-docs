@@ -1,0 +1,111 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#hosted-discover]
+= Discover hosted clusters
+
+[role="_abstract"]
+Enable the `hypershift-addon` for those managed {mce-short} clusters to discover the hosted clusters after all your {mce-short} clusters are imported into {acm-short}. Default add-ons are installed into a different namespace in the previous procedures. Similarly, you install the `hypershift-addon` into a different namespace in {mce-short} so that the add-ons agent for {mce-short} local-cluster and the agent for {acm-short} can work in {mce-short}.
+
+*Required access:* Cluster administrator
+
+*Important:* For all the following commands, replace `<managed-cluster-names>` with comma-separated managed cluster names for {mce-short}.
+
+.Procedure
+
+. Run the following command to set the `agentInstallNamespace` namespace of the add-on to `open-cluster-management-agent-addon-discovery`:
+
++
+[source,bash]
+----
+oc patch addondeploymentconfig hypershift-addon-deploy-config -n multicluster-engine --type=merge -p '{"spec":{"agentInstallNamespace":"open-cluster-management-agent-addon-discovery"}}'
+----
+
+. Run the following command to disable metrics and to disable the HyperShift operator management:
+
++
+[source,bash]
+----
+oc patch addondeploymentconfig hypershift-addon-deploy-config -n multicluster-engine --type=merge -p '{"spec":{"customizedVariables":[{"name":"disableMetrics","value": "true"},{"name":"disableHOManagement","value": "true"}]}}'
+----
+
+. *Optional:* Configure your customized naming convention. By default, imported hosted clusters use the `<mce-cluster-name>-<hosted-cluster-name>` naming pattern, but you can change the name with the following steps:
+
+.. Remove the default prefix by running the following command:
+
++
+[source,bash]
+----
+oc patch addondeploymentconfig hypershift-addon-deploy-config \
+  -n multicluster-engine \
+  --type=merge \
+  -p '{"spec":{"customizedVariables":[{"name":"disableMetrics","value":"true"},{"name":"disableHOManagement","value":"true"},{"name":"discoveryPrefix","value":"custom-prefix"}]}}'
+----
+
+.. Change `custom-prefix` to your new prefix. The hosted cluster names are created with the `<custom-prefix>-<hosted-cluster-name>` pattern. Run the following command:
+
++
+[source,bash]
+----
+oc patch addondeploymentconfig hypershift-addon-deploy-config \
+  -n multicluster-engine \
+  --type=merge \
+  -p '{"spec":{"customizedVariables":[{"name":"disableMetrics","value":"true"},{"name":"disableHOManagement","value":"true"},{"name":"discoveryPrefix","value":"custom-prefix"}]}}'
+----
+
+.. If you need to remove the discovery prefix entirely, first ensure all hosted clusters are detached from the respective clusters. *Important:* Using an empty string as the custom prefix can cause klusterlet naming collisions within the {mce-short} cluster. Run the following command:
+
++
+[source,bash]
+----
+oc patch addondeploymentconfig hypershift-addon-deploy-config \
+   -n multicluster-engine \
+   --type=json \
+   -p='[{"op":"add","path":"/spec/customizedVariables/-","value":{"name":"autoImportDisabled","value":"true"}}]'
+----
+
+. Run the following command to enable the `hypershift-addon` for {mce-short}:
+
++
+[source,bash]
+----
+clusteradm addon enable --names hypershift-addon --clusters <managed-cluster-names>
+----
+
+. Get the {mce-short} managed cluster names by running the following command in {acm-short}.
+
++
+[source,bash]
+----
+oc get managedcluster
+----
+
+. Log into {mce-short} clusters and verify that the `hypershift-addon` is installed in the namespace that you specified. Run the following command:
+
++
+[source,bash]
+----
+oc get deployment -n open-cluster-management-agent-addon-discovery
+----
++
+See the following example output that lists the add-ons:
++
+[source,bash]
+----
+NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
+cluster-proxy-proxy-agent           1/1     1            1           24h
+klusterlet-addon-workmgr            1/1     1            1           24h
+hypershift-addon-agent              1/1     1            1           24h
+managed-serviceaccount-addon-agent  1/1     1            1           24h
+----
++
+{acm-short} deploys the `hypershift-addon`, which is the discovery agent that discovers hosted clusters from {mce-short}. The agent creates the corresponding `DiscoveredCluster` custom resource in the {mce-short} managed cluster namespace in the {acm-short} hub cluster when the hosted cluster `kube-apiserver` becomes available.
+
+. View your discovered clusters in the console. Log in to hub cluster console and click *Fleet Management* > *Infrastructure* > *Clusters*.
++
+*Note:* For {ocp-short} versions earlier than version 4.20, select *All Clusters* from the cluster switcher.
+
+. Find the _Discovered clusters_ tab to view all discovered hosted clusters from {mce-short} with type `MultiClusterEngineHCP`.
+
+.Additional resources
+
+* xref:../acm_hosted_cluster/acm_integrate_import_hcp.adoc#auto-import-hcp[Automate import for discovered hosted clusters]

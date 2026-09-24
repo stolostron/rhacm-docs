@@ -1,0 +1,122 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#config-hcp-autoimport]
+= Configure settings for automatic import
+
+[role="_abstract"]
+Discovered hosted clusters from managed {mce-short} clusters are represented in `DiscoveredCluster` custom resources, which are located in the managed {mce-short} cluster namespace in {acm-short}. See the following `DiscoveredCluster` resource and namespace example:
+
+[source,yaml]
+----
+apiVersion: discovery.open-cluster-management.io/v1
+kind: DiscoveredCluster
+metadata:
+  creationTimestamp: "2024-05-30T23:05:39Z"
+  generation: 1
+  labels:
+    hypershift.open-cluster-management.io/hc-name: hosted-cluster-1
+    hypershift.open-cluster-management.io/hc-namespace: clusters
+  name: hosted-cluster-1
+  namespace: mce-1
+  resourceVersion: "1740725"
+  uid: b4c36dca-a0c4-49f9-9673-f561e601d837
+spec:
+  apiUrl: https://a43e6fe6dcef244f8b72c30426fb6ae3-ea3fec7b113c88da.elb.us-west-1.amazonaws.com:6443
+  cloudProvider: aws
+  creationTimestamp: "2024-05-30T23:02:45Z"
+  credential: {}
+  displayName: mce-1-hosted-cluster-1
+  importAsManagedCluster: false
+  isManagedCluster: false
+  name: hosted-cluster-1
+  openshiftVersion: 0.0.0
+  status: Active
+  type: MultiClusterEngineHCP
+----
+
+Discovered hosted clusters are not automatically imported into {acm-short} until the `spec.importAsManagedCluster` field is changed from `false` to `true`. Learn how to use a {acm-short} policy to automatically set this field to `true` for all `type.MultiClusterEngineHCP` within `DiscoveredCluster` resources so that discovered hosted clusters are immediately and automatically imported into {acm-short}.
+
+Configure your Policy to import all your discovered hosted clusters.
+
+.Procedure
+
+. Log in to your hub cluster from the CLI to complete the following procedure:
+. Create a YAML file for your `DiscoveredCluster` custom resource and edit the configuration that is referenced in the following example:
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-mce-hcp-autoimport
+  namespace: open-cluster-management-global-set
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/description: Discovered clusters that are of
+      type MultiClusterEngineHCP can be automatically imported into ACM as managed clusters.
+      This policy configure those discovered clusters so they are automatically imported. 
+      Fine tuning MultiClusterEngineHCP clusters to be automatically imported
+      can be done by configure filters at the configMap or add annotation to the discoverd cluster.
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: mce-hcp-autoimport-config
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ConfigMap
+                metadata:
+                  name: discovery-config
+                  namespace: open-cluster-management-global-set
+                data:
+                  rosa-filter: "" 
+          remediationAction: enforce
+          severity: low
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-mce-hcp-autoimport
+        spec:
+          remediationAction: enforce
+          severity: low
+          object-templates-raw: |
+            {{- /* find the MultiClusterEngineHCP DiscoveredClusters */ -}}
+            {{- range $dc := (lookup "discovery.open-cluster-management.io/v1" "DiscoveredCluster" "" "").items }}
+              {{- /* Check for the flag that indicates the import should be skipped */ -}}
+              {{- $skip := "false" -}}
+              {{- range $key, $value := $dc.metadata.annotations }}
+                {{- if and (eq $key "discovery.open-cluster-management.io/previously-auto-imported")
+                           (eq $value "true") }}
+                  {{- $skip = "true" }}
+                {{- end }}
+              {{- end }}
+              {{- /* if the type is MultiClusterEngineHCP and the status is Active */ -}}
+              {{- if and (eq $dc.spec.status "Active") 
+                         (contains (fromConfigMap "open-cluster-management-global-set" "discovery-config" "mce-hcp-filter") $dc.spec.displayName)
+                         (eq $dc.spec.type "MultiClusterEngineHCP")
+                         (eq $skip "false") }}
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: discovery.open-cluster-management.io/v1
+                kind: DiscoveredCluster
+                metadata:
+                  name: {{ $dc.metadata.name }}
+                  namespace: {{ $dc.metadata.namespace }}
+                spec:
+                  importAsManagedCluster: true
+              {{- end }}
+            {{- end }}
+----
++
+* To enable automatic import, change the `spec.remediationAction` to `enforce`.
+* To enable automatic import, change `spec.importAsManagedCluster` to `true`.
+. Run `oc apply -f <filename>.yaml -n <namespace>` to apply the file.
