@@ -12,11 +12,11 @@ If a hub cluster is managed by a global hub cluster, or if it is installed on a 
 
 The `backup-restore-enabled` policy validates the {acm-short} hub cluster backup and restore configuration and applies to local hub clusters, global hub clusters, and managed clusters where the {acm-short} hub cluster is installed. The policy includes a set of templates that check for the following constraints:
 
-- *Cluster backup component validation*
+- Cluster backup component validation
 +
 * `acm-cluster-backup-enabled` template checks if the `cluster-backup` component is enabled in the `MultiClusterHub` resource. The template validates that the backup functionality has the correct configuration for the `MultiClusterHub` resource. If the `cluster-backup` component is disabled with the `enabled: false` flag in the `spec.overrides.components` field of the `MultiClusterHub` resource, the policy becomes  `noncompliant` and displays instructions for enablement.
 
-- *OADP channel validation*
+- OADP channel validation
 +
 * When you enable the backup component on the `MultiClusterHub`, the cluster backup and restore operator Helm chart can automatically install the OADP operator in the `open-cluster-management-backup` namespace. You can also manually install the OADP operator in the namespace. 
 * The `OADP-channel` that you selected for manual installation must match or exceed the version set by the {acm-short} backup and restore operator Helm chart. 
@@ -27,7 +27,7 @@ is installed in the `open-cluster-management-backup` namespace.
 ** `oadp-channel-validation`: Use this template to ensure the OADP operator version in the `open-cluster-management-backup` namespace matches or exceeds the version set by the {acm-short} backup and restore operator.
 ** `custom-oadp-channel-validation`: Use this template to check if OADP operators in other namespaces match the version in the `open-cluster-management-backup` namespace.
 
-- *Pod validation*
+- Pod validation
 +
 The following templates check the pod status for the backup component and dependencies:
 +
@@ -35,34 +35,34 @@ The following templates check the pod status for the backup component and depend
 ** `oadp-pod-running` template checks if the OADP operator pod is running. 
 ** `velero-pod-running` template checks if the Velero pod is running.
 
-- *Data Protection Application validation*
+- Data Protection Application validation
 +
 * `data-protection-application-available` template checks if a `DataProtectioApplicatio.oadp.openshift.io` resource is created. This OADP resource sets up Velero configurations.
 
-- *Backup storage validation*
+- Backup storage validation
 +
 * `backup-storage-location-available` template checks if a `BackupStorageLocation.velero.io` resource is created and if the status value is `Available`. This implies that the connection to the backup storage is valid. 
 
-- *`BackupSchedule` collision validation*
+- `BackupSchedule` collision validation
 +
 * `acm-backup-clusters-collision-report` template verifies that the status is not `BackupCollision`, if a `BackupSchedule.cluster.open-cluster-management.io` exists on the current hub cluster. This verifies that the current hub cluster is not in collision with any other hub cluster when you write backup data to the storage location.
 +
-For a definition of the `BackupCollision`, see xref:../backup_restore/backup_schedule_prevent_collisions.adoc[Preventing backup collisions].
+For a definition of the `BackupCollision`, see _Prevent backup collisions_.
 
-- *`BackupSchedule` and restore status validation*
+- `BackupSchedule` and restore status validation
 +
 * `acm-backup-phase-validation` template checks that the status is not in `Failed`, or `Empty` state, if a `BackupSchedule.cluster.open-cluster-management.io` exists on the current cluster. This ensures that if this cluster is the primary hub cluster and is generating backups, the `BackupSchedule.cluster.open-cluster-management.io` status is healthy.
 * The same template checks that the status is not in a `Failed`, or `Empty` state, if a `Restore.cluster.open-cluster-management.io` exists on the current cluster. This ensures that if this cluster is the secondary hub cluster and is restoring backups, the `Restore.cluster.open-cluster-management.io` status is healthy.
 
-- *Backups exist validation*
+- Backups exist validation
 +
 * `acm-managed-clusters-schedule-backups-available` template checks if `Backup.velero.io` resources are available at the location specified by the `BackupStorageLocation.velero.io`, and if the backups are created by a `BackupSchedule.cluster.open-cluster-management.io` resource. This validates that the backups have been run at least once, using the backup and restore operator.
 
-- *Backups for completion*
+- Backups for completion
 +
 * An `acm-backup-in-progress-report` template checks if `Backup.velero.io` resources are stuck in the `InProgress` state. This validation is added because with a large number of resources, the velero pod restarts as the backup runs, and the backup stays in progress without proceeding to completion. During a normal backup, the backup resources are in progress at some point when it is run, but are not stuck and run to completion. It is normal to see the `acm-backup-in-progress-report` template report a warning during the time the schedule is running and backups are in progress.
 
-- *Backup schedules generate backups on the primary hub cluster*
+- Backup schedules generate backups on the primary hub cluster
 +
 * The `backup-schedule-cron-enabled` policy template notifies the hub cluster administrator that the primary hub cluster is not creating new backups. The policy shows that the `BackupSchedule.cluster.open-cluster-management.io` resource is disabled on the primary hub cluster or is not able to create scheduled backups.
 +
@@ -74,14 +74,15 @@ For a definition of the `BackupCollision`, see xref:../backup_restore/backup_sch
 +
 ** The `acm-validation-policy-schedule` backups are set to expire after you set a time for the backups cron schedule. If no cron job is running to create backups, the old `acm-validation-policy-schedule` backup is deleted because it expired and a new one is not created. As a result, if no `acm-validation-policy-schedule` backups exists, there are no active cron jobs generating backups.
 
-- *Auto import secret validation*
+- Auto import secret validation
 +
 * The `auto-import-account-secret` template checks whether a `ManagedServiceAccount` secret is created in the managed cluster namespaces other than the `<your-local-cluster-name>` namespace. The backup controller regularly scans for imported managed clusters. When a managed cluster is discovered, the backup controller creates the `ManagedServiceAccount` resource in the managed cluster namespace. This process starts the token creation on the managed cluster. If the managed cluster is not accessible at the time of this operation, the `ManagedServiceAccount` is unable to create the token. For example, if the managed cluster is hibernating, it is unable to create the token. If you then start a hub cluster backup, the backup lacks a token for automatically importing the managed cluster.
 
-- *Auto import backup label validation*
+- Auto import backup label validation
 +
 * The `auto-import-backup-label` template verifies the existence of a `ManagedServiceAccount` secret in the managed cluster namespaces other than the `<your-local-cluster-name>` namespace. If the template finds the `ManagedServiceAccount` secret, then the template enforces the `cluster.open-cluster-management.io/backup` label on the secret. This label is required for including the `ManagedServiceAccount` secrets in {acm-short} backups.
 
 .Additional resources
 
-* xref:../backup_restore/backup_validate_encryption.adoc[Protecting data using server-side encryption]
+* xref:../backup_restore/backup_validate_encryption.adoc[Server-side encryption protection]
+* xref:../backup_restore/backup_schedule_prevent_collisions.adoc[Prevent backup collisions]
