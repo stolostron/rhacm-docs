@@ -1,0 +1,31 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#prevent-backup-collision]
+= Preventing backup collisions
+
+[role="_abstract"]
+To prevent and report backup collisions, use the `BackupCollision` state in the `BackupSchedule.cluster.open-cluster-management.io` resource. The controller checks regularly if the latest backup in the storage location has been generated from the current hub cluster. If not, a different hub cluster has recently written backup data to the storage location, indicating that the hub cluster is colliding with a different hub cluster.
+
+In the backup collision scenario, the current hub cluster `BackupSchedule.cluster.open-cluster-management.io` resource status is set to `BackupCollision`. To prevent data corruption, this resource deletes the `Schedule.velero.io` resources. The backup policy reports the `BackupCollision`. 
+
+In this same scenario, the administrator verifies which hub cluster writes to the storage location. The administrator does this verification before removing the `BackupSchedule.cluster.open-cluster-management.io` resource from the invalid hub cluster. Then, the administrator can create a new `BackupSchedule.cluster.open-cluster-management.io` resource on the valid primary hub cluster, resuming the backup.
+
+.Procedure
+
+* To check if there is a backup collision, run the following command: 
++
+----
+oc get backupschedule -A
+----
++
+If there is a backup collision, the output might resemble the following example:
++
+----
+NAMESPACE       NAME               PHASE             MESSAGE
+openshift-adp   schedule-hub-1   BackupCollision   Backup acm-resources-schedule-20220301234625, from cluster with id [be97a9eb-60b8-4511-805c-298e7c0898b3] is using the same storage location. This is a backup collision with current cluster [1f30bfe5-0588-441c-889e-eaf0ae55f941] backup. Review and resolve the collision then create a new BackupSchedule resource to  resume backups from this cluster.
+----
+
+.Additional resources
+
+* xref:../backup_restore/backup_schedule_collisions.adoc#understand-backup-collision[Backup collisions]
+* xref:../backup_restore/backup_restore.adoc#restore-backup[Restoring a backup]
