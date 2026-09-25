@@ -1,0 +1,108 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#scraping-hub]
+= Scrape the hub cluster
+
+[role="_abstract"]
+Scrape metrics for the hub cluster. You can use Prometheus to expose metrics that are not exposed from the product console. These files are within the `openshift-monitoring` namespace:
+
+.Procedure
+
+. Create a `ServiceMonitor` for collecting services and exposing metrics. See the following YAML example:
++
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hub-subscription-metrics
+  namespace: openshift-monitoring
+spec:
+  endpoints:
+  - port: metrics
+  namespaceSelector:
+    matchNames:
+    - open-cluster-management
+  selector:
+    matchLabels:
+      app: hub-subscription-metrics
+----
+. Run the following command to apply the file:
++
+[source,bash]
+----
+oc apply -f
+----
+. Create a `Role` for setting the permissions for monitoring. See the following YAML file:
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-k8s-monitoring
+  namespace: open-cluster-management
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+----
+. Run the following command to apply the file:
++
+[source,bash]
+----
+oc apply -f
+----
+. Create a `RoleBinding` for binding the role to the Prometheus monitoring
+`ServiceAccount`, as it is in the following example:
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-k8s-monitoring-binding
+  namespace: open-cluster-management
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-k8s-monitoring
+subjects:
+- kind: ServiceAccount
+  name: prometheus-k8s
+  namespace: monitoring
+----
+. Run the following command to apply the file:
++
+[source,bash]
+----
+oc apply -f
+----
+. To verify, run the following query in the dashboard to find metrics that are reported by the Subscription Operator Metrics Service:
++
+----
+{service="hub-subscription-metrics"}
+----
