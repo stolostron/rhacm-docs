@@ -12,6 +12,451 @@ For more about deprecations and removals, see xref:../release_notes/acm_deprecat
 
 See the following known issues for the Application lifecycle component.
 
+<<<<<<< HEAD
+[#admin-no-sub-deploy-cluster-scoped-res]
+== Subscription users without administrator rights cannot deploy cluster-scoped resources
+
+If you don't have the `open-cluster-management:subscription-admin` `ClusterRoleBinding`, and create or update a `Subscription` resource, the subscription cannot deploy cluster-scoped resources through a Git, Helm repository, or object storage channel subscription. Examples of some cluster-scoped resources include `ClusterRoleBinding`, `ClusterRole`, `Namespace`, and `CustomResourceDefinition`.
+
+As a result, the subscription deploys only namespace-scoped resources.
+
+To work around the issue, bind the user who creates or updates the `Subscription` resource to the `open-cluster-management:subscription-admin` `ClusterRoleBinding` on the hub cluster.
+
+link:https://issues.redhat.com/browse/ACM-39827[ACM-39827]
+
+[#argo-pull-model-appset-non-default-namespace]
+== _ManifestWork_-based Pull model applications are rejected in non-default `ApplicationSet` namespaces
+
+When an `ApplicationSet` runs outside the `openshift-gitops` namespace by using the _ApplicationSet in any namespace_ feature, the controller creates generated pull-model `Application` objects in that custom namespace.
+
+The tenant-isolation check requires a `PlacementDecision` in the `Application` namespace that selects the target cluster before the controller creates a `ManifestWork`. Without that `PlacementDecision`, the controller silently rejects the applications, and the applications never propagate to managed clusters. 
+
+The check prevents a namespace with only the permission to create `Application` resources from targeting any managed cluster.
+
+To work around the issue, create a `ManagedClusterSetBinding` and a `Placement` that selects the target cluster or clusters in the `ApplicationSet` namespace. See the following example:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: global
+  namespace: <applicationset-namespace>
+spec:
+  clusterSet: global
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: my-managed-cluster-1
+  namespace: <applicationset-namespace>
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: name
+          operator: In
+          values:
+          - <target-managed-cluster-name>
+----
+
+link:https://issues.redhat.com/browse/ACM-39827[ACM-39827]
+
+[#cluster-admin-subscription-reconcile-delay]
+== Cluster administrator subscriptions on managed clusters delay initial resource deployment
+
+Subscriptions that use `cluster-admin` privilege elevation on a managed cluster experience a delay in initial resource deployment. The subscription controller confirms cluster administrator eligibility by checking whether the subscription appears in the `status.appliedResources` field of the `AppliedManifestWork`. The work agent populates the field at different times after you create the subscription.
+
+If the first local subscription reconcile runs before the work agent updates that status, the controller treats the `cluster-admin` status as unresolved and does not deploy resources during that reconcile cycle. As a result, the deployment is delayed.
+
+If the work agent status is up to date when the first reconcile runs, no delay occurs. Otherwise, resource deployment begins after one to three subscription reconcile loops complete. The default reconcile interval in appsub mode is 3 minutes for each loop, so deployment can begin up to 9 minutes after you create the subscription.
+
+link:https://issues.redhat.com/browse/ACM-39827[ACM-39827]
+
+[#updating-permission-errors]
+== Updating to {gitops} 1.17 causes permission errors 
+
+When you update your {gitops-short} operator to version 1.17, you get permission errors in your `ApplicationSet` resource status. 
+
+To workaround this issue, complete the following steps: 
+
+. Go to the `openshift-gitops` namespace and delete the `RoleBinding` resource named `openshift-gitops-applicationset-controller-placement`. 
+. Restart the `multicluster-operators-application-\*\` pod in the `open-cluster-management` namespace. 
+
+link:https://issues.redhat.com/browse/ACM-23907[ACM-23907]
+
+[#gitops-addon-olm-auto-detection]
+== Add-on auto-detection of cluster type might not enable {olm}-based deployment
+
+For {ocp-short} managed clusters, the {gitops} add-on uses auto-detection to determine the cluster type and enable {olm}-based deployment. When auto-detection does not work correctly, {olm}-based deployment might not be enabled.
+
+To work around this issue, enable {olm}-based deployment manually by adding `olmSubscription.enabled: true` to the `gitopsAddon` specification. See the following YAML example:
+
+[source,yaml]
+----
+gitopsAddon:
+  enabled: true
+  olmSubscription:
+    enabled: true
+----
+
+[#leftover-res-incorrect-gitops-uninstall]
+== Leftover resources after incorrect {gitops} add-on uninstall
+
+If you do not uninstall the {gitops} add-on in the correct order, you might encounter some ofthe following issues:
+
+* If the `Policy` is not deleted, it continues to enforce the `ArgoCD` custom resource on managed clusters, causing the operator and Argo CD to be re-created even after the add-on is removed.
+* If the `PlacementBinding` is not deleted, the `Policy` remains bound to the `Placement`, making re-enforcement more likely.
+* If finalizers are not cleared, leftover `Application` resources with finalizers can block namespace deletion. If needed, patch the finalizer by running the following command. Replace `<name>` with the name of your `Application`:
+
++
+[source,bash]
+----
+oc patch application <name> -n openshift-gitops --type=json -p '[{"op":"remove","path":"/metadata/finalizers"}]'
+----
+
+* Application workload namespaces, such as `guestbook`, are not removed by the add-on. Delete them manually if needed.
+* If you added custom `ClusterRoleBinding` resources, such as `acm-openshift-gitops-cluster-admin`, through the `Policy`, they remain on managed clusters after uninstall. Delete them manually if needed.
+
+To avoid these issues, uninstall the add-on in the correct order by using the procedure in xref:../gitops/gitops_pull_uninstall.adoc#gitops-pull-uninstall[Uninstall the {gitops-short} add-on].
+
+[#subscription-application-incorrect-warning]
+== Subscription application displays incorrect warning message
+
+When you deploy the Subscription application (Deprecated), it displays a warning message for the Subscription node in the _Application Topology_ page. If you check the Subscription node details, it incorrectly shows the `local-cluster` is offline.
+
+Check the real status of the `local-cluster` by clicking *Infrastructure* > *Clusters* from the Console navigation.
+
+link:https://issues.redhat.com/browse/ACM-18544[ACM-18544]
+
+[#application-table-menu]
+== The console menu of the Application table can be difficult to click 
+
+When Application resources get updated in the hub cluster, the Application page table also gets updated. If you have the menu of the Application table opened, then it gets closed with every update to the Application page table. Because the menu can close often, it can be difficult for you to click the menu. 
+
+To workaround this issue, click the Application name to go to the Application details page where you can click the same action menu without it closing with every update. 
+
+link:https://issues.redhat.com/browse/ACM-18543[ACM-18543]
+
+[#topology-displays-invalid-expression]
+== Application topology displays invalid expression 
+
+When you use the `Exist` or `DoesNotExist` operators in the `Placement` resource, the application topology node details display the expressions as `\#invalidExpr`. This display is wrong, and the expression is still valid and works in the `Placement` resource. To workaround this issue, edit the expression inside the `Placement` resource YAML. 
+
+link:https://issues.redhat.com/browse/ACM-15077[ACM-15077]
+
+[#editing-subscription-placement-rule]
+== Editing subscription applications with _PlacementRule_ does not display the subscription YAML in editor
+
+After you create a subscription application that references a `PlacementRule` resource, the subscription YAML does not display in the YAML editor in the console. Use your terminal to edit your subscription YAML file.
+
+link:https://issues.redhat.com/browse/ACM-8889[ACM-8889]
+
+[#helm-chart-with-secret-dependencies-cannot-be-deployed]
+== Helm Chart with secret dependencies cannot be deployed by the {acm-short} subscription 
+
+Using Helm Chart, you can define privacy data in a Kubernetes secret and refer to this secret within the `value.yaml` file of the Helm Chart.  
+
+The username and password are given by the referred Kubernetes secret resource `dbsecret`. For example, see the following sample `value.yaml` file: 
+
+[source,yaml]
+----
+credentials:
+  secretName: dbsecret
+  usernameSecretKey: username
+  passwordSecretKey: password
+----
+
+The Helm Chart with secret dependencies is only supported in the Helm binary CLI. It is not supported in the operator SDK Helm library. The {acm-short} subscription controller applies the operator SDK Helm library to install and upgrade the Helm Chart. Therefore, the {acm-short} subscription cannot deploy the Helm Chart with secret dependencies. 
+
+link:https://issues.redhat.com/browse/ACM-8727[ACM-8727]
+
+[#argo-pull-model-topology]
+== Topology does not correctly display for Argo CD pull model `ApplicationSet` application 
+
+When you use the Argo CD pull model to deploy `ApplicationSet` applications and the application resource names are customized, the resource names might appear different for each cluster. When this happens, the topology does not display your application correctly.
+
+link:https://issues.redhat.com/browse/ACM-6954[ACM-6954]
+
+[#argo-pull-model-controller-local]
+== Local cluster is excluded as a managed cluster for pull model
+
+The hub cluster application set deploys to target managed clusters, but the local cluster, which is a managed hub cluster, is excluded as a target managed cluster.
+
+As a result, if the Argo CD application is propagated to the local cluster by the Argo CD pull model, the local cluster Argo CD application is not cleaned up, even though the local cluster is removed from the placement decision of the Argo CD `ApplicationSet` resource.
+
+To work around the issue and clean up the local cluster Argo CD application, remove the `skip-reconcile` annotation from the local cluster Argo CD application. See the following annotation:
+
+[source,yaml]
+----
+annotations:
+    argocd.argoproj.io/skip-reconcile: "true"
+----
+
+Additionally, if you manually refresh the pull model Argo CD application in the *Applications* section of the Argo CD console, the refresh is not processed and the *REFRESH* button in the Argo CD console is disabled.
+
+To work around the issue, remove the `refresh` annotation from the Argo CD application. See the following annotation:
+
+[source,yaml]
+----
+annotations:
+    argocd.argoproj.io/refresh: normal 
+----
+
+link:https://issues.redhat.com/browse/ACM-7843[ACM-7843]
+
+[#argo-pull-model-controller]
+== Argo CD controller and the propagation controller might reconcile simultaneously
+
+Both the Argo CD controller and the propagation controller might reconcile on the same application resource and cause the duplicate instances of application deployment on the managed clusters, but from the different deployment models.
+
+For deploying applications by using the pull model, the Argo CD controllers ignore these application resources when the Argo CD `argocd.argoproj.io/skip-reconcile` annotation is added to the template section of the `ApplicationSet`. 
+
+The `argocd.argoproj.io/skip-reconcile` annotation is only available in the GitOps operator version 1.9.0, or later. To prevent conflicts, wait until the hub cluster and all the managed clusters are updated to GitOps operator version 1.9.0 before implementing the pull model.
+
+[#argo-pull-model-resource]
+== Resource fails to deploy
+
+All the resources listed in the `MulticlusterApplicationSetReport` are actually deployed on the managed clusters. If a resource fails to deploy, the resource is not included in the resource list, but the cause is listed in the error message.
+
+[#argo-pull-model-large]
+== Resource allocation might take several minutes
+
+For large environments with over 1000 managed clusters and Argo CD application sets that are deployed to hundreds of managed clusters, Argo CD application creation on the hub cluster might take several minutes. You can set the `requeueAfterSeconds` to `zero` in the `clusterDecisionResource` generator of the application set, as it is displayed in the following example file: 
+
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cm-allclusters-app-set
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: ocm-placement-generator
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: app-placement
+      requeueAfterSeconds: 0
+----
+
+[#object-bucket-subscription-admin]
+== Application ObjectBucket channel type cannot use allow and deny lists
+
+You cannot specify allow and deny lists with ObjectBucket channel type in the `subscription-admin` role. In other channel types, the allow and deny lists in the subscription indicates which Kubernetes resources can be deployed, and which Kubernetes resources should not be deployed.
+
+link:https://github.com/stolostron/backlog/issues/22763[GH-22763]
+
+[#changes-not-automatic]
+== Changes to the multicluster_operators_subscription image do not take effect automatically
+
+The `application-manager` add-on that is running on the managed clusters is now handled by the subscription operator, when it was previously handled by the klusterlet operator. The subscription operator is not managed the `multicluster-hub`, so changes to the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap do not take effect automatically.
+
+If the image that is used by the subscription operator is overrided by changing the `multicluster_operators_subscription` image in the `multicluster-hub` image manifest ConfigMap, the `application-manager` add-on on the managed clusters does not use the new image until the subscription operator pod is restarted. You need to restart the pod.
+
+[#policy-needs-subscription-admin]
+== Policy resource not deployed unless by subscription administrator
+
+The `policy.open-cluster-management.io/v1` resources are no longer deployed by an application subscription by default for {acm-short} version 2.4.
+
+A subscription administrator needs to deploy the application subscription to change this default behavior.
+
+See link:../applications/allow_deny.adoc[Creating an allow and deny list as subscription administrator] for information. `policy.open-cluster-management.io/v1` resources that were deployed by existing application subscriptions in previous {acm-short} versions remain, but are no longer reconciled with the source repository unless the application subscriptions are deployed by a subscription administrator.
+
+link:https://issues.redhat.com/browse/ACM-893[ACM-893]
+
+[#application-ansible-standalone]
+== Application Ansible hook stand-alone mode
+
+Ansible hook stand-alone mode is not supported. To deploy Ansible hook on the hub cluster with a subscription, you might use the following subscription YAML:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-rhacm-gitops-demo
+  namespace: hello-openshift
+  annotations:
+    apps.open-cluster-management.io/github-path: myapp
+    apps.open-cluster-management.io/github-branch: master
+spec:
+  hooksecretref:
+      name: toweraccess
+  channel: rhacm-gitops-demo/ch-rhacm-gitops-demo
+  placement:
+     local: true
+----
+However, this configuration might never create the Ansible instance, since the `spec.placement.local:true` has the subscription running on `standalone` mode. You need to create the subscription in hub mode. 
+
+. Create a placement rule that deploys to `local-cluster`. See the following sample where `local-cluster: "true"` refers to your hub cluster:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata: 
+  name: <towhichcluster>
+  namespace: hello-openshift
+spec:
+  clusterSelector:
+    matchLabels:
+      local-cluster: "true" 
+----
+. Reference that placement rule in your subscription. See the following sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: sub-rhacm-gitops-demo
+  namespace: hello-openshift
+  annotations:
+    apps.open-cluster-management.io/github-path: myapp
+    apps.open-cluster-management.io/github-branch: master
+spec:
+  hooksecretref:
+      name: toweraccess
+  channel: rhacm-gitops-demo/ch-rhacm-gitops-demo
+  placement:
+     placementRef:
+        name: <towhichcluster>
+        kind: PlacementRule
+----
+
+After applying both, you should see the Ansible instance created in your hub cluster.
+
+link:https://github.com/stolostron/backlog/issues/8036[GH-8036]
+
+[#application-not-deployed-after-an-updated-placement-rule]
+== Application not deployed after an updated placement rule
+
+If applications are not deploying after an update to a placement rule, verify that the `application-manager` pod is running.
+The `application-manager` is the subscription container that needs to run on managed clusters.
+
+You can run `oc get pods -n open-cluster-management-agent-addon |grep application-manager` to verify.
+
+You can also search for `kind:pod cluster:yourcluster` in the console and see if the `application-manager` is running.
+
+If you cannot verify, attempt to import the cluster again and verify again.
+
+[#subscription-operator-does-not-create-an-scc]
+== Subscription operator does not create an SCC
+
+Learn about {ocp} SCC at link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/authentication_and_authorization/index#managing-pod-security-policies[Managing security context constraints], which is an additional configuration required on the managed cluster.
+
+Different deployments have different security context and different service accounts. The subscription operator cannot create an SCC CR automatically.. Administrators control permissions for pods. A Security Context Constraints (SCC) CR is required to enable appropriate permissions for the relative service accounts to create pods in the non-default namespace. To manually create an SCC CR in your namespace, complete the following steps:
+
+. Find the service account that is defined in the deployments. For example, see the following `nginx` deployments:
+
++
+----
+nginx-ingress-52edb
+nginx-ingress-52edb-backend
+----
+
++
+. Create an SCC CR in your namespace to assign the required permissions to the service account or accounts. See the following example, where `kind: SecurityContextConstraints` is added:
+
++
+[source,yaml]
+----
+apiVersion: security.openshift.io/v1
+ defaultAddCapabilities:
+ kind: SecurityContextConstraints
+ metadata:
+   name: ingress-nginx
+   namespace: ns-sub-1
+ priority: null
+ readOnlyRootFilesystem: false
+ requiredDropCapabilities:
+ fsGroup:
+   type: RunAsAny
+ runAsUser:
+   type: RunAsAny
+ seLinuxContext:
+   type: RunAsAny
+ users:
+ - system:serviceaccount:my-operator:nginx-ingress-52edb
+ - system:serviceaccount:my-operator:nginx-ingress-52edb-backend
+----
+
+link:https://github.com/stolostron/backlog/issues/24248[GH-24248]
+
+[#application-channels-require-unique-namespaces]
+== Application channels require unique namespaces
+
+Creating more than one channel in the same namespace can cause errors with the hub cluster.
+
+For instance, namespace `charts-v1` is used by the installer as a Helm type channel, so do not create any additional channels in `charts-v1`. Ensure that you create your channel in a unique namespace. All channels need an individual namespace, except GitHub channels, which can share a namespace with another GitHub channel.
+
+[#ansible-automation-platform-fail]
+== {aap-short} job fail
+
+Ansible jobs fail to run when you select an incompatible option. {aap-short} only works when the `-cluster-scoped` channel options are chosen. This affects all components that need to perform Ansible jobs.
+
+link:https://github.com/stolostron/backlog/issues/14469[GH-14469]
+
+[#ansible-automation-operator-access]
+== {aap-short} operator access {aap-short} outside of a proxy
+
+The {aap} operator cannot access {aap-short} outside of a proxy-enabled {ocp-short} cluster. To resolve, you can install the {aap-short} within the proxy. See install steps that are provided by {aap-short}.
+
+link:https://github.com/stolostron/backlog/issues/16821[GH-16821]
+
+[#application-name]
+== Application name requirements
+
+An application name cannot exceed 37 characters. The application deployment displays the following error if the characters exceed this amount.
+
+[source,yaml]
+----
+status:
+  phase: PropagationFailed
+  reason: 'Deployable.apps.open-cluster-management.io "_long_lengthy_name_" is invalid: metadata.labels: Invalid value: "_long_lengthy_name_": must be no more than 63 characters/n'
+----
+
+link:https://github.com/stolostron/backlog/issues/14310[GH-14310]
+
+[#application-tables]
+== Application console table limitations
+
+See the following limitations to various _Application_ tables in the console:
+
+- From the _Applications_ table on the _Overview_ page and the _Subscriptions_ table on the _Advanced configuration_ page, the _Clusters_ column displays a count of clusters where application resources are deployed. Since applications are defined by resources on the local cluster, the local cluster is included in the search results, whether actual application resources are deployed on the local cluster or not.
+
+- From the _Advanced configuration_ table for _Subscriptions_, the _Applications_ column displays the total number of applications that use that subscription, but if the subscription deploys child applications, those are included in the search result, as well.
+
+- From the _Advanced configuration_ table for _Channels_, the _Subscriptions_ column displays the total number of subscriptions on the local cluster that use that channel, but this does not include subscriptions that are deployed by other subscriptions, which are included in the search result.
+
+link:https://github.com/stolostron/backlog/issues/12410[GH-12410]
+
+[#app-topology]
+== No Application console topology filtering
+
+The _Console_ and _Topology_ for _Application_ changes for the {product-version}. There is no filtering capability from the console Topology page.
+
+link:https://github.com/stolostron/backlog/issues/20831[GH-20831]
+
+[#cluster-permission-fails]
+== _ClusterPermission_ resource fails when creating many role bindings
+
+If you create a `ClusterPermission` resource that contains many role bindings within the same namespace and do not set the optional `name` field, it fails. This error occurs because the same name is used for the role bindings in the namespace.
+
+To workaround this issue, set the optional `name` field for each role binding with a unique name. 
+
+link:https://issues.redhat.com/browse/ACM-21342[ACM-21342]
+=======
 * xref:../release_notes/acm_sub_cluster_scoped.adoc#admin-rights-required[Subscription users without administrator rights cannot deploy cluster-scoped resources]
 * xref:../release_notes/acm_argo_pull_nondefault_ns.adoc#argo-pull-model-appset-non-default-namespace[_ManifestWork_-based Pull model applications are rejected in non-default `ApplicationSet` namespaces]
 * xref:../release_notes/acm_admin_sub_delay.adoc#admin-sub-delay[Cluster administrator subscriptions delay initial resource deployment]
@@ -39,3 +484,4 @@ See the following known issues for the Application lifecycle component.
 * xref:../release_notes/acm_application_tables.adoc#app-tables[Application console table limitations]
 * xref:../release_notes/acm_app_topology.adoc#app-topology[No Application console topology filtering]
 * xref:../release_notes/acm_cluster_permission_fails.adoc#cluster-permission-fails[_ClusterPermission_ resource fails when creating many role bindings]
+>>>>>>> 2.17_stage

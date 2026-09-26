@@ -1,0 +1,144 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-push-register-non-ocp]
+= Register non-{ocp-short} clusters to the {gitops} operator
+
+[role="_abstract"]
+Register non-{ocp-short} managed clusters with the Argo CD server on the hub cluster so that you can deploy applications to managed clusters.
+
+When you integrate managed clusters with the {gitops-short} operator, a secret containing a token to access each managed cluster is automatically created in the GitOps instance server namespace. The {gitops-short} controller requires this secret to successfully sync resources to the managed cluster.
+
+By default, the `application-manager` service account operates with cluster-admin permissions on the managed cluster to generate the {gitops-short} cluster secret. If you do not want to use the default service account, see xref:../gitops/gitops_push_service_account.adoc#gitops-push-service-account[Create a custom service account for Argo CD Push model].
+
+*Note:* Registering non-{ocp-short} clusters to the {gitops} operator is only available for the Push model.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* Install the {gitops} operator on your {acm-short} hub cluster.
+* Import one or more non-{ocp-short} managed clusters.
+* Create a `ManagedClusterSet` and bind it to the namespace where {gitops-short} is deployed. See xref:../clusters/cluster_lifecycle/create_clusterset.adoc#creating-a-managedclusterset[Creating a _ManagedClusterSet_] and xref:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource].
+* Enable the `ManagedServiceAccount` add-on to rotate the token that the Argo CD Push model uses to connect to the managed cluster.
+
+.Procedure
+
+. Create a `Placement` resource for the `GitOpsCluster` to select which managed clusters to register. Add the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: gitops-placement
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "NotIn"
+          values:
+          - OpenShift
+        - key: local-cluster
+          operator: DoesNotExist
+----
+
+. Apply the YAML sample. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f placement.yaml
+----
+
+. Create a `GitOpsCluster` custom resource to register the managed clusters. Addthe following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: gitops-cluster-push
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: gitops-placement
+----
+
+. Apply the YAML sample. Run the following command:
+
++
+[source,bash]
+----
+oc apply -f gitops-cluster-push.yaml
+----
++
+*Note:* The `GitOpsCluster` controller automatically creates the following resources during reconciliation:
++
+* The `acm-placement` duck-type `ConfigMap` in the `argoServer.argoNamespace`
+* A `Role` and `RoleBinding`
+* An `ArgoCD` `Policy` named `<gitopscluster-name>-argocd-policy`
+
+. If the API server URL in the `ManagedCluster` resource `spec` is empty, update it manually. Run the following command. Replace `<cluster-name>` with the name of the managed cluster:
+
++
+[source,bash]
+----
+oc edit managedclusters <cluster-name>
+----
+
+. Verify that the `spec` includes the client configuration. See the following example:
+
++
+[source,yaml]
+----
+spec:
+  managedClusterClientConfigs:
+  - caBundle: <base64-encoded-ca>
+    url: https://<api-server-url>
+----
+
+.Verification
+
+. Make sure that the `acm-placement` ConfigMap resembled the following example:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acm-placement
+  namespace: openshift-gitops
+data:
+  apiVersion: cluster.open-cluster-management.io/v1beta1
+  kind: placementdecisions
+  statusListKey: decisions
+  matchKey: clusterName
+----
+
+. Verify that each of the resources were created. Run the following commands:
+
++
+[source,bash]
+----
+oc get configmap acm-placement -n openshift-gitops -o yaml
+oc get role openshift-gitops-applicationset-controller-placement -n openshift-gitops
+oc get rolebinding openshift-gitops-applicationset-controller-placement -n openshift-gitops
+----
+
+.Additional resources
+
+* xref:../gitops/gitops_push_register.adoc#gitops-push-register[Register {ocp-short} managed clusters to the {gitops} operator]
