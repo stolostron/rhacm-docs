@@ -1,0 +1,95 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#rclone-replication-volsync]
+= Configure an Rclone replication
+
+[role="_abstract"]
+To copy a single persistent volume to multiple locations, create a `ReplicationSource` and a `ReplicationDestination` that use Rclone through an intermediate object storage location, such as AWS S3.
+
+.Prerequisites
+
+* VolSync is installed on the managed clusters that participate in the replication. See xref:../volsync/volsync_install.adoc#volsync-install-clusters[VolSync installation on managed clusters].
+
+.Procedure
+
+. Create a `ReplicationSource` custom resource that resembles the following example:
+
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: <source>
+  namespace: <source-ns>
+spec:
+  sourcePVC: <source-pvc>
+  trigger:
+    schedule: "*/6 * * * *"
+  rclone:
+    rcloneConfigSection: <intermediate-s3-bucket>
+    rcloneDestPath: <destination-bucket>
+    rcloneConfig: <rclone-secret>
+    copyMethod: Snapshot
+    storageClassName: <my-sc-name>
+    volumeSnapshotClassName: <my-vsc>
+----
++
+Replace `source` with the name for your replication source custom resource.
++
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
++
+Replace `source-pvc` with the persistent volume claim that you are replicating.
++
+Replace the value of `schedule` with how often to run the replication. This example runs every 6 minutes. The value must be within quotation marks. See xref:../volsync/volsync_schedule.adoc#volsync-schedule[VolSync replication schedule].
++
+Replace `intermediate-s3-bucket` with the path to the configuration section of the Rclone configuration file.
++
+Replace `destination-bucket` with the path to the object bucket where you want your replicated files copied.
++
+Replace `rclone-secret` with the name of the secret that contains your Rclone configuration information.
++
+See xref:../volsync/volsync_copy_params.adoc#volsync-copy-params[VolSync copy and storage parameters] for `copyMethod`, `storageClassName`, and `volumeSnapshotClassName`.
+
+. Create a `ReplicationDestination` custom resource that resembles the following example:
+
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: database-destination
+  namespace: dest
+spec:
+  trigger:
+    schedule: "3,9,15,21,27,33,39,45,51,57 * * * *"
+  rclone:
+    rcloneConfigSection: <intermediate-s3-bucket>
+    rcloneDestPath: <destination-bucket>
+    rcloneConfig: <rclone-secret>
+    copyMethod: Snapshot
+    accessModes: [ReadWriteOnce]
+    capacity: 10Gi
+    storageClassName: <my-sc>
+    volumeSnapshotClassName: <my-vsc>
+----
++
+Replace the value for `schedule` with how often to move the replication to the destination. The schedules for the source and destination must be offset so that the data can finish replicating before it is pulled from the destination. This example runs every 6 minutes, offset by 3 minutes. The value must be within quotation marks. See xref:../volsync/volsync_schedule.adoc#volsync-schedule[VolSync replication schedule].
++
+Replace `intermediate-s3-bucket` with the path to the configuration section of the Rclone configuration file.
++
+Replace `destination-bucket` with the path to the object bucket where you want your replicated files copied.
++
+Replace `rclone-secret` with the name of the secret that contains your Rclone configuration information.
++
+The value for `accessModes` specifies the access modes for the persistent volume claim. Valid values are `ReadWriteOnce` or `ReadWriteMany`.
++
+The `capacity` value specifies the size of the destination volume, which must be large enough to contain the incoming data.
++
+See xref:../volsync/volsync_copy_params.adoc#volsync-copy-params[VolSync copy and storage parameters] for `copyMethod`, `storageClassName`, and `volumeSnapshotClassName`.
+
+.Additional resources
+
+* xref:../volsync/volsync_privileged_movers.adoc#volsync-privileged-movers[Run VolSync movers as root]
+* xref:../volsync/volsync_convert_backup.adoc#volsync-convert-backup-pvc[Convert a replicated image to a persistent volume claim]
