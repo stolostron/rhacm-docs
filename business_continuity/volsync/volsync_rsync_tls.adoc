@@ -29,7 +29,7 @@ oc create ns <destination-ns>
 +
 Replace `destination-ns` with the namespace where your replication destination is located.
 
-.. Create a file named `replication_destination.yaml` and copy the following content:
+.. Create a file named `replication_destination.yaml`. Your resource might resemble the following content:
 
 +
 [source,yaml]
@@ -41,17 +41,18 @@ metadata:
   namespace: <destination-ns>
 spec:
   rsyncTLS:
-    serviceType: LoadBalancer <1>
+    serviceType: LoadBalancer
     copyMethod: Snapshot
-    capacity: 2Gi <2>
+    capacity: 2Gi
     accessModes: [ReadWriteOnce]
     storageClassName: gp2-csi
     volumeSnapshotClassName: csi-aws-vsc
 ----
-<1> For this example, the `serviceType` value of `LoadBalancer` is used. The load balancer service enables your source managed cluster to transfer information to a different destination managed cluster. You can use `ClusterIP` as the service type if your source and destinations are on the same cluster, or if you have Submariner network service configured. Note the address and the name of the secret to refer to when you configure the source cluster.
-<2> Make sure that the `capacity` value matches the capacity of the persistent volume claim that is being replicated.
 +
-See xref:../volsync/volsync_copy_params.adoc#volsync-copy-params[VolSync copy and storage parameters] if you need to set `storageClassName` and `volumeSnapshotClassName` to values other than the defaults for your environment.
+* For this example, the `serviceType` value of `LoadBalancer` is used. The load balancer service enables your source managed cluster to transfer information to a different destination managed cluster. You can use `ClusterIP` as the service type if your source and destinations are on the same cluster, or if you have Submariner network service configured. Note the address and the name of the secret to refer to when you configure the source cluster.
+* Make sure that the `capacity` value matches the capacity of the persistent volume claim that is being replicated.
+* Replace `destination` with the name of your replication destination custom resource.
+* Replace `destination-ns` with the name of the namespace where your destination is located.
 
 .. Run the following command on the destination cluster to create the `ReplicationDestination` resource:
 
@@ -74,11 +75,11 @@ ADDRESS=`oc get replicationdestination <destination> -n <destination-ns> --templ
 echo $ADDRESS
 ----
 +
-Replace `destination` with the name of your replication destination custom resource.
-+
-Replace `destination-ns` with the name of the namespace where your destination is located.
+* Replace `destination` with the name of your replication destination custom resource.
+* Replace `destination-ns` with the name of the namespace where your destination is located.
 +
 The output appears similar to the following example, which is for an Amazon Web Services environment:
+
 +
 ----
 a831264645yhrjrjyer6f9e4a02eb2-5592c0b3d94dd376.elb.us-east-1.amazonaws.com
@@ -93,11 +94,11 @@ KEYSECRET=`oc get replicationdestination <destination> -n <destination-ns> --tem
 echo $KEYSECRET
 ----
 +
-Replace `destination` with the name of your replication destination custom resource.
+* Replace `destination` with the name of your replication destination custom resource.
+* Replace `destination-ns` with the name of the namespace where your destination is located.
 +
-Replace `destination-ns` with the name of the namespace where your destination is located.
-+
-You enter this value on the source cluster when you configure the source. The output is the name of your TLS key secret, which might resemble the following name:
+Use the TLS key secret name from the output when you configure the source cluster. The output might resemble the following name:
+
 +
 ----
 volsync-rsync-tls-destination-name
@@ -121,9 +122,8 @@ Replace `destination-ns` with the namespace where your replication destination i
 vi /tmp/secret.yaml
 ----
 
-.. In the open secret file, make the following changes:
-... Change the namespace to the namespace of your source cluster. For this example, it is `source-ns`.
-... Remove the owner references (`.metadata.ownerReferences`).
+.. Change the namespace to the namespace of your source cluster. For this example, it is `source-ns`.
+.. Remove the owner references (`.metadata.ownerReferences`).
 
 .. On the source cluster, create the secret by entering the following command:
 
@@ -134,8 +134,7 @@ oc create -f /tmp/secret.yaml
 ----
 
 . Identify the source persistent volume claim that you want to replicate.
-. Create the `ReplicationSource` by completing the following steps:
-.. Create a file named `replication_source.yaml` on the source cluster and copy the following content:
+. Create the `ReplicationSource` resource on the source cluster. Your resource might resemble the following content:
 
 +
 [source,yaml]
@@ -157,19 +156,11 @@ spec:
     volumeSnapshotClassName: csi-aws-vsc
 ----
 +
-Replace `source` with the name for your replication source custom resource.
-+
-Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
-+
-Replace `persistent_volume_claim` with the name of your source persistent volume claim.
-+
-Replace `mykeysecret` with the name of the secret that you copied from the destination cluster to the source cluster (the value of `$KEYSECRET`).
-+
-Replace `my.host.com` with the host address that you copied from the `.status.rsyncTLS.address` field of the `ReplicationDestination`.
-+
-See xref:../volsync/volsync_copy_params.adoc#volsync-copy-params[VolSync copy and storage parameters] for `copyMethod`, `storageClassName`, and `volumeSnapshotClassName` options.
-+
-See xref:../volsync/volsync_schedule.adoc#volsync-schedule[VolSync replication schedule] for schedule options.
+* Replace `source` with the name for your replication source custom resource.
+* Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
+* Replace `persistent_volume_claim` with the name of your source persistent volume claim.
+* Replace `mykeysecret` with the name of the secret that you copied from the destination cluster to the source cluster (the value of `$KEYSECRET`).
+* Replace `my.host.com` with the host address that you copied from the `.status.rsyncTLS.address` field of the `ReplicationDestination`.
 
 .. On the source cluster, replace the `address` and `keySecret` values with the values that you noted from the destination cluster, then create the resource:
 
@@ -193,11 +184,11 @@ Replace `source-ns` with the namespace of the persistent volume claim where your
 oc describe ReplicationSource -n <source-ns> <source>
 ----
 +
-Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
+* Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
 +
-Replace `source` with the name of your replication source custom resource.
+* Replace `source` with the name of your replication source custom resource.
 +
-If the replication was successful, the output should be similar to the following example:
+If the replication is successful, the output should be similar to the following example:
 +
 ----
 Status:
@@ -219,10 +210,10 @@ Status:
 +
 If the `Last Sync Time` has no time listed, then the replication is not complete.
 
-You have a replica of your original persistent volume claim.
-
 .Additional resources
 
 * xref:../volsync/volsync_rsync_tls_secret.adoc#volsync-rsync-create-tls-secret[Rsync-TLS key secret]
 * xref:../volsync/volsync_convert_backup.adoc#volsync-convert-backup-pvc[Convert a replicated image to a persistent volume claim]
 * link:https://volsync.readthedocs.io/en/latest/usage/index.html[Usage] in the VolSync documentation
+* xref:../volsync/volsync_copy_params.adoc#volsync-copy-params[VolSync copy and storage parameters]
+* xref:../volsync/volsync_schedule.adoc#volsync-schedule[VolSync replication schedule]
