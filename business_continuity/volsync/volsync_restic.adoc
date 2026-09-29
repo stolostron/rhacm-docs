@@ -4,7 +4,7 @@
 = Configure a Restic backup
 
 [role="_abstract"]
-To create a Restic-based backup of a persistent volume, create a repository secret and a `ReplicationSource`. A Restic backup does not synchronize data between clusters. It copies backup data to the location that you specify in your `restic-config` secret.
+Configure a Restic backup of a persistent volume by creating a repository secret and a `ReplicationSource`. A Restic backup does not synchronize data between clusters. It copies backup data to the location that you specify in your `restic-config` secret.
 
 .Prerequisites
 
@@ -13,7 +13,7 @@ To create a Restic-based backup of a persistent volume, create a repository secr
 
 .Procedure
 
-. Specify a repository where your backup images are stored by creating a secret that resembles the following YAML content:
+. Specify a repository where your backup images are stored by creating a secret. Your resource might resemble the following example:
 
 +
 [source,yaml]
@@ -30,17 +30,15 @@ stringData:
   AWS_SECRET_ACCESS_KEY: password
 ----
 +
-Replace `my-restic-repository` with the location of the S3 bucket repository where you want to store your backup files.
-+
-Replace `my-restic-password` with the encryption key that is required to access the repository.
-+
-Replace `access` and `password` with the credentials for your provider, if required.
+* Replace `my-restic-repository` with the location of the S3 bucket repository where you want to store your backup files.
+* Replace `my-restic-password` with the encryption key that is required to access the repository.
+* Replace `access` and `password` with the credentials for your provider, if required.
 +
 If you need to prepare a new repository, see link:https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html[Preparing a new repository] for the procedure. If you use that procedure, skip the step that requires you to run the `restic init` command. VolSync automatically initializes the repository during the first backup.
 +
 *Important:* When you back up multiple persistent volume claims to the same S3 bucket, the path to the bucket must be unique for each persistent volume claim. Each persistent volume claim is backed up with a separate `ReplicationSource`, and each requires a separate restic-config secret. By sharing the same S3 bucket, each `ReplicationSource` has write access to the entire S3 bucket.
 
-. Configure your backup policy by creating a `ReplicationSource` object that resembles the following YAML content:
+. Create the `ReplicationSource` resource to configure your backup policy. Your resource might resemble the following example:
 
 +
 [source,yaml]
@@ -65,20 +63,18 @@ spec:
     copyMethod: Clone
 ----
 +
-Replace `source` with the persistent volume claim that you are backing up.
+* Replace `source` with the persistent volume claim that you are backing up.
+* Replace the value for `schedule` with how often to run the backup. This example runs every 30 minutes.
+* Replace the value of `pruneIntervalDays` with the number of days that elapse between instances of repacking the data to save space. The prune operation can generate significant I/O traffic while it is running.
+* Replace `restic-config` with the name of the secret that you created in the previous step.
+* Set the values for `retain` to your retention policy for the backed up images.
 +
-Replace the value for `schedule` with how often to run the backup. This example runs every 30 minutes. See xref:../volsync/volsync_schedule.adoc#volsync-schedule[VolSync replication schedule].
-+
-Replace the value of `pruneIntervalDays` with the number of days that elapse between instances of repacking the data to save space. The prune operation can generate significant I/O traffic while it is running.
-+
-Replace `restic-config` with the name of the secret that you created in the previous step.
-+
-Set the values for `retain` to your retention policy for the backed up images.
-+
-*Note:* Use `Clone` for the value of `copyMethod` to ensure that a point-in-time image is saved. See xref:../volsync/volsync_copy_params.adoc#volsync-copy-params[VolSync copy and storage parameters].
+*Note:* Use `Clone` for the value of `copyMethod` to ensure that a point-in-time image is saved.
 
 .Additional resources
 
 * xref:../volsync/volsync_restic_restore.adoc#restore-restic-backup[Restore a Restic backup]
 * xref:../volsync/volsync_privileged_movers.adoc#volsync-privileged-movers[Run VolSync movers as root]
+* xref:../volsync/volsync_copy_params.adoc#volsync-copy-params[VolSync copy and storage parameters]
+* xref:../volsync/volsync_schedule.adoc#volsync-schedule[VolSync replication schedule]
 * link:https://volsync.readthedocs.io/en/latest/usage/restic/index.html#backup-options[Backup options] in the VolSync documentation
