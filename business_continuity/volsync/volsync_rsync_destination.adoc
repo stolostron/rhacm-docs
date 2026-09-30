@@ -1,0 +1,105 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#volsync-rsync-destination]
+= Configure an Rsync replication destination
+
+[role="_abstract"]
+Configure a `ReplicationDestination` on the destination cluster and capture the `.status.rsync.address` and `.status.rsync.sshKeys` values to use on the source cluster.
+
+.Prerequisites
+
+* VolSync is installed on the source and destination managed clusters. See xref:../volsync/volsync_install.adoc#volsync-install-clusters[VolSync installation on managed clusters].
+* At least two managed clusters for the same {acm-short} hub cluster
+* Network connectivity between the clusters that you configure with VolSync. If the clusters are not on the same network, you can configure the link:../../networking/submariner/subm_intro.adoc#submariner[Submariner multicluster networking and service discovery] and use the `ClusterIP` value for `ServiceType`, or use a load balancer with the `LoadBalancer` value for `ServiceType`.
+* The source persistent volume claim is on a CSI storage class
+
+.Procedure
+
+. Run the following command on the destination cluster to create the namespace:
+
++
+[source,bash]
+----
+oc create ns <destination-ns>
+----
++
+Replace `destination-ns` with a name for the namespace that will contain your destination persistent volume claim.
+
+. Create a file named `replication_destination.yaml`. Your resource might resemble the following content:
+
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: <destination>
+  namespace: <destination-ns>
+spec:
+  rsync:
+    serviceType: LoadBalancer
+    copyMethod: Snapshot
+    capacity: 2Gi
+    accessModes: [ReadWriteOnce]
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: csi-aws-vsc
+----
++
+* For this example, the `serviceType` value of `LoadBalancer` is used. The load balancer service enables your source managed cluster to transfer information to a different destination managed cluster. You can use `ClusterIP` as the service type if your source and destinations are on the same cluster, or if you have Submariner network service configured. Note the address and the name of the secret to refer to when you configure the source cluster.
+* Make sure that the `capacity` value matches the capacity of the persistent volume claim that is being replicated.
+* Replace `destination` with the name of your replication destination custom resource.
+* Replace `destination-ns` with the name of the namespace where your destination is located.
+
+. Run the following command on the destination cluster to create the `ReplicationDestination` resource:
+
++
+[source,bash]
+----
+oc create -n <destination-ns> -f replication_destination.yaml
+----
++
+Replace `destination-ns` with the name of the namespace where your destination is located.
++
+After the `ReplicationDestination` resource is created, the `.status.rsync.address` field provides the destination address for source-to-destination communication, and the `.status.rsync.sshKeys` field provides the name of the SSH key secret for secure data transfer.
+
+. Run the following command to copy the value of `.status.rsync.address` to use on the source cluster:
+
++
+[source,bash]
+----
+ADDRESS=`oc get replicationdestination <destination> -n <destination-ns> --template={{.status.rsync.address}}`
+echo $ADDRESS
+----
++
+* Replace `destination` with the name of your replication destination custom resource.
+* Replace `destination-ns` with the name of the namespace where your destination is located.
++
+The output should appear similar to the following example for an Amazon Web Services environment:
+
++
+----
+a831264645yhrjrjyer6f9e4a02eb2-5592c0b3d94dd376.elb.us-east-1.amazonaws.com
+----
+
+. Run the following command to copy the name of the secret:
+
++
+[source,bash]
+----
+SSHKEYS=`oc get replicationdestination <destination> -n <destination-ns> --template={{.status.rsync.sshKeys}}`
+echo $SSHKEYS
+----
++
+* Replace `destination` with the name of your replication destination custom resource.
+* Replace `destination-ns` with the name of the namespace where your destination is located.
++
+Use the SSH keys secret name from the output when you configure the source cluster. The output might resemble the following name:
+
++
+----
+volsync-rsync-dst-src-destination-name
+----
+
+.Next steps
+
+To copy the SSH secret to the source cluster, see xref:../volsync/volsync_rsync_copy_secret.adoc#volsync-rsync-copy-secret[Copy the Rsync SSH secret to the source cluster].
