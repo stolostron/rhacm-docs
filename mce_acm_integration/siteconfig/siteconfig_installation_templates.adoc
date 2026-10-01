@@ -1,24 +1,15 @@
-[#install-templates]
-= Installation templates overview
+:_mod-docs-content-type: REFERENCE
 
+[#siteconfig-templates]
+= Installation templates
+
+[role="_abstract"]
 Installation templates are data-driven templates that are used to generate the set of installation artifacts. These templates follow the Golang `text/template` format, and are instantiated by using data from the `ClusterInstance` custom resource. This enables dynamic creation of installation manifests for each target cluster that has similar configurations, but with different values.
 
 You can also create multiple sets based on the different installation methods or cluster topologies. The {sco} supports the following types of installation templates:
 
 Cluster-level:: Templates that must reference only cluster-specific fields.
 Node-level:: Templates that can reference both cluster-specific and node-specific fields.
-
-For more information about installation templates, see the following documentation:
-
-* <<template-functions,Template functions>>
-* <<default-templates,Default set of templates>>
-* <<special-template-variables,Special template variables>>
-* <<custom-manifest-order,Customization of the manifests order>>
-* <<extra-annotations-labels,Configuration of additional annotations and labels>>
-* <<permissible-changes,Permissible changes after provisioning>>
-
-[#template-functions]
-== Template functions
 
 You can customize the templated fields. The {sco} supports all link:https://masterminds.github.io/sprig/[Sprig library functions].
 
@@ -37,206 +28,10 @@ See the following example of the `.toYaml` specification in the `ClusterInstance
 {{ end }}
 ----
 
-[#default-templates]
-== Default set of templates
+.Additional resources
 
-The {sco} provides the following default, validated, and immutable set of templates in the same namespace in which the operator is installed:
-
-|===
-|Installation method|Template type|File name|Template content
-
-.2+|{ai}
-|Cluster-level templates
-|`ai-cluster-templates-v1.yaml`
-|`AgentClusterInstall` +
-`ClusterDeployment` +
-`InfraEnv` +
-`KlusterletAddonConfig` +
-`ManagedCluster`
-
-|Node-level templates
-|`ai-node-templates-v1.yaml`
-|`BareMetalHost` +
-`NMStateConfig`
-
-.2+|Image-based Install Operator
-|Cluster-level templates
-|`ibi-cluster-templates-v1.yaml`
-|`ClusterDeployment` +
-`KlusterletAddonConfig` +
-`ManagedCluster`
-
-|Node-level templates
-|`ibi-node-templates-v1.yaml`
-|`BareMetalHost` +
-`ImageClusterInstall` +
-`NetworkSecret`
-|===
-
-For more information about the `ClusterInstance` API, use the _API Explorer_ in the console, or an `oc` command.
-
-[#special-template-variables]
-== Special template variables
-
-The {sco} provides a set of special template variables that you can use in your templates. See the following list:
-
-`CurrentNode`:: The {sco} explicitly controls the iteration of the node objects and exposes this variable to access all the content for the current node being handled in templating.
-`InstallConfigOverrides`:: Contains the merged `networkType`, `cpuPartitioningMode` and `installConfigOverrides` content.
-`ControlPlaneAgents`:: Consists of the number of control plane agents and it is automatically derived from the `ClusterInstance` node objects.
-`WorkerAgents`:: Consists of the number of worker agents and it is automatically derived from the `ClusterInstance` node objects.
-
-Capitalize the field name in the text template to create a custom templated field.
-
-For example, the `ClusterInstance` `spec` field is referenced with the `.Spec` prefix.
-However, you must reference special variable fields with the `.SpecialVars` prefix.
-
-*Important:* Instead of using the `.Spec.Nodes` prefix for the `spec.nodes` field, you must reference it with the `.SpecialVars.CurrentNode` special template variable.
-
-For example, if you want to specify the `name` and `namespace` for your current node by using the `CurrentNode` special template variable, use the field names in the following form:
-
-[source,yaml]
-----
-name: "{{ .SpecialVars.CurrentNode.HostName }}"
-namespace: "{{ .Spec.ClusterName }}"
-----
-
-[#custom-manifest-order]
-== Customization of the manifests order
-
-You can control the order in which manifests are created, updated, and deleted by using the `siteconfig.open-cluster-management.io/sync-wave` annotation. The annotation takes an integer as a value, and that integer constitutes as a _wave_.
-
-You can add one or several manifests to a single wave. If you do not specify a value, the annotation takes the default value of `0`.
-
-The {sco} reconciles the manifests in ascending order when creating or updating resources and it deletes resources in descending order.
-
-In the following example, if the {sco} creates or updates the manifests, the `AgentClusterInstall` and `ClusterDeployment` custom resources are reconciled in the first wave, while `KlusterletAddonConfig` and `ManagedCluster` custom resources are reconciled in the third wave:
-
-[source,yaml]
-----
-apiVersion: v1
-data:
-  AgentClusterInstall: |-
-    ...
-        siteconfig.open-cluster-management.io/sync-wave: "1"
-    ...
-  ClusterDeployment: |-
-    ...
-        siteconfig.open-cluster-management.io/sync-wave: "1"
-    ...
-  InfraEnv: |-
-    ...
-        siteconfig.open-cluster-management.io/sync-wave: "2"
-    ...
-  KlusterletAddonConfig: |-
-    ...
-        siteconfig.open-cluster-management.io/sync-wave: "3"
-    ...
-  ManagedCluster: |-
-    ...
-        siteconfig.open-cluster-management.io/sync-wave: "3"
-    ...
-kind: ConfigMap
-metadata:
-  name: assisted-installer-templates
-  namespace: example-namespace
-----
-
-If the {sco} deletes the resources, `KlusterletAddonConfig` and `ManagedCluster` custom resources are the first to be deleted, while the `AgentClusterInstall` and `ClusterDeployment` custom resources are the last.
-
-[#extra-annotations-labels]
-== Configuration of additional annotations and labels
-
-You can configure additional annotations and labels to both cluster-level and node-level installation manifests by using the `extraAnnotations` and `extraLabels` fields in the `ClusterInstance` API.
-The {sco} applies your additional annotations and labels to the manifests that you specify in the `ClusterInstance` resource.
-
-When creating your additional annotations and labels, you must specify a manifest type to allow the {sco} to apply them to all the matching manifests.
-However, the annotations and labels are arbitrary and you can set any key and value pairs that are meaningful to your applications.
-
-*Note:* The additional annotations and labels are only applied to the resources that were rendered through the referenced templates.
-
-View the following example application of `extraAnnotations` and `extraLabels`:
-
-[source,yaml]
-----
-apiVersion: siteconfig.open-cluster-management.io/v1alpha1
-kind: ClusterInstance
-metadata:
-  name: "example-sno"
-  namespace: "example-sno"
-spec:
-  [...]
-  clusterName: "example-sno"
-  extraAnnotations: <1>
-    ClusterDeployment:
-      myClusterAnnotation: success
-  extraLabels: <2>
-    ManagedCluster:
-      common: "true"
-      group-du: ""
-  nodes:
-    - hostName: "example-sno.example.redhat.com"
-      role: "master"
-      extraAnnotations: <3>
-        BareMetalHost:
-          myNodeAnnotation: success
-      extraLabels: <4>
-        BareMetalHost:
-          "testExtraLabel": "success"
-----
-<1> This field supports cluster-level annotations and labels that the {sco} applies to the the `ManagedCluster` and `ClusterDeployment` manifests.
-<2> This field supports node-level annotations and labels that the {sco} applies to the `BareMetalHost` manifest.
-<3> The `extraAnnotations` in this `BareMetalHost` example is `myNodeAnnotation`.
-<4> The `extraLabels` in this `BareMetalHost` example is `testExtraLabel`.
-
-You can verify that your additional labels are applied by running the following command:
-
-[source,terminal]
-----
-oc get managedclusters example-sno -ojsonpath='{.metadata.labels}' | jq
-----
-
-View the following example of applied labels:
-
-[source,json]
-----
-{
-  "common": "true",
-  "group-du": "",
-  ...
-}
-----
-
-You can verify that your additional annotations are applied by running the following command:
-
-[source,terminal]
-----
-oc get bmh example-sno.example.redhat.com -n example-sno -ojsonpath='{.metadata.annotations}' | jq
-----
-
-View the following example of applied annotations:
-
-[source,json]
-----
-{
-  "myNodeAnnotation": "success",
-  ...
-}
-----
-
-[#permissible-changes]
-== Permissible changes after provisioning
-
-You might want to change your cluster configuration but making changes to your cluster is not allowed during provisioning. However, after a cluster is provisioned, you can modify the following fields:
-
-
-* `spec.extraAnnotations`
-* `spec.extraLabels`
-* `spec.suppressedManifests`
-* `spec.pruneManifests`
-* `spec.clusterImageSetNameRef`
-* `spec.nodes.<node-id>.extraAnnotations`
-* `spec.nodes.<node-id>.extraLabels`
-* `spec.nodes.<node-id>.suppressedManifests`
-* `spec.nodes.<node-id>.pruneManifests`
-
-*Note:* `<node-id>` represents the updated `NodeSpec` object.
+* xref:../siteconfig/siteconfig_default_templates.adoc#siteconfig-default-templates[Default set of templates]
+* xref:../siteconfig/siteconfig_template_variables.adoc#siteconfig-template-variables[Special template variables]
+* xref:../siteconfig/siteconfig_manifest_order.adoc#siteconfig-manifest-order[Customization of the manifests order]
+* xref:../siteconfig/siteconfig_extra_annotations.adoc#siteconfig-annotations-labels[Configuration of additional annotations and labels]
+* xref:../siteconfig/siteconfig_permissible_changes.adoc#siteconfig-permissible-changes[Permissible changes after provisioning]

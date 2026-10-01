@@ -1,0 +1,77 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#annotate-worker-node]
+= Add an annotation to your worker node
+
+[role="_abstract"]
+Scale-in of a {sno} cluster removes a worker node from a cluster that was installed by the {sco}. Add an annotation to your worker node for removal. Complete the following steps to annotate a worker node from the managed cluster.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* If you are using GitOps ZTP, you have configured your GitOps ZTP environment. To configure your environment, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/edge_computing/ztp-preparing-the-hub-cluster[Preparing the hub cluster for GitOps ZTP].
+* You have the default templates. To get familiar with the default templates, see xref:../siteconfig/siteconfig_default_templates.adoc#siteconfig-default-templates[Default set of templates]
+* You have installed your cluster with the {sco}. To install a cluster with the {sco}, see xref:../siteconfig/siteconfig_install_clusters.adoc#install-sno-clusters[{sno} cluster installation with the {sco}]
+* You have set the `spec.clusterType` to `"SNO"`.
+
+.Procedure
+
+. Add an annotation in the `extraAnnotations` field of the worker node entry in the `ClusterInstance` custom resource that is used to provision your cluster:
+
++
+[source,yaml]
+----
+spec:
+   ...
+   nodes:
+   - hostName: "worker-node2.example.com"
+      role: "worker"
+      ironicInspect: ""
+      extraAnnotations:
+        BareMetalHost:
+          bmac.agent-install.openshift.io/remove-agent-and-node-on-delete: "true"
+...
+----
+
+. Apply the changes. See the following options:
+
++
+* If you are using {acm-short} without {gitops}, run the following command on the hub cluster:
+
++
+[source,terminal]
+----
+oc apply -f <clusterinstance>.yaml
+----
+
++
+* If you are using GitOps ZTP, push to your Git repository and wait for Argo CD to synchronize the changes.
+
+. Verify that the annotation is applied to the `BaremetalHost` worker resource by running the following command on the hub cluster:
+
++
+[source,terminal]
+----
+oc get bmh -n <clusterinstance_namespace> worker-node2.example.com -ojsonpath='{.metadata.annotations}' | jq
+----
+
++
+See the following example output for successful application of the annotation:
+
++
+[source,terminal]
+----
+{
+  "baremetalhost.metal3.io/detached": "assisted-service-controller",
+  "bmac.agent-install.openshift.io/hostname": "worker-node2.example.com",
+  "bmac.agent-install.openshift.io/remove-agent-and-node-on-delete": "true"
+  "bmac.agent-install.openshift.io/role": "master",
+  "inspect.metal3.io": "disabled",
+  "siteconfig.open-cluster-management.io/sync-wave": "1",
+}
+----
+
+.Additional resources
+
+* xref:../siteconfig/siteconfig_scale_in_delete_bmh.adoc#delete-worker-bmh[Delete the `BareMetalHost` resource of the worker node]
