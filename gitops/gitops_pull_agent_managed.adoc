@@ -1,0 +1,326 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#gitops-pull-agent-managed]
+= Enable the {gitops} add-on with Argo CD Agent in managed mode
+
+[role="_abstract"]
+In managed mode, the hub cluster is the source of truth. Applications are created on the hub cluster and the principal dispatches applications to agents for local reconciliation on managed clusters. Use managed more for centralized operation models where a single team manages everything from one place.
+
+*Required access:* Cluster administrator
+
+.Procedure
+
+. Create a `Placement` resource for the `GitOpsCluster` to select which managed clusters receive the add-on by adding the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: gitops-placement
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "In"
+          values:
+          - OpenShift
+        - key: local-cluster
+          operator: DoesNotExist
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f gitops-placement.yaml
+----
+
+. Create a `GitOpsCluster` resource with the Argo CD Agent enabled by adding the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: agent-gitops
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: gitops-placement
+  gitopsAddon:
+    enabled: true
+    argoCDAgent:
+      enabled: true
+----
++
+*Note:* The `mode` field determines the agent operation mode. The default value is `managed`. For {ocp-short} managed clusters, you can enable OLM-based deployment by adding `olmSubscription.enabled: true` to the `gitopsAddon` specification in case the add-on auto-detection of the cluster type is not working properly. For more information, see xref:../gitops/gitops_pull_addon_overview.adoc#gitops-addon-overview[{gitops} add-on overview].
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f gitopscluster.yaml
+----
+
+. Verify that the `ConfigMap` was created by running the following command:
+
++
+[source,bash]
+----
+oc get configmap acm-placement -n openshift-gitops -o yaml
+
+----
+
+. Verify that the `Role` was created by running the following command:
+
++
+[source,bash]
+----
+oc get role openshift-gitops-applicationset-controller-placement -n openshift-gitops
+----
+
+. Verify that the `RoleBinding` was created by running the following command:
+
++
+[source,bash]
+----
+oc get rolebinding openshift-gitops-applicationset-controller-placement -n openshift-gitops
+----
+
+. Customize the auto-generated `ArgoCD` `Policy` to add RBAC for the managed clusters. The following example shows the complete `Policy` with RBAC added as a second policy-template:
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: agent-gitops-argocd-policy
+  namespace: openshift-gitops
+  annotations:
+    policy.open-cluster-management.io/standards: NIST-CSF
+    policy.open-cluster-management.io/categories: PR.PT Protective Technology
+    policy.open-cluster-management.io/controls: PR.PT-3 Least Functionality
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: agent-gitops-argocd-config-policy
+        spec:
+          pruneObjectBehavior: None
+          remediationAction: enforce
+          severity: medium
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: argoproj.io/v1beta1
+                kind: ArgoCD
+                metadata:
+                  name: acm-openshift-gitops
+                  namespace: openshift-gitops
+                  labels:
+                    apps.open-cluster-management.io/gitopsaddon: "true"
+                spec:
+                  server:
+                    enabled: false
+                  argoCDAgent:
+                    agent:
+                      enabled: true
+                      allowedNamespaces:
+                        - "*"
+                      client:
+                        principalServerAddress: "<auto-discovered>"
+                        principalServerPort:
+                        mode: "managed"
+                      tls:
+                        secretName: argocd-agent-client-tls
+                        rootCASecretName: argocd-agent-ca
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: agent-gitops-argocd-rbac-policy
+        spec:
+          pruneObjectBehavior: None
+          remediationAction: enforce
+          severity: medium
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRoleBinding
+                metadata:
+                  name: acm-openshift-gitops-cluster-admin
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: ClusterRole
+                  name: cluster-admin
+                subjects:
+                  - kind: ServiceAccount
+                    name: acm-openshift-gitops-argocd-application-controller
+                    namespace: openshift-gitops
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRoleBinding
+                metadata:
+                  name: acm-openshift-gitops-argocd-agent-cluster-reader
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: ClusterRole
+                  name: view
+                subjects:
+                  - kind: ServiceAccount
+                    name: acm-openshift-gitops-agent-agent
+                    namespace: openshift-gitops
+----
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f policy.yaml
+----
++
+*Notes:* 
++
+* The `cluster-admin` `ClusterRole` in this example grants full cluster administrator privileges.
+* Do not add `Application` resources to the auto-generated `ArgoCD` `Policy`. The auto-generated `Policy` is for configuring the managed cluster.
+
+. Create a `Placement` resource for the `ApplicationSet` to select which managed clusters receive the application. Add the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: app-placement
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "In"
+          values:
+          - OpenShift
+        - key: local-cluster
+          operator: DoesNotExist
+----
++
+*Note:* This `Placement` is distinct from the `GitOpsCluster` `Placement` that you created in step 1. See _Configure Placement resources for {gitops}_ in the additional resource section for for more information.
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f app-placement.yaml
+----
+
+. Deploy applications by using an `ApplicationSet` resource on the hub cluster. In the Argo CD Agent-based pull model, use `destination.name` so that the principal routes the application to the correct agent. See the following YAML sample:
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook-appset
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: app-placement
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: '{{name}}-guestbook'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps
+        targetRevision: HEAD
+        path: guestbook
+      destination:
+        name: '{{name}}'
+        namespace: guestbook
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+----
++
+*Note:* The `destination.name: '\{\{name\}\}'` field distinguishes the Argo CD Agent-based pull model from the other models. The principal uses destination-based mapping to route applications to the correct agent. The `configMapRef: acm-placement` references the `ConfigMap` that the `GitOpsCluster` controller creates automatically during reconciliation.
+
+. Apply the YAML sample by running the following command:
+
++
+[source,bash]
+----
+oc apply -f applicationset.yaml
+----
+
+.Verification
+
+. Verify that the agent principal is running on the hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc get pods -n openshift-gitops -l app.kubernetes.io/name=openshift-gitops-agent-principal
+----
+
+. On the managed cluster, verify the agent is running by running the following command:
+
++
+[source,bash]
+----
+oc get pods -n openshift-gitops -l app.kubernetes.io/part-of=argocd-agent --context <managed-cluster-context>
+----
+
+. On the hub cluster, verify that the application status shows `Synced` by running the following command:
+
++
+[source,bash]
+----
+oc get applications.argoproj.io -n openshift-gitops
+----
+
+.Additional resources
+
+- xref:../gitops/gitops_placement.adoc#gitops-placement[Configure Placement resources for {gitops}]
