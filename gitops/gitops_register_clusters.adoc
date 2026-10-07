@@ -1,0 +1,52 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#register-gitops]
+= Registering managed clusters to {gitops}
+
+[role="_abstract"]
+Complete the following steps to register managed clusters to {gitops-short}:
+
+. Create a managed cluster set by binding it to the namespace where {gitops-short} is deployed. 
+
++
+- See link:../clusters/cluster_lifecycle/create_clustersetbinding.adoc#creating-a-managedclustersetbinding[Creating a _ManagedClusterSetBinding_ resource]. 
++
+- For placement information, see link:../clusters/cluster_lifecycle/placement_filter.adoc[Filtering with _ManagedCluster_ objects].
+
+
+. In the namespace that is used in managed cluster set binding, create a `Placement` custom resource to select a set of managed clusters to register to a {gitops-short} operator instance. Use the `multicloud-integration` placement example as a template. See _Using ManagedClusterSets with Placement_ for placement information. 
+
++
+*Notes:* 
++
+- Only {ocp-short} clusters are registered to an {gitops-short} operator instance, not other Kubernetes clusters.
+- In some unstable network scenarios, the managed clusters might be temporarily placed in `unavailable` or `unreachable` state. See _Configuring placement tolerations for {acm-short} and {gitops-short}_ for more details.
+
+. Create a `GitOpsCluster` custom resource to register the set of managed clusters from the placement decision to the specified instance of {gitops-short}. This enables the {gitops-short} instance to deploy applications to any of those {acm-short} managed clusters. Use the `_multicloud-integrations_` {gitops-short} cluster example.
++
+*Note:* The referenced `Placement` resource must be in the same namespace as the `GitOpsCluster` resource. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: gitops-cluster-sample
+  namespace: dev
+spec:
+  argoServer:
+    cluster: <your-local-cluster-name>
+    argoNamespace: openshift-gitops
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: all-openshift-clusters <1>
+----
+
++
+- The `placementRef.name` value is `all-openshift-clusters`, and is specified as target clusters for the {gitops-short} instance that is installed in `argoNamespace: openshift-gitops`. 
+- The `argoServer.cluster` specification requires the `<your-local-cluster-name>` value.
+
+. Save your changes. You can now follow the {gitops-short} workflow to manage your applications.
+

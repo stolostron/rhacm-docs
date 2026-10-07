@@ -1,0 +1,121 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#policy-install-ocp-gitops]
+= Generating a policy that installs {ocp-short} GitOps
+
+[role="_abstract"]
+You can generate a policy that installs {ocp-short} GitOps by using the Policy Generator. The {ocp-short} GitOps operator offers the _all namespaces_ installation mode, which you can view in the following example. Create a `Subscription` manifest file called `openshift-gitops-subscription.yaml`, similar to the following example:
+
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-operators
+spec:
+  channel: stable
+  name: openshift-gitops-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+----
+
+To pin to a specific version of the operator, add the following parameter and value: `spec.startingCSV: openshift-gitops-operator.v<version>`. Replace `<version>` with your preferred version.
+
+A `PolicyGenerator` configuration file is required. Use the configuration file named `policy-generator-config.yaml` to generate a policy to install {ocp-short} GitOps on all {ocp-short} managed clusters. See the following example:
+
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: install-openshift-gitops
+policyDefaults:
+  namespace: policies
+  placement:
+    clusterSelectors:
+      vendor: "OpenShift"
+  remediationAction: enforce
+policies:
+  - name: install-openshift-gitops
+    manifests:
+      - path: openshift-gitops-subscription.yaml
+----
+
+The last required file is `kustomization.yaml`, which requires the following configuration:
+
+[source,yaml]
+----
+generators:
+  - policy-generator-config.yaml
+----
+
+The generated policy might resemble the following file with `PlacementRule`(Deprecated):
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-install-openshift-gitops
+  namespace: policies
+spec:
+  clusterSelector:
+    matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-install-openshift-gitops
+  namespace: policies
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: placement-install-openshift-gitops
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: install-openshift-gitops
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/description:
+  name: install-openshift-gitops
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: install-openshift-gitops
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: Subscription
+                metadata:
+                  name: openshift-gitops-operator
+                  namespace: openshift-operators
+                spec:
+                  channel: stable
+                  name: openshift-gitops-operator
+                  source: redhat-operators
+                  sourceNamespace: openshift-marketplace
+          remediationAction: enforce
+          severity: low
+----
+
+Generated policies from manifests in the {ocp-short} documentation is supported. Any configuration guidance from the {ocp-short} documentation can be applied using the Policy Generator.
+

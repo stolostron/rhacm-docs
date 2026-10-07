@@ -1,0 +1,59 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#crd-pull-model]
+= Creating the _ApplicationSet_ custom resource
+
+[role="_abstract"]
+The Argo CD `ApplicationSet` resource is used to deploy applications on the managed clusters by using the Push or Pull model with a `placement` resource in the generator field that is used to get a list of managed clusters. 
+
+. For the Pull model, set the destination for the application to the default local Kubernetes server, as displayed in the following example. The application is deployed locally by the application controller on the managed cluster.
+
+. Add the annotations that are required to override the default Push model, as displayed in the following example `ApplicationSet` YAML, which uses the Pull model with template annotations:
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: `ApplicationSet`
+metadata:
+  name: guestbook-allclusters-app-set
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: ocm-placement-generator
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: aws-app-placement
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'<1>
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true" <2>
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true" <3>
+      name: '{{name}}-guestbook-app'
+    spec:
+      destination:
+        namespace: guestbook
+        server: https://kubernetes.default.svc
+      project: default
+      sources: [
+      {
+        repoURL: https://github.com/argoproj/argocd-example-apps.git
+        targetRevision: main
+        path: guestbook
+         }
+      ]
+      syncPolicy:
+        automated: {}
+        syncOptions:
+        - CreateNamespace=true
+----
++
+<1> The `apps.open-cluster-management.io/ocm-managed-cluster` is needed for the Pull model.
+<2> The `argocd.argoproj.io/skip-reconcile` is needed to ignore the Push model resources.
+<3> The `apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"` is also needed for the Pull model.
+

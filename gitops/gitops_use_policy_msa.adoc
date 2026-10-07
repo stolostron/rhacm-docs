@@ -1,0 +1,144 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#using-policy]
+= Using policy to create managed service accounts and cluster permissions 
+
+[role="_abstract"]
+When the GitOpsCluster resource is updated with the `ManagedServiceAccountRef`, each managed cluster in the placement of this GitOpsCluster needs to have the service account. If you have several managed clusters, it becomes tedious for you to create the managed service account and cluster permission for each managed cluster. You can simply this process by using a policy to create the managed service account and cluster permission for all your managed clusters
+
+When you apply the `ManagedServiceAccount` and `ClusterPermission` resources to the hub cluster, the placement of this policy is bound to the local cluster. Replicate those resources to the managed cluster namespace for all of the managed clusters in the placement of the GitOpsCluster resource.
+
+Using a policy to create the `ManagedServiceAccount` and `ClusterPermission` resources include the following attributes: 
+
+* Updating the `ManagedServiceAccount` and `ClusterPermission` object templates in the policy results in updates to all of the `ManagedServiceAccount` and `ClusterPermission` resources in all of the managed clusters.
+* Updating directly to the `ManagedServiceAccount` and `ClusterPermission` resources becomes reverted back to the original state because it is enforced by the policy.
+* If the placement decision for the GitOpsCluster placement changes, the policy manages the creation and deletion of the resources in the managed cluster namespaces.
+
+. To create a policy for a YAML to create a managed service account and cluster permission, create a YAML with the following content: 
+
++
+[source,yaml]
+----
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-gitops
+  namespace: openshift-gitops
+  annotations:
+    policy.open-cluster-management.io/standards: NIST-CSF
+    policy.open-cluster-management.io/categories: PR.PT Protective Technology
+    policy.open-cluster-management.io/controls: PR.PT-3 Least Functionality
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-gitops-sub
+        spec:
+          pruneObjectBehavior: None
+          remediationAction: enforce
+          severity: low
+          object-templates-raw: |
+            {{ range $placedec := (lookup "cluster.open-cluster-management.io/v1beta1" "PlacementDecision" "openshift-gitops" "" "cluster.open-cluster-management.io/placement=aws-app-placement").items }}
+            {{ range $clustdec := $placedec.status.decisions }}
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: authentication.open-cluster-management.io/v1alpha1
+                kind: ManagedServiceAccount
+                metadata:
+                  name: <managed-sa-sample>
+                  namespace: {{ $clustdec.clusterName }}
+                spec:
+                  rotation: {}
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.open-cluster-management.io/v1alpha1
+                kind: ClusterPermission
+                metadata:
+                  name: <clusterpermission-msa-subject-sample>
+                  namespace: {{ $clustdec.clusterName }}
+                spec:
+                  roles:
+                  - namespace: default
+                    rules:
+                    - apiGroups: ["apps"]
+                      resources: ["deployments"]
+                      verbs: ["get", "list", "create", "update", "delete"]
+                    - apiGroups: [""]
+                      resources: ["configmaps", "secrets", "pods", "podtemplates", "persistentvolumeclaims", "persistentvolumes"]
+                      verbs: ["get", "update", "list", "create", "delete"]
+                    - apiGroups: ["storage.k8s.io"]
+                      resources: ["*"]
+                      verbs: ["list"]
+                  - namespace: mortgage
+                    rules:
+                    - apiGroups: ["apps"]
+                      resources: ["deployments"]
+                      verbs: ["get", "list", "create", "update", "delete"]
+                    - apiGroups: [""]
+                      resources: ["configmaps", "secrets", "pods", "services", "namespace"]
+                      verbs: ["get", "update", "list", "create", "delete"]
+                  clusterRole:
+                    rules:
+                    - apiGroups: ["*"]
+                      resources: ["*"]
+                      verbs: ["get", "list"]
+                  roleBindings:
+                  - namespace: default
+                    roleRef:
+                      kind: Role
+                    subject:
+                      apiGroup: authentication.open-cluster-management.io
+                      kind: ManagedServiceAccount
+                      name: <managed-sa-sample>
+                  - namespace: mortgage
+                    roleRef:
+                      kind: Role
+                    subject:
+                      apiGroup: authentication.open-cluster-management.io
+                      kind: ManagedServiceAccount
+                      name: <managed-sa-sample>
+                  clusterRoleBinding:
+                    subject:
+                      apiGroup: authentication.open-cluster-management.io
+                      kind: ManagedServiceAccount
+                      name: <managed-sa-sample>
+            {{ end }}
+            {{ end }}
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-gitops
+  namespace: openshift-gitops
+placementRef:
+  name: lc-app-placement
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
+subjects:
+  - name: policy-gitops
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: lc-app-placement
+  namespace: openshift-gitops
+spec:
+  numberOfClusters: 1
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchLabels:
+          name: <your-local-cluster-name>
+----
+
+. Save the YAML file in a file called, `policy.yaml`.
+. Run `oc apply -f policy.yaml`. 
+. In the object template of the policy, it iterates through the placement decision of the GitOpsCluster associated placement and applies the following `ManagedServiceAccount` and `ClusterPermission` templates: 
+
