@@ -1,0 +1,79 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#ansible-hosted-cluster-install]
+= Running an {aap-short} job to install a hosted cluster
+
+[role="_abstract"]
+Start an {aap-short} job that installs a hosted cluster by creating paused HostedCluster and NodePool resources and a matching ClusterCurator resource.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* Meet the prerequisites in xref:../cluster_ansible/ansible_prereqs.adoc#prerequisites-for-ansible-integration-cluster[Prerequisites for {aap-short} cluster automation].
+
+.Procedure
+
+. Create the `HostedCluster` and `NodePool` resources, including the `pausedUntil: true` field. If you use the `hcp create cluster` command line interface command, you can specify the `--pausedUntil: true` flag.
++
+See the following examples:
++
+[source,yaml]
+----
+apiVersion: hypershift.openshift.io/v1beta1
+kind: HostedCluster
+metadata:
+  name: my-cluster
+  namespace: clusters
+spec:
+  pausedUntil: 'true'
+----
++
+[source,yaml]
+----
+apiVersion: hypershift.openshift.io/v1beta1
+kind: NodePool
+metadata:
+  name: my-cluster-us-east-2
+  namespace: clusters
+spec:
+  pausedUntil: 'true'
+----
+. Create a `ClusterCurator` resource with the same name as the `HostedCluster` resource and in the same namespace as the `HostedCluster` resource. See the following example:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: ClusterCurator
+metadata:
+  name: my-cluster
+  namespace: clusters
+  labels:
+    open-cluster-management: curator
+spec:
+  desiredCuration: install
+  install:
+    jobMonitorTimeout: 5
+    prehook:
+      - name: Demo Job Template
+        extra_vars:
+          variable1: something-interesting
+          variable2: 2
+      - name: Demo Job Template
+    posthook:
+      - name: Demo Job Template
+    towerAuthSecret: toweraccess
+----
+. If your {aap-short} Tower requires authentication, create a secret resource. See the following example:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: toweraccess
+  namespace: clusters
+stringData:
+  host: https://my-tower-domain.io
+  token: ANSIBLE_TOKEN_FOR_admin
+----
