@@ -1,0 +1,172 @@
+[#klusterlet-resource-requirements]
+= Configuring klusterlet agent resource requirements
+
+You can configure the CPU and memory resource requests and limits for the klusterlet agent deployments on a managed cluster by using a `KlusterletConfig` resource. This lets you tune the agent workload for constrained or high-throughput environments without manually editing deployments on the managed cluster.
+
+*Required access:* Cluster administrator
+
+[#klusterlet-resource-requirements-about]
+== About klusterlet resource requirements
+
+The klusterlet consists of agent deployments that run on each managed cluster:
+
+* *Default install mode:* `klusterlet-registration-agent` and `klusterlet-work-agent` run as separate deployments.
+* *Singleton install mode:* Both agents are combined into a single `klusterlet-agent` deployment.
+
+By default, the agents start with minimal resource requests (`cpu: 2m, memory: 16Mi`). In environments with many managed resources, add-ons, or strict QoS requirements, you can override these defaults by setting `spec.resourceRequirements` in a `KlusterletConfig` resource.
+
+The `resourceRequirements` field supports three QoS class types:
+
+[cols="1,2",options="header"]
+|===
+| Type | Description
+| `Default` | Uses the default resource requests and limits shipped with the klusterlet chart. This is the behavior when no `resourceRequirements` is set.
+| `BestEffort` | Sets no requests or limits on any agent container, giving the scheduler maximum flexibility. Pods may be evicted first under memory pressure.
+| `ResourceRequirement` | Applies explicit `requests` and `limits` you define to all containers in every klusterlet agent deployment.
+|===
+
+[#klusterlet-resource-requirements-procedure]
+== Setting resource requirements with KlusterletConfig
+
+. Create a `KlusterletConfig` resource with `spec.resourceRequirements` set. See the following example:
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: high-memory <1>
+spec:
+  resourceRequirements:
+    type: ResourceRequirement <2>
+    resourceRequirements:
+      requests:
+        cpu: 100m <3>
+        memory: 128Mi <4>
+      limits:
+        cpu: 500m <5>
+        memory: 512Mi <6>
+----
+<1> Replace with a name for the `KlusterletConfig` resource.
+<2> Set the QoS class type. Use `Default`, `BestEffort`, or `ResourceRequirement`.
+<3> Minimum CPU reserved for each agent container.
+<4> Minimum memory reserved for each agent container.
+<5> Maximum CPU allowed for each agent container.
+<6> Maximum memory allowed for each agent container.
+
+. Bind the `KlusterletConfig` to a managed cluster by adding the `agent.open-cluster-management.io/klusterlet-config` annotation to the `ManagedCluster` resource:
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    agent.open-cluster-management.io/klusterlet-config: high-memory <1>
+  name: <cluster-name> <2>
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+----
+<1> Use the name of your `KlusterletConfig` resource.
+<2> Replace with the name of the managed cluster.
++
+*Notes:*
++
+* If you use the console, enable the YAML view to add the annotation to the `ManagedCluster` resource.
+* You can use the name `global` for a `KlusterletConfig` to automatically apply the configuration to every managed cluster without requiring an annotation. See _Configuring the global KlusterletConfig_.
+* After the `ManagedCluster` annotation is set, the hub generates an updated `ManifestWork` containing the revised `Klusterlet` custom resource. The klusterlet operator on the managed cluster reconciles the deployments within a few minutes.
+
+[#klusterlet-resource-requirements-verify]
+== Verifying resource requirements on the managed cluster
+
+After the `KlusterletConfig` is applied and the managed cluster re-imports or reconciles, verify that the agent deployments reflect the new resources.
+
+. List klusterlet agent deployments on the managed cluster:
++
+[source,bash]
+----
+kubectl get deploy -n open-cluster-management-agent
+----
+
+. Inspect resource requests and limits on a deployment:
++
+[source,bash]
+----
+kubectl get deploy klusterlet-agent \
+  -n open-cluster-management-agent \
+  -o jsonpath='{.spec.template.spec.containers[*].resources}'
+----
++
+The output should reflect the `requests` and `limits` values you configured.
+
+[#klusterlet-resource-requirements-patch]
+== Updating resource requirements for an existing cluster
+
+If the managed cluster is already imported and you want to change the resource configuration, patch the existing `KlusterletConfig` resource on the hub cluster:
+
+[source,bash]
+----
+kubectl patch klusterletconfig <klusterletconfig-name> --type=merge -p '{
+  "spec": {
+    "resourceRequirements": {
+      "type": "ResourceRequirement",
+      "resourceRequirements": {
+        "requests": {"cpu": "200m", "memory": "256Mi"},
+        "limits":   {"cpu": "1",   "memory": "1Gi"}
+      }
+    }
+  }
+}'
+----
+
+The hub controller detects the change and regenerates the `ManifestWork` automatically. The klusterlet operator on the managed cluster applies the updated deployment spec within a few minutes.
+
+[#klusterlet-resource-requirements-besteffort]
+== Using BestEffort mode
+
+To remove all resource constraints from the klusterlet agent and let the Kubernetes scheduler manage allocation freely, set the type to `BestEffort`:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: besteffort-klusterlet
+spec:
+  resourceRequirements:
+    type: BestEffort
+----
+
+*Note:* BestEffort pods are the first to be evicted under node memory pressure. Use this setting only in non-production or resource-abundant environments.
+
+[#klusterlet-resource-requirements-global]
+== Applying a global resource requirement policy
+
+To apply the same resource requirements to every managed cluster without annotating each `ManagedCluster` individually, create or update the global `KlusterletConfig`:
+
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: global
+spec:
+  resourceRequirements:
+    type: ResourceRequirement
+    resourceRequirements:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+----
+
+A cluster-specific `KlusterletConfig` bound via annotation overrides the global configuration for that cluster if both define `resourceRequirements`.
+
+[#klusterlet-resource-requirements-additional-resources]
+== Additional resources
+
+* xref:../cluster_lifecycle/import_custom_bundle.adoc#import-custom-bundle-ca[Customizing the hub cluster API server URL and CA bundle during import]
+* xref:../cluster_lifecycle/import_custom_bundle.adoc#config-gloabl-klusterletconfig[Configuring the global KlusterletConfig]
