@@ -1,0 +1,100 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#deploying-policies-to-your-cluster]
+= Deploying policies to your cluster
+
+[role="_abstract"]
+After you push your changes, you can deploy the policies to your {acm} installation. Post deployment, your hub cluster is connected to your Git repository. Any further changes to your chosen branch of the Git repository is reflected in your cluster.
+
+.Procedure
+
+. By default, policies deployed with GitOps use the `merge` reconcile option. If you want to use the `replace` reconcile option instead, add the `apps.open-cluster-management.io/reconcile-option: replace` annotation to the `Subscription` resource and remove `apps.open-cluster-management.io/reconcile-option: merge`. Your `Subscription` might resemble the following file:
+
++
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  name: subscription-example
+  namespace: sub-ns
+  annotations:
+    apps.open-cluster-management.io/git-path: sample-resources
+    apps.open-cluster-management.io/reconcile-option: replace
+spec:
+----
+
+. From the `policy-collection` folder, run the following command to change the directory:
+
++
+[source,bash]
+----
+cd deploy
+----
+
+. Make sure that your command line interface (CLI) is configured to create resources on the correct cluster with the following command:
+
++
+[source,bash]
+----
+oc cluster-info
+----
++
+*Note:* The output of the command displays the API server details for the cluster, where {acm-short} is installed. If the correct URL is not displayed, configure your CLI to point to the correct cluster. See _Using the OpenShift CLI_ in the _Additional resources_ section for more information.
+
+. Create a namespace where your policies are created to control access and to organize the policies. Run the following command:
+
++
+[source,bash]
+----
+oc create namespace policy-namespace
+----
+
+. Run the following command to deploy the policies to your cluster:
+
++
+[source,bash]
+----
+./deploy.sh -u https://github.com/<your-repository>/policy-collection -p my-policies -n policy-namespace
+----
++
+Replace `your-repository` with your Git user name or repository name.
++
+*Note:* For reference, the full list of arguments for the `deploy.sh` script uses the following syntax:
++
+----
+./deploy.sh [-u <url>] [-b <branch>] [-p <path/to/dir>] [-n <namespace>] [-a|--name <resource-name>]
+----
++
+View the following explanations for each argument:
+
+* URL: The URL to the repository that you forked from the main `policy-collection` repository. 
+
+* Branch: Branch of the Git repository to point to. The default branch is `main`.
+
+* Subdirectory Path: The subdirectory path you created to contain the policies you want to use. In the previous sample, we used the `my-policies` subdirectory, but you can also specify which folder you want start with. For example, you can use `my-policies/AC-Access-Control`. The default folder is `stable`.
+
+* Namespace: The namespace where the resources and policies are created on the hub cluster. These instructions use the `policy-namespace` namespace. The default namespace is `policies`.
+
+* Name Prefix: Prefix for the `Channel` and `Subscription` resources. The default is `demo-stable-policies`.
+
+. To deploy policies with subscriptions, bind the `open-cluster-management:subscription-admin` ClusterRole to the user creating the subscription.
+
+. If you are using an allow list in the subscription, include the following API entries:
+
++
+[source,yaml]
+----
+    - apiVersion: policy.open-cluster-management.io/v1
+      kinds:
+        - "*"
+    - apiVersion: policy.open-cluster-management.io/v1beta1
+      kinds:
+        - "*"
+    - apiVersion: apps.open-cluster-management.io/v1
+      kinds:
+        - PlacementRule <1>
+    - apiVersion: cluster.open-cluster-management.io/v1beta1
+      kinds:
+        - Placement
+----
