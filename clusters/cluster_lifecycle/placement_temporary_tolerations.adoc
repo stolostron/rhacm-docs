@@ -1,0 +1,64 @@
+:_mod-docs-content-type: CONCEPT
+
+[#specifying-a-temporary-toleration]
+= Temporary tolerations
+
+[role="_abstract"]
+The value of `TolerationSeconds` specifies the period of time that the toleration tolerates the taint. This temporary toleration can be helpful when a managed cluster is offline and you want workloads to move to another managed cluster after a grace period.
+
+For example, the managed cluster with the following taint becomes unreachable:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: cluster.open-cluster-management.io/unreachable
+      timeAdded: '2022-02-21T08:11:06Z'
+----
+
+If you define a placement with a value for `TolerationSeconds`, as in the following example, the placement stops selecting the unreachable cluster after 5 minutes, allowing workloads to be deployed to another available managed cluster.
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: demo4
+  namespace: demo1
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+----
+
+After the managed cluster is unreachable for 5 minutes, the placement removes it from the selection, triggering the workload management system to redeploy to another cluster.
+
+You can also tolerate all built-in taints without a time limit. The following example shows a placement that continues to select clusters even when they are unreachable or unavailable:
+
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement1
+  namespace: ns1
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+    - key: cluster.open-cluster-management.io/unavailable
+      operator: Exists
+----
+
+With these tolerations, the placement continues to select the managed clusters indefinitely, regardless of their availability status.
+
+.Additional resources
+
+* xref:../cluster_lifecycle/placement_intro.adoc#placement-intro[Placement]
