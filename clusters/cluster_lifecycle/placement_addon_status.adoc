@@ -1,0 +1,91 @@
+:_mod-docs-content-type: CONCEPT
+
+[#add-on-status]
+= Add-on status
+
+[role="_abstract"]
+Placements can select managed clusters based on the status of the add-ons that are deployed on them. For example, a placement can select a managed cluster only if a specific add-on is enabled on that cluster.
+
+You can specify the label for the add-on, as well as its status, when you create the placement. A label is automatically created on a `ManagedCluster` resource if an add-on is enabled on the managed cluster. The label is automatically removed if the add-on is disabled.
+
+Each add-on is represented by a label in the format of `feature.open-cluster-management.io/addon-<addon_name>=<status_of_addon>`. 
+
+In that format, `addon_name` is the name of the add-on on the managed cluster, and `status_of_addon` is the add-on status required for the cluster to be selected.
+
+.Add-on status values
+|===
+| Value | Description
+
+| `available`
+| The add-on is enabled and available.
+
+| `unhealthy`
+| The add-on is enabled, but the lease is not updated continuously.
+
+| `unreachable`
+| The add-on is enabled, but there is no lease found for it. This can also be caused when the managed cluster is offline.
+|===
+
+For example, an available `application-manager` add-on is represented by a label on the managed cluster that reads the following:
+
+----
+feature.open-cluster-management.io/addon-application-manager: available
+----
+
+See the following examples to learn how to create placements based on add-ons and their status:
+
+- The following placement example includes all managed clusters that have `application-manager` enabled on them:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement1
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: feature.open-cluster-management.io/addon-application-manager
+              operator: Exists
+----
+
+- The following placement example includes all managed clusters that have `application-manager` enabled with an `available` status:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement2
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchLabels:
+            "feature.open-cluster-management.io/addon-application-manager": "available"
+----
+
+- The following placement example includes all managed clusters that have `application-manager` disabled:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement3
+  namespace: ns1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: feature.open-cluster-management.io/addon-application-manager
+              operator: DoesNotExist
+----

@@ -1,0 +1,58 @@
+:_mod-docs-content-type: CONCEPT
+
+[#placement-tolerations]
+= Placement tolerations
+
+[role="_abstract"]
+Tolerations are applied to placements, and allow the placements to select managed clusters that have matching taints.
+
+The specification of a toleration includes the following fields:
+
+* *Optional* Key - The key matches the taint key to allow the placement.
+* *Optional* Value - The value in the toleration must match the value of the taint for the toleration to allow the placement.
+* *Optional* Operator - The operator represents the relationship between a key and a value. Valid operators are `Equal` and `Exists`. The default value is `Equal`. A toleration matches a taint when the keys are the same, the effects are the same, and the operator is one of the following values:
+** `Equal` - The operator is `Equal` and the values are the same in the taint and the toleration.
+** `Exists` - The wildcard for value, so a placement can tolerate all taints of a particular category.
+* *Optional* Effect - The taint effect to match. When left empty, it matches all taint effects. The allowed values when specified are `NoSelect` or `NoSelectIfNew`.
+* *Optional* TolerationSeconds - The length of time, in seconds, that the toleration tolerates the taint before the placement stops selecting that cluster. If the effect value is not `NoSelect`, this field is ignored. The default value is `nil`, which indicates that there is no time limit. The time counting starts from the `TimeAdded` value in the taint, not from when the cluster was selected or when the toleration was added.
+
+The following example shows how to configure a toleration that tolerates clusters that have taints:
+
+* Taint on the managed cluster for this example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: gpu
+      value: "true"
+      timeAdded: '2022-02-21T08:11:06Z'
+----
+
+* Toleration on the placement that allows the taint to be tolerated:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement1
+  namespace: default
+spec:
+  tolerations:
+    - key: gpu
+      value: "true"
+      operator: Equal
+----
++
+With the example tolerations defined, `cluster1` could be selected by the placement because the `key: gpu` and `value: "true"` match.
+
+*Note:* A placement with a matching toleration is not guaranteed to select a specific managed cluster. Other selection criteria and prioritizers also affect which clusters are selected.
