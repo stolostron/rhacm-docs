@@ -1,0 +1,84 @@
+:_mod-docs-content-type: REFERENCE
+
+[#placement-tolerations]
+= Filter _ManagedClusters_ by defining tolerations with placement
+
+[role="_abstract"]
+To learn how to filter `ManagedClusters` with matching taints, see the following examples:
+
+* By default, the placement cannot select `cluster1` in the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: gpu
+      value: "true"
+      timeAdded: '2022-02-21T08:11:06Z'
+----
+
+* To select `cluster1` you must define tolerations. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  tolerations:
+    - key: gpu
+      value: "true"
+      operator: Equal
+----
+
+You can also select `ManagedClusters` with matching taints for a specified amount of time by using the `tolerationSeconds` parameter. `tolerationSeconds` defines how long a toleration stays bound to a taint. `tolerationSeconds` can automatically transfer applications that are deployed on a cluster that goes offline to another managed cluster after a specified length of time. Learn how to use `tolerationSeconds` by viewing the following examples:
+
+* In the following example, the managed cluster becomes unreachable:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+  taints:
+    - effect: NoSelect
+      key: cluster.open-cluster-management.io/unreachable
+      timeAdded: '2022-02-21T08:11:06Z'
+----
+
+* If you define a placement with `tolerationSeconds`, the workload is transferred to another available managed cluster. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement
+  namespace: ns1
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+----
++
+* Use the `tolerationSeconds` parameter to specify after how many seconds you want the workload to be transferred.
+
+.Additional resources
+
+* xref:../cluster_lifecycle/placement_intro.adoc#placement-intro[Selecting ManagedClusters with placement]
