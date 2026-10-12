@@ -1,0 +1,100 @@
+# Report include directives with invalid leveloffset values in assemblies and maps.
+#
+# AsciiDoc assemblies and maps use the leveloffset attribute value to define
+# the intended topic hierarchy. Make sure that the leveloffset values increment
+# by one and do not use a value that is lower than in the first included topic.
+---
+extends: script
+message: "Invalid leveloffset value."
+level: warning
+link: https://github.com/jhradilek/asciidoctor-dita-vale/blob/main/README.md#warnings
+scope: raw
+script: |
+  text              := import("text")
+  matches           := []
+
+  r_comment_block   := text.re_compile("^/{4,}\\s*$")
+  r_comment_line    := text.re_compile("^(//|//[^/].*)$")
+  r_content_type    := text.re_compile("^:_(?:mod-docs-content|content|module)-type:[ \\t]+((?i)map|assembly)[ \\t]*$")
+  r_include         := text.re_compile("^include::(?:[^ \\t\\[]|[^[]*[^ \\t\\[])\\[(.*)\\][ \\t]*$")
+  r_leveloffset     := text.re_compile("^(?:.*, *|)leveloffset=([+-]?[0-9]+)(?:,.*|)$")
+
+  // Teams are inconsistent in how they name attribute definition files and
+  // snippet files. As it is impossible to reliably identify these files without
+  // reading their contents, the following is a workaround specifically for
+  // openshift-docs:
+  r_attribute_file  := text.re_compile("^include::(?:\\{docdir\\}/)?(?:\\.\\./)*_?(?:attributes|(?:attributes|common|artifacts)/(?:attributes-[^/]+|[^/]*-?attributes[^/]*))\\.adoc\\[.*\\][ \\t]*$")
+  r_snippet_file    := text.re_compile("^include::(?:\\{docdir\\}/)?(?:\\.\\./)*_?(?:snippets/[^/]+|(?:common|artifacts)/snip[_-][^/]*)\\.adoc\\[.*\\][ \\t]*$")
+
+  document          := text.split(text.trim_suffix(scope, "\n"), "\n")
+
+  in_comment_block  := false
+  is_asciidoc_map   := false
+  is_first_include  := true
+  stack             := []
+
+  start             := 0
+  end               := 0
+
+  for line in document {
+    start += end
+    end    = len(line) + 1
+
+    if r_comment_block.match(line) {
+      delimiter := text.trim_space(line)
+      if ! in_comment_block {
+        in_comment_block = delimiter
+      } else if in_comment_block == delimiter {
+        in_comment_block = false
+      }
+      continue
+    }
+    if in_comment_block { continue }
+    if r_comment_line.match(line) { continue }
+
+    if r_content_type.match(line) {
+      is_asciidoc_map = true
+      continue
+    }
+
+    if ! r_include.match(line) { continue }
+    if r_attribute_file.match(line) || r_snippet_file.match(line) { continue }
+
+    attribute_list  := r_include.replace(line, "$1")
+    level_offset    := r_leveloffset.replace(attribute_list, "$1")
+    current_offset  := int(level_offset) || 0
+    previous_offset := stack[len(stack) - 1]
+
+    if is_first_include {
+      stack = append(stack, current_offset)
+      is_first_include = false
+      continue
+    }
+
+    if current_offset > previous_offset {
+      if current_offset - previous_offset > 1 {
+        matches = append(matches, {begin: start, end: start + end - 1})
+      }
+
+      stack = append(stack, current_offset)
+      continue
+    }
+
+    for len(stack) > 1 && current_offset < previous_offset  {
+      splice(stack, len(stack) - 1, 1)
+      previous_offset = stack[len(stack) - 1]
+    }
+
+    if current_offset > previous_offset {
+      stack = append(stack, current_offset)
+      continue
+    }
+
+    if current_offset < previous_offset {
+      matches = append(matches, {begin: start, end: start + end - 1})
+    }
+  }
+
+  if ! is_asciidoc_map {
+    matches = []
+  }

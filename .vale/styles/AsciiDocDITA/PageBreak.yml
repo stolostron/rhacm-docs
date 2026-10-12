@@ -1,0 +1,61 @@
+# Report that page breaks are not supported.
+#
+# DITA 1.3 does not support page breaks. If visual separation of the text is
+# needed, rewrite your content without using a page break.
+---
+extends: script
+message: "Page breaks are not supported in DITA."
+level: warning
+link: https://github.com/jhradilek/asciidoctor-dita-vale/blob/main/README.md#warnings
+scope: raw
+script: |
+  text              := import("text")
+  matches           := []
+
+  r_code_block      := text.re_compile("^(?:\\.{4,}|-{4,})[ \\t]*$")
+  r_comment_block   := text.re_compile("^/{4,}\\s*$")
+  r_comment_line    := text.re_compile("^(//|//[^/].*)$")
+  r_ignore_type     := text.re_compile("^:_(?:mod-docs-content|content|module)-type:[ \\t]+(?i:ignore)[ \\t]*$")
+  r_page_break      := text.re_compile("^<{3,}[ \\t]*$")
+
+  document          := text.split(text.trim_suffix(scope, "\n"), "\n")
+
+  in_code_block     := false
+  in_comment_block  := false
+  start             := 0
+  end               := 0
+
+  for line in document {
+    start += end
+    end    = len(line) + 1
+
+    if r_comment_block.match(line) {
+      delimiter := text.trim_space(line)
+      if ! in_comment_block {
+        in_comment_block = delimiter
+      } else if in_comment_block == delimiter {
+        in_comment_block = false
+      }
+      continue
+    }
+    if in_comment_block { continue }
+    if r_comment_line.match(line) { continue }
+
+    if r_code_block.match(line) {
+      delimiter := text.trim_space(line)
+      if ! in_code_block {
+        in_code_block = delimiter
+      } else if in_code_block == delimiter {
+        in_code_block = false
+      }
+      continue
+    }
+    if in_code_block { continue }
+
+    if r_ignore_type.match(line) {
+      matches = []
+      break
+    } else if r_page_break.match(line) {
+      matches = append(matches, {begin: start, end: start + end - 1})
+    }
+  }

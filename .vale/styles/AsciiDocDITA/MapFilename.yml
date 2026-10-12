@@ -1,0 +1,63 @@
+# Report file names with unsupported characters in assemblies and maps.
+#
+# DITA-OT and various component content management systems impose
+# additional restrictions on what characters can appear in DITA file names.
+# To prevent problems, only use lowercase alphanumeric characters and
+# hyphens in your file names.
+---
+extends: script
+message: "Use only lowercase alphanumeric characters and hyphens (a-z, 0-9, and -) in file names."
+level: warning
+link: https://github.com/jhradilek/asciidoctor-dita-vale/blob/main/README.md#warnings
+scope: raw
+script: |
+  text              := import("text")
+  matches           := []
+
+  r_comment_block   := text.re_compile("^/{4,}\\s*$")
+  r_comment_line    := text.re_compile("^(//|//[^/].*)$")
+  r_content_type    := text.re_compile("^:_(?:mod-docs-content|content|module)-type:[ \\t]+((?i)map|assembly)[ \\t]*$")
+  r_include         := text.re_compile("^include::(?:[^\\[]*/|)([^\\[/]+)\\.adoc\\[.*\\][ \\t]*$")
+  r_supported       := text.re_compile("^[a-z0-9-]+$")
+
+  document          := text.split(text.trim_suffix(scope, "\n"), "\n")
+
+  in_comment_block  := false
+  is_asciidoc_map   := false
+
+  start             := 0
+  end               := 0
+
+  for line in document {
+    start += end
+    end    = len(line) + 1
+
+    if r_comment_block.match(line) {
+      delimiter := text.trim_space(line)
+      if ! in_comment_block {
+        in_comment_block = delimiter
+      } else if in_comment_block == delimiter {
+        in_comment_block = false
+      }
+      continue
+    }
+    if in_comment_block { continue }
+    if r_comment_line.match(line) { continue }
+
+    if r_content_type.match(line) {
+      is_asciidoc_map = true
+      continue
+    }
+
+    if ! r_include.match(line) { continue }
+
+    file_name := r_include.replace(line, "$1")
+
+    if r_supported.match(file_name) { continue }
+
+    matches = append(matches, {begin: start, end: start + end - 1})
+  }
+
+  if ! is_asciidoc_map {
+    matches = []
+  }
