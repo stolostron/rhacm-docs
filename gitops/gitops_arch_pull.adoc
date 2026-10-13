@@ -1,0 +1,28 @@
+:_mod-docs-content-type: CONCEPT
+
+[#arch-pull]
+= Architecture Pull model
+
+[role="_abstract"]
+- Pull model can provide scalability relief compared to the push model by reducing stress on the controller in the hub cluster, but with more requests and status reporting required.
+
+- With Pull model, {ocp-short} {gitops-short} _does not_ apply resources directly from a centralized hub cluster to the managed clusters. The Argo CD Application is propagated from the hub cluster to the managed clusters.
+
+- Pull model implementation applies {ocm} registration, placement, and `manifestWork` APIs so that the hub cluster can use the secure communication channel between the hub cluster and the managed cluster to deploy resources.
+
+- Each managed cluster individually communicates with the GitHub repository to deploy the resource manifests locally, so you must install and configure {gitops-short} operators on each managed cluster.
+
+- An Argo CD server must be running on each target managed cluster. The Argo CD application resources are replicated on the managed clusters, which are then deployed by the local Argo CD server. The distributed Argo CD applications on the managed clusters are created with a single Argo CD `ApplicationSet` resource on the hub cluster.
+
+- The managed cluster is determined by the value of the `ocm-managed-cluster` annotation.
+
+- For successful implementation of Pull model, the Argo CD application controller must _ignore_ Push model application resources with the `argocd.argoproj.io/skip-reconcile` annotation in the template section of the `ApplicationSet`.
+
+- For Pull model, the _Argo CD Application controller_ on the managed cluster reconciles to deploy the application.
+
+- The Pull model _Resource sync controller_ on the hub cluster queries the {ocm} search V2 component on each managed cluster periodically to retrieve the resource list and error messages for each Argo CD application.
+
+- The _Aggregation controller_ on the hub cluster creates and updates the `MulticlusterApplicationSetReport` from across clusters by using the data from the Resource sync controller, and the status information from `manifestWork`.
+
+- The status of the deployments is gathered back to the hub cluster, but not all the detailed information is transmitted. Additional status updates are periodically scraped to provide an overview. The status feedback is not real-time, and each managed cluster {gitops-short} operator needs to communicate with the Git repository, which results in multiple requests.
+
