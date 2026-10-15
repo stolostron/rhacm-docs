@@ -1,26 +1,26 @@
-[#creating-a-cluster-on-premises]
-= Creating a cluster in an on-premises environment
+:_mod-docs-content-type: PROCEDURE
 
-You can use the console to create on-premises {ocp} clusters. You can create {sno} clusters, multi-node clusters, and compact three-node clusters. You can create these clusters on VMware vSphere, Red Hat OpenStack, Nutanix, External, or in a bare metal environment.
+[#create-a-cluster-on-premises-cli]
+= Create a cluster in an on-premises environment by using the CLI
+
+[role="_abstract"]
+You can create on-premises {ocp} clusters by using the CLI. You can create {sno} clusters, multi-node clusters, and compact three-node clusters. You can create these clusters on VMware vSphere, Red Hat OpenStack, Nutanix, External, or in a bare metal environment.
 
 Since the platform value is set to `platform=none`, there is no platform integration with the platform where you install the cluster. A {sno} cluster has only a single node, which hosts the control plane services and the user workloads. Use this configuration when you want to minimize the resource footprint of the cluster. 
 
-You can also provision multiple {sno} clusters on edge resources by using the zero touch provisioning feature, which is a feature that is available with {ocp}. For more information about zero touch provisioning, see _Clusters at the network far edge_ in the {ocp-short} documentation.
+You can also provision multiple {sno} clusters on edge resources by using the zero touch provisioning feature, which is a feature that is available with {ocp}. For more information about zero touch provisioning, see _Clusters at the network far edge_ in the additional resources section.
 
-* <<on-prem-prerequisites,Prerequisites>>
-* <<on-prem-creating-your-cluster-with-the-console,Creating your cluster with the console>>
-* <<on-prem-creating-your-cluster-with-the-cli,Creating your cluster with the command line>>
+You can also create a cluster on premises without the console by using the {ai} feature within the {cim} component. After you complete this procedure, you can boot the host from the discovery image that is generated. The order of the procedures is generally not important. 
 
-[#on-prem-prerequisites]
-== Prerequisites
+When creating an on-premises cluster, you need a namespace for your resources. Keep all of the resources in a shared namespace.
 
-See the following prerequisites before creating a cluster in an on-premises environment:
+.Prerequisites
 
 * You must have a deployed hub cluster on a supported {ocp-short} version.
 * You need a configured infrastructure environment with a host inventory of configured hosts. 
 * You must have internet access for your hub cluster (connected), or a connection to an internal or mirror registry that has a connection to the internet (disconnected) to retrieve the required images for creating the cluster.
 * You need a configured on-premises credential. 
-* You need an {ocp-short} image pull secret. See _Using image pull secrets_.
+* You need an {ocp-short} image pull secret. See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/images/managing-images#using-image-pull-secrets[Using image pull secrets].
 * You need the following DNS records:
 - The following API base domain must point to the static API VIP:
 +
@@ -30,84 +30,11 @@ See the following prerequisites before creating a cluster in an on-premises envi
 `*.apps.<cluster_name>.<base_domain>`
 * Review the hub cluster `KubeAPIServer` certificate verification strategy and update the strategy if needed. To learn what strategy to use for your setup, see link:../clusters/cluster_lifecycle/set_verification_strat.adoc#set-hub-kube-api-server[Configuring the hub cluster `KubeAPIServer` verification strategy].
 
+.Procedure
 
-[#on-prem-creating-your-cluster-with-the-console]
-== Creating your cluster with the console
+. Create and name your namespace. You can use any name except `assisted-installer`. Apply the following file which uses `sample-namespace` as an example for the namespace:
 
-To create a cluster from the console, complete the following steps:
-
-. Navigate to *Infrastructure* > *Clusters*.
-
-. On the _Clusters_ page, click *Create cluster* and complete the steps in the console.
-
-. Select *Host inventory* as the type of cluster.
-
-The following options are available for your assisted installation: 
-
-* *Use existing discovered hosts*: Select your hosts from a list of hosts that are in an existing host inventory.
-
-* *Discover new hosts*: Discover hosts that are not already in an existing infrastructure environment. Discover your own hosts, rather than using one that is already in an infrastructure environment.
-
-If you need to create a credential, see _Creating a credential for an on-premises environment_ for more information.
-
-The name for your cluster is used in the hostname of the cluster.
-
-*Important:* When you create a cluster, the controller creates a namespace for the cluster and its resources. Ensure that you include only resources for that cluster instance in that namespace. Destroying the cluster deletes the namespace and all of the resources in it.
-
-*Note:* Select *YAML: On* to view content updates as you enter the information in the console.
-
-If you want to add your cluster to an existing cluster set, you must have the correct permissions on the cluster set to add it. If you do not have `cluster-admin` privileges when you are creating the cluster, you must select a cluster set on which you have `clusterset-admin` permissions. If you do not have the correct permissions on the specified cluster set, the cluster creation fails. Contact your cluster administrator to provide you with `clusterset-admin` permissions to a cluster set if you do not have any cluster set options to select.
-
-Every managed cluster must be associated with a managed cluster set. If you do not assign the managed cluster to a `ManagedClusterSet`, it is automatically added to the `default` managed cluster set.
-
-If there is already a base DNS domain that is associated with the selected credential that you configured for your provider account, that value is populated in that field. You can change the value by overwriting it, but this setting cannot be changed after the cluster is created. The base domain of your provider is used to create routes to your {ocp} cluster components. It is configured in the DNS of your cluster provider as a Start of Authority (SOA) record. 
-
-The *OpenShift version* identifies the version of the {ocp-short} image that is used to create the cluster. If the version that you want to use is available, you can select the image from the list of images. If the image that you want to use is not a standard image, you can enter the URL to the image that you want to use. See _Release images_ to learn more.
-
-When you select a supported {ocp-short} version, an option to select *Install {sno}* is displayed. A {sno} cluster contains a single node which hosts the control plane services and the user workloads. See _Scaling hosts to an infrastructure environment_ to learn more about adding nodes to a {sno} cluster after it is created. 
-
-If you want your cluster to be a {sno} cluster, select the *{sno}* option. You can add additional workers to {sno} clusters by completing the following steps:
-
-. From the console, navigate to *Infrastructure* > *Clusters* and select the name of the cluster that you created or want to access.
-
-. Select *Actions* > *Add hosts* to add additional workers.
-
-*Note:* The {sno} control plane requires 8 CPU cores, while a control plane node for a multinode control plane cluster only requires 4 CPU cores.  
-
-After you review and save the cluster, your cluster is saved as a draft cluster. You can close the creation process and finish the process later by selecting the cluster name on the _Clusters_ page.
-
-If you are using existing hosts, select whether you want to select the hosts yourself, or if you want them to be selected automatically. The number of hosts is based on the number of nodes that you selected. For example, a {sno} cluster only requires one host, while a standard three-node cluster requires three hosts. 
-
-The locations of the available hosts that meet the requirements for this cluster are displayed in the list of _Host locations_. For distribution of the hosts and a more high-availability configuration, select multiple locations.
-
-If you are discovering new hosts with no existing infrastructure environment, complete the steps in _Adding hosts to the host inventory by using the Discovery Image_.
-
-After the hosts are bound, and the validations pass, complete the networking information for your cluster by adding the following IP addresses: 
-
-* API VIP: Specifies the IP address to use for internal API communication.
 +
-*Note:* This value must match the name that you used to create the DNS records listed in the prerequisites section. If not provided, the DNS must be pre-configured so that `api.` resolves correctly.
-
-* Ingress VIP: Specifies the IP address to use for ingress traffic.
-+
-*Note:* This value must match the name that you used to create the DNS records listed in the prerequisites section. If not provided, the DNS must be pre-configured so that `test.apps.` resolves correctly.
-
-If you are using {acm} and want to configure your managed cluster klusterlet to run on specific nodes, see xref:../cluster_lifecycle/adv_config_cluster.adoc#config-klusterlet-nodes[Optional: Configuring the klusterlet to run on specific nodes] for the required steps.
-
-You can view the status of the installation on the _Clusters_ navigation page.
-
-Continue with xref:../cluster_lifecycle/access_cluster.adoc#accessing-your-cluster[Accessing your cluster] for instructions for accessing your cluster. 
-
-[#on-prem-creating-your-cluster-with-the-cli]
-== Creating your cluster with the command line
-
-You can also create a cluster without the console by using the {ai} feature within the {cim} component. After you complete this procedure, you can boot the host from the discovery image that is generated. The order of the procedures is generally not important, but is noted when there is a required order.
-
-[#on-prem-creating-your-cluster-with-the-cli-namespace]
-=== Create the namespace
-
-You need a namespace for your resources. It is more convenient to keep all of the resources in a shared namespace. This example uses `sample-namespace` for the name of the namespace, but you can use any name except `assisted-installer`. Create a namespace by creating and applying the following file:
-
 [source,yaml]
 ----
 apiVersion: v1
@@ -116,11 +43,9 @@ metadata:
   name: sample-namespace
 ----
 
-[#on-prem-creating-your-cluster-with-the-cli-pull-secret]
-=== Add the pull secret to the namespace
+. Add a pull secret to the namespace. Add your link:https://console.redhat.com/openshift/install/pull-secret[pull secret] to your namespace by creating and applying the following custom resource:
 
-Add your link:https://console.redhat.com/openshift/install/pull-secret[pull secret] to your namespace by creating and applying the following custom resource:
-
++
 [source,yaml]
 ----
 apiVersion: v1
@@ -130,15 +55,14 @@ metadata:
   name: <pull-secret>
   namespace: sample-namespace
 stringData:
-  .dockerconfigjson: 'your-pull-secret-json' <1>
+  .dockerconfigjson: 'your-pull-secret-json'
 ----
-<1> Add the content of the pull secret. For example, this can include a `cloud.openshift.com`, `quay.io`, or `registry.redhat.io` authentication.
 
-[#on-prem-creating-your-cluster-with-the-cli-cluster-image-set]
-=== Generate a ClusterImageSet
+. Add the content of your pull secret in `stringData`. For example, this can include a `cloud.openshift.com`, `quay.io`, or `registry.redhat.io` authentication.
 
-Generate a `CustomImageSet` to specify the version of {ocp-short} for your cluster by creating and applying the following custom resource. Replace `<4.x.0>` with the supported version that you are using for `ClusterImageSet` for both the `name` and the `releaseImage`:
+. Generate a `CustomImageSet` to specify the version of {ocp-short} for your cluster by creating and applying the following custom resource. Replace `<4.x.0>` with the supported version that you are using for `ClusterImageSet` for both the `name` and the `releaseImage`:
 
++
 [source,yaml]
 ----
 apiVersion: hive.openshift.io/v1
@@ -149,15 +73,12 @@ spec:
   releaseImage: quay.io/openshift-release-dev/ocp-release:<4.x.0>-rc.0-x86_64
 ----
 
++
 *Note:* You need to create a multi-architecture `ClusterImageSet` if you install a managed cluster that has a different architecture than the hub cluster. To learn more, see xref:../release_images/release_images_cross_arch.adoc#manual-release-image-cross-arch[Create a release image to deploy a cluster on a different architecture].
 
-[#on-prem-creating-your-cluster-with-the-cli-clusterdeployment]
-=== Create the ClusterDeployment custom resource
+. Create the `ClusterDeployment` custom resource. The `ClusterDeployment` custom resource definition is an API that controls the lifecycle of the cluster and references the `AgentClusterInstall` custom resource in the `spec.ClusterInstallRef` setting, which defines the cluster parameters. Apply the following custom resource:
 
-The `ClusterDeployment` custom resource definition is an API that controls the lifecycle of the cluster. It references the `AgentClusterInstall` custom resource in the `spec.ClusterInstallRef` setting which defines the cluster parameters. 
-
-Create and apply a `ClusterDeployment` custom resource based on the following example:
-
++
 [source,yaml]
 ----
 apiVersion: hive.openshift.io/v1
@@ -170,7 +91,7 @@ spec:
   clusterInstallRef:
     group: extensions.hive.openshift.io
     kind: AgentClusterInstall
-    name: test-agent-cluster-install <1>
+    name: <test-agent-cluster-install>
     version: v1beta1
   clusterName: test-cluster
   controlPlaneConfig:
@@ -181,19 +102,16 @@ spec:
         matchLabels:
           location: internal
   pullSecretRef:
-    name: <pull-secret> <2>
+    name: <pull-secret>
 ----
 
-<1> Use the name of your `AgentClusterInstall` resource.
-<2> Use the pull secret that you downloaded in <<on-prem-creating-your-cluster-with-the-cli-pull-secret,Add the pull secret to the namespace>>. 
++
+* Add the name of your `AgentClusterInstall` resource to the `clusterInstallRef` name.
+* Add the pull secret that you previously created in the `pullSecretRef` field.
 
-[#create-agentclusterinstall-cr]
-=== Create the AgentClusterInstall custom resource
+. Create the AgentClusterInstall custom resource. In the `AgentClusterInstall` custom resource, you can specify many of the requirements for the clusters. For example, you can specify the cluster network settings, platform, number of control planes, and worker nodes. Create and add the a custom resource that resembles the following example:
 
-In the `AgentClusterInstall` custom resource, you can specify many of the requirements for the clusters. For example, you can specify the cluster network settings, platform, number of control planes, and worker nodes. 
-
-Create and add the a custom resource that resembles the following example, replacing `<4.x.0>` with the version of {ocp-short} that you are using: 
-
++
 [source,yaml]
 ----
 apiVersion: extensions.hive.openshift.io/v1beta1
@@ -202,11 +120,11 @@ metadata:
   name: test-agent-cluster-install
   namespace: demo-worker4
 spec:
-  platformType: BareMetal <1>
+  platformType: BareMetal
   clusterDeploymentRef:
-    name: single-node <2>
+    name: <single-node>
   imageSetRef:
-    name: openshift-v4.x.0 <3>
+    name: <openshift-<v4.x.0>>
   networking:
     clusterNetwork:
     - cidr: 10.128.0.0/14
@@ -216,21 +134,24 @@ spec:
     serviceNetwork:
     - 172.30.0.0/16
   provisionRequirements:
-    controlPlaneAgents: 1 <4>
-  sshPublicKey: | <5>
+    controlPlaneAgents: 1
+  sshPublicKey: |
     ssh-rsa <public-key-1>
     ssh-rsa <public-key-2>
     ssh-rsa <public-key-3>
 ----
 
-<1> Specify the platform type of the environment where the cluster is created. Possible values are: `BareMetal`, `None`, `VSphere`, `Nutanix`, or `External`.  
-<2> Use the same name that you used for your `ClusterDeployment` resource.
-<3> Use the `ClusterImageSet` that you generated in <<on-prem-creating-your-cluster-with-the-cli-cluster-image-set,Generate a ClusterImageSet>>.
-<4> Possible values are `1` and `3`. If you are using {ocp-short} version 4.18 or newer, the `platformType` field is set to `BareMetal` or `None`, and your CPU architecture is `x86_64`, you can also use `4` and `5`. Control plane nodes manage workloads, maintain cluster state, and ensure stability. You can increase fault tolerance and availability, and reduce downtime during failures, if you use more than three nodes.
-<5> You can specify one or multiple SSH public keys, which allow you to access the host after installing.
++
+* Replace `<4.x.0>` with the version of {ocp-short} that you are using.
+* Specify the platform type of the environment where the cluster is created in `spec.platformType`. Possible values are: `BareMetal`, `None`, `VSphere`, `Nutanix`, or `External`.  
+* For the `imgageSetRef` name, use the same name that you used for your `ClusterDeployment` resource.
+* Use the `ClusterImageSet` that you previously created.
+* Possible `ontrolPlaneAgents` values are `1` and `3`. If you are using {ocp-short} version 4.18 or newer, the `platformType` field is set to `BareMetal` or `None`, and your CPU architecture is `x86_64`, you can also use `4` and `5`. Control plane nodes manage workloads, maintain cluster state, and ensure stability. You can increase fault tolerance and availability, and reduce downtime during failures, if you use more than three nodes.
+* You can specify one or multiple SSH public keys in the `sshPublicKey` field, which allow you to access the host after installing.
 
-If you set `platformType:` to `External`, you must add the `external` spec. See the following example:
+. If you set `platformType:` to `External`, you must add the `external` spec. See the following example:
 
++
 [source,yaml]
 ----
 apiVersion: extensions.hive.openshift.io/v1beta1
@@ -241,20 +162,16 @@ metadata:
 spec:
   platformType: External
   external:
-    platformName: "myplatform" <1>
-    cloudControllerManager: External <2>
+    platformName: "myplatform"
+    cloudControllerManager: External
 ----
 
-<1> Add your platform name.
-<2> If you set the field to empty, `{}`, it disables the Cloud Controller Manager during installation. If you set it to `External`, you must add custom manifests to enable the Cloud Controller Manager.
+* Add your platform name to `platformName`.
+* If you set the `platformType` field to empty, `{}`, the Cloud Controller Manager is disabled during installation. If you set the field to `External`, you must add custom manifests to enable the Cloud Controller Manager.
 
-[#on-prem-creating-your-cluster-with-the-cli-nmstateconfig]
-=== Optional: Create the NMStateConfig custom resource
+. *Optional:* Create the `NMStateConfig` custom resource. The `NMStateConfig` custom resource is only required if you have a host-level network configuration, such as static IP addresses. If you create the `NMStateConfig` custom resource, you must complete this step before you create an `InfraEnv` custom resource. The values for `spec.nmStateConfigLabelSelector` in the `InfraEnv` custom resource refer to the `NMStateConfig` custom resource. The resource resembles the following example: 
 
-The `NMStateConfig` custom resource is only required if you have a host-level network configuration, such as static IP addresses. If you create the `NMStateConfig` custom resource, you must complete this step before you create an `InfraEnv` custom resource. The values for `spec.nmStateConfigLabelSelector` in the `InfraEnv` custom resource refer to the `NMStateConfig` custom resource.
-
-Create and apply your `NMStateConfig` custom resource, which resembles the following example. Replace values where needed: 
-
++
 [source,yaml]
 ----
 apiVersion: agent-install.openshift.io/v1beta1
@@ -308,22 +225,22 @@ spec:
       macAddress: "02:00:00:80:12:15"
 ----
 
-*Important:*
++
+* Replace `<mynmstateconfig>` with the name of your `NMStateConfig` resource.
+* Replace `<demo-worker4>` with the namespace of your `NMStateConfig` resource.
+* Replace `<value>` with the label value of your `NMStateConfig` resource.
+* Include the `demo-nmstate-label` label name and value in the `spec.nmStateConfigLabelSelector.matchLabels` field in the `InfraEnv` custom resource.
+* Add a MAC address when using the DHCP or static network protocol.
 
-- You must include the `demo-nmstate-label` label name and value in the `spec.nmStateConfigLabelSelector.matchLabels` field of the in the `InfraEnv` custom resource.
-- You must add a MAC address when using the DHCP or static network protocol.
++
+*Note:* To see additional examples for `NMState` that you can add to the `spec.config` field, see link:https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2025/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_network-configuration#additional_nmstate_configuration_examples[Additional NMState configuration examples] in the Assisted Installer for {ocp-short} documentation.
 
-To see additional examples for NMState that you can add to the `spec.config` field, see link:https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2025/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_network-configuration#additional_nmstate_configuration_examples[Additional NMState configuration examples] in the Assisted Installer for {ocp-short} documentation.
+. Create the `InfraEnv` custom resource, which provides the configuration to create the discovery ISO. Within this custom resource, you identify values for proxy settings, ignition overrides, and specify `NMState` labels. The value of `spec.nmStateConfigLabelSelector` in this custom resource references the `NMStateConfig` custom resource:
 
-[#on-prem-creating-your-cluster-with-the-cli-infraenv]
-=== Create the InfraEnv custom resource
-
-The `InfraEnv` custom resource provides the configuration to create the discovery ISO. Within this custom resource, you identify values for proxy settings, ignition overrides, and specify `NMState` labels. The value of `spec.nmStateConfigLabelSelector` in this custom resource references the `NMStateConfig` custom resource. 
-
++
 *Note:* If you plan to include the optional `NMStateConfig` custom resource, you must reference it in the `InfraEnv` custom resource. If you create the `InfraEnv` custom resource before you create the `NMStateConfig` custom resource edit the `InfraEnv` custom resource to reference the `NMStateConfig` custom resource and download the ISO after the reference is added. 
 
-Create and apply the following custom resource:
-
++
 [source,yaml]
 ----
 apiVersion: agent-install.openshift.io/v1beta1
@@ -347,10 +264,14 @@ spec:
     noProxy: .example.com,172.22.0.0/24,10.10.0.0/24
 ----
 
-<1> Replace the `clusterDeployment` resource name from _<<on-prem-creating-your-cluster-with-the-cli-clusterdeployment,Create the ClusterDeployment>>_.
-<2> Replace the `clusterDeployment` resource namespace from _<<on-prem-creating-your-cluster-with-the-cli-clusterdeployment,Create the ClusterDeployment>>_.
++
+* Add the name of the `clusterDeployment` resource to the `clusterRef` field.
+* Add the namespace of the `clusterDeployment` resource to the `clusterRef` field.
 
++
+See the following table for the fields that you can add to the `InfraEnv` custom resource:
 
++
 ._InfraEnv_ field table
 |===
 | Field | Optional or required | Description
@@ -365,42 +286,45 @@ spec:
 | You can specify proxy settings required by the host during discovery in the proxy section.
 |===
 
++
 *Note:* When provisioning with IPv6, you cannot define a CIDR address block in the `noProxy` settings. You must define each address separately.
 
-[#on-prem-creating-your-cluster-with-the-cli-boot-host]
-=== Boot the host from the discovery image
-
-The remaining steps explain how to boot the host from the discovery ISO image that results from the previous procedures. 
-
-. Download the discovery image from the namespace by running the following command:
+. Apply the `InfraEnv` custom resource by running the following command:
 +
+[source,bash]
+----
+oc apply -f infraenv.yaml
+----
+
+. Boot the host from the discovery ISO image that results from the previous procedures. Download the discovery image from the namespace by running the following command:
+
++
+[source,bash]
 ----
 curl --insecure -o image.iso $(kubectl -n sample-namespace get infraenvs.agent-install.openshift.io myinfraenv -o=jsonpath="{.status.isoDownloadURL}")
 ----
 
 . Move the discovery image to virtual media, a USB drive, or another storage location and boot the host from the discovery image that you downloaded. 
 
-. The `Agent` resource is created automatically. It is registered to the cluster and represents a host that booted from a discovery image. Approve the `Agent` custom resource and start the installation by running the following command:
+. The `Agent` resource is created automatically. It is registered to the cluster and represents a host that booted from a discovery image. Approve the `Agent` custom resource and start the installation by running the following command. Replace the agent name and UUID with your values:
+
 +
+[source,bash]
 ----
 oc -n sample-namespace patch agents.agent-install.openshift.io 07e80ea9-200c-4f82-aff4-4932acb773d4 -p '{"spec":{"approved":true}}' --type merge
 ----
-+
-Replace the agent name and UUID with your values. 
-+
-You can confirm that it was approved when the output of the previous command includes an entry for the target cluster that includes a value of `true` for the `APPROVED` parameter. 
 
-[#additional-resources-cluster-on-premises]
-== Additional resources
+.Verification
 
-- For additional steps that are required when creating a cluster on the Nutanix platform with the CLI, see link:https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2025/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_installing-on-nutanix#adding-hosts-on-nutanix-with-the-api_installing-on-nutanix[Adding hosts on Nutanix with the API] and link:https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2025/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_installing-on-nutanix#nutanix-post-installation-configuration_installing-on-nutanix[Nutanix post-installation configuration] in the {ocp} documentation.
+* You can confirm that it was approved when the output of the previous command includes an entry for the target cluster that includes a value of `true` for the `APPROVED` parameter. 
 
-- For additional information about zero touch provisioning, see link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/edge_computing/ztp-deploying-far-edge-clusters-at-scale[Clusters at the network far edge] in the {ocp-short} documentation.
+.Additional resources
 
-- See link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/images/managing-images#using-image-pull-secrets[Using image pull secrets]
-
-- See xref:../credentials/credential_hosted.adoc#creating-a-credential-hosted[Creating a credential for a hosted environment]
-
-- See xref:../release_images/release_image_intro.adoc#release-images-intro[Release images]
-
-- See xref:../assisted_installer/ai_add_host_console.adoc#add-host-host-inventory-console[Adding hosts to the host inventory by using the console]
+* xref:../cluster_lifecycle/create_cluster_on_prem_console.adoc#create-a-cluster-on-premises-console[Create a cluster in an on-premises environment by using the console]
+* link:https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2025/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_installing-on-nutanix#adding-hosts-on-nutanix-with-the-api_installing-on-nutanix[Adding hosts on Nutanix with the API] 
+* link:https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2025/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_installing-on-nutanix#nutanix-post-installation-configuration_installing-on-nutanix[Nutanix post-installation configuration]
+* link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/edge_computing/ztp-deploying-far-edge-clusters-at-scale[Clusters at the network far edge]
+* xref:../credentials/credential_on_prem.adoc#creating-a-credential-hosted[Creating a credential for a hosted environment]
+* xref:../release_images/release_image_intro.adoc#release-images-intro[Release images]
+* xref:../assisted_installer/ai_add_host_console.adoc#add-host-host-inventory-console[Adding hosts to the host inventory by using the console]
+* xref:../assisted_installer/ai_third_party_cni.adoc#config-third-party-cni-on-prem[Configuring third-party CNI plugins for on-premises cluster installation (Technology Preview)]
