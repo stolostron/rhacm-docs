@@ -1,0 +1,137 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#config-cluster-proxy-addon-hub-managed]
+= Configure cluster proxy add-ons for hub clusters and managed clusters
+
+[role="_abstract"]
+Configure a cluster proxy add-on for a hub cluster or managed cluster so that you can access the managed cluster `kube-apiserver`. Configure the `kubeconfig` file to access the managed cluster `kube-apiserver` by completing the following steps.
+
+.Procedure
+
+. Provide a valid access token for the managed cluster.
++
+*Note:* : You can use the corresponding token of the service account. You can also use the default service account that is in the default namespace.
+
+.. Export the `kubeconfig` file of the managed cluster by running the following command:
+
++
+[source,bash]
+----
+export KUBECONFIG=<managed-cluster-kubeconfig>
+----
+
+.. Add a role to your service account that allows it to access pods by running the following commands:
+
++
+[source,bash]
+----
+oc create role -n default test-role --verb=list,get --resource=pods
+oc create rolebinding -n default test-rolebinding --serviceaccount=default:default --role=test-role
+----
+
+.. Run the following command to locate the secret of the service account token. Replace `default-token` with the name of your secret:
+
++
+[source,bash]
+----
+oc get secret -n default | grep <default-token>
+----
+
+.. Run the following command to copy the token. Replace `default-token` with the name of your secret:
+
++
+[source,bash]
+----
+export MANAGED_CLUSTER_TOKEN=$(kubectl -n default get secret <default-token> -o jsonpath={.data.token} | base64 -d)
+----
+
+. Configure the `kubeconfig` file on the {acm-short} hub cluster.
+
+.. Export the current `kubeconfig` file on the hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc config view --minify --raw=true > cluster-proxy.kubeconfig
+----
+
+.. Modify the `server` file with your editor. This example uses commands when using `sed`. Run `alias sed=gsed`, if you are using OSX.
+
++
+[source,bash]
+----
+export TARGET_MANAGED_CLUSTER=<managed-cluster-name>
+
+export NEW_SERVER=https://$(oc get route -n multicluster-engine cluster-proxy-addon-user -o=jsonpath='{.spec.host}')/$TARGET_MANAGED_CLUSTER
+
+sed -i'' -e '/server:/c\    server: '"$NEW_SERVER"'' cluster-proxy.kubeconfig
+
+export CADATA=$(oc get configmap -n openshift-service-ca kube-root-ca.crt -o=go-template='{{index .data "ca.crt"}}' | base64)
+
+sed -i'' -e '/certificate-authority-data:/c\    certificate-authority-data: '"$CADATA"'' cluster-proxy.kubeconfig
+----
+
+.. Delete the original user credentials by entering the following commands:
+
++
+[source,bash]
+----
+sed -i'' -e '/client-certificate-data/d' cluster-proxy.kubeconfig
+sed -i'' -e '/client-key-data/d' cluster-proxy.kubeconfig
+sed -i'' -e '/token/d' cluster-proxy.kubeconfig
+----
+
+.. Add the token of the service account:
+
++
+[source,bash]
+----
+sed -i'' -e '$a\    token: '"$MANAGED_CLUSTER_TOKEN"'' cluster-proxy.kubeconfig
+----
+
+. List all of the pods on the target namespace of the target managed cluster by running the following command. Replace the `default` namespace with the namespace that you want to use:
+
++
+[source,bash]
+----
+oc get pods --kubeconfig=cluster-proxy.kubeconfig -n <default>
+----
+
+. Access other services on the managed cluster. This feature is available when the managed cluster is a {ocp} cluster. The service must use `service-serving-certificate` to generate server certificates:
+
++
+* From the managed cluster, use the following service account token:
+
++
+[source,bash]
+----
+export PROMETHEUS_TOKEN=$(kubectl get secret -n openshift-monitoring $(kubectl get serviceaccount -n openshift-monitoring prometheus-k8s -o=jsonpath='{.secrets[0].name}') -o=jsonpath='{.data.token}' | base64 -d)
+----
+
+* From the hub cluster, convert the certificate authority to a file by running the following command:
+
++
+[source,bash]
+----
+oc get configmap kube-root-ca.crt -o=jsonpath='{.data.ca\.crt}' > hub-ca.crt
+----
+
+. Get Prometheus metrics of the managed cluster by using the following commands:
+
++
+[source,bash]
+----
+export SERVICE_NAMESPACE=openshift-monitoring
+export SERVICE_NAME=prometheus-k8s
+export SERVICE_PORT=9091
+export SERVICE_PATH="api/v1/query?query=machine_cpu_sockets"
+curl --cacert hub-ca.crt $NEW_SERVER/api/v1/namespaces/$SERVICE_NAMESPACE/services/$SERVICE_NAME:$SERVICE_PORT/proxy-service/$SERVICE_PATH -H "Authorization: Bearer $PROMETHEUS_TOKEN"
+----
+
+.Next steps
+
+* xref:../cluster_lifecycle/cluster_proxy_addon_settings.adoc#cluster-proxy-addon-settings[Configure proxy settings for cluster proxy add-ons]
+
+.Additional resources
+
+* xref:../cluster_lifecycle/cluster_proxy_addon_settings.adoc#cluster-proxy-addon-settings[Configure proxy settings for cluster proxy add-ons]
