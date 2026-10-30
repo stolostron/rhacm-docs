@@ -1,0 +1,47 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#defragmenting-the-hub-cluster-etcd-database]
+= Defragment the etcd database after removing a cluster
+
+[role="_abstract"]
+Defragment the `etcd` database on the hub cluster after you remove a managed cluster to reclaim disk space.
+
+Having many managed clusters can affect the size of the `etcd` database in the hub cluster. In {ocp-short} 4.8, when you delete a managed cluster, the `etcd` database in the hub cluster is not automatically reduced in size.
+
+In some scenarios, the `etcd` database can run out of space. An error `etcdserver: mvcc: database space exceeded` is displayed. To correct this error, reduce the size of the `etcd` database by compacting the database history and defragmenting the `etcd` database.
+
+*Note:* For {ocp-short} version 4.9 and later, the etcd Operator automatically defragments disks and compacts the `etcd` history. No manual intervention is needed. The following procedure is for {ocp-short} version 4.8 and earlier.
+
+.Prerequisites
+
+* Install the OpenShift CLI (`oc`).
+* Log in as a user with `cluster-admin` privileges.
+
+.Procedure
+
+. Open a remote shell session to the `etcd` member. Run the following command:
+
++
+[source,bash]
+----
+oc rsh -n openshift-etcd etcd-control-plane-0.example.com etcdctl endpoint status --cluster -w table
+----
+
+. Run the following command to compact the `etcd` history:
+
++
+[source,bash]
+----
+sh-4.4#etcdctl compact $(etcdctl endpoint status --write-out="json" |  egrep -o '"revision":[0-9]*' | egrep -o '[0-9]*' -m1)
+----
+
++
+The output might resemble the following example:
+
++
+[source,bash]
+----
+compacted revision 158774421
+----
+
+. Defragment the `etcd` database and clear any `NOSPACE` alarms as outlined in link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/scalability_and_performance/recommended-performance-and-scalability-practices-2#etcd-defrag_recommended-etcd-practices[Defragmenting `etcd` data].
