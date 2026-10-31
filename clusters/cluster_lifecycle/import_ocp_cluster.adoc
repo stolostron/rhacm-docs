@@ -1,0 +1,169 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#import-ocp-cluster-steps]
+= Import an {ocp-short} cluster
+
+[role="_abstract"]
+Complete the following steps to import an {ocp-short} cluster manually, without a static network or a bare metal host, and prepare it for adding nodes:
+
+*Prerequisites:*
+
+* Enable the {cim} feature.
+
+.Procedure
+
+. Create a namespace for the {ocp-short} cluster that you want to import by applying the following YAML content:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: managed-cluster
+----
+
+. Make sure that a `ClusterImageSet` matching the {ocp-short} cluster you are importing exists by applying the following YAML content. Replace `<4.x.0>` with the version of {ocp-short} that you are using:
+
++
+[source,yaml]
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterImageSet
+metadata:
+  name: openshift-v4.x
+spec:
+  releaseImage: quay.io/openshift-release-dev/ocp-release@sha256:22e149142517dfccb47be828f012659b1ccf71d26620e6f62468c264a7ce7863
+----
+
+. Add your pull secret to access the image by applying the following YAML content. Replace <pull-secret-json> with your pull secret JSON:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: pull-secret
+  namespace: managed-cluster
+stringData:
+  .dockerconfigjson: <pull-secret-json>
+----
+
+. Copy the `kubeconfig` from your {ocp-short} cluster to the hub cluster. Get the `kubeconfig` from your {ocp-short} cluster by running the following command. Make sure that `kubeconfig` is set as the cluster being imported:
+
++
+[source,bash]
+----
+oc get secret -n openshift-kube-apiserver node-kubeconfigs -ojson | jq '.data["lb-ext.kubeconfig"]' --raw-output | base64 -d > /tmp/kubeconfig.some-other-cluster
+----
+
+. If your cluster API is accessed through a custom domain, you must first edit this `kubeconfig` by adding your custom certificates in the `certificate-authority-data` field and by changing the `server` field to match your custom domain. Copy the `kubeconfig` to the hub cluster by running the following command. Make sure that `kubeconfig` is set as your hub cluster:
+
++
+[source,bash]
+----
+oc -n managed-cluster create secret generic some-other-cluster-admin-kubeconfig --from-file=kubeconfig=/tmp/kubeconfig.some-other-cluster
+----
+
+. Create an `AgentClusterInstall` custom resource by applying the following YAML content:
+
++
+[source,yaml]
+----
+apiVersion: extensions.hive.openshift.io/v1beta1
+kind: AgentClusterInstall
+metadata:
+  name: <your-cluster-name>
+  namespace: <managed-cluster>
+spec:
+  networking:
+    userManagedNetworking: true
+  clusterDeploymentRef:
+    name: <your-cluster>
+  imageSetRef:
+    name: openshift-v4.x.z
+  provisionRequirements:
+    controlPlaneAgents: <control_plane_agents>
+  sshPublicKey: <ssh_public_key>
+----
+
++
+* Replace `<your-cluster-name>` with the name of your cluster.
+* Replace `<control_plane_agents>` with `1` if you are using a {sno} cluster, or with `3` if you are using a multinode cluster.
+* Optional: Replace `<ssh_public_key>` with your SSH public key to log in to nodes for troubleshooting.
+
+. Create a `ClusterDeployment` by applying the following YAML content. Replace values where needed:
+
++
+[source,yaml]
+----
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: <your-cluster-name>
+  namespace: managed-cluster
+spec:
+  baseDomain: <redhat.com>
+  installed: <true>
+  clusterMetadata:
+      adminKubeconfigSecretRef:
+        name: <your-cluster-name-admin-kubeconfig>
+      clusterID: <"">
+      infraID: <"">
+  clusterInstallRef:
+    group: extensions.hive.openshift.io
+    kind: AgentClusterInstall
+    name: your-cluster-name-install
+    version: v1beta1
+  clusterName: your-cluster-name
+  platform:
+    agentBareMetal:
+  pullSecretRef:
+    name: pull-secret
+----
+
++
+* Replace `name: <your-cluster-name>` with the name of your cluster.
+* Replace `baseDomain: <redhat.com>` with the domain that you are using for your {ocp-short} cluster.
+* Replace `installed: <true>` with `true` to automatically import your {ocp-short} cluster as a production environment cluster.
+* Replace `name: <your-cluster-name-admin-kubeconfig>` with a reference to the `kubeconfig` that you created in step 4.
+* Leave `clusterID: <"">` and `infraID: <"">` empty in production environments.
+
+. Add an `InfraEnv` custom resource to discover new hosts to add to your cluster by applying the following YAML content. The following example might require additional configuration if you are not using a static IP address:
+
++
+[source,yaml]
+----
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: your-infraenv
+  namespace: managed-cluster
+spec:
+  clusterRef:
+    name: your-cluster-name
+    namespace: managed-cluster
+  pullSecretRef:
+    name: pull-secret
+  sshAuthorizedKey: ""
+----
+
++
+*Notes:*
+* The `clusterRef` field is optional if you are using late binding. If you are not using late binding, you must add the `clusterRef`.
+* Add the optional `sshAuthorizedKey` field to log in to nodes for troubleshooting.
+
+. If the import is successful, a URL to download an ISO file appears. Download the ISO file by running the following command, replacing `<url>` with the URL that appears:
+
++
+[source,bash]
+----
+oc get infraenv -n managed-cluster some-other-infraenv -ojson | jq ".status.<url>" --raw-output | xargs curl -k -o /storage0/isos/some-other.iso
+----
+
++
+*Note:* You can automate host discovery by using bare metal host.
+
+. *Optional:* If you want to use {acm-short} features, such as policies, on your {ocp-short} cluster, create a `ManagedCluster` resource. Make sure that the name of your `ManagedCluster` resource matches the name of your `ClusterDeplpoyment` resource. If you are missing the `ManagedCluster` resource, your cluster status is `detached` in the console.
