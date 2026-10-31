@@ -1,0 +1,62 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#volsync-rsync-tls-source]
+= Configure an Rsync-TLS replication source
+
+[role="_abstract"]
+Configure a `ReplicationSource` on the source cluster by using the address and TLS key secret values that you copied from the `ReplicationDestination`.
+
+.Prerequisites
+
+* You configured a `ReplicationDestination` and captured the `.status.rsyncTLS.address` and `.status.rsyncTLS.keySecret` values. See xref:../volsync/volsync_rsync_tls_destination.adoc#volsync-rsync-tls-destination[Configure an Rsync-TLS replication destination].
+* You copied the Rsync-TLS key secret to the source cluster. See xref:../volsync/volsync_rsync_tls_copy_secret.adoc#volsync-rsync-tls-copy-secret[Copy the Rsync-TLS key secret to the source cluster].
+* The source persistent volume claim is on a CSI storage class
+
+.Procedure
+
+. Identify the source persistent volume claim that you want to replicate.
+. Create the `ReplicationSource` resource on the source cluster. Your resource might resemble the following content:
+
++
+[source,yaml]
+----
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: <source>
+  namespace: <source-ns>
+spec:
+  sourcePVC: <persistent_volume_claim>
+  trigger:
+    schedule: "*/3 * * * *"
+  rsyncTLS:
+    keySecret: <mykeysecret>
+    address: <my.host.com>
+    copyMethod: Snapshot
+    storageClassName: gp2-csi
+    volumeSnapshotClassName: csi-aws-vsc
+----
++
+* Replace `source` with the name for your replication source custom resource.
+* Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
+* Replace `persistent_volume_claim` with the name of your source persistent volume claim.
+* Replace `mykeysecret` with the name of the secret that you copied from the destination cluster to the source cluster (the value of `$KEYSECRET`).
+* Replace `my.host.com` with the host address that you copied from the `.status.rsyncTLS.address` field of the `ReplicationDestination`.
+
+. On the source cluster, replace the `address` and `keySecret` values with the values that you noted from the destination cluster, then create the resource:
+
++
+[source,bash]
+----
+sed -i "s/<my.host.com>/$ADDRESS/g" replication_source.yaml
+sed -i "s/<mykeysecret>/$KEYSECRET/g" replication_source.yaml
+oc create -n <source-ns> -f replication_source.yaml
+----
++
+Replace `source-ns` with the namespace of the persistent volume claim where your source is located.
++
+*Note:* You must create the file in the same namespace as the persistent volume claim that you want to replicate.
+
+.Next steps
+
+To verify that the replication completed, see xref:../volsync/volsync_rsync_tls_verify.adoc#volsync-rsync-tls-verify[Verify an Rsync-TLS replication].

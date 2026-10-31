@@ -1,0 +1,51 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#argo-pull-model-appset-non-default-namespace]
+= _ManifestWork_-based Pull model applications are rejected in non-default `ApplicationSet` namespaces
+
+[role="_abstract"]
+When an `ApplicationSet` runs outside the `openshift-gitops` namespace by using the _ApplicationSet in any namespace_ feature, the controller creates generated pull-model `Application` objects in that custom namespace.
+
+The tenant-isolation check requires a `PlacementDecision` in the `Application` namespace that selects the target cluster before the controller creates a `ManifestWork`. Without that `PlacementDecision`, the controller silently rejects the applications, and the applications never propagate to managed clusters.
+
+The check prevents a namespace with only the permission to create `Application` resources from targeting any managed cluster.
+
+.Procedure
+
+* Create a `ManagedClusterSetBinding` and a `Placement` that selects the target cluster or clusters in the `ApplicationSet` namespace. See the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: global
+  namespace: <applicationset-namespace>
+spec:
+  clusterSet: global
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: my-managed-cluster-1
+  namespace: <applicationset-namespace>
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: name
+          operator: In
+          values:
+          - <target-managed-cluster-name>
+----
+
+.Additional resources
+
+* link:https://issues.redhat.com/browse/ACM-39827[ACM-39827]

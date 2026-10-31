@@ -1,0 +1,66 @@
+:_mod-docs-content-type: CONCEPT
+
+[#status-report]
+= _MulticlusterApplicationSetReport_
+
+[role="_abstract"]
+- For the Pull model, the `MulticlusterApplicationSetReport` aggregates application status from across your managed clusters.
+
+- The report includes the list of resources and the overall status of the application from each managed cluster.
+
+- A separate report resource is created for each Argo CD ApplicationSet resource. The report is created in the same namespace as the `ApplicationSet`.
+
+- The report includes the following items:
+
++
+. A list of resources for the Argo CD application
+. The overall sync and health status for each Argo CD application
+. An error message for each cluster where the overall status is `out of sync` or `unhealthy`
+. A summary status all the states of your managed clusters
+
+- The _Resource sync controller_ and the _Aggregation controller_ both run every 10 seconds to create the report.
+
+- The two controllers, along with the Propagation controller, run in separate containers in the same `multicluster-integrations` pod, as shown in the following example output:
+
++
+----
+NAMESPACE               NAME                                       READY   STATUS
+open-cluster-management multicluster-integrations-7c46498d9-fqbq4  3/3     Running
+----
+
+The following is an example `MulticlusterApplicationSetReport` YAML file for the `guestbook` application:
+
+[source,yaml]
+----
+apiVersion: apps.open-cluster-management.io/v1alpha1
+kind: MulticlusterApplicationSetReport
+metadata:
+  labels:
+    apps.open-cluster-management.io/hosting-applicationset: openshift-gitops.guestbook-allclusters-app-set
+  name: guestbook-allclusters-app-set
+  namespace: openshift-gitops
+statuses:
+  clusterConditions:
+  - cluster: cluster1
+    conditions:
+    - message: 'Failed sync attempt: one or more objects failed to apply, reason: services is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-Argo CD-application-controller" cannot create resource "services" in API group "" in the namespace "guestbook",deployments.apps is forbidden: User <name> cannot create resource "deployments" in API group "apps" in the namespace "guestboo...'
+      type: SyncError
+    healthStatus: Missing
+    syncStatus: OutOfSync
+  - cluster: pcluster1
+    healthStatus: Progressing
+    syncStatus: Synced
+  - cluster: pcluster2
+    healthStatus: Progressing
+    syncStatus: Synced
+  summary:
+    clusters: "3"
+    healthy: "0"
+    inProgress: "2"
+    notHealthy: "3"
+    notSynced: "1"
+    synced: "2"
+----
+
+*Note:* If a resource fails to deploy, the resource is not included in the resource list. See error messages for information.
+

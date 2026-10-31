@@ -1,0 +1,68 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#save-apply-cluster-resources]
+= Save and apply managed {ocp-short} cluster resources
+
+[role="_abstract"]
+To save a copy of your managed cluster resources and apply them to a new hub cluster, complete the following steps:
+
+.Procedure
+
+. Get your resources from your source hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc –kubeconfig <source_hub_kubeconfig> -n <managed_cluster_name> get <resource_name> <cluster_provisioning_namespace> -oyaml > <resource_name>.yaml
+----
+
++
+* Replace `<source_hub_kubeconfig>` with the path to the `kubeconfig` file of the source hub cluster.
+* Replace `<managed_cluster_name>` with the name of the managed {ocp-short} cluster.
+* Replace `<resource_name>` with the name of the resource you want to import.
+* Replace `<cluster_provisioning_namespace>` with the namespace of the {ocp-short} cluster.
+
+. Repeat the command for every resource you want to import by replacing `<resource_name>` with the name of the resource.
+
+. Remove the `ownerReferences` property from the `AgentClusterInstall` resource by running the following command:
+
++
+[source,bash]
+----
+yq --in-place -y 'del(.metadata.ownerReferences)' AgentClusterInstall.yaml
+----
+
+. Remove the `ownerReferences` property from the `Secret` (`admin-kubeconfig`) resource by running the following command:
+
++
+[source,bash]
+----
+yq --in-place -y 'del(.metadata.ownerReferences)' AdminKubeconfigSecret.yaml
+----
+
+. Detach the managed cluster from the source hub cluster by running the following command:
+
++
+[source,bash]
+----
+oc –kubeconfig <target_hub_kubeconfig> delete ManagedCluster <cluster_name>
+----
+
++
+* Replace `<target_hub_kubeconfig>` with the path to the `kubeconfig` file of the target hub cluster.
+* Replace `<cluster_name>` with the name of the managed {ocp-short} cluster.
+
+. Create a namespace on the target hub cluster for the managed cluster. Use a similar name as the source hub cluster.
+
+. Apply your stored resources on the target hub cluster individually by running the following command:
+
++
+[source,bash]
+----
+oc –kubeconfig <target_hub_kubeconfig> apply -f <resource_name>.yaml
+----
+
++
+* Replace `<target_hub_kubeconfig>` with the path to the `kubeconfig` file of the target hub cluster.
+* Replace `<resource_name>.yaml` with the name of the resource you want to apply.
+* Replace `<resource_name>.yaml` with `.` if you want to apply all the resources as a group instead of individually.

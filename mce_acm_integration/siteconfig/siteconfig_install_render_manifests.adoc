@@ -1,0 +1,121 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#render-install-manifests]
+= Render the installation manifests
+
+[role="_abstract"]
+Render the installation manifests by referencing the templates and supporting manifests in the `ClusterInstance` custom resource. Reference the templates and supporting manifests in the `ClusterInstance` custom resource. Complete the following steps to render the installation manifests by using the default cluster and node templates.
+
+*Required access:* Cluster administrator
+
+.Procedure
+
+. In the `example-sno` namespace, create the `ClusterInstance` custom resource that is named `clusterinstance-ibi.yaml` in the following example:
+
++
+[source,yaml]
+----
+apiVersion: siteconfig.open-cluster-management.io/v1alpha1
+kind: ClusterInstance
+metadata:
+  name: "example-clusterinstance"
+  namespace: "example-sno"
+spec:
+  #clusterType: "SNO"
+  holdInstallation: false
+  extraManifestsRefs:
+    - name: extra-machine-configs
+    - name: enable-crun
+  pullSecretRef:
+    name: "pull-secret"
+  [...]
+  clusterName: "example-sno"
+  [...]
+  clusterImageSetNameRef: "img4.17-x86-64"
+  [...]
+  reference:
+  [...]
+    namespace:
+    [...]
+  templateRefs:
+    - name: ibi-cluster-templates-v1
+      namespace: rhacm
+      hostRef:
+        - name: example-bmh
+          namespace: example-sno
+  [...]
+  nodes:
+      [...]
+      bmcCredentialsName:
+        name: "example-bmh-secret"
+      [...]
+      templateRefs:
+        - name: ibi-node-templates-v1
+          namespace: rhacm
+      [...]
+----
+
+. Ensure that the `namespace` in the `ClusterInstance` custom resource matches the target namespace that you defined.
+
+. *Optional:* If you want to scale out or scale in your {sno} clusters, you must set the `spec.clusterType` field to `"SNO"`.
+
+. Reference the `name` of one or more extra manifests `ConfigMap` objects.
+
+. Reference the `name` of your pull secret.
+
+. Ensure that the value of the `clusterName` field in the `ClusterInstance` custom resource matches the value of the `namespace` field.
+
+. Specify dependencies or related objects in different namespaces.
+
+. Specify the namespace of the reference object.
+
+. Reference the `name` of the cluster-level templates in the `spec.templateRefs` field. If you are using a default installation template, the `namespace` must match the namespace where the Operator is installed.
+
+. Specify a reference to a `BareMetalHost` resource that is in a different namespace.
+
+. Reference the `name` of the BMC secret.
+
+. Reference the `name` of the node-level templates in the `spec.nodes.templateRefs` field. If you are using a default installation template, the `namespace` must match the namespace where the Operator is installed.
+
+. Apply the file and create the resource by running the following command:
+
++
+[source,terminal]
+----
+oc apply -f clusterinstance-ibi.yaml
+----
+
++
+After you create the custom resource, the {sco} starts reconciling the `ClusterInstance` custom resource, then validates and renders the installation manifests.
++
+The {sco} continues to monitor for changes in the `ClusterDeployment` custom resources to update the cluster installation progress of the corresponding `ClusterInstance` custom resource.
+
+. Monitor the process by running the following command:
+
++
+[source,terminal]
+----
+oc get clusterinstance <cluster_name> -n <target_namespace> -o yaml
+----
+
++
+See the following example output from the `status.conditions` section for successful manifest generation:
+
++
+[source,terminal]
+----
+message: Applied site config manifests
+reason: Completed
+status: "True"
+type: RenderedTemplatesApplied
+----
+
+. Check the manifests that {sco} rendered by running the following command:
+
++
+[source,terminal]
+----
+oc get clusterinstance <cluster_name> -n <target_namespace> -o jsonpath='{.status.manifestsRendered}'
+----
++
+For more information about status conditions, use the _API Explorer_ in the console, or an `oc` command.

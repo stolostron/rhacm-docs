@@ -1,0 +1,116 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#deploy-appset-standard]
+= Deploying the _ApplicationSet_ resource for standard configurations
+
+[role="_abstract"]
+If you have limited support for role-based access control (RBAC), then you might want to deploy the `ApplicationSet` resource for standard configurations. 
+
+For simple RBAC management, you can deploy the `ApplicationSet` resource for standard configurations, giving you the following benefits:  
+
+* Namespaces are not specified in the GitHub repository resources.
+* The destination of the workload namespace is specified in the `Application` template. 
+* The `ApplicationSet` resource uses the default `AppProject` resource.
+
+.Procedure
+
+. In the `openshift-gitops` namespace, create a `Placement` resource. See the following sample:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: all-openshift-clusters-except-local
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: vendor
+          operator: "In"
+          values:
+          - OpenShift
+        - key: local-cluster
+          operator: DoesNotExist
+----
+
+. Create the `ApplicationSet` resource in the `appset-2` namespace with the default `AppProject` resource by adding the following YAML file sample:  
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+  name: appset-2
+----
+
+. Apply the YAML file sample by running the following command: 
+
++
+[source,bash]
+----
+oc apply -f namespace-example.yaml
+----
+
+. Create the `ApplicationSet` resource in the `appset-2` namespace with the default `AppProject` resource by adding the following YAML file sample:  
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: helloworld
+  namespace: appset-2                                                              
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: all-openshift-clusters
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+      name: '{{name}}-helloworld'
+    spec:
+      destination:
+        namespace: helloworld                                                          
+        server: https://kubernetes.default.svc
+      project: default                                                                         
+      source:
+        path: helloworld                                                                                             
+        repoURL: https://github.com/stolostron/application-samples.git                   
+        targetRevision: HEAD
+      syncPolicy:
+        automated: {}
+----
+
+. Apply the YAML file sample by running the following command: 
+
++
+[source,bash]
+----
+oc apply -f applicationset-example.yaml
+----
++
+* The `ApplicationSet` resource gets created in the `appset-2` namespace on your hub cluster.
+* The `Application` resources get deployed to the `appset-2` namespace on your managed clusters.
+* The `Application` resource deploys its workloads to the `Helloworld` namespace on your managed clusters.
+* The default Argo CD `AppProject` resource configuration gets applied
+* All the `Application` resources defined in the specified path of the GitHub repository are not namespace specific. 

@@ -1,0 +1,66 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#import-configuring-nodeselector-tolerations]
+= Configure the klusterlet to run on specific nodes
+
+[role="_abstract"]
+*Optional:* You can specify which nodes you want the managed cluster klusterlet to run on by configuring the `nodeSelector` and `tolerations` annotation for the managed cluster.
+
+*Required access:* Cluster administrator
+
+.Prerequisites
+
+* A deployed hub cluster. If you are importing bare metal clusters, the hub cluster must be installed on a supported {ocp} version.
+* A cluster you want to manage.
+* The `base64` command line tool.
+* A defined `multiclusterhub.spec.imagePullSecret` if you are importing a cluster that was not created by {ocp-short}. This secret might have been created when {mce} was installed. See _Custom image pull secret_ for more information about how to define this secret.
+* Review the hub cluster `KubeAPIServer` certificate verification strategy and update the strategy if needed. To learn what strategy to use for your setup, see link:../clusters/cluster_lifecycle/set_verification_strat.adoc#set-hub-kube-api-server[Configuring the hub cluster `KubeAPIServer` verification strategy].
+
+.Procedure
+
+. Select the managed cluster that you want to update from the clusters page in the console. 
+
+. Set the YAML switch to `On` to view the YAML content.
+
++
+*Note:* The YAML editor is only available when importing or creating a cluster. To edit the managed cluster YAML definition after importing or creating, you must use the {ocp-short} command-line interface or the {acm-short} search feature.
+
+. Add the `nodeSelector` annotation to the managed cluster YAML definition. The key for this annotation is: `open-cluster-management/nodeSelector`. The value of this annotation is a string map with JSON formatting.
+
+. Add the `tolerations` entry to the managed cluster YAML definition. The key of this annotation is: `open-cluster-management/tolerations`. The value of this annotation represents a link:https://github.com/kubernetes/api/blob/release-1.24/core/v1/types.go#L3007[toleration] list with JSON formatting. The resulting YAML might resemble the following example:
+
++
+[source,yaml]
+----
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  annotations:
+    open-cluster-management/nodeSelector: '{"dedicated":"acm"}'
+    open-cluster-management/tolerations: '[{"key":"dedicated","operator":"equal","value":"acm","effect":"NoSchedule"}]' 
+----
+
++
+*Note:* If you use a `KlusterletConfig`, the managed cluster uses the configuration in the `KlusterletConfig` settings instead of the settings in the managed cluster annotation.
+
+. Alternatively, you can also use a `KlusterletConfig` to configure the `nodeSelector` and `tolerations` for the managed cluster. Apply the following sample YAML content. Replace `<klusterletconfigName>` with the name of your `KlusterletConfig`:
+
++
+[source,yaml]
+----
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: <klusterletconfigName>
+spec:
+  nodePlacement:
+    nodeSelector:
+      dedicated: acm
+    tolerations:
+      - key: dedicated
+        operator: Equal
+        value: acm
+        effect: NoSchedule
+----
+
+. Add the `agent.open-cluster-management.io/klusterlet-config: `<klusterletconfigName>` annotation to the managed cluster, replacing `<klusterletconfigName>` with the name of your `KlusterletConfig`.

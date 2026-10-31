@@ -1,0 +1,58 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#release-images-connected]
+= Maintain a custom list of release images when connected
+
+[role="_abstract"]
+You might want to use the same release image for all of your clusters. To simplify, create your own custom list of release images that are available when creating a cluster. Complete the following steps to manage your available release images:
+
+.Procedure
+
+. Fork the link:https://github.com/stolostron/acm-hive-openshift-releases/tree/backplane-2.10[acm-hive-openshift-releases GitHub].
+
+. Add the YAML files for the images that you want available when you create a cluster. Add the images to the `./clusterImageSets/stable/` or `./clusterImageSets/fast/` directory by using the Git console or the terminal.
+
+. Create a `ConfigMap` file in the `multicluster-engine` namespace that is named `cluster-image-set-git-repo`. See the following example, but replace `mce-version` with you current version of {mce-short}, for example, `2.11`:
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-image-set-git-repo
+  namespace: multicluster-engine
+data:
+  gitRepoUrl:
+  gitRepoBranch: backplane-<mce-version>
+  gitRepoPath: clusterImageSets
+  channel:
+  insecureSkipVerify:
+  caCerts: 
+----
++
+* For `gitRepoUrl`, use the URL that you received when you forked the `acm-hive-openshift-releases` repository. 
+* For `channel`, choose to use either of the supported values, `fast` or `stable`.
+* For `insecureSkipVerify`, set the `insecureSkipVerify` specification to `true` to build the insecure connection. The supported values are `true` or `false`.
+* For `caCerts`, list the certified authority (CA) certificates to build a secure HTTPS connection.
+
+. Retrieve the available YAML files from the main repository by merging changes into your forked repository with the following procedure:
+
+.. Commit and merge your changes to your forked repository.
+.. Synchronize your list of fast release images after you clone the `acm-hive-openshift-releases` repository by updating the value of channel field in the `cluster-image-set-git-repo` `ConfigMap` to `fast`.
+.. Synchronize and display the stable release images by updating the value of channel field in the `cluster-image-set-git-repo` `ConfigMap` to `stable`.
++
+After updating the `ConfigMap`, the list of available stable release images updates with the currently available images in about one minute.
+
+. Run the following commands to list what is available and remove the defaults. Replace `<clusterImageSet_NAME>` with the name of the cluster image set that you want to remove:
+
++
+[source,bash] 
+----
+oc get clusterImageSets
+oc delete clusterImageSet <clusterImageSet_NAME>
+----
+
+.Verification
+
+* View the list of currently available release images in the console when you are creating a cluster.

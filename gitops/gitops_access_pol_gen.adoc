@@ -1,0 +1,92 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#access-policy-gen-gitops]
+= Accessing the Policy Generator from {gitops-short}
+
+[role="_abstract"]
+To access the Policy Generator from {gitops-short}, you must configure the Init Container to copy the Policy Generator binary from the {acm-short} Application Subscription container image. You must also configure {gitops-short} by providing the `--enable-alpha-plugins` flag when it runs Kustomize.
+
+To create, read, update, and delete policies and placements with the Policy Generator, grant access to the Policy Generator from {gitops-short}.
+
+.Procedure
+
+. Edit the {gitops-short} `argocd` object with the following command:
+
++
+[source,bash]
+----
+oc -n openshift-gitops edit argocd openshift-gitops
+----
+
+. To update the Policy Generator to a newer version, add the `registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel9` image used by the Init Container to a newer tag. Replace the `<version>` parameter with the latest {acm-short} version in your `ArgoCD` resource. Your `ArgoCD` resource might resemble the following YAML file:
+
++
+[source,yaml]
+----
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec:
+  kustomizeBuildOptions: --enable-alpha-plugins
+  repo:
+    env:
+    - name: KUSTOMIZE_PLUGIN_HOME
+      value: /etc/kustomize/plugin
+    initContainers:
+    - args:
+      - -c
+      - cp /policy-generator/PolicyGenerator-not-fips-compliant /policy-generator-tmp/PolicyGenerator
+      command:
+      - /bin/bash
+      image: registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel9:v<version>
+      name: policy-generator-install
+      volumeMounts:
+      - mountPath: /policy-generator-tmp
+        name: policy-generator
+    volumeMounts:
+    - mountPath: /etc/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator
+      name: policy-generator
+    volumes:
+    - emptyDir: {}
+      name: policy-generator
+----
++
+*Note:* Alternatively, you can create a `ConfigurationPolicy` resource that contains the `ArgoCD` manifest and template the version to match the version set in the `MulticlusterHub`:
+
++
+[source,yaml]
+----
+image: '{{ (index (lookup "apps/v1" "Deployment" "open-cluster-management" "multicluster-operators-hub-subscription").spec.template.spec.containers 0).image }}'
+----
+
+. If you want to enable the processing of Helm charts within the Kustomize directory before generating policies, set the `POLICY_GEN_ENABLE_HELM` environment variable to `"true"` in the `spec.repo.env` field:
+
++
+[source,yaml]
+----
+env:
+- name: POLICY_GEN_ENABLE_HELM
+  value: "true"
+----
+
+. To create, read, update, and delete policies and placements, create a `ClusterRoleBinding` object to grant the {gitops-short} service account access to {acm-short} hub cluster. Your `ClusterRoleBinding` might resemble the following resource:
+
++
+[source,yaml]
+----
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: openshift-gitops-policy-admin
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: openshift-gitops-policy-admin
+----
+
