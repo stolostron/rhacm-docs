@@ -1,0 +1,109 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#custom-hub-api-certificates-replace]
+= Replace a hub certificate with a different root CA
+
+[role="_abstract"]
+Replace the named certificate for the hub cluster external load balancer when the old and new certificates have different root CA certificates.
+
+.Procedure
+
+. Locate your `APIServer` custom resource, which resembles the following example:
+
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+        name: old-cert-secret
+----
+
+. Create a new secret in the `openshift-config` namespace that contains the content of the existing and new certificates.
+
+. Copy the old certificate into a new certificate by running the following command:
+
++
+[source,bash]
+----
+cp old.crt combined.crt
+----
+
+. Add the contents of the new certificate to the copy of the old certificate by running the following command:
+
++
+[source,bash]
+----
+cat new.crt >> combined.crt
+----
+
+. Apply the combined certificates to create a secret by running the following command:
+
++
+[source,bash]
+----
+oc create secret tls combined-certs-secret --cert=combined.crt --key=old.key -n openshift-config
+----
+
+. Update your `APIServer` resource to reference the combined certificate as the `servingCertificate`. Your `APIServer` resource might resemble the following file:
+
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+        name: combined-cert-secret
+----
+
++
+After about 15 minutes, the CA bundle containing both new and old certificates is propagated to the managed clusters.
+
+. Create another secret named `new-cert-secret` in the `openshift-config` namespace that contains only the new certificate information by entering the following command:
+
++
+[source,bash]
+----
+oc create secret tls new-cert-secret --cert=new.crt --key=new.key -n openshift-config
+----
+
+. Update the `APIServer` resource by changing the name of `servingCertificate` to reference the `new-cert-secret`. Your resource might resemble the following example:
+
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  audit:
+    profile: Default
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.mycluster.example.com
+      servingCertificate:
+        name: new-cert-secret
+----
+
++
+After about 15 minutes, the previous certificate is removed from the CA bundle, and the change is automatically propagated to the managed clusters.
