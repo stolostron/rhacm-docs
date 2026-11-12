@@ -4,11 +4,9 @@
 = Integrating Gatekeeper constraints and constraint templates
 
 [role="_abstract"]
-Integrate Gatekeeper constraints and constraint templates to create `Gatekeeper` policies for multicluster distribution of Gatekeeper constraints and audit results. Add templates and constraints to the `policy-templates` of a `Policy` resource.
+Integrate Gatekeeper constraints and constraint templates to create `Gatekeeper` policies for multicluster distribution of Gatekeeper constraints and audit results. Add templates and constraints to the `policy-templates` of a `Policy` resource. Review the following YAML examples that use Gatekeeper constraints in {acm-short} policies.
 
 .Procedure
-
-Review the following YAML examples that use Gatekeeper constraints in {acm-short} policies:
 
 * `ConstraintTemplates` and constraints: Use the Gatekeeper integration feature by using {acm-short} policies for multicluster distribution of Gatekeeper constraints and Gatekeeper audit results aggregation on the hub cluster. The following example defines a Gatekeeper `ConstraintTemplate` and constraint (`K8sRequiredLabels`) to ensure the `gatekeeper` label is set on all namespaces:
 
@@ -20,7 +18,7 @@ kind: Policy
 metadata:
   name: require-gatekeeper-labels-on-ns
 spec:
-  remediationAction: inform <1>
+  remediationAction: inform
   disabled: false
   policy-templates:
     - objectDefinition:
@@ -29,7 +27,7 @@ spec:
         metadata:
           name: k8srequiredlabels
           annotations:
-            policy.open-cluster-management.io/severity: low <2>
+            policy.open-cluster-management.io/severity: low
         spec:
           crd:
             spec:
@@ -58,7 +56,7 @@ spec:
         metadata:
           name: ns-must-have-gk
           annotations:
-            policy.open-cluster-management.io/severity: low <2>
+            policy.open-cluster-management.io/severity: low
         spec:
           enforcementAction: dryrun
           match:
@@ -68,10 +66,10 @@ spec:
           parameters:
             labels: ["gatekeeper"]
 ----
+
 +
-<1> Since the `remediationAction` is set to `inform`, the `enforcementAction` field of the Gatekeeper constraint is overridden to `warn`. This means that Gatekeeper detects and warns you about creating or updating a namespace that is missing the `gatekeeper` label. If the policy `remediationAction` is set to `enforce`, the Gatekeeper constraint `enforcementAction` field is overridden to `deny`. In this context, this configuration prevents any user from creating or updating a namespace that is missing the `gatekeeper` label.
-+
-<2> *Optional:* Set a severity value for the `policy.open-cluster-management.io/severity` annotation for each Gatekeeper constraint or constraint template. Valid values are the same as for other {acm-short} policy types: `low`, `medium`, `high`, or `critical`.
+* When `spec.remediationAction` is set to `inform`, the `enforcementAction` field of the Gatekeeper constraint is overridden to `warn`. Gatekeeper detects and warns you about creating or updating a namespace that is missing the `gatekeeper` label. If you set the policy `remediationAction` to `enforce`, the Gatekeeper constraint `enforcementAction` field is overridden to `deny`, which prevents any user from creating or updating a namespace that is missing the `gatekeeper` label.
+* *Optional:* Set the `policy.open-cluster-management.io/severity` annotation on each Gatekeeper constraint and constraint template. Valid values are `low`, `medium`, `high`, or `critical`, which are the same severity values used by other {acm-short} policy types.
 +
 With the previous policy, you might receive the following policy status message: `warn - you must provide labels: {"gatekeeper"} (on Namespace default); warn - you must provide labels: {"gatekeeper"} (on Namespace gatekeeper-system)`. When you delete Gatekeeper constraints or `ConstraintTemplates` from a policy, the constraints and `ConstraintTemplates` are also deleted from your managed cluster.
 +
@@ -92,7 +90,7 @@ kind: ConfigurationPolicy
 metadata:
   name: policy-gatekeeper-admission
 spec:
-  remediationAction: inform <1> 
+  remediationAction: inform
   severity: low
   object-templates:
     - complianceType: mustnothave
@@ -100,20 +98,20 @@ spec:
         apiVersion: v1
         kind: Event
         metadata:
-          namespace: openshift-gatekeeper-system <2> 
+          namespace: openshift-gatekeeper-system
           annotations:
             constraint_action: deny
             constraint_kind: K8sRequiredLabels
             constraint_name: ns-must-have-gk
             event_type: violation
 ----
-<1> The `ConfigurationPolicy` `remediationAction` parameter is overwritten by `remediationAction` in the parent policy. 
-<2> Set to the actual namespace where Gatekeeper is running if it is different. 
+
++
+* The `spec.remediationAction` value in this `ConfigurationPolicy` resource is overwritten by the `spec.remediationAction` value in the parent `Policy` resource.
+* Set `metadata.namespace` to the namespace where Gatekeeper is running. Use `openshift-gatekeeper-system` when Gatekeeper runs in the default namespace, and replace that value when Gatekeeper runs in a different namespace.
 
 
 .Additional resources
-
-For more details, see the following resources: 
 
 - link:https://github.com/open-cluster-management-io/policy-collection/blob/main/stable/CM-Configuration-Management/policy-gatekeeper-operator-downstream.yaml[`policy-gatekeeper-operator.yaml`]
 
