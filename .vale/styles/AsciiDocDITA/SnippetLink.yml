@@ -1,0 +1,91 @@
+# Report links and cross references in snippets.
+#
+# Lists all links and cross references in snippet files. Use this
+# information to identify snippets that might bring links and cross
+# references to the main body of a concept topic during conversion.
+---
+extends: script
+message: "%s"
+level: suggestion
+link: https://github.com/jhradilek/asciidoctor-dita-vale/blob/main/README.md#suggestions
+scope: raw
+script: |
+  text              := import("text")
+  matches           := []
+
+  r_allowed_char    := text.re_compile("[_*`#~^ \\t()<>\\[\\]]")
+  r_code_block      := text.re_compile("^(?:\\.{4,}|-{4,})[ \\t]*$")
+  r_comment_block   := text.re_compile("^/{4,}\\s*$")
+  r_comment_line    := text.re_compile("^(//|//[^/].*)$")
+  r_content_type    := text.re_compile("^:_(?:mod-docs-content|content|module)-type:[ \\t]+(?i:snippet)")
+  r_domain_markup   := text.re_compile("(?:https?|file|ftp|irc):///?[_*`#~^]{1,2}[^_*`#~^]*?[_*`#~^]{1,2}")
+  r_inline_link     := text.re_compile("(?:|link:|<)(?:|\\+\\+)(?:https?|file|ftp|irc)://[^ \\t\\[\\]]+(?:|\\+\\+)(?:|\\[.*?\\])>?")
+  r_inline_xref     := text.re_compile("<<[A-Za-z0-9/.:{].*?>>")
+  r_link_macro      := text.re_compile("(?:link|mailto):(?:|[^: \\t\\[][^: \\t\\[]*)\\[.*?\\]")
+  r_xref_macro      := text.re_compile("xref:[A-Za-z0-9/.:{].*?\\[.*?\\]")
+  r_uri_scheme      := text.re_compile("^[_*`#~^()<>\\[\\]]*(?:https?|file|ftp|irc)://[_*`#~^()<>\\[\\]]*$")
+
+  document          := text.split(text.trim_suffix(scope, "\n"), "\n")
+
+  in_comment_block  := false
+  in_code_block     := false
+  is_snippet        := false
+  start             := 0
+  end               := 0
+
+  match_link := func(regex, line) {
+    for i, entry in regex.find(line, -1) {
+      link := entry[0]
+
+      if (link.begin > 0) && ! r_allowed_char.match(text.substr(line, link.begin - 1, link.begin)) {
+        continue
+      }
+      if r_domain_markup.match(link.text) || r_uri_scheme.match(link.text) {
+        continue
+      }
+
+      matches = append(matches, {begin: start + link.begin, end: start + link.end})
+    }
+  }
+
+  for line in document {
+    start += end
+    end    = len(line) + 1
+
+    if r_comment_block.match(line) {
+      delimiter := text.trim_space(line)
+      if ! in_comment_block {
+        in_comment_block = delimiter
+      } else if in_comment_block == delimiter {
+        in_comment_block = false
+      }
+      continue
+    }
+    if in_comment_block { continue }
+    if r_comment_line.match(line) { continue }
+
+    if r_code_block.match(line) {
+      delimiter := text.trim_space(line)
+      if ! in_code_block {
+        in_code_block = delimiter
+      } else if in_code_block == delimiter {
+        in_code_block = false
+      }
+      continue
+    }
+    if in_code_block { continue }
+
+    if r_content_type.match(line) {
+      is_snippet = true
+      continue
+    }
+
+    match_link(r_link_macro, line)
+    match_link(r_inline_link, line)
+    match_link(r_xref_macro, line)
+    match_link(r_inline_xref, line)
+  }
+
+  if ! is_snippet {
+    matches = []
+  }

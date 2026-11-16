@@ -1,0 +1,76 @@
+# Report assemblies and maps with more than 200 include directives.
+#
+# To ensure optimum performance in component content management systems
+# (CCMS), do not use more than 200 include directives in AsciiDoc
+# assemblies and maps.
+---
+extends: script
+message: "The number of include directives exceeds 200."
+level: warning
+link: https://github.com/jhradilek/asciidoctor-dita-vale/blob/main/README.md#warnings
+scope: raw
+script: |
+  text              := import("text")
+  matches           := []
+
+  r_comment_block   := text.re_compile("^/{4,}\\s*$")
+  r_comment_line    := text.re_compile("^(//|//[^/].*)$")
+  r_content_type    := text.re_compile("^:_(?:mod-docs-content|content|module)-type:[ \\t]+((?i)map|assembly)[ \\t]*$")
+  r_include         := text.re_compile("^include::(?:[^ \\t\\[]|[^[]*[^ \\t\\[])\\[.*\\][ \\t]*$")
+
+  // Teams are inconsistent in how they name attribute definition files and
+  // snippet files. As it is impossible to reliably identify these files without
+  // reading their contents, the following is a workaround specifically for
+  // openshift-docs:
+  r_attribute_file  := text.re_compile("^include::(?:\\{docdir\\}/)?(?:\\.\\./)*_?(?:attributes|(?:attributes|common|artifacts)/(?:attributes-[^/]+|[^/]*-?attributes[^/]*))\\.adoc\\[.*\\][ \\t]*$")
+
+  document          := text.split(text.trim_suffix(scope, "\n"), "\n")
+
+  in_comment_block  := false
+  is_asciidoc_map   := false
+  content_type      := ""
+  include_count     := 0
+  max_count         := 200
+
+  start             := 0
+  end               := 0
+
+  for line in document {
+    start += end
+    end    = len(line) + 1
+
+    if r_comment_block.match(line) {
+      delimiter := text.trim_space(line)
+      if ! in_comment_block {
+        in_comment_block = delimiter
+      } else if in_comment_block == delimiter {
+        in_comment_block = false
+      }
+      continue
+    }
+    if in_comment_block { continue }
+    if r_comment_line.match(line) { continue }
+
+    if r_content_type.match(line) {
+      is_asciidoc_map = true
+      content_type    = text.to_lower(r_content_type.replace(line, "$1"))
+      continue
+    }
+
+    if r_include.match(line) && ! r_attribute_file.match(line) {
+      include_count++
+
+      if include_count >= max_count {
+        if include_count == max_count && content_type != "assembly" {
+          continue
+        }
+
+        matches = append(matches, {begin: start, end: start + end - 1})
+        break
+      }
+    }
+  }
+
+  if ! is_asciidoc_map {
+    matches = []
+  }

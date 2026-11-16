@@ -1,0 +1,77 @@
+# Report unexpected contents in maps.
+#
+# AsciiDoc maps can only contain a document title, a document ID, and
+# include directives to define intended topic hierarchy. Additionally, they
+# can contain custom document attribute definitions for the purpose of
+# previewing the AsciiDoc content. Do not place any other contents in
+# AsciiDoc maps.
+---
+extends: script
+message: "Maps only support document titles, IDs, include directives, and attribute definitions."
+level: warning
+link: https://github.com/jhradilek/asciidoctor-dita-vale/blob/main/README.md#warnings
+scope: raw
+script: |
+  text              := import("text")
+  matches           := []
+
+  r_attribute       := text.re_compile("^:!?\\S[^:]*:")
+  r_comment_block   := text.re_compile("^/{4,}\\s*$")
+  r_comment_line    := text.re_compile("^(//|//[^/].*)$")
+  r_content_type    := text.re_compile("^:_(?:mod-docs-content|content|module)-type:[ \\t]+(?i:map)[ \\t]*$")
+  r_document_title  := text.re_compile("^(?:=[ \\t]+|\\.{1,2})[^ \\t.].*$")
+  r_empty_line      := text.re_compile("^[ \\t]*$")
+  r_id_attribute    := text.re_compile("^\\[(?:id=['\\x22]|#|\\[)[A-Za-z_:{}][A-Za-z0-9_.:{}-]*(?:['\\x22],?[^\\]]*|,[^\\]]*\\]?|\\]?)\\][ \\t]*$")
+  r_include         := text.re_compile("^include::(?:[^ \\t\\[]|[^[]*[^ \\t\\[])\\[.*\\][ \\t]*$")
+
+  document          := text.split(text.trim_suffix(scope, "\n"), "\n")
+
+  in_comment_block  := false
+  is_asciidoc_map   := false
+  has_id            := false
+  has_title         := false
+  start             := 0
+  end               := 0
+
+  for line in document {
+    start += end
+    end    = len(line) + 1
+
+    if r_comment_block.match(line) {
+      delimiter := text.trim_space(line)
+      if ! in_comment_block {
+        in_comment_block = delimiter
+      } else if in_comment_block == delimiter {
+        in_comment_block = false
+      }
+      continue
+    }
+    if in_comment_block { continue }
+    if r_comment_line.match(line) { continue }
+
+    if r_empty_line.match(line) { continue }
+
+    if r_content_type.match(line) {
+      is_asciidoc_map = true
+      continue
+    }
+
+    if r_id_attribute.match(line) && ! has_id {
+      has_id = true
+      continue
+    }
+
+    if r_document_title.match(line) && ! has_title {
+      has_title = true
+      continue
+    }
+
+    if r_include.match(line) { continue }
+    if r_attribute.match(line) { continue }
+
+    matches = append(matches, {begin: start, end: start + end - 1})
+  }
+
+  if ! is_asciidoc_map {
+    matches = []
+  }
