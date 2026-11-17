@@ -1,0 +1,45 @@
+:_mod-docs-content-type: PROCEDURE
+
+[#alert-forward-upgrade-fails]
+= Manually configured alert forwarding fails after upgrade
+
+[role="_abstract"]
+When you upgrade to {acm-short} {product-version} and later, alert forwarding can fail if you disabled automatic configuration by setting `mco-disable-alerting: true` in the `MultiClusterObservability` custom resource, and if you manually configured alert forwarding.
+
+From {acm-short} {product-version}, alert forwarding is expected to go through the `observatorium-api` route instead of the dedicated Alertmanager route on the hub cluster. This change ensures that all Alertmanager replicas receive the correct state. If your manual configuration still uses the dedicated Alertmanager route, alert forwarding fails.
+
+Alert forwarding can also fail because the `endpoint-operator` continually reverts your changes. When alert forwarding is disabled, the `endpoint-operator` detects its own secrets in the config map and attempts to remove them.
+
+.Procedure
+
+. Update your manually configured alert forwarding configuration to use the new `observatorium-api` route in `staticConfigs` and the updated TLS configuration.
+. Update the secret name in the `cluster-monitoring-config` config map in the `openshift-monitoring` namespace for platform alerts.
+. Update the secret name in the `user-workload-monitoring-config` config map in the `openshift-user-workload-monitoring` namespace for user workload alerts. Update your policy to match the following config map example:
+
++
+[source,yaml]
+----
+        pathPrefix: /api/alertmanager/v2/default
+        bearerToken:
+          key: token
+          name: observability-alertmanager-accessor-93d616e16c444d1fa67
+        staticConfigs:
+        - observatorium-api-open-cluster-management-observability.apps.your-hub-cluster.com
+        tlsConfig:
+          ca:
+            key: ca.crt
+            name: obs-alertmanager-mtls-ca-93d616e16c444d1fa67
+          cert:
+            key: tls.crt
+            name: obs-alertmanager-mtls-cert-93d616e16c444d1fa67
+          insecureSkipVerify: false
+          key:
+            key: tls.key
+            name: obs-alertmanager-mtls-cert-93d616e16c444d1fa67
+----
+
+. Add the `observability.open-cluster-management.io/unmanaged: "true"` annotation to the cluster monitoring config maps so that the `endpoint-operator` does not reconcile them.
+
+.Additional resources
+
+* link:https://issues.redhat.com/browse/ACM-47621[ACM-47621]
